@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+	<PropertyGroup>
+		<TargetFrameworks>net6.0-ios;net6.0-android</TargetFrameworks>
+		<Version>6.0.0-rc.10.9</Version>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+
+		<Authors>Joseph Young</Authors>
+		<Company>Sparc Cooperative</Company>
+		<Description>MAUI Sparc package</Description>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageTags>MAUI;Mobile;Sparc</PackageTags>
+		<PackageProjectUrl>https://github.com/sparc-coop/Sparc.Kernel</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/sparc-coop/Sparc.Kernel</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="Files\readme.md" Pack="true" PackagePath="\"/>
+		<None Include="Files\icon.png" Pack="true" PackagePath="\"/>
+	</ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="IdentityModel.OidcClient" Version="4.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Sparc.Core\Sparc.Core.csproj" />
+	</ItemGroup>
+</Project>
