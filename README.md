@@ -1,3 +1,12 @@
+[![MIT License](https://img.shields.io/github/license/sparc-coop/Sparc.Kernel)](https://github.com/sparc-coop/Sparc.Kernel/blob/main/LICENSE)
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Features?label=Nuget%20Sparc.Features)](https://www.nuget.org/packages/Sparc.Features/)
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Core?label=Nuget%20Sparc.Core)](https://www.nuget.org/packages/Sparc.Core/)
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Maui?label=Nuget%20Sparc.Platforms.Maui)](https://www.nuget.org/packages/Sparc.Platforms.Maui/)
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Web?label=Nuget%20Sparc.Platforms.Web)](https://www.nuget.org/packages/Sparc.Platforms.Web/)
+
+![Sparc Logo](Sparc.Core/Files/icon.png)
+
+
 # Introduction 
 TODO
 
