@@ -46,7 +46,7 @@ You can find and install the Nuget packages
 
 
 # Documentation
-Learn more about how to use Sparc.Kernel by visiting TODO []().
+Learn more about how to use Sparc.Kernel by visiting [Docs](https://sparc-coop.github.io/Sparc.Kernel/).
 
 # Examples / Templates
 TODO
