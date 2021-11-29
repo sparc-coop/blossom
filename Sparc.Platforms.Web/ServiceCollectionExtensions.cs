@@ -22,6 +22,11 @@ namespace Sparc.Authentication.Blazor
             return builder.AddActiveDirectoryApi<T>(apiScope, baseUrl, "AzureAd");
         }
 
+        public static IServiceCollection AddPublicApi<T>(this WebAssemblyHostBuilder builder, string baseUrl) where T : class
+        {
+            return builder.AddActiveDirectoryApi<T>(string.Empty, baseUrl, string.Empty);
+        }
+
         public static IServiceCollection AddActiveDirectoryApi<T>(this WebAssemblyHostBuilder builder, string apiScope, string baseUrl, string configurationSectionName) where T : class
         {
             var client = builder.Services.AddHttpClient("api");

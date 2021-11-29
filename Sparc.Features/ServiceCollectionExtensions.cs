@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using System;
 using System.Linq;
 using Microsoft.AspNetCore.Diagnostics;
+using System.Reflection;
 
 namespace Sparc.Features
 {
@@ -34,7 +35,7 @@ namespace Sparc.Features
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = typeof(T).Namespace, Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = typeof(T).Namespace ?? typeof(T).Assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title, Version = "v1" });
                 c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
                 c.UseAllOfToExtendReferenceSchemas();
             });
@@ -47,7 +48,7 @@ namespace Sparc.Features
             if (env.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{typeof(T).Namespace} v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{typeof(T).Namespace ?? typeof(T).Assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title} v1"));
             }
             else
             {
