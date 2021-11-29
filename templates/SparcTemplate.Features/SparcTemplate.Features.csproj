@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Sparc.Features\Sparc.Features.csproj" />
+    <PackageReference Include="Sparc.Features" Version="6.0.0" />
   </ItemGroup>
 
 </Project>
