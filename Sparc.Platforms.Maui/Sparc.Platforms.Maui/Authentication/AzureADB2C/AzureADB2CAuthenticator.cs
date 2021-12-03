@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Identity.Client;
+using Microsoft.Maui.Controls;
 using Sparc.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +16,7 @@ namespace Sparc.Platforms.Maui
         private readonly IPublicClientApplication _pca;
         public AzureADB2CSettings Settings { get; }
         public static AuthenticationResult AuthResult { get; set; }
+        public ClaimsPrincipal User { get; set; }
 
         public AzureADB2CAuthenticator(AzureADB2CSettings settings)
         {
@@ -45,7 +48,8 @@ namespace Sparc.Platforms.Maui
             }
 
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-            return (await GetAuthenticationStateAsync()).User;
+            User = (await GetAuthenticationStateAsync()).User;
+            return User;
         }
 
         private async Task<AuthenticationResult> AcquireTokenSilent()
@@ -140,6 +144,11 @@ namespace Sparc.Platforms.Maui
             var user = new ClaimsPrincipal(identity);
 
             return Task.FromResult(new AuthenticationState(user));
+        }
+
+        public Task<bool> LoginAsync()
+        {
+            throw new NotImplementedException();
         }
     }
 }
