@@ -7,7 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sparc.Features" Version="6.0.0" />
+    <PackageReference Include="Sparc.Authentication.AzureADB2C" Version="6.0.0" />
+    <PackageReference Include="Sparc.Features" Version="6.0.1" />
   </ItemGroup>
 
 </Project>

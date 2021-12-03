@@ -11,6 +11,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped<IConfiguration>(_ => builder.Configuration);
 
-builder.AddPublicApi<SparcTemplateApi>(builder.Configuration["ApiUrl"]);
+builder.AddB2CApi<SparcTemplateApi>(builder.Configuration["ApiScope"], builder.Configuration["ApiUrl"]);
 
 await builder.Build().RunAsync();

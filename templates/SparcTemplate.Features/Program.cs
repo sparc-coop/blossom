@@ -1,6 +1,6 @@
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.Sparcify<Program>().AddAuthentication().AddJwtBearer();
+builder.Services.Sparcify<Program>(builder.Configuration["ClientUrl"]).AddAzureADB2CAuthentication(builder.Configuration);
 
 builder.Services.AddRazorPages();
 
