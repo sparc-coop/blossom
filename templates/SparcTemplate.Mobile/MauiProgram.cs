@@ -10,6 +10,7 @@ using SparcTemplate.Mobile.Data;
 using SparcTemplate.UI;
 using SparcTemplate.UI.Shared;
 using Microsoft.Identity.Client;
+using Microsoft.Maui.Essentials;
 
 namespace SparcTemplate.Mobile
 {
@@ -30,7 +31,18 @@ namespace SparcTemplate.Mobile
 
             //builder.Services.AddBlazorWebView();
 
-            //builder.Services.AddSelfHostedApi;
+            builder.Services.AddB2CApi<SparcTemplateApi>( "https://api.prontoservices.io/",
+                    new("prontopay",
+                    "",
+                    "ProntoPay.API",
+                    parentWindowLocator: () =>
+                    {
+#if ANDROID
+                        return Platform.CurrentActivity;
+#else
+                        return null;
+#endif
+                    }));
 
 
             builder.Services.AddSingleton<WeatherForecastService>();

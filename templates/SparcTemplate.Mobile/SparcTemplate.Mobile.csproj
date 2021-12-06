@@ -60,7 +60,7 @@
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0-android'">
 	  <PackageReference Include="Sparc.Platforms.Maui">
-	    <Version>6.0.0-rc.10.9</Version>
+	    <Version>6.0.1-rc.10.9</Version>
 	  </PackageReference>
 	</ItemGroup>
 
