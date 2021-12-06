@@ -19,7 +19,7 @@ namespace Sparc.Platforms.Maui
                 Authority = baseUrl.TrimEnd('/'),
                 ClientId = clientId,
                 RedirectUri = $"{callbackScheme}://",
-                Scope = $"openid profile {scope}",
+                Scope = $"openid profile {scope} offline_access",
                 Browser = new WebAuthenticatorBrowser($"{callbackScheme}://")
             };
 
