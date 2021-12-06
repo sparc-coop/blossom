@@ -121,5 +121,10 @@ namespace Sparc.Platforms.Maui
             User = new ClaimsPrincipal();
             AccessToken = null;
         }
+
+        public Task<ClaimsPrincipal> LoginAsync(string returnUrl)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
