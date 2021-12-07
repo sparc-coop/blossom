@@ -6,7 +6,6 @@ using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 using Sparc.Platforms.Maui;
 using SparcTemplate.Features;
-using SparcTemplate.Mobile.Data;
 using SparcTemplate.UI;
 using SparcTemplate.UI.Shared;
 using Microsoft.Identity.Client;
@@ -20,21 +19,12 @@ namespace SparcTemplate.Mobile
         {
             var builder = MauiApp.CreateBuilder().Sparcify<MainLayout>();
 
-
-            //builder
-            //    .RegisterBlazorMauiWebView()
-            //    .UseMauiApp<App>()
-            //    .ConfigureFonts(fonts =>
-            //    {
-            //        fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-            //    });
-
-            //builder.Services.AddBlazorWebView();
-
-            builder.Services.AddB2CApi<SparcTemplateApi>( "https://api.prontoservices.io/",
-                    new("prontopay",
+            //TODO replace with your settings
+            //more info https://sparc-coop.github.io/Sparc.Kernel/
+            builder.Services.AddB2CApi<SparcTemplateApi>( "https://api.sparctemplate.io/",
+                    new("sparctemplate",
                     "",
-                    "ProntoPay.API",
+                    "SparcTemplate.API",
                     parentWindowLocator: () =>
                     {
 #if ANDROID
@@ -45,7 +35,6 @@ namespace SparcTemplate.Mobile
                     }));
 
 
-            builder.Services.AddSingleton<WeatherForecastService>();
 
             return builder.Build();
         }

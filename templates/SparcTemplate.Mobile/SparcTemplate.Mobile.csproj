@@ -78,4 +78,8 @@
 	  <ProjectReference Include="..\SparcTemplate.UI\SparcTemplate.UI.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Shared\" />
+	</ItemGroup>
+
 </Project>
