@@ -28,7 +28,7 @@ namespace Sparc.Authentication.SelfHosted
             services.AddRazorPages(); // for Login UI
             services.AddHttpContextAccessor();
 
-            ApiScopes = new List<ApiScope>() { new ApiScope(apiName.Replace(" ", "."), apiName), new ApiScope("offline_access") };
+            ApiScopes = new List<ApiScope>() { new ApiScope(apiName.Replace(" ", "."), apiName) };
             foreach (var client in clients)
                 client.AllowedScopes = ApiScopes.Select(x => x.Name).Union(IdentityScopes.Select(x => x.Name)).ToList();
 
