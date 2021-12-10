@@ -4,17 +4,17 @@
 		<TargetFrameworks>net6.0-android;net6.0-ios;</TargetFrameworks>
 		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) and '$(MSBuildRuntimeType)' == 'Full'">$(TargetFrameworks);net6.0-windows10.0.19041</TargetFrameworks>-->
 		<OutputType>Exe</OutputType>
-		<RootNamespace>SparcTemplate.Mobile</RootNamespace>
+		<RootNamespace>$ext_safeprojectname$.Mobile</RootNamespace>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 		<EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
 		<EnableDefaultCssItems>false</EnableDefaultCssItems>
 
 		<!-- Display name -->
-		<ApplicationTitle>SparcTemplate.Mobile</ApplicationTitle>
+		<ApplicationTitle>$ext_safeprojectname$.Mobile</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.SparcTemplate.Mobile</ApplicationId>
+		<ApplicationId>com.companyname.$ext_safeprojectname$.Mobile</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationVersion>1</ApplicationVersion>
@@ -75,11 +75,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\SparcTemplate.UI\SparcTemplate.UI.csproj" />
+	  <ProjectReference Include="..\$ext_safeprojectname$.UI\$ext_safeprojectname$.UI.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Shared\" />
-	</ItemGroup>
+
 
 </Project>

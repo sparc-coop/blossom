@@ -5,13 +5,13 @@ using Microsoft.Maui.Controls.Compatibility;
 using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 using Sparc.Platforms.Maui;
-using SparcTemplate.Features;
-using SparcTemplate.UI;
-using SparcTemplate.UI.Shared;
+using $ext_safeprojectname$.Features;
+using $ext_safeprojectname$.UI;
+using $ext_safeprojectname$.UI.Shared;
 using Microsoft.Identity.Client;
 using Microsoft.Maui.Essentials;
 
-namespace SparcTemplate.Mobile
+namespace $ext_safeprojectname$.Mobile
 {
     public static class MauiProgram
     {
@@ -21,7 +21,7 @@ namespace SparcTemplate.Mobile
 
             //TODO replace with your settings
             //more info https://sparc-coop.github.io/Sparc.Kernel/
-            builder.Services.AddB2CApi<SparcTemplateApi>( "https://api.sparctemplate.io/",
+            builder.Services.AddB2CApi<$ext_safeprojectname$Api > ( "https://api.sparctemplate.io/",
                     new("sparctemplate",
                     "",
                     "SparcTemplate.API",

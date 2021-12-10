@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SparcTemplate.UI\SparcTemplate.UI.csproj" />
+    <ProjectReference Include="..\$ext_safeprojectname$.UI\$ext_safeprojectname$.UI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

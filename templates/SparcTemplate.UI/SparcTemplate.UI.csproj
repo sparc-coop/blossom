@@ -21,15 +21,15 @@
 		<PackageReference Include="Sparc.UI" Version="6.0.0" />
 	</ItemGroup>
 
-	<!--<ItemGroup>
-		<OpenApiReference Include="../$safeprojectname$.Features/swagger.json" Namespace="$safeprojectname$.Features">
-			<ClassName>$safeprojectname$Api</ClassName>
-		</OpenApiReference>
-	</ItemGroup>-->
-
 	<ItemGroup>
+		<OpenApiReference Include="../$ext_safeprojectname$.Features/swagger.json" Namespace="$ext_safeprojectname$.Features">
+			<ClassName>$ext_safeprojectname$Api</ClassName>
+		</OpenApiReference>
+	</ItemGroup>
+
+	<!--<ItemGroup>
 		<OpenApiReference Include="../SparcTemplate.Features/swagger.json" Namespace="SparcTemplate.Features">
 			<ClassName>SparcTemplateApi</ClassName>
 		</OpenApiReference>
-	</ItemGroup>
+	</ItemGroup>-->
 </Project>
