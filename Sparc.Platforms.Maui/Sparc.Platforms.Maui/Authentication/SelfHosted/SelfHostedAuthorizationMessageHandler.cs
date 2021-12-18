@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Maui.Essentials;
 using System;
 using System.Net.Http;
 using System.Threading;
@@ -31,9 +32,11 @@ namespace Sparc.Platforms.Maui
                 return response;
             }
 
+            var storage_token = await SecureStorage.GetAsync("AccessToken");
             var accessToken = result.User?.FindFirst("access_token");
-            if (accessToken != null)
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken.Value);
+            
+            if (accessToken != null || storage_token != null)
+                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken?.Value ?? storage_token);
 
             return await base.SendAsync(request, cancellationToken);
         }

@@ -26,17 +26,35 @@ namespace Sparc.Platforms.Maui
             return this;
         }
 
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            return Task.FromResult(new AuthenticationState(User ?? new ClaimsPrincipal()));
+            //logic to get user here if tokens are saved locally
+            await GetTokensFromSecureStorageAsync();
+
+            if(AccessToken == null) return new AuthenticationState(new ClaimsPrincipal());
+
+            var user = await Client.GetUserInfoAsync(AccessToken);
+            //todo check if it is possible to build the user with this info
+            if (user.IsError)
+                return new AuthenticationState(new ClaimsPrincipal());
+
+            var cid = new ClaimsIdentity();
+            cid.AddClaim(new Claim("access_token", AccessToken));
+            cid.AddClaim(new Claim("refresh_token", RefreshToken));
+
+            var cp = new ClaimsPrincipal();
+            cp.AddIdentity(cid);
+
+            return new AuthenticationState(cp);
         }
 
         public async Task<bool> LoginAsync()
         {
             await GetTokensFromSecureStorageAsync();
 
-            if (await TryRefreshTokenAsync())
-                return true;
+            //TODO check if access token is really expiring
+            //if (await TryRefreshTokenAsync())
+            //    return true;
 
             return await LoginInteractivelyAsync();
         }
@@ -59,7 +77,9 @@ namespace Sparc.Platforms.Maui
 
         private async Task<bool> TryRefreshTokenAsync()
         {
-            if (RefreshToken != null && AccessTokenExpiration.HasValue && AccessTokenExpiration.Value.AddSeconds(-30) > DateTime.UtcNow)
+            if (RefreshToken == null) return false;
+
+            if (AccessTokenExpiration.HasValue && AccessTokenExpiration.Value.AddSeconds(-30) > DateTime.UtcNow)
             {
                 // Use the refresh token
                 var refreshResult = await Client.RefreshTokenAsync(RefreshToken);
@@ -73,6 +93,14 @@ namespace Sparc.Platforms.Maui
                 }
                 else
                     throw new Exception(refreshResult.Error);
+            }
+            else if (AccessTokenExpiration.HasValue)
+            {
+                //token still valid
+                //maybe return User data with
+                var user = await Client.GetUserInfoAsync(AccessToken);
+
+                return true;
             }
 
             return false;
