@@ -1,4 +1,5 @@
-﻿using Microsoft.Identity.Client;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Identity.Client;
 using Sparc.Core;
 using System.Net.Http;
 using System.Threading;
@@ -6,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Sparc.Platforms.Maui
 {
-    public class SparcAuthorizationMessageHandler : SparcHttpClientHandler
+    public class SparcAuthorizationMessageHandler : DelegatingHandler
     {
-        public SparcAuthorizationMessageHandler(ISparcAuthenticator authenticator) : base()
+        public SparcAuthorizationMessageHandler(ISparcAuthenticator authenticator)
         {
             Authenticator = authenticator;
         }
@@ -34,6 +35,26 @@ namespace Sparc.Platforms.Maui
                 };
                 return response;
             }
+        }
+    }
+
+    public class InsecureSparcAuthorizationMessageHandler : SelfHostedAuthorizationMessageHandler
+    {
+        public InsecureSparcAuthorizationMessageHandler(AuthenticationStateProvider provider) : base(provider)
+        {
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (InnerHandler is HttpClientHandler httpclienthandler)
+                httpclienthandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                {
+                    if (cert.Issuer.Equals("CN=localhost"))
+                        return true;
+                    return errors == System.Net.Security.SslPolicyErrors.None;
+                };
+
+            return await base.SendAsync(request, cancellationToken);
         }
     }
 }

@@ -26,14 +26,28 @@ namespace Sparc.Platforms.Maui
             services.AddSingleton(_ => new SelfHostedAuthenticator().WithOptions(options));
             services.AddSingleton<AuthenticationStateProvider>(s => s.GetRequiredService<SelfHostedAuthenticator>());
             services.AddSingleton<ISparcAuthenticator>(s => s.GetRequiredService<SelfHostedAuthenticator>());
-             
-            services.AddSingleton<SelfHostedAuthorizationMessageHandler>();
-            services.AddHttpClient("api")
-                .AddHttpMessageHandler<SelfHostedAuthorizationMessageHandler>();
+
+            if (IsLocal(baseUrl))
+            {
+                services.AddSingleton<InsecureSelfHostedAuthorizationMessageHandler>();
+                services.AddHttpClient("api")
+                    .AddHttpMessageHandler<InsecureSelfHostedAuthorizationMessageHandler>();
+            }
+            else
+            {
+                services.AddSingleton<SelfHostedAuthorizationMessageHandler>();
+                services.AddHttpClient("api")
+                    .AddHttpMessageHandler<SelfHostedAuthorizationMessageHandler>();
+            }
 
             services.AddScoped(x => (T)Activator.CreateInstance(typeof(T), baseUrl, x.GetService<IHttpClientFactory>().CreateClient("api")));
 
             return services;
+        }
+
+        private static bool IsLocal(string baseUrl)
+        {
+            return baseUrl.StartsWith("https://localhost") || baseUrl.StartsWith("https://127.0.0.1") || baseUrl.StartsWith("https://10.0.2.2");
         }
     }
 }

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Sparc.Platforms.Maui
 {
-    public class SelfHostedAuthorizationMessageHandler : SparcHttpClientHandler
+    public class SelfHostedAuthorizationMessageHandler : DelegatingHandler
     {
-        public SelfHostedAuthorizationMessageHandler(AuthenticationStateProvider provider) : base()
+        public SelfHostedAuthorizationMessageHandler(AuthenticationStateProvider provider)
         {
             Provider = provider;
         }
@@ -34,6 +34,26 @@ namespace Sparc.Platforms.Maui
             var accessToken = result.User?.FindFirst("access_token");
             if (accessToken != null)
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken.Value);
+
+            return await base.SendAsync(request, cancellationToken);
+        }
+    }
+
+    public class InsecureSelfHostedAuthorizationMessageHandler : SelfHostedAuthorizationMessageHandler
+    {
+        public InsecureSelfHostedAuthorizationMessageHandler(AuthenticationStateProvider provider) : base(provider)
+        {
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (InnerHandler is HttpClientHandler httpclienthandler)
+                httpclienthandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
+                {
+                    if (cert.Issuer.Equals("CN=localhost"))
+                        return true;
+                    return errors == System.Net.Security.SslPolicyErrors.None;
+                };
 
             return await base.SendAsync(request, cancellationToken);
         }

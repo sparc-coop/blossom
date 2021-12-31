@@ -2,10 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Sparc.Core;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Sparc.Platforms.Maui
@@ -19,14 +16,27 @@ namespace Sparc.Platforms.Maui
             services.AddSingleton<AzureADB2CAuthenticator>();
             services.AddSingleton<AuthenticationStateProvider>(s => s.GetRequiredService<AzureADB2CAuthenticator>());
             services.AddSingleton<ISparcAuthenticator>(s => s.GetRequiredService<AzureADB2CAuthenticator>());
-            services.AddScoped<SparcAuthorizationMessageHandler>();
 
-            services.AddHttpClient("api")
-                .AddHttpMessageHandler<SparcAuthorizationMessageHandler>();
+            if (IsLocal(baseUrl))
+            {
+                services.AddSingleton<InsecureSparcAuthorizationMessageHandler>();
+                services.AddHttpClient("api")
+                    .AddHttpMessageHandler<InsecureSparcAuthorizationMessageHandler>();
+            }
+            else
+            {
+                services.AddScoped<SparcAuthorizationMessageHandler>();
+                services.AddHttpClient("api")
+                    .AddHttpMessageHandler<SparcAuthorizationMessageHandler>();
+            }
 
             services.AddScoped(x => (T)Activator.CreateInstance(typeof(T), baseUrl, x.GetService<IHttpClientFactory>().CreateClient("api")));
 
             return Task.FromResult(services);
+        }
+        private static bool IsLocal(string baseUrl)
+        {
+            return baseUrl.StartsWith("https://localhost") || baseUrl.StartsWith("https://127.0.0.1") || baseUrl.StartsWith("https://10.0.2.2");
         }
     }
 }
