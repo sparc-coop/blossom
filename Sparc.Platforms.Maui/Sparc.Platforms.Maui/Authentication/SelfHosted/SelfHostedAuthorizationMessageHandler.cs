@@ -47,14 +47,7 @@ namespace Sparc.Platforms.Maui
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            if (InnerHandler is HttpClientHandler httpclienthandler)
-                httpclienthandler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) =>
-                {
-                    if (cert.Issuer.Equals("CN=localhost"))
-                        return true;
-                    return errors == System.Net.Security.SslPolicyErrors.None;
-                };
-
+            InnerHandler = InsecureHandlerProvider.GetHandler();
             return await base.SendAsync(request, cancellationToken);
         }
     }

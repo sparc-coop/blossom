@@ -20,14 +20,17 @@ namespace Sparc.Platforms.Maui
                 ClientId = clientId,
                 RedirectUri = $"{callbackScheme}://",
                 Scope = $"openid profile {scope} offline_access",
-                Browser = new WebAuthenticatorBrowser($"{callbackScheme}://")
+                Browser = new WebAuthenticatorBrowser($"{callbackScheme}://"),
             };
+
+            if (InsecureHandlerProvider.IsLocal(baseUrl))
+                options.BackchannelHandler = InsecureHandlerProvider.GetHandler();
 
             services.AddSingleton(_ => new SelfHostedAuthenticator().WithOptions(options));
             services.AddSingleton<AuthenticationStateProvider>(s => s.GetRequiredService<SelfHostedAuthenticator>());
             services.AddSingleton<ISparcAuthenticator>(s => s.GetRequiredService<SelfHostedAuthenticator>());
 
-            if (IsLocal(baseUrl))
+            if (InsecureHandlerProvider.IsLocal(baseUrl))
             {
                 services.AddSingleton<InsecureSelfHostedAuthorizationMessageHandler>();
                 services.AddHttpClient("api")
@@ -43,11 +46,6 @@ namespace Sparc.Platforms.Maui
             services.AddScoped(x => (T)Activator.CreateInstance(typeof(T), baseUrl, x.GetService<IHttpClientFactory>().CreateClient("api")));
 
             return services;
-        }
-
-        private static bool IsLocal(string baseUrl)
-        {
-            return baseUrl.StartsWith("https://localhost") || baseUrl.StartsWith("https://127.0.0.1") || baseUrl.StartsWith("https://10.0.2.2");
         }
     }
 }

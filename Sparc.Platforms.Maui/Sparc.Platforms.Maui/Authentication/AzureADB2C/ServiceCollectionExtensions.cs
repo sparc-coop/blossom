@@ -17,7 +17,7 @@ namespace Sparc.Platforms.Maui
             services.AddSingleton<AuthenticationStateProvider>(s => s.GetRequiredService<AzureADB2CAuthenticator>());
             services.AddSingleton<ISparcAuthenticator>(s => s.GetRequiredService<AzureADB2CAuthenticator>());
 
-            if (IsLocal(baseUrl))
+            if (InsecureHandlerProvider.IsLocal(baseUrl))
             {
                 services.AddSingleton<InsecureSparcAuthorizationMessageHandler>();
                 services.AddHttpClient("api")
@@ -33,10 +33,6 @@ namespace Sparc.Platforms.Maui
             services.AddScoped(x => (T)Activator.CreateInstance(typeof(T), baseUrl, x.GetService<IHttpClientFactory>().CreateClient("api")));
 
             return Task.FromResult(services);
-        }
-        private static bool IsLocal(string baseUrl)
-        {
-            return baseUrl.StartsWith("https://localhost") || baseUrl.StartsWith("https://127.0.0.1") || baseUrl.StartsWith("https://10.0.2.2");
         }
     }
 }
