@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Sparc.Platforms.Maui
 {
-    public class SelfHostedAuthorizationMessageHandler : DelegatingHandler
+    public class SelfHostedAuthorizationMessageHandler : SparcHttpClientHandler
     {
-        public SelfHostedAuthorizationMessageHandler(AuthenticationStateProvider provider)
+        public SelfHostedAuthorizationMessageHandler(AuthenticationStateProvider provider) : base()
         {
             Provider = provider;
         }

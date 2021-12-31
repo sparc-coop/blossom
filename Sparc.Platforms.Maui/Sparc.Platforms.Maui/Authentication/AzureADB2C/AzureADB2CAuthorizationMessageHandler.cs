@@ -1,18 +1,14 @@
 ﻿using Microsoft.Identity.Client;
 using Sparc.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Sparc.Platforms.Maui
 {
-    public class SparcAuthorizationMessageHandler : DelegatingHandler
+    public class SparcAuthorizationMessageHandler : SparcHttpClientHandler
     {
-        public SparcAuthorizationMessageHandler(ISparcAuthenticator authenticator)
+        public SparcAuthorizationMessageHandler(ISparcAuthenticator authenticator) : base()
         {
             Authenticator = authenticator;
         }
