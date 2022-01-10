@@ -49,7 +49,8 @@ namespace Sparc.Plugins.Database.Cosmos
             var exists = await Query.Where(x => x.Id == item.Id).CountAsync();
             if (exists > 0)
             {
-                Context.Set<T>().Update(item);
+                Context.Add(item);
+                Context.Update(item);
                 await Context.SaveChangesAsync();
             }
             else
