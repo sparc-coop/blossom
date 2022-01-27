@@ -39,10 +39,9 @@ namespace Sparc.Plugins.Database.Cosmos
 
         public async Task AddAsync(T item)
         {
-            await Context.Set<T>().AddAsync(item);
+            Context.Add(item);
             await SaveChangesAsync();
         }
-
 
         public async Task UpdateAsync(T item)
         {

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
 		<TargetFrameworks>net6.0-ios;net6.0-android</TargetFrameworks>
-		<Version>6.0.4-rc.10.9</Version>
+		<Version>6.0.4-rc.11.3</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
