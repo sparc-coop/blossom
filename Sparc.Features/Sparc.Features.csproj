@@ -5,7 +5,7 @@
 		<Nullable>enable</Nullable>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
-		<Version>6.0.1</Version>
+		<Version>6.1.2</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Joseph Young</Authors>
@@ -20,8 +20,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="Files\readme.md" Pack="true" PackagePath="\"/>
-		<None Include="Files\icon.png" Pack="true" PackagePath="\"/>
+		<None Include="Files\readme.md" Pack="true" PackagePath="\" />
+		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>

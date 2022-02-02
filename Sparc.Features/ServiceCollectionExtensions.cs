@@ -10,6 +10,7 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Reflection;
+using Sparc.Core;
 
 namespace Sparc.Features
 {
@@ -39,6 +40,8 @@ namespace Sparc.Features
                 c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
                 c.UseAllOfToExtendReferenceSchemas();
             });
+
+            services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
 
             return services;
         }
