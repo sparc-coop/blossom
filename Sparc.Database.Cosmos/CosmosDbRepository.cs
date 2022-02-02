@@ -39,17 +39,17 @@ namespace Sparc.Plugins.Database.Cosmos
 
         public async Task AddAsync(T item)
         {
-            await Context.Set<T>().AddAsync(item);
+            Context.Add(item);
             await SaveChangesAsync();
         }
-
 
         public async Task UpdateAsync(T item)
         {
             var exists = await Query.Where(x => x.Id == item.Id).CountAsync();
             if (exists > 0)
             {
-                Context.Set<T>().Update(item);
+                Context.Add(item);
+                Context.Update(item);
                 await Context.SaveChangesAsync();
             }
             else

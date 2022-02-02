@@ -36,7 +36,7 @@ namespace Sparc.Authentication.SelfHosted
                 .AddJwtBearer(options =>
                 {
                     options.Authority = serverUrl;
-                    options.TokenValidationParameters = new TokenValidationParameters { ValidateAudience = false };
+                    options.TokenValidationParameters = new TokenValidationParameters { ValidateAudience = false, ValidateLifetime = false };
                 });
 
             services.AddAuthorization();

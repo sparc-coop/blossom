@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<Version>6.0.0</Version>
+		<Version>6.0.2</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Joseph Young</Authors>
@@ -18,15 +18,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="Files\readme.md" Pack="true" PackagePath="\"/>
-		<None Include="Files\icon.png" Pack="true" PackagePath="\"/>
+		<None Include="Files\readme.md" Pack="true" PackagePath="\" />
+		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="MediatR" Version="9.0.0" />
 		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="6.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="6.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
