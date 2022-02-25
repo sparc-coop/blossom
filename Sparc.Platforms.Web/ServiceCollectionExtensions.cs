@@ -84,8 +84,17 @@ namespace Sparc.Authentication.Blazor
             services.AddScoped(sp => new SparcAuthorizationMessageHandler(sp.GetService<IAccessTokenProvider>(), sp.GetService<NavigationManager>(), baseUrl));
             services.AddHttpClient("api")
                 .AddHttpMessageHandler<SparcAuthorizationMessageHandler>();
+            
+            
 
             services.AddScoped(x => (T)Activator.CreateInstance(typeof(T), baseUrl, x.GetService<IHttpClientFactory>().CreateClient("api")));
+
+            services.AddHttpClient("publicApi");
+            services.AddScoped<Public<T>>(x => () =>
+               (T)Activator.CreateInstance(typeof(T),
+               baseUrl,
+               x.GetService<IHttpClientFactory>().CreateClient("publicApi")));
+            
 
             return services;
         }
