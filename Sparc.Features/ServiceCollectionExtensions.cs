@@ -39,6 +39,7 @@ namespace Sparc.Features
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = typeof(T).Namespace ?? typeof(T).Assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title, Version = "v1" });
                 c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
                 c.UseAllOfToExtendReferenceSchemas();
+                c.EnableAnnotations();
             });
 
             services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));

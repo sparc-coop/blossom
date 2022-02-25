@@ -9,6 +9,20 @@ namespace Sparc.Features
 {
 
     [Feature]
+    public abstract class BaseFeature<T, TOut> : BaseAsyncEndpoint.WithRequest<T>.WithResponse<TOut>
+    {
+
+    }
+
+    [Feature]
+    public abstract class BaseFeature<TOut> : BaseAsyncEndpoint.WithoutRequest.WithResponse<TOut>
+    {
+        
+    }
+
+
+
+    [Feature]
     public abstract class Feature<T, TOut> : BaseAsyncEndpoint.WithRequest<T>.WithResponse<TOut>
     {
         [ApiExplorerSettings(IgnoreApi = true)]
