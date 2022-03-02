@@ -51,11 +51,14 @@ namespace Sparc.Notifications.Twilio
             return true;
         }
 
-        public async Task<bool> SendEmailAsync(string emailAddresses, string subject, string body, List<(string filename, string base64)>? attachments = null)
+        public async Task<bool> SendEmailAsync(string emailAddresses, string subject, string body, string? fromEmailAddress = null, List<(string filename, string base64)>? attachments = null)
         {
+            if (fromEmailAddress == null)
+                fromEmailAddress = Config.FromEmailAddress;
+
             var msg = new SendGridMessage
             {
-                From = new EmailAddress(Config.FromEmailAddress, Config.FromName ?? Config.FromEmailAddress),
+                From = new EmailAddress(fromEmailAddress, Config.FromName ?? fromEmailAddress),
                 Subject = subject,
                 PlainTextContent = body,
                 HtmlContent = body
