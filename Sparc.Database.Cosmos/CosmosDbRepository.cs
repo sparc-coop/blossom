@@ -45,9 +45,10 @@ namespace Sparc.Plugins.Database.Cosmos
 
         public async Task UpdateAsync(T item)
         {
-            var exists = await Query.Where(x => x.Id == item.Id).CountAsync();
-            if (exists > 0)
+            var existing = await FindAsync(item.Id);
+            if (existing != null)
             {
+                Context.Entry(existing).State = EntityState.Detached;
                 Context.Add(item);
                 Context.Update(item);
                 await Context.SaveChangesAsync();
