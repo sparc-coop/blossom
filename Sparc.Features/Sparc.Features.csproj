@@ -17,6 +17,7 @@
 		<PackageProjectUrl>https://github.com/sparc-coop/Sparc.Kernel</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/sparc-coop/Sparc.Kernel</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<UserSecretsId>8283fa8d-b891-4274-8ac8-a8483b91a52a</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
