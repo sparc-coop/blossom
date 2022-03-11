@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sparc.Core;
+using Sparc.Platforms.Web;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -64,6 +65,8 @@ namespace Sparc.Authentication.Blazor
                 });
             }
 
+            builder.Services.AddSingleton<RootScope>();
+
             return builder.Services;
         }
 
@@ -94,7 +97,8 @@ namespace Sparc.Authentication.Blazor
                (T)Activator.CreateInstance(typeof(T),
                baseUrl,
                x.GetService<IHttpClientFactory>().CreateClient("publicApi")));
-            
+
+            services.AddSingleton<RootScope>();
 
             return services;
         }
