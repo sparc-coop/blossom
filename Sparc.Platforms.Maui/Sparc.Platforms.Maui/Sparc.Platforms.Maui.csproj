@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
 		<TargetFrameworks>net6.0-ios;net6.0-android</TargetFrameworks>
-		<Version>6.0.4-rc.13.1</Version>
+		<Version>6.0.4-rc.13.2</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
@@ -29,8 +29,8 @@
 		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.41.0" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Sparc.Core\Sparc.Core.csproj" />
+	  <ProjectReference Include="..\..\Sparc.UI\Sparc.UI.csproj" />
 	</ItemGroup>
 </Project>

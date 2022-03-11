@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
+using Sparc.Core;
 
 namespace Sparc.Platforms.Maui;
 
@@ -16,7 +17,8 @@ public static class ServiceCollectionExtensions
         builder.Services.AddBlazorWebView();
         builder.Services.AddAuthorizationCore();
         builder.Services.AddScoped<IErrorBoundaryLogger, ConsoleErrorBoundaryLogger>()
-            .AddScoped<LayoutComponentBase, TMainLayout>();
+            .AddScoped<LayoutComponentBase, TMainLayout>()
+            .AddSingleton<RootScope>();
 
         return builder;
     }
