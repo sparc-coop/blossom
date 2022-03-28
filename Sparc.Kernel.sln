@@ -39,6 +39,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Notifications.Twilio"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Platforms.Web.ActiveDirectory", "Sparc.Platforms.Web.ActiveDirectory\Sparc.Platforms.Web.ActiveDirectory.csproj", "{A9903E82-03FE-4197-AE7E-66AE66DC0E19}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sparc.Notifications.Azure", "Sparc.Notifications.Azure\Sparc.Notifications.Azure.csproj", "{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -299,6 +301,22 @@ Global
 		{A9903E82-03FE-4197-AE7E-66AE66DC0E19}.Release|x64.Build.0 = Release|Any CPU
 		{A9903E82-03FE-4197-AE7E-66AE66DC0E19}.Release|x86.ActiveCfg = Release|Any CPU
 		{A9903E82-03FE-4197-AE7E-66AE66DC0E19}.Release|x86.Build.0 = Release|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Debug|arm64.Build.0 = Debug|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Debug|x64.Build.0 = Debug|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Debug|x86.Build.0 = Debug|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Release|arm64.ActiveCfg = Release|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Release|arm64.Build.0 = Release|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Release|x64.ActiveCfg = Release|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Release|x64.Build.0 = Release|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Release|x86.ActiveCfg = Release|Any CPU
+		{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
