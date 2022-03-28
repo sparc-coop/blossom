@@ -11,7 +11,7 @@ namespace Sparc.Plugins.Database.Cosmos
     public class CosmosDbRepository<T> : IRepository<T> where T : class, IRoot<string>
     {
         public IQueryable<T> Query { get; }
-        private DbContext Context { get; }
+        public DbContext Context { get; }
         public CosmosDbDatabaseProvider DbProvider { get; }
 
         private static bool IsCreated;
