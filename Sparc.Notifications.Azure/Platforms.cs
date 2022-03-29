@@ -4,5 +4,6 @@ public enum Platforms
 {
     iOS,
     Android,
-    Windows
+    Windows,
+    Web
 }

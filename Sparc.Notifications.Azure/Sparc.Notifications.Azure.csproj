@@ -19,8 +19,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="Files\readme.md" Pack="true" PackagePath="\" />
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
+		<None Update="README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>

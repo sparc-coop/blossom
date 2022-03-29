@@ -1,8 +1,6 @@
 ﻿using Microsoft.Azure.NotificationHubs;
 using Microsoft.Azure.NotificationHubs.Messaging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Sparc.Notifications.Azure
@@ -16,14 +14,14 @@ namespace Sparc.Notifications.Azure
 
         public NotificationHubClient Hub { get; }
 
-        public async Task<bool> RegisterAsync(string userId, string deviceId, Platforms platform, params string[] tags)
+        public async Task<bool> RegisterAsync(string userId, string deviceId, string token, Platforms platform)
         {
             var installation = new Installation
             {
                 InstallationId = $"{userId}|{deviceId}",
                 UserId = userId,
-                PushChannel = deviceId,
-                Tags = tags,
+                PushChannel = token,
+                Tags = new string[] { "default" },
                 Platform = platform switch
                 {
                     Platforms.Windows => NotificationPlatform.Wns,
@@ -32,7 +30,18 @@ namespace Sparc.Notifications.Azure
                     _ => throw new Exception("Invalid platform")
                 }
             };
-            
+
+            InstallationTemplate defaultTemplate = platform switch
+            {
+                Platforms.Windows => new WindowsNotificationTemplate(),
+                Platforms.Android => new AndroidNotificationTemplate(),
+                Platforms.iOS => new IosNotificationTemplate(),
+                Platforms.Web => new WebNotificationTemplate(),
+                _ => throw new Exception("Invalid platform")
+            };
+
+            installation.Templates.Add("default", defaultTemplate);
+
             try
             {
                 await Hub.CreateOrUpdateInstallationAsync(installation);
@@ -44,49 +53,27 @@ namespace Sparc.Notifications.Azure
             }
         }
 
-        public async Task<bool> SendAsync(string userId, string deviceId, string message)
+        public async Task<bool> SendAsync(Message message, params string[] tags)
         {
-            var installationId = $"{userId}|{deviceId}";
-            string[] userTag = new string[2];
-            userTag[0] = "$InstallationId:{" + installationId + "}";
-
-            var installation = await Hub.GetInstallationAsync(installationId);
-
-            NotificationOutcome outcome = installation.Platform switch
-            {
-                NotificationPlatform.Wns => await Hub.SendWindowsNativeNotificationAsync(WindowsTemplate(message), userTag),
-                NotificationPlatform.Apns => await Hub.SendAppleNativeNotificationAsync(AppleTemplate(message), userTag),
-                NotificationPlatform.Fcm => await Hub.SendFcmNativeNotificationAsync(AndroidTemplate(message), userTag),
-                _ => throw new Exception("Invalid platform")
-            };
-
+            NotificationOutcome outcome = await Hub.SendTemplateNotificationAsync(message.ToDictionary(), tags);
             return outcome.State != NotificationOutcomeState.Abandoned && outcome.State != NotificationOutcomeState.Unknown;
         }
 
-        public async Task<bool> SendAsync(Platforms platform, string userId, string message)
+        public async Task<bool> SendAsync(string userId, Message message) => await SendAsync(message, "$UserId:{" + userId + "}");
+
+        public async Task<bool> SendAsync(string userId, string deviceId, Message message)
+            => await SendAsync(message, "$InstallationId:{" + userId + "|" + deviceId + "}");
+
+        public async Task<bool> ScheduleAsync(Message message, DateTime scheduledTime, params string[] tags)
         {
-            string[] userTag = new string[2];
-            userTag[0] = "username:" + userId;
-            //userTag[1] = "from:" + user;
-
-            NotificationOutcome outcome = platform switch
-            {
-                Platforms.Windows => await Hub.SendWindowsNativeNotificationAsync(WindowsTemplate(message), userTag),
-                Platforms.iOS => await Hub.SendAppleNativeNotificationAsync(AppleTemplate(message), userTag),
-                Platforms.Android => await Hub.SendFcmNativeNotificationAsync(AndroidTemplate(message), userTag),
-                _ => throw new Exception("Invalid platform")
-            };
-
-            return outcome.State != NotificationOutcomeState.Abandoned && outcome.State != NotificationOutcomeState.Unknown;
+            var notification = new TemplateNotification(message.ToDictionary());
+            await Hub.ScheduleNotificationAsync(notification, scheduledTime, tags);
+            return true;
         }
 
+        public async Task<bool> ScheduleAsync(string userId, Message message, DateTime scheduledTime) => await ScheduleAsync(message, scheduledTime, "$UserId:{" + userId + "}");
 
-        private static string WindowsTemplate(string message) => @"<toast><visual><binding template=""ToastText01""><text id=""1"">"
-        + message
-        + "</text></binding></visual></toast>";
-
-        private static string AppleTemplate(string message) => "{\"aps\":{\"alert\":\"" + message + "\"}}";
-
-        private static string AndroidTemplate(string message) => "{ \"data\" : {\"message\":\"" + message + "\"}}";
+        public async Task<bool> ScheduleAsync(string userId, string deviceId, Message message, DateTime scheduledTime)
+            => await ScheduleAsync(message, scheduledTime, "$InstallationId:{" + userId + "|" + deviceId + "}");
     }
 }

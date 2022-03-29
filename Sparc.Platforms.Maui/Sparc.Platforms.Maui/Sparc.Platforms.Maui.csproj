@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
 		<TargetFrameworks>net6.0-ios;net6.0-android</TargetFrameworks>
-		<Version>6.0.4-rc.13.2</Version>
+		<Version>6.0.5-rc.14.1</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 
-		<Authors>Joseph Young</Authors>
+		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>MAUI Sparc package</Description>
 		<PackageIcon>icon.png</PackageIcon>
@@ -30,6 +30,12 @@
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.41.0" />
 	</ItemGroup>
 
+	<ItemGroup Condition="$(TargetFramework.Contains('android'))">
+		<PackageReference Include="Xamarin.Firebase.Messaging" Version="122.0.0" />
+		<PackageReference Include="Xamarin.Google.Dagger" Version="2.39.1" />
+		<PackageReference Include="Xamarin.GooglePlayServices.Base" Version="117.6.0" />
+	</ItemGroup>
+	
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Sparc.UI\Sparc.UI.csproj" />
 	</ItemGroup>
