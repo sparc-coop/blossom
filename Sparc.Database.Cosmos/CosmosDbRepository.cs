@@ -141,5 +141,10 @@ namespace Sparc.Plugins.Database.Cosmos
         {
             throw new NotImplementedException();
         }
+
+        public Task CommitAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

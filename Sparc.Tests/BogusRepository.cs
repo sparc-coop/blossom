@@ -82,5 +82,10 @@ namespace Sparc.Tests
         {
             throw new NotImplementedException();
         }
+
+        public Task CommitAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

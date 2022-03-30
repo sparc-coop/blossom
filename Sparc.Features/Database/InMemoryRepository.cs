@@ -23,6 +23,11 @@ namespace Sparc.Features
             throw new NotImplementedException();
         }
 
+        public Task CommitAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task DeleteAsync(T item)
         {
             _items.Remove(item);
