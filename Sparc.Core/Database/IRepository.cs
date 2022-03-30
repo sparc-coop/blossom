@@ -19,6 +19,7 @@ namespace Sparc.Core
         Task<T?> FindAsync(object id);
         Task<List<T>> FromSqlAsync(string sql, params (string, object)[] parameters);
         Task<List<U>> FromSqlAsync<U>(string sql, params (string, object)[] parameters);
+        void BeginBulkOperation();
     }
     
     public interface IRepository<T, TId> where T : IRoot<TId>

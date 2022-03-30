@@ -77,5 +77,10 @@ namespace Sparc.Tests
         {
             throw new NotImplementedException();
         }
+
+        public void BeginBulkOperation()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
