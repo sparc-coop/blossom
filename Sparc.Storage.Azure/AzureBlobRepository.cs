@@ -29,7 +29,12 @@ namespace Sparc.Storage.Azure
 
             item.Url = blob.Uri.AbsoluteUri;
         }
-        
+
+        public void BeginBulkOperation()
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task DeleteAsync(File item)
         {
             var container = await GetContainer(item);

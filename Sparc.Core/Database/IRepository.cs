@@ -17,8 +17,11 @@ namespace Sparc.Core
         Task ExecuteAsync(object id, Action<T> action);
         Task ExecuteAsync(T entity, Action<T> action);
         Task<T?> FindAsync(object id);
+        Task CommitAsync();
         Task<List<T>> FromSqlAsync(string sql, params (string, object)[] parameters);
         Task<List<U>> FromSqlAsync<U>(string sql, params (string, object)[] parameters);
+        void BeginBulkOperation();
+
     }
     
     public interface IRepository<T, TId> where T : IRoot<TId>

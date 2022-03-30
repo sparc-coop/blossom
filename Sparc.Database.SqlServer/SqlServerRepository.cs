@@ -15,6 +15,7 @@ namespace Sparc.Database.SqlServer
         protected readonly DbContext context;
         protected DbSet<T> Command => context.Set<T>();
         public IQueryable<T> Query => context.Set<T>().AsNoTracking();
+        bool bulkOperation = false;
 
         public SqlServerRepository(DbContext context)
         {
@@ -44,18 +45,31 @@ namespace Sparc.Database.SqlServer
         public async Task AddAsync(T item)
         {
             Command.Add(item);
+            if (bulkOperation)
+            {
+                return;
+            }
+
             await CommitAsync();
         }
 
         public async Task UpdateAsync(T item)
         {
             Command.Update(item);
+            if (bulkOperation)
+            {
+                return;
+            }
             await CommitAsync();
         }
 
         public async Task DeleteAsync(T item)
         {
             Command.Remove(item);
+            if (bulkOperation)
+            {
+                return;
+            }
             await CommitAsync();
         }
 
@@ -118,6 +132,11 @@ namespace Sparc.Database.SqlServer
             var result = context.Database.GetDbConnection().Query<U>(sql, p, commandType: commandType).ToList();
 
             return Task.FromResult(result);
+        }
+
+        public void BeginBulkOperation()
+        {
+            bulkOperation = true;
         }
     }
 }

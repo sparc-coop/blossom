@@ -18,6 +18,16 @@ namespace Sparc.Features
             return Task.CompletedTask;
         }
 
+        public void BeginBulkOperation()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CommitAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         public Task DeleteAsync(T item)
         {
             _items.Remove(item);
