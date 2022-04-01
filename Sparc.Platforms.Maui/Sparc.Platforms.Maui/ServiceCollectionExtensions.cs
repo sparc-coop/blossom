@@ -19,16 +19,20 @@ public static class ServiceCollectionExtensions
             .AddScoped<LayoutComponentBase, TMainLayout>()
             .AddSingleton<RootScope>();
 
+#if ANDROID
+        builder.Services.AddSingleton<Device, AndroidDevice>();
+#elif IOS
+        builder.Services.AddSingleton<Device, IosDevice>();
+#endif
+
         return builder;
     }
 
     public static MauiAppBuilder AddPushNotifications(this MauiAppBuilder builder)
     {
 #if ANDROID
-        builder.Services.AddSingleton<ITokenProvider, AndroidDeviceTokenProvider>();        
         builder.Services.AddSingleton<IPushNotificationService, AndroidPushNotificationService>();
 #elif IOS
-        builder.Services.AddSingleton<ITokenProvider, IosDeviceTokenProvider>();
         builder.Services.AddSingleton<IPushNotificationService, IosPushNotificationService>();
 #endif
         return builder;

@@ -2,6 +2,7 @@
 using Android.Content;
 using Firebase.Messaging;
 using Microsoft.AspNetCore.Components;
+using Sparc.Core;
 
 namespace Sparc.Platforms.Maui;
 
@@ -9,15 +10,16 @@ namespace Sparc.Platforms.Maui;
 [IntentFilter(new[] { "com.google.firebase.MESSAGING_EVENT" })]
 public class AndroidPushNotificationService : FirebaseMessagingService, IPushNotificationService
 {
-    public PushTokenProvider TokenManager { get; }
+    public Device Device { get; }
     public NavigationManager Nav { get; }
 
-    public AndroidPushNotificationService(NavigationManager nav)
+    public AndroidPushNotificationService(Device device, NavigationManager nav)
     {
+        Device = device;
         Nav = nav;
     }
 
-    public override void OnNewToken(string token) => TokenManager.UpdateTokenAsync(token).Wait();
+    public override void OnNewToken(string token) => Device.PushToken = token;
 
     public override void OnMessageReceived(RemoteMessage message)
     {

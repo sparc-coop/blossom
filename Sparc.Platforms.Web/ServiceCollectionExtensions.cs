@@ -13,7 +13,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection Sparcify(this WebAssemblyHostBuilder builder)
     {
-        builder.Services.AddSingleton<WebDeviceTokenProvider>();
+        builder.Services.AddSingleton<WebDevice>();
         return builder.Services;
     }
     

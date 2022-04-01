@@ -1,6 +1,7 @@
 ﻿using Foundation;
 using Microsoft.Maui;
 using Microsoft.Maui.Essentials;
+using Sparc.Core;
 using Sparc.Platforms.Maui.Platforms.iOS.Push;
 using System.Threading.Tasks;
 using UIKit;
@@ -68,8 +69,8 @@ public abstract class SparcDelegate : MauiUIApplicationDelegate
 
     async Task CompleteRegistrationAsync(NSData deviceToken)
     {
-        var push = (PushTokenProvider)Services.GetService(typeof(PushTokenProvider));
-        if (push != null)
-            await push.UpdateTokenAsync(deviceToken.ToHexString());
+        var device = (Device)Services.GetService(typeof(Device));
+        if (device != null)
+            device.PushToken = deviceToken.ToHexString();
     }
 }
