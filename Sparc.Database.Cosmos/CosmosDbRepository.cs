@@ -136,5 +136,15 @@ namespace Sparc.Plugins.Database.Cosmos
         {
             return Query.WithPartitionKey(partitionKey);
         }
+
+        public void BeginBulkOperation()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CommitAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
