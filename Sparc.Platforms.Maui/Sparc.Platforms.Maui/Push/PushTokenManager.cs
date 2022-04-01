@@ -1,20 +1,14 @@
-﻿using System;
+﻿using Microsoft.Maui.Essentials;
+using System.Threading.Tasks;
 
 namespace Sparc.Platforms.Maui;
 
 public class PushTokenManager
 {
-    public PushTokenManager(Func<string> onTokenChanged)
+    internal async Task UpdateTokenAsync(string token)
     {
-        TokenChanged = onTokenChanged;
+        await SecureStorage.SetAsync("pushtoken", token);
     }
 
-    internal void UpdateToken(string token)
-    {
-        Token = token;
-        TokenChanged();
-    }
-
-    public string Token { get; private set; }
-    public Func<string> TokenChanged;
+    internal async Task<string> GetTokenAsync() => await SecureStorage.GetAsync("pushtoken");
 }

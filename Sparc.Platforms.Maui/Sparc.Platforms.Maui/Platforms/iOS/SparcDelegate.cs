@@ -2,6 +2,7 @@
 using Microsoft.Maui;
 using Microsoft.Maui.Essentials;
 using Sparc.Platforms.Maui.Platforms.iOS.Push;
+using Sparc.Platforms.Maui.Push;
 using System.Threading.Tasks;
 using UIKit;
 using UserNotifications;

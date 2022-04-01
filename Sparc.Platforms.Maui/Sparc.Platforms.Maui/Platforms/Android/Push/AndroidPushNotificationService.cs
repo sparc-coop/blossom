@@ -1,5 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
+using Android.Provider;
 using Firebase.Messaging;
 using Microsoft.AspNetCore.Components;
 
@@ -12,12 +13,14 @@ public class AndroidPushNotificationService : FirebaseMessagingService, IPushNot
     public PushTokenManager TokenManager { get; }
     public NavigationManager Nav { get; }
 
+    public string DeviceId => Settings.Secure.GetString(Application.Context.ContentResolver, Settings.Secure.AndroidId);
+
     public AndroidPushNotificationService(NavigationManager nav)
     {
         Nav = nav;
     }
 
-    public override void OnNewToken(string token) => TokenManager.UpdateToken(token);
+    public override void OnNewToken(string token) => TokenManager.UpdateTokenAsync(token).Wait();
 
     public override void OnMessageReceived(RemoteMessage message)
     {

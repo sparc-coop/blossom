@@ -1,10 +1,7 @@
-﻿using Sparc.Platforms.Maui.Platforms.Android;
-using System;
+﻿namespace Sparc.Platforms.Maui;
 
-namespace Sparc.Platforms.Maui
+public interface IPushNotificationService
 {
-    public interface IPushNotificationService
-    {
-        PushTokenManager TokenManager { get; }
-    }
+    string DeviceId { get; }
+    PushTokenManager TokenManager { get; }
 }
