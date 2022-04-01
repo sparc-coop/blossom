@@ -2,6 +2,7 @@
 
 public interface IPushNotificationService
 {
-    string DeviceId { get; }
-    PushTokenManager TokenManager { get; }
+    void OnNewToken(string token);
+    void OnMessageReceived(string url);
+
 }

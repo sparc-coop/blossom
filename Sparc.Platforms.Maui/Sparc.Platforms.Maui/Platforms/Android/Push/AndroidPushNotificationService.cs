@@ -1,19 +1,16 @@
 ﻿using Android.App;
 using Android.Content;
-using Android.Provider;
 using Firebase.Messaging;
 using Microsoft.AspNetCore.Components;
 
-namespace Sparc.Platforms.Maui.Platforms.Android;
+namespace Sparc.Platforms.Maui;
 
 [Service]
 [IntentFilter(new[] { "com.google.firebase.MESSAGING_EVENT" })]
 public class AndroidPushNotificationService : FirebaseMessagingService, IPushNotificationService
 {
-    public PushTokenManager TokenManager { get; }
+    public PushTokenProvider TokenManager { get; }
     public NavigationManager Nav { get; }
-
-    public string DeviceId => Settings.Secure.GetString(Application.Context.ContentResolver, Settings.Secure.AndroidId);
 
     public AndroidPushNotificationService(NavigationManager nav)
     {
@@ -25,6 +22,11 @@ public class AndroidPushNotificationService : FirebaseMessagingService, IPushNot
     public override void OnMessageReceived(RemoteMessage message)
     {
         if (message.Data.TryGetValue("action", out var url))
-            Nav.NavigateTo(url);
+            OnMessageReceived(url);
+    }
+
+    public void OnMessageReceived(string url)
+    {
+        Nav.NavigateTo(url);
     }
 }

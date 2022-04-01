@@ -1,20 +1,22 @@
 ﻿using Microsoft.AspNetCore.Components;
-using UIKit;
 
-namespace Sparc.Platforms.Maui.Platforms.iOS;
+namespace Sparc.Platforms.Maui;
 
-public class iOSPushNotificationService : IPushNotificationService
+public class IosPushNotificationService : IPushNotificationService
 {
-    public PushTokenManager TokenManager { get; }
+    public PushTokenProvider TokenProvider { get; }
     public NavigationManager Nav { get; }
 
-    public string DeviceId => UIDevice.CurrentDevice.IdentifierForVendor.ToString();
-
-    public iOSPushNotificationService(PushTokenManager tokenManager, NavigationManager nav)
+    public IosPushNotificationService(PushTokenProvider tokenProvider, NavigationManager nav)
     {
-        TokenManager = tokenManager;
+        TokenProvider = tokenProvider;
         Nav = nav;
     }
 
-    public void OnNewToken(string token) => TokenManager.UpdateTokenAsync(token).Wait();
+    public void OnNewToken(string token) => TokenProvider.UpdateTokenAsync(token).Wait();
+
+    public void OnMessageReceived(string url)
+    {
+        Nav.NavigateTo(url);
+    }
 }

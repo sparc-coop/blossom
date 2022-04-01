@@ -6,7 +6,7 @@ namespace Sparc.Notifications.Azure
 {
     public class Message
     {
-        public Message(string title, string body, string priority)
+        public Message(string title, string body, MessagePriorities priority = MessagePriorities.Normal)
         {
             Title = title;
             Body = body;
@@ -16,7 +16,7 @@ namespace Sparc.Notifications.Azure
         public string Title { get; set; }
         public string Body { get; set; }
         public string? Image { get; set; }
-        public string Priority { get; set; }
+        public MessagePriorities Priority { get; set; }
         public string? Icon { get; set; }
         public string? Color { get; set; }
         public string? Sound { get; set; }
@@ -39,5 +39,11 @@ namespace Sparc.Notifications.Azure
 
             return result;
         }
+    }
+
+    public enum MessagePriorities
+    {
+        Normal,
+        High
     }
 }
