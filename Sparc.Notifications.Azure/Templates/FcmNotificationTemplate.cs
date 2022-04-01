@@ -7,7 +7,7 @@ namespace Sparc.Notifications.Azure
     {
         public FcmNotificationTemplate() : base()
         {
-            notification = new("$(title)", "$(body}", "$(image)");
+            notification = new("$(title)", "$(body)", "$(image)");
             Body = JsonSerializer.Serialize(new
             {
                 notification

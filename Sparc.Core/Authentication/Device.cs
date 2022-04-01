@@ -5,7 +5,7 @@
         public virtual string? Id { get; set; }
         public virtual string? PushToken { get; set; }
         public string? DeviceType { get; set; }
-        public string? Platform { get; set; }
+        public virtual string? Platform { get; set;  }
         public string? Idiom { get; set; }
         public string? Manufacturer { get; set; }
         public string? Model { get; set; }

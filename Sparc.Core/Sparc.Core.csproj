@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0;net6.0-android</TargetFrameworks>
     <Nullable>enable</Nullable>
-    <Version>6.2.1</Version>
+    <Version>6.2.4</Version>
     <LangVersion>10.0</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 

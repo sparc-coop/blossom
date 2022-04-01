@@ -40,4 +40,6 @@ public class IosDevice : Device
             SecureStorage.SetAsync("sparc-device-pushtoken", value).Wait();
         }
     }
+
+    public override Core.Platforms? Platform => Core.Platforms.iOS;
 }

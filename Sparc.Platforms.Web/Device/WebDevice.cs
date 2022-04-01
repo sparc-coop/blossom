@@ -36,6 +36,25 @@ namespace Sparc.Platforms.Web
             }
             set {  _id = value; }
         }
+
+        private string _pushToken;
+        public override string PushToken
+        {
+            get
+            {
+                if (_pushToken != null) return _pushToken;
+                if (LocalStorage.ContainKey("sparc-device-pushtoken"))
+                    _pushToken = LocalStorage.GetItemAsString("sparc-device-pushtoken");
+                return _pushToken;
+            }
+            set
+            {
+                _pushToken = value;
+                LocalStorage.SetItemAsString("sparc-device-pushtoken", value);
+            }
+        }
+
+        public override string Platform => Core.Platforms.Web;
         public ISyncLocalStorageService LocalStorage { get; }
     }
 }

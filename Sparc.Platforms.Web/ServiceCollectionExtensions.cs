@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -13,7 +14,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection Sparcify(this WebAssemblyHostBuilder builder)
     {
-        builder.Services.AddSingleton<WebDevice>();
+        builder.Services.AddBlazoredLocalStorage();
+        builder.Services.AddScoped<Device, WebDevice>();
         return builder.Services;
     }
     

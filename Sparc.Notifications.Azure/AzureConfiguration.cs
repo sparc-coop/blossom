@@ -2,6 +2,6 @@
 
 public class AzureConfiguration
 {
-    public string? ConnectionString { get; internal set; }
-    public string? HubName { get; internal set; }
+    public string? ConnectionString { get; set; }
+    public string? HubName { get; set; }
 }

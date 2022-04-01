@@ -1,6 +1,8 @@
 ﻿using Microsoft.Azure.NotificationHubs;
 using Microsoft.Azure.NotificationHubs.Messaging;
+using Sparc.Core;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Sparc.Notifications.Azure
@@ -14,24 +16,26 @@ namespace Sparc.Notifications.Azure
 
         public NotificationHubClient Hub { get; }
 
-        public async Task<bool> RegisterAsync(string userId, string deviceId, string token, Platforms platform)
+        public async Task<bool> RegisterAsync(string userId, Device device)
         {
             var installation = new Installation
             {
-                InstallationId = $"{userId}|{deviceId}",
+                InstallationId = $"{userId}-{device.Id}",
                 UserId = userId,
-                PushChannel = token,
+                PushChannel = device.PushToken,
                 Tags = new string[] { "default" },
-                Platform = platform switch
+                Templates = new Dictionary<string, InstallationTemplate>(),
+                Platform = device.Platform switch
                 {
                     Platforms.Windows => NotificationPlatform.Wns,
                     Platforms.iOS => NotificationPlatform.Apns,
                     Platforms.Android => NotificationPlatform.Fcm,
+                    Platforms.Web => NotificationPlatform.Fcm,
                     _ => throw new Exception("Invalid platform")
                 }
             };
 
-            InstallationTemplate defaultTemplate = platform switch
+            InstallationTemplate defaultTemplate = device.Platform switch
             {
                 Platforms.Windows => new WindowsNotificationTemplate(),
                 Platforms.Android => new AndroidNotificationTemplate(),
@@ -42,15 +46,8 @@ namespace Sparc.Notifications.Azure
 
             installation.Templates.Add("default", defaultTemplate);
 
-            try
-            {
-                await Hub.CreateOrUpdateInstallationAsync(installation);
-                return true;
-            }
-            catch (MessagingException)
-            {
-                return false;
-            }
+            await Hub.CreateOrUpdateInstallationAsync(installation);
+            return true;
         }
 
         public async Task<bool> SendAsync(Message message, params string[] tags)

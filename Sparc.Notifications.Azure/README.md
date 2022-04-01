@@ -130,10 +130,9 @@ public RegisterDevice(AzureNotificationService notifications) => Notifications =
 
 ```csharp
 // userId is your app's identifier for the user
-// deviceId is ideally a static ID identifying the device
-// token is a real-time token generated on the client by the respective Push Notification Service
+// device is an injectable object of type Device that automatically pulls device and push token info from each Sparc platform 
 
-await notifications.RegisterAsync(userId, deviceId, token, Platforms.Android);
+await notifications.RegisterAsync(userId, device);
 ```
 
 ### Step 5: Send Messages
