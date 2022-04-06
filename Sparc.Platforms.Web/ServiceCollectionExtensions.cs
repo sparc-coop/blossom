@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sparc.Core;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 
 namespace Sparc.Platforms.Web;
@@ -107,13 +108,5 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<RootScope>();
 
         return services;
-    }
-}
-
-public class SparcAuthorizationMessageHandler : AuthorizationMessageHandler
-{
-    public SparcAuthorizationMessageHandler(IAccessTokenProvider provider, NavigationManager navigation, string baseUrl) : base(provider, navigation)
-    {
-        ConfigureHandler(authorizedUrls: new[] { baseUrl.TrimEnd('/') + "/api/" });
     }
 }
