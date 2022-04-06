@@ -8,84 +8,83 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Sparc.Authentication.Blazor
+namespace Sparc.Platforms.Web.ActiveDirectory;
+
+public class CustomAccountFactory
+ : AccountClaimsPrincipalFactory<CustomUserAccount>
 {
-    public class CustomAccountFactory
-     : AccountClaimsPrincipalFactory<CustomUserAccount>
+    private readonly ILogger<CustomAccountFactory> logger;
+    private readonly IServiceProvider serviceProvider;
+
+    public CustomAccountFactory(IAccessTokenProviderAccessor accessor,
+        IServiceProvider serviceProvider,
+        ILogger<CustomAccountFactory> logger)
+        : base(accessor)
     {
-        private readonly ILogger<CustomAccountFactory> logger;
-        private readonly IServiceProvider serviceProvider;
+        this.serviceProvider = serviceProvider;
+        this.logger = logger;
+    }
 
-        public CustomAccountFactory(IAccessTokenProviderAccessor accessor,
-            IServiceProvider serviceProvider,
-            ILogger<CustomAccountFactory> logger)
-            : base(accessor)
+    public async override ValueTask<ClaimsPrincipal> CreateUserAsync(
+        CustomUserAccount account,
+        RemoteAuthenticationUserOptions options)
+    {
+        var initialUser = await base.CreateUserAsync(account, options);
+
+        if (initialUser.Identity.IsAuthenticated)
         {
-            this.serviceProvider = serviceProvider;
-            this.logger = logger;
-        }
+            var userIdentity = (ClaimsIdentity)initialUser.Identity;
 
-        public async override ValueTask<ClaimsPrincipal> CreateUserAsync(
-            CustomUserAccount account,
-            RemoteAuthenticationUserOptions options)
-        {
-            var initialUser = await base.CreateUserAsync(account, options);
-
-            if (initialUser.Identity.IsAuthenticated)
+            foreach (var role in account.Roles)
             {
-                var userIdentity = (ClaimsIdentity)initialUser.Identity;
-
-                foreach (var role in account.Roles)
-                {
-                    userIdentity.AddClaim(new Claim("role", role));
-                }
-
-                if (userIdentity.HasClaim(c => c.Type == "hasgroups"))
-                {
-                    IUserMemberOfCollectionWithReferencesPage groupsAndAzureRoles =
-                        null;
-
-                    try
-                    {
-                        var graphClient = ActivatorUtilities
-                            .CreateInstance<GraphServiceClient>(serviceProvider);
-                        var oid = userIdentity.Claims.FirstOrDefault(x => x.Type == "oid")?
-                            .Value;
-
-                        if (!string.IsNullOrEmpty(oid))
-                        {
-                            groupsAndAzureRoles = await graphClient.Users[oid].MemberOf
-                                .Request().GetAsync();
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        // Optional: Log the error
-                    }
-
-                    if (groupsAndAzureRoles != null)
-                    {
-                        foreach (var entry in groupsAndAzureRoles)
-                        {
-                            userIdentity.AddClaim(new Claim("group", entry.Id));
-                        }
-                    }
-
-                    var claim = userIdentity.Claims.FirstOrDefault(
-                        c => c.Type == "hasgroups");
-
-                    userIdentity.RemoveClaim(claim);
-                }
-                else
-                {
-                    foreach (var group in account.Groups)
-                    {
-                        userIdentity.AddClaim(new Claim("group", group));
-                    }
-                }
+                userIdentity.AddClaim(new Claim("role", role));
             }
 
-            return initialUser;
+            if (userIdentity.HasClaim(c => c.Type == "hasgroups"))
+            {
+                IUserMemberOfCollectionWithReferencesPage groupsAndAzureRoles =
+                    null;
+
+                try
+                {
+                    var graphClient = ActivatorUtilities
+                        .CreateInstance<GraphServiceClient>(serviceProvider);
+                    var oid = userIdentity.Claims.FirstOrDefault(x => x.Type == "oid")?
+                        .Value;
+
+                    if (!string.IsNullOrEmpty(oid))
+                    {
+                        groupsAndAzureRoles = await graphClient.Users[oid].MemberOf
+                            .Request().GetAsync();
+                    }
+                }
+                catch (Exception)
+                {
+                    // Optional: Log the error
+                }
+
+                if (groupsAndAzureRoles != null)
+                {
+                    foreach (var entry in groupsAndAzureRoles)
+                    {
+                        userIdentity.AddClaim(new Claim("group", entry.Id));
+                    }
+                }
+
+                var claim = userIdentity.Claims.FirstOrDefault(
+                    c => c.Type == "hasgroups");
+
+                userIdentity.RemoveClaim(claim);
+            }
+            else
+            {
+                foreach (var group in account.Groups)
+                {
+                    userIdentity.AddClaim(new Claim("group", group));
+                }
+            }
         }
+
+        return initialUser;
     }
 }

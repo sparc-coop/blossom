@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Identity.Client;
 using Microsoft.Maui.Controls;
+using Microsoft.Maui.Essentials;
 using Sparc.Core;
 using System;
 using System.Collections.Generic;
@@ -86,7 +87,7 @@ namespace Sparc.Platforms.Maui
         {
             var builder = _pca.AcquireTokenInteractive(Settings.Scopes).WithPrompt(Prompt.ForceLogin);
 
-            if (Device.RuntimePlatform != "UWP")
+            if (DeviceInfo.Platform != DevicePlatform.WinUI)
             {
                 SystemWebViewOptions options = new()
                 {
