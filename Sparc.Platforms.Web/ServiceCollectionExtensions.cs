@@ -114,6 +114,6 @@ public class SparcAuthorizationMessageHandler : AuthorizationMessageHandler
 {
     public SparcAuthorizationMessageHandler(IAccessTokenProvider provider, NavigationManager navigation, string baseUrl) : base(provider, navigation)
     {
-        ConfigureHandler(authorizedUrls: new[] { baseUrl });
+        ConfigureHandler(authorizedUrls: new[] { baseUrl.TrimEnd('/') + "/api/" });
     }
 }

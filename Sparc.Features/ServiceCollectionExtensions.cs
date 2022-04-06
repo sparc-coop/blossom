@@ -11,6 +11,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Diagnostics;
 using System.Reflection;
 using Sparc.Core;
+using Sparc.Features.Authentication;
 
 namespace Sparc.Features
 {
@@ -40,6 +41,24 @@ namespace Sparc.Features
                 c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
                 c.UseAllOfToExtendReferenceSchemas();
                 c.EnableAnnotations();
+
+                // Add JWT Authentication
+                c.OperationFilter<SwaggerAuthorizeFilter>();
+                var securityScheme = new OpenApiSecurityScheme
+                {
+                    Name = "JWT Authentication",
+                    Description = "Enter JWT Bearer token **_only_**",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Reference = new OpenApiReference
+                    {
+                        Id = "bearer",
+                        Type = ReferenceType.SecurityScheme
+                    }
+                };
+                c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
             });
 
             services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
