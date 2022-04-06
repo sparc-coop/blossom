@@ -59,7 +59,7 @@ namespace Sparc.Notifications.Azure
         public async Task<bool> SendAsync(string userId, Message message) => await SendAsync(message, "$UserId:{" + userId + "}");
 
         public async Task<bool> SendAsync(string userId, string deviceId, Message message)
-            => await SendAsync(message, "$InstallationId:{" + userId + "|" + deviceId + "}");
+            => await SendAsync(message, "$InstallationId:{" + userId + "-" + deviceId + "}");
 
         public async Task<bool> ScheduleAsync(Message message, DateTime scheduledTime, params string[] tags)
         {
@@ -71,6 +71,6 @@ namespace Sparc.Notifications.Azure
         public async Task<bool> ScheduleAsync(string userId, Message message, DateTime scheduledTime) => await ScheduleAsync(message, scheduledTime, "$UserId:{" + userId + "}");
 
         public async Task<bool> ScheduleAsync(string userId, string deviceId, Message message, DateTime scheduledTime)
-            => await ScheduleAsync(message, scheduledTime, "$InstallationId:{" + userId + "|" + deviceId + "}");
+            => await ScheduleAsync(message, scheduledTime, "$InstallationId:{" + userId + "-" + deviceId + "}");
     }
 }

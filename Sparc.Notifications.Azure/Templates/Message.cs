@@ -10,13 +10,13 @@ namespace Sparc.Notifications.Azure
         {
             Title = title;
             Body = body;
-            Priority = priority;
+            Priority = priority == MessagePriorities.Normal ? "normal" : "high";
         }
 
         public string Title { get; set; }
         public string Body { get; set; }
         public string? Image { get; set; }
-        public MessagePriorities Priority { get; set; }
+        public string Priority { get; set; }
         public string? Icon { get; set; }
         public string? Color { get; set; }
         public string? Sound { get; set; }
