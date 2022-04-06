@@ -8,7 +8,7 @@
                 <NotAuthorized>
                     @if (!context.User.Identity.IsAuthenticated)
                     {
-                        <RedirectToLogin />
+                        <Sparc.Platforms.Web.Authentication.RedirectToLogin />
                     }
                     else if (NotAuthorized is not null)
                     {

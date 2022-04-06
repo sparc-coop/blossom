@@ -1,7 +1,7 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sparc.Core;
@@ -12,29 +12,29 @@ namespace Sparc.Platforms.Web;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection Sparcify(this WebAssemblyHostBuilder builder)
+    public static IServiceCollection Sparcify(this WebApplicationBuilder builder)
     {
         builder.Services.AddBlazoredLocalStorage();
         builder.Services.AddScoped<Device, WebDevice>();
         return builder.Services;
     }
     
-    public static IServiceCollection AddB2CApi<T>(this WebAssemblyHostBuilder builder, string apiScope, string baseUrl = null) where T : class
+    public static IServiceCollection AddB2CApi<T>(this WebApplicationBuilder builder, string apiScope, string baseUrl = null) where T : class
     {
         return builder.AddActiveDirectoryApi<T>(apiScope, baseUrl, "AzureAdB2C");
     }
 
-    public static IServiceCollection AddActiveDirectoryApi<T>(this WebAssemblyHostBuilder builder, string apiScope, string baseUrl = null) where T : class
+    public static IServiceCollection AddActiveDirectoryApi<T>(this WebApplicationBuilder builder, string apiScope, string baseUrl = null) where T : class
     {
         return builder.AddActiveDirectoryApi<T>(apiScope, baseUrl, "AzureAd");
     }
 
-    public static IServiceCollection AddPublicApi<T>(this WebAssemblyHostBuilder builder, string baseUrl) where T : class
+    public static IServiceCollection AddPublicApi<T>(this WebApplicationBuilder builder, string baseUrl) where T : class
     {
         return builder.AddActiveDirectoryApi<T>(string.Empty, baseUrl, string.Empty);
     }
 
-    public static IServiceCollection AddActiveDirectoryApi<T>(this WebAssemblyHostBuilder builder, string apiScope, string baseUrl, string configurationSectionName) where T : class
+    public static IServiceCollection AddActiveDirectoryApi<T>(this WebApplicationBuilder builder, string apiScope, string baseUrl, string configurationSectionName) where T : class
     {
         var client = builder.Services.AddHttpClient("api");
         var publicClient = builder.Services.AddHttpClient("publicApi");
@@ -48,17 +48,17 @@ public static class ServiceCollectionExtensions
 
         builder.Services.AddScoped(x =>
             (T)Activator.CreateInstance(typeof(T),
-            baseUrl ?? builder.HostEnvironment.BaseAddress,
+            baseUrl,
             x.GetService<IHttpClientFactory>().CreateClient("api")));
 
         builder.Services.AddScoped<Public<T>>(x => () =>
             (T)Activator.CreateInstance(typeof(T),
-            baseUrl ?? builder.HostEnvironment.BaseAddress,
+            baseUrl,
             x.GetService<IHttpClientFactory>().CreateClient("publicApi")));
 
         builder.Services.AddScoped<ApiResolver<T>>(x => key =>
             (T)Activator.CreateInstance(typeof(T),
-            baseUrl ?? builder.HostEnvironment.BaseAddress,
+            baseUrl,
             x.GetService<IHttpClientFactory>().CreateClient(key)));
 
         if (configurationSectionName.Contains("B2C"))
