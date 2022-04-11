@@ -1,8 +1,7 @@
 ﻿<Project>
 	<Target Name="InstallSwashbuckleCLI" AfterTargets="PostBuildEvent">
-		 <Exec Condition="!Exists('.config\dotnet-tools.json')" Command="dotnet new tool-manifest" />
-		 <Exec Command="dotnet tool install Swashbuckle.AspNetCore.Cli --version 6.2.3" />
-		 <Exec Command="swagger tofile --output &quot;swagger.json&quot; &quot;bin/$(Configuration)/net6.0/$(AssemblyName).dll&quot; v1" />
+		<Exec Condition="!Exists('.config\dotnet-tools.json')" Command="dotnet new tool-manifest" />
+		<Exec Command="dotnet tool install Swashbuckle.AspNetCore.Cli --version 6.2.3" />
+		<Exec Command="dotnet swagger tofile --output &quot;swagger.json&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/net6.0/$(AssemblyName).dll&quot; v1" />
 	</Target>
 </Project>
-		
