@@ -1,6 +1,6 @@
 # Sparc.Notifications.Azure
 
-The `Sparc.Notifications.Azure` project enables integration between Sparc projects and Azure Notification Hubs, with fallbacks for Web Push. 
+The `Sparc.Notifications.Azure` library enables integration between Sparc projects and Azure Notification Hubs, with fallbacks for Web Push. 
 
 ## Getting Started
 

@@ -3,20 +3,30 @@
 ![Sparc Logo](Sparc.Core/Files/icon.png)
 
 
-# Introduction 
+# What is Sparc.Kernel?
 
 **Sparc.Kernel** is an opinionated framework-of-a-framework for .NET 6.0 Web, Mobile, and Desktop development.
 
-Its chief aim is to introduce conventions that, when followed, remove as much of the connective tissue as possible, 
-so that you may focus more of your programming energy on the logic of the back end and the presentation of the front end.
+# OK, what is it really?
 
-# How to get started
+**Sparc.Kernel** is a hand-crafted framework full of architectural conventions that attempt to remove as much of the boilerplate connective tissue as possible. 
+
+Its chief aim is to remove all the drivel it possibly can, so that you may focus more of your beautiful programming energy on what really matters for your app: 
+
+- the logic of the back end, and 
+- the presentation of the front end.
+
+Nothing else should matter nearly as much.
+
+# How is a Sparc solution structured?
 
 A typical Sparc solution has three main components: 
 
-- one **Features** project. This project serves as the main back end API for the application, and contains the vast majority of the application's logic.
-- one **UI** project. This project serves as the shared front end for Web, Mobile, and Desktop, using Blazor as its underlying architecture. 
-- one or more **Platforms** projects. These projects serve as the deployable projects for Web (using Sparc.Platforms.Web) and Android/iOS/Mac/Windows (using Sparc.Platforms.Maui). They are typically very small projects with only platform-specific code, as most of the UI exists in the shared UI project.
+- one **Features** project. This project is the main back end API for the application, and contains the vast majority of the application's logic.
+- one **UI** project. This project is the shared front end for Web, Mobile, and Desktop, using Blazor as its underlying architecture. 
+- *(optional)* one or more **Platforms** projects, if you're deploying to multiple platforms. These projects are the deployable units for Web (using Sparc.Platforms.Web) and Android/iOS/Mac/Windows (using Sparc.Platforms.Maui). They are typically very small projects with only platform-specific startup code and platform overrides. The vast majority of the UI code should still exist in the shared UI project.
+
+# Alright, how do I use it?
 
 ## Step 1. Create a Sparc Solution
 
@@ -25,19 +35,19 @@ A typical Sparc solution has three main components:
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Features?label=Sparc.Features)](https://www.nuget.org/packages/Sparc.Features/)
 
 
-2. Add a *Razor Class Library* project to your solution (preferably called *[YourProject]*.UI).
-> Follow the [Sparc.UI documentation](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.UI) for setup.
-[![Nuget](https://img.shields.io/nuget/v/Sparc.UI?label=Sparc.UI)](https://www.nuget.org/packages/Sparc.UI/)
-
-3. Add a *Blazor Web Assembly App* project to your solution (preferably called *[YourProject]*.Web). 
+2. Add a *Blazor Web Assembly App* project to your solution (preferably called *[YourProject]*.Web). 
 > Follow the [Sparc.Platforms.Web documentation](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.Platforms.Web) for setup.
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Web?label=Sparc.Platforms.Web)](https://www.nuget.org/packages/Sparc.Platforms.Web/)
+
+### *(optional)* If you are targeting mobile and/or desktop platforms:
+3. Add a *Razor Class Library* project to your solution (preferably called *[YourProject]*.UI).
+> Follow the [Sparc.UI documentation](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.UI) for setup.
+[![Nuget](https://img.shields.io/nuget/v/Sparc.UI?label=Sparc.UI)](https://www.nuget.org/packages/Sparc.UI/)
 
 4. Add a *.NET MAUI Blazor App* project to your solution (preferably called *[YourProject]*.Maui).
 > Follow the [Sparc.Platforms.Maui documentation](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.UI) for setup.
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Maui?label=Sparc.Platforms.Maui)](https://www.nuget.org/packages/Sparc.Platforms.Maui/)
 
-> Note for Web-Only Projects: If you don't plan to deploy a mobile or desktop version of your app, you do not yet need the **UI** project or the **MAUI** platform project. You may skip steps #2 and #4 above for now and go with just two projects (Features and Web). If you choose to deploy a mobile/desktop app later, you can easily add the other projects and migrate the UI to the shared **UI** project.
 
 ## Step 2. Write your app
 
