@@ -15,7 +15,7 @@ namespace Sparc.Core
             }
         }
 
-        public event Action OnStateChanged;
+        public event Action? OnStateChanged;
 
         protected void NotifyStateChanged() => OnStateChanged?.Invoke();
     }

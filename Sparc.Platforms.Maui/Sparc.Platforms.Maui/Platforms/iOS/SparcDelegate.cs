@@ -1,6 +1,6 @@
 ﻿using Foundation;
 using Microsoft.Maui;
-using Microsoft.Maui.Essentials;
+using Microsoft.Maui.ApplicationModel;
 using Sparc.Core;
 using Sparc.Platforms.Maui.Platforms.iOS.Push;
 using System.Threading.Tasks;
@@ -64,10 +64,10 @@ public abstract class SparcDelegate : MauiUIApplicationDelegate
 
     [Export("application:didRegisterForRemoteNotificationsWithDeviceToken:")]
     public void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken)
-        => CompleteRegistrationAsync(deviceToken).ContinueWith((task) => { if (task.IsFaulted) throw task.Exception; });
+        => CompleteRegistration(deviceToken);
 
 
-    async Task CompleteRegistrationAsync(NSData deviceToken)
+    void CompleteRegistration(NSData deviceToken)
     {
         var device = (Device)Services.GetService(typeof(Device));
         if (device != null)

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
 		<TargetFrameworks>net6.0-ios;net6.0-android</TargetFrameworks>
-		<Version>6.0.5-rc.14.4</Version>
+		<Version>6.2.0-rc</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
@@ -24,10 +24,10 @@
 	
 	<ItemGroup>
 		<PackageReference Include="IdentityModel.OidcClient" Version="4.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Identity.Client" Version="4.41.0" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.43.0" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$(TargetFramework.Contains('android'))">

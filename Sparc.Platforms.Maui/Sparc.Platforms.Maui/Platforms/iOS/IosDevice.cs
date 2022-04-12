@@ -1,4 +1,4 @@
-﻿using Microsoft.Maui.Essentials;
+﻿using Microsoft.Maui.Storage;
 using Sparc.Core;
 using UIKit;
 
@@ -41,5 +41,5 @@ public class IosDevice : Device
         }
     }
 
-    public override Core.Platforms? Platform => Core.Platforms.iOS;
+    public override string Platform => Core.Platforms.iOS;
 }
