@@ -194,7 +194,7 @@ A MAUI Project can override any behavior from your UI project in two ways:
 	   {
 		   public async Task SendAsync(string email) => await Email.ComposeAsync(new EmailMessage { To = new List<string> { email } });
 	   }
-```
+	```
 3. In the `MauiProgram.cs` file, set up Dependency Injection to inject the correct platform-specific class for the interface:
 	```csharp
 	public static class MauiProgram 
