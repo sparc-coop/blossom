@@ -9,7 +9,7 @@
 5. Inject the Api class into your app (preferably in the `_Imports.razor` global file):
 	```razor
 	@inject PointOfSaleApi Api
-```
+	```
 6. Use the Api class throughout your application.
 	```razor
 	var orders = await Api.GetAllOrdersAsync();
