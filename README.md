@@ -5,20 +5,20 @@
 
 # What is Sparc.Kernel?
 
-**Sparc.Kernel** is an opinionated framework-of-a-framework for .NET 6.0 Web, Mobile, and Desktop development.
+**Sparc.Kernel** is an opinionated framework-of-a-framework for .NET 6.0 Web, Mobile, and Desktop development using a single shared codebase.
 
-# OK, what is it really?
+## OK, what is it really?
 
 **Sparc.Kernel** is a hand-crafted framework full of architectural conventions that attempt to remove as much of the boilerplate connective tissue as possible. 
 
-Its chief aim is to remove all the drivel it possibly can, so that you may focus more of your beautiful programming energy on what really matters for your app: 
+Its chief aim is to remove all the drivel it possibly can, so that you may focus more of your creative programming energy on what really matters for your app: 
 
 - the logic of the back end, and 
 - the presentation of the front end.
 
-Nothing else should matter nearly as much.
+Everything else should be secondary.
 
-# How is a Sparc solution structured?
+## How is a Sparc solution structured?
 
 A typical Sparc solution has three main components: 
 
@@ -26,25 +26,26 @@ A typical Sparc solution has three main components:
 - one **UI** project. This project is the shared front end for Web, Mobile, and Desktop, using Blazor as its underlying architecture. 
 - *(optional)* one or more **Platforms** projects, if you're deploying to multiple platforms. These projects are the deployable units for Web (using Sparc.Platforms.Web) and Android/iOS/Mac/Windows (using Sparc.Platforms.Maui). They are typically very small projects with only platform-specific startup code and platform overrides. The vast majority of the UI code should still exist in the shared UI project.
 
-# Alright, how do I use it?
+# Get Started with Sparc.Kernel
 
-## Step 1. Create a Sparc Solution
+## Step 1. Create a Sparc Solution with a Features and Web Project
 
-1. Create a new .NET 6.0 solution with an *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
+1. **Features Project:** Create a new .NET 6.0 solution with an *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
 > Follow the [Sparc.Features documentation](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.Features) for setup.
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Features?label=Sparc.Features)](https://www.nuget.org/packages/Sparc.Features/)
 
 
-2. Add a *Blazor Web Assembly App* project to your solution (preferably called *[YourProject]*.Web). 
+2. **Web Project:** Add a *Blazor Web Assembly App* project to your solution (preferably called *[YourProject]*.Web). 
 > Follow the [Sparc.Platforms.Web documentation](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.Platforms.Web) for setup.
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Web?label=Sparc.Platforms.Web)](https://www.nuget.org/packages/Sparc.Platforms.Web/)
 
-### *(optional)* If you are targeting mobile and/or desktop platforms:
-3. Add a *Razor Class Library* project to your solution (preferably called *[YourProject]*.UI).
+## Step 1a *(optional, if you're targeting mobile/desktop platforms)*: Add a Shared UI project and a MAUI Desktop/Mobile project
+
+1. **Shared UI Project:** Add a *Razor Class Library* project to your solution (preferably called *[YourProject]*.UI).
 > Follow the [Sparc.UI documentation](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.UI) for setup.
 [![Nuget](https://img.shields.io/nuget/v/Sparc.UI?label=Sparc.UI)](https://www.nuget.org/packages/Sparc.UI/)
 
-4. Add a *.NET MAUI Blazor App* project to your solution (preferably called *[YourProject]*.Maui).
+2. **Mobile/Desktop Project:** Add a *.NET MAUI Blazor App* project to your solution (preferably called *[YourProject]*.Maui).
 > Follow the [Sparc.Platforms.Maui documentation](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.UI) for setup.
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Maui?label=Sparc.Platforms.Maui)](https://www.nuget.org/packages/Sparc.Platforms.Maui/)
 
@@ -130,6 +131,18 @@ Sparc.Kernel is the architecture for all of [Sparc Cooperative](https://www.spar
 - [Law of 100](https://github.com/sparc-coop/law-of-100) (Features, Platforms.Web, Authentication.AzureADB2C, Database.Cosmos, Notifications.Azure)
 - [Kodekit](https://github.com/sparc-coop/kodekit) (Features, Platforms.Web, Authentication.AzureADB2C, Database.Cosmos)
 - [Ibis](https://github.com/sparc-coop/ibis) (Features, Platforms.Web, Authentication.AzureADB2C, Notifications.Twilio, Storage.Azure, Database.Cosmos)
+
+# Built With
+
+Sparc.Kernel is built on the shoulders of giants:
+
+- [Ardalis.ApiEndpoints](https://github.com/ardalis/ApiEndpoints) by [@ardalis](https://twitter.com/ardalis)
+- [IdentityServer](https://github.com/IdentityServer) by [Duende](https://twitter.com/DuendeIdentity)
+- [Swagger](https://swagger.io/)
+- [NSwag](https://github.com/RicoSuter/NSwag) by [@RicoSuter](https://twitter.com/RicoSuter)
+- [Blazored LocalStorage](https://github.com/Blazored/LocalStorage) by [@chris_sainty](https://twitter.com/chris_sainty)
+- [Bogus](https://github.com/bchavez/Bogus) by [@bchavez](https://twitter.com/bchavez)
+- [.NET Core](https://github.com/dotnet/core), [ASP.NET Core](https://github.com/dotnet/aspnetcore), [MAUI](https://github.com/dotnet/maui), [Entity Framework](https://github.com/dotnet/efcore), [Cosmos DB](https://github.com/Azure/azure-cosmos-dotnet-v3), and many more from [@microsoft](https://twitter.com/Microsoft)
 
 # Contributing
 
