@@ -203,9 +203,9 @@ All Features inheriting from `Feature<TIn, TOut>` or `Feature<TOut>` are *automa
 design decision made on purpose, as most API endpoints in the real world should be private and authenticated.
 
 The simplest way to set up authentication in your Sparc solution is to use one of Sparc's authentication plugins 
-([Azure AD B2C](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.Authentication.AzureADB2C), 
-[Active Directory](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.Authentication.ActiveDirectory), or 
-[Self-Hosted](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.Authentication.SelfHosted)).
+([Azure AD B2C](/Sparc.Authentication.AzureADB2C), 
+[Active Directory](/Sparc.Authentication.ActiveDirectory), or 
+[Self-Hosted](/Sparc.Authentication.SelfHosted)).
 
 However, Sparc.Kernel also contains a non-authenticated Feature option called `PublicFeature`. Public Features are useful for
 true public API endpoints (such as a community-accessible list for non-logged-in users). 
