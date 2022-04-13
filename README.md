@@ -5,7 +5,7 @@
 
 # What is Sparc.Kernel?
 
-**Sparc.Kernel** is an opinionated framework-of-a-framework for .NET 6.0 Web, Mobile, and Desktop development using a single shared codebase.
+**Sparc.Kernel** is an opinionated framework-of-a-framework for .NET 6.0 Web, Mobile, and Desktop development using a single shared codebase (C# and Blazor).
 
 ## OK, what is it really?
 
@@ -116,7 +116,7 @@ To send emails, text messages, and push notifications, Sparc offers two librarie
 ## Step 4. Deploy your solution
 
 1. Deploy the Features project to any .NET 6.0 ASP.NET Core-compatible host (eg. Azure App Services).
-2. Deploy the Web Platform project to any WebAssembly-compatible host (eg. Azure App Services).
+2. Deploy the Web Platform project to any Web Assembly-compatible host (eg. Azure App Services).
 3. Deploy the MAUI Platform project to Google, Apple, and Windows stores, or as desired.
 
 # Documentation

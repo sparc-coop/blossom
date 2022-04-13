@@ -29,9 +29,9 @@ Almost all programming in the world can be abstracted down to the following form
 
 Every function, every group of functions, every program, every project, every solution, is a long linear chain of this basic formula.
 
-So, the closer that we can get to this basic formula, the simpler our architecture becomes.
+The closer that we can get to this basic formula, the simpler our architecture becomes.
 
-With that in mind, the basic ingredients of a Feature are the following:
+So with that in mind, the basic ingredients of a Feature are the following:
 
 #### In:
 
@@ -52,6 +52,7 @@ With that in mind, the basic ingredients of a Feature are the following:
 ```csharp
 // This is the form of your Input Data
 public record GetOrderRequest(string CustomerId, string PurchaseOrderNumber);
+
 // This is the form of your Output Data
 public record GetOrderResponse(string OrderId, List<OrderDetail> Lines, decimal Tax, decimal Shipping);
 
@@ -169,6 +170,7 @@ Specific data types per API endpoint enable the following benefits:
 - the core Entities are protected from needing to evolve as the API evolves,
 - the shape of each API can evolve separately from all the Entities or other API methods
 
+If you don't like records, you can use classes!
 
 ## What if my Feature doesn't have any Input Data?
 
@@ -199,9 +201,9 @@ All Features inheriting from `Feature<TIn, TOut>` or `Feature<TOut>` are *automa
 design decision made on purpose, as most API endpoints in the real world should be private and authenticated.
 
 The simplest way to set up authentication in your Sparc solution is to use one of Sparc's authentication plugins 
-([Azure AD B2C](https://github.com/sparc-coop/Sparc.Kernel/tree/feature/documentation/Sparc.Authentication.AzureADB2C), 
-[Active Directory](https://github.com/sparc-coop/Sparc.Kernel/tree/feature/documentation/Sparc.Authentication.ActiveDirectory), or 
-[Self-Hosted](https://github.com/sparc-coop/Sparc.Kernel/tree/feature/documentation/Sparc.Authentication.SelfHosted)).
+([Azure AD B2C](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.Authentication.AzureADB2C), 
+[Active Directory](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.Authentication.ActiveDirectory), or 
+[Self-Hosted](https://github.com/sparc-coop/Sparc.Kernel/tree/main/Sparc.Authentication.SelfHosted)).
 
 However, Sparc.Kernel also contains a non-authenticated Feature option called `PublicFeature`. Public Features are useful for
 true public API endpoints (such as a community-accessible list for non-logged-in users). 
