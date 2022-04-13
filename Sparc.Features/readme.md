@@ -1,5 +1,7 @@
 # Sparc.Features
 
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Features?label=Sparc.Features)](https://www.nuget.org/packages/Sparc.Features/)
+
 The `Sparc.Features` library is the main framework library for the *Features Project* in your Sparc solution.
 
 ## What is a Features Project?
@@ -84,47 +86,47 @@ When the project containing the example Feature above is built, Sparc.Kernel aut
 
 - A protected API endpoint at `/api/GetOrder`
 - An auto-generated client class with a method for each Feature, which automatically calls the API at the correct URL and with the correct authentication headers: 
-```csharp
-public async Task<GetOrderResponse> GetOrderAsync(GetOrderRequest request);
-```
+    ```csharp
+    public async Task<GetOrderResponse> GetOrderAsync(GetOrderRequest request);
+    ```
 
 ### How do I call a Feature from my UI/Web/Mobile/Desktop project?
 
 1. Inject the auto-generated Api class into your Blazor page/component (you can also do this once for the entire application in the Imports.razor file):
-```razor
-@inject PointOfSaleApi Api
-```
+    ```razor
+    @inject PointOfSaleApi Api
+    ```
 2. Call the appropriate method on the Api class (note: it will be named `[FeatureName]Async`):
-```cs
-var request = new(customerId, poNum);
-var order = await Api.GetOrderAsync(request);
-```
+    ```cs
+    var request = new(customerId, poNum);
+    var order = await Api.GetOrderAsync(request);
+    ```
 
 ## Get Started with a Features Project
 
 1. Create a new *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
 2. Add the `Sparc.Features` Nuget package to your newly created project: [![Nuget](https://img.shields.io/nuget/v/Sparc.Features?label=Sparc.Features)](https://www.nuget.org/packages/Sparc.Features/)
 3. Add the following setting to your `appsettings.json` file, using the local URL and port of your Web project:
-```json
-{ "WebClientUrl": "https://localhost:7147"  }
-```
-> (Alternatively, you may pass the URL directly as a string in the Startup code below, but we prefer to keep it in `appsettings.json`, since it will change once deployed.)
+    ```json
+    { "WebClientUrl": "https://localhost:7147" }
+    ```
+    > (Alternatively, you may pass the URL directly as a string in the Startup code below, but we prefer to keep it in `appsettings.json`, since it will change once deployed.)
 
 4. Add the following two lines of code to your `Startup.cs` file, in the appropriate methods:
 
-```csharp
-public void ConfigureServices(IServiceCollection services)
-{
-    // Add this line of code
-    services.Sparcify<Startup>(Configuration["WebClientUrl"]);
-}
+    ```csharp
+    public void ConfigureServices(IServiceCollection services)
+    {
+        // Add this line of code
+        services.Sparcify<Startup>(Configuration["WebClientUrl"]);
+    }
 
-public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-{
-    // Add this line of code
-    app.Sparcify<Startup>(env);
-}
-```
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        // Add this line of code
+        app.Sparcify<Startup>(env);
+    }
+    ```
 
 5. Create your Entities and Features.
 
@@ -179,15 +181,15 @@ instead. This enables the following changes to your Feature:
 
 - The `ExecuteAsync` function has no input parameters:
 
-```csharp
-public override async Task<GetAllOrdersResponse> ExecuteAsync() {}
-```
+    ```csharp
+    public override async Task<GetAllOrdersResponse> ExecuteAsync() {}
+    ```
 
 - The client API will also automatically take no parameters:
 
-```csharp
-var orders = await Api.GetAllOrdersAsync();
-```
+    ```csharp
+    var orders = await Api.GetAllOrdersAsync();
+    ```
 
 ## What if my Feature doesn't have any Output Data?
 

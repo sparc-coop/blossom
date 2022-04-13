@@ -1,5 +1,7 @@
 # Sparc.Platforms.Web
 
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Web?label=Sparc.Platforms.Web)](https://www.nuget.org/packages/Sparc.Platforms.Web/)
+
 The `Sparc.Platforms.Web` library is the main framework library for the *Web Project* in your Sparc solution.
 
 ## What is a Web Project?
@@ -20,28 +22,29 @@ A *Web Project* is currently driven by Blazor Web Assembly. This way it acts as 
 2. Add the `Sparc.Platforms.Web` Nuget package to your newly created project: 
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Web?label=Sparc.Platforms.Web)](https://www.nuget.org/packages/Sparc.Platforms.Web/)
 3. Add the following setting to your `wwwroot/appsettings.json` file, using the local URL and port of your Features Project:
-```json
-{ "ApiUrl": "https://localhost:7001"  }
-```
+    ```json
+    { "ApiUrl": "https://localhost:7001"  }
+    ```
 4. Add the following line of code to your `Startup.cs` file, in the appropriate method:
 
-```csharp
-    public static async Task Main(string[] args)
-    {
-        var builder = WebAssemblyHostBuilder.CreateDefault(args);
+    ```csharp
+        public static async Task Main(string[] args)
+        {
+            var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-        // Add this line of code
-        builder.Sparcify();
-    }
-```
+            // Add this line of code
+            builder.Sparcify();
+        }
+    ```
 5. Modify the `App.razor` file at the root of your Web Project, fully replacing its contents with the following:
-```html
-<Sparc.Platforms.Web.SparcApp 
-        MainLayout="typeof(MainLayout)" 
-        Startup="typeof(Program)" />
-```
+    ```html
+    <Sparc.Platforms.Web.SparcApp 
+            MainLayout="typeof(MainLayout)" 
+            Startup="typeof(Program)" />
+    ```
+
 6. Write your app.
-    a. *(Web-only projects)* Write your UI pages and components directly in the Web Project, using guidance from the [Sparc.UI documentation](/Sparc.UI).
+    a. *(Web-only projects)* Write your UI pages and components directly in the Web Project, using guidance from the [Sparc.UI documentation](/Sparc.UI). Also make sure to follow the "Connect Your UI to your Features" instructions, replacing the UI Project with your Web Project.
     b. *(Multi-platform projects)* Create a [Sparc.UI](/Sparc.UI) project, reference it from your Web Project, and write your UI components within the UI project.
 
 ## Run and Debug a Web Project Locally
@@ -77,35 +80,35 @@ A Web Project can override any behavior from your UI project in two ways:
 
 1. Create an interface in your *UI Project* that contains the methods that need to be overridden (eg. `IEmailService`).
 2. Use this interface in all UI Components and Pages that need to call this function:
-```razor
-   @inject IEmailService EmailService
-   async Task SendEmail() => await EmailService.SendAsync(email);
-```
+    ```razor
+       @inject IEmailService EmailService
+       async Task SendEmail() => await EmailService.SendAsync(email);
+    ```
 3. In each platform project, create a class that inherits from this interface:
-```csharp
-   public class WebEmailService : IEmailService
-   {
-       public WebEmailService(IJSRuntime js) => Js = js;
+    ```csharp
+       public class WebEmailService : IEmailService
+       {
+           public WebEmailService(IJSRuntime js) => Js = js;
        
-       public IJSRuntime Js { get; }
+           public IJSRuntime Js { get; }
 
-       public async Task SendAsync(string email) => await Js.InvokeVoidAsync("goToHref", $"mailto:{email}");
-   }
-```
+           public async Task SendAsync(string email) => await Js.InvokeVoidAsync("goToHref", $"mailto:{email}");
+       }
+    ```
 3. In the Program.cs/Startup.cs file for each platform project (eg. Web), set up Dependency Injection to inject the correct platform-specific class for the interface:
-```csharp
-public class Program 
-{
-   public static async Task Main(string[] args)
-   {
-       var builder = WebAssemblyHostBuilder.CreateDefault(args);
-       ...
-        builder.Services.AddScoped<IEmailService, WebEmailService>();
-   }
-}
+    ```csharp
+    public class Program 
+    {
+       public static async Task Main(string[] args)
+       {
+           var builder = WebAssemblyHostBuilder.CreateDefault(args);
+           ...
+            builder.Services.AddScoped<IEmailService, WebEmailService>();
+       }
+    }
 ```
 
 #### Override UI Components and Pages
 
 1. Create a .razor file in your Web Project with the same name, and under the same folder structure, as the .razor file in your UI Project that you wish to 
-1. override. This component will automatically be used in place of the base UI component.
+override. This component will automatically be used in place of the base UI component.
