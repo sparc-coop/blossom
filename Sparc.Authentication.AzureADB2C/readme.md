@@ -58,7 +58,7 @@ Take note of the following items as you are setting things up. You will need the
 
 2. Add the following line of code to your `Startup.cs` or `MauiProgram.cs` file to register the client features in Authentication. Pass in:
  
-    - your auto-generated Api class type (generated from your OpenApiReference -- more info in the [Sparc.UI documentation](/Sparc.UI)
+    - your auto-generated Api class type (generated from your OpenApiReference -- more info in the [Sparc.UI documentation](/Sparc.UI))
     - the scope URI from your AD B2C Setup in Azure (this gives your UI Project access to the Features Project)
     - the base URL of your Features Project (this sets up the base URL for your auto-generated Api class and configures it for proper authentication headers)
 
