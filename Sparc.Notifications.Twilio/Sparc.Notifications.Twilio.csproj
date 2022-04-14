@@ -19,8 +19,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="Files\readme.md" Pack="true" PackagePath="\"/>
-		<None Include="Files\icon.png" Pack="true" PackagePath="\"/>
+		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -29,5 +28,9 @@
 	  <PackageReference Include="SendGrid" Version="9.24.4" />
 	  <PackageReference Include="SendGrid.Extensions.DependencyInjection" Version="1.0.1" />
 	  <PackageReference Include="Twilio" Version="5.68.0" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <None Update="readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 </Project>

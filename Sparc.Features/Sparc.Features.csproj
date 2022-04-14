@@ -21,7 +21,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="Files\readme.md" Pack="true" PackagePath="\" />
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
@@ -43,5 +42,9 @@
 
 	<ItemGroup>
 		<None Include="build\**" Pack="True" PackagePath="build\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 </Project>
