@@ -4,14 +4,14 @@
 		<Nullable>enable</Nullable>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
-		<Version>6.0.10</Version>
+		<Version>6.0.11</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Sparc Azure Notifications package</Description>
 		<PackageIcon>icon.png</PackageIcon>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageTags>Notifications;Twilio;Sparc</PackageTags>
 		<PackageProjectUrl>https://github.com/sparc-coop/Sparc.Kernel</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/sparc-coop/Sparc.Kernel</RepositoryUrl>
@@ -20,7 +20,7 @@
 
 	<ItemGroup>
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
-		<None Update="README.md" Pack="true" PackagePath="\" />
+		<None Include="README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>
