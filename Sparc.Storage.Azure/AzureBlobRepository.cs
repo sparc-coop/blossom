@@ -35,6 +35,11 @@ namespace Sparc.Storage.Azure
             throw new NotImplementedException();
         }
 
+        public Task CommitAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task DeleteAsync(File item)
         {
             var container = await GetContainer(item);
