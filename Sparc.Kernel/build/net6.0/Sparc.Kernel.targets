@@ -1,5 +1,5 @@
 ﻿<Project>
-	<Target Name="InstallSwashbuckleCLI" AfterTargets="PostBuildEvent">
+	<Target Name="SparcSwaggerGenerator" AfterTargets="PostBuildEvent">
 		<Exec Condition="!Exists('.config\dotnet-tools.json')" Command="dotnet new tool-manifest" />
 		<Exec Command="dotnet tool install Swashbuckle.AspNetCore.Cli --version 6.3.0" />
 		<Exec Command="dotnet swagger tofile --output &quot;swagger.json&quot; &quot;$(MSBuildProjectDirectory)/bin/$(Configuration)/net6.0/$(AssemblyName).dll&quot; v1" />

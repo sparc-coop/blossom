@@ -2,14 +2,12 @@
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
-		<RazorLangVersion>3.0</RazorLangVersion>
 		<OutputType>Library</OutputType>
 		<Nullable>enable</Nullable>
-		<Version>6.1.4</Version>
-		<LangVersion>10.0</LangVersion>
+		<Version>7.0.0-pre.6</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
-		<Authors>Joseph Young</Authors>
+		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Sparc UI package</Description>
 		<PackageIcon>icon.png</PackageIcon>
@@ -21,24 +19,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.0" />
-		<PackageReference Include="NSwag.ApiDescription.Client" Version="13.15.10">
-			<PrivateAssets>none</PrivateAssets>
-		</PackageReference>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="readme.md" Pack="true" PackagePath="\" />
+		<None Update="readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 </Project>

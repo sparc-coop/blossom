@@ -5,22 +5,21 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Diagnostics;
-using System.Reflection;
 using Sparc.Core;
 
 namespace Sparc.Kernel;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection Sparcify<T>(this IServiceCollection services, string? clientUrl = null)
+    public static WebApplicationBuilder Sparcify(this WebApplicationBuilder builder, string? clientUrl = null)
     {
-        services.AddControllers(); // for API
-        services.AddSingleton<FeatureRouteTransformer>(); // is this necessary? yes
+        builder.Services.AddControllers(); // for API
+        builder.Services.AddSingleton<FeatureRouteTransformer>(); // is this necessary? yes
 
         if (clientUrl != null)
-            services.AddCors(options =>
+            builder.Services.AddCors(options =>
             {
-                options.AddDefaultPolicy(builder => 
+                options.AddDefaultPolicy(builder =>
                 builder.WithOrigins(clientUrl)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
@@ -28,25 +27,26 @@ public static class ServiceCollectionExtensions
                 .AllowCredentials());
             });
 
-        services.AddSwaggerGen(c =>
+        builder.Services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = typeof(T).Namespace ?? typeof(T).Assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title, Version = "v1" });
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = builder.Environment.ApplicationName, Version = "v1" });
             c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
             c.UseAllOfToExtendReferenceSchemas();
             c.EnableAnnotations();
         });
 
-        services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
+        builder.Services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
+        builder.Services.AddSingleton<RootScope>();
 
-        return services;
+        return builder;
     }
 
-    public static IApplicationBuilder Sparcify<T>(this IApplicationBuilder app, IWebHostEnvironment env)
+    public static WebApplication Sparcify(this WebApplication app)
     {
-        if (env.IsDevelopment())
+        if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{typeof(T).Namespace ?? typeof(T).Assembly.GetCustomAttribute<AssemblyTitleAttribute>()?.Title} v1"));
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{app.Environment.ApplicationName} v1"));
         }
         else
         {
@@ -73,37 +73,9 @@ public static class ServiceCollectionExtensions
         {
             endpoints.MapDynamicControllerRoute<FeatureRouteTransformer>("{namespace}/{controller}");
             endpoints.MapRazorPages();
+            endpoints.MapFallbackToPage("/_Host");
         });
-        
+
         return app;
-    }
-
-    public static IServiceCollection AddTransientForBaseType<T>(this IServiceCollection services)
-    {
-        Type[] features = GetFeatures<T>();
-
-        foreach (var feature in features)
-            services.AddTransient(feature);
-
-        return services;
-    }
-
-    public static IServiceCollection AddScopedForBaseType<T>(this IServiceCollection services)
-    {
-        Type[] features = GetFeatures<T>();
-
-        foreach (var feature in features)
-            services.AddScoped(feature);
-
-        return services;
-    }
-
-    private static Type[] GetFeatures<T>()
-    {
-        return (from domainAssembly in AppDomain.CurrentDomain.GetAssemblies()
-                from assemblyType in domainAssembly.GetTypes()
-                where typeof(T).IsAssignableFrom(assemblyType)
-                && !assemblyType.IsAbstract
-                select assemblyType).ToArray();
     }
 }

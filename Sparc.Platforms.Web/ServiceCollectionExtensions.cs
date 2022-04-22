@@ -1,7 +1,7 @@
 ﻿using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sparc.Core;
@@ -12,32 +12,18 @@ namespace Sparc.Platforms.Web;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection Sparcify(this WebApplicationBuilder builder)
+    public static WebAssemblyHostBuilder Sparcify(this WebAssemblyHostBuilder builder)
     {
         builder.Services.AddBlazoredLocalStorage();
         builder.Services.AddScoped<Device, WebDevice>();
-        return builder.Services;
-    }
-    
-    public static IServiceCollection AddB2CApi<T>(this WebApplicationBuilder builder, string apiScope, string baseUrl = null) where T : class
-    {
-        return builder.AddActiveDirectoryApi<T>(apiScope, baseUrl, "AzureAdB2C");
+        builder.Services.AddScoped<IConfiguration>(_ => builder.Configuration);
+
+        return builder;
     }
 
-    public static IServiceCollection AddActiveDirectoryApi<T>(this WebApplicationBuilder builder, string apiScope, string baseUrl = null) where T : class
-    {
-        return builder.AddActiveDirectoryApi<T>(apiScope, baseUrl, "AzureAd");
-    }
-
-    public static IServiceCollection AddPublicApi<T>(this WebApplicationBuilder builder, string baseUrl) where T : class
-    {
-        return builder.AddActiveDirectoryApi<T>(string.Empty, baseUrl, string.Empty);
-    }
-
-    public static IServiceCollection AddActiveDirectoryApi<T>(this WebApplicationBuilder builder, string apiScope, string baseUrl, string configurationSectionName) where T : class
+    public static WebAssemblyHostBuilder AddB2CApi<T>(this WebAssemblyHostBuilder builder, string baseUrl = null) where T : class
     {
         var client = builder.Services.AddHttpClient("api");
-        var publicClient = builder.Services.AddHttpClient("publicApi");
 
         builder.Services.AddScoped(sp => new SparcAuthorizationMessageHandler(sp.GetService<IAccessTokenProvider>(), sp.GetService<NavigationManager>(), baseUrl));
 
@@ -51,29 +37,16 @@ public static class ServiceCollectionExtensions
             baseUrl,
             x.GetService<IHttpClientFactory>().CreateClient("api")));
 
-        builder.Services.AddScoped<Public<T>>(x => () =>
-            (T)Activator.CreateInstance(typeof(T),
-            baseUrl,
-            x.GetService<IHttpClientFactory>().CreateClient("publicApi")));
-
-        builder.Services.AddScoped<ApiResolver<T>>(x => key =>
-            (T)Activator.CreateInstance(typeof(T),
-            baseUrl,
-            x.GetService<IHttpClientFactory>().CreateClient(key)));
-
-        if (configurationSectionName.Contains("B2C"))
+        builder.Services.AddMsalAuthentication(options =>
         {
-            builder.Services.AddMsalAuthentication(options =>
-            {
-                builder.Configuration.Bind(configurationSectionName, options.ProviderOptions.Authentication);
-                options.ProviderOptions.DefaultAccessTokenScopes.Add(apiScope);
-                options.UserOptions.NameClaim = "http://schemas.microsoft.com/identity/claims/objectidentifier";
-            });
-        }
+            builder.Configuration.Bind("AzureAdB2C", options.ProviderOptions.Authentication);
+            options.ProviderOptions.DefaultAccessTokenScopes.Add(builder.Configuration["AzureAdB2C:Scope"]);
+            options.UserOptions.NameClaim = "http://schemas.microsoft.com/identity/claims/objectidentifier";
+        });
 
         builder.Services.AddSingleton<RootScope>();
 
-        return builder.Services;
+        return builder;
     }
 
     public static IServiceCollection AddSelfHostedApi<T>(this IServiceCollection services, string apiName, string baseUrl, string clientId) where T : class
@@ -93,8 +66,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped(sp => new SparcAuthorizationMessageHandler(sp.GetService<IAccessTokenProvider>(), sp.GetService<NavigationManager>(), baseUrl));
         services.AddHttpClient("api")
             .AddHttpMessageHandler<SparcAuthorizationMessageHandler>();
-        
-        
+
+
 
         services.AddScoped(x => (T)Activator.CreateInstance(typeof(T), baseUrl, x.GetService<IHttpClientFactory>().CreateClient("api")));
 
