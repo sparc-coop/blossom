@@ -6,6 +6,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Diagnostics;
 using Sparc.Core;
+using Sparc.Features.Authentication;
 
 namespace Sparc.Kernel;
 
@@ -33,9 +34,29 @@ public static class ServiceCollectionExtensions
             c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
             c.UseAllOfToExtendReferenceSchemas();
             c.EnableAnnotations();
+
+            // Add JWT Authentication
+            c.OperationFilter<SwaggerAuthorizeFilter>();
+            var securityScheme = new OpenApiSecurityScheme
+            {
+                Name = "JWT Authentication",
+                Description = "Enter JWT Bearer token **_only_**",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Reference = new OpenApiReference
+                {
+                    Id = "bearer",
+                    Type = ReferenceType.SecurityScheme
+                }
+            };
+            c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
         });
 
-        builder.Services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
+        if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
+        
         builder.Services.AddSingleton<RootScope>();
 
         return builder;

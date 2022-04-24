@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
-		<Version>7.0.0-pre.1.13</Version>
+		<Version>7.0.0-pre.1.16</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Sparc Cooperative</Authors>
@@ -29,7 +29,6 @@
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.3.0" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.18" />
 		<PackageReference Include="System.Text.Json" Version="6.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.4" />
 
 		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
 	</ItemGroup>

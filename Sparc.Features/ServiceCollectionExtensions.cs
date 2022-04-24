@@ -61,7 +61,8 @@ namespace Sparc.Features
                 c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
             });
 
-            services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
+            if (!services.Any(x => x.ServiceType == typeof(IRepository<>)))
+                services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
 
             return services;
         }

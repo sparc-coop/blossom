@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Sparc.Kernel;
 
-[Feature]
+[PublicFeature]
 public abstract class PublicFeature<T, TOut> : BaseAsyncEndpoint.WithRequest<T>.WithResponse<TOut>
 {
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -28,7 +28,7 @@ public abstract class PublicFeature<T, TOut> : BaseAsyncEndpoint.WithRequest<T>.
     }
 }
 
-[Feature]
+[PublicFeature]
 public abstract class PublicFeature<TOut> : BaseAsyncEndpoint.WithoutRequest.WithResponse<TOut>
 {
     [ApiExplorerSettings(IgnoreApi = true)]
@@ -48,6 +48,13 @@ public abstract class PublicFeature<TOut> : BaseAsyncEndpoint.WithoutRequest.Wit
         { 
             return this.Exception(e); 
         }
+    }
+}
+
+public class PublicFeatureAttribute : RouteAttribute
+{
+    public PublicFeatureAttribute() : base($"publicapi/[controller]")
+    {
     }
 }
 

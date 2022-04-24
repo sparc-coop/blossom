@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Sparc.Plugins.Database.Cosmos
 {
@@ -15,7 +16,7 @@ namespace Sparc.Plugins.Database.Cosmos
             }));
             services.AddScoped(typeof(DbContext), typeof(T));
             services.AddScoped(sp => new CosmosDbDatabaseProvider(sp.GetRequiredService<DbContext>(), databaseName));
-            services.AddScoped(typeof(IRepository<>), typeof(CosmosDbRepository<>));
+            services.Replace(ServiceDescriptor.Scoped(typeof(IRepository<>), typeof(CosmosDbRepository<>)));
             return services;
         }
     }
