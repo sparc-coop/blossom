@@ -1,6 +1,6 @@
 ﻿using Foundation;
 using Microsoft.Maui;
-using Microsoft.Maui.Essentials;
+using Microsoft.Maui.ApplicationModel;
 using Sparc.Core;
 using Sparc.Platforms.Maui.Platforms.iOS.Push;
 using System.Threading.Tasks;

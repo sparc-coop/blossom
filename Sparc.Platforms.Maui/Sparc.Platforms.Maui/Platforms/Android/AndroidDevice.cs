@@ -1,7 +1,7 @@
 ﻿using Sparc.Core;
 using Android.Provider;
 using Android.App;
-using Microsoft.Maui.Essentials;
+using Microsoft.Maui.Storage;
 
 namespace Sparc.Platforms.Maui;
 
@@ -42,5 +42,5 @@ public class AndroidDevice : Device
         }
     }
 
-    public override Core.Platforms? Platform => Core.Platforms.Android;
+    public override string Platform => Core.Platforms.Android;
 }

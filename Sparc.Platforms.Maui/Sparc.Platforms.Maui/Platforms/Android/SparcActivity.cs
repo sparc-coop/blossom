@@ -5,7 +5,7 @@ using Android.Gms.Common;
 using Android.OS;
 using Android.Runtime;
 using Microsoft.Maui;
-using Microsoft.Maui.Essentials;
+using Microsoft.Maui.ApplicationModel;
 
 namespace Sparc.Platforms.Maui.Platforms.Android;
 
