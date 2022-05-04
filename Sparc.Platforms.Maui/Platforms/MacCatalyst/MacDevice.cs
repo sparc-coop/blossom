@@ -1,8 +1,8 @@
-﻿using Android.Provider;
+﻿using UIKit;
 
 namespace Sparc.Platforms.Maui;
 
-public class AndroidDevice : Core.Device
+public class MacDevice : Core.Device
 {
     private string _id;
     public override string Id
@@ -12,7 +12,7 @@ public class AndroidDevice : Core.Device
             if (_id != null) return _id;
             try
             {
-                _id = Settings.Secure.GetString(global::Android.App.Application.Context.ContentResolver, Settings.Secure.AndroidId);
+                _id = UIDevice.CurrentDevice.IdentifierForVendor.ToString();
             }
             catch
             { }
@@ -39,5 +39,5 @@ public class AndroidDevice : Core.Device
         }
     }
 
-    public override string Platform => Core.Platforms.Android;
+    public override string Platform => Core.Platforms.Mac;
 }

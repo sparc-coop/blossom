@@ -1,12 +1,11 @@
 ﻿using Foundation;
-using Sparc.Core;
-using Sparc.Platforms.Maui.Platforms.iOS.Push;
+using Sparc.Platforms.Maui.iOS.Push;
 using UIKit;
 using UserNotifications;
 
-namespace Sparc.Platforms.Maui.Platforms.iOS;
+namespace Sparc.Platforms.Maui.iOS;
 
-public abstract class SparcDelegate : MauiUIApplicationDelegate
+public abstract class IosDelegate : MauiUIApplicationDelegate
 {
     public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
     {
@@ -23,9 +22,9 @@ public abstract class SparcDelegate : MauiUIApplicationDelegate
         return base.ContinueUserActivity(application, userActivity, completionHandler);
     }
 
-    public bool IsPushNotificationEnabled => 
-        UIDevice.CurrentDevice.CheckSystemVersion(13, 0) 
-        && Services.GetService(typeof(IPushNotificationService)) != null;
+    public bool IsPushNotificationEnabled =>
+        UIDevice.CurrentDevice.CheckSystemVersion(10, 0) &&
+        Services.GetService(typeof(IPushNotificationService)) != null;
 
     public override bool FinishedLaunching(UIApplication application, NSDictionary launchOptions)
     {
@@ -37,26 +36,11 @@ public abstract class SparcDelegate : MauiUIApplicationDelegate
                 | UNAuthorizationOptions.Sound, (approvalGranted, error) =>
                 {
                     if (approvalGranted && error == null)
-                        RegisterForRemoteNotifications();
+                        UIApplication.SharedApplication.RegisterForRemoteNotifications();
                 });
         }
 
         return base.FinishedLaunching(application, launchOptions);
-    }
-
-    static void RegisterForRemoteNotifications()
-    {
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            var pushSettings = UIUserNotificationSettings.GetSettingsForTypes(
-                UIUserNotificationType.Alert |
-                UIUserNotificationType.Badge |
-                UIUserNotificationType.Sound,
-                new NSSet());
-
-            UIApplication.SharedApplication.RegisterUserNotificationSettings(pushSettings);
-            UIApplication.SharedApplication.RegisterForRemoteNotifications();
-        });
     }
 
     [Export("application:didRegisterForRemoteNotificationsWithDeviceToken:")]

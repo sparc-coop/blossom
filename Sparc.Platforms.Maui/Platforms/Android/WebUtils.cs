@@ -57,9 +57,8 @@ static class WebUtils
             {
                 return new Foundation.NSUrl(uri.OriginalString);
             }
-            catch (Exception ex)
+            catch
             {
-                Debug.WriteLine($"Unable to create NSUrl from Original string, trying Absolute URI: {ex.Message}");
                 return new Foundation.NSUrl(uri.AbsoluteUri);
             }
         }

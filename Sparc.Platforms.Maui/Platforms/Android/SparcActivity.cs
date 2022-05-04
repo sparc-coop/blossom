@@ -5,7 +5,7 @@ using Android.Gms.Common;
 using Android.OS;
 using Android.Runtime;
 
-namespace Sparc.Platforms.Maui.Platforms.Android;
+namespace Sparc.Platforms.Maui.Android;
 
 public class SparcActivity : MauiAppCompatActivity
 {
@@ -53,6 +53,7 @@ public class SparcActivity : MauiAppCompatActivity
             return;
         }
 
+#if ANDROID26_0_OR_GREATER
         var defaultChannel = new NotificationChannel("default",
                                               "Default Notifications",
                                               NotificationImportance.Default)
@@ -70,6 +71,7 @@ public class SparcActivity : MauiAppCompatActivity
         var notificationManager = (NotificationManager)GetSystemService(NotificationService);
         notificationManager.CreateNotificationChannel(defaultChannel);
         notificationManager.CreateNotificationChannel(urgentChannel);
+#endif
     }
 
 }
