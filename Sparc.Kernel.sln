@@ -31,7 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sparc.Platforms", "Sparc.Pl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.UI", "Sparc.UI\Sparc.UI.csproj", "{3F4E6791-F13A-4BA8-9F77-A70E6D58A23E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Platforms.Maui", "Sparc.Platforms.Maui\Sparc.Platforms.Maui\Sparc.Platforms.Maui.csproj", "{511DD8CB-0CCD-4EF8-A4E0-E77B5598ED00}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Platforms.Maui", "Sparc.Platforms.Maui\Sparc.Platforms.Maui.csproj", "{511DD8CB-0CCD-4EF8-A4E0-E77B5598ED00}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Notifications.Twilio", "Sparc.Notifications.Twilio\Sparc.Notifications.Twilio.csproj", "{CDFD24B5-A8CA-4C5E-A95C-27258DC858AA}"
 EndProject

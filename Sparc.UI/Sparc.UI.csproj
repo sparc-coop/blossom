@@ -4,7 +4,7 @@
 		<TargetFramework>net6.0</TargetFramework>
 		<OutputType>Library</OutputType>
 		<Nullable>enable</Nullable>
-		<Version>7.0.0-pre.6</Version>
+		<Version>7.0.0-pre.7</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Sparc Cooperative</Authors>
