@@ -3,11 +3,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Sparc.Core;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
+using Sparc.Platforms.Maui;
 
 namespace Sparc.Platforms.Web;
 
@@ -16,7 +13,7 @@ public static class ServiceCollectionExtensions
     public static WebAssemblyHostBuilder Sparcify(this WebAssemblyHostBuilder builder)
     {
         builder.Services.AddBlazoredLocalStorage();
-        builder.Services.AddScoped<Device, WebDevice>();
+        builder.Services.AddScoped<Core.Device, WebDevice>();
         builder.Services.AddScoped<IConfiguration>(_ => builder.Configuration);
 
         return builder;

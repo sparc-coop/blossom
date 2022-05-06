@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
-		<TargetFrameworks>net6.0-ios;net6.0-android;net6.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks>net6.0;net6.0-ios;net6.0-android;net6.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
 		<Version>7.0.0-pre.1</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -41,7 +41,15 @@
 		<PackageReference Include="Xamarin.Google.Dagger" Version="2.39.1" />
 		<PackageReference Include="Xamarin.GooglePlayServices.Base" Version="118.0.1" />
 	</ItemGroup>
-	
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.4" />
+		<PackageReference Include="Microsoft.Authentication.WebAssembly.Msal" Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+	</ItemGroup>
+
 	<ItemGroup>
 	  <ProjectReference Include="..\Sparc.UI\Sparc.UI.csproj" />
 	</ItemGroup>

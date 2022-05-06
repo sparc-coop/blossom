@@ -21,6 +21,12 @@ public static class ServiceCollectionExtensions
         builder.Services.AddSingleton<Device, AndroidDevice>();
 #elif IOS
         builder.Services.AddSingleton<Device, IosDevice>();
+#elif MAC
+        builder.Services.AddSingleton<Device, MacDevice>();
+#elif WINDOWS
+        builder.Services.AddSingleton<Device, WindowsDevice>();
+#else
+        builder.Services.AddSingleton<Device, WebDevice>();
 #endif
 
         return builder;
@@ -32,6 +38,10 @@ public static class ServiceCollectionExtensions
         builder.Services.AddSingleton<IPushNotificationService, AndroidPushNotificationService>();
 #elif IOS
         builder.Services.AddSingleton<IPushNotificationService, IosPushNotificationService>();
+#elif MAC
+        builder.Services.AddSingleton<IPushNotificationService, MacPushNotificationService>();
+#elif WINDOWS
+        builder.Services.AddSingleton<IPushNotificationService, WindowsPushNotificationService>();
 #endif
         return builder;
     }

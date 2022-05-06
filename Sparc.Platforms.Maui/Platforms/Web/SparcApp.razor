@@ -8,7 +8,7 @@
                 <NotAuthorized>
                     @if (!context.User.Identity.IsAuthenticated)
                     {
-                        <Sparc.Platforms.Web.Authentication.RedirectToLogin />
+                        <Sparc.Platforms.Maui.Platforms.Web.Authentication.RedirectToLogin />
                     }
                     else if (NotAuthorized is not null)
                     {

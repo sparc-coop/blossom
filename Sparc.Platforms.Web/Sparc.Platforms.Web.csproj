@@ -15,10 +15,6 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
-	</ItemGroup>
-
 
 	<ItemGroup>
 		<SupportedPlatform Include="browser" />
@@ -30,10 +26,6 @@
 		<PackageReference Include="Microsoft.Authentication.WebAssembly.Msal" Version="6.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Files\" />
 	</ItemGroup>
 
 	<ItemGroup>
