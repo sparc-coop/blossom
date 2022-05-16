@@ -14,6 +14,9 @@ public static class ServiceCollectionExtensions
 {
     public static WebApplicationBuilder Sparcify(this WebApplicationBuilder builder, string? clientUrl = null)
     {
+        var app = builder.Build();
+        app.MapGet("/", )
+        
         builder.Services.AddControllers(); // for API
         builder.Services.AddSingleton<FeatureRouteTransformer>(); // is this necessary? yes
 

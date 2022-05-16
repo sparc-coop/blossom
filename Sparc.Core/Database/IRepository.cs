@@ -13,7 +13,7 @@ namespace Sparc.Core
         // Commands
         Task AddAsync(T item);
         Task UpdateAsync(T item);
-        Task DeleteAsync(T item);
+        Task DeleteAsync(T item); 
         Task ExecuteAsync(object id, Action<T> action);
         Task ExecuteAsync(T entity, Action<T> action);
         Task<T?> FindAsync(object id);
