@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net6.0;net6.0-android</TargetFrameworks>
     <Nullable>enable</Nullable>
-    <Version>6.2.4</Version>
+    <Version>6.3.1</Version>
     <LangVersion>10.0</LangVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
@@ -11,7 +11,6 @@
 	  <Company>Sparc Cooperative</Company>
 	  <Description>Sparc Core package</Description>
 	  <PackageIcon>icon.png</PackageIcon>
-	  <PackageReadmeFile>readme.md</PackageReadmeFile>
 	  <PackageTags>Core;Sparc</PackageTags>
 	  <PackageProjectUrl>https://github.com/sparc-coop/Sparc.Kernel</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/sparc-coop/Sparc.Kernel</RepositoryUrl>
