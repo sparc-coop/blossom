@@ -3,14 +3,13 @@
 	<PropertyGroup>
 		<TargetFrameworks>net6.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
-		<Version>6.0.2</Version>
+		<Version>6.1.1</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Joseph Young</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>SQL Server Database Sparc package</Description>
 		<PackageIcon>icon.png</PackageIcon>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
 		<PackageTags>SQL Server;Database;Web;Sparc</PackageTags>
 		<PackageProjectUrl>https://github.com/sparc-coop/Sparc.Kernel</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/sparc-coop/Sparc.Kernel</RepositoryUrl>
@@ -18,11 +17,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="Files\readme.md" Pack="true" PackagePath="\"/>
-		<None Include="Files\icon.png" Pack="true" PackagePath="\"/>
+		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="6.0.1" />
 		<PackageReference Include="Dapper" Version="2.0.123" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.0" />
 	</ItemGroup>

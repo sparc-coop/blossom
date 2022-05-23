@@ -11,6 +11,7 @@ namespace Sparc.Database.SqlServer
             services.AddSqlServerWithoutRepository<T>(connectionString);
             services.AddScoped(typeof(DbContext), typeof(T));
             services.AddScoped(typeof(IRepository<>), typeof(SqlServerRepository<>));
+            services.AddScoped(typeof(ISpecRepository<>), typeof(SqlServerSpecRepository<>));
             return services;
         }
 
