@@ -7,7 +7,7 @@
 		<IsPackable>true</IsPackable>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
-		<Authors>Joseph Young</Authors>
+		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Tests Sparc package</Description>
 		<PackageIcon>icon.png</PackageIcon>

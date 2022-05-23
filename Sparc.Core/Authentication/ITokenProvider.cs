@@ -1,7 +1,6 @@
-﻿namespace Sparc.Core
+﻿namespace Sparc.Core;
+
+public interface ITokenProvider
 {
-    public interface ITokenProvider
-    {
-        string? Token { get; set; }
-    }
+    string? Token { get; set; }
 }

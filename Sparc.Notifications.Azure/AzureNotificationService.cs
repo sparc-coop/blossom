@@ -1,8 +1,5 @@
 ﻿using Microsoft.Azure.NotificationHubs;
 using Sparc.Core;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Sparc.Notifications.Azure;
 

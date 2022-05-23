@@ -6,7 +6,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Diagnostics;
 using Sparc.Core;
-using Sparc.Features.Authentication;
+using Sparc.Kernel.Authentication;
 
 namespace Sparc.Kernel;
 

@@ -1,17 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace Sparc.Features.Authentication;
+namespace Sparc.Kernel.Authentication;
 
 public class SwaggerAuthorizeFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         // Get Authorize attribute
-        var attributes = context.MethodInfo.DeclaringType.GetCustomAttributes(true)
+        var attributes = context.MethodInfo.DeclaringType!.GetCustomAttributes(true)
                                 .Union(context.MethodInfo.GetCustomAttributes(true));
 
         if (attributes != null && attributes.OfType<AuthorizeAttribute>().Any() && !attributes.OfType<AllowAnonymousAttribute>().Any())

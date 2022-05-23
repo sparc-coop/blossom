@@ -5,7 +5,7 @@
 		<Version>6.0.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
-		<Authors>Joseph Young</Authors>
+		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>AD Authentication Sparc package</Description>
 		<PackageIcon>icon.png</PackageIcon>
@@ -17,13 +17,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="Files\readme.md" Pack="true" PackagePath="\"/>
-		<None Include="Files\icon.png" Pack="true" PackagePath="\"/>
+		<None Include="Files\readme.md" Pack="true" PackagePath="\" />
+		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Identity.Web.UI" Version="1.20.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.5" />
+		<PackageReference Include="Microsoft.Identity.Web.UI" Version="1.24.1" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
 	</ItemGroup>

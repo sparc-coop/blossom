@@ -6,31 +6,30 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 
-namespace Sparc.Authentication.AzureADB2C
+namespace Sparc.Authentication.AzureADB2C;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static IServiceCollection AddAzureADB2CAuthentication(this IServiceCollection services, IConfiguration configuration, string configurationSectionName = "AzureAdB2C")
     {
-        public static IServiceCollection AddAzureADB2CAuthentication(this IServiceCollection services, IConfiguration configuration)
+        services.AddMicrosoftIdentityWebApiAuthentication(configuration, configurationSectionName);
+
+        //GDPR
+        services.Configure<CookiePolicyOptions>(options =>
         {
-            services.AddMicrosoftIdentityWebApiAuthentication(configuration, "AzureAdB2C");
+            options.CheckConsentNeeded = context => true;
+            options.MinimumSameSitePolicy = SameSiteMode.None;
+            options.HandleSameSiteCookieCompatibility();
+        });
 
-            //GDPR
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-                options.HandleSameSiteCookieCompatibility();
-            });
+        services.AddControllersWithViews().AddMicrosoftIdentityUI();
 
-            services.AddControllersWithViews().AddMicrosoftIdentityUI();
+        // To fix User.Identity.Name
+        services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            options.TokenValidationParameters.NameClaimType = "name";
+        });
 
-            // To fix User.Identity.Name
-            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
-            {
-                options.TokenValidationParameters.NameClaimType = "name";
-            });
-
-            return services;
-        }
+        return services;
     }
 }

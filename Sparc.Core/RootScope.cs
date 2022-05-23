@@ -1,22 +1,19 @@
-﻿using System;
+﻿namespace Sparc.Core;
 
-namespace Sparc.Core
+public class RootScope
 {
-    public class RootScope
+    private bool _isLoading;
+    public bool IsLoading
     {
-        private bool _isLoading;
-        public bool IsLoading
+        get => _isLoading;
+        set
         {
-            get => _isLoading;
-            set
-            {
-                _isLoading = value;
-                NotifyStateChanged();
-            }
+            _isLoading = value;
+            NotifyStateChanged();
         }
-
-        public event Action OnStateChanged;
-
-        protected void NotifyStateChanged() => OnStateChanged?.Invoke();
     }
+
+    public event Action? OnStateChanged;
+
+    protected void NotifyStateChanged() => OnStateChanged?.Invoke();
 }

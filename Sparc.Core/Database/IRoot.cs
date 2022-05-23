@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
+﻿namespace Sparc.Core;
 
-namespace Sparc.Core
+public interface IRoot<T>
 {
-    public interface IRoot<T>
-    {
-        T Id { get; set; }
-    }
+    T Id { get; set; }
 }

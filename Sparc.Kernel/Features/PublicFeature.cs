@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Sparc.Kernel;
 
 [PublicFeature]
-public abstract class PublicFeature<T, TOut> : BaseAsyncEndpoint.WithRequest<T>.WithResponse<TOut>
+public abstract class PublicFeature<T, TOut> : EndpointBaseAsync.WithRequest<T>.WithActionResult<TOut>
 {
     [ApiExplorerSettings(IgnoreApi = true)]
     public abstract Task<TOut> ExecuteAsync(T request);
@@ -29,7 +29,7 @@ public abstract class PublicFeature<T, TOut> : BaseAsyncEndpoint.WithRequest<T>.
 }
 
 [PublicFeature]
-public abstract class PublicFeature<TOut> : BaseAsyncEndpoint.WithoutRequest.WithResponse<TOut>
+public abstract class PublicFeature<TOut> : EndpointBaseAsync.WithoutRequest.WithActionResult<TOut>
 {
     [ApiExplorerSettings(IgnoreApi = true)]
     public abstract Task<TOut> ExecuteAsync();

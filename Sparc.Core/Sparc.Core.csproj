@@ -1,27 +1,32 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
-    <Version>7.0.0</Version>
-    <LangVersion>10.0</LangVersion>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	<PropertyGroup>
+		<TargetFrameworks>net6.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<Version>7.0.0</Version>
+		<LangVersion>10.0</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
-	  <Authors>Joseph Young</Authors>
-	  <Company>Sparc Cooperative</Company>
-	  <Description>Sparc Core package</Description>
-	  <PackageIcon>icon.png</PackageIcon>
-	  <PackageTags>Core;Sparc</PackageTags>
-	  <PackageProjectUrl>https://github.com/sparc-coop/Sparc.Kernel</PackageProjectUrl>
-	  <RepositoryUrl>https://github.com/sparc-coop/Sparc.Kernel</RepositoryUrl>
-	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
+		<Authors>Sparc Cooperative</Authors>
+		<Company>Sparc Cooperative</Company>
+		<Description>Sparc Core package</Description>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageTags>Core;Sparc</PackageTags>
+		<PackageProjectUrl>https://github.com/sparc-coop/Sparc.Kernel</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/sparc-coop/Sparc.Kernel</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="readme.md" Pack="true" PackagePath="\" />
+	  <PackageReference Include="Ardalis.Specification" Version="6.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 </Project>

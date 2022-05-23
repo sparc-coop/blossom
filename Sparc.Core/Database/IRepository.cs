@@ -1,31 +1,24 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Ardalis.Specification;
 
-namespace Sparc.Core
+namespace Sparc.Core;
+
+public interface IRepository<T>
 {
-    public interface IRepository<T>
-    {
-        // Queries
-        IQueryable<T> Query { get; }
+    // Queries
+    IQueryable<T> Query { get; }
 
-        // Commands
-        Task AddAsync(T item);
-        Task AddAsync(IEnumerable<T> items);
-        Task UpdateAsync(T item);
-        Task UpdateAsync(IEnumerable<T> items);
-        Task DeleteAsync(T item);
-        Task DeleteAsync(IEnumerable<T> items);
-        Task ExecuteAsync(object id, Action<T> action);
-        Task ExecuteAsync(T entity, Action<T> action);
-        Task<T?> FindAsync(object id);
-        Task<List<T>> FromSqlAsync(string sql, params (string, object)[] parameters);
-        Task<List<U>> FromSqlAsync<U>(string sql, params (string, object)[] parameters);
-    }
-    
-    public interface IRepository<T, TId> where T : IRoot<TId>
-    {
-        
-    }
+    // Commands
+    Task AddAsync(T item);
+    Task AddAsync(IEnumerable<T> items);
+    Task UpdateAsync(T item);
+    Task UpdateAsync(IEnumerable<T> items);
+    Task DeleteAsync(T item);
+    Task DeleteAsync(IEnumerable<T> items);
+    Task ExecuteAsync(object id, Action<T> action);
+    Task ExecuteAsync(T entity, Action<T> action);
+    Task<T?> FindAsync(object id);
+    Task<T?> FindAsync(ISpecification<T> spec);
+    Task<List<T>> GetAllAsync(ISpecification<T> spec);
+    Task<int> CountAsync(ISpecification<T> spec);
+    Task<bool> AnyAsync(ISpecification<T> spec);
 }

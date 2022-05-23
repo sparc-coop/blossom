@@ -3,10 +3,11 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<Version>7.0.0-pre.1</Version>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Version>7.0.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
-		<Authors>Joseph Young</Authors>
+		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Cosmos Database Sparc package</Description>
 		<PackageIcon>icon.png</PackageIcon>
@@ -23,8 +24,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="6.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="6.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="6.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -8,7 +8,7 @@
 		<Version>6.3.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
-		<Authors>Joseph Young</Authors>
+		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Sparc Features package</Description>
 		<PackageIcon>icon.png</PackageIcon>

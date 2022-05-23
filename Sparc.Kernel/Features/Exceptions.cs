@@ -42,7 +42,7 @@ public class ForbiddenException : HttpResponseException
 
 public static class FeatureExtensions
 {
-    public static ActionResult Exception(this BaseEndpointAsync controller, HttpResponseException exception)
+    public static ActionResult Exception(this EndpointBase controller, HttpResponseException exception)
     {
         return exception.Status switch
         {

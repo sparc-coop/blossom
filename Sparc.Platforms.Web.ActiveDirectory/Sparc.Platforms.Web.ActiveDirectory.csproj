@@ -5,7 +5,7 @@
 		<Version>6.0.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
-		<Authors>Joseph Young</Authors>
+		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Web platform Active Directory Sparc package</Description>
 		<PackageIcon>icon.png</PackageIcon>
