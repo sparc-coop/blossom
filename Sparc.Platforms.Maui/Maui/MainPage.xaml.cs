@@ -1,6 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-
-namespace Sparc.Blossom;
+﻿namespace Sparc.Blossom.Maui;
 
 public partial class MainPage : ContentPage
 {

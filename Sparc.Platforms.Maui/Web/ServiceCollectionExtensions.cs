@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Sparc.Core;
 using Sparc.Blossom;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Sparc.Platforms.Web;
 
@@ -64,6 +65,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped(sp => new SparcAuthorizationMessageHandler(sp.GetService<IAccessTokenProvider>(), sp.GetService<NavigationManager>(), baseUrl));
         services.AddHttpClient("api")
             .AddHttpMessageHandler<SparcAuthorizationMessageHandler>();
+
+        services.AddScoped(x =>
+           (T)Activator.CreateInstance(typeof(T),
+           baseUrl,
+           x.GetService<IHttpClientFactory>().CreateClient("api")));
 
         services.AddSingleton<RootScope>();
 

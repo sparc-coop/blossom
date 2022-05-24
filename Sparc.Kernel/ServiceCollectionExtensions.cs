@@ -94,7 +94,6 @@ public static class ServiceCollectionExtensions
         {
             endpoints.MapDynamicControllerRoute<FeatureRouteTransformer>("{namespace}/{controller}");
             endpoints.MapRazorPages();
-            endpoints.MapFallbackToPage("/_Host");
         });
 
         return app;

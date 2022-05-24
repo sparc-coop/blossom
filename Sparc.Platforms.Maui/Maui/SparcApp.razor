@@ -9,7 +9,7 @@
                     <NotAuthorized>
                         @if (context.User.Identity == null)
                         {
-                            <Sparc.Blossom.Authentication.RedirectToLogin />
+                            <Sparc.Blossom.Maui.Authentication.RedirectToLogin />
                         }
                         else if (NotAuthorized is not null)
                         {

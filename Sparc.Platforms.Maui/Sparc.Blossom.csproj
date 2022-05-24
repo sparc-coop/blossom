@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net6.0;net6.0-ios;net6.0-android;net6.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
-		<Version>7.0.0-pre.1</Version>
+		<Version>7.0.0-pre.4</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
@@ -27,7 +27,19 @@
 	<ItemGroup>
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
-	
+
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<UseMaui>false</UseMaui>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<Compile Remove="**\Platforms\**\*.cs" />
+		<None Include="**\Platforms\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+		<Compile Remove="**\Maui\**\*.cs" />
+		<Content Remove="**\Maui\**\*.razor" />
+		<None Include="**\Maui\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.5" />

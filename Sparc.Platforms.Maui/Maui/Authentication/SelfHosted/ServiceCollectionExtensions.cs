@@ -1,5 +1,7 @@
 ﻿using IdentityModel.OidcClient;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.DependencyInjection;
+using Sparc.Blossom.Maui;
 using Sparc.Core;
 
 namespace Sparc.Blossom;
