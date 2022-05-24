@@ -1,7 +1,7 @@
 ﻿using Microsoft.Identity.Client;
 using Sparc.Core;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public class SparcAuthorizationMessageHandler : DelegatingHandler
 {

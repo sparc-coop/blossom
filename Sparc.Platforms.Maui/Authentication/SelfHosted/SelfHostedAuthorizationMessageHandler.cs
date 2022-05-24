@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public class SelfHostedAuthorizationMessageHandler : DelegatingHandler
 {

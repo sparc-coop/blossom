@@ -1,4 +1,4 @@
-﻿@inherits Sparc.UI.RootElement
+﻿@inherits RootElement
 
 <SparcErrorBoundary>
     <CascadingAuthenticationState>
@@ -9,7 +9,7 @@
                     <NotAuthorized>
                         @if (context.User.Identity == null)
                         {
-                            <RedirectToLogin />
+                            <Sparc.Blossom.Authentication.RedirectToLogin />
                         }
                         else if (NotAuthorized is not null)
                         {

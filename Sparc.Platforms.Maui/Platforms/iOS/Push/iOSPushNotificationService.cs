@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Sparc.Core;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public class IosPushNotificationService : IPushNotificationService
 {

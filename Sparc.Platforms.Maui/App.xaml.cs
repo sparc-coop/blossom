@@ -1,6 +1,6 @@
 ﻿using Application = Microsoft.Maui.Controls.Application;
 
-namespace Sparc.Platforms.Maui
+namespace Sparc.Blossom
 {
     public partial class App : Application
     {

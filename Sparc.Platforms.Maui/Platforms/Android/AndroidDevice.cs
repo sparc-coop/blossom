@@ -1,6 +1,6 @@
 ﻿using Android.Provider;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public class AndroidDevice : Core.Device
 {

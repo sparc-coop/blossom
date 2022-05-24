@@ -1,4 +1,4 @@
-﻿namespace Sparc.Platforms.Maui;
+﻿namespace Sparc.Blossom;
 
 public class AzureADB2CSettings
 {

@@ -1,4 +1,4 @@
-﻿namespace Sparc.Platforms.Maui;
+﻿namespace Sparc.Blossom;
 
 public interface IPushNotificationService
 {

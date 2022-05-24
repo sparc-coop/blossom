@@ -3,7 +3,7 @@ using Microsoft.Identity.Client;
 using Sparc.Core;
 using System.Security.Claims;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public class AzureADB2CAuthenticator : AuthenticationStateProvider, ISparcAuthenticator
 {

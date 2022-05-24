@@ -3,7 +3,7 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 [Activity(ConfigurationChanges = ConfigChanges.Orientation | ConfigChanges.ScreenSize)]
 class SparcAuthenticatorIntermediateActivity : Activity

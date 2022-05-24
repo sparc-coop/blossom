@@ -4,7 +4,7 @@ using Firebase.Messaging;
 using Microsoft.AspNetCore.Components;
 using Sparc.Core;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 [Service]
 [IntentFilter(new[] { "com.google.firebase.MESSAGING_EVENT" })]

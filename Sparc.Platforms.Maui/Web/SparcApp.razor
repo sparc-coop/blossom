@@ -1,4 +1,4 @@
-@inherits Sparc.UI.RootElement
+@inherits RootElement
 
 <CascadingAuthenticationState>
     <Router AppAssembly="@Startup.Assembly" PreferExactMatches="@true" AdditionalAssemblies="@AdditionalAssemblies">
@@ -8,7 +8,7 @@
                 <NotAuthorized>
                     @if (!context.User.Identity.IsAuthenticated)
                     {
-                        <Sparc.Platforms.Maui.Platforms.Web.Authentication.RedirectToLogin />
+                        <Sparc.Blossom.Web.Authentication.RedirectToLogin />
                     }
                     else if (NotAuthorized is not null)
                     {

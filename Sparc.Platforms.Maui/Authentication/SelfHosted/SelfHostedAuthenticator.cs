@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 using Sparc.Core;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public class SelfHostedAuthenticator : AuthenticationStateProvider, ISparcAuthenticator
 {

@@ -1,8 +1,8 @@
-# Sparc.Platforms.Maui
+# Sparc.Blossom
 
-[![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Maui?label=Sparc.Platforms.Maui)](https://www.nuget.org/packages/Sparc.Platforms.Maui/)
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Blossom?label=Sparc.Blossom)](https://www.nuget.org/packages/Sparc.Blossom/)
 
-The `Sparc.Platforms.Maui` library is the main framework library for the *MAUI Project* in your Sparc solution.
+The `Sparc.Blossom` library is the main framework library for the *MAUI Project* in your Sparc solution.
 
 ## What is a MAUI Project?
 
@@ -26,8 +26,8 @@ Web.
 ## Get Started with a MAUI Project
 
 1. Create a new *.NET MAUI Blazor App* project in your solution, preferably called *[Your Project]*.Maui.
-2. Add the `Sparc.Platforms.Maui` Nuget package to your newly created project: 
-[![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Maui?label=Sparc.Platforms.Maui)](https://www.nuget.org/packages/Sparc.Platforms.Maui/)
+2. Add the `Sparc.Blossom` Nuget package to your newly created project: 
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Blossom?label=Sparc.Blossom)](https://www.nuget.org/packages/Sparc.Blossom/)
 3. Add the following line of code to your `MauiProgram.cs` file, in the appropriate method:
 
 	```csharp
@@ -41,9 +41,9 @@ Web.
 				...            
 			}
 	```
-4. *(optional)* Add an `_Imports.razor` file to the root of your project, and add a `Sparc.Platforms.Maui` using statement to it:
+4. *(optional)* Add an `_Imports.razor` file to the root of your project, and add a `Sparc.Blossom` using statement to it:
 	```razor
-	@using Sparc.Platforms.Maui
+	@using Sparc.Blossom
 	```
 
 5. Write your app.

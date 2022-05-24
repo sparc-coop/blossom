@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Sparc.Core;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public static class SelfHostedServiceCollectionExtensions
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public class SparcErrorBoundary : ErrorBoundary
 {

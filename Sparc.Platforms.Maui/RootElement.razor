@@ -1,0 +1,13 @@
+﻿@implements IDisposable
+
+@code {
+    protected override void OnInitialized()
+    {
+        RootScope.OnStateChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        RootScope.OnStateChanged -= StateHasChanged;
+    }
+}

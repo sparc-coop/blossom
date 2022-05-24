@@ -1,7 +1,7 @@
 ﻿using Android.Content;
 using AndroidX.Browser.CustomTabs;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public partial class SparcAuthenticator
 {

@@ -1,9 +1,9 @@
 ﻿using Foundation;
-using Sparc.Platforms.Maui.iOS.Push;
+using Sparc.Blossom.iOS.Push;
 using UIKit;
 using UserNotifications;
 
-namespace Sparc.Platforms.Maui.iOS;
+namespace Sparc.Blossom.iOS;
 
 public abstract class IosDelegate : MauiUIApplicationDelegate
 {
@@ -48,10 +48,12 @@ public abstract class IosDelegate : MauiUIApplicationDelegate
         => CompleteRegistrationAsync(deviceToken).ContinueWith((task) => { if (task.IsFaulted) throw task.Exception; });
 
 
-    async Task CompleteRegistrationAsync(NSData deviceToken)
+    Task CompleteRegistrationAsync(NSData deviceToken)
     {
         var device = (Core.Device)Services.GetService(typeof(Core.Device));
         if (device != null)
             device.PushToken = deviceToken.ToHexString();
+
+        return Task.CompletedTask;
     }
 }

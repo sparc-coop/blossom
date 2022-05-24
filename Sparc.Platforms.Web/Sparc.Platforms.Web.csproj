@@ -29,10 +29,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Sparc.UI\Sparc.UI.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <None Update="readme.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 

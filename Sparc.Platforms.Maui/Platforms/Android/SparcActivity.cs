@@ -5,7 +5,7 @@ using Android.Gms.Common;
 using Android.OS;
 using Android.Runtime;
 
-namespace Sparc.Platforms.Maui.Android;
+namespace Sparc.Blossom.Android;
 
 public class SparcActivity : MauiAppCompatActivity
 {

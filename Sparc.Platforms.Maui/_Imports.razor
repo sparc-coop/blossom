@@ -2,7 +2,12 @@
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Authorization
 
-@using Sparc.Platforms.Maui
-@using Sparc.Platforms.Maui.Authentication
+@using System.Net.Http
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
 
-@inject Sparc.Core.RootScope RootScope
+@using Sparc.Core
+@using Sparc.Blossom
+
+@inject NavigationManager Nav
+@inject RootScope RootScope

@@ -1,7 +1,7 @@
 ﻿using Foundation;
 using System.Text;
 
-namespace Sparc.Platforms.Maui.Mac.Push;
+namespace Sparc.Blossom.Mac.Push;
 
 internal static class NSDataExtensions
 {

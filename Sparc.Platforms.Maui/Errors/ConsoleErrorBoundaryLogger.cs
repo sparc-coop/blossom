@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Web;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public class ConsoleErrorBoundaryLogger : IErrorBoundaryLogger
 {

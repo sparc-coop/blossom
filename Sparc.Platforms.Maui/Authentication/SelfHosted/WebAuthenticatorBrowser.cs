@@ -2,7 +2,7 @@
 using IBrowser = IdentityModel.OidcClient.Browser.IBrowser;
 
 // Taken from https://www.davidbritch.com/2020/04/authentication-from-xamarinforms-app_8.html
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public class WebAuthenticatorBrowser : IBrowser
 {

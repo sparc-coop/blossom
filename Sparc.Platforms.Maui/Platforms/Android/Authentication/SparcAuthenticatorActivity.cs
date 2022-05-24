@@ -1,7 +1,7 @@
 ﻿using Android.Content;
 using Android.OS;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
 public class SparcAuthenticatorActivity : WebAuthenticatorCallbackActivity
 {

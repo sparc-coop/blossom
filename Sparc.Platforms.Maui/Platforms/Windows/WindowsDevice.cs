@@ -1,10 +1,10 @@
 ﻿using Blazored.LocalStorage;
 
-namespace Sparc.Platforms.Maui;
+namespace Sparc.Blossom;
 
-public class WebDevice : Core.Device
+public class WindowsDevice : Core.Device
 {
-    public WebDevice(ISyncLocalStorageService localStorage)
+    public WindowsDevice(ISyncLocalStorageService localStorage)
     {
         LocalStorage = localStorage;
     }
