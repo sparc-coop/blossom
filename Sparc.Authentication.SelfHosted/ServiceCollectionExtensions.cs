@@ -29,7 +29,7 @@ public static class ServiceCollectionExtensions
         foreach (var client in clients)
             client.AllowedScopes = ApiScopes.Select(x => x.Name).Union(IdentityScopes.Select(x => x.Name)).ToList();
 
-        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        services.AddAuthentication()
             .AddJwtBearer(options =>
             {
                 options.Authority = serverUrl;

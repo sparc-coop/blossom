@@ -4,7 +4,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 using Sparc.Core;
 
-namespace Sparc.Plugins.Database.Cosmos;
+namespace Sparc.Database.Cosmos;
 
 public class CosmosDbRepository<T> : RepositoryBase<T>, ISqlRepository<T> where T : class, IRoot<string>
 {

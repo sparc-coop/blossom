@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Sparc.Plugins.Database.Cosmos;
+namespace Sparc.Database.Cosmos;
 
 public class CosmosDbDatabaseProvider
 {

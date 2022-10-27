@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;net6.0-ios;net6.0-android;net6.0-maccatalyst</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFrameworks>net7.0;net7.0-ios;net7.0-android;net7.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
 		<Version>7.0.0-pre.4</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<UseMaui>true</UseMaui>
@@ -10,7 +10,7 @@
 
 		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
-		<Description>MAUI Sparc package</Description>
+		<Description>An opinionated framework-of-a-framework for ASP.NET 7.</Description>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageTags>MAUI;Mobile;Sparc</PackageTags>
 		<PackageProjectUrl>https://github.com/sparc-coop/Sparc.Kernel</PackageProjectUrl>
@@ -19,7 +19,7 @@
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
@@ -28,27 +28,33 @@
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
-	<PropertyGroup Condition="'$(TargetFramework)' == 'net6.0'">
+	<PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
 		<UseMaui>false</UseMaui>
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-		<Compile Remove="**\Platforms\**\*.cs" />
-		<None Include="**\Platforms\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+		<Compile Remove="**\Platforms\Android\*.cs" />
+		<Compile Remove="**\Platforms\iOS\*.cs" />
+		<Compile Remove="**\Platforms\MacCatalyst\*.cs" />
+		<Compile Remove="**\Platforms\Windows\*.cs" />
+		<None Include="**\Platforms\Android\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+		<None Include="**\Platforms\iOS\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+		<None Include="**\Platforms\MacCatalyst\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+		<None Include="**\Platforms\Windows\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 		<Compile Remove="**\Maui\**\*.cs" />
 		<Content Remove="**\Maui\**\*.razor" />
 		<None Include="**\Maui\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Components" Version="6.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components" Version="7.0.0-rc.2.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.0-rc.2.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.0-rc.2.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.0-rc.2.*" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="7.0.0-rc.2.*" />
 		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
-		<PackageReference Include="Microsoft.Authentication.WebAssembly.Msal" Version="6.0.5" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Authentication.WebAssembly.Msal" Version="7.0.0-rc.2.*" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0-rc.2.*" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.44.0" />
 		<PackageReference Include="IdentityModel.OidcClient" Version="4.0.0" />
 		<PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />

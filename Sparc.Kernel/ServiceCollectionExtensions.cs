@@ -12,7 +12,7 @@ namespace Sparc.Kernel;
 
 public static class ServiceCollectionExtensions
 {
-    public static WebApplicationBuilder Sparcify(this WebApplicationBuilder builder, string? clientUrl = null)
+    public static WebApplicationBuilder AddSparcKernel(this WebApplicationBuilder builder, string? clientUrl = null)
     {
         builder.Services.AddControllers(); // for API
         builder.Services.AddSingleton<FeatureRouteTransformer>(); // is this necessary? yes
@@ -56,13 +56,13 @@ public static class ServiceCollectionExtensions
 
         if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))
             builder.Services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
-        
-        builder.Services.AddSingleton<RootScope>();
+
+        builder.Services.AddRazorPages();
 
         return builder;
     }
 
-    public static WebApplication Sparcify(this WebApplication app)
+    public static WebApplication UseSparcKernel(this WebApplication app)
     {
         if (app.Environment.IsDevelopment())
         {
@@ -73,6 +73,8 @@ public static class ServiceCollectionExtensions
         {
             app.UseHsts();
         }
+
+        app.UseCookiePolicy();
 
         app.UseExceptionHandler(x => x.Run(async context =>
         {
@@ -88,13 +90,9 @@ public static class ServiceCollectionExtensions
 
         app.UseRouting();
         app.UseAuthorization();
-        app.UseCookiePolicy();
 
-        app.UseEndpoints(endpoints =>
-        {
-            endpoints.MapDynamicControllerRoute<FeatureRouteTransformer>("{namespace}/{controller}");
-            endpoints.MapRazorPages();
-        });
+        app.MapDynamicControllerRoute<FeatureRouteTransformer>("{namespace}/{controller}");
+        app.MapRazorPages();
 
         return app;
     }

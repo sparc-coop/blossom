@@ -1,18 +1,23 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.UI;
 
 namespace Sparc.Authentication.AzureADB2C;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddAzureADB2CAuthentication(this IServiceCollection services, IConfiguration configuration, string configurationSectionName = "AzureAdB2C")
+    public static AuthenticationBuilder AddAzureADB2CAuthentication(this IServiceCollection services, IConfiguration configuration, string configurationSectionName = "AzureAdB2C")
     {
-        services.AddMicrosoftIdentityWebApiAuthentication(configuration, configurationSectionName);
+        var builder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
+        builder.AddMicrosoftIdentityWebApi(
+                configuration,
+                configurationSectionName,
+                JwtBearerDefaults.AuthenticationScheme,
+                false);
 
         //GDPR
         services.Configure<CookiePolicyOptions>(options =>
@@ -22,14 +27,12 @@ public static class ServiceCollectionExtensions
             options.HandleSameSiteCookieCompatibility();
         });
 
-        services.AddControllersWithViews().AddMicrosoftIdentityUI();
-
         // To fix User.Identity.Name
         services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
         {
             options.TokenValidationParameters.NameClaimType = "name";
         });
 
-        return services;
+        return builder;
     }
 }

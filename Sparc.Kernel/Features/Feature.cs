@@ -1,21 +1,9 @@
 ﻿using Ardalis.ApiEndpoints;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Sparc.Kernel;
 
-[Feature]
-public abstract class BaseFeature<T, TOut> : EndpointBaseAsync.WithRequest<T>.WithActionResult<TOut>
-{
-
-}
-
-[Feature]
-public abstract class BaseFeature<TOut> : EndpointBaseAsync.WithoutRequest.WithActionResult<TOut>
-{
-    
-}
 
 [Feature]
 public abstract class Feature<T, TOut> : EndpointBaseAsync.WithRequest<T>.WithActionResult<TOut>
@@ -24,7 +12,7 @@ public abstract class Feature<T, TOut> : EndpointBaseAsync.WithRequest<T>.WithAc
     public abstract Task<TOut> ExecuteAsync(T request);
 
     [HttpPost("")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     public override async Task<ActionResult<TOut>> HandleAsync([FromBody]T request, CancellationToken cancellationToken)
     {
         try
@@ -46,7 +34,7 @@ public abstract class Feature<TOut> : EndpointBaseAsync.WithoutRequest.WithActio
     public abstract Task<TOut> ExecuteAsync();
 
     [HttpPost("")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     public override async Task<ActionResult<TOut>> HandleAsync(CancellationToken cancellationToken)
     {
         try

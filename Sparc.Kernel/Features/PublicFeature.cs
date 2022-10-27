@@ -1,5 +1,4 @@
 ﻿using Ardalis.ApiEndpoints;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,7 +11,7 @@ public abstract class PublicFeature<T, TOut> : EndpointBaseAsync.WithRequest<T>.
     public abstract Task<TOut> ExecuteAsync(T request);
 
     [HttpPost("")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     [AllowAnonymous]
     public override async Task<ActionResult<TOut>> HandleAsync([FromBody] T request, CancellationToken cancellationToken)
     {
@@ -35,7 +34,7 @@ public abstract class PublicFeature<TOut> : EndpointBaseAsync.WithoutRequest.Wit
     public abstract Task<TOut> ExecuteAsync();
 
     [HttpPost("")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize]
     [AllowAnonymous]
     public override async Task<ActionResult<TOut>> HandleAsync(CancellationToken cancellationToken)
     {
