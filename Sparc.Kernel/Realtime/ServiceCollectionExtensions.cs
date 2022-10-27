@@ -17,14 +17,14 @@ public static class ServiceCollectionExtensions
     {
         services.AddSwaggerGen(options =>
         {
-            options.DocumentFilter<PolymorphismDocumentFilter<SparcNotification>>();
-            options.SchemaFilter<PolymorphismSchemaFilter<SparcNotification>>();
+            options.DocumentFilter<PolymorphismDocumentFilter<SparcNotification, THub>>();
+            options.SchemaFilter<PolymorphismSchemaFilter<SparcNotification, THub>>();
         });
 
         var signalR = services.AddSignalR();
         //.AddMessagePackProtocol();
 
-        services.AddMediatR(Assembly.GetExecutingAssembly());
+        services.AddMediatR(typeof(THub).Assembly);
         services.AddSingleton<Publisher>();
 
         // Use the User ID as the SignalR user identifier    
@@ -38,7 +38,7 @@ public static class ServiceCollectionExtensions
 }
 
 // taken from https://stackoverflow.com/questions/49006079/using-swashbuckle-for-asp-net-core-how-can-i-add-a-model-to-the-generated-model
-public class PolymorphismDocumentFilter<T> : IDocumentFilter
+public class PolymorphismDocumentFilter<T, THub> : IDocumentFilter
 {
     public void Apply(OpenApiDocument openApiDoc, DocumentFilterContext context)
     {
@@ -64,7 +64,7 @@ public class PolymorphismDocumentFilter<T> : IDocumentFilter
             parentSchema.Properties.Add(discriminatorName, new OpenApiSchema { Type = "string", Default = new OpenApiString(abstractType.FullName) });
 
         // register all subclasses
-        var derivedTypes = abstractType.GetTypeInfo().Assembly.GetTypes()
+        var derivedTypes = typeof(THub).Assembly.GetTypes()
             .Where(x => abstractType != x && abstractType.IsAssignableFrom(x));
 
         foreach (var type in derivedTypes)
@@ -72,7 +72,7 @@ public class PolymorphismDocumentFilter<T> : IDocumentFilter
     }
 }
 
-public class PolymorphismSchemaFilter<T> : ISchemaFilter
+public class PolymorphismSchemaFilter<T, THub> : ISchemaFilter
 {
     private readonly Lazy<HashSet<Type>> derivedTypes = new(Init);
 
@@ -113,7 +113,7 @@ public class PolymorphismSchemaFilter<T> : ISchemaFilter
     private static HashSet<Type> Init()
     {
         var abstractType = typeof(T);
-        var dTypes = abstractType.GetTypeInfo().Assembly
+        var dTypes = typeof(THub).Assembly
             .GetTypes()
             .Where(x => abstractType != x && abstractType.IsAssignableFrom(x));
 
