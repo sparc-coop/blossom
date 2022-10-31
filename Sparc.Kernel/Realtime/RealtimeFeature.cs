@@ -1,6 +1,5 @@
 ﻿using Ardalis.ApiEndpoints;
 using MediatR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -4,12 +4,12 @@ namespace Sparc.Realtime;
 
 public class SparcNotificationForwarder<TNotification> : RealtimeFeature<TNotification> where TNotification : SparcNotification
 {
-    public SparcNotificationForwarder(IHubContext hub)
+    public SparcNotificationForwarder(IHubContext<SparcHub> hub)
     {
         Hub = hub; 
     }
 
-    public IHubContext Hub { get; }
+    public IHubContext<SparcHub> Hub { get; }
 
     public override async Task ExecuteAsync(TNotification notification)
     {
