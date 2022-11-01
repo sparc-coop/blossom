@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
         var signalR = services.AddSignalR();
         //.AddMessagePackProtocol();
 
-        services.AddMediatR(typeof(THub).Assembly, typeof(Notification).Assembly);
+        services.AddMediatR(typeof(THub).Assembly, typeof(Notification).Assembly, typeof(SparcNotificationForwarder<>).Assembly);
         services.AddSingleton<Publisher>();
 
         // Use the User ID as the SignalR user identifier    
