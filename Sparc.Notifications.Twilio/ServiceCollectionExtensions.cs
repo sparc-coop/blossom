@@ -8,7 +8,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddTwilio(this IServiceCollection services, IConfiguration configuration, string sectionName = "Twilio")
     {
-        var twilioConfig = configuration.GetSection(sectionName).Get<TwilioConfiguration>();
+        var twilioConfig = configuration.GetSection(sectionName).Get<TwilioConfiguration>()!;
         services.AddSingleton(_ => twilioConfig).AddScoped<TwilioService>();
 
         if (!string.IsNullOrWhiteSpace(twilioConfig.SendGridApiKey))

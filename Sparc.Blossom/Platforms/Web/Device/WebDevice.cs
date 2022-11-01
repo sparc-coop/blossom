@@ -9,8 +9,8 @@ public class WebDevice : Core.Device
         LocalStorage = localStorage;
     }
 
-    private string _id;
-    public override string Id
+    private string? _id;
+    public override string? Id
     {
         get
         {
@@ -35,8 +35,8 @@ public class WebDevice : Core.Device
         set {  _id = value; }
     }
 
-    private string _pushToken;
-    public override string PushToken
+    private string? _pushToken;
+    public override string? PushToken
     {
         get
         {

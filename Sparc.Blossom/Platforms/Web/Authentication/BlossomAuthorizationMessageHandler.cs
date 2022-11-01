@@ -3,27 +3,27 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using System.Net.Http.Headers;
 
-namespace Sparc.Platforms.Web;
+namespace Sparc.Blossom.Web;
 
-public class SparcAuthorizationMessageHandler : DelegatingHandler, IDisposable
+public class BlossomAuthorizationMessageHandler : DelegatingHandler, IDisposable
 {
     private readonly IAccessTokenProvider _provider;
     private readonly NavigationManager _navigation;
-    private readonly AuthenticationStateChangedHandler _authenticationStateChangedHandler;
-    private AccessToken _lastToken;
-    private AuthenticationHeaderValue _cachedHeader;
-    private Uri[] _authorizedUris;
-    private AccessTokenRequestOptions _tokenOptions;
+    private readonly AuthenticationStateChangedHandler? _authenticationStateChangedHandler;
+    private AccessToken? _lastToken;
+    private AuthenticationHeaderValue? _cachedHeader;
+    private Uri[]? _authorizedUris;
+    private AccessTokenRequestOptions? _tokenOptions;
 
     /// <summary>
-    /// Initializes a new instance of <see cref="SparcAuthorizationMessageHandler"/>.
+    /// Initializes a new instance of <see cref="BlossomAuthorizationMessageHandler"/>.
     /// </summary>
     /// <param name="provider">The <see cref="IAccessTokenProvider"/> to use for provisioning tokens.</param>
     /// <param name="navigation">The <see cref="NavigationManager"/> to use for performing redirections.</param>
-    public SparcAuthorizationMessageHandler(
+    public BlossomAuthorizationMessageHandler(
         IAccessTokenProvider provider,
         NavigationManager navigation,
-        string baseUrl)
+        string? baseUrl)
     {
         _provider = provider;
         _navigation = navigation;
@@ -44,11 +44,11 @@ public class SparcAuthorizationMessageHandler : DelegatingHandler, IDisposable
         var now = DateTimeOffset.Now;
         if (_authorizedUris == null)
         {
-            throw new InvalidOperationException($"The '{nameof(SparcAuthorizationMessageHandler)}' is not configured. " +
-                $"Call '{nameof(SparcAuthorizationMessageHandler.ConfigureHandler)}' and provide a list of endpoint urls to attach the token to.");
+            throw new InvalidOperationException($"The '{nameof(BlossomAuthorizationMessageHandler)}' is not configured. " +
+                $"Call '{nameof(BlossomAuthorizationMessageHandler.ConfigureHandler)}' and provide a list of endpoint urls to attach the token to.");
         }
 
-        if (_authorizedUris.Any(uri => uri.IsBaseOf(request.RequestUri)))
+        if (_authorizedUris.Any(uri => uri.IsBaseOf(request.RequestUri!)))
         {
             if (_lastToken == null || now >= _lastToken.Expires.AddMinutes(-5))
             {
@@ -85,11 +85,11 @@ public class SparcAuthorizationMessageHandler : DelegatingHandler, IDisposable
     /// <param name="returnUrl">The return URL to use in case there is an issue provisioning the token and a redirection to the
     /// identity provider is necessary.
     /// </param>
-    /// <returns>This <see cref="SparcAuthorizationMessageHandler"/>.</returns>
-    public SparcAuthorizationMessageHandler ConfigureHandler(
-        IEnumerable<string> authorizedUrls,
-        IEnumerable<string> scopes = null,
-        string returnUrl = null)
+    /// <returns>This <see cref="BlossomAuthorizationMessageHandler"/>.</returns>
+    public BlossomAuthorizationMessageHandler ConfigureHandler(
+        IEnumerable<string?> authorizedUrls,
+        IEnumerable<string>? scopes = null,
+        string? returnUrl = null)
     {
         if (_authorizedUris != null)
         {
@@ -101,7 +101,11 @@ public class SparcAuthorizationMessageHandler : DelegatingHandler, IDisposable
             throw new ArgumentNullException(nameof(authorizedUrls));
         }
 
-        var uris = authorizedUrls.Select(uri => new Uri(uri, UriKind.Absolute)).ToArray();
+        var uris = authorizedUrls
+            .Where(uri => uri != null)
+            .Select(uri => new Uri(uri!, UriKind.Absolute))
+            .ToArray();
+        
         if (uris.Length == 0)
         {
             throw new ArgumentException("At least one URL must be configured.", nameof(authorizedUrls));

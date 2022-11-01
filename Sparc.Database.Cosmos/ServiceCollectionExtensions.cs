@@ -1,7 +1,7 @@
-﻿using Sparc.Core;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Azure.Cosmos;
+using Sparc.Core;
 
 namespace Sparc.Database.Cosmos;
 

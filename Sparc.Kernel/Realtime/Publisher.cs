@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Sparc.Core;
 
 namespace Sparc.Realtime;
 
@@ -23,12 +24,12 @@ public class Publisher
 
     public Task Publish<TNotification>(TNotification notification)
     {
-        return Publish(notification, DefaultStrategy, default(CancellationToken));
+        return Publish(notification, DefaultStrategy, default);
     }
 
     public Task Publish<TNotification>(TNotification notification, PublishStrategy strategy)
     {
-        return Publish(notification, strategy, default(CancellationToken));
+        return Publish(notification, strategy, default);
     }
 
     public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken)
@@ -189,14 +190,14 @@ public enum PublishStrategy
 
 public class SparcMediator : Mediator
 {
-    private Func<IEnumerable<Func<MediatR.INotification, CancellationToken, Task>>, MediatR.INotification, CancellationToken, Task> _publish;
+    private Func<IEnumerable<Func<INotification, CancellationToken, Task>>, INotification, CancellationToken, Task> _publish;
 
-    public SparcMediator(ServiceFactory serviceFactory, Func<IEnumerable<Func<MediatR.INotification, CancellationToken, Task>>, MediatR.INotification, CancellationToken, Task> publish) : base(serviceFactory)
+    public SparcMediator(ServiceFactory serviceFactory, Func<IEnumerable<Func<INotification, CancellationToken, Task>>, INotification, CancellationToken, Task> publish) : base(serviceFactory)
     {
         _publish = publish;
     }
 
-    protected override Task PublishCore(IEnumerable<Func<MediatR.INotification, CancellationToken, Task>> allHandlers, MediatR.INotification notification, CancellationToken cancellationToken)
+    protected override Task PublishCore(IEnumerable<Func<INotification, CancellationToken, Task>> allHandlers, INotification notification, CancellationToken cancellationToken)
     {
         return _publish(allHandlers, notification, cancellationToken);
     }

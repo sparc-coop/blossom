@@ -1,4 +1,4 @@
-@inherits RootElement
+@using Sparc.Blossom.Platforms.Web.Authentication
 
 <CascadingAuthenticationState>
     <Router AppAssembly="@Startup.Assembly" PreferExactMatches="@true" AdditionalAssemblies="@AdditionalAssemblies">
@@ -6,9 +6,9 @@
             <AuthorizeRouteView RouteData="@routeData"
                                 DefaultLayout="@MainLayout">
                 <NotAuthorized>
-                    @if (!context.User.Identity.IsAuthenticated)
+                    @if (!context.User.Identity?.IsAuthenticated == true)
                     {
-                        <Sparc.Blossom.Web.Authentication.RedirectToLogin />
+                        <RedirectToLogin />
                     }
                     else if (NotAuthorized is not null)
                     {
@@ -51,20 +51,13 @@
     </Router>
 </CascadingAuthenticationState>
 
-@if (Loading != null)
-{
-    <div class="sparc-loading @(RootScope.IsLoading ? "sparc-loading-active" : "")">
-        @Loading
-    </div>
-}
-
 @code {
-    [Parameter] public Type Startup { get; set; }
-    [Parameter] public Type MainLayout { get; set; }
-    [Parameter] public RenderFragment NotAuthorized { get; set; }
-    [Parameter] public RenderFragment Authorizing { get; set; }
-    [Parameter] public RenderFragment NotFound { get; set; }
-    [Parameter] public RenderFragment Loading { get; set; }
+    [Parameter] public Type Startup { get; set; } = null!;
+    [Parameter] public Type MainLayout { get; set; } = null!;
+    [Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
+    [Parameter] public RenderFragment Authorizing { get; set; } = null!;
+    [Parameter] public RenderFragment NotFound { get; set; } = null!;
+    [Parameter] public RenderFragment Loading { get; set; } = null!;
 
     public System.Reflection.Assembly[] AdditionalAssemblies => MainLayout.Assembly.FullName == Startup.Assembly.FullName
         ? new[] { this.GetType().Assembly }

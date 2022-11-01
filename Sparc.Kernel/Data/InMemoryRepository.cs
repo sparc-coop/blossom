@@ -1,7 +1,8 @@
 ﻿using Ardalis.Specification;
 using Sparc.Core;
+using Sparc.Kernel;
 
-namespace Sparc.Kernel;
+namespace Sparc.Data;
 
 public class InMemoryRepository<T> : IRepository<T> where T : class
 {
@@ -60,21 +61,21 @@ public class InMemoryRepository<T> : IRepository<T> where T : class
 
     public Task<T?> FindAsync(object id)
     {
-        if (typeof(T).IsAssignableTo(typeof(IRoot<string>)))
+        if (typeof(T).IsAssignableTo(typeof(Root<string>)))
         {
-            var itemsWithStringIds = _items.Cast<IRoot<string>>();
+            var itemsWithStringIds = _items.Cast<Root<string>>();
             var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
             return Task.FromResult(item);
         }
 
-        if (typeof(T).IsAssignableTo(typeof(IRoot<int>)))
+        if (typeof(T).IsAssignableTo(typeof(Root<int>)))
         {
-            var itemsWithStringIds = _items.Cast<IRoot<int>>();
+            var itemsWithStringIds = _items.Cast<Root<int>>();
             var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
             return Task.FromResult(item);
         }
 
-        throw new Exception("The items repository is not an IRoot.");
+        throw new Exception("The item for this repository is not a Root.");
     }
 
     public Task<T?> FindAsync(ISpecification<T> spec)
@@ -89,9 +90,8 @@ public class InMemoryRepository<T> : IRepository<T> where T : class
 
     public async Task UpdateAsync(T item)
     {
-        object? id = (item as IRoot<string>)?.Id;
-        if (id == null)
-            id = (item as IRoot<int>)?.Id;
+        object? id = (item as Root<string>)?.Id;
+        id ??= (item as Root<int>)?.Id;
 
         if (id == null)
             throw new Exception("The item passed to UpdateAsync has no Id set.");

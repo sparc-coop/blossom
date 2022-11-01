@@ -1,24 +1,24 @@
 ﻿using System.Security.Claims;
 
-namespace Sparc.Platforms.Web;
+namespace Sparc.Blossom.Authentication;
 
 public static class ClaimsPrincipalExtensions
 {
-    public static string Email(this ClaimsPrincipal principal) =>
-principal.Get(ClaimTypes.Email)
-?? principal.Get("emails");
+    public static string? Email(this ClaimsPrincipal principal) =>
+        principal.Get(ClaimTypes.Email)
+        ?? principal.Get("emails");
 
-    public static string FirstName(this ClaimsPrincipal principal) =>
+    public static string? FirstName(this ClaimsPrincipal principal) =>
         principal.Get("given_name")
         ?? principal.Get("http://schemas.microsoft.com/identity/claims/givenname")
         ?? principal.Get(ClaimTypes.GivenName);
 
-    public static string LastName(this ClaimsPrincipal principal) =>
+    public static string? LastName(this ClaimsPrincipal principal) =>
         principal.Get("family_name")
         ?? principal.Get("http://schemas.microsoft.com/identity/claims/lastname")
         ?? principal.Get("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname")
         ?? principal.Get("surname")
         ?? principal.Get(ClaimTypes.Name);
 
-    public static string Get(this ClaimsPrincipal principal, string key) => principal?.FindFirst(key)?.Value;
+    public static string? Get(this ClaimsPrincipal principal, string key) => principal?.FindFirst(key)?.Value;
 }

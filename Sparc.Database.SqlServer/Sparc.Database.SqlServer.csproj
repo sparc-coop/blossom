@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0</TargetFrameworks>
+		<TargetFrameworks>net7.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<Version>7.0.0-pre.1</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -22,12 +22,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="6.0.1" />
+		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="6.1.0" />
 		<PackageReference Include="Dapper" Version="2.0.123" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.0-rc.2.22472.11" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
+	  <ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
 	</ItemGroup>
 </Project>

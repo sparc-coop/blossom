@@ -2,7 +2,7 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace Sparc.Kernel.Authentication;
+namespace Sparc.Authentication;
 
 public class SwaggerAuthorizeFilter : IOperationFilter
 {

@@ -1,6 +1,6 @@
 ﻿using System.Linq.Dynamic.Core;
 
-namespace Sparc.Kernel;
+namespace Sparc.Data;
 
 public static class RepositoryExtensions
 {

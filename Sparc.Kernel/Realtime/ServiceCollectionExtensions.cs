@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Models;
+using Sparc.Blossom;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 
@@ -17,14 +18,14 @@ public static class ServiceCollectionExtensions
     {
         services.AddSwaggerGen(options =>
         {
-            options.DocumentFilter<PolymorphismDocumentFilter<SparcNotification, THub>>();
-            options.SchemaFilter<PolymorphismSchemaFilter<SparcNotification, THub>>();
+            options.DocumentFilter<PolymorphismDocumentFilter<Notification, THub>>();
+            options.SchemaFilter<PolymorphismSchemaFilter<Notification, THub>>();
         });
 
         var signalR = services.AddSignalR();
         //.AddMessagePackProtocol();
 
-        services.AddMediatR(typeof(THub).Assembly, typeof(SparcNotification).Assembly);
+        services.AddMediatR(typeof(THub).Assembly, typeof(Notification).Assembly);
         services.AddSingleton<Publisher>();
 
         // Use the User ID as the SignalR user identifier    

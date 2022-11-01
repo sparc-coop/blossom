@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Sparc.Core;
+using Sparc.Kernel;
 using Sparc.Realtime;
 
-namespace Sparc.Kernel.Database;
+namespace Sparc.Data;
 
 public class SparcContext : DbContext
 {
@@ -21,9 +21,9 @@ public class SparcContext : DbContext
 
     async Task DispatchDomainEventsAsync()
     {
-        var domainEntities = ChangeTracker.Entries<ISparcRoot>().Where(x => x.Entity.Events != null && x.Entity.Events.Any());
-        var domainEvents = domainEntities.SelectMany(x => x.Entity.Events!).ToList();
-        domainEntities.ToList().ForEach(entity => entity.Entity.Events!.Clear());
+        var domainEntities = ChangeTracker.Entries<Root>().Where(x => x.Entity._events != null && x.Entity._events.Any());
+        var domainEvents = domainEntities.SelectMany(x => x.Entity._events!).ToList();
+        domainEntities.ToList().ForEach(entity => entity.Entity._events!.Clear());
 
         var tasks = domainEvents
             .Select(async (domainEvent) =>
@@ -34,6 +34,6 @@ public class SparcContext : DbContext
         await Task.WhenAll(tasks);
 
         foreach (var entity in domainEntities)
-            entity.Entity.Events!.Clear();
+            entity.Entity._events!.Clear();
     }
 }
