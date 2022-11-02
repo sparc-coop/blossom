@@ -3,7 +3,7 @@ using Sparc.Core;
 
 namespace Sparc.Authentication;
 
-public class SparcUserRepository<T> : IUserSecurityStampStore<T> where T : SparcUser
+public class SparcUserRepository<T> : IUserSecurityStampStore<T> where T : SparcUser, new()
 {
     public SparcUserRepository(IRepository<T> users)
     {

@@ -1,10 +1,11 @@
-﻿using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
-using Sparc.Blossom;
 using Microsoft.Extensions.DependencyInjection;
+using Sparc.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Blazored.LocalStorage;
 
 namespace Sparc.Blossom.Web;
 
@@ -22,8 +23,7 @@ public static class ServiceCollectionExtensions
         if (builder.Configuration["Oidc:Authority"] != null)
             builder.AddOidcApi<T>();
 
-        //if (builder.Configuration["Passwordless"] != null)
-        //    builder.AddPasswordlessApi<T>(baseUrl);
+        builder.AddPasswordlessApi<T>();
 
         builder.AddBlossomHttpClient<T>(baseUrl);
 
@@ -55,6 +55,18 @@ public static class ServiceCollectionExtensions
             if (builder.Configuration["Oidc:Scope"] != null)
                 options.ProviderOptions.DefaultScopes.Add(builder.Configuration["Oidc:Scope"]!.Replace(" ", "."));
         });
+
+        return builder;
+    }
+
+    public static WebAssemblyHostBuilder AddPasswordlessApi<T>(this WebAssemblyHostBuilder builder) where T : class
+    {
+        builder.Services.AddScoped<IAccessTokenProvider, PasswordlessAccessTokenProvider>();
+        builder.Services.AddAuthorizationCore(options =>
+        {
+            options.AddPolicy("Passwordless", policy => policy.Requirements.Add(new PasswordlessRequirement()));
+        });
+        builder.Services.AddScoped<IAuthorizationHandler, PasswordlessAuthorizationHandler>();
 
         return builder;
     }

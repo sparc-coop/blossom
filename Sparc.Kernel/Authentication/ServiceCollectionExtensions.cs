@@ -6,12 +6,15 @@ using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Sparc.Kernel;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Sparc.Authentication;
 
 public static class ServiceCollectionExtensions
 {
-    public static AuthenticationBuilder AddPasswordlessAuthentication<TUser>(this WebApplicationBuilder builder, AuthenticationBuilder auth) where TUser : SparcUser
+    public static AuthenticationBuilder AddPasswordlessAuthentication<TUser>(this WebApplicationBuilder builder, AuthenticationBuilder auth) where TUser : SparcUser, new()
     {
         auth.AddJwtBearer("Passwordless", o =>
         {
@@ -30,8 +33,9 @@ public static class ServiceCollectionExtensions
         });
 
         builder.Services.AddScoped<IUserStore<TUser>, SparcUserRepository<TUser>>()
-            .AddScoped<IRoleStore<SparcRole>, SparcRoleStore>();
-
+            .AddScoped<IRoleStore<SparcRole>, SparcRoleStore>()
+            .AddScoped<PasswordlessJwtProvider>();
+        
         builder.Services.AddIdentity<TUser, SparcRole>()
             .AddDefaultTokenProviders();
 
@@ -47,5 +51,29 @@ public static class ServiceCollectionExtensions
         return auth;
     }
 
+    public static void UsePasswordlessAuthentication<TUser>(this WebApplication app) where TUser : SparcUser
+    {
+        app.MapGet("/PasswordlessLogin", async (string userId, string token, string returnUrl, UserManager<TUser> users, HttpContext context, PasswordlessJwtProvider jwt) =>
+        {
+            var user = await users.FindByIdAsync(userId);
+            if (user == null)
+                throw new NotAuthorizedException($"Can't find user {userId}");
 
+            var isValid = await users.VerifyUserTokenAsync(user, "Default", "passwordless-auth", token);
+
+            if (isValid)
+            {
+                await users.UpdateSecurityStampAsync(user);
+                await context.SignInAsync(IdentityConstants.ApplicationScheme, user.CreatePrincipal());
+
+                var returnUri = new Uri(returnUrl);
+                var callbackUrl = $"{returnUri.Scheme}://{returnUri.Authority}/authentication/login-callback";
+                callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "returnUrl", returnUrl);
+                callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "passwordless", jwt.CreateJwt(user));
+                return Results.Redirect(callbackUrl);
+            }
+            return Results.Unauthorized();
+
+        });
+    }
 }
