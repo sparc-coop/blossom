@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Authentication.WebAssembly.Msal.Models;
+using Polly;
 
 namespace Sparc.Blossom.Web;
 
@@ -85,7 +86,14 @@ public static class ServiceCollectionExtensions
         {
             if (apiBaseUrl != null)
                 client.BaseAddress = new Uri(apiBaseUrl);
-        });
+        })
+            .AddTransientHttpErrorPolicy(polly => polly.WaitAndRetryAsync(new[]
+            {
+                TimeSpan.FromSeconds(1),
+                TimeSpan.FromSeconds(2),
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(10)
+            }));
 
         if (string.IsNullOrWhiteSpace(apiBaseUrl))
             client.AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();

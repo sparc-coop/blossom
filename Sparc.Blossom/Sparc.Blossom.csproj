@@ -3,7 +3,7 @@
 		<TargetFrameworks>net7.0</TargetFrameworks>
 		<!--<TargetFrameworks>net7.0;net7.0-ios;net7.0-android;net7.0-maccatalyst</TargetFrameworks>-->
 		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>-->
-		<Version>7.0.0-pre.15</Version>
+		<Version>7.0.0-pre.16</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
@@ -79,7 +79,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.0-rc.2.22476.2" />
 		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Authentication.WebAssembly.Msal" Version="7.0.0-rc.2.*" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0-rc.2.*" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.0-rc.2.22476.2" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.44.0" />
 		<PackageReference Include="IdentityModel.OidcClient" Version="4.0.0" />
