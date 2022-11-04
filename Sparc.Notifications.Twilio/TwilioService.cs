@@ -3,6 +3,7 @@ using SendGrid.Helpers.Mail;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Twilio;
+using Twilio.Http;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Rest.Lookups.V1;
 
@@ -72,6 +73,23 @@ public class TwilioService
             foreach (var (filename, base64) in attachments)
                 msg.AddAttachment(filename, base64);
         }
+
+        return true;
+    }
+
+    public async Task<bool> SendEmailTemplateAsync(string toEmail, string templateId, object templateData, string? fromEmailAddress = null)
+    {
+        fromEmailAddress ??= Config.FromEmailAddress;
+
+        var message = MailHelper.CreateSingleTemplateEmail(
+           new EmailAddress(fromEmailAddress, Config.FromName ?? fromEmailAddress),
+           new EmailAddress(toEmail),
+           templateId,
+           templateData);
+
+        var result = await SendGridClient.SendEmailAsync(message);
+        if (!result.IsSuccessStatusCode)
+            throw new Exception($"Unable to send email: Error {result.StatusCode}");
 
         return true;
     }
