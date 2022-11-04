@@ -1,18 +1,15 @@
-﻿using Ardalis.Specification;
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Sparc.Core;
 
 namespace Sparc.Storage.Azure;
 
-public class AzureBlobRepository : IRepository<File>
+public class AzureBlobRepository : IFileRepository<File>
 {
     public AzureBlobRepository(BlobServiceClient client)
     {
         Client = client;
     }
-
-    public IQueryable<File> Query => throw new NotImplementedException();
 
     public BlobServiceClient Client { get; }
 
@@ -31,16 +28,6 @@ public class AzureBlobRepository : IRepository<File>
         await Parallel.ForEachAsync(items, async (item, token) => await AddAsync(item));
     }
 
-    public Task<bool> AnyAsync(ISpecification<File> spec)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<int> CountAsync(ISpecification<File> spec)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task DeleteAsync(File item)
     {
         var container = await GetContainer(item);
@@ -51,16 +38,6 @@ public class AzureBlobRepository : IRepository<File>
     public async Task DeleteAsync(IEnumerable<File> items)
     {
         await Parallel.ForEachAsync(items, async (item, token) => await DeleteAsync(item));
-    }
-
-    public Task ExecuteAsync(object id, Action<File> action)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task ExecuteAsync(File entity, Action<File> action)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<File?> FindAsync(object id)
@@ -86,27 +63,6 @@ public class AzureBlobRepository : IRepository<File>
 
         return null;
     }
-
-    public Task<File?> FindAsync(ISpecification<File> spec)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<List<File>> FromSqlAsync(string sql, params (string, object)[] parameters)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<List<U>> FromSqlAsync<U>(string sql, params (string, object)[] parameters)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<List<File>> GetAllAsync(ISpecification<File> spec)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task UpdateAsync(File item)
     {
         var container = await GetContainer(item);
