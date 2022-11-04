@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
-		<Version>7.0.0-pre.8</Version>
+		<Version>7.0.0-pre.9</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -25,7 +25,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0-rc.2.22476.2" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0-rc.2.22472.3" />
-		<PackageReference Include="Microsoft.Identity.Web" Version="1.25.3" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="1.25.5" />
 	</ItemGroup>
 
 	<ItemGroup>
