@@ -63,7 +63,6 @@ public static class ServiceCollectionExtensions
 
             if (isValid)
             {
-                await users.UpdateSecurityStampAsync(user);
                 await context.SignInAsync(IdentityConstants.ApplicationScheme, user.CreatePrincipal());
 
                 var returnUri = new Uri(returnUrl);

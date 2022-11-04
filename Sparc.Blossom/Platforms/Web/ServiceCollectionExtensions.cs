@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Sparc.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Authentication.WebAssembly.Msal.Models;
 
 namespace Sparc.Blossom.Web;
 
@@ -67,6 +69,7 @@ public static class ServiceCollectionExtensions
             options.AddPolicy("Passwordless", policy => policy.Requirements.Add(new PasswordlessRequirement()));
         });
         builder.Services.AddScoped<IAuthorizationHandler, PasswordlessAuthorizationHandler>();
+        builder.Services.AddScoped<AuthenticationStateProvider, PasswordlessAuthenticationStateProvider<RemoteAuthenticationState, RemoteUserAccount, MsalProviderOptions>>();
 
         return builder;
     }
