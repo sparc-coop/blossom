@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Sparc.Kernel;
+namespace Sparc.Core;
 
 public static class ClaimsPrincipalExtensions
 {

@@ -10,7 +10,7 @@ namespace Sparc.Authentication.AzureADB2C;
 
 public static class ServiceCollectionExtensions
 {
-    public static AuthenticationBuilder AddAzureADB2CAuthentication(this IServiceCollection services, IConfiguration configuration, string configurationSectionName = "AzureAdB2C")
+    public static AuthenticationBuilder AddAzureADB2CAuthentication<TUser>(this IServiceCollection services, IConfiguration configuration, string configurationSectionName = "AzureAdB2C") where TUser : ISparcUser
     {
         var builder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
         builder.AddMicrosoftIdentityWebApi(
@@ -32,6 +32,8 @@ public static class ServiceCollectionExtensions
         {
             options.TokenValidationParameters.NameClaimType = "name";
         });
+
+        services.AddTransient<IClaimsTransformation, AzureAdB2CClaimsTransformation<TUser>>();
 
         return builder;
     }

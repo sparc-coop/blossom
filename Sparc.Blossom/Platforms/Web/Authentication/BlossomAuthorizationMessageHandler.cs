@@ -50,7 +50,7 @@ public class BlossomAuthorizationMessageHandler : DelegatingHandler, IDisposable
 
         if (_authorizedUris.Any(uri => uri.IsBaseOf(request.RequestUri!)))
         {
-            if (_lastToken == null || now >= _lastToken.Expires.AddMinutes(-5))
+            if (_lastToken == null || _lastToken.Expires == default || now >= _lastToken.Expires.AddMinutes(-5))
             {
                 var tokenResult = _tokenOptions != null ?
                     await _provider.RequestAccessToken(_tokenOptions) :

@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Sparc.Core;
 
 namespace Sparc.Realtime;
 
