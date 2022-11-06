@@ -6,6 +6,12 @@
 @code {
     protected override void OnInitialized()
     {
-        Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
+        var options = new InteractiveRequestOptions()
+            {
+                Interaction = InteractionType.SignIn,
+                ReturnUrl = Navigation.Uri
+            };
+
+        Navigation.NavigateToLogin($"authentication/login", options);
     }
 }

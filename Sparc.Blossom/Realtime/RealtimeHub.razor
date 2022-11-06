@@ -61,11 +61,17 @@
             .Build();
 
         Connection.On("ReceiveMessage", () => { }); // placeholder event so that we can add more On events afterward
+    }
 
-        await ConnectAsync();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Connection?.State == HubConnectionState.Disconnected)
+        {
+            await ConnectAsync();
 
-        if (Connection.State == HubConnectionState.Connected && OnConnected.HasDelegate)
-            await OnConnected.InvokeAsync(Connection);
+            if (Connection.State == HubConnectionState.Connected && OnConnected.HasDelegate)
+                await OnConnected.InvokeAsync(Connection);
+        }
     }
 
     async Task ConnectAsync()
