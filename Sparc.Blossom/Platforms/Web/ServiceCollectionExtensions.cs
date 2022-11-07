@@ -86,6 +86,7 @@ public static class ServiceCollectionExtensions
         {
             if (apiBaseUrl != null)
                 client.BaseAddress = new Uri(apiBaseUrl);
+            client.DefaultRequestVersion = new Version(2, 0);
         })
             .AddTransientHttpErrorPolicy(polly => polly.WaitAndRetryAsync(new[]
             {
