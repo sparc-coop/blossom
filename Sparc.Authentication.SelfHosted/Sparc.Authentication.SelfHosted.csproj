@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
-		<Version>7.0.0-pre.1</Version>
+		<Version>7.0.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Sparc Cooperative</Authors>
@@ -24,7 +24,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="IdentityServer4" Version="4.1.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
