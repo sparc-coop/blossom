@@ -14,75 +14,74 @@ namespace Sparc.Blossom.Web;
 
 public static class ServiceCollectionExtensions
 {
-    public static WebAssemblyHostBuilder AddBlossom<T>(this WebAssemblyHostBuilder builder, string? baseUrl = null) where T : class
+    public static IServiceCollection AddBlossom<T>(this IServiceCollection services, IConfiguration configuration, string? baseUrl = null) where T : class
     {
-        builder.Services.AddBlazoredLocalStorage();
-        builder.Services.AddScoped<Core.Device, WebDevice>();
-        builder.Services.AddScoped<IConfiguration>(_ => builder.Configuration);
+        services.AddBlazoredLocalStorage();
+        services.AddScoped<Core.Device, WebDevice>();
+        services.AddScoped(_ => configuration);
 
-        if (builder.Configuration["AzureAdB2C:Authority"] != null)
-            builder.AddB2CApi<T>();
+        if (configuration["AzureAdB2C:Authority"] != null)
+            services.AddB2CApi<T>(configuration);
 
-        if (builder.Configuration["Oidc:Authority"] != null)
-            builder.AddOidcApi<T>();
+        if (configuration["Oidc:Authority"] != null)
+            services.AddOidcApi<T>(configuration);
 
-        builder.AddPasswordlessApi<T>();
+        services.AddPasswordlessApi<T>();
 
-        builder.AddBlossomHttpClient<T>(baseUrl);
+        services.AddBlossomHttpClient<T>(baseUrl);
 
-        return builder;
+        return services;
     }
 
-    public static WebAssemblyHostBuilder AddB2CApi<T>(this WebAssemblyHostBuilder builder) where T : class
+    public static IServiceCollection AddB2CApi<T>(this IServiceCollection services, IConfiguration configuration) where T : class
     {
-        builder.Services.AddMsalAuthentication(options =>
+        services.AddMsalAuthentication(options =>
         {
-            builder.Configuration.Bind("AzureAdB2C", options.ProviderOptions.Authentication);
+            configuration.Bind("AzureAdB2C", options.ProviderOptions.Authentication);
             options.UserOptions.NameClaim = "http://schemas.microsoft.com/identity/claims/objectidentifier";
 
-            if (builder.Configuration["AzureAdB2C:Scope"] != null)
-                options.ProviderOptions.DefaultAccessTokenScopes.Add(builder.Configuration["AzureAdB2C:Scope"]!);
+            if (configuration["AzureAdB2C:Scope"] != null)
+                options.ProviderOptions.DefaultAccessTokenScopes.Add(configuration["AzureAdB2C:Scope"]!);
         });
 
-
-        return builder;
+        return services;
     }
 
-    public static WebAssemblyHostBuilder AddOidcApi<T>(this WebAssemblyHostBuilder builder) where T : class
+    public static IServiceCollection AddOidcApi<T>(this IServiceCollection services, IConfiguration configuration) where T : class
     {
         // Add Blazor WebAssembly auth
-        builder.Services.AddOidcAuthentication(options =>
+        services.AddOidcAuthentication(options =>
         {
-            builder.Configuration.Bind("Oidc", options.ProviderOptions);
+            configuration.Bind("Oidc", options.ProviderOptions);
             options.ProviderOptions.ResponseType = "code";
-            if (builder.Configuration["Oidc:Scope"] != null)
-                options.ProviderOptions.DefaultScopes.Add(builder.Configuration["Oidc:Scope"]!.Replace(" ", "."));
+            if (configuration["Oidc:Scope"] != null)
+                options.ProviderOptions.DefaultScopes.Add(configuration["Oidc:Scope"]!.Replace(" ", "."));
         });
 
-        return builder;
+        return services;
     }
 
-    public static WebAssemblyHostBuilder AddPasswordlessApi<T>(this WebAssemblyHostBuilder builder) where T : class
+    public static IServiceCollection AddPasswordlessApi<T>(this IServiceCollection services) where T : class
     {
-        builder.Services.AddScoped<IAccessTokenProvider, PasswordlessAccessTokenProvider>();
-        builder.Services.AddAuthorizationCore(options =>
+        services.AddScoped<IAccessTokenProvider, PasswordlessAccessTokenProvider>();
+        services.AddAuthorizationCore(options =>
         {
             options.AddPolicy("Passwordless", policy => policy.Requirements.Add(new PasswordlessRequirement()));
         });
-        builder.Services.AddScoped<IAuthorizationHandler, PasswordlessAuthorizationHandler>();
-        builder.Services.AddScoped<AuthenticationStateProvider, PasswordlessAuthenticationStateProvider<RemoteAuthenticationState, RemoteUserAccount, MsalProviderOptions>>();
+        services.AddScoped<IAuthorizationHandler, PasswordlessAuthorizationHandler>();
+        services.AddScoped<AuthenticationStateProvider, PasswordlessAuthenticationStateProvider<RemoteAuthenticationState, RemoteUserAccount, MsalProviderOptions>>();
 
-        return builder;
+        return services;
     }
 
-    public static void AddBlossomHttpClient<T>(this WebAssemblyHostBuilder builder, string? apiBaseUrl) where T : class
+    public static void AddBlossomHttpClient<T>(this IServiceCollection services, string? apiBaseUrl) where T : class
     {
-        builder.Services.AddScoped(sp => new BlossomAuthorizationMessageHandler(
-            sp.GetRequiredService<IAccessTokenProvider>(), 
+        services.AddScoped(sp => new BlossomAuthorizationMessageHandler(
+            sp.GetRequiredService<IAccessTokenProvider>(),
             sp.GetRequiredService<NavigationManager>(),
             apiBaseUrl));
 
-        var client = builder.Services.AddHttpClient<T>(client =>
+        var client = services.AddHttpClient<T>(client =>
         {
             if (apiBaseUrl != null)
                 client.BaseAddress = new Uri(apiBaseUrl);
@@ -100,6 +99,35 @@ public static class ServiceCollectionExtensions
             client.AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
         else
             client.AddHttpMessageHandler<BlossomAuthorizationMessageHandler>();
+    }
+
+    public static WebAssemblyHostBuilder AddBlossom<T>(this WebAssemblyHostBuilder builder, string? baseUrl = null) where T : class
+    {
+        builder.Services.AddBlossom<T>(builder.Configuration);
+        return builder;
+    }
+
+    public static WebAssemblyHostBuilder AddB2CApi<T>(this WebAssemblyHostBuilder builder) where T : class
+    {
+        builder.Services.AddB2CApi<T>(builder.Configuration);
+        return builder;
+    }
+
+    public static WebAssemblyHostBuilder AddOidcApi<T>(this WebAssemblyHostBuilder builder) where T : class
+    {
+        builder.Services.AddOidcApi<T>(builder.Configuration);
+        return builder;
+    }
+
+    public static WebAssemblyHostBuilder AddPasswordlessApi<T>(this WebAssemblyHostBuilder builder) where T : class
+    {
+        builder.Services.AddPasswordlessApi<T>();
+        return builder;
+    }
+
+    public static void AddBlossomHttpClient<T>(this WebAssemblyHostBuilder builder, string? apiBaseUrl) where T : class
+    {
+        builder.Services.AddBlossomHttpClient<T>(apiBaseUrl);
     }
 
 }
