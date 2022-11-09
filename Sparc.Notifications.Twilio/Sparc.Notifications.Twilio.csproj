@@ -5,7 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
-		<Version>7.0.0</Version>
+		<Version>7.0.2</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		
 		<Authors>Sparc Cooperative</Authors>
@@ -28,7 +28,7 @@
 	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
 	  <PackageReference Include="SendGrid" Version="9.28.1" />
 	  <PackageReference Include="SendGrid.Extensions.DependencyInjection" Version="1.0.1" />
-	  <PackageReference Include="Twilio" Version="6.0.0-rc.2" />
+	  <PackageReference Include="Twilio" Version="5.81.1" />
 	</ItemGroup>
 	
 	<ItemGroup>
