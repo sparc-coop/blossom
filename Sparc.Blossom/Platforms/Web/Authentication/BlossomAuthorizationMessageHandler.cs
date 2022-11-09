@@ -8,7 +8,6 @@ namespace Sparc.Blossom.Web;
 public class BlossomAuthorizationMessageHandler : DelegatingHandler, IDisposable
 {
     private readonly IAccessTokenProvider _provider;
-    private readonly NavigationManager _navigation;
     private readonly AuthenticationStateChangedHandler? _authenticationStateChangedHandler;
     private AccessToken? _lastToken;
     private AuthenticationHeaderValue? _cachedHeader;
@@ -22,11 +21,9 @@ public class BlossomAuthorizationMessageHandler : DelegatingHandler, IDisposable
     /// <param name="navigation">The <see cref="NavigationManager"/> to use for performing redirections.</param>
     public BlossomAuthorizationMessageHandler(
         IAccessTokenProvider provider,
-        NavigationManager navigation,
         string? baseUrl)
     {
         _provider = provider;
-        _navigation = navigation;
 
         // Invalidate the cached _lastToken when the authentication state changes
         if (_provider is AuthenticationStateProvider authStateProvider)
