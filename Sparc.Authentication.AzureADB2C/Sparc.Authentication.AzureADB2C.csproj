@@ -1,11 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<Version>6.0.0</Version>
+		<TargetFramework>net7.0</TargetFramework>
+		<Version>7.0.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
 
-		<Authors>Joseph Young</Authors>
+		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Azure AD B2C Authentication Sparc package</Description>
 		<PackageIcon>icon.png</PackageIcon>
@@ -21,8 +23,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Identity.Web.UI" Version="1.20.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="1.25.5" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

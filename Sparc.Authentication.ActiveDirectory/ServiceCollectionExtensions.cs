@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
-using System;
 
 namespace Sparc.Authentication.ActiveDirectory
 {
@@ -10,7 +8,7 @@ namespace Sparc.Authentication.ActiveDirectory
     {
         public static IServiceCollection AddActiveDirectoryAuthentication(this IServiceCollection services, IConfigurationSection configuration)
         {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services.AddAuthentication()
                 .AddMicrosoftIdentityWebApi(configuration);
 
             return services;

@@ -1,4 +1,5 @@
-﻿using Sparc.Core;
+﻿using Ardalis.Specification;
+using Sparc.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,6 +85,41 @@ namespace Sparc.Tests
         }
 
         public Task CommitAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddAsync(IEnumerable<T> items)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UpdateAsync(IEnumerable<T> items)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteAsync(IEnumerable<T> items)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> FindAsync(ISpecification<T> spec)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<T>> GetAllAsync(ISpecification<T> spec)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<int> CountAsync(ISpecification<T> spec)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> AnyAsync(ISpecification<T> spec)
         {
             throw new NotImplementedException();
         }

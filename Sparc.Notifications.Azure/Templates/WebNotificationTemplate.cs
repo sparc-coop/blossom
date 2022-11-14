@@ -1,6 +1,5 @@
-﻿namespace Sparc.Notifications.Azure
+﻿namespace Sparc.Notifications.Azure;
+
+public class WebNotificationTemplate : FcmNotificationTemplate
 {
-    public class WebNotificationTemplate : FcmNotificationTemplate
-    {
-    }
 }

@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<Version>6.0.8</Version>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Version>7.0.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
-		<Authors>Joseph Young</Authors>
+		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Cosmos Database Sparc package</Description>
 		<PackageIcon>icon.png</PackageIcon>
@@ -18,19 +19,18 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="Files\readme.md" Pack="true" PackagePath="\" />
+		<None Include="readme.md" Pack="true" PackagePath="\" />
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="MediatR" Version="9.0.0" />
-		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="9.0.0" />
+		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="6.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="6.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="7.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
+	  <ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
 	</ItemGroup>
 
 </Project>

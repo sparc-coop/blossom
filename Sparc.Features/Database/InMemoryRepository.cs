@@ -18,20 +18,22 @@ namespace Sparc.Features
             return Task.CompletedTask;
         }
 
-        public void BeginBulkOperation()
+        public async Task AddAsync(IEnumerable<T> items)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task CommitAsync()
-        {
-            throw new NotImplementedException();
+            foreach (var item in items)
+                await AddAsync(item);
         }
 
         public Task DeleteAsync(T item)
         {
             _items.Remove(item);
             return Task.CompletedTask;
+        }
+
+        public async Task DeleteAsync(IEnumerable<T> items)
+        {
+            foreach (var item in items)
+                await DeleteAsync(item);
         }
 
         public async Task ExecuteAsync(object id, Action<T> action)
@@ -92,6 +94,12 @@ namespace Sparc.Features
                 await DeleteAsync(existingItem);
 
             await AddAsync(item);
+        }
+
+        public async Task UpdateAsync(IEnumerable<T> items)
+        {
+            foreach (var item in items)
+                await UpdateAsync(item);
         }
     }
 }

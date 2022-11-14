@@ -1,48 +1,47 @@
 ﻿using Azure.Storage.Blobs.Models;
 
-namespace Sparc.Storage.Azure
+namespace Sparc.Storage.Azure;
+
+public enum AccessTypes
 {
-    public enum AccessTypes
+    Public,
+    PublicAndDiscoverable,
+    Private
+}
+
+public static class AccessTypesExtensions
+{
+    public static PublicAccessType ToBlobAccessType(this AccessTypes accessType)
     {
-        Public,
-        PublicAndDiscoverable,
-        Private
+        switch (accessType)
+        {
+            case AccessTypes.Public:
+                return PublicAccessType.Blob;
+            case AccessTypes.PublicAndDiscoverable:
+                return PublicAccessType.BlobContainer;
+            case AccessTypes.Private:
+                return PublicAccessType.None;
+            default:
+                break;
+        }
+
+        return PublicAccessType.Blob;
     }
 
-    public static class AccessTypesExtensions
+    public static AccessTypes ToAccessType(this PublicAccessType accessType)
     {
-        public static PublicAccessType ToBlobAccessType(this AccessTypes accessType)
+        switch (accessType)
         {
-            switch (accessType)
-            {
-                case AccessTypes.Public:
-                    return PublicAccessType.Blob;
-                case AccessTypes.PublicAndDiscoverable:
-                    return PublicAccessType.BlobContainer;
-                case AccessTypes.Private:
-                    return PublicAccessType.None;
-                default:
-                    break;
-            }
-
-            return PublicAccessType.Blob;
+            case PublicAccessType.Blob:
+                return AccessTypes.Public;
+            case PublicAccessType.BlobContainer:
+                return AccessTypes.PublicAndDiscoverable;
+            case PublicAccessType.None:
+                return AccessTypes.Private;
+            default:
+                break;
         }
 
-        public static AccessTypes ToAccessType(this PublicAccessType accessType)
-        {
-            switch (accessType)
-            {
-                case PublicAccessType.Blob:
-                    return AccessTypes.Public;
-                case PublicAccessType.BlobContainer:
-                    return AccessTypes.PublicAndDiscoverable;
-                case PublicAccessType.None:
-                    return AccessTypes.Private;
-                default:
-                    break;
-            }
-
-            return AccessTypes.Public;
-        }
+        return AccessTypes.Public;
     }
 }

@@ -2,9 +2,9 @@
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
-		<Version>6.2.7</Version>
+		<Version>7.0.0-pre.6</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Authors>Joseph Young</Authors>
+		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Web platform Sparc package</Description>
 		<PackageIcon>icon.png</PackageIcon>
@@ -15,10 +15,6 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
-	</ItemGroup>
-
 
 	<ItemGroup>
 		<SupportedPlatform Include="browser" />
@@ -26,19 +22,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="Blazored.LocalStorage" Version="4.2.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Authentication.WebAssembly.Msal" Version="6.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.4" />
+		<PackageReference Include="Microsoft.Authentication.WebAssembly.Msal" Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="Files\" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Sparc.Authentication.Client\Sparc.Authentication.Client.csproj" />
-		<ProjectReference Include="..\Sparc.UI\Sparc.UI.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

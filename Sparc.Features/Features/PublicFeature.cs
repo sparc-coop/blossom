@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Sparc.Features
 {
-    [Feature]
+    [PublicFeature]
     public abstract class PublicFeature<T, TOut> : BaseAsyncEndpoint.WithRequest<T>.WithResponse<TOut>
     {
         [ApiExplorerSettings(IgnoreApi = true)]
@@ -30,7 +30,7 @@ namespace Sparc.Features
         }
     }
 
-    [Feature]
+    [PublicFeature]
     public abstract class PublicFeature<TOut> : BaseAsyncEndpoint.WithoutRequest.WithResponse<TOut>
     {
         [ApiExplorerSettings(IgnoreApi = true)]
@@ -50,6 +50,13 @@ namespace Sparc.Features
             { 
                 return this.Exception(e); 
             }
+        }
+    }
+
+    public class PublicFeatureAttribute : RouteAttribute
+    {
+        public PublicFeatureAttribute() : base($"publicapi/[controller]")
+        {
         }
     }
 

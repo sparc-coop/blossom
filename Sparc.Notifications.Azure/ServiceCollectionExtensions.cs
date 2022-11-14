@@ -8,7 +8,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAzurePushNotifications(this IServiceCollection services, IConfigurationSection configuration)
     {
         var azureConfig = configuration.Get<AzureConfiguration>();
-        services.AddSingleton(_ => azureConfig).AddScoped<AzureNotificationService>();
+        services.AddSingleton(_ => azureConfig!).AddScoped<AzureNotificationService>();
 
         return services;
     }
