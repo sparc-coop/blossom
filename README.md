@@ -28,11 +28,11 @@ A typical Blossom solution has three main components:
 
 # Get Started with Blossom
 
-## Step 1. Create a Sparc Solution with a Features and Web Project
+## Step 1. Create a Blossom Solution with a Features and Web Project
 
-1. **Features Project:** Create a new .NET 6.0 solution with an *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
-> Follow the [Sparc.Features documentation](/Sparc.Features) for setup.
-[![Nuget](https://img.shields.io/nuget/v/Sparc.Features?label=Sparc.Features)](https://www.nuget.org/packages/Sparc.Features/)
+1. **Features Project:** Create a new .NET 7.0 solution with an *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
+> Follow the [Sparc.Kernel documentation](/Sparc.Kernel) for setup.
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Kernel?label=Sparc.Kernel)](https://www.nuget.org/packages/Sparc.Kernel/)
 
 
 2. **Web Project:** Add a *Blazor Web Assembly App* project to your solution (preferably called *[YourProject]*.Web). 
