@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.ResponseCompression;
 using Sparc.Kernel;
 
-namespace TemplateWebNET7
+namespace TemplateWebNET7.Features
 {
     public class Program
     {

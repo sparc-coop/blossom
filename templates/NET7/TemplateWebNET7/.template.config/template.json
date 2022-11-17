@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Sparc Coop",
+  "classifications": [ "API", "Features" ],
+  "identity": "TemplateWebNET7",
+  "name": "Blossom Features Project",
+  "description": "",
+  "shortName": "blossom-features",
+  "sourceName": "TemplateWebNET7",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "preferNameDirectory": true
+}
