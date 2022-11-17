@@ -1,13 +1,12 @@
 ﻿@page "/fetchdata"
-@using TemplateWebNET7.Shared
-@inject HttpClient Http
+@*@inject HttpClient Http*@
 
 <PageTitle>Weather forecast</PageTitle>
 
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from the server.</p>
-
+@*
 @if (forecasts == null)
 {
     <p><em>Loading...</em></p>
@@ -35,13 +34,13 @@ else
             }
         </tbody>
     </table>
-}
+}*@
 
 @code {
-    private WeatherForecast[]? forecasts;
+    //private WeatherForecast[]? forecasts;
 
-    protected override async Task OnInitializedAsync()
-    {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
-    }
+    //protected override async Task OnInitializedAsync()
+    //{
+    //    forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+    //}
 }

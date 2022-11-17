@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using TemplateWebNET7.Client;
+using Sparc.Blossom.Web;
+using TemplateWebNET7.Web;
+using TemplateWebNET7.Api;
+using Blazored.Modal;
 
-namespace TemplateWebNET7.Client
+namespace TemplateWebNET7.Web
 {
     public class Program
     {
@@ -12,7 +15,11 @@ namespace TemplateWebNET7.Client
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
 
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddBlazoredModal();
+
+            //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
+            builder.AddBlossom<TemplateWebNET7Api>(builder.Configuration["ApiUrl"]);
 
             await builder.Build().RunAsync();
         }
