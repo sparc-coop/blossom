@@ -1,6 +1,23 @@
-# Sparc.Features
+# Sparc.Kernel
 
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Features?label=Sparc.Features)](https://www.nuget.org/packages/Sparc.Features/)
+
+# Table of contents
+
+- [What is a Features Project](https://github.com/sparc-coop/blossom/edit/feature/blossom-docs/Sparc.Kernel/readme.md#what-is-a-features-project)
+- [What is a Feature?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#what-is-a-feature)
+    - [Where did the idea of a Feature come from?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#where-did-the-idea-of-a-feature-come-from)
+    - [What does a Feature look like?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#what-does-a-feature-look-like)
+    - [What are the benefits of using Features?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#what-are-the-benefits-of-using-features)
+    - [How do I call a Feature from my UI/Web/Mobile/Desktop project?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#how-do-i-call-a-feature-from-my-uiwebmobiledesktop-project)
+    - [Get Started with a Features Project](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#get-started-with-a-features-project)
+- Data
+    - InMemoryRepository
+- [FAQ](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#faq)
+    - [Can I create multiple Features per file, like MVC Controllers do?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#can-i-create-multiple-features-per-file-like-mvc-controllers-do)
+    - [Why do you use Records for your Input and Output data?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#why-do-you-use-records-for-your-input-and-output-data)
+    - [What if my Feature doesn't have any Input Data?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#what-if-my-feature-doesnt-have-any-input-data)
+    - [How do I authenticate my Features?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#how-do-i-authenticate-my-features)
 
 The `Sparc.Features` library is the main framework library for the *Features Project* in your Sparc solution.
 
@@ -102,7 +119,7 @@ When the project containing the example Feature above is built, Sparc.Kernel aut
     var order = await Api.GetOrderAsync(request);
     ```
 
-## Get Started with a Features Project
+### Get Started with a Features Project
 
 1. Create a new *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
 2. Add the `Sparc.Features` Nuget package to your newly created project: [![Nuget](https://img.shields.io/nuget/v/Sparc.Features?label=Sparc.Features)](https://www.nuget.org/packages/Sparc.Features/)
@@ -132,9 +149,13 @@ When the project containing the example Feature above is built, Sparc.Kernel aut
 
 ---
 
-# FAQ
+## Data
 
-## Can I create multiple Features per file, like MVC Controllers do? 
+### InMemoryRepository
+
+## FAQ
+
+### Can I create multiple Features per file, like MVC Controllers do? 
 
 Each feature is self-contained into a single class for a reason. A class is a great container for all of the things a Feature needs:
 
@@ -148,7 +169,7 @@ This is contrary to the more typical layered approach with separate repositories
 a creative and organizational catalyst, as it enables pure focus on the logic that you are working on at the time, rather than having
 to hunt all over the code for the stack of functions that are executed.
 
-## Why do you use Records for your Input and Output data?
+### Why do you use Records for your Input and Output data?
 
 C# Records are a great way to create a separate data type that is:
 
@@ -174,7 +195,7 @@ Specific data types per API endpoint enable the following benefits:
 
 If you don't like records, you can use classes!
 
-## What if my Feature doesn't have any Input Data?
+### What if my Feature doesn't have any Input Data?
 
 If you need to call an API method that only returns Output Data without any Input Data required, inherit your Feature from `Feature<[your output data type]>` 
 instead. This enables the following changes to your Feature:
@@ -191,13 +212,13 @@ instead. This enables the following changes to your Feature:
     var orders = await Api.GetAllOrdersAsync();
     ```
 
-## What if my Feature doesn't have any Output Data?
+### What if my Feature doesn't have any Output Data?
 
 It is our opinion that *all* Features should have some form of Output Data, so that the projects using this API can know the result of their call. This can be as simple 
 as a `bool` or `ActionResult` return if you like, but in most cases there is always something slightly more substantial that can be returned. There is currently 
 no Feature type in Sparc.Kernel that returns no Output Data.
 
-## How do I authenticate my Features?
+### How do I authenticate my Features?
 
 All Features inheriting from `Feature<TIn, TOut>` or `Feature<TOut>` are *automatically authenticated* with the `[Authorize]` attribute of ASP.NET Core. This is a 
 design decision made on purpose, as most API endpoints in the real world should be private and authenticated.
