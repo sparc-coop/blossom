@@ -1,23 +1,21 @@
-﻿using Sparc.Kernel;
+﻿using Microsoft.EntityFrameworkCore;
+using Sparc.Core;
+using Sparc.Kernel;
 
 namespace TemplateWebNET7.Features
 {
     public class GetWeatherForecast : PublicFeature<List<WeatherForecast>>
     {
-        private static readonly string[] Summaries = new[]
+        public GetWeatherForecast(IRepository<WeatherForecast> weatherForecastRep)
         {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+            WeatherForecastRep = weatherForecastRep;
+        }
+
+        public IRepository<WeatherForecast> WeatherForecastRep { get; set; }
 
         public override async Task<List<WeatherForecast>> ExecuteAsync()
         {
-            return await Task.FromResult(Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToList());
+            return await Task.FromResult(WeatherForecastRep.Query.ToList());
         }
     }
 }

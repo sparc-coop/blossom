@@ -10,8 +10,7 @@ namespace TemplateWebNET7.Features
             var builder = WebApplication.CreateBuilder(args);
 
             builder.AddSparcKernel(builder.Configuration["WebClientUrl"]);
-
-            
+                        
             var app = builder.Build();
 
             app.UseHttpsRedirection();

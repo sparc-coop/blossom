@@ -1,6 +1,8 @@
+using Sparc.Kernel;
+
 namespace TemplateWebNET7.Features
 {
-    public class WeatherForecast
+    public class WeatherForecast : Root
     {
         public DateTime Date { get; set; }
 
