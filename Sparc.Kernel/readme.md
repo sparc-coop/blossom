@@ -4,20 +4,20 @@
 
 # Table of contents
 
-- [What is a Features Project](https://github.com/sparc-coop/blossom/edit/feature/blossom-docs/Sparc.Kernel/readme.md#what-is-a-features-project)
-- [What is a Feature?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#what-is-a-feature)
-    - [Where did the idea of a Feature come from?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#where-did-the-idea-of-a-feature-come-from)
-    - [What does a Feature look like?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#what-does-a-feature-look-like)
-    - [What are the benefits of using Features?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#what-are-the-benefits-of-using-features)
-    - [How do I call a Feature from my UI/Web/Mobile/Desktop project?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#how-do-i-call-a-feature-from-my-uiwebmobiledesktop-project)
-    - [Get Started with a Features Project](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#get-started-with-a-features-project)
-- [Data](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#data)
-    - [InMemoryRepository](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#inmemoryrepository)
-- [FAQ](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#faq)
-    - [Can I create multiple Features per file, like MVC Controllers do?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#can-i-create-multiple-features-per-file-like-mvc-controllers-do)
-    - [Why do you use Records for your Input and Output data?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#why-do-you-use-records-for-your-input-and-output-data)
-    - [What if my Feature doesn't have any Input Data?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#what-if-my-feature-doesnt-have-any-input-data)
-    - [How do I authenticate my Features?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#how-do-i-authenticate-my-features)
+- [What is a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-features-project)
+- [What is a Feature?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-feature)
+    - [Where did the idea of a Feature come from?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#where-did-the-idea-of-a-feature-come-from)
+    - [What does a Feature look like?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-does-a-feature-look-like)
+    - [What are the benefits of using Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-are-the-benefits-of-using-features)
+    - [How do I call a Feature from my UI/Web/Mobile/Desktop project?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-call-a-feature-from-my-uiwebmobiledesktop-project)
+    - [Get Started with a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#get-started-with-a-features-project)
+- [Data](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#data)
+    - [InMemoryRepository](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#inmemoryrepository)
+- [FAQ](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#faq)
+    - [Can I create multiple Features per file, like MVC Controllers do?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#can-i-create-multiple-features-per-file-like-mvc-controllers-do)
+    - [Why do you use Records for your Input and Output data?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#why-do-you-use-records-for-your-input-and-output-data)
+    - [What if my Feature doesn't have any Input Data?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-if-my-feature-doesnt-have-any-input-data)
+    - [How do I authenticate my Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-authenticate-my-features)
 
 The `Sparc.Features` library is the main framework library for the *Features Project* in your Sparc solution.
 
@@ -152,6 +152,9 @@ When the project containing the example Feature above is built, Sparc.Kernel aut
 ## Data
 
 ### InMemoryRepository
+
+Sparc.Kernel has a built-in [InMemoryRepository](https://github.com/sparc-coop/blossom/blob/main/Sparc.Kernel/Data/InMemoryRepository.cs)
+
 
 ## FAQ
 
