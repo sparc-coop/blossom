@@ -9,6 +9,7 @@ using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Authentication.WebAssembly.Msal.Models;
 using Polly;
+using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom.Web;
 
@@ -21,14 +22,16 @@ public static class ServiceCollectionExtensions
         services.AddScoped(_ => configuration);
 
         if (configuration["AzureAdB2C:Authority"] != null)
-            services.AddB2CApi<T>(configuration);
-
-        if (configuration["Oidc:Authority"] != null)
-            services.AddOidcApi<T>(configuration);
-
-        services.AddPasswordlessApi<T>();
-
-        services.AddBlossomHttpClient<T>(baseUrl);
+            services.AddB2CApi<T>(configuration).AddPasswordlessApi<T>().AddBlossomHttpClient<T>(baseUrl);
+        else if (configuration["Oidc:Authority"] != null)
+            services.AddOidcApi<T>(configuration).AddPasswordlessApi<T>().AddBlossomHttpClient<T>(baseUrl);
+        else
+        {
+            // Anonymous authentication only
+            services.AddAuthorizationCore();
+            services.AddScoped<AuthenticationStateProvider, AnonymousAuthenticationStateProvider>();
+            services.AddBlossomHttpClient<T>(baseUrl, false);
+        }
 
         return services;
     }
@@ -74,7 +77,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static void AddBlossomHttpClient<T>(this IServiceCollection services, string? apiBaseUrl) where T : class
+    public static void AddBlossomHttpClient<T>(this IServiceCollection services, string? apiBaseUrl, bool configureAuthentication = true) where T : class
     {
         services.AddScoped(sp => new BlossomAuthorizationMessageHandler(
             sp.GetRequiredService<IAccessTokenProvider>(),
@@ -94,6 +97,9 @@ public static class ServiceCollectionExtensions
                 TimeSpan.FromSeconds(5),
                 TimeSpan.FromSeconds(10)
             }));
+
+        if (!configureAuthentication)
+            return;
 
         if (string.IsNullOrWhiteSpace(apiBaseUrl))
             client.AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
