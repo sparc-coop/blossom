@@ -11,8 +11,8 @@
     - [What are the benefits of using Features?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#what-are-the-benefits-of-using-features)
     - [How do I call a Feature from my UI/Web/Mobile/Desktop project?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#how-do-i-call-a-feature-from-my-uiwebmobiledesktop-project)
     - [Get Started with a Features Project](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#get-started-with-a-features-project)
-- Data
-    - InMemoryRepository
+- [Data](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#data)
+    - [InMemoryRepository](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#inmemoryrepository)
 - [FAQ](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#faq)
     - [Can I create multiple Features per file, like MVC Controllers do?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#can-i-create-multiple-features-per-file-like-mvc-controllers-do)
     - [Why do you use Records for your Input and Output data?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs/Sparc.Kernel#why-do-you-use-records-for-your-input-and-output-data)
