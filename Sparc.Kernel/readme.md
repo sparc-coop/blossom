@@ -19,7 +19,7 @@
     - [What if my Feature doesn't have any Input Data?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-if-my-feature-doesnt-have-any-input-data)
     - [How do I authenticate my Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-authenticate-my-features)
 
-The `Sparc.Features` library is the main framework library for the *Features Project* in your Sparc solution.
+The `Sparc.Features` library is the main framework library for the *Features Project* in your Blossom solution.
 
 ## What is a Features Project?
 
@@ -122,27 +122,27 @@ When the project containing the example Feature above is built, Sparc.Kernel aut
 ### Get Started with a Features Project
 
 1. Create a new *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
-2. Add the `Sparc.Features` Nuget package to your newly created project: [![Nuget](https://img.shields.io/nuget/v/Sparc.Features?label=Sparc.Features)](https://www.nuget.org/packages/Sparc.Features/)
+2. Add the `Sparc.Kernel` Nuget package to your newly created project: [![Nuget](https://img.shields.io/nuget/v/Sparc.Kernel?label=Sparc.Kernel)](https://www.nuget.org/packages/Sparc.Kernel/)
 3. Add the following setting to your `appsettings.json` file, using the local URL and port of your Web project:
     ```json
     { "WebClientUrl": "https://localhost:7147" }
     ```
     > (Alternatively, you may pass the URL directly as a string in the Startup code below, but we prefer to keep it in `appsettings.json`, since it will change once deployed.)
 
-4. Add the following two lines of code to your `Startup.cs` file, in the appropriate methods:
+4. Add the following two lines of code to your `Program.cs` file, in the appropriate methods:
 
     ```csharp
-    public void ConfigureServices(IServiceCollection services)
+    public static void Main(string[] args)
     {
+        ...
         // Add this line of code
-        services.Sparcify<Startup>(Configuration["WebClientUrl"]);
+        builder.AddSparcKernel(builder.Configuration["WebClientUrl"]);
+        ...
+        // Add this line of code
+        app.UseSparcKernel();
+        ...
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-    {
-        // Add this line of code
-        app.Sparcify<Startup>(env);
-    }
     ```
 
 5. Create your Entities and Features.
@@ -153,8 +153,8 @@ When the project containing the example Feature above is built, Sparc.Kernel aut
 
 ### InMemoryRepository
 
-Sparc.Kernel has a built-in [InMemoryRepository](https://github.com/sparc-coop/blossom/blob/main/Sparc.Kernel/Data/InMemoryRepository.cs)
-
+Sparc.Kernel has a built-in [InMemoryRepository](https://github.com/sparc-coop/blossom/blob/main/Sparc.Kernel/Data/InMemoryRepository.cs), no need to worry about data infrastructure until you really need it, one more way to fasten your development and tests if you want to.
+By adding Sparc.Kernel to your Features project you already have an InMemory layer available, you just need to inject the IRepository<YourEntity> to your Feature like the [example found on Blossom's template](https://github.com/sparc-coop/blossom/blob/feature/blossom-docs/templates/NET7/TemplateWebNET7/TemplateWebNET7.Features/WeatherForecast/GetWeatherForecast.cs)
 
 ## FAQ
 
