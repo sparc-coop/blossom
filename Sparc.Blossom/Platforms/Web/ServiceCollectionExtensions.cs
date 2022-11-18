@@ -109,7 +109,7 @@ public static class ServiceCollectionExtensions
 
     public static WebAssemblyHostBuilder AddBlossom<T>(this WebAssemblyHostBuilder builder, string? baseUrl = null) where T : class
     {
-        builder.Services.AddBlossom<T>(builder.Configuration);
+        builder.Services.AddBlossom<T>(builder.Configuration, baseUrl);
         return builder;
     }
 
