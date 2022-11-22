@@ -6,6 +6,25 @@
   <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="Sparc.Core/Files/blossom_logo_black.png">
 </picture>
 
+# Table of contents
+
+- :blossom: [What is Blossom?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#what-is-blossom)
+  - [OK, what is it really?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#ok-what-is-it-really)
+  - [How is a Blossom solution structured?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#how-is-a-blossom-solution-structured)
+- :rocket: [Get Started with Blossom](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#get-started-with-blossom)
+  - [Step 1. Create a Blossom Solution with a Features and Web Project](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#step-1-create-a-blossom-solution-with-a-features-and-web-project)
+  - [Step 2. Write your app](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#step-2-write-your-app)
+  - [Step 3. Add Sparc plugins as you need them](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#step-3-add-sparc-plugins-as-you-need-them)
+    - [Database](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#database)
+    - [Authentication](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#authentication)
+    - [Notifications](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#notifications)
+  - [Step 4. Deploy your solution](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#step-4-deploy-your-solution)
+- :notebook: [Documentation](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#documentation)
+- :computer: [Examples / Templates](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#examples--templates)
+- :hammer_and_wrench: [Built With](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#built-with)
+- :handshake: [Contributing](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#contributing)
+
+
 
 # What is Blossom?
 
