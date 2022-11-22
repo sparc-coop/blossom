@@ -1,27 +1,15 @@
-using Microsoft.AspNetCore.ResponseCompression;
-using Sparc.Kernel;
+var builder = WebApplication.CreateBuilder(args);
 
-namespace TemplateWebNET7.Features
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+builder.AddSparcKernel(builder.Configuration["WebClientUrl"]);
 
-            builder.AddSparcKernel(builder.Configuration["WebClientUrl"]);
-                        
-            var app = builder.Build();
+var app = builder.Build();
 
-            app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
-            app.UseBlazorFrameworkFiles();
-            app.UseSparcKernel();
-         
-            app.MapControllers();
-            app.MapFallbackToFile("index.html");
+app.UseBlazorFrameworkFiles();
+app.UseSparcKernel();
 
-            app.Run();
-        }
-    }
-}
+app.MapControllers();
+app.MapFallbackToFile("index.html");
+
+app.Run();
