@@ -11,12 +11,18 @@ public class SparcContext : DbContext
         Publisher = publisher;
     }
     public Publisher Publisher { get; }
+    PublishStrategy PublishStrategy = PublishStrategy.ParallelNoWait;
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var result = await base.SaveChangesAsync(cancellationToken);
         await DispatchDomainEventsAsync();
         return result;
+    }
+
+    public void SetPublishStrategy(PublishStrategy strategy)
+    {
+        PublishStrategy = strategy;
     }
 
     async Task DispatchDomainEventsAsync()
@@ -28,7 +34,7 @@ public class SparcContext : DbContext
         var tasks = domainEvents
             .Select(async (domainEvent) =>
             {
-                await Publisher.Publish(domainEvent, PublishStrategy.ParallelNoWait);
+                await Publisher.Publish(domainEvent, PublishStrategy);
             });
 
         await Task.WhenAll(tasks);
