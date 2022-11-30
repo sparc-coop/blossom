@@ -1,4 +1,5 @@
-﻿using SendGrid;
+﻿using Newtonsoft.Json;
+using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -15,7 +16,9 @@ public class TwilioService
     {
         Config = configuration;
         SendGridClient = sendGridClient;
-        TwilioClient.Init(configuration.AccountSid, configuration.AuthToken);
+        
+        if (configuration.AccountSid != null && configuration.AuthToken != null)
+            TwilioClient.Init(configuration.AccountSid, configuration.AuthToken);
     }
 
     public TwilioConfiguration Config { get; }
@@ -60,7 +63,7 @@ public class TwilioService
             PlainTextContent = body,
             HtmlContent = body
         };
-        
+
         foreach (var email in emailAddresses.Split(',', ';').Select(x => x.Trim()))
             msg.AddTo(email);
 
@@ -92,6 +95,23 @@ public class TwilioService
             throw new Exception($"Unable to send email: Error {result.StatusCode}");
 
         return true;
+    }
+
+    public async Task AddContactAsync(string emailAddress, string listId, Dictionary<string, string>? customProperties = null)
+    {
+        var request = JsonConvert.SerializeObject(new
+        {
+            list_ids = new[] { listId },
+            contacts = new[] { new { email = emailAddress, custom_fields = customProperties } }
+        });
+
+        var response = await SendGridClient.RequestAsync(
+            method: BaseClient.Method.PUT,
+            urlPath: "marketing/contacts",
+            requestBody: request);
+
+        if (!response.IsSuccessStatusCode)
+            throw new Exception($"Unable to add contact: Error {response.StatusCode}");
     }
 
     private static bool IsValidEmail(string email)

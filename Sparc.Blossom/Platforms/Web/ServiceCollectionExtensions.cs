@@ -81,7 +81,6 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped(sp => new BlossomAuthorizationMessageHandler(
             sp.GetRequiredService<IAccessTokenProvider>(),
-            sp.GetRequiredService<NavigationManager>(),
             apiBaseUrl));
 
         var client = services.AddHttpClient<T>(client =>
