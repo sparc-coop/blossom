@@ -2,7 +2,16 @@
 
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Blossom?label=Sparc.Blossom)](https://www.nuget.org/packages/Sparc.Blossom/)
 
-The `Sparc.Blossom` library is the main framework library for the *MAUI Project* in your Sparc solution.
+The `Sparc.Blossom` library is the main framework library for the *Platform Project* in your Blossom solution, examples of Platforms Projects are Web and MAUI.
+
+# Table of contents
+- [Get Started with a Web Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#get-started-with-a-web-project)
+- [What is a MAUI Project?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#what-is-a-maui-project)
+	- Get Started with a MAUI Project
+	- Run and Debug a MAUI Project Locally
+	- Deploy your MAUI Project
+- [FAQ](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#faq)
+	- How do I create MAUI platform-specific code in multi-platform projects?
 
 ## What is a MAUI Project?
 
