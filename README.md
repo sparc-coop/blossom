@@ -150,7 +150,7 @@ To upload and download blob files using a modern storage solution, Blossom offer
 
 # Documentation
 
-Learn more about how to use Sparc.Kernel by visiting the source folder for each package (linked above). 
+Learn more about how to use Blossom by visiting the source folder for each package (linked above). 
 Each package contains its own readme for installing and getting started.
 
 # Examples / Templates
