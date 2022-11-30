@@ -18,7 +18,7 @@
     - [Can I create multiple Features per file, like MVC Controllers do?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#can-i-create-multiple-features-per-file-like-mvc-controllers-do)
     - [Why do you use Records for your Input and Output data?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#why-do-you-use-records-for-your-input-and-output-data)
     - [What if my Feature doesn't have any Input Data?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-if-my-feature-doesnt-have-any-input-data)
-    - [How do I authenticate my Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-authenticate-my-features)
+    - [How do I authenticate my Features and how to use Public Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-authenticate-my-features-and-how-to-use-public-features)
 
 
 ## Let's AddSparcKernel
@@ -166,7 +166,9 @@ By adding Sparc.Kernel to your Features project you already have an InMemory lay
 
     ```
 
-5. Create your Entities and Features.
+5. Create your Entities and Features. Create a folder structure based on the name of your Entity, you can check out some examples at the [Ibis.Features](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features) project, here is the *Messages* folder with a *Entities* folder inside, where are placed all the related and necessary entities, here is the main [Message class](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Messages/Entities/Message.cs), and last but not least you can also see all the Message related features, such as `DeleteMessage`, `EditMessageTags`, `GetAllMessages`, `HearMessage`, etc.
+
+![image](https://user-images.githubusercontent.com/1815134/204842128-33c30b9b-333b-45e6-82c6-c6bafe8d032a.png)
 
 ---
 
@@ -236,7 +238,7 @@ It is our opinion that *all* Features should have some form of Output Data, so t
 as a `bool` or `ActionResult` return if you like, but in most cases there is always something slightly more substantial that can be returned. There is currently 
 no Feature type in Sparc.Kernel that returns no Output Data.
 
-### How do I authenticate my Features?
+### How do I authenticate my Features and how to use Public Features?
 
 All Features inheriting from `Feature<TIn, TOut>` or `Feature<TOut>` are *automatically authenticated* with the `[Authorize]` attribute of ASP.NET Core. This is a 
 design decision made on purpose, as most API endpoints in the real world should be private and authenticated.
