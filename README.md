@@ -18,6 +18,7 @@
     - [Database](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#database)
     - [Authentication](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#authentication)
     - [Notifications](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#notifications)
+    - [Storage](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#storage)
   - [Step 4. Deploy your solution](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#step-4-deploy-your-solution)
 - :notebook: [Documentation](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#documentation)
 - :computer: [Examples / Templates](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#examples--templates)
@@ -135,6 +136,10 @@ To send emails, text messages, and push notifications, Sparc offers two librarie
 
 - Azure Notification Hub (for web and mobile push notifications): [Sparc.Notifications.Azure](/Sparc.Notifications.Azure)
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Notifications.Azure?label=Sparc.Notifications.Azure)](https://www.nuget.org/packages/Sparc.Notifications.Azure/)
+
+### Storage
+
+- Azure Storage Plugin
 
 ## Step 4. Deploy your solution
 
