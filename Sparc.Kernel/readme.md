@@ -4,22 +4,32 @@
 
 # Table of contents
 
-- [What is a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-features-project)
-- [What is a Feature?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-feature)
-    - [Where did the idea of a Feature come from?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#where-did-the-idea-of-a-feature-come-from)
-    - [What does a Feature look like?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-does-a-feature-look-like)
-    - [What are the benefits of using Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-are-the-benefits-of-using-features)
-    - [How do I call a Feature from my UI/Web/Mobile/Desktop project?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-call-a-feature-from-my-uiwebmobiledesktop-project)
-    - [Get Started with a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#get-started-with-a-features-project)
+- Let's AddSparcKernel
+- Authentication
 - [Data](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#data)
     - [InMemoryRepository](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#inmemoryrepository)
+- Features
+    - [What is a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-features-project)
+    - [What is a Feature?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-feature)
+        - [Where did the idea of a Feature come from?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#where-did-the-idea-of-a-feature-come-from)
+        - [What does a Feature look like?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-does-a-feature-look-like)
+        - [What are the benefits of using Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-are-the-benefits-of-using-features)
+        - [How do I call a Feature from my UI/Web/Mobile/Desktop project?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-call-a-feature-from-my-uiwebmobiledesktop-project)
+        - [Get Started with a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#get-started-with-a-features-project)
+- Realtime
 - [FAQ](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#faq)
     - [Can I create multiple Features per file, like MVC Controllers do?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#can-i-create-multiple-features-per-file-like-mvc-controllers-do)
     - [Why do you use Records for your Input and Output data?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#why-do-you-use-records-for-your-input-and-output-data)
     - [What if my Feature doesn't have any Input Data?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-if-my-feature-doesnt-have-any-input-data)
     - [How do I authenticate my Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-authenticate-my-features)
 
-The `Sparc.Features` library is the main framework library for the *Features Project* in your Blossom solution.
+
+## Let's AddSparcKernel
+The `Sparc.Kernel` library is the main framework library for the *Features Project* in your Blossom solution. And we can activate it with a single line of code at your Program.cs file
+
+```
+    builder.AddSparcKernel(builder.Configuration["WebClientUrl"]);
+```
 
 ## What is a Features Project?
 
