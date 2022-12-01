@@ -107,6 +107,21 @@ public class SqlServerRepository<T> : RepositoryBase<T>, ISqlRepository<T> where
         return source;
     }
 
+    public IQueryable<T> TemporalAll()
+    {
+        return context.Set<T>().TemporalAll();
+    }
+
+    public IQueryable<T> TemporalBetween(DateTime fromDate, DateTime toDate)
+    {
+        return context.Set<T>().TemporalBetween(fromDate, toDate);
+    }
+
+    public IQueryable<T> TemporalAsOf(DateTime asOfDate)
+    {
+        return context.Set<T>().TemporalAsOf(asOfDate);
+    }
+
     private async Task CommitAsync()
     {
         await context.SaveChangesAsync();
