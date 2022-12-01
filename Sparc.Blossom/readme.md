@@ -9,12 +9,15 @@ The `Sparc.Blossom` library is the main framework library for the *Platform Proj
 	- [Run and Debug a Web Project Locally](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#run-and-debug-a-web-project-locally)
 	- [Deploy your Web Project to the Web](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#deploy-your-web-project-to-the-web)
 - [What is a MAUI Project?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#what-is-a-maui-project)
-	- Get Started with a MAUI Project
-	- Run and Debug a MAUI Project Locally
-	- Deploy your MAUI Project
-- Shared UI
-- Examples/Templates
-	- Pages and components
+	- [Get Started with a MAUI Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#get-started-with-a-maui-project)
+	- [Run and Debug a MAUI Project Locally](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#run-and-debug-a-maui-project-locally)
+	- [Deploy your MAUI Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#deploy-your-maui-project)
+- [Shared UI Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#shared-ui-project)
+	- [Get Started with a UI Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#get-started-with-a-ui-project)
+	- [Connect your UI to your Features](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#connect-your-ui-to-your-features)
+- [Examples and Templates](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#examples-and-templates)
+	- [Web Project only](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#web-project-only)
+	- [Pages and components](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#pages-and-components)
 - [FAQ](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#faq)
 	- How do I create MAUI platform-specific code in multi-platform projects?
 
@@ -242,7 +245,52 @@ Your *MAUI Project* is directly deployable to the Google, Apple, and Windows sto
 
 *Coming soon*
 
-## Examples / Templates
+## Shared UI Project
+A UI Project is where you put all shared Blazor Pages and Components for your Web and MAUI projects to use.
+
+If your project is multi-platform (i.e. web + desktop and/or mobile), this project should exist so that you are only writing the UI codebase once and sharing it across every platform.
+
+All UI responsiveness is handled through CSS media queries, as a mobile web application would handle it.
+
+In short: Write your UI as a mobile-responsive web application, and you get Desktop & Mobile apps "for free".
+
+### Get Started with a UI Project
+1. Add a *Razor Class Library* project to your solution (preferably called *[YourProject]*.UI).
+2. Reference your UI Project from your Web and MAUI Projects (as a Project Reference).
+3. Write your user interface within your UI Project as Blazor Pages and Components.
+
+### Connect your UI to your Features
+
+One of the best aspects of Sparc.Kernel is its ability to auto-generate a client method for every Feature you write, with zero configuration.
+
+Every time your solution is built, Sparc.Kernel automatically creates the following, for every feature:
+
+- An entire API surface for all of your Features (eg. `/api/DoSomething`)
+- An auto-generated client class with a method for each Feature, which automatically calls the API at the correct URL and with the correct authentication headers: 
+    ```csharp
+    public async Task<GetOrderResponse> DoSomethingAsync(GetOrderRequest request);
+    ```
+
+To set this up, you need to point your UI Project to the `swagger.json` file in your Features Project, and configure it as an OpenAPI reference:
+
+1. Right-click your UI Project -> Add Connected Service -> Add Service Reference -> OpenAPI
+2. Choose the "File" Radio button, and navigate and select the `swagger.json` file generated inside your Features Project.
+3. Type in any namespace and class name you desire for your client-side Api class.
+4. Click OK. The Api class will now be generated for you, and will regenerate automatically on every new build.
+	> If you ever need to manually regenerate this class, simply open the Connected Service -> Regenerate.
+
+To use this Api class in your Blazor components:
+
+1. Inject the Api class into your app (preferably in the `_Imports.razor` global file):
+	```razor
+	@inject PointOfSaleApi Api
+	```
+2. Use the Api class throughout your application.
+	```razor
+	var orders = await Api.GetAllOrdersAsync();
+	```
+
+## Examples and Templates
 - Web Project only
 	- [Ibis.Web](https://github.com/sparc-coop/ibis/tree/main/Ibis.Web)
 	- [Kodekit.Web](https://github.com/sparc-coop/kodekit/tree/master/Kodekit.Web)
@@ -251,9 +299,9 @@ Your *MAUI Project* is directly deployable to the Google, Apple, and Windows sto
 	- [Installation.razor](https://github.com/sparc-coop/kodekit/blob/master/Kodekit.Web/Pages/Installation.razor)
 ## FAQ
 
-### How do I create MAUI platform-specific code in multi-platform projects?
+### How do I create platform-specific code in multi-platform projects?
 
-A MAUI Project can override any behavior from your UI project in two ways:
+A Platform Project can override any behavior from your UI project in two ways:
 
 #### Override Behavior in Classes (best for logic and C# code)
 
@@ -263,14 +311,25 @@ A MAUI Project can override any behavior from your UI project in two ways:
 	   @inject IEmailService EmailService
 	   async Task SendEmail() => await EmailService.SendAsync(email);
 	```
-3. In your MAUI Project, create a class that inherits from this interface:
+3. In your specific platform Project, create a class that inherits from this interface:
 	```csharp
 	   public class MobileEmailService : IEmailService
 	   {
 		   public async Task SendAsync(string email) => await Email.ComposeAsync(new EmailMessage { To = new List<string> { email } });
 	   }
 	```
-3. In the `MauiProgram.cs` file, set up Dependency Injection to inject the correct platform-specific class for the interface:
+	or
+	```csharp
+	public class WebEmailService : IEmailService
+	   {
+	       public WebEmailService(IJSRuntime js) => Js = js;
+
+	       public IJSRuntime Js { get; }
+
+	       public async Task SendAsync(string email) => await Js.InvokeVoidAsync("goToHref", $"mailto:{email}");
+	   }
+	```
+3. In the `Program.cs` file or `MauiProgram.cs`, set up Dependency Injection to inject the correct platform-specific class for the interface:
 	```csharp
 	public static class MauiProgram 
 	{
@@ -281,8 +340,13 @@ A MAUI Project can override any behavior from your UI project in two ways:
 	   }
 	}
 	```
+	or
+	```csharp
+	    var builder = WebAssemblyHostBuilder.CreateDefault(args);
+	    ...
+	    builder.Services.AddScoped<IEmailService, WebEmailService>();
+	```
 
 #### Override UI Components and Pages
 
-1. Create a .razor file in your MAUI Project with the same name, and under the same folder structure, as the .razor file in your UI Project that you wish to 
-override. This component will automatically be used in place of the base UI component.
+1. Create a .razor file in your specific platform Project with the same name, and under the same folder structure, as the .razor file in your UI Project that you wish to override. This component will automatically be used in place of the base UI component.
