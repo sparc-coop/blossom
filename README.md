@@ -8,7 +8,7 @@
 
 # Table of contents
 
-- :blossom: [What is Blossom?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#what-is-blossom)
+- :blossom: [What is Blossom?](#what-is-blossom)
   - [OK, what is it really?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#ok-what-is-it-really)
   - [How is a Blossom solution structured?](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#how-is-a-blossom-solution-structured)
 - :rocket: [Get Started with Blossom](https://github.com/sparc-coop/blossom/tree/feature/blossom-docs#get-started-with-blossom)
