@@ -1,3 +1,11 @@
 ﻿namespace Sparc.Blossom;
 
-public record Notification(string? SubscriptionId = null) : MediatR.INotification;
+public class Notification : MediatR.INotification
+{
+    public Notification(string? subscriptionId = null)
+    {
+        SubscriptionId = subscriptionId;
+    }
+
+    public string? SubscriptionId { get; }
+}
