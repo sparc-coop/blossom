@@ -12,7 +12,8 @@ The `Sparc.Blossom` library is the main framework library for the *Platform Proj
 	- Get Started with a MAUI Project
 	- Run and Debug a MAUI Project Locally
 	- Deploy your MAUI Project
-- [Examples/Templates]
+- Shared UI
+- Examples/Templates
 	- Pages and components
 - [FAQ](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#faq)
 	- How do I create MAUI platform-specific code in multi-platform projects?
