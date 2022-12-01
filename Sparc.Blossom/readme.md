@@ -6,12 +6,70 @@ The `Sparc.Blossom` library is the main framework library for the *Platform Proj
 
 # Table of contents
 - [Get Started with a Web Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#get-started-with-a-web-project)
+	- [Run and Debug a Web Project Locally](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#run-and-debug-a-web-project-locally)
+	- [Deploy your Web Project to the Web](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#deploy-your-web-project-to-the-web)
 - [What is a MAUI Project?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#what-is-a-maui-project)
 	- Get Started with a MAUI Project
 	- Run and Debug a MAUI Project Locally
 	- Deploy your MAUI Project
+- [Examples/Templates]
+	- Pages and components
 - [FAQ](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#faq)
 	- How do I create MAUI platform-specific code in multi-platform projects?
+
+## Get Started with a Web Project
+A *Web Project* is the project that you intend to deploy to Web platforms for use in a web browser.
+
+If your project is multi-platform (i.e. web + desktop and/or mobile), this project should ideally contain only **startup** and **platform-specific** code.
+
+If your project is web-only, the *Web Project* can also contain all of the UI components and pages for your project. 
+Otherwise, the UI components and pages should go into a shared [Sparc.UI](/Sparc.UI) project, so 
+that the mobile/desktop (MAUI) project can use the same UI components.
+
+A *Web Project* is currently driven by Blazor Web Assembly. This way it acts as a self-contained application similar to mobile and desktop.
+
+Here are the steps to create your Web Project:
+
+1. Create a New Blazor Web Assembly Empty project (preferably called [YourProject].Web
+2. Add the `Sparc.Blossom` Nuget package to your project
+3. Make sure it's running on the same address you defined as `WebClientUrl` in your *Features* project, look at the `applicationUrl` property inside the `Properties` > `launchSettings.json`
+4. Add a `appsettings.json` inside the `wwwroot` folder and add the following setting (this must match the *Features* project Url
+```json
+{ "ApiUrl": "https://localhost:7001" }
+```
+4. Add the following line to your `Program.cs`
+5. Modify the `App.razor` file at the root of your Web Project, fully replacing its contents with the following:
+```html
+<Sparc.Blossom.Platforms.Web.BlossomApp MainLayout="typeof(MainLayout)"
+                                            Startup="typeof(Program)" />
+```
+6. Connect to your *Features* project using 
+7. Write your app. 
+	a. (Web-only projects) Write your UI pages and components directly in the Web Project, using guidance from the examples. Also make sure to follow the "Connect Your UI to your Features" instructions, replacing the UI Project with your Web Project. 
+	b. (Multi-platform projects) Create a Sparc.UI project, reference it from your Web Project, and write your UI components within the UI project.
+
+### Run and Debug a Web Project Locally
+
+Normally, a Web Project should be run in parallel with your Features Project, so that the local API can be accessed directly. 
+
+Our favorite way to set this up with minimal issues is the following:
+
+1. Right-click your Web Project -> Set as Startup Project.
+2. Ensure your Web Startup settings are set correctly (i.e. IIS Express or the Project Name itself), and take note of the assigned ports in `launchsettings.json` for the selected startup path.
+3. Right-click your Features Project -> Set as Startup Project.
+4. Ensure your Features Startup settings are set correctly (i.e. IIS Express or the Project Name itself), and take note of the assigned ports in `launchsettings.json` for the selected startup path.
+5. Ensure that the `WebClientUrl` in your Features project and `ApiUrl` in your Web project point to the correct local ports.
+6. Right-click your Solution -> Set Startup Projects.
+7. Set your Features and Web projects to "Start" to enable local debugging and Hot Reload.
+8. Set all other projects to "None".
+9. Run your solution. The projects will each run according to the settings you chose in steps #2 and #4, and full debugging + Hot Reload will be enabled for both projects.
+
+### Deploy your Web Project to the Web
+
+Your *Web Project* is directly deployable to any Web Assembly-compatible host (such as Azure App Service). Simply use the normal publishing procedures
+to publish your project like any other Web project.
+
+Once deployed, ensure that the `ApiUrl` and `WebClientUrl` settings are updated to match the live URLs.
 
 ## What is a MAUI Project?
 
@@ -183,6 +241,13 @@ Your *MAUI Project* is directly deployable to the Google, Apple, and Windows sto
 
 *Coming soon*
 
+## Examples / Templates
+- Web Project only
+	- [Ibis.Web](https://github.com/sparc-coop/ibis/tree/main/Ibis.Web)
+	- [Kodekit.Web](https://github.com/sparc-coop/kodekit/tree/master/Kodekit.Web)
+- Pages and components
+	- [NewMessage.razor](https://github.com/sparc-coop/ibis/blob/main/Ibis.Web/Messages/NewMessage.razor)
+	- [Installation.razor](https://github.com/sparc-coop/kodekit/blob/master/Kodekit.Web/Pages/Installation.razor)
 ## FAQ
 
 ### How do I create MAUI platform-specific code in multi-platform projects?
