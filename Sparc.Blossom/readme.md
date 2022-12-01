@@ -82,21 +82,18 @@ A *Maui Project* is the project that you intend to deploy to Mobile (Android/iOS
 If your project is multi-platform (i.e. desktop and/or mobile + web), this project should ideally contain only **startup** and **platform-specific** code.
 
 If your project is mobile/desktop-only, the *MAUI Project* can also contain all of the UI components and pages for your project. 
-Otherwise, the UI components and pages should go into a shared [Sparc.UI](/Sparc.UI) project, so 
-that the Web Project can use the same UI components.
+Otherwise, the UI components and pages should go into a shared *UI* project, so that the Web Project can use the same UI components.
 
-A *MAUI Project* is driven by [.NET MAUI](https://dotnet.microsoft.com/en-us/apps/maui), Microsoft's newest cross-platform development framework. .NET MAUI is currently in Release Candidate status, and 
-Sparc.Kernel supports .NET MAUI Release Candidate.
+A *MAUI Project* is driven by [.NET MAUI](https://dotnet.microsoft.com/en-us/apps/maui), Microsoft's newest cross-platform development framework. .NET MAUI is currently in Release Candidate status, and Blossom supports .NET MAUI Release Candidate.
 
 However, we believe that true cross-platform development must also include Web, and .NET MAUI XAML files cannot yet be deployed directly to Web. 
-This is why Sparc.Kernel works purely with **Blazor Pages and Components**, so that a true single Shared UI library can be constructed for Mobile, Desktop, and 
-Web. 
+This is why Blossom works purely with **Blazor Pages and Components**, so that a true single Shared UI library can be constructed for Mobile, Desktop, and Web. 
 
-.NET MAUI includes support for Blazor via an integrated WebView, and this is the functionality that Sparc.Kernel leverages.
+.NET MAUI includes support for Blazor via an integrated WebView, and this is the functionality that Blossom leverages.
 
 ## Get Started with a MAUI Project
 
-1. Create a new *.NET MAUI Blazor App* project in your solution, preferably called *[Your Project]*.Maui.
+1. Create a new *.NET MAUI Blazor App* project in your solution, preferably called *[Your Project]*.MAUI.
 2. Add the `Sparc.Blossom` Nuget package to your newly created project: 
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Blossom?label=Sparc.Blossom)](https://www.nuget.org/packages/Sparc.Blossom/)
 3. Add the following line of code to your `MauiProgram.cs` file, in the appropriate method:
