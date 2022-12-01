@@ -48,7 +48,7 @@ A typical Blossom solution has three main components:
 
 - one **Features** project. This project is the main back end API for the application, and contains the vast majority of the application's logic.
 - one **UI** project. This project is the shared front end for Web, Mobile, and Desktop, using Blazor as its underlying architecture. 
-- *(optional)* one or more **Platforms** projects, if you're deploying to multiple platforms. These projects are the deployable units for Web (using Sparc.Platforms.Web) and Android/iOS/Mac/Windows (using Sparc.Platforms.Maui). They are typically very small projects with only platform-specific startup code and platform overrides. The vast majority of the UI code should still exist in the shared UI project.
+- *(optional)* one or more **Platforms** projects, if you're deploying to multiple platforms. These projects are the deployable units for Web and Android/iOS/Mac/Windows (using Sparc.Blossom). They are typically very small projects with only platform-specific startup code and platform overrides. The vast majority of the UI code should still exist in the shared UI project.
 
 # Get Started with Blossom
 
