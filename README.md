@@ -1,15 +1,19 @@
 [![MIT License](https://img.shields.io/github/license/sparc-coop/Sparc.Kernel)](https://github.com/sparc-coop/Sparc.Kernel/blob/main/LICENSE)
 
-![Sparc Logo](Sparc.Core/Files/icon.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="Sparc.Core/Files/blossom_logo_white.png">
+  <source media="(prefers-color-scheme: light)" srcset="Sparc.Core/Files/blossom_logo_black.png">
+  <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="Sparc.Core/Files/blossom_logo_black.png">
+</picture>
 
 
-# What is Sparc.Kernel?
+# What is Blossom?
 
-**Sparc.Kernel** is an opinionated framework-of-a-framework for .NET 6.0 Web, Mobile, and Desktop development using a single shared codebase (C# and Blazor).
+**Blossom** is an opinionated framework-of-a-framework for .NET 7.0 Web, Mobile, and Desktop development using a single shared codebase (C# and Blazor).
 
 ## OK, what is it really?
 
-**Sparc.Kernel** is a hand-crafted framework full of architectural conventions that attempt to remove as much of the boilerplate connective tissue as possible. 
+**Blossom** is a hand-crafted framework full of architectural conventions that attempt to remove as much of the boilerplate connective tissue as possible. 
 
 Its chief aim is to remove all the drivel it possibly can, so that you may focus more of your creative programming energy on what really matters for your app: 
 
@@ -18,21 +22,21 @@ Its chief aim is to remove all the drivel it possibly can, so that you may focus
 
 Everything else should be secondary.
 
-## How is a Sparc solution structured?
+## How is a Blossom solution structured?
 
-A typical Sparc solution has three main components: 
+A typical Blossom solution has three main components: 
 
 - one **Features** project. This project is the main back end API for the application, and contains the vast majority of the application's logic.
 - one **UI** project. This project is the shared front end for Web, Mobile, and Desktop, using Blazor as its underlying architecture. 
 - *(optional)* one or more **Platforms** projects, if you're deploying to multiple platforms. These projects are the deployable units for Web (using Sparc.Platforms.Web) and Android/iOS/Mac/Windows (using Sparc.Platforms.Maui). They are typically very small projects with only platform-specific startup code and platform overrides. The vast majority of the UI code should still exist in the shared UI project.
 
-# Get Started with Sparc.Kernel
+# Get Started with Blossom
 
-## Step 1. Create a Sparc Solution with a Features and Web Project
+## Step 1. Create a Blossom Solution with a Features and Web Project
 
-1. **Features Project:** Create a new .NET 6.0 solution with an *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
-> Follow the [Sparc.Features documentation](/Sparc.Features) for setup.
-[![Nuget](https://img.shields.io/nuget/v/Sparc.Features?label=Sparc.Features)](https://www.nuget.org/packages/Sparc.Features/)
+1. **Features Project:** Create a new .NET 7.0 solution with an *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
+> Follow the [Sparc.Kernel documentation](/Sparc.Kernel) for setup.
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Kernel?label=Sparc.Kernel)](https://www.nuget.org/packages/Sparc.Kernel/)
 
 
 2. **Web Project:** Add a *Blazor Web Assembly App* project to your solution (preferably called *[YourProject]*.Web). 
