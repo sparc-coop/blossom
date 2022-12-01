@@ -4,32 +4,32 @@
 
 # Table of contents
 
-- Let's AddSparcKernel
-- Authentication
-- [Data](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#data)
+- [Let's AddSparcKernel](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#lets-addsparckernel)
+- [What is a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-features-project)
+- [What is a Feature?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-feature)
+    - [Where did the idea of a Feature come from?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#where-did-the-idea-of-a-feature-come-from)
+    - [What does a Feature look like?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-does-a-feature-look-like)
+    - [What are the benefits of using Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-are-the-benefits-of-using-features)
+    - [How do I call a Feature from my UI/Web/Mobile/Desktop project?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-call-a-feature-from-my-uiwebmobiledesktop-project)
+    - [Entities and IRepository](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#entities-and-irepository)
     - [InMemoryRepository](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#inmemoryrepository)
-- Features
-    - [What is a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-features-project)
-    - [What is a Feature?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-feature)
-        - [Where did the idea of a Feature come from?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#where-did-the-idea-of-a-feature-come-from)
-        - [What does a Feature look like?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-does-a-feature-look-like)
-        - [What are the benefits of using Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-are-the-benefits-of-using-features)
-        - [How do I call a Feature from my UI/Web/Mobile/Desktop project?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-call-a-feature-from-my-uiwebmobiledesktop-project)
-        - [Get Started with a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#get-started-with-a-features-project)
-- Realtime
+- [Get Started with a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#get-started-with-a-features-project)
 - [FAQ](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#faq)
     - [Can I create multiple Features per file, like MVC Controllers do?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#can-i-create-multiple-features-per-file-like-mvc-controllers-do)
     - [Why do you use Records for your Input and Output data?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#why-do-you-use-records-for-your-input-and-output-data)
     - [What if my Feature doesn't have any Input Data?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-if-my-feature-doesnt-have-any-input-data)
-    - [How do I authenticate my Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-authenticate-my-features)
+    - [How do I authenticate my Features and how to use Public Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-authenticate-my-features-and-how-to-use-public-features)
 
 
 ## Let's AddSparcKernel
 The `Sparc.Kernel` library is the main framework library for the *Features Project* in your Blossom solution. And we can activate it with a single line of code at your Program.cs file
 
-```
+```csharp
     builder.AddSparcKernel(builder.Configuration["WebClientUrl"]);
 ```
+
+Here you will find the steps to create a *Features Project* from the scratch and some of the questions we had to answer to get there.
+
 
 ## What is a Features Project?
 
@@ -129,7 +129,18 @@ When the project containing the example Feature above is built, Sparc.Kernel aut
     var order = await Api.GetOrderAsync(request);
     ```
 
-### Get Started with a Features Project
+### Entities and IRepository
+
+At this point you already noticed we introduced Entities and the IRepository at the code, and that is ok, it should be as simple as this, your entities are normal C# classes and the repository interface has all the deault operations you can expect.
+
+For more information and technical details visit the [Sparc.Core](https://github.com/sparc-coop/blossom/blob/main/Sparc.Core) documentation
+
+### InMemoryRepository
+
+Sparc.Kernel has a built-in [InMemoryRepository](https://github.com/sparc-coop/blossom/blob/main/Sparc.Kernel/Data/InMemoryRepository.cs), no need to worry about data infrastructure until you really need it, one more way to fasten your development and tests if you want to.
+By adding Sparc.Kernel to your Features project you already have an InMemory layer available, you just need to inject the `IRepository<YourEntity>` to your Feature like the `IRepository<Order>` in the example above.
+
+## Get Started with a Features Project
 
 1. Create a new *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
 2. Add the `Sparc.Kernel` Nuget package to your newly created project: [![Nuget](https://img.shields.io/nuget/v/Sparc.Kernel?label=Sparc.Kernel)](https://www.nuget.org/packages/Sparc.Kernel/)
@@ -155,16 +166,12 @@ When the project containing the example Feature above is built, Sparc.Kernel aut
 
     ```
 
-5. Create your Entities and Features.
+5. Create your Entities and Features. Create a folder structure based on the name of your Entity, you can check out some examples at the [Ibis.Features](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features) project, here is the *Messages* folder with a *Entities* folder inside, where are placed all the related and necessary entities, here is the main [Message class](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Messages/Entities/Message.cs), and last but not least you can also see all the Message related features, such as `DeleteMessage`, `EditMessageTags`, `GetAllMessages`, `HearMessage`, etc.
+
+![image](https://user-images.githubusercontent.com/1815134/204842128-33c30b9b-333b-45e6-82c6-c6bafe8d032a.png)
 
 ---
 
-## Data
-
-### InMemoryRepository
-
-Sparc.Kernel has a built-in [InMemoryRepository](https://github.com/sparc-coop/blossom/blob/main/Sparc.Kernel/Data/InMemoryRepository.cs), no need to worry about data infrastructure until you really need it, one more way to fasten your development and tests if you want to.
-By adding Sparc.Kernel to your Features project you already have an InMemory layer available, you just need to inject the IRepository<YourEntity> to your Feature like the [example found on Blossom's template](https://github.com/sparc-coop/blossom/blob/feature/blossom-docs/templates/NET7/TemplateWebNET7/TemplateWebNET7.Features/WeatherForecast/GetWeatherForecast.cs)
 
 ## FAQ
 
@@ -231,7 +238,7 @@ It is our opinion that *all* Features should have some form of Output Data, so t
 as a `bool` or `ActionResult` return if you like, but in most cases there is always something slightly more substantial that can be returned. There is currently 
 no Feature type in Sparc.Kernel that returns no Output Data.
 
-### How do I authenticate my Features?
+### How do I authenticate my Features and how to use Public Features?
 
 All Features inheriting from `Feature<TIn, TOut>` or `Feature<TOut>` are *automatically authenticated* with the `[Authorize]` attribute of ASP.NET Core. This is a 
 design decision made on purpose, as most API endpoints in the real world should be private and authenticated.
