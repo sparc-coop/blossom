@@ -27,7 +27,7 @@ A *Web Project* is the project that you intend to deploy to Web platforms for us
 If your project is multi-platform (i.e. web + desktop and/or mobile), this project should ideally contain only **startup** and **platform-specific** code.
 
 If your project is web-only, the *Web Project* can also contain all of the UI components and pages for your project. 
-Otherwise, the UI components and pages should go into a shared [Sparc.UI](/Sparc.UI) project, so 
+Otherwise, the UI components and pages should go into a shared *UI* project, so 
 that the mobile/desktop (MAUI) project can use the same UI components.
 
 A *Web Project* is currently driven by Blazor Web Assembly. This way it acts as a self-contained application similar to mobile and desktop.
