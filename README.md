@@ -1,4 +1,4 @@
-[![MIT License](https://img.shields.io/github/license/sparc-coop/Sparc.Kernel)](https://github.com/sparc-coop/Sparc.Kernel/blob/main/LICENSE)
+[![MIT License](https://img.shields.io/github/license/sparc-coop/blossom)](https://github.com/sparc-coop/blossom/blob/main/LICENSE)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="Sparc.Core/Files/blossom_logo_white.png">
