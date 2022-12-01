@@ -1,31 +1,33 @@
 # Sparc.Kernel
 
-[![Nuget](https://img.shields.io/nuget/v/Sparc.Features?label=Sparc.Features)](https://www.nuget.org/packages/Sparc.Features/)
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Kernel?label=Sparc.Kernel)](https://www.nuget.org/packages/Sparc.Kernel/)
 
 # Table of contents
 
-- [Let's AddSparcKernel](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#lets-addsparckernel)
-- [What is a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-features-project)
-- [What is a Feature?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-is-a-feature)
-    - [Where did the idea of a Feature come from?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#where-did-the-idea-of-a-feature-come-from)
-    - [What does a Feature look like?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-does-a-feature-look-like)
-    - [What are the benefits of using Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-are-the-benefits-of-using-features)
-    - [How do I call a Feature from my UI/Web/Mobile/Desktop project?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-call-a-feature-from-my-uiwebmobiledesktop-project)
-    - [Entities and IRepository](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#entities-and-irepository)
-    - [InMemoryRepository](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#inmemoryrepository)
-- [Get Started with a Features Project](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#get-started-with-a-features-project)
-- [FAQ](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#faq)
-    - [Can I create multiple Features per file, like MVC Controllers do?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#can-i-create-multiple-features-per-file-like-mvc-controllers-do)
-    - [Why do you use Records for your Input and Output data?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#why-do-you-use-records-for-your-input-and-output-data)
-    - [What if my Feature doesn't have any Input Data?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#what-if-my-feature-doesnt-have-any-input-data)
-    - [How do I authenticate my Features and how to use Public Features?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Kernel#how-do-i-authenticate-my-features-and-how-to-use-public-features)
+- [Let's AddSparcKernel](#lets-addsparckernel)
+- [What is a Features Project](#what-is-a-features-project)
+- [What is a Feature?](#what-is-a-feature)
+    - [Where did the idea of a Feature come from?](#where-did-the-idea-of-a-feature-come-from)
+    - [What does a Feature look like?](#what-does-a-feature-look-like)
+    - [What are the benefits of using Features?](#what-are-the-benefits-of-using-features)
+    - [How do I call a Feature from my UI/Web/Mobile/Desktop project?](#how-do-i-call-a-feature-from-my-uiwebmobiledesktop-project)
+    - [Entities and IRepository](#entities-and-irepository)
+    - [InMemoryRepository](#inmemoryrepository)
+- [Get Started with a Features Project](#get-started-with-a-features-project)
+- [FAQ](#faq)
+    - [Can I create multiple Features per file, like MVC Controllers do?](#can-i-create-multiple-features-per-file-like-mvc-controllers-do)
+    - [Why do you use Records for your Input and Output data?](#why-do-you-use-records-for-your-input-and-output-data)
+    - [What if my Feature doesn't have any Input Data?](#what-if-my-feature-doesnt-have-any-input-data)
+    - [How do I authenticate my Features and how to use Public Features?](#how-do-i-authenticate-my-features-and-how-to-use-public-features)
 
 
 ## Let's AddSparcKernel
-The `Sparc.Kernel` library is the main framework library for the *Features Project* in your Blossom solution. And we can activate it with a single line of code at your Program.cs file
+The `Sparc.Kernel` library is the main framework library for the *Features Project* in your Blossom solution. And we can activate it with just two lines of code at your Program.cs file
 
 ```csharp
     builder.AddSparcKernel(builder.Configuration["WebClientUrl"]);
+    ...
+    app.UseSparcKernel();
 ```
 
 Here you will find the steps to create a *Features Project* from the scratch and some of the questions we had to answer to get there.
