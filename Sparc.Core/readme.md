@@ -8,7 +8,7 @@ You should not normally need to add this project directly to your Blossom Soluti
 
 This readme will serve as an architectural guide for best practices on Entities, Roots, and Repositories, and how to design them the Blossom way.
 
-#Table of contents
+# Table of contents
 - [The Blossom Core Architecture](https://github.com/sparc-coop/blossom/tree/main/Sparc.Core#the-blossom-core-architecture)
 	- [Entities vs. Database Schemas](https://github.com/sparc-coop/blossom/tree/main/Sparc.Core#entities-vs-database-schemas)
 	- [Write your Entities as Normal C# Classes](https://github.com/sparc-coop/blossom/tree/main/Sparc.Core#write-your-entities-as-normal-c#-classes)
