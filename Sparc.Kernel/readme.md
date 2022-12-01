@@ -22,7 +22,7 @@
 
 
 ## Let's AddSparcKernel
-The `Sparc.Kernel` library is the main framework library for the *Features Project* in your Blossom solution. And we can activate it with just two lines of code at your Program.cs file
+The `Sparc.Kernel` library is the main framework library for the *Features Project* in your Blossom solution. And we can activate it with just two lines of code at your `Program.cs` file
 
 ```csharp
     builder.AddSparcKernel(builder.Configuration["WebClientUrl"]);
