@@ -19,7 +19,7 @@ The `Sparc.Blossom` library is the main framework library for the *Platform Proj
 	- [Web Project only](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#web-project-only)
 	- [Pages and components](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#pages-and-components)
 - [FAQ](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#faq)
-	- How do I create MAUI platform-specific code in multi-platform projects?
+	- [How do I create platform-specific code in multi-platform projects?](https://github.com/sparc-coop/blossom/tree/main/Sparc.Blossom#how-do-i-create-platform-specific-code-in-multi-platform-projects)
 
 ## Get Started with a Web Project
 A *Web Project* is the project that you intend to deploy to Web platforms for use in a web browser.
