@@ -22,14 +22,14 @@ Add this plugin to your Features Project if you'd like to use a custom authentic
 	}
 	```
 
-3. Create a class that inherits from `SparcAuthenticator` and minimally provides an implementation for the following abstract methods in the class:
+3. Create a class that inherits from [SparcAuthenticator](SparcAuthenticator.cs] and minimally provides an implementation for the following abstract methods in the class:
 
     - `async Task<List<Claim>> GetClaimsAsync(string userId);`
     - `async Task<bool> IsActiveAsync(string userId);`
     - `async Task<bool> LoginAsync(string userName, string password);`
     - `string? GetUserId(ClaimsPrincipal? principal);`
 
-4. Add the following line of code to your `Startup.cs` file to register the `Sparc.Authentication.SelfHosted` plugin. Pass in:
+4. Add the following line of code to your `Program.cs` file to register the `Sparc.Authentication.SelfHosted` plugin. Pass in:
 
     - The class type of your derived SparcAuthenticator class.
     - The base URL of your Features Project. This registers the OAuth Authority. 
@@ -37,40 +37,32 @@ Add this plugin to your Features Project if you'd like to use a custom authentic
     - The name and URI scheme of your MAUI Project. This sets the MAUI Project up as a valid client with access to your Features Project.
 
     ```csharp
-    services.AddSelfHostedAuthentication<MyAppAuthenticator>(Configuration["BaseUrl"],
-    ("Web", Configuration["WebClientUrl"]),
-    ("Mobile", Configuration["MobileClientUrl"]));
+    builder.Services.AddSelfHostedAuthentication<MyAppAuthenticator>(builder.Configuration["BaseUrl"],
+    ("Web", builder.Configuration["WebClientUrl"]),
+    ("Mobile", builder.Configuration["MobileClientUrl"]));
 
 	```
 
 
 ### In your Platform projects (Web/Maui):
 
-1. Add the following line of code to your `Startup.cs` or `MauiProgram.cs` file to register the client authentication features. Pass in:
+1. Add the following settings to your `wwwroot/appsettings.json` file, replacing the values as necessary to match your application:
+   ```json
+   "Oidc": {
+    "Authority": "",
+    "ClientId": "",
+    "Scope":  ""
+   }
+   ```
+2. You just need to add Blossom to your platform project to register the client features in Authentication, add the following line of code to your `Program.cs` or `MauiProgram.cs` file.
  
-    - your auto-generated Api class type (generated from your OpenApiReference -- more info in the [Sparc.UI documentation](/Sparc.UI))
-    - the name of your Features Api (this will be used as the OAuth2 allowed scope)
-    - the base URL of your Features Project (this sets up the base URL for your auto-generated Api class and configures it for proper authentication headers)
-    - the client ID that matches the client ID you set up in your Features Project for this client project (in this case, "Web" or "Mobile")
-
     ```csharp
-       builder.AddSelfHostedApi<MyContactNetworkApi>(
-            "MyApp API",
-            builder.Configuration["ApiUrl"],
-            "Mobile");
+        builder.AddBlossom<MyAppApi>(builder.Configuration["ApiUrl"]);
     ```
+> pass in your auto-generated Api class type (generated from your OpenApiReference -- more info in the [Sparc.Blossom documentation](/Sparc.Blossom))
 
-    or
 
-    ```csharp
-       builder.Services.AddSelfHostedApi<MyContactNetworkApi>(
-            "MyApp API",
-            builder.Configuration["ApiUrl"],
-            "Web");
-    ```
-    > Note: This registration method exists within the Sparc.Platforms.* projects. There is no need to add this plugin directly to your Platform Projects.
-
-4. Run your solution. All of your Features will be automatically protected with JWT-based access tokens, and these access tokens will be sent automatically when
+3. Run your solution. All of your Features will be automatically protected with JWT-based access tokens, and these access tokens will be sent automatically when
 the users are logged in.
 
 5. To log in, set your login button to navigate to `/authentication/login?returnUrl=`. To log out, navigate to `/authentication/logout`.
