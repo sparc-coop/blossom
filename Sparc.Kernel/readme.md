@@ -278,6 +278,11 @@ app.UsePasswordlessAuthentication<User>();
 
 Yes, that's all.
 
+We're using this in our Ibis project to generate magic links that can be emailed to folks to one-click access rooms they're invited to, without having to manually sign up first or create any sort of password.
+
+Here is a feature that uses our (UserManager Extension)[Authentication/UserManagerPasswordlessExtensions.cs] `CreateMagicSignInLinkAsync`: [InviteUser Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Users/InviteUser.cs)
+
+
 ## Examples
 
 Here are the links to some existing Features projects and features using Blossom
