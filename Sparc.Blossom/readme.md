@@ -41,16 +41,19 @@ Here are the steps to create your Web Project:
 ```json
 { "ApiUrl": "https://localhost:7001" }
 ```
-4. Add the following line to your `Program.cs`
-5. Modify the `App.razor` file at the root of your Web Project, fully replacing its contents with the following:
+5. Add the following line to your `Program.cs`
+```csharp
+builder.AddBlossom<YouProjectApi>(builder.Configuration["ApiUrl"]);
+```
+6. Modify the `App.razor` file at the root of your Web Project, fully replacing its contents with the following:
 ```html
 <Sparc.Blossom.Platforms.Web.BlossomApp MainLayout="typeof(MainLayout)"
                                             Startup="typeof(Program)" />
 ```
-6. Connect to your *Features* project using 
-7. Write your app. 
-	a. (Web-only projects) Write your UI pages and components directly in the Web Project, using guidance from the examples. Also make sure to follow the "Connect Your UI to your Features" instructions, replacing the UI Project with your Web Project. 
-	b. (Multi-platform projects) Create a Sparc.UI project, reference it from your Web Project, and write your UI components within the UI project.
+7. Connect to your *Features* project following [Connect your UI to your Features](#connect-your-ui-to-your-features)
+8. Write your app.
+	- (Web-only projects) Write your UI pages and components directly in the Web Project, using guidance from the examples. Also make sure to follow the "Connect Your UI to your Features" instructions, replacing the UI Project with your Web Project. 
+	- Multi-platform projects) Create a Sparc.UI project, reference it from your Web Project, and write your UI components within the UI project.
 
 ### Run and Debug a Web Project Locally
 
