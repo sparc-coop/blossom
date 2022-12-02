@@ -134,4 +134,4 @@ In case you want to check how it implements the interface here is the [AzureBlob
 
 ### ISqlRepository
 
-This one is an example of when you already have your infrastructure defined or at least an idea that your project will use a SQL database, for example. So here we extended the [IRepository](/Data/IRepository.cs) to have specific SQL operations (`FromSqlAsync`) check the [ISqlRepository](/Data/ISqlRepository) and one of its implementations at [SqlServerRepository.cs](/Sparc.Database.SqlServer/SqlServerRepository.cs)
+This one is an example of when you already have your infrastructure defined or at least an idea that your project will use a SQL database, for example. So here we extended the [IRepository](Data/IRepository.cs) to have specific SQL operations (`FromSqlAsync`) check the [ISqlRepository](Data/ISqlRepository) and one of its implementations at [SqlServerRepository.cs](/Sparc.Database.SqlServer/SqlServerRepository.cs)
