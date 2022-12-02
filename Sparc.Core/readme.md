@@ -1,7 +1,5 @@
 # Sparc.Core
 
-[![Nuget](https://img.shields.io/nuget/v/Sparc.Core?label=Sparc.Core)](https://www.nuget.org/packages/Sparc.Core/)
-
 The `Sparc.Core` library contains a few shared classes and interfaces that are used by many libraries in Blossom, such as the [Sparc.Kernel](/Sparc.Kernel).
 
 You should not normally need to add this project directly to your Blossom Solution. Other libraries and plugins will bring it in as needed.
@@ -9,12 +7,12 @@ You should not normally need to add this project directly to your Blossom Soluti
 This readme will serve as an architectural guide for best practices on Entities, Roots, and Repositories, and how to design them the Blossom way.
 
 # Table of contents
-- [The Blossom Core Architecture](https://github.com/sparc-coop/blossom/tree/main/Sparc.Core#the-blossom-core-architecture)
-	- [Entities vs. Database Schemas](https://github.com/sparc-coop/blossom/tree/main/Sparc.Core#entities-vs-database-schemas)
-	- [Write your Entities as Normal C# Classes](https://github.com/sparc-coop/blossom/tree/main/Sparc.Core#write-your-entities-as-normal-c#-classes)
-	- [Features and Repositories](https://github.com/sparc-coop/blossom/tree/main/Sparc.Core#features-and-repositories)
-	- [IFileRepository](https://github.com/sparc-coop/blossom/tree/main/Sparc.Core#ifilerepository)
-	- [ISqlRepository](https://github.com/sparc-coop/blossom/tree/main/Sparc.Core#isqlrepository)
+- [The Blossom Core Architecture](#the-blossom-core-architecture)
+	- [Entities vs. Database Schemas](#entities-vs-database-schemas)
+	- [Write your Entities as Normal C# Classes](#write-your-entities-as-normal-c#-classes)
+	- [Features and Repositories](#features-and-repositories)
+	- [IFileRepository](#ifilerepository)
+	- [ISqlRepository](#isqlrepository)
 
 ## The Blossom Core Architecture
 
@@ -132,8 +130,8 @@ We have to let the app do *everything else*. We have to design the app so it can
 
 Following the same idea we have the IFileRepository, so you'll have it available in case you need to implement your own or use one of our plugins, like for example the [![Nuget](https://img.shields.io/nuget/v/Sparc.Storage.Azure?label=Sparc.Storage.Azure)](https://www.nuget.org/packages/Sparc.Storage.Azure/). 
 
-In case you want to check how it implements the interface here is the [AzureBlobRepository.cs](https://github.com/sparc-coop/blossom/blob/main/Sparc.Storage.Azure/AzureBlobRepository.cs)
+In case you want to check how it implements the interface here is the [AzureBlobRepository.cs](/Sparc.Storage.Azure/AzureBlobRepository.cs)
 
 ### ISqlRepository
 
-This one is an example of when you already have your infrastructure defined or at least an idea that your project will use a SQL database, for example. So here we extended the [IRepository](/Data/IRepository.cs) to have specific SQL operations (`FromSqlAsync`) check the [ISqlRepository](/Data/ISqlRepository) and one of its implementations at [SqlServerRepository.cs](https://github.com/sparc-coop/blossom/blob/main/Sparc.Database.SqlServer/SqlServerRepository.cs)
+This one is an example of when you already have your infrastructure defined or at least an idea that your project will use a SQL database, for example. So here we extended the [IRepository](/Data/IRepository.cs) to have specific SQL operations (`FromSqlAsync`) check the [ISqlRepository](/Data/ISqlRepository) and one of its implementations at [SqlServerRepository.cs](/Sparc.Database.SqlServer/SqlServerRepository.cs)
