@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
         if (configuration["AzureAdB2C:Authority"] != null)
             services.AddB2CApi<T>(configuration).AddPasswordlessApi<T>().AddBlossomHttpClient<T>(baseUrl);
         else if (configuration["Oidc:Authority"] != null)
-            services.AddOidcApi<T>(configuration).AddPasswordlessApi<T>().AddBlossomHttpClient<T>(baseUrl);
+            services.AddOidcApi<T>(configuration).AddBlossomHttpClient<T>(baseUrl);
         else
         {
             // Anonymous authentication only
