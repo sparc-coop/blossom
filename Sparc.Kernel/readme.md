@@ -14,6 +14,7 @@
     - [Entities and IRepository](#entities-and-irepository)
     - [InMemoryRepository](#inmemoryrepository)
 - [Get Started with a Features Project](#get-started-with-a-features-project)
+- [Passwordless authentication](#passwordless-authentication)
 - [Examples](#examples)
 - [FAQ](#faq)
     - [Can I create multiple Features per file, like MVC Controllers do?](#can-i-create-multiple-features-per-file-like-mvc-controllers-do)
@@ -187,6 +188,34 @@ We're always trying to keep things as clean as possible, so the answer to this q
 3. Inject it in a feature adding it to the constructor as `ITranslator translator`
 > [TranslateMessage Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Messages/TranslateMessage.cs)
 ---
+
+## Passwordless Authentication
+
+Now Sparc.Kernel comes by default with Passwordless authentication flows, which are the new "more modern" approach to logins. *Microsoft recommends passwordless authentication methods such as Windows Hello, FIDO2 security keys, and the Microsoft Authenticator app because they provide the most secure sign-in experience. Although a user can sign-in using other common methods such as a username and password, passwords should be replaced with more secure authentication methods.* [Microsoft Documentation on Passwordless authentication](https://learn.microsoft.com/en-us/azure/active-directory/authentication/concept-authentication-methods)
+
+> You can check out more about this topic [here](https://www.microsoft.com/en-us/security/business/solutions/passwordless-authentication)
+
+To enable passwordless authentication in your project you need to follow the next steps:
+
+1. At your Features Project add the following settings to your `appsettings.json`
+```json
+"Passwordless": {
+    "Key": "",
+    "Issuer": "",
+    "Audience": ""
+  }
+```
+
+2. Add the following to your `Program.cs` file
+```csharp
+var auth = builder.Services.AddAzureADB2CAuthentication<User>(builder.Configuration); //example considering you're using primarily Azure AD B2C
+builder.AddPasswordlessAuthentication<User>(auth);
+...
+app.UsePasswordlessAuthentication<User>();
+```
+
+Yes, that's all.
+
 ## Examples
 
 Here are the links to some existing Features projects and features using Blossom
