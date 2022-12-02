@@ -21,7 +21,7 @@ In Your Features Project:
 	}
 	```
 
-3. Create an `SparcContext` class, configuring all root entities as necessary. Example:
+3. Create a `SparcContext` class, configuring all root entities as necessary. Example:
     ```csharp
 	public class MyAppContext : SparcContext
     {
