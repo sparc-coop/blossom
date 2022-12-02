@@ -21,11 +21,12 @@ In Your Features Project:
 	}
 	```
 
-3. Create an Entity Framework `DbContext` class, configuring all root entities as necessary. Example:
+3. Create a `SparcContext` class, configuring all root entities as necessary. Example:
     ```csharp
-	public class MyAppContext : DbContext
+	public class MyAppContext : SparcContext
     {
-      public MyAppContext(DbContextOptions options) : base(options)
+      public virtual DbSet<User> Users => Set<User>();
+      public MyAppContext(DbContextOptions options, Publisher publisher) : base(options, publisher)
       { }
 
 	  protected override void OnModelCreating(ModelBuilder builder)
@@ -35,9 +36,9 @@ In Your Features Project:
 	}
 	```
 
-4. Add the following line of code to your `Startup.cs` file in your Features Project to register the `Sparc.Database.SqlServer` plugin. Pass in the `DbContext` class type you created, the connection string from your `appsettings.json` file, and the name of your database.
+4. Add the following line of code to your `Program.cs` file in your Features Project to register the `Sparc.Database.SqlServer` plugin. Pass in the `SparcContext` class type you created, the connection string from your `appsettings.json` file, and the name of your database.
     ```csharp
-    services.AddSqlServer<MyAppContext>(Configuration.GetConnectionString("Database"));
+    builder.Services.AddSqlServer<MyAppContext>(builder.Configuration.GetConnectionString("Database"));
 	```
 
 5. Inject `IRepository<T>` into any feature that needs to load from or save data to the database. All typically necessary database operations exist within this interface. The SqlServer DB Repository you configured will automatically be used.
@@ -46,4 +47,4 @@ In Your Features Project:
 
 For more information on root entities, or how to use `IRepository<T>`, see the [Sparc.Core documentation](/Sparc.Core).
 
-For an example on using `IRepository<T>` inside a Feature, see the examples in the [Sparc.Features documentation](/Sparc.Features).
+For an example on using `IRepository<T>` inside a Feature, see the examples in the [Sparc.Kernel documentation](/Sparc.Kernel).
