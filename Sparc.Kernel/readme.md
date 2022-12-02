@@ -136,11 +136,11 @@ When the project containing the example Feature above is built, Sparc.Kernel aut
 
 At this point you already noticed we introduced Entities and the IRepository at the code, and that is ok, it should be as simple as this, your entities are normal C# classes and the repository interface has all the deault operations you can expect.
 
-For more information and technical details visit the [Sparc.Core](https://github.com/sparc-coop/blossom/blob/main/Sparc.Core) documentation
+For more information and technical details visit the [Sparc.Core](/Sparc.Core) documentation
 
 ### InMemoryRepository
 
-Sparc.Kernel has a built-in [InMemoryRepository](https://github.com/sparc-coop/blossom/blob/main/Sparc.Kernel/Data/InMemoryRepository.cs), no need to worry about data infrastructure until you really need it, one more way to fasten your development and tests if you want to.
+Sparc.Kernel has a built-in [InMemoryRepository](/Data/InMemoryRepository.cs), no need to worry about data infrastructure until you really need it, one more way to fasten your development and tests if you want to.
 By adding Sparc.Kernel to your Features project you already have an InMemory layer available, you just need to inject the `IRepository<YourEntity>` to your Feature like the `IRepository<Order>` in the example above.
 
 ## Get Started with a Features Project
