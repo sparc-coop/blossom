@@ -175,7 +175,7 @@ By adding Sparc.Kernel to your Features project you already have an InMemory lay
 
 ### And about a entirely new service?
 
-One question that you'll face along the way is, if I need to create a new service what's the best way to do that? 
+One question you may have along the way is, *and if I need to create a new service what's the best way to do that?*
 We're always trying to keep things as clean as possible, so the answer to this question would be to think in your service as a *plugin* where you can just plug and play in your features project. So the suggested steps are
 
 1. Create a *_Plugins* folder at your project and create your services there, we recommend you to implement it from a generic interface, for example, our new service is a translator, and it could be an Azure Translator or using any other provider.
@@ -194,6 +194,7 @@ Here are the links to some existing Features projects and features using Blossom
 - [Ibis.Features Project](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features)
 - [GetRooms Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Rooms/GetRooms.cs)
 - [CreateRoom Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Rooms/CreateRoom.cs)
+- [DeleteMessage Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Messages/DeleteMessage.cs)
 
 ## FAQ
 
