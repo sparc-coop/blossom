@@ -38,9 +38,9 @@ Take note of the following items as you are setting things up. You will need the
 	}
 	```
 
-3. Add the following line of code to your `Startup.cs` file to register the `Sparc.Authentication.AzureADB2C` plugin. It will automatically read the data from the `AzureAdB2C` configuration in your `appsettings.json`.
+3. Add the following line of code to your `Program.cs` file to register the `Sparc.Authentication.AzureADB2C` plugin. It will automatically read the data from the `AzureAdB2C` configuration in your `appsettings.json`.
     ```csharp
-    services.AddAzureADB2CAuthentication(Configuration);
+    builder.Services.AddAzureADB2CAuthentication(builder.Configuration);
 	```
 
 ### In your Platform projects (Web/Maui):
@@ -56,34 +56,18 @@ Take note of the following items as you are setting things up. You will need the
     }
     ```
 
-2. Add the following line of code to your `Startup.cs` or `MauiProgram.cs` file to register the client features in Authentication. Pass in:
+2. You just need to add Blossom to your platform project to register the client features in Authentication, add the following line of code to your `Program.cs` or `MauiProgram.cs` file.
  
-    - your auto-generated Api class type (generated from your OpenApiReference -- more info in the [Sparc.UI documentation](/Sparc.UI))
-    - the scope URI from your AD B2C Setup in Azure (this gives your UI Project access to the Features Project)
-    - the base URL of your Features Project (this sets up the base URL for your auto-generated Api class and configures it for proper authentication headers)
-
     ```csharp
-        builder.AddB2CApi<MyAppApi>(
-            "https://myapp.onmicrosoft.com/00000000-0000-0000-0000-000000000000/MyApp.Access",
-            builder.Configuration["ApiUrl"]);
+        builder.AddBlossom<MyAppApi>(builder.Configuration["ApiUrl"]);
     ```
-
-    or
-
-    ```csharp
-        builder.Services.AddB2CApi<MyAppApi>(
-            "https://myapp.onmicrosoft.com/00000000-0000-0000-0000-000000000000/MyApp.Access",
-            builder.Configuration["ApiUrl"]);
-    ```
-
-    > Note: This registration method exists within the Sparc.Platforms.* projects. There is no need to add this plugin directly to your Platform Projects.
+> pass in your auto-generated Api class type (generated from your OpenApiReference -- more info in the [Sparc.Blossom documentation](/Sparc.Blossom))
 
 3. *(Web projects only)* Add the following line of code to your `index.html` file. This adds the necessary JS library for Blazor Web Assembly Authentication using MSAL:
     ```html
     <script src="_content/Microsoft.Authentication.WebAssembly.Msal/AuthenticationService.js"></script>
     ```
 
-4. Run your solution. All of your Features will be automatically protected with JWT-based access tokens, and these access tokens will be sent automatically when
-the users are logged in.
+4. Run your solution. All of your Features will be automatically protected with JWT-based access tokens, and these access tokens will be sent automatically when the users are logged in.
 
 5. To log in, set your login button to navigate to `/authentication/login?returnUrl=`. To log out, navigate to `/authentication/logout`.
