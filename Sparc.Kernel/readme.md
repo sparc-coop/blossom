@@ -13,6 +13,7 @@
     - [How do I call a Feature from my UI/Web/Mobile/Desktop project?](#how-do-i-call-a-feature-from-my-uiwebmobiledesktop-project)
     - [Entities and IRepository](#entities-and-irepository)
     - [InMemoryRepository](#inmemoryrepository)
+    - [Specification](#specification)
 - [Get Started with a Features Project](#get-started-with-a-features-project)
 - [Passwordless authentication](#passwordless-authentication)
 - [Examples](#examples)
@@ -141,8 +142,69 @@ For more information and technical details visit the [Sparc.Core](/Sparc.Core) d
 
 ### InMemoryRepository
 
-Sparc.Kernel has a built-in [InMemoryRepository](/Data/InMemoryRepository.cs), no need to worry about data infrastructure until you really need it, one more way to fasten your development and tests if you want to.
+Sparc.Kernel has a built-in [InMemoryRepository](Data/InMemoryRepository.cs), no need to worry about data infrastructure until you really need it, one more way to fasten your development and tests if you want to.
 By adding Sparc.Kernel to your Features project you already have an InMemory layer available, you just need to inject the `IRepository<YourEntity>` to your Feature like the `IRepository<Order>` in the example above.
+
+### Specification
+
+Sparc.Kernel has Specification-enabled repositories, which hugely clean up query code in our Features. The Specification pattern encapsulates query logic in its own class, which promotes the reuse of common queries. Some of the main benefits highlighted in the official docs are:
+
+- Keep data access query logic in one place
+- Keep data access query logic in the domain layer
+- Reuse common queries throughout your application
+
+#### How to use Specifications?
+
+Since Sparc.Kernel already has Specification-enabled repository you can start using it at anytime, we recommend you to create a Queries folder inside your feature's folder
+
+![image](https://user-images.githubusercontent.com/1815134/205227380-20f75626-f2be-40c3-a813-7dfc400476aa.png)
+
+One example of Specification is:
+```csharp
+using Ardalis.Specification;
+
+namespace YourProject.Features.Licenses.Queries;
+
+public class TransferrableLicenseTypes : Specification<LicenseType>
+{
+    public TransferrableLicenseTypes()
+    {
+        Query
+            .Include(x => x.Licenses)
+            .Where(x => x.IsActive && x.IsVisible);
+    }
+}
+```
+
+and here is how you use it in your feature:
+```csharp
+using YourProject.Features.Licenses.Queries;
+
+namespace YourProject.Features.Licenses;
+
+public class GetTransferrableLicenses : Feature<List<GetLicensesResponse>>
+{
+    IRepository<LicenseType> LicenseTypes;
+    public GetTransferrableLicenses(IRepository<LicenseType> licenseTypes)
+    {
+        LicenseTypes = licenseTypes;
+    }
+
+    public override async Task<List<GetLicensesResponse>> ExecuteAsync()
+    {
+        var result = await LicenseTypes.GetAllAsync(new TransferrableLicenseTypes());
+
+        return result.Select(x => new GetLicensesResponse(
+            x.Id,
+            x.Name))
+            .Where(x => x.TotalInStorage > 0)
+        .OrderBy(x => x.Name)
+        .ToList();
+    }
+}
+```
+
+> You can check more about Specifications [here](http://specification.ardalis.com/)
 
 ## Get Started with a Features Project
 
