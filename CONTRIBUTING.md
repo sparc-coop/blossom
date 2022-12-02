@@ -10,7 +10,7 @@ Create a fork of the project.
 ## Guidelines for Contributing
 
 ### Reporting a bug
-Add a new issue [here](https://github.com/sparc-coop/Sparc.Kernel/issues) and describe the problem as well as how to replicate it.
+Add a new issue [here](https://github.com/sparc-coop/blossom/issues) and describe the problem as well as how to replicate it.
 
 ### Submitting a Pull Request
 If you wish to submit a PR, please link to an existing issue or create a new one.
