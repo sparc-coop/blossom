@@ -137,7 +137,7 @@ When the project containing the example Feature above is built, Sparc.Kernel aut
 
 ### Entities and IRepository
 
-At this point you already noticed we introduced Entities and the IRepository at the code, and that is ok, it should be as simple as this, your entities are normal C# classes and the repository interface has all the deault operations you can expect.
+At this point you already noticed we introduced Entities and the IRepository at the code, and that is ok, it should be as simple as this, your entities are normal C# classes and the repository interface has all the default operations you can expect.
 
 For more information and technical details visit the [Sparc.Core](/Sparc.Core) documentation
 
