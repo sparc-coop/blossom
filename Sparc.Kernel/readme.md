@@ -257,7 +257,7 @@ We're always trying to keep things as clean as possible, so the answer to this q
 
 ## Realtime
 
-Sparc.Kernel gives your project realtime capabilities, it has a realtime layer built on top of SignalR and MediatR to deliver `RealtimeFeatures` and notifications, you can check out more at the [Realtime documentation here](/Realtime)
+Sparc.Kernel gives your project realtime capabilities, it has a realtime layer built on top of SignalR and MediatR to deliver `RealtimeFeatures` and notifications, you can check out more at the [Realtime documentation here](Realtime)
 
 ## Passwordless Authentication
 
