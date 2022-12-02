@@ -15,6 +15,7 @@
     - [InMemoryRepository](#inmemoryrepository)
     - [Specification](#specification)
 - [Get Started with a Features Project](#get-started-with-a-features-project)
+- [Realtime](#realtime)
 - [Passwordless authentication](#passwordless-authentication)
 - [Examples](#examples)
 - [FAQ](#faq)
@@ -206,6 +207,9 @@ public class GetTransferrableLicenses : Feature<List<GetLicensesResponse>>
 
 > You can check more about Specifications [here](http://specification.ardalis.com/)
 
+
+
+
 ## Get Started with a Features Project
 
 1. Create a new *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
@@ -250,6 +254,10 @@ We're always trying to keep things as clean as possible, so the answer to this q
 3. Inject it in a feature adding it to the constructor as `ITranslator translator`
 > [TranslateMessage Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Messages/TranslateMessage.cs)
 ---
+
+## Realtime
+
+Sparc.Kernel gives your project realtime capabilities, it has a realtime layer built on top of SignalR and MediatR to deliver `RealtimeFeatures` and notifications, you can check out more at the [Realtime documentation here](/Realtime)
 
 ## Passwordless Authentication
 
