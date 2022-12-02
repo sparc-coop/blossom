@@ -21,11 +21,12 @@ In Your Features Project:
 	}
 	```
 
-3. Create an Entity Framework `DbContext` class, configuring all root entities as necessary. Example:
+3. Create an `SparcContext` class, configuring all root entities as necessary. Example:
     ```csharp
-	public class MyAppContext : DbContext
+	public class MyAppContext : SparcContext
     {
-      public MyAppContext(DbContextOptions options) : base(options)
+      public DbSet<User> Users => Set<User>();
+      public MyAppContext(DbContextOptions options, Publisher publisher) : base(options, publisher)
       { }
 
 	  protected override void OnModelCreating(ModelBuilder builder)
@@ -51,4 +52,5 @@ For an example on using `IRepository<T>` inside a Feature, see the examples in t
 For an example of an app using Cosmos check the Ibis Features Project
 	- [Project](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features)
 	- [appsettings.json](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/appsettings.json)
+	- [IbisContext Class](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/_Plugins/IbisContext.cs)
 	- [Program.cs](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Program.cs)
