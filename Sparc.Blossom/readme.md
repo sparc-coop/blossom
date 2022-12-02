@@ -181,7 +181,7 @@ A Platform Project can override any behavior from your UI project in two ways:
 	   @inject IEmailService EmailService
 	   async Task SendEmail() => await EmailService.SendAsync(email);
 	```
-3. In your specific platform Project, create a class that inherits from this interface:
+3. In your specific platform Project, create a class that implements the interface:
 	```csharp
 	   public class MobileEmailService : IEmailService
 	   {
