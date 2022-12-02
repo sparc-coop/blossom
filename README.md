@@ -136,7 +136,7 @@ To send emails, text messages, and push notifications, Blossom offers two librar
 To upload and download blob files using a modern storage solution, Blossom offers:
 
 - Azure Storage Plugin: [Sparc.Storage.Azure](https://www.nuget.org/packages/Sparc.Storage.Azure)
-
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Storage.Azure?label=Sparc.Storage.Azure)](https://www.nuget.org/packages/Sparc.Storage.Azure/)
 
 ## Step 4. Deploy your solution
 
