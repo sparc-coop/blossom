@@ -1,23 +1,22 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using System.Web;
 
 namespace Sparc.Authentication;
 
-public class PasswordlessAccessTokenProvider : IAccessTokenProvider
+public class SparcAccessTokenProvider : IAccessTokenProvider
 {
-    public static readonly string TokenName = "_sparc_passwordless_access_token";
+    public static readonly string TokenName = "_sparc_access_token";
 
-    public PasswordlessAccessTokenProvider(AuthenticationStateProvider provider, ILocalStorageService localStorage, NavigationManager navigation)
+    public SparcAccessTokenProvider(ILocalStorageService localStorage, NavigationManager navigation)
     {
-        Provider = provider as IAccessTokenProvider;
         LocalStorage = localStorage;
         Navigation = navigation;
     }
 
-    public IAccessTokenProvider? Provider { get; }
     public ILocalStorageService LocalStorage { get; }
     public NavigationManager Navigation { get; }
 
@@ -26,9 +25,9 @@ public class PasswordlessAccessTokenProvider : IAccessTokenProvider
         var uri = new Uri(Navigation.Uri);
 
         var queryString = HttpUtility.ParseQueryString(uri.Query);
-        if (queryString["passwordless"] != null)
+        if (queryString["token"] != null)
         {
-            await LocalStorage.SetItemAsync(TokenName, queryString["passwordless"]);
+            await LocalStorage.SetItemAsync(TokenName, queryString["token"]);
             Navigation.NavigateTo(queryString["returnUrl"]!);
         }
     }
@@ -49,11 +48,6 @@ public class PasswordlessAccessTokenProvider : IAccessTokenProvider
         var token = await LocalStorage.GetItemAsync<string>(TokenName);
         if (token == null)
         {
-            if (Provider != null)
-                return options == null
-                    ? await Provider.RequestAccessToken()
-                    : await Provider.RequestAccessToken(options);
-
             return new AccessTokenResult(AccessTokenResultStatus.RequiresRedirect,
                 null,
                 "/authentication/login",
@@ -67,4 +61,14 @@ public class PasswordlessAccessTokenProvider : IAccessTokenProvider
 
         return new AccessTokenResult(AccessTokenResultStatus.Success, new AccessToken { Value = token }, null, null);
     }
+}
+
+public sealed class SparcAccessTokenProviderAccessor : IAccessTokenProviderAccessor
+{
+    private readonly IServiceProvider _provider;
+    private IAccessTokenProvider? _tokenProvider;
+
+    public SparcAccessTokenProviderAccessor(IServiceProvider provider) => _provider = provider;
+
+    public IAccessTokenProvider TokenProvider => _tokenProvider ??= _provider.GetRequiredService<IAccessTokenProvider>();
 }

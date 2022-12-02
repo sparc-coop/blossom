@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Authentication.WebAssembly.Msal.Models;
 using Polly;
 using Sparc.Blossom.Authentication;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication.Internal;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Sparc.Blossom.Web;
 
@@ -22,9 +24,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped(_ => configuration);
 
         if (configuration["AzureAdB2C:Authority"] != null)
-            services.AddB2CApi<T>(configuration).AddPasswordlessApi<T>().AddBlossomHttpClient<T>(baseUrl);
+            services.AddB2CApi<T>(configuration).AddSparcApi<T>().AddBlossomHttpClient<T>(baseUrl);
         else if (configuration["Oidc:Authority"] != null)
             services.AddOidcApi<T>(configuration).AddBlossomHttpClient<T>(baseUrl);
+        else if (configuration["Sparc:Authority"] != null)
+            services.AddSparcApi<T>().AddBlossomHttpClient<T>(baseUrl);
         else
         {
             // Anonymous authentication only
@@ -64,15 +68,15 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddPasswordlessApi<T>(this IServiceCollection services) where T : class
+    public static IServiceCollection AddSparcApi<T>(this IServiceCollection services) where T : class
     {
-        services.AddScoped<IAccessTokenProvider, PasswordlessAccessTokenProvider>();
+        services.AddScoped<IAccessTokenProvider, SparcAccessTokenProvider>();
         services.AddAuthorizationCore(options =>
         {
-            options.AddPolicy("Passwordless", policy => policy.Requirements.Add(new PasswordlessRequirement()));
+            options.AddPolicy("Sparc", policy => policy.Requirements.Add(new SparcAccessTokenRequirement()));
         });
-        services.AddScoped<IAuthorizationHandler, PasswordlessAuthorizationHandler>();
-        services.AddScoped<AuthenticationStateProvider, PasswordlessAuthenticationStateProvider<RemoteAuthenticationState, RemoteUserAccount, MsalProviderOptions>>();
+        services.AddScoped<IAuthorizationHandler, SparcAccessTokenAuthorizationHandler>();
+        services.AddScoped<AuthenticationStateProvider, SparcAuthenticationStateProvider>();
 
         return services;
     }
@@ -124,9 +128,9 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
-    public static WebAssemblyHostBuilder AddPasswordlessApi<T>(this WebAssemblyHostBuilder builder) where T : class
+    public static WebAssemblyHostBuilder AddSparcApi<T>(this WebAssemblyHostBuilder builder) where T : class
     {
-        builder.Services.AddPasswordlessApi<T>();
+        builder.Services.AddSparcApi<T>();
         return builder;
     }
 

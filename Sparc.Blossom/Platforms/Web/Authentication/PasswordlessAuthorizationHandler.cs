@@ -1,24 +1,23 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 
 namespace Sparc.Authentication;
 
-public class PasswordlessRequirement : DenyAnonymousAuthorizationRequirement
+public class SparcAccessTokenRequirement : DenyAnonymousAuthorizationRequirement
 {
 }
 
-public class PasswordlessAuthorizationHandler : AuthorizationHandler<PasswordlessRequirement>
+public class SparcAccessTokenAuthorizationHandler : AuthorizationHandler<SparcAccessTokenRequirement>
 {
-    public PasswordlessAuthorizationHandler(ILocalStorageService localStorage) : base()
+    public SparcAccessTokenAuthorizationHandler(ILocalStorageService localStorage) : base()
     {
         LocalStorage = localStorage;
     }
 
     public ILocalStorageService LocalStorage { get; }
 
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PasswordlessRequirement requirement)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, SparcAccessTokenRequirement requirement)
     {
         if (await HasValidAccessToken())
         {
@@ -32,7 +31,7 @@ public class PasswordlessAuthorizationHandler : AuthorizationHandler<Passwordles
 
     private async Task<bool> HasValidAccessToken()
     {
-        var token = await LocalStorage.GetItemAsync<string>(PasswordlessAccessTokenProvider.TokenName);
+        var token = await LocalStorage.GetItemAsync<string>(SparcAccessTokenProvider.TokenName);
         return token != null;
     }
 }

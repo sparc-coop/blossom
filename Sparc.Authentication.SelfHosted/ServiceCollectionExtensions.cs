@@ -1,24 +1,22 @@
 ﻿using IdentityServer4.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Sparc.Core;
 
 namespace Sparc.Authentication.SelfHosted;
 
 public static class ServiceCollectionExtensions
 {
-    public static IIdentityServerBuilder AddSelfHostedAuthentication<T>(this IServiceCollection services, string serverUrl, string clientId, string clientUrl) where T : SparcAuthenticator
+    public static IIdentityServerBuilder AddSelfHostedAuthentication<T>(this IServiceCollection services, string clientId, string clientUrl) where T : SparcAuthenticator
     {
         var clients = new[] { services.CreateClient(clientId, clientUrl) };
-        return services.AddSelfHostedAuthentication<T>(serverUrl, clients);
+        return services.AddSelfHostedAuthentication<T>(clients);
     }
 
-    public static IIdentityServerBuilder AddSelfHostedAuthentication<T>(this IServiceCollection services, string serverUrl, params (string, string)[] clients) where T : SparcAuthenticator
+    public static IIdentityServerBuilder AddSelfHostedAuthentication<T>(this IServiceCollection services, params (string, string)[] clients) where T : SparcAuthenticator
     {
-        return services.AddSelfHostedAuthentication<T>(serverUrl, clients.Select(x => services.CreateClient(x.Item1, x.Item2)).ToArray());
+        return services.AddSelfHostedAuthentication<T>(clients.Select(x => services.CreateClient(x.Item1, x.Item2)).ToArray());
     }
 
-    private static IIdentityServerBuilder AddSelfHostedAuthentication<T>(this IServiceCollection services, string serverUrl, IEnumerable<Client> clients) where T : SparcAuthenticator
+    private static IIdentityServerBuilder AddSelfHostedAuthentication<T>(this IServiceCollection services, IEnumerable<Client> clients) where T : SparcAuthenticator
     {
         var apiName = typeof(T).Namespace!;
 
@@ -29,13 +27,7 @@ public static class ServiceCollectionExtensions
         foreach (var client in clients)
             client.AllowedScopes = ApiScopes.Select(x => x.Name).Union(IdentityScopes.Select(x => x.Name)).ToList();
 
-        services.AddAuthentication()
-            .AddJwtBearer(options =>
-            {
-                options.Authority = serverUrl;
-                options.TokenValidationParameters = new TokenValidationParameters { ValidateAudience = false, ValidateLifetime = false };
-            });
-
+        services.AddAuthentication().AddJwtBearer();
         services.AddAuthorization();
 
         services.AddCors(options =>
@@ -53,6 +45,7 @@ public static class ServiceCollectionExtensions
             .AddInMemoryApiScopes(ApiScopes)
             .AddInMemoryClients(clients)
             .AddProfileService<SparcProfileService>();
+        
         return builder;
     }
 
