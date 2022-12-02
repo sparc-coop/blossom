@@ -58,3 +58,5 @@ In Your Features Project:
         }
     }
     ```
+    
+   You can check a real example at the [InviteUser Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Users/InviteUser.cs)
