@@ -236,7 +236,7 @@ public class GetTransferrableLicenses : Feature<List<GetLicensesResponse>>
 
     ```
 
-5. Create your Entities and Features. Create a folder structure based on the name of your Entity, you can check out some examples at the [Ibis.Features](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features) project, here is the *Messages* folder with a *Entities* folder inside, where are placed all the related and necessary entities, here is the main [Message class](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Messages/Entities/Message.cs), and last but not least you can also see all the Message related features, such as `DeleteMessage`, `EditMessageTags`, `GetAllMessages`, `HearMessage`, etc.
+5. Create your Entities and Features. Create a folder structure based on the name of your Entity, you can check out some examples at the [Ibis.Features](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features) project, below is a *Messages* folder with an *Entities* folder inside, where are placed all the related and necessary entities, here is the main [Message class](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Messages/Entities/Message.cs), and last but not least you can also see all the Message related features, such as `DeleteMessage`, `EditMessageTags`, `GetAllMessages`, `HearMessage`, etc.
 
 ![image](https://user-images.githubusercontent.com/1815134/204842128-33c30b9b-333b-45e6-82c6-c6bafe8d032a.png)
 
