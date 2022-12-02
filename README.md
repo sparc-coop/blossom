@@ -112,7 +112,7 @@ All Features by default require some form of authentication, as most real-world 
 
 When you're ready, simply add the appropriate NuGet package to the `Features` project and configure it per the documentation. 
 
-Blossom includes three main options for authentication:
+Blossom includes two main options for authentication:
 
 - Azure AD B2C (good for secure OAuth2.0 consumer apps): 
 [Sparc.Authentication.AzureADB2C](/Sparc.Authentication.AzureADB2C) 
@@ -135,7 +135,7 @@ To send emails, text messages, and push notifications, Blossom offers two librar
 
 To upload and download blob files using a modern storage solution, Blossom offers:
 
-- Azure Storage Plugin: [Sparc.Storage.Azure](https://www.nuget.org/packages/Sparc.Storage.Azure)
+- Azure Storage Plugin: [Sparc.Storage.Azure](Sparc.Storage.Azure)
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Storage.Azure?label=Sparc.Storage.Azure)](https://www.nuget.org/packages/Sparc.Storage.Azure/)
 
 ## Step 4. Deploy your solution

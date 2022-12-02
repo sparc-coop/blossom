@@ -15,6 +15,7 @@
     - [InMemoryRepository](#inmemoryrepository)
     - [Specification](#specification)
 - [Get Started with a Features Project](#get-started-with-a-features-project)
+- [Realtime](#realtime)
 - [Passwordless authentication](#passwordless-authentication)
 - [Examples](#examples)
 - [FAQ](#faq)
@@ -206,6 +207,9 @@ public class GetTransferrableLicenses : Feature<List<GetLicensesResponse>>
 
 > You can check more about Specifications [here](http://specification.ardalis.com/)
 
+
+
+
 ## Get Started with a Features Project
 
 1. Create a new *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
@@ -232,7 +236,7 @@ public class GetTransferrableLicenses : Feature<List<GetLicensesResponse>>
 
     ```
 
-5. Create your Entities and Features. Create a folder structure based on the name of your Entity, you can check out some examples at the [Ibis.Features](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features) project, here is the *Messages* folder with a *Entities* folder inside, where are placed all the related and necessary entities, here is the main [Message class](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Messages/Entities/Message.cs), and last but not least you can also see all the Message related features, such as `DeleteMessage`, `EditMessageTags`, `GetAllMessages`, `HearMessage`, etc.
+5. Create your Entities and Features. Create a folder structure based on the name of your Entity, you can check out some examples at the [Ibis.Features](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features) project, below is a *Messages* folder with an *Entities* folder inside, where are placed all the related and necessary entities, here is the main [Message class](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Messages/Entities/Message.cs), and last but not least you can also see all the Message related features, such as `DeleteMessage`, `EditMessageTags`, `GetAllMessages`, `HearMessage`, etc.
 
 ![image](https://user-images.githubusercontent.com/1815134/204842128-33c30b9b-333b-45e6-82c6-c6bafe8d032a.png)
 
@@ -250,6 +254,10 @@ We're always trying to keep things as clean as possible, so the answer to this q
 3. Inject it in a feature adding it to the constructor as `ITranslator translator`
 > [TranslateMessage Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Messages/TranslateMessage.cs)
 ---
+
+## Realtime
+
+Sparc.Kernel gives your project realtime capabilities, it has a realtime layer built on top of SignalR and MediatR to deliver `RealtimeFeatures` and notifications, you can check out more at the [Realtime documentation here](Realtime)
 
 ## Passwordless Authentication
 
@@ -277,6 +285,11 @@ app.UsePasswordlessAuthentication<User>();
 ```
 
 Yes, that's all.
+
+We're using this in our Ibis project to generate magic links that can be emailed to folks to one-click access rooms they're invited to, without having to manually sign up first or create any sort of password.
+
+Here is a feature that uses our (UserManager Extension)[Authentication/UserManagerPasswordlessExtensions.cs] `CreateMagicSignInLinkAsync`: [InviteUser Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Users/InviteUser.cs)
+
 
 ## Examples
 
