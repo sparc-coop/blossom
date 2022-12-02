@@ -118,10 +118,6 @@ Blossom includes three main options for authentication:
 [Sparc.Authentication.AzureADB2C](/Sparc.Authentication.AzureADB2C) 
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Authentication.AzureADB2C?label=Sparc.Authentication.AzureADB2C)](https://www.nuget.org/packages/Sparc.Authentication.AzureADB2C/)
 
-- Active Directory (good for internal apps): [Sparc.Authentication.ActiveDirectory](/Sparc.Authentication.ActiveDirectory)
-[![Nuget](https://img.shields.io/nuget/v/Sparc.Authentication.ActiveDirectory?label=Sparc.Authentication.ActiveDirectory)](https://www.nuget.org/packages/Sparc.Authentication.ActiveDirectory/)
-
-
 - Self-Hosted Identity Server (good for custom authentication flows): [Sparc.Authentication.SelfHosted](/Sparc.Authentication.SelfHosted)
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Authentication.SelfHosted?label=Sparc.Authentication.SelfHosted)](https://www.nuget.org/packages/Sparc.Authentication.SelfHosted/)
 
