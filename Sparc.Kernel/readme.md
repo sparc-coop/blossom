@@ -14,6 +14,7 @@
     - [Entities and IRepository](#entities-and-irepository)
     - [InMemoryRepository](#inmemoryrepository)
 - [Get Started with a Features Project](#get-started-with-a-features-project)
+- [Examples](#examples)
 - [FAQ](#faq)
     - [Can I create multiple Features per file, like MVC Controllers do?](#can-i-create-multiple-features-per-file-like-mvc-controllers-do)
     - [Why do you use Records for your Input and Output data?](#why-do-you-use-records-for-your-input-and-output-data)
@@ -172,8 +173,27 @@ By adding Sparc.Kernel to your Features project you already have an InMemory lay
 
 ![image](https://user-images.githubusercontent.com/1815134/204842128-33c30b9b-333b-45e6-82c6-c6bafe8d032a.png)
 
----
+### And about a entirely new service?
 
+One question that you'll face along the way is, if I need to create a new service what's the best way to do that? 
+We're always trying to keep things as clean as possible, so the answer to this question would be to think in your service as a *plugin* where you can just plug and play in your features project. So the suggested steps are
+
+1. Create a *_Plugins* folder at your project and create your services there, we recommend you to implement it from a generic interface, for example, our new service is a translator, and it could be an Azure Translator or using any other provider.
+> Here is a real example: Ibis [Plugins folder](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features/_Plugins)
+
+2. Register it on the `Program.cs` file as `builder.Services.AddScoped<ITranslator,AzureTranslator>()`
+> Ibis [Program.cs](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Program.cs)
+
+3. Inject it in a feature adding it to the constructor as `ITranslator translator`
+> [TranslateMessage Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Messages/TranslateMessage.cs)
+---
+## Examples
+
+Here are the links to some existing Features projects and features using Blossom
+
+- [Ibis.Features Project](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features)
+- [GetRooms Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Rooms/GetRooms.cs)
+- [CreateRoom Feature](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Rooms/CreateRoom.cs)
 
 ## FAQ
 
@@ -205,6 +225,8 @@ Since a Feature's Input and Output data classes meet all of these requirements, 
 
 ```csharp
 public record GetProductsRequest(string SearchTerm, bool ShowDeletedProducts);
+...
+public record GetAllMessagesResponse(string Language, List<Message> Messages);
 ```
 
 It is a good practice to return a specific data type for the specific API endpoint you are calling, and to receive a specific data type into 
