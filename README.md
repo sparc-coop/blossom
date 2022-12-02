@@ -112,7 +112,7 @@ All Features by default require some form of authentication, as most real-world 
 
 When you're ready, simply add the appropriate NuGet package to the `Features` project and configure it per the documentation. 
 
-Blossom includes three main options for authentication:
+Blossom includes two main options for authentication:
 
 - Azure AD B2C (good for secure OAuth2.0 consumer apps): 
 [Sparc.Authentication.AzureADB2C](/Sparc.Authentication.AzureADB2C) 
