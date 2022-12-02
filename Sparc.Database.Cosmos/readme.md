@@ -49,8 +49,9 @@ For more information on root entities, or how to use `IRepository<T>`, see the [
 
 For an example on using `IRepository<T>` inside a Feature, see the examples in the [Sparc.Kernel documentation](/Sparc.Kernel).
 
-For an example of an app using Cosmos check the Ibis Features Project
-	- [Project](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features)
-	- [appsettings.json](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/appsettings.json)
-	- [IbisContext Class](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/_Plugins/IbisContext.cs)
-	- [Program.cs](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Program.cs)
+For an example of an app using Cosmos check the Ibis Features Project:
+
+- [Project](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features)
+- [appsettings.json](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/appsettings.json)
+- [IbisContext Class](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/_Plugins/IbisContext.cs)
+- [Program.cs](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Program.cs)
