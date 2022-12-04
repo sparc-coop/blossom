@@ -31,7 +31,7 @@ public class SparcAccessTokenAuthorizationHandler : AuthorizationHandler<SparcAc
 
     private async Task<bool> HasValidAccessToken()
     {
-        var token = await LocalStorage.GetItemAsync<string>(SparcAccessTokenProvider.TokenName);
+        var token = await LocalStorage.GetItemAsync<string>(SparcAuthenticator.TokenName);
         return token != null;
     }
 }

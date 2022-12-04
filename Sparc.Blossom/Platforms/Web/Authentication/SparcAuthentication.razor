@@ -1,32 +1,23 @@
-﻿@page "/sparcauthentication/{action}"
+﻿@page "/_authorize"
 
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 @using Sparc.Authentication;
 
 <div class="sparc-authentication">
-    if ( && SparcProvider == null)
-    {
-    <Microsoft.AspNetCore.Components.WebAssembly.Authentication.RemoteAuthenticatorView Action="@Action" />
-    }
 </div>
 
 @inject IAccessTokenProvider AccessTokenProvider
 @code {
-    [Parameter] public string Action { get; set; } = null!;
-    SparcAccessTokenProvider? SparcProvider;
-    bool IsInitialized;
+    SparcAuthenticator? SparcProvider;
 
     protected override void OnInitialized()
     {
-        SparcProvider = AccessTokenProvider as SparcAccessTokenProvider;
-        IsInitialized = true;
+        SparcProvider = AccessTokenProvider as SparcAuthenticator;
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        if (Action == "login-callback" && SparcProvider != null)
-        {
-            await SparcProvider.SetAccessToken();
-        }
+        if (SparcProvider != null)
+            await SparcProvider.Init();
     }
 }

@@ -5,7 +5,7 @@ using System.Net.Http.Headers;
 
 namespace Sparc.Blossom.Web;
 
-public class BlossomAuthorizationMessageHandler : DelegatingHandler, IDisposable
+public class SparcAuthorizationMessageHandler : DelegatingHandler, IDisposable
 {
     private readonly IAccessTokenProvider _provider;
     private readonly AuthenticationStateChangedHandler? _authenticationStateChangedHandler;
@@ -14,14 +14,7 @@ public class BlossomAuthorizationMessageHandler : DelegatingHandler, IDisposable
     private Uri[]? _authorizedUris;
     private AccessTokenRequestOptions? _tokenOptions;
 
-    /// <summary>
-    /// Initializes a new instance of <see cref="BlossomAuthorizationMessageHandler"/>.
-    /// </summary>
-    /// <param name="provider">The <see cref="IAccessTokenProvider"/> to use for provisioning tokens.</param>
-    /// <param name="navigation">The <see cref="NavigationManager"/> to use for performing redirections.</param>
-    public BlossomAuthorizationMessageHandler(
-        IAccessTokenProvider provider,
-        string? baseUrl)
+    public SparcAuthorizationMessageHandler(IAccessTokenProvider provider, string? baseUrl)
     {
         _provider = provider;
 
@@ -35,14 +28,13 @@ public class BlossomAuthorizationMessageHandler : DelegatingHandler, IDisposable
         ConfigureHandler(authorizedUrls: new[] { baseUrl });
     }
 
-    /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.Now;
         if (_authorizedUris == null)
         {
-            throw new InvalidOperationException($"The '{nameof(BlossomAuthorizationMessageHandler)}' is not configured. " +
-                $"Call '{nameof(BlossomAuthorizationMessageHandler.ConfigureHandler)}' and provide a list of endpoint urls to attach the token to.");
+            throw new InvalidOperationException($"The '{nameof(SparcAuthorizationMessageHandler)}' is not configured. " +
+                $"Call '{nameof(SparcAuthorizationMessageHandler.ConfigureHandler)}' and provide a list of endpoint urls to attach the token to.");
         }
 
         if (_authorizedUris.Any(uri => uri.IsBaseOf(request.RequestUri!)))
@@ -73,20 +65,7 @@ public class BlossomAuthorizationMessageHandler : DelegatingHandler, IDisposable
         return await base.SendAsync(request, cancellationToken);
     }
 
-    /// <summary>
-    /// Configures this handler to authorize outbound HTTP requests using an access token. The access token is only attached if at least one of
-    /// <paramref name="authorizedUrls" /> is a base of <see cref="HttpRequestMessage.RequestUri" />.
-    /// </summary>
-    /// <param name="authorizedUrls">The base addresses of endpoint URLs to which the token will be attached.</param>
-    /// <param name="scopes">The list of scopes to use when requesting an access token.</param>
-    /// <param name="returnUrl">The return URL to use in case there is an issue provisioning the token and a redirection to the
-    /// identity provider is necessary.
-    /// </param>
-    /// <returns>This <see cref="BlossomAuthorizationMessageHandler"/>.</returns>
-    public BlossomAuthorizationMessageHandler ConfigureHandler(
-        IEnumerable<string?> authorizedUrls,
-        IEnumerable<string>? scopes = null,
-        string? returnUrl = null)
+    public SparcAuthorizationMessageHandler ConfigureHandler(IEnumerable<string?> authorizedUrls, IEnumerable<string>? scopes = null, string? returnUrl = null)
     {
         if (_authorizedUris != null)
         {

@@ -1,0 +1,43 @@
+﻿@page "/_login"
+@model Sparc.Authentication.LoginModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="sparc-login">
+        <header>
+            <p>Sign in</p>
+            <img src="@(Configuration["WebClientUrl"])/images/Logo.svg" alt="Vault" />
+        </header>
+        <form method="post">
+            <label>
+                Email Address or Username
+                <input type="text" asp-for="Email" placeholder="your@email.com" />
+            </label>
+
+            <label>
+                Password
+                <input type="password" asp-for="Password" placeholder="Password" />
+            </label>
+
+            @if (Model.Error != null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    <p>@Model.Error</p>
+                </div>
+            }
+
+            <button type="submit">Sign In</button>
+
+            @*<p><a href="#">Forgot your password?</a></p>*@
+        </form>
+    </div>
+    <aside>
+        Don't have an account?
+        <a href="/Account/SignUp">Sign Up</a>
+    </aside>
+</div>

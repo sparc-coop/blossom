@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+﻿using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,11 +6,8 @@ using Sparc.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Authentication.WebAssembly.Msal.Models;
 using Polly;
 using Sparc.Blossom.Authentication;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication.Internal;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Sparc.Blossom.Web;
 
@@ -70,22 +66,20 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddSparcApi<T>(this IServiceCollection services) where T : class
     {
-        services.AddScoped<IAccessTokenProvider, SparcAccessTokenProvider>();
+        services.AddScoped<IAccessTokenProvider, SparcAuthenticator>();
         services.AddAuthorizationCore(options =>
         {
             options.AddPolicy("Sparc", policy => policy.Requirements.Add(new SparcAccessTokenRequirement()));
         });
         services.AddScoped<IAuthorizationHandler, SparcAccessTokenAuthorizationHandler>();
-        services.AddScoped<AuthenticationStateProvider, SparcAuthenticationStateProvider>();
+        services.AddScoped<AuthenticationStateProvider, SparcAuthenticator>();
 
         return services;
     }
 
     public static void AddBlossomHttpClient<T>(this IServiceCollection services, string? apiBaseUrl, bool configureAuthentication = true) where T : class
     {
-        services.AddScoped(sp => new BlossomAuthorizationMessageHandler(
-            sp.GetRequiredService<IAccessTokenProvider>(),
-            apiBaseUrl));
+        services.AddScoped(sp => new SparcAuthorizationMessageHandler(sp.GetRequiredService<IAccessTokenProvider>(), apiBaseUrl));
 
         var client = services.AddHttpClient<T>(client =>
         {
@@ -107,7 +101,7 @@ public static class ServiceCollectionExtensions
         if (string.IsNullOrWhiteSpace(apiBaseUrl))
             client.AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
         else
-            client.AddHttpMessageHandler<BlossomAuthorizationMessageHandler>();
+            client.AddHttpMessageHandler<SparcAuthorizationMessageHandler>();
     }
 
     public static WebAssemblyHostBuilder AddBlossom<T>(this WebAssemblyHostBuilder builder, string? baseUrl = null) where T : class

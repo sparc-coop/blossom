@@ -51,24 +51,26 @@ public static class ServiceCollectionExtensions
         return auth;
     }
 
-    public static AuthenticationBuilder AddSparcAuthentication<TUser>(this WebApplicationBuilder builder) where TUser : SparcUser, new()
+    public static AuthenticationBuilder AddSparcAuthentication<T>(this WebApplicationBuilder builder) where T : SparcAuthenticator
     {
         var auth = builder.Services.AddAuthentication().AddJwtBearer();
 
-        builder.Services.AddScoped<IUserStore<TUser>, SparcUserRepository<TUser>>()
-            .AddScoped<IRoleStore<SparcRole>, SparcRoleStore>();
+        //builder.Services.AddScoped<IUserStore<TUser>, SparcUserRepository<TUser>>()
+        //    .AddScoped<IRoleStore<SparcRole>, SparcRoleStore>();
 
-        builder.Services.AddIdentity<TUser, SparcRole>()
-            .AddDefaultTokenProviders();
+        //builder.Services.AddIdentity<TUser, SparcRole>()
+        //    .AddDefaultTokenProviders();
 
         builder.Services.AddAuthorization();
+
+        builder.Services.AddScoped(typeof(SparcAuthenticator), typeof(T));
 
         return auth;
     }
 
     public static void UsePasswordlessAuthentication<TUser>(this WebApplication app) where TUser : SparcUser
     {
-        app.MapGet("/PasswordlessLogin", async (string userId, string token, string returnUrl, UserManager<TUser> users, HttpContext context, IOptionsSnapshot<JwtBearerOptions> config) =>
+        app.MapGet("/PasswordlessLogin", async (string userId, string token, string returnUrl, UserManager<TUser> users, HttpContext context, SparcAuthenticator authenticator) =>
         {
             var user = await users.FindByIdAsync(userId);
             if (user == null)
@@ -81,9 +83,9 @@ public static class ServiceCollectionExtensions
                 await context.SignInAsync(IdentityConstants.ApplicationScheme, user.CreatePrincipal());
 
                 var returnUri = new Uri(returnUrl);
-                var callbackUrl = $"{returnUri.Scheme}://{returnUri.Authority}/authentication/login-callback";
+                var callbackUrl = $"{returnUri.Scheme}://{returnUri.Authority}/_authorize";
                 callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "returnUrl", returnUrl);
-                callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "passwordless", user.CreateToken(config.Value));
+                callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "token", authenticator.CreateToken(user));
                 return Results.Redirect(callbackUrl);
             }
             return Results.Unauthorized();
