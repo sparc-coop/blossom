@@ -1,16 +1,23 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Sparc.Kernel;
 using Sparc.Realtime;
+using System.Security.Claims;
 
 namespace Sparc.Data;
 
 public class SparcContext : DbContext
 {
-    public SparcContext(DbContextOptions options, Publisher publisher) : base(options)
+    public SparcContext(DbContextOptions options, Publisher publisher, IHttpContextAccessor http) : base(options)
     {
         Publisher = publisher;
+        Http = http;
     }
+    
     public Publisher Publisher { get; }
+    protected IHttpContextAccessor Http { get; }
+    protected ClaimsPrincipal? User => Http.HttpContext?.User;
+
     PublishStrategy PublishStrategy = PublishStrategy.ParallelNoWait;
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

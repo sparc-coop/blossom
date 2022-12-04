@@ -59,6 +59,7 @@ public static class ServiceCollectionExtensions
             builder.Services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
 
         builder.Services.AddRazorPages();
+        builder.Services.AddHttpContextAccessor();
 
         return builder;
     }
