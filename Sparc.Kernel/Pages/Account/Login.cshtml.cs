@@ -45,7 +45,7 @@ public class LoginModel : PageModel
 
         if (user != null)
         {
-            await HttpContext.SignInAsync(user.CreatePrincipal());
+            //await HttpContext.SignInAsync(user.CreatePrincipal());
             
             var returnUri = new Uri(ReturnUrl!);
             var token = Authenticator.CreateToken(user);

@@ -1,10 +1,16 @@
-﻿@inject NavigationManager Navigation
+﻿@page "/_authorize"
+@attribute [AllowAnonymous]
 
-<div class="sparc-redirecttologin">
+@using Microsoft.AspNetCore.Authorization;
+@using Sparc.Authentication;
+@inject NavigationManager Navigation
+
+<div class="sparc-authentication">
 </div>
 
+@inject IAccessTokenProvider AccessTokenProvider
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         var options = new InteractiveRequestOptions()
             {
@@ -12,6 +18,10 @@
                 ReturnUrl = Navigation.Uri
             };
 
-        Navigation.NavigateToLogin($"authentication/login", options);
+        if (AccessTokenProvider is SparcAuthenticator auth)
+            await auth.Init();
+        else
+            Navigation.NavigateToLogin($"authentication/login", options);
+
     }
 }

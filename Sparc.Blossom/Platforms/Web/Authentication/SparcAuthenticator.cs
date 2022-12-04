@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
 using System.Text.Json;
@@ -69,20 +70,21 @@ public class SparcAuthenticator : AuthenticationStateProvider, IAccessTokenProvi
         return Convert.FromBase64String(base64);
     }
 
-    public async Task Init()
+    public virtual async Task Init()
     {
         var uri = new Uri(Navigation.Uri);
-
         var queryString = HttpUtility.ParseQueryString(uri.Query);
+        var returnUrl = queryString.AllKeys.Contains("returnUrl") ? queryString["returnUrl"]! : "/";
+
         if (queryString["token"] != null)
         {
-            var returnUrl = queryString.AllKeys.Contains("returnUrl") ? queryString["returnUrl"]! : "/";
             await LocalStorage.SetItemAsync(TokenName, queryString["token"]);
             Navigation.NavigateTo(returnUrl);
         }
         else
         {
-            Navigation.NavigateToLogin(Config["Sparc:Authority"] + "/_login");
+            var loginUrl = QueryHelpers.AddQueryString(Config["Sparc:Authority"] + "/_login", "returnUrl", Navigation.Uri);
+            Navigation.NavigateToLogin(loginUrl);
         }
     }
 

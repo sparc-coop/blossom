@@ -34,21 +34,12 @@ public abstract class SparcUser : Root<string>, ISparcUser
 
     public virtual ClaimsPrincipal CreatePrincipal()
     {
+        AddClaim(ClaimTypes.NameIdentifier, Id);
+        AddClaim(ClaimTypes.Name, UserName);
         RegisterClaims();
 
-        var claims = new List<Claim>
-        {
-            new(ClaimTypes.NameIdentifier, Id)
-        };
+        var claims = Claims.Select(x => new Claim(x.Key, x.Value));
 
-        foreach (var claim in Claims.Keys)
-        {
-            claims.Add(new Claim(claim, Claims[claim]));
-        }
-
-        if (!claims.Any(x => x.Type == ClaimTypes.Name) && UserName != null)
-            claims.Add(new(ClaimTypes.Name, UserName));
-        
         return new ClaimsPrincipal(new ClaimsIdentity(claims, "Sparc"));
     }
 }
