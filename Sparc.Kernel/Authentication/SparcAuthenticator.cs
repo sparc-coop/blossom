@@ -16,11 +16,12 @@ public abstract class SparcAuthenticator
     public IConfiguration Config { get; }
 
     public abstract Task<SparcUser?> LoginAsync(string userName, string password);
+    public abstract Task<SparcUser?> RefreshClaimsAsync(ClaimsPrincipal principal);
     
-    public virtual string CreateToken(SparcUser user, string? signingKey = null, int expirationInMinutes = 60 * 24)
+    public virtual string CreateToken(ClaimsPrincipal principal, string? signingKey = null, int expirationInMinutes = 60 * 24)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
-        var identity = user.CreatePrincipal().Identity as ClaimsIdentity;
+        var identity = principal.Identity as ClaimsIdentity;
 
         var secretKey = Encoding.UTF8.GetBytes(signingKey ?? Config["Jwt:Key"]!);
 
@@ -33,4 +34,7 @@ public abstract class SparcAuthenticator
         var jwToken = tokenHandler.CreateToken(tokenDescriptor);
         return tokenHandler.WriteToken(jwToken);
     }
+
+    public virtual string CreateToken(SparcUser user, string? signingKey = null, int expirationInMinutes = 60 * 24)
+        => CreateToken(user.CreatePrincipal(), signingKey, expirationInMinutes);
 }

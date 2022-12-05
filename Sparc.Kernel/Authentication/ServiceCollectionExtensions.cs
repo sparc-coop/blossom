@@ -35,7 +35,7 @@ public static class ServiceCollectionExtensions
 
         builder.Services.AddScoped<IUserStore<TUser>, SparcUserRepository<TUser>>()
             .AddScoped<IRoleStore<SparcRole>, SparcRoleStore>();
-        
+
         builder.Services.AddIdentity<TUser, SparcRole>()
             .AddDefaultTokenProviders();
 
@@ -53,12 +53,14 @@ public static class ServiceCollectionExtensions
 
     public static AuthenticationBuilder AddSparcAuthentication<T>(this WebApplicationBuilder builder, string? signingKey = null) where T : SparcAuthenticator
     {
-        var auth = builder.Services.AddAuthentication().AddJwtBearer(options =>
+        var auth = builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddCookie()
+            .AddJwtBearer(options =>
         {
             options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey ?? builder.Configuration["Jwt:Key"]!));
             options.TokenValidationParameters.ValidateAudience = false;
             options.TokenValidationParameters.ValidateIssuer = false;
-        }            
+        }
         );
 
         //builder.Services.AddScoped<IUserStore<TUser>, SparcUserRepository<TUser>>()

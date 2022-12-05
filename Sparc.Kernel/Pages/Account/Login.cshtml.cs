@@ -1,11 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
+using System.Security.Claims;
 
 namespace Sparc.Authentication;
 
 [BindProperties]
+[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+[AllowAnonymous]
 public class LoginModel : PageModel
 {
     public LoginModel(SparcAuthenticator authenticator)
@@ -21,10 +26,14 @@ public class LoginModel : PageModel
 
     private SparcAuthenticator Authenticator { get; }
 
-    public IActionResult OnGet()
+    public async Task<IActionResult> OnGet()
     {
         if (User.Identity?.IsAuthenticated == true && ReturnUrl != null)
-            return Redirect(ReturnUrl);
+        {
+            var user = await Authenticator.RefreshClaimsAsync(User);
+            if (user != null)
+                return await LoginAsync(user.CreatePrincipal());
+        }
         
         return Page();
     }
@@ -44,19 +53,22 @@ public class LoginModel : PageModel
         var user = await Authenticator.LoginAsync(Email, Password);
 
         if (user != null)
-        {
-            //await HttpContext.SignInAsync(user.CreatePrincipal());
-            
-            var returnUri = new Uri(ReturnUrl!);
-            var token = Authenticator.CreateToken(user);
-            var callbackUrl = $"{returnUri.Scheme}://{returnUri.Authority}/_authorize";
-            callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "returnUrl", ReturnUrl!);
-            callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "token", token);
-            return Redirect(callbackUrl);
-        }
-        
+            return await LoginAsync(user.CreatePrincipal());
+
         Error = "Could not log you in! Please try entering your code again or request a new code.";
         return Page();
 
+    }
+
+    private async Task<IActionResult> LoginAsync(ClaimsPrincipal principal)
+    {
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+        var returnUri = new Uri(ReturnUrl!);
+        var token = Authenticator.CreateToken(principal);
+        var callbackUrl = $"{returnUri.Scheme}://{returnUri.Authority}/_authorize";
+        callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "returnUrl", ReturnUrl!);
+        callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "token", token);
+        return Redirect(callbackUrl);
     }
 }

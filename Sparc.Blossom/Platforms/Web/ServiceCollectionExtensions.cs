@@ -73,6 +73,7 @@ public static class ServiceCollectionExtensions
         });
         services.AddScoped<IAuthorizationHandler, SparcAccessTokenAuthorizationHandler>();
         services.AddScoped<AuthenticationStateProvider, SparcAuthenticator>();
+        services.AddScoped<SparcAuthenticator>();
 
         return services;
     }

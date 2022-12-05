@@ -19,7 +19,7 @@
             };
 
         if (AccessTokenProvider is SparcAuthenticator auth)
-            await auth.Init();
+            await auth.LoginAsync();
         else
             Navigation.NavigateToLogin($"authentication/login", options);
 

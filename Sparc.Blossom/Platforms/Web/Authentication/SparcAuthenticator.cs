@@ -32,7 +32,7 @@ public class SparcAuthenticator : AuthenticationStateProvider, IAccessTokenProvi
             return new AuthenticationState(_user);
 
         var token = await RequestAccessToken();
-        if (token.Status == AccessTokenResultStatus.Success && token.TryGetToken(out var jwt) && jwt.Expires > DateTime.UtcNow)
+        if (token.Status == AccessTokenResultStatus.Success && token.TryGetToken(out var jwt))
         {
             _user = new ClaimsPrincipal(CreateIdentity(jwt.Value));
         }
@@ -47,20 +47,11 @@ public class SparcAuthenticator : AuthenticationStateProvider, IAccessTokenProvi
     private static ClaimsIdentity CreateIdentity(string token)
     {
         var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
-        return new ClaimsIdentity(jwt.Claims, "Sparc", "unique_name", "");
+        var identity = new ClaimsIdentity(jwt.Claims, "Sparc", "unique_name", "roles");
+        return identity;
     }
 
-    private static byte[] ParseBase64WithoutPadding(string base64)
-    {
-        switch (base64.Length % 4)
-        {
-            case 2: base64 += "=="; break;
-            case 3: base64 += "="; break;
-        }
-        return Convert.FromBase64String(base64);
-    }
-
-    public virtual async Task Init()
+    public virtual async Task LoginAsync()
     {
         var uri = new Uri(Navigation.Uri);
         var queryString = HttpUtility.ParseQueryString(uri.Query);
@@ -69,7 +60,8 @@ public class SparcAuthenticator : AuthenticationStateProvider, IAccessTokenProvi
         if (queryString["token"] != null)
         {
             await LocalStorage.SetItemAsync(TokenName, queryString["token"]);
-            Navigation.NavigateTo(returnUrl);
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+            Navigation.NavigateTo(returnUrl, true);
         }
         else
         {
@@ -81,8 +73,8 @@ public class SparcAuthenticator : AuthenticationStateProvider, IAccessTokenProvi
     public virtual async Task LogoutAsync()
     {
         await LocalStorage.RemoveItemAsync(TokenName);
-        _user = new ClaimsPrincipal(new ClaimsIdentity());
-        NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_user)));
+        _user = null;
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         Navigation.NavigateToLogout(Config["Sparc:Authority"] + "/_logout");
     }
 
