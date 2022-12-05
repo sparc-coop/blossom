@@ -8,7 +8,7 @@ public class LogoutModel : PageModel
 {
     public async Task<IActionResult> OnGet()
     {
-        await HttpContext.SignOutAsync();
+        // await HttpContext.SignOutAsync();
         return Page();
     }
 }

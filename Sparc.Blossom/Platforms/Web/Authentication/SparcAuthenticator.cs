@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text.Json;
 using System.Web;
 
 namespace Sparc.Authentication;
@@ -46,18 +46,8 @@ public class SparcAuthenticator : AuthenticationStateProvider, IAccessTokenProvi
 
     private static ClaimsIdentity CreateIdentity(string token)
     {
-        var claims = new List<Claim>();
-        var payload = token.Split('.')[1];
-
-        var jsonBytes = ParseBase64WithoutPadding(payload);
-
-        var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-        if (keyValuePairs != null)
-        {
-            claims.AddRange(keyValuePairs.Select(kvp => new Claim(kvp.Key, kvp.Value.ToString()!)));
-        }
-
-        return new ClaimsIdentity(claims, "Sparc");
+        var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
+        return new ClaimsIdentity(jwt.Claims, "Sparc", "unique_name", "");
     }
 
     private static byte[] ParseBase64WithoutPadding(string base64)
@@ -86,6 +76,14 @@ public class SparcAuthenticator : AuthenticationStateProvider, IAccessTokenProvi
             var loginUrl = QueryHelpers.AddQueryString(Config["Sparc:Authority"] + "/_login", "returnUrl", Navigation.Uri);
             Navigation.NavigateToLogin(loginUrl);
         }
+    }
+
+    public virtual async Task LogoutAsync()
+    {
+        await LocalStorage.RemoveItemAsync(TokenName);
+        _user = new ClaimsPrincipal(new ClaimsIdentity());
+        NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_user)));
+        Navigation.NavigateToLogout(Config["Sparc:Authority"] + "/_logout");
     }
 
     public async ValueTask<AccessTokenResult> RequestAccessToken()

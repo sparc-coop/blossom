@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Sparc.Kernel;
-using System.IdentityModel.Tokens.Jwt;
+﻿using Sparc.Kernel;
 using System.Security.Claims;
 
 namespace Sparc.Authentication;
@@ -18,6 +15,7 @@ public abstract class SparcUser : Root<string>, ISparcUser
     public string? LoginProviderKey { get; set; }
 
     protected Dictionary<string, string> Claims { get; set; } = new();
+    protected Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = new();
 
     protected void AddClaim(string type, string? value)
     {
@@ -30,6 +28,17 @@ public abstract class SparcUser : Root<string>, ISparcUser
             Claims.Add(type, value);
     }
 
+    protected void AddClaim(string type, IEnumerable<string> values)
+    {
+        if (values == null || !values.Any())
+            return;
+
+        if (MultiClaims.ContainsKey(type))
+            MultiClaims[type] = values;
+        else
+            MultiClaims.Add(type, values);
+    }
+
     protected abstract void RegisterClaims();
 
     public virtual ClaimsPrincipal CreatePrincipal()
@@ -38,7 +47,8 @@ public abstract class SparcUser : Root<string>, ISparcUser
         AddClaim(ClaimTypes.Name, UserName);
         RegisterClaims();
 
-        var claims = Claims.Select(x => new Claim(x.Key, x.Value));
+        var claims = Claims.Select(x => new Claim(x.Key, x.Value)).ToList();
+        claims.AddRange(MultiClaims.SelectMany(x => x.Value.Select(v => new Claim(x.Key, v))));
 
         return new ClaimsPrincipal(new ClaimsIdentity(claims, "Sparc"));
     }
