@@ -7,5 +7,5 @@ public class Notification : MediatR.INotification
         SubscriptionId = subscriptionId;
     }
 
-    public string? SubscriptionId { get; }
+    public string? SubscriptionId { get; set; }
 }

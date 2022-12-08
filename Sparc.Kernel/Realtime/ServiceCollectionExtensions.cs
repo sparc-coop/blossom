@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sparc.Blossom;
+using System.Text.Json.Serialization;
 
 namespace Sparc.Realtime;
 
@@ -17,7 +18,12 @@ public static class ServiceCollectionExtensions
             options.SchemaFilter<PolymorphismSchemaFilter<Notification, THub>>();
         });
 
-        var signalR = services.AddSignalR();
+        var signalR = services.AddSignalR()
+            .AddJsonProtocol(options =>
+            {
+                options.PayloadSerializerOptions.PropertyNamingPolicy = null;
+                options.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+            });
         //.AddMessagePackProtocol();
 
         services.AddMediatR(typeof(THub).Assembly, typeof(Notification).Assembly, typeof(SparcNotificationForwarder<>).Assembly);
