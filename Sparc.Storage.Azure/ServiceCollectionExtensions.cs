@@ -1,8 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using Microsoft.Extensions.DependencyInjection;
-using Sparc.Core;
 
-namespace Sparc.Storage.Azure;
+namespace Sparc.Blossom.Data;
 
 public static class ServiceCollectionExtensions
 {

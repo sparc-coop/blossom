@@ -1,6 +1,6 @@
 ﻿using Azure.Storage.Blobs.Models;
 
-namespace Sparc.Storage.Azure;
+namespace Sparc.Blossom.Data;
 
 public enum AccessTypes
 {

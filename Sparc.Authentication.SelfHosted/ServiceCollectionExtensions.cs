@@ -1,5 +1,5 @@
 ﻿using IdentityServer4.Models;
-using Sparc.Core;
+using Sparc.Blossom;
 
 namespace Sparc.Authentication.SelfHosted;
 

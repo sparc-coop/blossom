@@ -1,4 +1,4 @@
-﻿namespace Sparc.Notifications.Twilio;
+﻿namespace Sparc.Blossom.Realtime;
 
 public class TwilioConfiguration
 {

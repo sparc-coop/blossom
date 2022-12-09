@@ -14,8 +14,8 @@
 		<Description>Self-Hosted Authentication Sparc package</Description>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageTags>Self-Hosted;Blazor;Authentication;Web;Sparc</PackageTags>
-		<PackageProjectUrl>https://github.com/sparc-coop/Sparc.Kernel</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/sparc-coop/Sparc.Kernel</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/sparc-coop/blossom</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/sparc-coop/blossom</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 	<ItemGroup>
@@ -28,6 +28,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
+		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 	</ItemGroup>
 </Project>

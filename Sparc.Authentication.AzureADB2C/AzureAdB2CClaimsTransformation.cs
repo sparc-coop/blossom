@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication;
-using Sparc.Core;
+using Sparc.Blossom.Data;
 using System.Security.Claims;
 
-namespace Sparc.Authentication.AzureADB2C;
+namespace Sparc.Blossom.Authentication;
 
-public class AzureAdB2CClaimsTransformation<TUser> : IClaimsTransformation where TUser : ISparcUser
+public class AzureAdB2CClaimsTransformation<TUser> : IClaimsTransformation where TUser : IUser
 {
     public AzureAdB2CClaimsTransformation(IRepository<TUser> users)
     {

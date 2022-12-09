@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Sparc.Notifications.Azure;
+namespace Sparc.Blossom.Realtime;
 
 public class IosNotificationTemplate : InstallationTemplate
 {

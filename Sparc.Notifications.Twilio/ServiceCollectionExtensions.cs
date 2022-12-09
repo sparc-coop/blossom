@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using SendGrid.Extensions.DependencyInjection;
 
-namespace Sparc.Notifications.Twilio;
+namespace Sparc.Blossom.Realtime;
 
 public static class ServiceCollectionExtensions
 {

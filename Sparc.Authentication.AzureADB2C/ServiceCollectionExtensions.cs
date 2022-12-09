@@ -6,11 +6,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
 
-namespace Sparc.Authentication.AzureADB2C;
+namespace Sparc.Blossom.Authentication;
 
 public static class ServiceCollectionExtensions
 {
-    public static AuthenticationBuilder AddAzureADB2CAuthentication<TUser>(this IServiceCollection services, IConfiguration configuration, string configurationSectionName = "AzureAdB2C") where TUser : ISparcUser
+    public static AuthenticationBuilder AddAzureADB2CAuthentication<TUser>(this IServiceCollection services, IConfiguration configuration, string configurationSectionName = "AzureAdB2C") where TUser : IUser
     {
         var builder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
         builder.AddMicrosoftIdentityWebApi(

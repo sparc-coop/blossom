@@ -2,11 +2,10 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
-using Sparc.Core;
 using System.Data;
 using System.Linq.Expressions;
 
-namespace Sparc.Database.SqlServer;
+namespace Sparc.Blossom.Data;
 
 public class SqlServerRepository<T> : RepositoryBase<T>, ISqlRepository<T> where T : class
 {

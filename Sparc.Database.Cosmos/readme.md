@@ -44,6 +44,6 @@ In Your Features Project:
 
 ## More Info
 
-For more information on root entities, or how to use `IRepository<T>`, see the [Sparc.Core documentation](/Sparc.Core).
+For more information on root entities, or how to use `IRepository<T>`, see the [Sparc.Blossom.Core documentation](/Sparc.Blossom.Core).
 
 For an example on using `IRepository<T>` inside a Feature, see the examples in the [Sparc.Features documentation](/Sparc.Features).

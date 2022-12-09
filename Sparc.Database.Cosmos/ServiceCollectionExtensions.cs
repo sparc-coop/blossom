@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Azure.Cosmos;
-using Sparc.Core;
 
-namespace Sparc.Database.Cosmos;
+namespace Sparc.Blossom.Data;
 
 public static class ServiceCollectionExtensions
 {

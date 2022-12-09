@@ -1,8 +1,7 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Sparc.Core;
 
-namespace Sparc.Storage.Azure;
+namespace Sparc.Blossom.Data;
 
 public class AzureBlobRepository : IFileRepository<File>
 {

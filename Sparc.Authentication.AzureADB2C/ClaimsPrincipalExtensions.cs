@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Sparc.Authentication.AzureADB2C;
+namespace Sparc.Blossom.Authentication;
 
 public static class ClaimsPrincipalExtensions
 {

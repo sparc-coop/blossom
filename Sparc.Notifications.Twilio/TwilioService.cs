@@ -4,11 +4,10 @@ using SendGrid.Helpers.Mail;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Twilio;
-using Twilio.Http;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Rest.Lookups.V1;
 
-namespace Sparc.Notifications.Twilio;
+namespace Sparc.Blossom.Realtime;
 
 public class TwilioService
 {

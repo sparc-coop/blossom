@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net7.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+		<Version>7.1.0-pre.1</Version>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+		<Authors>Sparc Cooperative</Authors>
+		<Company>Sparc Cooperative</Company>
+		<Description>Blossom Plugin for SQL Server Data</Description>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageTags>SQL Server;Database;Web;Sparc;Blossom</PackageTags>
+		<PackageProjectUrl>https://github.com/sparc-coop/blossom</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/sparc-coop/blossom</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="6.1.0" />
+		<PackageReference Include="Dapper" Version="2.0.123" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+	</ItemGroup>
+</Project>

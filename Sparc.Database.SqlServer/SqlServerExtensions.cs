@@ -1,6 +1,4 @@
-﻿using Sparc.Core;
-
-namespace Sparc.Database.SqlServer;
+﻿namespace Sparc.Blossom.Data;
 
 public static class SqlServerExtensions
 {

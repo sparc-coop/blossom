@@ -1,4 +1,4 @@
-﻿namespace Sparc.Notifications.Azure;
+﻿namespace Sparc.Blossom.Realtime;
 
 public class WebNotificationTemplate : FcmNotificationTemplate
 {

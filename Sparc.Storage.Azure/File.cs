@@ -1,4 +1,4 @@
-﻿namespace Sparc.Storage.Azure;
+﻿namespace Sparc.Blossom.Data;
 
 public class File
 {

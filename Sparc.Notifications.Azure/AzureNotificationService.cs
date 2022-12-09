@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.NotificationHubs;
-using Sparc.Core;
+using Sparc.Blossom.Authentication;
 
-namespace Sparc.Notifications.Azure;
+namespace Sparc.Blossom.Realtime;
 
 public class AzureNotificationService
 {
@@ -12,7 +12,7 @@ public class AzureNotificationService
 
     public NotificationHubClient Hub { get; }
 
-    public async Task<bool> RegisterAsync(string userId, Device device)
+    public async Task<bool> RegisterAsync(string userId, IDevice device)
     {
         var installation = new Installation
         {
@@ -23,20 +23,20 @@ public class AzureNotificationService
             Templates = new Dictionary<string, InstallationTemplate>(),
             Platform = device.Platform switch
             {
-                Platforms.Windows => NotificationPlatform.Wns,
-                Platforms.iOS => NotificationPlatform.Apns,
-                Platforms.Android => NotificationPlatform.Fcm,
-                Platforms.Web => NotificationPlatform.Fcm,
+                "Windows" => NotificationPlatform.Wns,
+                "iOS" => NotificationPlatform.Apns,
+                "Android" => NotificationPlatform.Fcm,
+                "Web" => NotificationPlatform.Fcm,
                 _ => throw new Exception("Invalid platform")
             }
         };
 
         InstallationTemplate defaultTemplate = device.Platform switch
         {
-            Platforms.Windows => new WindowsNotificationTemplate(),
-            Platforms.Android => new AndroidNotificationTemplate(),
-            Platforms.iOS => new IosNotificationTemplate(),
-            Platforms.Web => new WebNotificationTemplate(),
+            "Windows" => new WindowsNotificationTemplate(),
+            "Android" => new AndroidNotificationTemplate(),
+            "iOS" => new IosNotificationTemplate(),
+            "Web" => new WebNotificationTemplate(),
             _ => throw new Exception("Invalid platform")
         };
 

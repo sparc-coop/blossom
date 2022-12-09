@@ -1,6 +1,6 @@
 ﻿using Microsoft.Azure.Cosmos.Linq;
 
-namespace Sparc.Database.Cosmos;
+namespace Sparc.Blossom.Data;
 
 public static class CosmosDbExtensions
 {

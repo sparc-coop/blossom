@@ -1,8 +1,7 @@
-﻿using Sparc.Core;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sparc.Database.SqlServer;
+namespace Sparc.Blossom.Data;
 
 public static class ServiceCollectionExtensions
 {

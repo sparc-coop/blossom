@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sparc.Notifications.Azure;
+namespace Sparc.Blossom.Realtime;
 
 public static class ServiceCollectionExtensions
 {

@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sparc.Tests
+namespace Sparc.Blossom;
+
+public class FeatureTest<T>
 {
-    public class FeatureTest<T>
-    {
-        
-    }
+    
 }

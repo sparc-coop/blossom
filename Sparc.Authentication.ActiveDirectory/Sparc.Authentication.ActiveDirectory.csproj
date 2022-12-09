@@ -11,8 +11,8 @@
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 		<PackageTags>Authentication;AD;Web;Sparc</PackageTags>
-		<PackageProjectUrl>https://github.com/sparc-coop/Sparc.Kernel</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/sparc-coop/Sparc.Kernel</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/sparc-coop/blossom</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/sparc-coop/blossom</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 

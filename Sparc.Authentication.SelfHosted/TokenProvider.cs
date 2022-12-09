@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Sparc.Core;
+using Sparc.Blossom;
 
 namespace Sparc.Authentication.SelfHosted;
 

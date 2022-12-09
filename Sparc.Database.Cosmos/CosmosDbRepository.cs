@@ -2,9 +2,8 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
-using Sparc.Core;
 
-namespace Sparc.Database.Cosmos;
+namespace Sparc.Blossom.Data;
 
 public class CosmosDbRepository<T> : RepositoryBase<T>, ISqlRepository<T> where T : class, IRoot<string>
 {

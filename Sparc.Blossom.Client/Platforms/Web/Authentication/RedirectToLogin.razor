@@ -1,0 +1,28 @@
+﻿@page "/_authorize"
+@attribute [AllowAnonymous]
+@namespace Sparc.Blossom.Authentication
+
+@using Microsoft.AspNetCore.Authorization;
+@using Sparc.Blossom.Authentication;
+@inject NavigationManager Navigation
+
+<div class="blossom-authentication">
+</div>
+
+@inject IAccessTokenProvider AccessTokenProvider
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        var options = new InteractiveRequestOptions()
+            {
+                Interaction = InteractionType.SignIn,
+                ReturnUrl = Navigation.Uri
+            };
+
+        if (AccessTokenProvider is BlossomAuthenticator auth)
+            await auth.LoginAsync();
+        else
+            Navigation.NavigateToLogin($"authentication/login", options);
+
+    }
+}
