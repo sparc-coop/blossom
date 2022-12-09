@@ -1,4 +1,5 @@
 ﻿@using Microsoft.AspNetCore.SignalR.Client;
+@namespace Sparc.Blossom.Realtime
 @implements IAsyncDisposable
 
 @code {
@@ -17,7 +18,7 @@
             }));
     }
 
-    protected async Task On<T>(string subscriptionId, Action<T> action) where T : Notification
+    protected async Task On<T>(string subscriptionId, Action<T> action) where T : INotification
     {
         if (Hub != null)
         {

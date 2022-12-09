@@ -2,5 +2,5 @@
 
 public interface INotification : MediatR.INotification
 {
-    public string SubscriptionId { get; set; }
+    public string? SubscriptionId { get; }
 }

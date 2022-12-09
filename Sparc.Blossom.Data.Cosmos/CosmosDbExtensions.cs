@@ -1,14 +1,13 @@
 ﻿using Microsoft.Azure.Cosmos.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom.Data;
 
 public static class CosmosDbExtensions
 {
-    public static async Task<List<T>> ToListAsync<T>(this IQueryable<T> query)
+    public static IQueryable<T> WithPartitionKey<T>(this IQueryable<T> query, string partitionKey) where T : class
     {
-        var iterator = query.ToFeedIterator();
-        var result = await iterator.ReadNextAsync();
-        return result.ToList();
+        return CosmosQueryableExtensions.WithPartitionKey(query, partitionKey);
     }
 
     public static async IAsyncEnumerable<T> ToAsyncEnumerable<T>(this IQueryable<T> query)

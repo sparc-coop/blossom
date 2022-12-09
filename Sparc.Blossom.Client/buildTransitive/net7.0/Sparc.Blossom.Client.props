@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <Project>
 	<PropertyGroup>
-		<OpenApiGenerateCodeOptions>/UseBaseUrl:false /ExcludedTypeNames:Notification /AdditionalNamespaceUsages:Sparc.Blossom.Realtime</OpenApiGenerateCodeOptions>
+		<OpenApiGenerateCodeOptions>/UseBaseUrl:false /ExcludedTypeNames:Notification /AdditionalNamespaceUsages:Sparc.Blossom.Realtime.Swagger</OpenApiGenerateCodeOptions>
 	</PropertyGroup>
 </Project>
