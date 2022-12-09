@@ -5,23 +5,23 @@ VisualStudioVersion = 17.0.31512.422
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Core", "Sparc.Blossom.Core\Sparc.Blossom.Core.csproj", "{01C91A5C-3145-47E1-9852-C9EEF80F378D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Data.Cosmos", "Sparc.Database.Cosmos\Sparc.Blossom.Data.Cosmos.csproj", "{D114A309-9369-4893-9534-257447606BD7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Data.Cosmos", "Sparc.Blossom.Data.Cosmos\Sparc.Blossom.Data.Cosmos.csproj", "{D114A309-9369-4893-9534-257447606BD7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Tests", "Sparc.Tests\Sparc.Blossom.Tests.csproj", "{389CC10E-BDF2-4DB8-976F-07BBFF4A1133}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Tests", "Sparc.Blossom.Tests\Sparc.Blossom.Tests.csproj", "{389CC10E-BDF2-4DB8-976F-07BBFF4A1133}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Authentication.AzureADB2C", "Sparc.Authentication.AzureADB2C\Sparc.Blossom.Authentication.AzureADB2C.csproj", "{9B632024-0D62-4D8B-8084-DE3F276F1206}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Authentication.AzureADB2C", "Sparc.Blossom.Authentication.AzureADB2C\Sparc.Blossom.Authentication.AzureADB2C.csproj", "{9B632024-0D62-4D8B-8084-DE3F276F1206}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Data.SqlServer", "Sparc.Database.SqlServer\Sparc.Blossom.Data.SqlServer.csproj", "{10B7D245-DCCA-4A43-932D-295B69C326F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Data.SqlServer", "Sparc.Blossom.Data.SqlServer\Sparc.Blossom.Data.SqlServer.csproj", "{10B7D245-DCCA-4A43-932D-295B69C326F4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Data.AzureStorage", "Sparc.Storage.Azure\Sparc.Blossom.Data.AzureStorage.csproj", "{D535D2C5-8982-414B-BA87-D193F9CAFFF3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Data.AzureStorage", "Sparc.Blossom.Data.AzureStorage\Sparc.Blossom.Data.AzureStorage.csproj", "{D535D2C5-8982-414B-BA87-D193F9CAFFF3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sparc.Blossom.Authentication", "Sparc.Blossom.Authentication", "{83F7C43B-B59D-4A53-9A86-23491B5AAC40}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sparc.Blossom.Data", "Sparc.Blossom.Data", "{3E532811-D187-4747-95F7-F774F0DBA5EA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Realtime.Twilio", "Sparc.Notifications.Twilio\Sparc.Blossom.Realtime.Twilio.csproj", "{CDFD24B5-A8CA-4C5E-A95C-27258DC858AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Realtime.Twilio", "Sparc.Blossom.Realtime.Twilio\Sparc.Blossom.Realtime.Twilio.csproj", "{CDFD24B5-A8CA-4C5E-A95C-27258DC858AA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Realtime.AzureNotificationHubs", "Sparc.Notifications.Azure\Sparc.Blossom.Realtime.AzureNotificationHubs.csproj", "{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Realtime.Azure", "Sparc.Blossom.Realtime.Azure\Sparc.Blossom.Realtime.Azure.csproj", "{1BBC9913-AB0C-4FB4-AE30-37E7DB50B6ED}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sparc.Blossom.Realtime", "Sparc.Blossom.Realtime", "{DAB528BD-AAC2-479A-861C-FB2CE1EAC781}"
 EndProject
