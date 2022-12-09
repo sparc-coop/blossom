@@ -8,13 +8,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
-using Sparc.Blossom;
 
 namespace Sparc.Blossom.Authentication;
 
 public static class ServiceCollectionExtensions
 {
-    public static AuthenticationBuilder AddPasswordlessAuthentication<TUser>(this WebApplicationBuilder builder, AuthenticationBuilder auth) where TUser : BlossomUser, new()
+    public static AuthenticationBuilder AddPasswordlessAuthentication<TUser>(this WebApplicationBuilder builder, AuthenticationBuilder auth)
+        where TUser : BlossomUser, new()
     {
         auth.AddJwtBearer("Passwordless", o =>
         {
@@ -37,6 +37,8 @@ public static class ServiceCollectionExtensions
 
         builder.Services.AddIdentity<TUser, BlossomRole>()
             .AddDefaultTokenProviders();
+
+        builder.Services.AddScoped<BlossomAuthenticator, PasswordlessAuthenticator>();
 
         builder.Services
             .AddAuthorization(options =>

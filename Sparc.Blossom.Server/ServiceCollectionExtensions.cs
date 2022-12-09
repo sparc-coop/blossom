@@ -63,6 +63,24 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
+    public static WebApplication BuildBlossom(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddServerSideBlazor();
+
+        var app = builder.Build();
+
+        app.UseBlazorFrameworkFiles();
+        app.UseBlossom();
+        app.MapControllers();
+        app.MapBlazorHub();
+        app.MapFallbackToFile("index.html");
+
+        if (builder.Environment.IsDevelopment())
+            app.UseDeveloperExceptionPage();
+
+        return app;
+    }
+
     public static WebApplication UseBlossom(this WebApplication app)
     {
         if (app.Environment.IsDevelopment())

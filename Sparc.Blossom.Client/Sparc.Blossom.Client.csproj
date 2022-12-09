@@ -91,8 +91,4 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Push\" />
-	</ItemGroup>
 </Project>
