@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Diagnostics;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
+using System.Globalization;
 
 namespace Sparc.Blossom;
 
@@ -115,4 +116,24 @@ public static class ServiceCollectionExtensions
 
         return app;
     }
+
+    public static IApplicationBuilder UseCultures(this IApplicationBuilder app, string[] supportedCultures)
+    {
+        app.UseRequestLocalization(options => options
+            .AddSupportedCultures(supportedCultures)
+            .AddSupportedUICultures(supportedCultures));
+
+        return app;
+    }
+    public static IApplicationBuilder UseAllCultures(this IApplicationBuilder app)
+    {
+        var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures)
+            .Select(x => x.Name)
+            .ToArray();
+        
+        app.UseCultures(allCultures);
+
+        return app;
+    }
+   
 }
