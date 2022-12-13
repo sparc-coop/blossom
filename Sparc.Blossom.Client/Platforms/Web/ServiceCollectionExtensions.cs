@@ -18,20 +18,25 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDevice, WebDevice>();
         services.AddScoped(_ => configuration);
 
+        var hasAuth = configuration["AzureAdB2C:Authority"] != null
+            || configuration["Oidc:Authority"] != null
+            || configuration["Blossom:Authority"] != null;
+        
         if (configuration["AzureAdB2C:Authority"] != null)
-            services.AddB2CApi<T>(configuration).AddBlossomApi<T>().AddBlossomHttpClient<T>(baseUrl);
-        else if (configuration["Oidc:Authority"] != null)
-            services.AddOidcApi<T>(configuration).AddBlossomHttpClient<T>(baseUrl);
-        else if (configuration["Blossom:Authority"] != null)
-            services.AddBlossomApi<T>().AddBlossomHttpClient<T>(baseUrl);
-        else
+            services.AddB2CApi<T>(configuration);
+        if (configuration["Oidc:Authority"] != null)
+            services.AddOidcApi<T>(configuration);
+        if (configuration["Blossom:Authority"] != null)
+            services.AddBlossomApi<T>();
+
+        if (!hasAuth)
         {
-            // Anonymous authentication only
             services.AddAuthorizationCore();
             services.AddScoped<AuthenticationStateProvider, AnonymousAuthenticationStateProvider>();
-            services.AddBlossomHttpClient<T>(baseUrl, false);
         }
 
+        services.AddBlossomHttpClient<T>(baseUrl, hasAuth);
+        
         return services;
     }
 
