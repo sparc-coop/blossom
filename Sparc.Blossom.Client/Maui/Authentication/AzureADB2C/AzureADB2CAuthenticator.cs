@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Identity.Client;
-using Sparc.Blossom;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
@@ -18,7 +17,7 @@ public class AzureADB2CAuthenticator : AuthenticationStateProvider, IAuthenticat
         // default redirectURI; each platform specific project will have to override it with its own
         var builder = PublicClientApplicationBuilder.Create(settings.ClientID)
             .WithB2CAuthority(settings.AuthoritySignInSignUp)
-            .WithIosKeychainSecurityGroup(settings.IOSKeyChainGroup)
+            //.WithIosKeychainSecurityGroup(settings.IOSKeyChainGroup)
             .WithRedirectUri($"msal{settings.ClientID}://auth");
 
 #if ANDROID
@@ -48,7 +47,7 @@ public class AzureADB2CAuthenticator : AuthenticationStateProvider, IAuthenticat
 
     private async Task<AuthenticationResult> AcquireTokenSilent()
     {
-        IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync(Settings.PolicySignUpSignIn);
+        IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync();
         AuthenticationResult authResult = await _pca.AcquireTokenSilent(Settings.Scopes, GetAccountByPolicy(accounts, Settings.PolicySignUpSignIn))
            .WithB2CAuthority(Settings.AuthoritySignInSignUp)
            .ExecuteAsync();
@@ -66,7 +65,7 @@ public class AzureADB2CAuthenticator : AuthenticationStateProvider, IAuthenticat
 
     public async Task EditProfileAsync()
     {
-        IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync(Settings.PolicyEditProfile);
+        IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync();
 
         var builder = _pca.AcquireTokenInteractive(Settings.Scopes)
             .WithAccount(GetAccountByPolicy(accounts, Settings.PolicyEditProfile))
@@ -84,7 +83,7 @@ public class AzureADB2CAuthenticator : AuthenticationStateProvider, IAuthenticat
         {
             SystemWebViewOptions options = new()
             {
-                iOSHidePrivacyPrompt = true
+                //iOSHidePrivacyPrompt = true
             };
 
             builder.WithSystemWebViewOptions(options);
@@ -103,11 +102,11 @@ public class AzureADB2CAuthenticator : AuthenticationStateProvider, IAuthenticat
     public async Task LogoutAsync()
     {
 
-        IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync(Settings.PolicySignUpSignIn);
+        IEnumerable<IAccount> accounts = await _pca.GetAccountsAsync();
         while (accounts.Any())
         {
             await _pca.RemoveAsync(accounts.FirstOrDefault());
-            accounts = await _pca.GetAccountsAsync(Settings.PolicySignUpSignIn);
+            accounts = await _pca.GetAccountsAsync();
         }
 
         AuthResult = null;
@@ -130,7 +129,7 @@ public class AzureADB2CAuthenticator : AuthenticationStateProvider, IAuthenticat
         if (AuthResult?.IdToken == null)
             return Task.FromResult(new AuthenticationState(new ClaimsPrincipal()));
 
-        var identity = new ClaimsIdentity(AuthResult.ClaimsPrincipal.Claims, "none");
+        var identity = new ClaimsIdentity("none");
 
         if (AuthResult.AccessToken != null)
             identity.AddClaim(new Claim("access_token", AuthResult.AccessToken));

@@ -1,16 +1,17 @@
 ﻿using Blazored.LocalStorage;
+using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom;
 
-public class WindowsDevice : Core.Device
+public class WindowsDevice : IDevice
 {
     public WindowsDevice(ISyncLocalStorageService localStorage)
     {
         LocalStorage = localStorage;
     }
 
-    private string _id;
-    public override string Id
+    private string? _id;
+    public string Id
     {
         get
         {
@@ -35,8 +36,8 @@ public class WindowsDevice : Core.Device
         set {  _id = value; }
     }
 
-    private string _pushToken;
-    public override string PushToken
+    private string? _pushToken;
+    public string PushToken
     {
         get
         {
@@ -52,6 +53,13 @@ public class WindowsDevice : Core.Device
         }
     }
 
-    public override string Platform => "Windows";
+    public string Platform => "Windows";
     public ISyncLocalStorageService LocalStorage { get; }
+    public string? DeviceType { get; set; }
+    string? IDevice.Platform { get; set; }
+    public string? Idiom { get; set; }
+    public string? Manufacturer { get; set; }
+    public string? Model { get; set; }
+    public string? Name { get; set; }
+    public string? VersionString { get; set; }
 }

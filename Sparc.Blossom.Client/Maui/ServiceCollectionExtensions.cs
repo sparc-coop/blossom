@@ -1,21 +1,23 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Sparc.Blossom;
-using Device = Sparc.Blossom.Authentication.Device;
+using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom;
 
 public static class ServiceCollectionExtensions
 {
-    public static MauiAppBuilder AddBlossom<TMainLayout>(this MauiAppBuilder builder) where TMainLayout : LayoutComponentBase
+    public static MauiAppBuilder AddBlossom<TApp, TMainLayout>(this MauiAppBuilder builder)
+        where TApp : Application
+        where TMainLayout : LayoutComponentBase
     {
-        builder.UseMauiApp<App>();
+        builder.UseMauiApp<TApp>();
 
-        builder.Services.AddBlazorWebView();
+        builder.Services.AddMauiBlazorWebView();
         builder.Services.AddAuthorizationCore();
-        builder.Services.AddScoped<IErrorBoundaryLogger, ConsoleErrorBoundaryLogger>()
-            .AddScoped<LayoutComponentBase, TMainLayout>()
-            .AddSingleton<RootScope>();
+        builder.Services
+            .AddScoped<IErrorBoundaryLogger, ConsoleErrorBoundaryLogger>()
+            .AddScoped<LayoutComponentBase, TMainLayout>();
 
 #if ANDROID
         builder.Services.AddSingleton<Device, AndroidDevice>();
@@ -24,7 +26,7 @@ public static class ServiceCollectionExtensions
 #elif MAC
         builder.Services.AddSingleton<Device, MacDevice>();
 #elif WINDOWS
-        builder.Services.AddSingleton<Device, WindowsDevice>();
+        builder.Services.AddSingleton<IDevice, WindowsDevice>();
 #else
         builder.Services.AddSingleton<Device, WebDevice>();
 #endif

@@ -2,7 +2,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net7.0</TargetFrameworks>
 		<!--<TargetFrameworks>net7.0;net7.0-ios;net7.0-android;net7.0-maccatalyst</TargetFrameworks>-->
-		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>-->
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>
 		<Version>7.1.0-pre.7</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<UseMaui>true</UseMaui>
@@ -88,7 +88,16 @@
 		<PackageReference Include="Xamarin.GooglePlayServices.Base" Version="118.0.1" />
 	</ItemGroup>
 
+	<PropertyGroup Condition="'$(TargetFramework)' != 'net7.0'">
+		<PublishReadyToRun>true</PublishReadyToRun>
+		<PublishTrimmed>true</PublishTrimmed>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' != 'net7.0'">
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.3.1" />
+	</ItemGroup>
+
 	<ItemGroup>
-	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 	</ItemGroup>
 </Project>
