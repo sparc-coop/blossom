@@ -1,0 +1,18 @@
+﻿@page "/_logout"
+@model Sparc.Blossom.Authentication.LogoutModel
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+@{
+    Layout = "_Layout";
+}
+
+<div class="sign-in">
+    <header>
+        You have been successfully logged out.
+    </header>
+    <aside>
+        Didn't mean to log out?
+        <a href="@(Configuration["WebClientUrl"])">Sign In</a>
+    </aside>
+</div>

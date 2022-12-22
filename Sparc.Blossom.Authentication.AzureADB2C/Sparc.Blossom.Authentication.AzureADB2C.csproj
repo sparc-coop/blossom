@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Version>7.1.0-pre.2</Version>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+
+		<Authors>Sparc Cooperative</Authors>
+		<Company>Sparc Cooperative</Company>
+		<Description>Azure AD B2C Authentication plugin for Blossom</Description>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageTags>Azure AD B2C;Authentication;Sparc;Blossom</PackageTags>
+		<PackageProjectUrl>https://github.com/sparc-coop/blossom</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/sparc-coop/blossom</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="1.25.10" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="readme.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+</Project>
