@@ -3,7 +3,7 @@
 		<TargetFrameworks>net7.0</TargetFrameworks>
 		<!--<TargetFrameworks>net7.0;net7.0-ios;net7.0-android;net7.0-maccatalyst</TargetFrameworks>-->
 		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net7.0-windows10.0.19041.0</TargetFrameworks>-->
-		<Version>7.1.0-pre.7</Version>
+		<Version>7.1.0-pre.10</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
@@ -28,7 +28,6 @@
 
 	<ItemGroup>
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
-		<None Include="buildTransitive\**" Pack="True" PackagePath="buildTransitive\" />
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(TargetFramework)' == 'net7.0'">
