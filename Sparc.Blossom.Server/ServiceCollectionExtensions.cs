@@ -67,6 +67,7 @@ public static class ServiceCollectionExtensions
     public static WebApplication BuildBlossom(this WebApplicationBuilder builder)
     {
         builder.Services.AddServerSideBlazor();
+        builder.Services.AddOutputCache();
 
         var app = builder.Build();
 
@@ -109,6 +110,7 @@ public static class ServiceCollectionExtensions
         app.UseCors();
 
         app.UseRouting();
+        app.UseOutputCache();
         app.UseAuthorization();
 
         app.MapDynamicControllerRoute<FeatureRouteTransformer>("{namespace}/{controller}");
