@@ -71,7 +71,6 @@ public static class ServiceCollectionExtensions
 
         var app = builder.Build();
 
-        app.UseBlazorFrameworkFiles();
         app.UseBlossom();
         app.MapControllers();
         app.MapBlazorHub();
