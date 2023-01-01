@@ -30,7 +30,7 @@ public class LoginModel : PageModel
     {
         if (User.Identity?.IsAuthenticated == true && ReturnUrl != null)
         {
-            var user = await Authenticator.RefreshClaimsAsync(User);
+            var user = await Authenticator.LoginAsync(User);
             if (user != null)
                 return await LoginAsync(user.CreatePrincipal());
         }

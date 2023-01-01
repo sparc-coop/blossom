@@ -79,7 +79,7 @@ public static class ServiceCollectionExtensions
 
     public static void UsePasswordlessAuthentication<TUser>(this WebApplication app) where TUser : BlossomUser
     {
-        app.MapGet("/PasswordlessLogin", async (string userId, string token, string returnUrl, UserManager<TUser> users, HttpContext context, BlossomAuthenticator authenticator) =>
+        app.MapGet("/_passwordless", async (string userId, string token, string returnUrl, UserManager<TUser> users, HttpContext context, BlossomAuthenticator authenticator) =>
         {
             var user = await users.FindByIdAsync(userId);
             if (user == null)

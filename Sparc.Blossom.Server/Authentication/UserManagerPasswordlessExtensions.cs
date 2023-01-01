@@ -24,7 +24,7 @@ public static class UserManagerPasswordlessExtensions
     {
         var token = await manager.GenerateUserTokenAsync(user, "Default", "passwordless-auth");
 
-        var url = "/PasswordlessLogin";
+        var url = "/_passwordless";
         url = QueryHelpers.AddQueryString(url, "userId", user.Id);
         url = QueryHelpers.AddQueryString(url, "token", token);
         url = QueryHelpers.AddQueryString(url, "returnUrl", returnUrl);

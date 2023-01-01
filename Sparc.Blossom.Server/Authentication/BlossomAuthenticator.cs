@@ -16,7 +16,7 @@ public abstract class BlossomAuthenticator
     public IConfiguration Config { get; }
 
     public abstract Task<BlossomUser?> LoginAsync(string userName, string password);
-    public abstract Task<BlossomUser?> RefreshClaimsAsync(ClaimsPrincipal principal);
+    public abstract Task<BlossomUser?> LoginAsync(ClaimsPrincipal principal);
     
     public virtual string CreateToken(ClaimsPrincipal principal, string? signingKey = null, int expirationInMinutes = 60 * 24)
     {
