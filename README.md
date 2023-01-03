@@ -1,9 +1,9 @@
 [![MIT License](https://img.shields.io/github/license/sparc-coop/Sparc.Kernel)](https://github.com/sparc-coop/Sparc.Kernel/blob/main/LICENSE)
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="Sparc.Core/Files/blossom_logo_white.png">
-  <source media="(prefers-color-scheme: light)" srcset="Sparc.Core/Files/blossom_logo_black.png">
-  <img alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="Sparc.Core/Files/blossom_logo_black.png">
+  <source media="(prefers-color-scheme: dark)" srcset="Sparc.Blossom.Core/Files/blossom_logo_white.png">
+  <source media="(prefers-color-scheme: light)" srcset="Sparc.Blossom.Core/Files/blossom_logo_black.png">
+  <img alt="Shows logo in light/dark mode." src="Sparc.Blossom.Core/Files/blossom_logo_black.png">
 </picture>
 
 
