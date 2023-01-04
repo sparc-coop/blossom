@@ -1,11 +1,6 @@
-﻿namespace Sparc.Blossom;
+﻿namespace Sparc.Blossom.Realtime.Swagger;
 
-public class Notification : MediatR.INotification
+public class Notification : INotification
 {
-    public Notification(string? subscriptionId = null)
-    {
-        SubscriptionId = subscriptionId;
-    }
-
-    public string? SubscriptionId { get; }
+    public string? SubscriptionId { get; set; }
 }

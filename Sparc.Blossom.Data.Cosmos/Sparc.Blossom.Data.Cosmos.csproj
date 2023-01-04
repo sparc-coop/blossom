@@ -1,33 +1,36 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net7.0</TargetFrameworks>
+		<TargetFramework>net7.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<Version>7.1.0-pre.6</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<Version>7.1.0-pre.2</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
-		<Description>Blossom Core package</Description>
+		<Description>Blossom plugin for Azure Cosmos DB</Description>
 		<PackageIcon>icon.png</PackageIcon>
-		<PackageTags>Sparc;Blossom</PackageTags>
+		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<PackageTags>Cosmos;Database;Web;Sparc;Blossom</PackageTags>
 		<PackageProjectUrl>https://github.com/sparc-coop/blossom</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/sparc-coop/blossom</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<None Include="readme.md" Pack="true" PackagePath="\" />
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Ardalis.Specification" Version="6.1.0" />
-	  <PackageReference Include="MediatR.Contracts" Version="1.0.1" />
+		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="6.1.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="7.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="readme.md" Pack="true" PackagePath="\" />
-		<None Include="buildTransitive\**" Pack="True" PackagePath="buildTransitive\" />
+	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 	</ItemGroup>
+
 </Project>
