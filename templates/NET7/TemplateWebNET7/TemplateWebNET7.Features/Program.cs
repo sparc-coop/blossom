@@ -1,15 +1,19 @@
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddSparcKernel(builder.Configuration["WebClientUrl"]);
+builder.AddBlossom(builder.Configuration["WebClientUrl"]);
+
+builder.Services.AddServerSideBlazor();
+builder.Services.AddOutputCache();
 
 var app = builder.Build();
 
-app.UseHttpsRedirection();
-
 app.UseBlazorFrameworkFiles();
-app.UseSparcKernel();
-
+app.UseBlossom();
 app.MapControllers();
+app.MapBlazorHub();
 app.MapFallbackToFile("index.html");
+
+if (builder.Environment.IsDevelopment())
+    app.UseDeveloperExceptionPage();
 
 app.Run();
