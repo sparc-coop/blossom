@@ -15,6 +15,7 @@
   "symbols":{
     "SolutionType":{
       "type": "parameter",
+      "displayName": "Solution Type",
       "description": "Select what to include",
       "datatype":"choice",
       "choices": [
@@ -30,6 +31,48 @@
         }
       ],
       "defaultValue": "featuresweb"
+    },
+    "AddSQL":{
+      "type": "parameter",
+      "displayName": "Add a SQL Server database",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
+    },
+    "AddCosmos":{
+      "type": "parameter",
+      "displayName": "Add Cosmosdb",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
+    },
+    "AddAzureStorage":{
+      "type": "parameter",
+      "displayName": "Add Azure Storage Plugin",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
+    },
+    "AddAzureADAuth":{
+      "type": "parameter",
+      "displayName": "Add Azure AD B2C Plugin",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
+    },
+    "AddTwilio":{
+      "type": "parameter",
+      "displayName": "Add Twilio Notifications Plugin",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
+    },
+    "AddAzureNotifications":{
+      "type": "parameter",
+      "displayName": "Add Azure Notifications Plugin",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
     }
   },
   "sources": [

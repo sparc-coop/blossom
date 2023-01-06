@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.1" />
     <PackageReference Include="Sparc.Blossom.Server" Version="7.1.0-pre.13" />
+	<PackageReference Include="Sparc.Blossom.Data.AzureStorage" Version="7.1.0-pre.1" />
   </ItemGroup>
 
 

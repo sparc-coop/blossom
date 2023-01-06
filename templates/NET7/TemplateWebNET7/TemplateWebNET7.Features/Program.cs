@@ -2,6 +2,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddBlossom(builder.Configuration["WebClientUrl"]);
 
+@*#if (AddAzureStorage)
+builder.Services.AddAzureStorage(builder.Configuration.GetConnectionString("Storage")!);
+#endif*@
+
 builder.Services.AddServerSideBlazor();
 builder.Services.AddOutputCache();
 
