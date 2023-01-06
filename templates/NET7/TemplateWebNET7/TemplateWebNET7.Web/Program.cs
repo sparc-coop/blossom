@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Sparc.Blossom;
-using TemplateWebNET7.Api;
 using Blazored.Modal;
 using TemplateWebNET7.Web;
 
@@ -11,7 +10,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddBlazoredModal();
 
-builder.AddBlossom<TemplateWebNET7Api>(builder.Configuration["ApiUrl"]);
+builder.AddBlossom<TemplateWebNET7Client>(builder.Configuration["ApiUrl"]);
 
 await builder.Build().RunAsync();
 

@@ -1,10 +1,10 @@
 {
   "$schema": "http://json.schemastore.org/template",
   "author": "Sparc Coop",
-  "classifications": [ "Multiplatform", "Features" ],
+  "classifications": [ "Web", "Features" ],
   "identity": "TemplateWebNET7",
   "name": "Blossom Project",
-  "description": "",
+  "description": "Creates a Blossom Web or Features only project",
   "shortName": "blossom-template",
   "sourceName": "TemplateWebNET7",
   "tags": {
@@ -27,11 +27,6 @@
           "choice": "featuresweb",
           "description": "Creates a solution with the Features + Web project",
           "displayName": "Web Project"
-        },
-        {
-          "choice": "multiplatform",
-          "description": "Creates a solution with all available platforms",
-          "displayName": "Multiplatform"
         }
       ],
       "defaultValue": "featuresweb"
@@ -45,12 +40,6 @@
           "exclude": [
             "TemplateWebNET7.Web/**/*",
             "TemplateWebNET7.sln"
-          ]
-        },
-        {
-          "condition": "(SolutionType != 'onlyfeatures')",
-          "exclude": [
-            "TemplateWebNET7onlyfeatures.sln"
           ]
         }
       ]
