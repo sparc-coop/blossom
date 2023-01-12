@@ -12,7 +12,12 @@ namespace TemplateWebNET7.Features._Plugins
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+#if (AddCosmos)
             builder.Entity<User>().ToContainer("Users").HasPartitionKey(x => x.UserId);
+#endif
+#if (AddSQL)
+            builder.Entity<User>().ToTable("Users");
+#endif
         }
     }
 }
