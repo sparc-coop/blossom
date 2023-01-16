@@ -31,6 +31,9 @@ public class PasswordlessAuthenticator<T> : BlossomAuthenticator where T : Bloss
 
     public async Task<string> CreateMagicSignInLinkAsync(T user, string returnUrl)
     {
+        if (user.SecurityStamp == null)
+            await UserManager.UpdateSecurityStampAsync(user);
+        
         var token = await UserManager.GenerateUserTokenAsync(user, "Default", "passwordless-auth");
 
         var url = "/_authenticate";
