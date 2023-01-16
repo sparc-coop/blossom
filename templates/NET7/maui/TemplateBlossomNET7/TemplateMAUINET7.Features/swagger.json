@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "TemplateWebNET7.Features, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "title": "TemplateMAUINET7.Features, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
     "version": "v1"
   },
   "paths": {

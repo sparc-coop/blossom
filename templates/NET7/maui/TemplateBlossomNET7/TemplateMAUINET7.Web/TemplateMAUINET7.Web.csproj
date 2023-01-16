@@ -5,12 +5,8 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
-		<ServicesPath>OpenAPIs\TemplateWebNET7Client.cs</ServicesPath>
+		<ServicesPath>OpenAPIs\TemplateMAUINET7Client.cs</ServicesPath>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <OpenApiReference Include="..\TemplateWebNET7.Features\swagger.json" Link="OpenAPIs\swagger.json" OutputPath="$([System.IO.Path]::Combine($(MSBuildProjectDirectory),$(ServicesPath)))" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Blazored.Modal" Version="7.1.0" />
@@ -29,6 +25,10 @@
 		</PackageReference>
 		<PackageReference Include="Sparc.Blossom.Client" Version="7.1.0-pre.10" />
 
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\TemplateMAUINET7.UI\TemplateMAUINET7.UI.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -4,7 +4,32 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+	<ServicesPath>OpenAPIs\TemplateMAUINET7Client.cs</ServicesPath>
   </PropertyGroup>
+
+	<ItemGroup>
+		<OpenApiReference Include="..\TemplateMAUINET7.Features\swagger.json" Link="OpenAPIs\swagger.json" OutputPath="$([System.IO.Path]::Combine($(MSBuildProjectDirectory),$(ServicesPath)))" Namespace="TemplateMAUINET7.Features" ClassName="TemplateMAUINET7Client" />
+	</ItemGroup>
+	
+  <ItemGroup>
+    <Content Remove="App.razor" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <None Remove="wwwroot\css\app.css" />
+    <None Remove="wwwroot\css\app.min.css" />
+    <None Remove="wwwroot\css\bootstrap\bootstrap.min.css" />
+    <None Remove="wwwroot\css\bootstrap\bootstrap.min.css.map" />
+    <None Remove="wwwroot\css\open-iconic\FONT-LICENSE" />
+    <None Remove="wwwroot\css\open-iconic\font\css\open-iconic-bootstrap.min.css" />
+    <None Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.eot" />
+    <None Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.otf" />
+    <None Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.svg" />
+    <None Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.ttf" />
+    <None Remove="wwwroot\css\open-iconic\font\fonts\open-iconic.woff" />
+    <None Remove="wwwroot\css\open-iconic\ICON-LICENSE" />
+    <None Remove="wwwroot\css\open-iconic\README.md" />
+  </ItemGroup>
 
 
   <ItemGroup>
@@ -13,6 +38,27 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="3.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NSwag.ApiDescription.Client" Version="13.0.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="App.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="App.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="App.razor" />
   </ItemGroup>
 
 </Project>

@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateMAUINET7.UI", "Temp
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Platforms", "Platforms", "{05BD6775-308A-4199-A817-74E8B3707B4A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Client", "..\..\..\..\Sparc.Blossom.Client\Sparc.Blossom.Client.csproj", "{5C3C243A-CAC8-40BA-AAFF-1B6507C04B18}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blossom", "Blossom", "{18D94792-7F6F-4F89-B148-FD586AE3C7B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +41,10 @@ Global
 		{42807A10-7CE5-4A4A-B3E3-692A265BB4E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42807A10-7CE5-4A4A-B3E3-692A265BB4E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42807A10-7CE5-4A4A-B3E3-692A265BB4E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C3C243A-CAC8-40BA-AAFF-1B6507C04B18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C3C243A-CAC8-40BA-AAFF-1B6507C04B18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C3C243A-CAC8-40BA-AAFF-1B6507C04B18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C3C243A-CAC8-40BA-AAFF-1B6507C04B18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,6 +52,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B9345617-CE1E-402D-82FA-175285E010B6} = {05BD6775-308A-4199-A817-74E8B3707B4A}
 		{15A1CE61-E2AB-4337-BE2B-4BBCCE06A1C1} = {05BD6775-308A-4199-A817-74E8B3707B4A}
+		{5C3C243A-CAC8-40BA-AAFF-1B6507C04B18} = {18D94792-7F6F-4F89-B148-FD586AE3C7B8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {58201C72-775B-436A-8512-E1B2D781FB51}

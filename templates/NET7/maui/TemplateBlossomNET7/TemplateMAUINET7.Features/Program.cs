@@ -41,6 +41,8 @@ app.MapFallbackToFile("index.html");
 if (builder.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 
+#if (AddAzureADAuth)
 app.UsePasswordlessAuthentication<User>();
+#endif
 
 app.Run();

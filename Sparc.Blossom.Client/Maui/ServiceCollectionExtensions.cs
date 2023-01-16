@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Sparc.Blossom;
 using Device = Sparc.Blossom.Authentication.Device;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Maui;
 
 public static class ServiceCollectionExtensions
 {
