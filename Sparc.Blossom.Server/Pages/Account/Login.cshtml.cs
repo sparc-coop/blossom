@@ -41,10 +41,10 @@ public class LoginModel : PageModel
     public async Task<IActionResult> OnPostAsync()
     {
         if (ReturnUrl == null) return Page();
-        return await PerformLogin();
+        return await LoginAsync();
     }
 
-    async Task<IActionResult> PerformLogin()
+    public virtual async Task<IActionResult> LoginAsync()
     {
         Error = null;
         if (string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(Email)) 
@@ -57,10 +57,9 @@ public class LoginModel : PageModel
 
         Error = "Could not log you in! Please try entering your code again or request a new code.";
         return Page();
-
     }
 
-    private async Task<IActionResult> LoginAsync(ClaimsPrincipal principal)
+    protected async Task<IActionResult> LoginAsync(ClaimsPrincipal principal)
     {
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
