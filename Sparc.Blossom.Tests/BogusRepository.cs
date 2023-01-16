@@ -68,16 +68,6 @@ public class BogusRepository<T> : IRepository<T> where T : class, IRoot<string>
             await AddAsync(item);
     }
 
-    public Task<List<T>> FromSqlAsync(string sql, params (string, object)[] parameters)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<List<U>> FromSqlAsync<U>(string sql, params (string, object)[] parameters)
-    {
-        throw new NotImplementedException();
-    }
-
     public void BeginBulkOperation()
     {
         throw new NotImplementedException();
@@ -119,6 +109,11 @@ public class BogusRepository<T> : IRepository<T> where T : class, IRoot<string>
     }
 
     public Task<bool> AnyAsync(ISpecification<T> spec)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IQueryable<T> FromSqlRaw(string sql, params object[] parameters)
     {
         throw new NotImplementedException();
     }

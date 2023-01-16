@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Sparc.Blossom.Data;
 
-public class SqlServerRepository<T> : RepositoryBase<T>, ISqlRepository<T> where T : class
+public class SqlServerRepository<T> : RepositoryBase<T>, IRepository<T> where T : class
 {
     protected readonly DbContext context;
     protected DbSet<T> Command => context.Set<T>();
@@ -111,9 +111,9 @@ public class SqlServerRepository<T> : RepositoryBase<T>, ISqlRepository<T> where
         await context.SaveChangesAsync();
     }
 
-    public async Task<List<T>> FromSqlAsync(string sql, params (string, object)[] parameters)
+    public IQueryable<T> FromSqlRaw(string sql, params object[] parameters)
     {
-        return await FromSqlAsync<T>(sql, parameters);
+        return context.Set<T>().FromSqlRaw(sql, parameters);
     }
 
     public Task<List<U>> FromSqlAsync<U>(string sql, params (string, object)[] parameters)

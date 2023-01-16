@@ -81,6 +81,11 @@ public class InMemoryRepository<T> : IRepository<T> where T : class
         return Task.FromResult(spec.Evaluate(_items).FirstOrDefault());
     }
 
+    public IQueryable<T> FromSqlRaw(string sql, params object[] parameters)
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<List<T>> GetAllAsync(ISpecification<T> spec)
     {
         return Task.FromResult(spec.Evaluate(_items).ToList());

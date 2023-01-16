@@ -10,7 +10,6 @@ public static class ServiceCollectionExtensions
         services.AddSqlServerWithoutRepository<T>(connectionString, serviceLifetime);
         services.Add(new ServiceDescriptor(typeof(DbContext), typeof(T), serviceLifetime));
         services.Add(new ServiceDescriptor(typeof(IRepository<>), typeof(SqlServerRepository<>), serviceLifetime));
-        services.Add(new ServiceDescriptor(typeof(ISqlRepository<>), typeof(SqlServerRepository<>), serviceLifetime));
         return services;
     }
 
