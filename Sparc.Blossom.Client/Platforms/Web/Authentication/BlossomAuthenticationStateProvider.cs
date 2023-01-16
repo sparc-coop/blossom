@@ -71,7 +71,7 @@ public class BlossomAuthenticationStateProvider : AuthenticationStateProvider, I
         else
         {
             var loginUrl = QueryHelpers.AddQueryString(Config["Blossom:Authority"] + "/_login", "returnUrl", Navigation.Uri);
-            Navigation.NavigateToLogin(loginUrl);
+            Navigation.NavigateTo(loginUrl, true);
         }
     }
 
