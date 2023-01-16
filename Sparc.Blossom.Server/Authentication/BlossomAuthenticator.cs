@@ -23,7 +23,9 @@ public abstract class BlossomAuthenticator
         var tokenHandler = new JwtSecurityTokenHandler();
         var identity = principal.Identity as ClaimsIdentity;
 
-        var secretKey = Encoding.UTF8.GetBytes(signingKey ?? Config["Jwt:Key"]!);
+        var secretKey = Encoding.UTF8.GetBytes(signingKey ??
+            Config["Passwordless:Key"] ??
+            Config["Jwt:Key"]!);
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {

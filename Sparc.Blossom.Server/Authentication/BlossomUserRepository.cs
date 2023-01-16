@@ -14,7 +14,7 @@ public class BlossomUserRepository<T> : IUserSecurityStampStore<T> where T : Blo
 
     public async Task<IdentityResult> CreateAsync(T user, CancellationToken cancellationToken)
     {
-        await Users.AddAsync(user);
+        await Users.UpdateAsync(user);
         return IdentityResult.Success;
     }
 

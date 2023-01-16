@@ -59,7 +59,9 @@ public static class ServiceCollectionExtensions
             .AddCookie()
             .AddJwtBearer(options =>
         {
-            options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey ?? builder.Configuration["Jwt:Key"]!));
+            options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey ??
+                builder.Configuration["Passwordless:Key"] ??
+                builder.Configuration["Jwt:Key"]!));
             options.TokenValidationParameters.ValidateAudience = false;
             options.TokenValidationParameters.ValidateIssuer = false;
         }
