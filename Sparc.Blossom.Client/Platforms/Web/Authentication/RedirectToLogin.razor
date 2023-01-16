@@ -19,7 +19,7 @@
                 ReturnUrl = Navigation.Uri
             };
 
-        if (AccessTokenProvider is BlossomAuthenticator auth)
+        if (AccessTokenProvider is BlossomAuthenticationStateProvider auth)
             await auth.LoginAsync();
         else
             Navigation.NavigateToLogin($"authentication/login", options);

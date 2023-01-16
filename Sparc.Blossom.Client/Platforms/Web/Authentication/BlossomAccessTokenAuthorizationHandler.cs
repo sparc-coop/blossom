@@ -26,7 +26,7 @@ public class BlossomAccessTokenAuthorizationHandler : AuthorizationHandler<Bloss
 
     private async Task<bool> HasValidAccessToken()
     {
-        var token = await LocalStorage.GetItemAsync<string>(BlossomAuthenticator.TokenName);
+        var token = await LocalStorage.GetItemAsync<string>(BlossomAuthenticationStateProvider.TokenName);
         return token != null;
     }
 }

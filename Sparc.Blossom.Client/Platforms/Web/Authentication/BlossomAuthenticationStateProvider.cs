@@ -10,12 +10,12 @@ using System.Web;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomAuthenticator : AuthenticationStateProvider, IAccessTokenProvider
+public class BlossomAuthenticationStateProvider : AuthenticationStateProvider, IAccessTokenProvider
 {
     public static readonly string TokenName = "_blossom_access_token";
     private ClaimsPrincipal? _user;
 
-    public BlossomAuthenticator(ILocalStorageService localStorage, NavigationManager navigation, IConfiguration config)
+    public BlossomAuthenticationStateProvider(ILocalStorageService localStorage, NavigationManager navigation, IConfiguration config)
     {
         LocalStorage = localStorage;
         Navigation = navigation;
@@ -60,6 +60,11 @@ public class BlossomAuthenticator : AuthenticationStateProvider, IAccessTokenPro
         if (queryString["token"] != null)
         {
             await LocalStorage.SetItemAsync(TokenName, queryString["token"]);
+        }
+
+        var token = await RequestAccessToken();
+        if (token.Status == AccessTokenResultStatus.Success)
+        {
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
             Navigation.NavigateTo(returnUrl, true);
         }

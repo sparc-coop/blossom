@@ -1,15 +1,46 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-internal class PasswordlessAuthenticator : BlossomAuthenticator
+public class PasswordlessAuthenticator<T> : BlossomAuthenticator where T : BlossomUser, new()
 {
-    public PasswordlessAuthenticator(IConfiguration config) : base(config)
+    public PasswordlessAuthenticator(IConfiguration config, UserManager<T> userManager) : base(config)
     {
+        UserManager = userManager;
     }
 
-    public override Task<BlossomUser?> LoginAsync(string userName, string password)
+    public UserManager<T> UserManager { get; }
+
+    public async Task<string> CreateMagicSignInLinkAsync(string username, string returnUrl)
+    {
+        var user = await UserManager.FindByNameAsync(username);
+        if (user == null)
+        {
+            user = new()
+            {
+                UserName = username
+            };
+            await UserManager.CreateAsync(user);
+        }
+
+        return await CreateMagicSignInLinkAsync(user, returnUrl);
+    }
+
+    public async Task<string> CreateMagicSignInLinkAsync(T user, string returnUrl)
+    {
+        var token = await UserManager.GenerateUserTokenAsync(user, "Default", "passwordless-auth");
+
+        var url = "/_authenticate";
+        url = QueryHelpers.AddQueryString(url, "userId", user.Id);
+        url = QueryHelpers.AddQueryString(url, "token", token);
+        url = QueryHelpers.AddQueryString(url, "returnUrl", returnUrl);
+        return url;
+    }
+
+    public override Task<BlossomUser?> LoginAsync(string userName, string? password = null)
     {
         throw new NotImplementedException();
     }

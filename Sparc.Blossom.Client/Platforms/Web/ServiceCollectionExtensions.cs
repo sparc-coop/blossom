@@ -70,14 +70,14 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddBlossomApi<T>(this IServiceCollection services) where T : class
     {
-        services.AddScoped<IAccessTokenProvider, BlossomAuthenticator>();
+        services.AddScoped<IAccessTokenProvider, BlossomAuthenticationStateProvider>();
         services.AddAuthorizationCore(options =>
         {
             options.AddPolicy("Blossom", policy => policy.Requirements.Add(new BlossomAccessTokenRequirement()));
         });
         services.AddScoped<IAuthorizationHandler, BlossomAccessTokenAuthorizationHandler>();
-        services.AddScoped<AuthenticationStateProvider, BlossomAuthenticator>();
-        services.AddScoped<BlossomAuthenticator>();
+        services.AddScoped<AuthenticationStateProvider, BlossomAuthenticationStateProvider>();
+        services.AddScoped<BlossomAuthenticationStateProvider>();
 
         return services;
     }

@@ -38,7 +38,8 @@ public static class ServiceCollectionExtensions
         builder.Services.AddIdentity<TUser, BlossomRole>()
             .AddDefaultTokenProviders();
 
-        builder.Services.AddScoped<BlossomAuthenticator, PasswordlessAuthenticator>();
+        builder.Services.AddScoped<BlossomAuthenticator, PasswordlessAuthenticator<TUser>>();
+        builder.Services.AddScoped<PasswordlessAuthenticator<TUser>>();
 
         builder.Services
             .AddAuthorization(options =>
@@ -79,12 +80,11 @@ public static class ServiceCollectionExtensions
 
     public static void UsePasswordlessAuthentication<TUser>(this WebApplication app) where TUser : BlossomUser
     {
-        app.MapGet("/PasswordlessLogin", async (string userId, string token, string returnUrl, UserManager<TUser> users, HttpContext context, BlossomAuthenticator authenticator) =>
+        app.MapGet("/_authenticate", async (string userId, string token, string returnUrl, UserManager<TUser> users, HttpContext context, BlossomAuthenticator authenticator) =>
         {
-            var user = await users.FindByIdAsync(userId);
-            if (user == null)
-                throw new NotAuthorizedException($"Can't find user {userId}");
-
+            var user = await users.FindByIdAsync(userId) 
+                ?? throw new NotAuthorizedException($"Can't find user {userId}");
+            
             var isValid = await users.VerifyUserTokenAsync(user, "Default", "passwordless-auth", token);
 
             if (isValid)
