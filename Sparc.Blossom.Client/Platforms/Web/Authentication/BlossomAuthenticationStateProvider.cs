@@ -51,8 +51,14 @@ public class BlossomAuthenticationStateProvider : AuthenticationStateProvider, I
         return identity;
     }
 
-    public virtual async Task LoginAsync()
+    public virtual async Task LoginAsync(bool forceLogin = false)
     {
+        if (forceLogin)
+        {
+            await LocalStorage.RemoveItemAsync(TokenName);
+            _user = null;
+        }
+
         var uri = new Uri(Navigation.Uri);
         var queryString = HttpUtility.ParseQueryString(uri.Query);
         var returnUrl = queryString.AllKeys.Contains("returnUrl") ? queryString["returnUrl"]! : "/";

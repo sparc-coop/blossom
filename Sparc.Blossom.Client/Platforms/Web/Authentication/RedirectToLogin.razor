@@ -11,6 +11,8 @@
 
 @inject IAccessTokenProvider AccessTokenProvider
 @code {
+    [Parameter][SupplyParameterFromQuery] public bool Force { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         var options = new InteractiveRequestOptions()
@@ -20,7 +22,7 @@
             };
 
         if (AccessTokenProvider is BlossomAuthenticationStateProvider auth)
-            await auth.LoginAsync();
+            await auth.LoginAsync(Force);
         else
             Navigation.NavigateToLogin($"authentication/login", options);
 
