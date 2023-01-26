@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Client", "..\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Blossom", "Blossom", "{18D94792-7F6F-4F89-B148-FD586AE3C7B8}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TemplateMAUINET7.Web2", "TemplateMAUINET7.Web2\TemplateMAUINET7.Web2.csproj", "{DD666527-9572-4DB9-9733-ECF4EB9425FC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{5C3C243A-CAC8-40BA-AAFF-1B6507C04B18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C3C243A-CAC8-40BA-AAFF-1B6507C04B18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C3C243A-CAC8-40BA-AAFF-1B6507C04B18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD666527-9572-4DB9-9733-ECF4EB9425FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD666527-9572-4DB9-9733-ECF4EB9425FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD666527-9572-4DB9-9733-ECF4EB9425FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD666527-9572-4DB9-9733-ECF4EB9425FC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,10 +2,10 @@
 
 namespace Sparc.Blossom.Authentication;
 
-public class IosDevice : Core.Device
+public class IosDevice : IDevice
 {
-    private string _id;
-    public override string Id
+    private string? _id;
+    public string? Id
     {
         get
         {
@@ -22,8 +22,8 @@ public class IosDevice : Core.Device
         set { _id = value; }
     }
 
-    private string _pushToken;
-    public override string PushToken
+    private string? _pushToken;
+    public string? PushToken
     {
         get
         {
@@ -39,5 +39,13 @@ public class IosDevice : Core.Device
         }
     }
 
-    public override string Platform => Core.Platforms.iOS;
+    public string? Platform => "iOS";
+
+    public string? DeviceType { get; set; }
+    string? IDevice.Platform { get; set; }
+    public string? Idiom { get; set; }
+    public string? Manufacturer { get; set; }
+    public string? Model { get; set; }
+    public string? Name { get; set; }
+    public string? VersionString { get; set; }
 }

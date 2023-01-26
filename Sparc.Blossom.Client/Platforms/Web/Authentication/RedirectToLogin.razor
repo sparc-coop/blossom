@@ -19,10 +19,10 @@
                 ReturnUrl = Navigation.Uri
             };
 
-        if (AccessTokenProvider is BlossomAuthenticator auth)
-            await auth.LoginAsync();
-        else
-            Navigation.NavigateToLogin($"authentication/login", options);
+        //if (AccessTokenProvider is BlossomAuthenticator auth)
+        //    await auth.LoginAsync();
+        //else
+        //    Navigation.NavigateToLogin($"authentication/login", options);
 
     }
 }

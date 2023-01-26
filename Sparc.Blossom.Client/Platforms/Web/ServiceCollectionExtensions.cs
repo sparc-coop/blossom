@@ -107,6 +107,7 @@ public static class ServiceCollectionExtensions
             client.AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
         else
             client.AddHttpMessageHandler<BlossomAuthorizationMessageHandler>();
+
     }
 
     public static WebAssemblyHostBuilder AddBlossom<T>(this WebAssemblyHostBuilder builder, string? baseUrl = null) where T : class

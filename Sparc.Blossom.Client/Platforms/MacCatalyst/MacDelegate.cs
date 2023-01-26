@@ -1,4 +1,6 @@
 ﻿using Foundation;
+using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Realtime;
 using UIKit;
 using UserNotifications;
 
@@ -49,7 +51,7 @@ public abstract class BlossomDelegate : MauiUIApplicationDelegate
 
     Task CompleteRegistrationAsync(NSData deviceToken)
     {
-        var device = (Core.Device)Services.GetService(typeof(Core.Device));
+        var device = (IDevice)Services.GetService(typeof(IDevice));
         if (device != null)
             device.PushToken = deviceToken.ToHexString();
 

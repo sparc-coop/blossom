@@ -1,12 +1,11 @@
-﻿@page "/fetchdata"
+﻿@page "/fetchdatam"
 
-<PageTitle>Weather forecast</PageTitle>
+@using TemplateMAUINET7.MAUI.Data
+@inject WeatherForecastService ForecastService
 
 <h1>Weather forecast</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
-
-@*<button class="btn btn-primary" @onclick="AddRandomData">Add Random Data</button>
+<p>This component demonstrates fetching data from a service.</p>
 
 @if (forecasts == null)
 {
@@ -27,16 +26,10 @@ else
             @foreach (var forecast in forecasts)
             {
                 <tr>
-                    <td>@forecast.Date</td>
+                    <td>@forecast.Date.ToShortDateString()</td>
                     <td>@forecast.TemperatureC</td>
                     <td>@forecast.TemperatureF</td>
                     <td>@forecast.Summary</td>
-                </tr>
-            }
-            @if(forecasts.Count == 0)
-            {
-                <tr>
-                    <td colspan="4">No Data Found</td>
                 </tr>
             }
         </tbody>
@@ -44,17 +37,10 @@ else
 }
 
 @code {
-    private ICollection<WeatherForecast> forecasts;
+    private WeatherForecast[] forecasts;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Api.GetWeatherForecastAsync();
-    }
-
-    private async void AddRandomData()
-    {
-        forecasts = await Api.AddRandomWeatherForecastAsync();
-        StateHasChanged();
+        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
     }
 }
-*@

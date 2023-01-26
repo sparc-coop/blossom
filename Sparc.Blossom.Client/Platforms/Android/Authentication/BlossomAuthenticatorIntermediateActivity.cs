@@ -12,13 +12,13 @@ class BlossomAuthenticatorIntermediateActivity : Activity
 	const string actualIntentExtra = "actual_intent";
 
 	bool launched;
-	Intent actualIntent;
+	Intent? actualIntent;
 
-	protected override void OnCreate(Bundle savedInstanceState)
+	protected override void OnCreate(Bundle? savedInstanceState)
 	{
 		base.OnCreate(savedInstanceState);
 
-		var extras = savedInstanceState ?? Intent.Extras;
+		var extras = savedInstanceState ?? Intent?.Extras;
 
 		// read the values
 		launched = extras?.GetBoolean(launchedExtra, false) ?? false;

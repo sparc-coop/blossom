@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Sparc.Blossom;
+using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom.Realtime;
 
 public class IosPushNotificationService : IPushNotificationService
 {
-    public Core.Device Device { get; }
+    public IDevice Device { get; }
     public NavigationManager Nav { get; }
 
-    public IosPushNotificationService(Core.Device device, NavigationManager nav)
+    public IosPushNotificationService(IDevice device, NavigationManager nav)
     {
         Device = device;
         Nav = nav;

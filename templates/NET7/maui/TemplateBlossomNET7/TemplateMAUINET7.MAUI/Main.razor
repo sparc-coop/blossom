@@ -1,11 +1,16 @@
-﻿<Router AppAssembly="@typeof(Main).Assembly">
+﻿@using Sparc.Blossom 
+
+<BlossomMauiApp MainLayout="typeof(TemplateMAUINET7.UI.Shared.MainLayout)" Startup="typeof(MauiProgram)" />
+
+
+@*<Router AppAssembly="@typeof(Main).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(TemplateMAUINET7.UI.Shared.MainLayout)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
     <NotFound>
-        <LayoutView Layout="@typeof(MainLayout)">
+        <LayoutView Layout="@typeof(TemplateMAUINET7.UI.Shared.MainLayout)">
             <p role="alert">Sorry, there's nothing at this address.</p>
         </LayoutView>
     </NotFound>
-</Router>
+</Router>*@

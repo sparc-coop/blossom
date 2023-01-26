@@ -5,10 +5,11 @@ public class AzureADB2CSettings
     public AzureADB2CSettings(string hostname,
         string clientId,
         string scope,
+        Func<object> parentWindowLocator,
         string signInPolicy = "B2C_1_SignIn_SignUp",
         string editProfilePolicy = "b2c_1_edit_profile",
-        string resetPasswordPolicy = "b2c_1_reset",
-        Func<object> parentWindowLocator = null)
+        string resetPasswordPolicy = "b2c_1_reset"
+        )
     {
         Tenant = $"{hostname}.onmicrosoft.com";
         Hostname = $"{hostname}.b2clogin.com";

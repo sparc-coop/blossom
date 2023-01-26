@@ -9,8 +9,8 @@ public class AzureADB2CAuthenticator : AuthenticationStateProvider, IAuthenticat
 {
     private readonly IPublicClientApplication _pca;
     public AzureADB2CSettings Settings { get; }
-    public static AuthenticationResult AuthResult { get; set; }
-    public ClaimsPrincipal User { get; set; }
+    public static AuthenticationResult? AuthResult { get; set; }
+    public ClaimsPrincipal? User { get; set; }
 
     public AzureADB2CAuthenticator(AzureADB2CSettings settings)
     {

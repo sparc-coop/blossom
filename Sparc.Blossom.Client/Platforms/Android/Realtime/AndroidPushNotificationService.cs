@@ -3,17 +3,23 @@ using Android.Content;
 using Firebase.Messaging;
 using Microsoft.AspNetCore.Components;
 using Sparc.Blossom;
+using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom.Realtime;
 
-[Service]
+[Service(Exported = true)]
 [IntentFilter(new[] { "com.google.firebase.MESSAGING_EVENT" })]
 public class AndroidPushNotificationService : FirebaseMessagingService, IPushNotificationService
 {
-    public Core.Device Device { get; }
+    public IDevice Device { get; }
     public NavigationManager Nav { get; }
 
-    public AndroidPushNotificationService(Core.Device device, NavigationManager nav)
+    public AndroidPushNotificationService()
+    {
+
+    }
+
+    public AndroidPushNotificationService(IDevice device, NavigationManager nav)
     {
         Device = device;
         Nav = nav;

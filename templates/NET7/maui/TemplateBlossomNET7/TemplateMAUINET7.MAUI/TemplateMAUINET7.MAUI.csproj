@@ -55,6 +55,16 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\..\..\Sparc.Blossom.Client\Sparc.Blossom.Client.csproj" />
+      <ProjectReference Include="..\TemplateMAUINET7.UI\TemplateMAUINET7.UI.csproj" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net7.0-android'">
+      <PackageReference Include="Xamarin.Firebase.Messaging">
+        <Version>122.0.0.5</Version>
+      </PackageReference>
+      <PackageReference Include="Xamarin.GooglePlayServices.Base">
+        <Version>118.0.1</Version>
+      </PackageReference>
     </ItemGroup>
 
 </Project>

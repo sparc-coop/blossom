@@ -9,7 +9,7 @@ namespace Sparc.Blossom;
 
 public class BlossomActivity : MauiAppCompatActivity
 {
-    protected override void OnCreate(Bundle savedInstanceState)
+    protected override void OnCreate(Bundle? savedInstanceState)
     {
         base.OnCreate(savedInstanceState);
         Platform.Init(this, savedInstanceState);
@@ -24,7 +24,7 @@ public class BlossomActivity : MauiAppCompatActivity
         Platform.OnResume(this);
     }
 
-    protected override void OnNewIntent(Intent intent)
+    protected override void OnNewIntent(Intent? intent)
     {
         base.OnNewIntent(intent);
 
@@ -53,25 +53,25 @@ public class BlossomActivity : MauiAppCompatActivity
             return;
         }
 
-#if ANDROID26_0_OR_GREATER
-        var defaultChannel = new NotificationChannel("default",
-                                              "Default Notifications",
-                                              NotificationImportance.Default)
-        {
-            Description = "Default messages appear in this channel"
-        };
+//#if ANDROID26_0_OR_GREATER
+//        var defaultChannel = new NotificationChannel("default",
+//                                              "Default Notifications",
+//                                              NotificationImportance.Default)
+//        {
+//            Description = "Default messages appear in this channel"
+//        };
 
-        var urgentChannel = new NotificationChannel("urgent",
-                                              "Urgent Notifications",
-                                              NotificationImportance.High)
-        {
-            Description = "Urgent messages appear in this channel"
-        };
+//        var urgentChannel = new NotificationChannel("urgent",
+//                                              "Urgent Notifications",
+//                                              NotificationImportance.High)
+//        {
+//            Description = "Urgent messages appear in this channel"
+//        };
 
-        var notificationManager = (NotificationManager)GetSystemService(NotificationService);
-        notificationManager.CreateNotificationChannel(defaultChannel);
-        notificationManager.CreateNotificationChannel(urgentChannel);
-#endif
+//        var notificationManager = (NotificationManager)GetSystemService(NotificationService);
+//        notificationManager.CreateNotificationChannel(defaultChannel);
+//        notificationManager.CreateNotificationChannel(urgentChannel);
+//#endif
     }
 
 }

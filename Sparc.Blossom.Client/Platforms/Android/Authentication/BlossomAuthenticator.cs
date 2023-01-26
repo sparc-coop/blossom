@@ -1,9 +1,11 @@
 ﻿using Android.Content;
 using AndroidX.Browser.CustomTabs;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 
 namespace Sparc.Blossom.Authentication;
 
-public partial class BlossomAuthenticator
+public partial class BlossomAuthenticator : AuthenticationStateProvider, IAccessTokenProvider
 {
     static TaskCompletionSource<WebAuthenticatorResult> tcsResponse = null;
     static Uri currentRedirectUri = null;
@@ -123,5 +125,23 @@ public partial class BlossomAuthenticator
         }
     }
 
+    public ValueTask<AccessTokenResult> RequestAccessToken()
+    {
+        throw new NotImplementedException();
+    }
 
+    public ValueTask<AccessTokenResult> RequestAccessToken(AccessTokenRequestOptions options)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Task<AuthenticationState> GetAuthenticationStateAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual async Task LoginAsync()
+    {
+        throw new NotImplementedException();
+    }
 }
