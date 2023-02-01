@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Sparc.Blossom;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Realtime;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Polly;
 //using Device = Sparc.Blossom.Authentication.Device;
 
 namespace Sparc.Blossom;
@@ -41,7 +43,7 @@ public static class ServiceCollectionExtensions
         //    services.AddScoped<AuthenticationStateProvider, AnonymousAuthenticationStateProvider>();
         //}
 
-        //services.AddBlossomHttpClient<T>(baseUrl, hasAuth);
+        //builder.Services.AddBlossomHttpClient<T>(baseUrl, hasAuth);
 
         //#if ANDROID
         //        builder.Services.AddSingleton<Device, AndroidDevice>();
@@ -79,15 +81,15 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<AzureADB2CAuthenticator>();
         services.AddSingleton<AuthenticationStateProvider>(s => s.GetRequiredService<AzureADB2CAuthenticator>());
         services.AddSingleton<IAuthenticator>(s => s.GetRequiredService<AzureADB2CAuthenticator>());
-        services.AddScoped<BlossomAuthorizationMessageHandler>();
+        services.AddScoped<AzureADB2CAuthorizationMessageHandler>();
 
         services.AddHttpClient("api")
-            .AddHttpMessageHandler<BlossomAuthorizationMessageHandler>();
+            .AddHttpMessageHandler<AzureADB2CAuthorizationMessageHandler>();
 
         services.AddScoped(x => (T)Activator.CreateInstance(typeof(T), baseUrl, x.GetService<IHttpClientFactory>().CreateClient("api")));
 
         return Task.FromResult(services);
     }
 
-
+    
 }

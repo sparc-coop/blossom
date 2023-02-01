@@ -3,9 +3,9 @@ using Sparc.Blossom;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomAuthorizationMessageHandler : DelegatingHandler
+public class AzureADB2CAuthorizationMessageHandler : DelegatingHandler
 {
-    public BlossomAuthorizationMessageHandler(IAuthenticator authenticator)
+    public AzureADB2CAuthorizationMessageHandler(IAuthenticator authenticator)
     {
         Authenticator = authenticator;
     }

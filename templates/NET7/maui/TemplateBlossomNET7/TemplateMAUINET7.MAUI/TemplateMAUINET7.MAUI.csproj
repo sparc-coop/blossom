@@ -54,8 +54,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\..\..\..\Sparc.Blossom.Client\Sparc.Blossom.Client.csproj" />
-      <ProjectReference Include="..\TemplateMAUINET7.UI\TemplateMAUINET7.UI.csproj" />
+		<ProjectReference Include="..\TemplateMAUINET7.UI\TemplateMAUINET7.UI.csproj" />
+		<ProjectReference Include="..\..\..\..\..\Sparc.Blossom.Client\Sparc.Blossom.Client.csproj" />
+      
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net7.0-android'">
