@@ -86,7 +86,7 @@ public class BlossomAuthenticationStateProvider : AuthenticationStateProvider, I
         await LocalStorage.RemoveItemAsync(TokenName);
         _user = null;
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-        Navigation.NavigateToLogout(Config["Blossom:Authority"] + "/_logout");
+        Navigation.NavigateTo(Config["Blossom:Authority"] + "/_logout", true);
     }
 
     public async ValueTask<AccessTokenResult> RequestAccessToken()
