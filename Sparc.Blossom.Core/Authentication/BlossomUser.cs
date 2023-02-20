@@ -1,11 +1,10 @@
-﻿using System.Security.Claims;
+﻿using Sparc.Blossom.Data;
+using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomUser
+public class BlossomUser : Root<string>
 {
-    public string Id { get; set; } = string.Empty;
-
     public string? SecurityStamp { get; set; }
 
     public string? UserName { get; set; }

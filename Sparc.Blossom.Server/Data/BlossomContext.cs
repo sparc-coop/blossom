@@ -33,9 +33,7 @@ public class BlossomContext : DbContext
 
     async Task DispatchDomainEventsAsync()
     {
-        var domainEntities = ChangeTracker.Entries<Root>().Where(x => x.Entity._events != null && x.Entity._events.Any());
-        var domainEvents = domainEntities.SelectMany(x => x.Entity._events!).ToList();
-        domainEntities.ToList().ForEach(entity => entity.Entity._events!.Clear());
+        var domainEvents = ChangeTracker.Entries<Root>().SelectMany(x => x.Entity.Publish());
 
         var tasks = domainEvents
             .Select(async (domainEvent) =>
@@ -44,8 +42,5 @@ public class BlossomContext : DbContext
             });
 
         await Task.WhenAll(tasks);
-
-        foreach (var entity in domainEntities)
-            entity.Entity._events!.Clear();
     }
 }

@@ -11,6 +11,17 @@ public class Root
         _events ??= new List<INotification>();
         _events!.Add(notification);
     }
+
+    public List<INotification> Publish()
+    {
+        if (_events == null || !_events.Any())
+            return new();
+
+        var domainEvents = _events.ToList();
+        _events.Clear();
+
+        return domainEvents;
+    }
 }
 
 public class Root<T> : Root, IRoot<T> where T : notnull
