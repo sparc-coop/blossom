@@ -8,16 +8,13 @@ namespace Sparc.Blossom.Authentication;
 
 public static class ServiceCollectionExtensions
 {
-    public static AuthenticationBuilder AddBlossomAuthentication<T, TUser>(this WebApplicationBuilder builder)
-        where T : BlossomAuthenticator
+    public static AuthenticationBuilder AddBlossomAuthentication<TUser>(this WebApplicationBuilder builder)
         where TUser : BlossomUser, new()
     {
         var auth = builder.Services.AddAuthentication().AddCookie(opt =>
         {
-            opt.Cookie.IsEssential = true;
-            opt.Cookie.HttpOnly = true;
+            opt.Cookie.Name = "__Blossom";
             opt.Cookie.SameSite = SameSiteMode.Strict;
-            opt.SlidingExpiration = true;
         });
 
         builder.Services.AddScoped<IUserStore<TUser>, BlossomUserRepository<TUser>>()
@@ -28,7 +25,7 @@ public static class ServiceCollectionExtensions
         
         builder.Services.AddAuthorization();
 
-        builder.Services.AddScoped(typeof(BlossomAuthenticator), typeof(T));
+        builder.Services.AddScoped(typeof(BlossomAuthenticator), typeof(BlossomAuthenticator<TUser>));
 
         return auth;
     }
