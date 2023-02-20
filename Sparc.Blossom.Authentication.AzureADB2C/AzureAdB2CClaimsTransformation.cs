@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class AzureAdB2CClaimsTransformation<TUser> : IClaimsTransformation where TUser : IUser
+public class AzureAdB2CClaimsTransformation<TUser> : IClaimsTransformation where TUser : BlossomUser
 {
     public AzureAdB2CClaimsTransformation(IRepository<TUser> users)
     {

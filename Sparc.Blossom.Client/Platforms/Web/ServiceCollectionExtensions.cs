@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authorization;
-using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using Polly;
 using Sparc.Blossom.Authentication;
@@ -14,7 +11,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBlossom<T>(this IServiceCollection services, IConfiguration configuration, string? baseUrl = null) where T : class
     {
-        services.AddBlazoredLocalStorage();
         services.AddScoped<IDevice, WebDevice>();
         services.AddScoped(_ => configuration);
 
@@ -35,7 +31,7 @@ public static class ServiceCollectionExtensions
             services.AddScoped<AuthenticationStateProvider, AnonymousAuthenticationStateProvider>();
         }
 
-        services.AddBlossomHttpClient<T>(baseUrl, hasAuth);
+        services.AddBlossomHttpClient<T>(baseUrl);
         
         return services;
     }
@@ -70,22 +66,14 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddBlossomApi<T>(this IServiceCollection services) where T : class
     {
-        services.AddScoped<IAccessTokenProvider, BlossomAuthenticationStateProvider>();
-        services.AddAuthorizationCore(options =>
-        {
-            options.AddPolicy("Blossom", policy => policy.Requirements.Add(new BlossomAccessTokenRequirement()));
-        });
-        services.AddScoped<IAuthorizationHandler, BlossomAccessTokenAuthorizationHandler>();
         services.AddScoped<AuthenticationStateProvider, BlossomAuthenticationStateProvider>();
         services.AddScoped<BlossomAuthenticationStateProvider>();
 
         return services;
     }
 
-    public static void AddBlossomHttpClient<T>(this IServiceCollection services, string? apiBaseUrl, bool configureAuthentication = true) where T : class
+    public static void AddBlossomHttpClient<T>(this IServiceCollection services, string? apiBaseUrl) where T : class
     {
-        services.AddScoped(sp => new BlossomAuthorizationMessageHandler(sp.GetRequiredService<IAccessTokenProvider>(), apiBaseUrl));
-
         var client = services.AddHttpClient<T>(client =>
         {
             if (apiBaseUrl != null)
@@ -100,13 +88,7 @@ public static class ServiceCollectionExtensions
                 TimeSpan.FromSeconds(10)
             }));
 
-        if (!configureAuthentication)
-            return;
-
-        if (string.IsNullOrWhiteSpace(apiBaseUrl))
-            client.AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
-        else
-            client.AddHttpMessageHandler<BlossomAuthorizationMessageHandler>();
+        client.AddHttpMessageHandler<BlossomAuthorizationMessageHandler>();
     }
 
     public static WebAssemblyHostBuilder AddBlossom<T>(this WebAssemblyHostBuilder builder, string? baseUrl = null) where T : class

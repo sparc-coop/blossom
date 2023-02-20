@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -30,7 +29,6 @@ public static class ServiceCollectionExtensions
 
         // Use the User ID as the SignalR user identifier    
         services.AddSingleton<IUserIdProvider, UserIdProvider>();
-        services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>>(_ => new BlossomHubAuthenticator(hubName));
 
         services.AddTransient<IHubContext<BlossomHub>>(s => s.GetRequiredService<IHubContext<THub>>());
 

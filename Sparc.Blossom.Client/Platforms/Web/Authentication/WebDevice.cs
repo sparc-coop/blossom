@@ -1,35 +1,21 @@
-﻿using Blazored.LocalStorage;
+﻿using Microsoft.JSInterop;
 
 namespace Sparc.Blossom.Authentication;
 
 public class WebDevice : IDevice
 {
-    public WebDevice(ISyncLocalStorageService localStorage)
+    public WebDevice(IJSRuntime js)
     {
-        LocalStorage = localStorage;
+        Js = js as IJSInProcessRuntime 
+            ?? throw new ArgumentException("WebDevice requires IJSInProcessRuntime", nameof(js));
     }
-
+    
     private string? _id;
     public string? Id
     {
         get
         {
-            if (_id != null)
-                return _id;
-
-            try
-            {
-
-                if (LocalStorage.ContainKey("blossom-device-id"))
-                    _id = LocalStorage.GetItemAsString("blossom-device-id");
-                else
-                {
-                    _id = Guid.NewGuid().ToString();
-                    LocalStorage.SetItemAsString("blossom-device-id", _id);
-                }
-            }
-            catch { }
-
+            _id ??= GetOrSet("blossom-device-id", Guid.NewGuid().ToString());
             return _id;
         }
         set { _id = value; }
@@ -40,20 +26,30 @@ public class WebDevice : IDevice
     {
         get
         {
-            if (_pushToken != null) return _pushToken;
-            if (LocalStorage.ContainKey("blossom-device-pushtoken"))
-                _pushToken = LocalStorage.GetItemAsString("blossom-device-pushtoken");
+            _pushToken ??= GetOrSet("blossom-device-pushtoken");            
             return _pushToken;
         }
         set
         {
             _pushToken = value;
-            LocalStorage.SetItemAsString("blossom-device-pushtoken", value);
+            GetOrSet("blossom-device-pushtoken", value, true);
         }
     }
 
+    private string? GetOrSet(string key, string? value = null, bool overwrite = false)
+    {
+        var result = Js.Invoke<string?>("localStorage.getItem", key);
+
+        if (value != null && (result == null || overwrite))
+        {
+            Js.InvokeVoid("localStorage.setItem", key, value);
+            result = value;
+        }
+
+        return result;
+    }
+
     public string Platform => "Web";
-    public ISyncLocalStorageService LocalStorage { get; }
     public string? DeviceType { get; set; }
     string? IDevice.Platform { get; set; }
     public string? Idiom { get; set; }
@@ -61,4 +57,5 @@ public class WebDevice : IDevice
     public string? Model { get; set; }
     public string? Name { get; set; }
     public string? VersionString { get; set; }
+    public IJSInProcessRuntime Js { get; }
 }

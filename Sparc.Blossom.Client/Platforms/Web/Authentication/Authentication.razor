@@ -1,9 +1,0 @@
-﻿@page "/authentication/{action}"
-
-<div class="blossom-authentication">
-    <RemoteAuthenticatorView Action="@Action" />
-</div>
-
-@code {
-    [Parameter] public string Action { get; set; } = null!;
-}

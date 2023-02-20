@@ -5,7 +5,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Diagnostics;
-using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 using System.Globalization;
 
@@ -35,24 +34,6 @@ public static class ServiceCollectionExtensions
             c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
             c.UseAllOfToExtendReferenceSchemas();
             c.EnableAnnotations();
-
-            // Add JWT Authentication
-            c.OperationFilter<SwaggerAuthorizeFilter>();
-            var securityScheme = new OpenApiSecurityScheme
-            {
-                Name = "JWT Authentication",
-                Description = "Enter JWT Bearer token **_only_**",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                BearerFormat = "JWT",
-                Reference = new OpenApiReference
-                {
-                    Id = "bearer",
-                    Type = ReferenceType.SecurityScheme
-                }
-            };
-            c.AddSecurityDefinition(securityScheme.Reference.Id, securityScheme);
         });
 
         if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))

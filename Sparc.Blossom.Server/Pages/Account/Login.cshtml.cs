@@ -62,12 +62,6 @@ public class LoginModel : PageModel
     protected async Task<IActionResult> LoginAsync(ClaimsPrincipal principal)
     {
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-        var returnUri = new Uri(ReturnUrl!);
-        var token = Authenticator.CreateToken(principal);
-        var callbackUrl = $"{returnUri.Scheme}://{returnUri.Authority}/_authorize";
-        callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "returnUrl", ReturnUrl!);
-        callbackUrl = QueryHelpers.AddQueryString(callbackUrl, "token", token);
-        return Redirect(callbackUrl);
+        return Redirect(ReturnUrl!);
     }
 }

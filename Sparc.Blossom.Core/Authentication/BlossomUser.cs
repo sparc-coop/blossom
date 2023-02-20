@@ -1,13 +1,11 @@
-﻿using Sparc.Blossom.Data;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public abstract class BlossomUser : Root<string>, IUser
+public class BlossomUser
 {
-    public BlossomUser()
-    { }
-    
+    public string Id { get; set; } = string.Empty;
+
     public string? SecurityStamp { get; set; }
 
     public string? UserName { get; set; }
@@ -39,7 +37,11 @@ public abstract class BlossomUser : Root<string>, IUser
             MultiClaims.Add(type, values);
     }
 
-    protected abstract void RegisterClaims();
+    protected virtual void RegisterClaims()
+    {
+        // Do nothing in base class. This should be overridden in derived classes to
+        // create the claims from the persisted user.
+    }
 
     public virtual ClaimsPrincipal CreatePrincipal()
     {

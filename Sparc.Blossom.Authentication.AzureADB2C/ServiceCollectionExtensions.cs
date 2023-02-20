@@ -10,7 +10,7 @@ namespace Sparc.Blossom.Authentication;
 
 public static class ServiceCollectionExtensions
 {
-    public static AuthenticationBuilder AddAzureADB2CAuthentication<TUser>(this IServiceCollection services, IConfiguration configuration, string configurationSectionName = "AzureAdB2C") where TUser : IUser
+    public static AuthenticationBuilder AddAzureADB2CAuthentication<TUser>(this IServiceCollection services, IConfiguration configuration, string configurationSectionName = "AzureAdB2C") where TUser : BlossomUser
     {
         var builder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
         builder.AddMicrosoftIdentityWebApi(

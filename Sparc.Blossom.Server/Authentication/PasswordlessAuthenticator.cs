@@ -36,7 +36,7 @@ public class PasswordlessAuthenticator<T> : BlossomAuthenticator where T : Bloss
         
         var token = await UserManager.GenerateUserTokenAsync(user, "Default", "passwordless-auth");
 
-        var url = "/_authenticate";
+        var url = "/auth/login-passwordless";
         url = QueryHelpers.AddQueryString(url, "userId", user.Id);
         url = QueryHelpers.AddQueryString(url, "token", token);
         url = QueryHelpers.AddQueryString(url, "returnUrl", returnUrl);
