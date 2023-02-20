@@ -3,13 +3,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
 [BindProperties]
-[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+[Authorize]
 [AllowAnonymous]
 public class LoginModel : PageModel
 {
