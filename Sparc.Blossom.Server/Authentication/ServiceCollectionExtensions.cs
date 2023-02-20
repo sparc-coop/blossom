@@ -13,7 +13,7 @@ public static class ServiceCollectionExtensions
     {
         var auth = builder.Services.AddAuthentication().AddCookie(opt =>
         {
-            opt.Cookie.Name = "__Blossom";
+            opt.Cookie.Name = "__Host-blossom";
             opt.Cookie.SameSite = SameSiteMode.Strict;
         });
 
