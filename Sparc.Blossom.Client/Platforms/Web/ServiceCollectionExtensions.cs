@@ -88,6 +88,7 @@ public static class ServiceCollectionExtensions
                 TimeSpan.FromSeconds(10)
             }));
 
+        services.AddScoped<BlossomAuthorizationMessageHandler>();
         client.AddHttpMessageHandler<BlossomAuthorizationMessageHandler>();
     }
 
