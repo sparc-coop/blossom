@@ -11,7 +11,7 @@ public abstract class BlossomAuthenticator
     public abstract Task<BlossomUser?> RefreshClaimsAsync(ClaimsPrincipal principal);
 }
 
-public class BlossomAuthenticator<TUser> where TUser : BlossomUser, new()
+public class BlossomAuthenticator<TUser> : BlossomAuthenticator where TUser : BlossomUser, new()
 {
     public BlossomAuthenticator(IConfiguration config, UserManager<TUser> userManager, SignInManager<TUser> signInManager)
     {
@@ -24,7 +24,7 @@ public class BlossomAuthenticator<TUser> where TUser : BlossomUser, new()
     public UserManager<TUser> UserManager { get; }
     public SignInManager<TUser> SignInManager { get; }
 
-    public virtual async Task<BlossomUser?> LoginAsync(string userName, string password)
+    public override async Task<BlossomUser?> LoginAsync(string userName, string password)
     {
         var result = await SignInManager.PasswordSignInAsync(userName, password, true, false);
         if (result.Succeeded)
@@ -33,7 +33,7 @@ public class BlossomAuthenticator<TUser> where TUser : BlossomUser, new()
         return null;
     }
 
-    public virtual async Task<BlossomUser?> RefreshClaimsAsync(ClaimsPrincipal principal)
+    public override async Task<BlossomUser?> RefreshClaimsAsync(ClaimsPrincipal principal)
     {
         return await UserManager.FindByIdAsync(principal.Id());
     }
