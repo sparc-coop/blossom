@@ -23,7 +23,7 @@ public static class ServiceCollectionExtensions
         if (configuration["Oidc:Authority"] != null)
             services.AddOidcApi<T>(configuration);
         if (configuration["Blossom:Authority"] != null)
-            services.AddBlossomApi<T>();
+            services.AddBlossomApi<T>(configuration);
 
         if (!hasAuth)
         {
@@ -64,10 +64,13 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddBlossomApi<T>(this IServiceCollection services) where T : class
+    public static IServiceCollection AddBlossomApi<T>(this IServiceCollection services, IConfiguration configuration) where T : class
     {
         services.AddScoped<AuthenticationStateProvider, BlossomAuthenticationStateProvider>();
         services.AddScoped<BlossomAuthenticationStateProvider>();
+
+        var authUrl = configuration["Blossom:Authority"]!.TrimEnd('/') + "/auth/";
+        services.AddHttpClient<BlossomAuthenticationClient>(client => client.BaseAddress = new Uri(authUrl));
 
         return services;
     }
@@ -112,7 +115,7 @@ public static class ServiceCollectionExtensions
 
     public static WebAssemblyHostBuilder AddBlossomApi<T>(this WebAssemblyHostBuilder builder) where T : class
     {
-        builder.Services.AddBlossomApi<T>();
+        builder.Services.AddBlossomApi<T>(builder.Configuration);
         return builder;
     }
 
