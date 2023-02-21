@@ -66,6 +66,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddBlossomApi<T>(this IServiceCollection services, IConfiguration configuration) where T : class
     {
+        services.AddAuthorizationCore();
         services.AddScoped<AuthenticationStateProvider, BlossomAuthenticationStateProvider>();
         services.AddScoped<BlossomAuthenticationStateProvider>();
 

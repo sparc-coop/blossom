@@ -14,8 +14,19 @@ public class BlossomAuthenticationClient
 
     internal async Task<ClaimsPrincipal> GetUserAsync()
     {
-        var user = await _httpClient.GetFromJsonAsync<BlossomUser>("userinfo");
-        return user?.CreatePrincipal()
-            ?? new ClaimsPrincipal(new ClaimsIdentity());
+        ClaimsPrincipal principal = new ClaimsPrincipal(new ClaimsIdentity());
+        try
+        {
+            var user = await _httpClient.GetFromJsonAsync<BlossomUser>("userinfo");
+            if (user != null)
+                principal = user.CreatePrincipal();
+        }
+        catch (HttpRequestException e)
+        {
+            if (e.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                return principal;
+        }
+
+        return principal;
     }
 }

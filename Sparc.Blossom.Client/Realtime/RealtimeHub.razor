@@ -39,7 +39,6 @@
     }
 </CascadingValue>
 
-@inject IAccessTokenProvider AccessTokenProvider
 @code {
     [Parameter] public string Url { get; set; } = "";
     [Parameter] public RenderFragment ChildContent { get; set; } = null!;
@@ -47,16 +46,12 @@
 
     HubConnection? Connection { get; set; }
     bool IsConnected => Connection?.State == HubConnectionState.Connected;
-    string? AccessToken { get; set; }
     bool HasError;
 
     protected override void OnInitialized()
     {
         Connection = new HubConnectionBuilder()
-            .WithUrl(Url, options =>
-                {
-                    options.AccessTokenProvider = () => Task.FromResult(AccessToken);
-                })
+            .WithUrl(Url)
             //.AddMessagePackProtocol()
             .WithAutomaticReconnect()
             .Build();
@@ -88,12 +83,6 @@
         {
             try
             {
-                var provider = await AccessTokenProvider.RequestAccessToken();
-                if (provider.TryGetToken(out var token))
-                    AccessToken = token.Value;
-                else
-                    throw new Exception("Access token not available");
-
                 await Connection.StartAsync();
                 return;
             }

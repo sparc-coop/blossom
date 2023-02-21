@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -30,8 +31,17 @@ public static class ServiceCollectionExtensions
         return auth;
     }
 
-    public static void UsePasswordlessAuthentication<TUser>(this WebApplication app) where TUser : BlossomUser
+    public static void UseBlossomAuthentication<TUser>(this WebApplication app) where TUser : BlossomUser
     {
+        app.MapGet("/auth/userinfo", async (UserManager<TUser> users, ClaimsPrincipal principal) =>
+        {
+            if (principal.Identity?.IsAuthenticated != true)
+                return Results.Unauthorized();
+
+            var user = await users.FindByIdAsync(principal.Id());
+            return Results.Ok(user);
+        });
+        
         app.MapGet("/auth/login-passwordless", 
             async (string userId, string token, string returnUrl, UserManager<TUser> users, HttpContext context, BlossomAuthenticator authenticator) =>
         {
