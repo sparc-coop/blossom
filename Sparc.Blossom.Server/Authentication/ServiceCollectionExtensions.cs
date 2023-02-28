@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
             options.Cookie.Name = "__Host-blossom";
             options.Cookie.SameSite = SameSiteMode.Strict;
             options.LoginPath = new PathString("/_auth/login");
+            options.LogoutPath = new PathString("/_auth/logout");
             options.SlidingExpiration = true;
             options.Cookie.MaxAge = options.ExpireTimeSpan;
         });
