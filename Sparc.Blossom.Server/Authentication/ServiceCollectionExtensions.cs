@@ -23,6 +23,15 @@ public static class ServiceCollectionExtensions
 
         builder.Services.AddIdentity<TUser, BlossomRole>()
             .AddDefaultTokenProviders();
+
+        builder.Services.ConfigureApplicationCookie(options =>
+        {
+            options.Cookie.Name = "__Host-blossom";
+            options.Cookie.SameSite = SameSiteMode.Strict;
+            options.LoginPath = new PathString("/_auth/login");
+            options.SlidingExpiration = true;
+            options.Cookie.MaxAge = options.ExpireTimeSpan;
+        });
         
         builder.Services.AddAuthorization();
 
