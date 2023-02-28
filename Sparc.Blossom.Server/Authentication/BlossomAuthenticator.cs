@@ -59,7 +59,7 @@ public class BlossomAuthenticator<TUser> : BlossomAuthenticator where TUser : Bl
 
         var token = await UserManager.GenerateUserTokenAsync(user, "Default", "passwordless-auth");
 
-        var url = "/auth/login-passwordless";
+        var url = "/_auth/login-silent";
         url = QueryHelpers.AddQueryString(url, "userId", user.Id);
         url = QueryHelpers.AddQueryString(url, "token", token);
         url = QueryHelpers.AddQueryString(url, "returnUrl", returnUrl);

@@ -43,7 +43,7 @@ public class BlossomAuthenticationStateProvider : AuthenticationStateProvider
         if (forceLogin)
             _user = Anonymous();
         
-        var loginUrl = QueryHelpers.AddQueryString(Config["Blossom:Authority"] + "/auth/login", "returnUrl", Navigation.Uri);
+        var loginUrl = QueryHelpers.AddQueryString(Config["Blossom:Authority"] + "/_auth/login", "returnUrl", Navigation.Uri);
         Navigation.NavigateTo(loginUrl, true);
 
         return Task.CompletedTask;
@@ -53,7 +53,7 @@ public class BlossomAuthenticationStateProvider : AuthenticationStateProvider
     {
         _user = Anonymous();
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-        Navigation.NavigateTo(Config["Blossom:Authority"] + "/auth/logout", true);
+        Navigation.NavigateTo(Config["Blossom:Authority"] + "/_auth/logout", true);
 
         return Task.CompletedTask;
     }

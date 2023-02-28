@@ -33,7 +33,7 @@ public static class ServiceCollectionExtensions
 
     public static void UseBlossomAuthentication<TUser>(this WebApplication app) where TUser : BlossomUser
     {
-        app.MapGet("/auth/userinfo", async (UserManager<TUser> users, ClaimsPrincipal principal) =>
+        app.MapGet("/_auth/userinfo", async (UserManager<TUser> users, ClaimsPrincipal principal) =>
         {
             if (principal.Identity?.IsAuthenticated != true)
                 return Results.Unauthorized();
@@ -42,7 +42,7 @@ public static class ServiceCollectionExtensions
             return Results.Ok(user);
         });
         
-        app.MapGet("/auth/login-passwordless", 
+        app.MapGet("/_auth/login-silent", 
             async (string userId, string token, string returnUrl, UserManager<TUser> users, HttpContext context, BlossomAuthenticator authenticator) =>
         {
             var user = await users.FindByIdAsync(userId) 
