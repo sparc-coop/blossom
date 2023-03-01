@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
+using System.Net.Mail;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
 public abstract class BlossomAuthenticator
 {
-    public abstract Task<BlossomUser?> LoginAsync(string userName, string password);
+    public abstract Task<BlossomUser?> LoginAsync(string userName, string password, string? tokenProvider = null);
     public abstract Task<BlossomUser?> RefreshClaimsAsync(ClaimsPrincipal principal);
 }
 
@@ -24,11 +27,22 @@ public class BlossomAuthenticator<TUser> : BlossomAuthenticator where TUser : Bl
     public UserManager<TUser> UserManager { get; }
     public SignInManager<TUser> SignInManager { get; }
 
-    public override async Task<BlossomUser?> LoginAsync(string userName, string password)
+    public override async Task<BlossomUser?> LoginAsync(string userName, string password, string? tokenProvider = null)
     {
-        var result = await SignInManager.PasswordSignInAsync(userName, password, true, false);
-        if (result.Succeeded)
-            return await UserManager.FindByNameAsync(userName);
+        var success = tokenProvider switch
+        {
+            "Email" => await ValidateOneTimeCodeAsync(userName, password),
+            "Phone" => await ValidateOneTimeCodeAsync(userName, password),
+            "Link" => await ValidateMagicSignInLinkAsync(userName, password),
+            _ => (await SignInManager.PasswordSignInAsync(userName, password, false, false)).Succeeded
+        };
+
+        if (success)
+        {
+            var user = await GetOrCreateAsync(userName);
+            await SignInManager.SignInAsync(user, true);
+            return user;
+        }
 
         return null;
     }
@@ -38,11 +52,63 @@ public class BlossomAuthenticator<TUser> : BlossomAuthenticator where TUser : Bl
         return await UserManager.FindByIdAsync(principal.Id());
     }
 
-    public async Task<string> CreateMagicSignInLinkAsync(string username, string returnUrl)
+    public async Task<string> CreateOneTimeCodeAsync(string userName)
     {
-        var user = await UserManager.FindByNameAsync(username);
+        var tokenProvider = IsEmail(userName)
+            ? TokenOptions.DefaultEmailProvider
+            : TokenOptions.DefaultPhoneProvider;
+        
+        var user = await GetOrCreateAsync(userName);
+        return await UserManager.GenerateTwoFactorTokenAsync(user, tokenProvider);
+    }
+
+    private async Task<bool> ValidateOneTimeCodeAsync(string userName, string password)
+    {
+        var tokenProvider = IsEmail(userName)
+            ? TokenOptions.DefaultEmailProvider
+            : TokenOptions.DefaultPhoneProvider;
+
+        var user = await GetOrCreateAsync(userName);
+        
+        return await UserManager.VerifyTwoFactorTokenAsync(user, tokenProvider, password);
+    }
+
+    public async Task<string> CreateMagicSignInLinkAsync(string username, string returnUrl, HttpRequest? request = null)
+    {
+        var user = await GetOrCreateAsync(username);
+        var token = await UserManager.GenerateUserTokenAsync(user, "Default", "passwordless-auth");
+
+        var url = "/_auth/login-silent";
+        url = QueryHelpers.AddQueryString(url, "userId", user.Id);
+        url = QueryHelpers.AddQueryString(url, "token", token);
+        url = QueryHelpers.AddQueryString(url, "returnUrl", returnUrl);
+
+        if (request != null && !returnUrl.StartsWith("http"))
+            url = $"{request.Scheme}://{request.Host.Value.TrimEnd('/')}/{url.TrimStart('/')}";
+
+        return url;
+    }
+
+    public async Task<bool> ValidateMagicSignInLinkAsync(string username, string token)
+    {
+        var user = await GetOrCreateAsync(username);
+        if (user == null)
+            return false;
+        
+        return await UserManager.VerifyUserTokenAsync(user, "Default", "passwordless-auth", token);
+    }
+
+    private async Task<TUser> GetOrCreateAsync(string username)
+    {
+        var user = Guid.TryParse(username, out Guid id)
+            ? await UserManager.FindByIdAsync(username)
+            : await UserManager.FindByNameAsync(username);
+
         if (user == null)
         {
+            if (id != Guid.Empty)
+                throw new ArgumentException($"User ID {id} not found.");
+
             user = new()
             {
                 UserName = username
@@ -50,19 +116,19 @@ public class BlossomAuthenticator<TUser> : BlossomAuthenticator where TUser : Bl
             await UserManager.CreateAsync(user);
         }
 
-        return await CreateMagicSignInLinkAsync(user, returnUrl);
+        return user;
     }
 
-    public async Task<string> CreateMagicSignInLinkAsync(TUser user, string returnUrl)
+    private static bool IsEmail(string address)
     {
-        await UserManager.UpdateSecurityStampAsync(user);
-
-        var token = await UserManager.GenerateUserTokenAsync(user, "Default", "passwordless-auth");
-
-        var url = "/_auth/login-silent";
-        url = QueryHelpers.AddQueryString(url, "userId", user.Id);
-        url = QueryHelpers.AddQueryString(url, "token", token);
-        url = QueryHelpers.AddQueryString(url, "returnUrl", returnUrl);
-        return url;
+        try
+        {
+            var m = new MailAddress(address);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }

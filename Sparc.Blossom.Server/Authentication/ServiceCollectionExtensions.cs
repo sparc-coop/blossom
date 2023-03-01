@@ -36,12 +36,13 @@ public static class ServiceCollectionExtensions
         
         builder.Services.AddAuthorization();
 
+        builder.Services.AddScoped<BlossomAuthenticator<TUser>>();
         builder.Services.AddScoped(typeof(BlossomAuthenticator), typeof(BlossomAuthenticator<TUser>));
 
         return auth;
     }
 
-    public static void UseBlossomAuthentication<TUser>(this WebApplication app) where TUser : BlossomUser
+    public static void UseBlossomAuthentication<TUser>(this WebApplication app) where TUser : BlossomUser, new()
     {
         app.MapGet("/_auth/userinfo", async (UserManager<TUser> users, ClaimsPrincipal principal) =>
         {
@@ -53,14 +54,11 @@ public static class ServiceCollectionExtensions
         });
         
         app.MapGet("/_auth/login-silent", 
-            async (string userId, string token, string returnUrl, UserManager<TUser> users, HttpContext context, BlossomAuthenticator authenticator) =>
+            async (string userId, string token, string returnUrl, HttpContext context, BlossomAuthenticator<TUser> authenticator) =>
         {
-            var user = await users.FindByIdAsync(userId) 
-                ?? throw new NotAuthorizedException($"Can't find user {userId}");
-            
-            var isValid = await users.VerifyUserTokenAsync(user, "Default", "passwordless-auth", token);
+            var user = await authenticator.LoginAsync(userId, token);
 
-            if (!isValid)
+            if (user == null)
                 return Results.Unauthorized();
 
             await context.SignInAsync(IdentityConstants.ApplicationScheme, user.CreatePrincipal());
