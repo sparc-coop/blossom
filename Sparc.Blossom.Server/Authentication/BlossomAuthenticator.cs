@@ -83,7 +83,7 @@ public class BlossomAuthenticator<TUser> : BlossomAuthenticator where TUser : Bl
         url = QueryHelpers.AddQueryString(url, "token", token);
         url = QueryHelpers.AddQueryString(url, "returnUrl", returnUrl);
 
-        if (request != null && !returnUrl.StartsWith("http"))
+        if (request != null)
             url = $"{request.Scheme}://{request.Host.Value.TrimEnd('/')}/{url.TrimStart('/')}";
 
         return url;

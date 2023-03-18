@@ -56,7 +56,7 @@ public static class ServiceCollectionExtensions
         app.MapGet("/_auth/login-silent", 
             async (string userId, string token, string returnUrl, HttpContext context, BlossomAuthenticator<TUser> authenticator) =>
         {
-            var user = await authenticator.LoginAsync(userId, token);
+            var user = await authenticator.LoginAsync(userId, token, "Link");
 
             if (user == null)
                 return Results.Unauthorized();
