@@ -2,7 +2,7 @@
 
 namespace Sparc.Blossom.Data;
 
-public class Root
+public class Entity
 {
     internal List<INotification>? _events;
 
@@ -24,14 +24,14 @@ public class Root
     }
 }
 
-public class Root<T> : Root, IRoot<T> where T : notnull
+public class Entity<T> : Entity, IEntity<T> where T : notnull
 {
-    public Root()
+    public Entity()
     {
         Id = default!;
     }
 
-    public Root(T id) => Id = id;
+    public Entity(T id) => Id = id;
 
     public virtual T Id { get; set; }
 }

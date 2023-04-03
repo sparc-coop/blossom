@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T : class, IRoot<string>
+public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T : class, IEntity<string>
 {
     public IQueryable<T> Query { get; }
     public DbContext Context { get; }

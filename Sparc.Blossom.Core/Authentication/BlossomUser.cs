@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomUser : Root<string>
+public class BlossomUser : Entity<string>
 {
     public string? SecurityStamp { get; set; }
 

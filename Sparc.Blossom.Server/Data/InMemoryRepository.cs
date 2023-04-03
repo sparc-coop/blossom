@@ -59,16 +59,16 @@ public class InMemoryRepository<T> : IRepository<T> where T : class
 
     public Task<T?> FindAsync(object id)
     {
-        if (typeof(T).IsAssignableTo(typeof(Root<string>)))
+        if (typeof(T).IsAssignableTo(typeof(Entity<string>)))
         {
-            var itemsWithStringIds = _items.Cast<Root<string>>();
+            var itemsWithStringIds = _items.Cast<Entity<string>>();
             var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
             return Task.FromResult(item);
         }
 
-        if (typeof(T).IsAssignableTo(typeof(Root<int>)))
+        if (typeof(T).IsAssignableTo(typeof(Entity<int>)))
         {
-            var itemsWithStringIds = _items.Cast<Root<int>>();
+            var itemsWithStringIds = _items.Cast<Entity<int>>();
             var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
             return Task.FromResult(item);
         }
@@ -93,8 +93,8 @@ public class InMemoryRepository<T> : IRepository<T> where T : class
 
     public async Task UpdateAsync(T item)
     {
-        object? id = (item as Root<string>)?.Id;
-        id ??= (item as Root<int>)?.Id;
+        object? id = (item as Entity<string>)?.Id;
+        id ??= (item as Entity<int>)?.Id;
 
         if (id == null)
             throw new Exception("The item passed to UpdateAsync has no Id set.");

@@ -71,7 +71,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<BlossomAuthenticationStateProvider>();
 
         var authUrl = configuration["Blossom:Authority"]!.TrimEnd('/') + "/_auth/";
-        services.AddHttpClient<BlossomAuthenticationClient>(client => client.BaseAddress = new Uri(authUrl));
+        var authClient = services.AddHttpClient<BlossomAuthenticationClient>(client => client.BaseAddress = new Uri(authUrl));
+        authClient.AddHttpMessageHandler<BlossomAuthorizationMessageHandler>();
 
         return services;
     }

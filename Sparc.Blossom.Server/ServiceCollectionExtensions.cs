@@ -15,7 +15,6 @@ public static class ServiceCollectionExtensions
     public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, string? clientUrl = null)
     {
         builder.Services.AddControllers(); // for API
-        builder.Services.AddSingleton<FeatureRouteTransformer>(); // is this necessary? yes
 
         if (clientUrl != null)
             builder.Services.AddCors(options =>
@@ -93,7 +92,6 @@ public static class ServiceCollectionExtensions
         app.UseOutputCache();
         app.UseAuthorization();
 
-        app.MapDynamicControllerRoute<FeatureRouteTransformer>("{namespace}/{controller}");
         app.MapRazorPages();
 
         return app;
