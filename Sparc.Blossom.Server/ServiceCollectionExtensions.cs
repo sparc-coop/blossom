@@ -14,8 +14,10 @@ public static class ServiceCollectionExtensions
 {
     public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, string? clientUrl = null)
     {
-        builder.Services.AddControllers(); // for API
+        // builder.Services.AddControllers(); // for API
 
+        builder.Services.AddGrpc().AddJsonTranscoding();
+        builder.Services.AddGrpcSwagger();
         if (clientUrl != null)
             builder.Services.AddCors(options =>
             {

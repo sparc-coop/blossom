@@ -5,6 +5,20 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Data;
 
+public class BlossomContext<T> : BlossomContext where T : class
+{
+    public DbSet<T> All => Set<T>();
+    
+    public BlossomContext(DbContextOptions options, Publisher publisher, IHttpContextAccessor http) : base(options, publisher, http)
+    {
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<T>();
+    }
+}
+
 public class BlossomContext : DbContext
 {
     public BlossomContext(DbContextOptions options, Publisher publisher, IHttpContextAccessor http) : base(options)
@@ -18,6 +32,11 @@ public class BlossomContext : DbContext
     protected ClaimsPrincipal? User => Http.HttpContext?.User;
 
     PublishStrategy PublishStrategy = PublishStrategy.ParallelNoWait;
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Conventions.Add(_ => new BlossomPropertyDiscoveryConvention());
+    }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
