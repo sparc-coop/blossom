@@ -51,11 +51,13 @@ public class SparcAuthenticator : AuthenticationStateProvider, IAccessTokenProvi
         return identity;
     }
 
-    public virtual async Task LoginAsync()
+    public virtual async Task LoginAsync(string? returnUrl = null)
     {
         var uri = new Uri(Navigation.Uri);
         var queryString = HttpUtility.ParseQueryString(uri.Query);
-        var returnUrl = queryString.AllKeys.Contains("returnUrl") ? queryString["returnUrl"]! : "/";
+        
+        if (string.IsNullOrWhiteSpace(returnUrl))       
+            returnUrl = queryString.AllKeys.Contains("returnUrl") ? queryString["returnUrl"]! : "/";
 
         if (queryString["token"] != null)
         {
@@ -65,7 +67,10 @@ public class SparcAuthenticator : AuthenticationStateProvider, IAccessTokenProvi
         }
         else
         {
-            var loginUrl = QueryHelpers.AddQueryString(Config["Sparc:Authority"] + "/_login", "returnUrl", Navigation.Uri);
+            if (!returnUrl.StartsWith("http"))
+                returnUrl = Navigation.ToAbsoluteUri(returnUrl).AbsoluteUri;
+            
+            var loginUrl = QueryHelpers.AddQueryString(Config["Sparc:Authority"] + "/_login", "returnUrl", returnUrl);
             Navigation.NavigateToLogin(loginUrl);
         }
     }
