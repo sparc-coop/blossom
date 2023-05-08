@@ -14,10 +14,10 @@ public static class ServiceCollectionExtensions
 {
     public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, string? clientUrl = null)
     {
-        // builder.Services.AddControllers(); // for API
+        builder.Services.AddControllers(); // for API
 
-        builder.Services.AddGrpc().AddJsonTranscoding();
-        builder.Services.AddGrpcSwagger();
+        //builder.Services.AddGrpc().AddJsonTranscoding();
+        //builder.Services.AddGrpcSwagger();
         if (clientUrl != null)
             builder.Services.AddCors(options =>
             {
@@ -29,13 +29,9 @@ public static class ServiceCollectionExtensions
                 .AllowCredentials());
             });
 
-        builder.Services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = builder.Environment.ApplicationName, Version = "v1" });
-            c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
-            c.UseAllOfToExtendReferenceSchemas();
-            c.EnableAnnotations();
-        });
+        builder.Services.RegisterAggregates();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
 
         if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))
             builder.Services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
@@ -77,6 +73,7 @@ public static class ServiceCollectionExtensions
         }
 
         app.UseCookiePolicy();
+        app.MapAggregates();
 
         app.UseExceptionHandler(x => x.Run(async context =>
         {

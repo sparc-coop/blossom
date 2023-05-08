@@ -1,8 +1,7 @@
-using Sparc.Blossom.Server.Example.TodoItem;
+using Sparc.Blossom;
 
 var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+builder.AddBlossom();
 
-app.MapGrpcService<TodoItem>();
-
+var app = builder.BuildBlossom();
 app.Run();

@@ -1,6 +1,7 @@
 ﻿using Ardalis.Specification;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom;
 
@@ -17,7 +18,11 @@ public static class BlossomAggregateExtensions
     {
         var modules = DiscoverAggregates();
         foreach (var module in modules)
-            services.AddScoped(module);
+        {
+            //var entity = module.GetGenericArguments().First();
+            //services.AddScoped(typeof(IRepository<>).MakeGenericType(entity));
+            services.AddSingleton(module);
+        }
 
         return services;
     }

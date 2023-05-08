@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Sparc.Blossom.Data;
+using System.Reflection;
 
 namespace Sparc.Blossom;
 
@@ -32,30 +34,28 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity<s
 
     protected void MapBaseEndpoints(IEndpointRouteBuilder endpoints)
     {
-        AggregateEndpoints = endpoints.MapGroup(BaseUrl)
-            .WithGroupName(Name);
-            //.WithOpenApi();
+        AggregateEndpoints = endpoints.MapGroup(BaseUrl);
 
-        AggregateEndpoints.MapGet("", DefaultGetAllAsync);
-        AggregateEndpoints.MapPost("", CreateAsync ?? DefaultCreateAsync);
+        AggregateEndpoints.MapGet("", DefaultGetAllAsync).WithName($"GetAll{Name}").WithOpenApi();
+        AggregateEndpoints.MapPost("", CreateAsync ?? DefaultCreateAsync).WithName($"Create{typeof(T).Name}").WithOpenApi();
 
-        RootEndpoints = AggregateEndpoints.MapGroup("{id}")
-            .AddEndpointFilter<BlossomCommandFilter<T>>();
+        RootEndpoints = AggregateEndpoints.MapGroup("{id}");
 
-        RootEndpoints.MapGet("", DefaultGetAsync);
-        RootEndpoints.MapPut("", UpdateAsync ?? DefaultUpdateAsync);
-        RootEndpoints.MapDelete("", DeleteAsync ?? DefaultDeleteAsync);
+        RootEndpoints.MapGet("", DefaultGetAsync).WithName($"Get{typeof(T).Name}").WithOpenApi();
+        RootEndpoints.MapPut("", UpdateAsync ?? DefaultUpdateAsync).WithName($"Update{typeof(T).Name}").WithOpenApi();
+        RootEndpoints.MapDelete("", DeleteAsync ?? DefaultDeleteAsync).WithName($"Delete{typeof(T).Name}").WithOpenApi();
 
-        foreach (var command in typeof(T).GetMethods())
+        var bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+        foreach (var command in typeof(T).GetMethods(bindingFlags).Where(m => !m.IsSpecialName))
         {
             var factory = RequestDelegateFactory.Create(command, context => (T)context.Items["entity"]!, null);
-            RootEndpoints.MapPut(command.Name, factory.RequestDelegate);
+            RootEndpoints.MapPut(command.Name, factory.RequestDelegate).WithName(command.Name).WithOpenApi();
         }
     }
 
-    protected Ok<T> DefaultGetAsync(T entity)
+    protected async Task<Ok<T>> DefaultGetAsync(string id, IRepository<T> repository)
     {
-        return TypedResults.Ok(entity);
+        return TypedResults.Ok(await repository.FindAsync(id));
     }
 
     protected async Task<Ok<List<T>>> DefaultGetAllAsync(IRepository<T> repository)
@@ -64,19 +64,19 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity<s
         return TypedResults.Ok(results);
     }
 
-    protected async Task<Created<T>> DefaultCreateAsync(T entity, IRepository<T> repository)
+    protected async Task<Created<T>> DefaultCreateAsync([FromBody] T entity, IRepository<T> repository)
     {
         await repository.AddAsync(entity);
         return TypedResults.Created($"{BaseUrl}/{entity.Id}", entity);
     }
 
-    protected async Task<Results<NotFound, Ok<T>>> DefaultUpdateAsync(T entity, IRepository<T> repository)
+    protected async Task<Results<NotFound, Ok<T>>> DefaultUpdateAsync([FromBody] T entity, IRepository<T> repository)
     {
         await repository.UpdateAsync(entity);
         return TypedResults.Ok(entity);
     }
 
-    protected async Task<Results<NotFound, NoContent>> DefaultDeleteAsync(T entity, IRepository<T> repository)
+    protected async Task<Results<NotFound, NoContent>> DefaultDeleteAsync([FromBody] T entity, IRepository<T> repository)
     {
         var result = await repository.FindAsync(entity.Id);
         if (result == null)
