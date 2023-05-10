@@ -3,7 +3,7 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomUserRepository<T> : IUserSecurityStampStore<T> where T : BlossomUser, new()
+public class BlossomUserRepository<T> : IUserSecurityStampStore<T>, IUserEmailStore<T> where T : BlossomUser, new()
 {
     public BlossomUserRepository(IRepository<T> users)
     {
@@ -29,6 +29,11 @@ public class BlossomUserRepository<T> : IUserSecurityStampStore<T> where T : Blo
         GC.SuppressFinalize(this);
     }
 
+    public async Task<T?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+    {
+        return await FindByNameAsync(normalizedEmail, cancellationToken);
+    }
+
     public async Task<T?> FindByIdAsync(string userId, CancellationToken cancellationToken)
     {
         return await Users.FindAsync(userId);
@@ -38,6 +43,21 @@ public class BlossomUserRepository<T> : IUserSecurityStampStore<T> where T : Blo
     {
         var user = Users.Query.FirstOrDefault(x => x.UserName == normalizedUserName);
         return Task.FromResult(user);
+    }
+
+    public async Task<string?> GetEmailAsync(T user, CancellationToken cancellationToken)
+    {
+        return await GetNormalizedUserNameAsync(user, cancellationToken);
+    }
+
+    public Task<bool> GetEmailConfirmedAsync(T user, CancellationToken cancellationToken)
+    {
+        return Task.FromResult(true);
+    }
+
+    public async Task<string?> GetNormalizedEmailAsync(T user, CancellationToken cancellationToken)
+    {
+        return await GetNormalizedUserNameAsync(user, cancellationToken);
     }
 
     public Task<string?> GetNormalizedUserNameAsync(T user, CancellationToken cancellationToken)
@@ -58,6 +78,21 @@ public class BlossomUserRepository<T> : IUserSecurityStampStore<T> where T : Blo
     public Task<string?> GetUserNameAsync(T user, CancellationToken cancellationToken)
     {
         return Task.FromResult(user.UserName);
+    }
+
+    public async Task SetEmailAsync(T user, string? email, CancellationToken cancellationToken)
+    {
+        await SetUserNameAsync(user, email, cancellationToken);
+    }
+
+    public Task SetEmailConfirmedAsync(T user, bool confirmed, CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public async Task SetNormalizedEmailAsync(T user, string? normalizedEmail, CancellationToken cancellationToken)
+    {
+        await SetNormalizedUserNameAsync(user, normalizedEmail, cancellationToken);
     }
 
     public async Task SetNormalizedUserNameAsync(T user, string? normalizedName, CancellationToken cancellationToken)
