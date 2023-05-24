@@ -18,7 +18,6 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity<s
 {
     public BlossomAggregate()
     {
-        GetAllAsync = () => new BlossomGetAllSpecification<T>(100);
     }
 
     public virtual string Name => typeof(T).Name + "s";
@@ -36,7 +35,7 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity<s
     {
         AggregateEndpoints = endpoints.MapGroup(BaseUrl);
 
-        AggregateEndpoints.MapGet("", DefaultGetAllAsync).WithName($"GetAll{Name}").WithOpenApi();
+        AggregateEndpoints.MapGet("", GetAllAsync ?? DefaultGetAllAsync).WithName($"GetAll{Name}").WithOpenApi();
         AggregateEndpoints.MapPost("", CreateAsync ?? DefaultCreateAsync).WithName($"Create{typeof(T).Name}").WithOpenApi();
 
         RootEndpoints = AggregateEndpoints.MapGroup("{id}");
@@ -60,7 +59,7 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity<s
 
     protected async Task<Ok<List<T>>> DefaultGetAllAsync(IRepository<T> repository)
     {
-        var results = await repository.GetAllAsync(GetAllAsync());
+        var results = await repository.GetAllAsync(new BlossomGetAllSpecification<T>(100));
         return TypedResults.Ok(results);
     }
 
@@ -91,7 +90,7 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity<s
     }
 
     protected Delegate? GetAsync;
-    protected Func<ISpecification<T>> GetAllAsync;
+    protected Delegate? GetAllAsync;
     protected Delegate? CreateAsync;
     protected Delegate? UpdateAsync;
     protected Delegate? DeleteAsync;
