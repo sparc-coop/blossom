@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net7.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
-		<Version>7.1.0</Version>
+		<Version>7.2.0-pre.1</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
@@ -22,7 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Ardalis.Specification" Version="6.1.0" />
+	  <PackageReference Include="Ardalis.Specification" Version="7.0.0" />
 	  <PackageReference Include="MediatR.Contracts" Version="1.0.1" />
 	</ItemGroup>
 

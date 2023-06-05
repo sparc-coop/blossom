@@ -117,4 +117,9 @@ public class BogusRepository<T> : IRepository<T> where T : class, IRoot<string>
     {
         throw new NotImplementedException();
     }
+
+    public Task<List<TOut>> FromSqlAsync<TOut>(string sql, params object[] parameters)
+    {
+        throw new NotImplementedException();
+    }
 }

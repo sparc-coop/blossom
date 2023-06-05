@@ -22,4 +22,5 @@ public interface IRepository<T>
     Task<int> CountAsync(ISpecification<T> spec);
     Task<bool> AnyAsync(ISpecification<T> spec);
     IQueryable<T> FromSqlRaw(string sql, params object[] parameters);
+    Task<List<TOut>> FromSqlAsync<TOut>(string sql, params object[] parameters);
 }

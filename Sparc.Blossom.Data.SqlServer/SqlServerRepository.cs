@@ -116,7 +116,7 @@ public class SqlServerRepository<T> : RepositoryBase<T>, IRepository<T> where T 
         return context.Set<T>().FromSqlRaw(sql, parameters);
     }
 
-    public Task<List<U>> FromSqlAsync<U>(string sql, params (string, object)[] parameters)
+    public async Task<List<TOut>> FromSqlAsync<TOut>(string sql, params object[] parameters)
     {
         var isStoredProcedure = sql.StartsWith("EXEC ");
         var commandType = isStoredProcedure ? CommandType.StoredProcedure : CommandType.Text;
@@ -124,17 +124,20 @@ public class SqlServerRepository<T> : RepositoryBase<T>, IRepository<T> where T 
         if (isStoredProcedure)
             sql = sql.Replace("EXEC ", "");
 
-        var p = new DynamicParameters();
+        sql = sql.Replace("{", "@p").Replace("}", "");
+        var sqlParameters = new DynamicParameters();
         if (parameters != null)
+        {
+            var p = 0;
             foreach (var parameter in parameters)
             {
-                var key = (parameter.Item1.Contains("@") ? "" : "@") + parameter.Item1;
-                p.Add(key, parameter.Item2);
+                var key = $"@p{p++}";
+                sqlParameters.Add(key, parameter);
             }
+        }
 
-        var result = context.Database.GetDbConnection().Query<U>(sql, p, commandType: commandType).ToList();
-
-        return Task.FromResult(result);
+        var result = await context.Database.GetDbConnection().QueryAsync<TOut>(sql, sqlParameters, commandType: commandType);
+        return result.ToList();
     }
    
     public async Task AddAsync(IEnumerable<T> items)

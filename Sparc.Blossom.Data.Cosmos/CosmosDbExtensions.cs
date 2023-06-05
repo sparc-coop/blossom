@@ -30,4 +30,12 @@ public static class CosmosDbExtensions
 
         return repository.Query;
     }
+
+    public static async Task<List<TOut>> FromSqlAsync<T, TOut>(this IRepository<T> repository, string sql, string? partitionKey, params object[] parameters) where T : class, IRoot<string>
+    {
+        if (repository is CosmosDbRepository<T> cosmosRepository)
+            return await cosmosRepository.FromSqlAsync<TOut>(sql, partitionKey, parameters);
+
+        throw new NotImplementedException();
+    }
 }
