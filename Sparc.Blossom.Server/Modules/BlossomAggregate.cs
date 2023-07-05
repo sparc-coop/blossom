@@ -23,7 +23,7 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity<s
     public virtual string Name => typeof(T).Name + "s";
 
     protected RouteGroupBuilder AggregateEndpoints = null!;
-    protected RouteGroupBuilder RootEndpoints = null!;
+    protected RouteGroupBuilder EntityEndpoints = null!;
     protected string BaseUrl => $"/{Name.ToLower()}";
 
     public virtual void MapEndpoints(IEndpointRouteBuilder endpoints)
@@ -38,17 +38,17 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity<s
         AggregateEndpoints.MapGet("", GetAllAsync ?? DefaultGetAllAsync).WithName($"GetAll{Name}").WithOpenApi();
         AggregateEndpoints.MapPost("", CreateAsync ?? DefaultCreateAsync).WithName($"Create{typeof(T).Name}").WithOpenApi();
 
-        RootEndpoints = AggregateEndpoints.MapGroup("{id}");
+        EntityEndpoints = AggregateEndpoints.MapGroup("{id}");
 
-        RootEndpoints.MapGet("", DefaultGetAsync).WithName($"Get{typeof(T).Name}").WithOpenApi();
-        RootEndpoints.MapPut("", UpdateAsync ?? DefaultUpdateAsync).WithName($"Update{typeof(T).Name}").WithOpenApi();
-        RootEndpoints.MapDelete("", DeleteAsync ?? DefaultDeleteAsync).WithName($"Delete{typeof(T).Name}").WithOpenApi();
+        EntityEndpoints.MapGet("", DefaultGetAsync).WithName($"Get{typeof(T).Name}").WithOpenApi();
+        EntityEndpoints.MapPut("", UpdateAsync ?? DefaultUpdateAsync).WithName($"Update{typeof(T).Name}").WithOpenApi();
+        EntityEndpoints.MapDelete("", DeleteAsync ?? DefaultDeleteAsync).WithName($"Delete{typeof(T).Name}").WithOpenApi();
 
         var bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         foreach (var command in typeof(T).GetMethods(bindingFlags).Where(m => !m.IsSpecialName))
         {
             var factory = RequestDelegateFactory.Create(command, context => (T)context.Items["entity"]!, null);
-            RootEndpoints.MapPut(command.Name, factory.RequestDelegate).WithName(command.Name).WithOpenApi();
+            EntityEndpoints.MapPut(command.Name, factory.RequestDelegate).WithName(command.Name).WithOpenApi();
         }
     }
 
