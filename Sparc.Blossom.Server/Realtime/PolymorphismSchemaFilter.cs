@@ -29,7 +29,7 @@ public class PolymorphismSchemaFilter<T, THub> : ISchemaFilter
             Required = schema.Required
         };
 
-        if (context.SchemaRepository.Schemas.TryGetValue(typeof(T).Name, out OpenApiSchema _))
+        if (context.SchemaRepository.Schemas.TryGetValue(typeof(T).Name, out OpenApiSchema? _))
         {
             schema.AllOf = new List<OpenApiSchema> {
             new OpenApiSchema { Reference = new OpenApiReference { Id = typeof(T).Name, Type = ReferenceType.Schema } },

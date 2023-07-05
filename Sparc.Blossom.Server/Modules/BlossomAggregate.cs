@@ -59,7 +59,7 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity<s
 
     protected async Task<Ok<List<T>>> DefaultGetAllAsync(IRepository<T> repository)
     {
-        var results = await repository.GetAllAsync(new BlossomGetAllSpecification<T>(100));
+        var results = await repository.GetAllAsync(new BlossomGetAllSpecification<T>(null, 100));
         return TypedResults.Ok(results);
     }
 

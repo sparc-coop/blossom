@@ -11,8 +11,8 @@ public class BlossomUser : Entity<string>
 
     public string? LoginProviderKey { get; set; }
 
-    protected Dictionary<string, string> Claims { get; set; } = new();
-    protected Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = new();
+    public Dictionary<string, string> Claims { get; set; } = new();
+    public Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = new();
 
     protected void AddClaim(string type, string? value)
     {
