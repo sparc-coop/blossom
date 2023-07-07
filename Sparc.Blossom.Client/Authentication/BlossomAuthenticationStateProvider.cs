@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
 
@@ -43,7 +42,7 @@ public class BlossomAuthenticationStateProvider : AuthenticationStateProvider
         if (forceLogin)
             _user = Anonymous();
         
-        var loginUrl = QueryHelpers.AddQueryString(Config["Blossom:Authority"] + "/_auth/login", "returnUrl", Navigation.Uri);
+        var loginUrl = $"{Config["Blossom:Authority"]}/_auth/login?returnUrl={Navigation.Uri}";
         Navigation.NavigateTo(loginUrl, true);
 
         return Task.CompletedTask;
