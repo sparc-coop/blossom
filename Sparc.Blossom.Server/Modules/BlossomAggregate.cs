@@ -14,7 +14,7 @@ public interface IBlossomAggregate
     public void MapEndpoints(IEndpointRouteBuilder endpoints);
 }
 
-public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity<string>
+public abstract class BlossomAggregate<T> : IBlossomAggregate
 {
     public BlossomAggregate()
     {
