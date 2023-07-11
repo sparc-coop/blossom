@@ -22,6 +22,8 @@ public class Entity
 
         return domainEvents;
     }
+
+    public virtual object GenericId { get; } = null!;
 }
 
 public class Entity<T> : Entity, IEntity<T> where T : notnull
@@ -32,6 +34,7 @@ public class Entity<T> : Entity, IEntity<T> where T : notnull
     }
 
     public Entity(T id) => Id = id;
+    public override object GenericId => Id;
 
     public virtual T Id { get; set; }
 }

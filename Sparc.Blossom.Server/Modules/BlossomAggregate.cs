@@ -14,7 +14,7 @@ public interface IBlossomAggregate
     public void MapEndpoints(IEndpointRouteBuilder endpoints);
 }
 
-public abstract class BlossomAggregate<T> : IBlossomAggregate
+public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity
 {
     public BlossomAggregate()
     {
@@ -40,16 +40,16 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate
 
         EntityEndpoints = AggregateEndpoints.MapGroup("{id}");
 
-        EntityEndpoints.MapGet("", DefaultGetAsync).WithName($"Get{typeof(T).Name}").WithOpenApi();
-        EntityEndpoints.MapPut("", UpdateAsync ?? DefaultUpdateAsync).WithName($"Update{typeof(T).Name}").WithOpenApi();
-        EntityEndpoints.MapDelete("", DeleteAsync ?? DefaultDeleteAsync).WithName($"Delete{typeof(T).Name}").WithOpenApi();
-
         var bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         foreach (var command in typeof(T).GetMethods(bindingFlags).Where(m => !m.IsSpecialName))
         {
             var factory = RequestDelegateFactory.Create(command, context => (T)context.Items["entity"]!, null);
             EntityEndpoints.MapPut(command.Name, factory.RequestDelegate).WithName(command.Name).WithOpenApi();
         }
+
+        //EntityEndpoints.MapGet("", DefaultGetAsync).WithName($"Get{typeof(T).Name}").WithOpenApi();
+        //EntityEndpoints.MapPut("", UpdateAsync ?? DefaultUpdateAsync).WithName($"Update{typeof(T).Name}").WithOpenApi();
+        //EntityEndpoints.MapDelete("", DeleteAsync ?? DefaultDeleteAsync).WithName($"Delete{typeof(T).Name}").WithOpenApi();
     }
 
     protected async Task<Ok<T>> DefaultGetAsync(string id, IRepository<T> repository)
@@ -66,7 +66,7 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate
     protected async Task<Created<T>> DefaultCreateAsync([FromBody] T entity, IRepository<T> repository)
     {
         await repository.AddAsync(entity);
-        return TypedResults.Created($"{BaseUrl}/{entity.Id}", entity);
+        return TypedResults.Created($"{BaseUrl}/{entity.GenericId}", entity);
     }
 
     protected async Task<Results<NotFound, Ok<T>>> DefaultUpdateAsync([FromBody] T entity, IRepository<T> repository)
@@ -77,7 +77,7 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate
 
     protected async Task<Results<NotFound, NoContent>> DefaultDeleteAsync([FromBody] T entity, IRepository<T> repository)
     {
-        var result = await repository.FindAsync(entity.Id);
+        var result = await repository.FindAsync(entity.GenericId);
         if (result == null)
             return TypedResults.NotFound();
 

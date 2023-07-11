@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Sparc.Blossom;
 
-public class BlossomGetAllSpecification<T> : Specification<T> where T : Entity<string>
+public class BlossomGetAllSpecification<T> : Specification<T> where T : Entity
 {
     public BlossomGetAllSpecification(Expression<Func<T, bool>>? filterQuery = null, int? take = null)
     {
