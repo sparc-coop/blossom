@@ -1,0 +1,32 @@
+@namespace Sparc.Blossom.Realtime
+
+<div class="blossom-animation" id="@Id" style="@($"height: {Height}px; width: {Width}px")" @onclick=Click>
+    <CascadingValue Value="Animation">
+        @ChildContent
+    </CascadingValue>
+</div>
+
+@inject BlossomAnimator Animator
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; } = null!;
+    [Parameter] public int Height { get; set; } = 800;
+    [Parameter] public int Width { get; set; } = 800;
+    [Parameter] public EventCallback<BlossomAnimation> OnClick { get; set; }
+    [Parameter] public EventCallback<BlossomAnimation> OnScroll { get; set; }
+
+    public Animation Animation { get; set; } = new("", 800, 800);
+    string Id = Guid.NewGuid().ToString();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Animation = await Animator.InitializeAsync(Id);
+        }
+        await Animator.StartAsync();
+    }
+
+    async Task Click() => await OnClick.InvokeAsync(this);
+
+    public async Task AnimateAsync() => await Animator.AnimateAsync();
+}

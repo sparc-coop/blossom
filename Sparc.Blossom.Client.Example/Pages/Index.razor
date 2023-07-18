@@ -1,0 +1,31 @@
+﻿@page "/"
+@using Sparc.Blossom.Realtime
+
+<h1>Hello, world!</h1>
+
+<BlossomAnimation Height="800" Width="800" @ref=Example OnClick="Crash">
+    <Rectangle 
+        Name="ground" 
+        X="0" 
+        Y="@(Example.Animation.Height - 25)" 
+        Width="@(Example.Animation.Width * 2)" 
+        Height="60" 
+        Animate="false" />
+    <Rectangle 
+        Name="boxA" 
+        X="400" 
+        Y="200" 
+        Width="80" 
+        Height="80" 
+        Fill="blue" 
+        Stroke="red" />
+</BlossomAnimation>
+
+@code {
+    BlossomAnimation Example { get; set; } = null!;
+
+    async Task Crash(BlossomAnimation animation)
+    {
+        await animation.AnimateAsync();
+    }
+}

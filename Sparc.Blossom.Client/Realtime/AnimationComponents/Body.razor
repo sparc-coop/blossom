@@ -1,0 +1,30 @@
+@namespace Sparc.Blossom.Realtime
+
+@inject BlossomAnimator Animator
+@code {
+    [CascadingParameter] public Animation Animation { get; set; } = null!;
+    [Parameter] public string Name { get; set; } = Guid.NewGuid().ToString();
+    [Parameter] public string? Fill { get; set; }
+    [Parameter] public string? Stroke { get; set; }
+    [Parameter] public bool Animate { get; set; } = true;
+
+    protected Bodies.Body? Item;
+
+    protected async Task RegisterAsync(Bodies.Body body)
+    {
+        body = body with { 
+            fill = Fill,
+            stroke = Stroke,
+            animate = Animate
+        };
+
+        Item = body;
+        await Animator.AddAsync(body);
+    }
+
+    public async Task AnimateAsync()
+    {
+        if (Item != null)
+            await Animator.AnimateAsync(Item);
+    }
+}
