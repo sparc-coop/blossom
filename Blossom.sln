@@ -37,7 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example", "Example", "{4D87
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Server.Example", "Sparc.Blossom.Server.Example\Sparc.Blossom.Server.Example.csproj", "{229C8D0A-5CE1-4335-BC64-E5FF301D318A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sparc.Blossom.Client.Example", "Sparc.Blossom.Client.Example\Sparc.Blossom.Client.Example.csproj", "{2662EF04-5E42-42D9-AA3A-A8A2BB5E62C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Client.Example", "Sparc.Blossom.Client.Example\Sparc.Blossom.Client.Example.csproj", "{2662EF04-5E42-42D9-AA3A-A8A2BB5E62C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
