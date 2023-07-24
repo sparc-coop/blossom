@@ -23,7 +23,6 @@ let Svg = Matter.Svg;
 //    }
 //};
 
-gsap.registerPlugin(ScrollTrigger);
 
 class MatterRectCirc {
     constructor(element) {
@@ -61,6 +60,7 @@ class MatterRectCirc {
 
         // run the engine
         Runner.run(this.runner, this.engine);
+        console.log("ran engine");
     }
 
     addWalls() {
@@ -252,7 +252,3 @@ class MatterRectCirc {
         mouse.element.removeEventListener("DOMMouseScroll", mouse.mousewheel);
     }
 }
-
-window.addEventListener("DOMContentLoaded", function () {
-    new MatterRectCirc(".matter-rect-circ");
-});
