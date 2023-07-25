@@ -1,149 +1,46 @@
 ﻿@namespace Sparc.Blossom.Realtime
 
-<div class="features-wrapper-2">
-    <div id="w-node-a585b237-ffa5-80f2-513f-6abe89ea6f85-93a1e0f4" class="text-child _2 js-banner-blue js-animate-title">
-        <h3 class="features-h js-split-title" style="">
-            <div class="js-title" style="display: block; text-align: start; position: relative; opacity: 1; visibility: inherit; transform-origin: 50% 50%; transform: translate3d(0px, 0px, 0px); transform-style: preserve-3d; perspective: 1000px;">
-                Maintain and
-            </div>
-            <div class="js-title" style="display: block; text-align: start; position: relative; opacity: 1; visibility: inherit; transform-origin: 50% 50%; transform: translate3d(0px, 0px, 0px); transform-style: preserve-3d; perspective: 1000px;">
-                <span class="world">scale</span>
-            </div>
-        </h3>
-        <p class="p-leading js-p-split" style="">
-            <div class="p-line" style="display: block; text-align: start; position: relative; transform: translate(0px, 0px); opacity: 1;">
-                In times of great pressure and deadlines that can kill —
-            </div>
-            <div class="p-line" style="display: block; text-align: start; position: relative; transform: translate(0px, 0px); opacity: 1;">
-                you'll be fully equipped to maintain, update and scale a
-            </div>
-            <div class="p-line" style="display: block; text-align: start; position: relative; transform: translate(0px, 0px); opacity: 1;">
-                product or website. Every god d*mn project that the
-            </div>
-            <div class="p-line" style="display: block; text-align: start; position: relative; transform: translate(0px, 0px); opacity: 1;">
-                client decides to “revise” or scale from 1 to humongous
-            </div>
-            <div class="p-line" style="display: block; text-align: start; position: relative; transform: translate(0px, 0px); opacity: 1;">
-                will be a child's play to you. This is what design system
-            </div>
-            <div class="p-line" style="display: block; text-align: start; position: relative; transform: translate(0px, 0px); opacity: 1;">
-                are for. Use them right.
-            </div>
-        </p>
-    </div>
-    <div id="w-node-a585b237-ffa5-80f2-513f-6abe89ea6f8c-93a1e0f4" class="w-embed w-script matter-parent">
-        <div class="matter-rect-circ">
-        </div>
-    </div>
+<div class="shapes">
+    <svg id="square" width="134" height="134" viewBox="0 0 134 134" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path id="squarePath" transform="rotate(-90 0 134)" fill="#F05A67" d="M23 134h88s23 0 23 23v88s0 23 -23 23h-88s-23 0 -23 -23v-88s0 -23 23 -23" />
+    </svg>
+
+    <svg id="triangle" width="134" height="123" viewBox="0 0 134 123" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path id="trianglePath" d="M79.8686 115.277C74.1492 125.422 59.8506 125.422 54.1311 115.277L2.01285 22.8271C-3.70659 12.6817 3.4427 -6.24527e-06 14.8816 -5.23088e-06L119.118 4.01277e-06C130.557 5.02717e-06 137.706 12.6818 131.987 22.8272L79.8686 115.277Z" fill="#4D4ADF" />
+    </svg>
+
+    <svg id="circle" width="135" height="134" viewBox="0 0 135 134" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path id="circlePath" transform="rotate(-90 0 134)" fill="#E2A30D" d="M67 134h0s67 0 67 67v0.001s0 67 -67 67h0s-67 0 -67 -67v-0.001s0 -67 67 -67" />
+    </svg>
+
+    <svg id="diamond" width="135" height="135" viewBox="0 0 135 135" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path id="diamondPath" d="M5.47779 80.595C-1.82593 73.2576 -1.82593 61.3614 5.47779 54.024L53.7762 5.50303C61.0799 -1.83434 72.9216 -1.83435 80.2253 5.50303L128.524 54.024C135.827 61.3614 135.827 73.2576 128.524 80.595L80.2253 129.116C72.9216 136.453 61.0799 136.453 53.7762 129.116L5.47779 80.595Z" fill="#3BD7FF" />
+    </svg>
+</div>
+
+<div class="game-example" id="game-container">
 </div>
 
 <style>
-    .features-wrapper-2 {
-        grid-row-gap: 0;
-        position: relative;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        padding-right: 2em;
-        padding-left: 2em;
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-box-align: center;
-        -webkit-align-items: center;
-        -ms-flex-align: center;
-        align-items: center;
-        grid-row-gap: 4em
+    .shapes {
+        display: none;
     }
 
-    .js-banner-blue {
-        height: max-content;
-    }
-
-    .text-child {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        width: 50%;
-        padding: 7em 5.3em;
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        grid-row-gap: 2em;
-        border-radius: 3.5em
-    }
-
-    .text-child._2 {
-        width: 100%;
-        max-width: 730px;
-        background-color: #2172ff
-    }
-
-    .text-child._2.js-banner-blue {
-        min-width: auto
-    }
-
-    h3 {
-        margin-top: 0;
-        margin-bottom: .2em;
-        font-size: 3.5em;
-        line-height: 1;
-        font-family: Arial, sans-serif;
-        font-weight: 500;
-        color: white;
-    }
-
-    .p-line {
-        font-family: Arial, sans-serif;
-        color: white;
-    }
-
-    .matter-parent {
-        width: 1165px;
-        height: 628px;
-    }
-
-    .matter-rect-circ {
-        width: 100%;
-        height: 100%;
-        background: transparent;
-        cursor: pointer;
-    }
-
-    .matter-canvas {
-        display: inline-block;
-        width: 100%;
-        height: 100%;
-        background:  0% 0% / contain transparent;
-    }
-
-    .w-embed:after, .w-embed:before {
-        content: " ";
-        display: table;
-        grid-column-start: 1;
-        grid-row-start: 1;
-        grid-column-end: 2;
-        grid-row-end: 2
-    }
-
-    .w-embed:after {
-        clear: both
-    }
-
-    #w-node-a585b237-ffa5-80f2-513f-6abe89ea6f7c-93a1e0f4, #w-node-a585b237-ffa5-80f2-513f-6abe89ea6f8c-93a1e0f4, #w-node-a585b237-ffa5-80f2-513f-6abe89ea6f8e-93a1e0f4 {
-        -ms-grid-column: span 1;
-        grid-column-start: span 1;
-        -ms-grid-column-span: 1;
-        grid-column-end: span 1;
-        -ms-grid-row: span 1;
-        grid-row-start: span 1;
-        -ms-grid-row-span: 1;
-        grid-row-end: span 1
+    .game-example {
+        width: 100vw;
+        height: 100vh;
     }
 </style>
+
+@inject IJSRuntime JSRuntime
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("createGame");
+
+        }
+    }
+}
