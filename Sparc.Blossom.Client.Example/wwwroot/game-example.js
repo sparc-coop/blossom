@@ -1,8 +1,8 @@
 ﻿function createGame() {
 
     var canvas = document.getElementById("game-container");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
 
     window.addEventListener("resize", function () {
         document.getElementById("game-container").width = window.innerWidth;
@@ -45,8 +45,9 @@
         options: {
             wireframes: false,
             showInternalEdges: false,
-            width: percentX(100),
-            height: percentY(100),
+            width: percentX(100) - 2,
+            height: percentY(100) - 2,
+            borderRadius: 40,
             background: "transparent",
         }
     });
@@ -87,31 +88,59 @@
         134,
         134,
         Svg.pathToVertices(squarePath),
+        {
+            render: {
+                fillStyle: "#F05A67",
+                strokeStyle: "#F05A67",
+            }
+        },
         true
     );
 
     const trianglePath = document.getElementById("trianglePath");
     triangleV = Bodies.fromVertices(
-        134,
+        402,
         134,
         Svg.pathToVertices(trianglePath),
+        {
+            render: {
+                fillStyle: "#4D4ADF",
+                strokeStyle: "#4D4ADF",
+                lineWidth: 1
+            }
+        },
         true
     );
 
     const circlePath = document.getElementById("circlePath");
     circleV = Bodies.fromVertices(
-        134,
+        900,
         134,
         Svg.pathToVertices(circlePath),
+        {
+            render: {
+                fillStyle: "#E2A30D",
+                strokeStyle: "#E2A30D",
+                lineWidth: 1
+            }
+        },
         true
     );
 
     const diamondPath = document.getElementById("diamondPath");
     diamondV = Bodies.fromVertices(
-        134,
+        536,
         134,
         Svg.pathToVertices(diamondPath),
-        true
+        {
+            render: {
+                fillStyle: "#3BD7FF",
+                strokeStyle: "#3BD7FF",
+                lineWidth: 1
+            }
+        },
+        true,
+        removeDuplicatePoints = 2
     );
 
     bodies.push(squareV, triangleV, circleV, diamondV);
