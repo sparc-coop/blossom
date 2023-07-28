@@ -22,7 +22,6 @@
         Runner = Matter.Runner,
         Bodies = Matter.Bodies,
         Svg = Matter.Svg,
-        Vertices = Matter.Vertices,
         Mouse = Matter.Mouse,
         MouseConstraint = Matter.MouseConstraint,
         World = Matter.World;
@@ -85,9 +84,9 @@
 
     const squarePath = document.getElementById("squarePath");
     squareV = Bodies.fromVertices(
+        150,
         134,
-        134,
-        Svg.pathToVertices(squarePath),
+        Svg.pathToVertices(squarePath, 1),
         {
             render: {
                 fillStyle: "#F05A67",
@@ -99,9 +98,9 @@
 
     const trianglePath = document.getElementById("trianglePath");
     triangleV = Bodies.fromVertices(
-        402,
+        200,
         134,
-        Svg.pathToVertices(trianglePath),
+        Svg.pathToVertices(trianglePath, 1),
         {
             render: {
                 fillStyle: "#4D4ADF",
@@ -114,9 +113,9 @@
 
     const circlePath = document.getElementById("circlePath");
     circleV = Bodies.fromVertices(
-        900,
         134,
-        Svg.pathToVertices(circlePath),
+        134,
+        Svg.pathToVertices(circlePath, 1),
         {
             render: {
                 fillStyle: "#E2A30D",
@@ -129,9 +128,9 @@
 
     const diamondPath = document.getElementById("diamondPath");
     diamondV = Bodies.fromVertices(
-        536,
+        500,
         134,
-        Svg.pathToVertices(diamondPath),
+        Svg.pathToVertices(diamondPath ,1),
         {
             render: {
                 fillStyle: "#3BD7FF",
@@ -139,8 +138,7 @@
                 lineWidth: 1
             }
         },
-        true,
-        removeDuplicatePoints = 2
+        true
     );
 
     bodies.push(squareV, triangleV, circleV, diamondV);
