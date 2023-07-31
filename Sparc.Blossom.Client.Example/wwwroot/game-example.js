@@ -1,9 +1,7 @@
 ﻿function createGame() {
-
     var canvas = document.getElementById("game-container");
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
-
     window.addEventListener("resize", function () {
         document.getElementById("game-container").width = window.innerWidth;
         document.getElementById("game-container").height = window.innerHeight;
@@ -22,6 +20,8 @@
         Runner = Matter.Runner,
         Bodies = Matter.Bodies,
         Svg = Matter.Svg,
+        Composite = Matter.Composite,
+        Composites = Matter.Composites,
         Mouse = Matter.Mouse,
         MouseConstraint = Matter.MouseConstraint,
         World = Matter.World;
@@ -72,77 +72,272 @@
 
     // create bodies from shapes and add to world
 
-    const square = document.getElementById("square"),
-        triangle = document.getElementById("triangle"),
-        circle = document.getElementById("circle"),
-        diamond = document.getElementById("diamond");
+    var stack1 = [],
+        stack2 = [],
+        stack3 = [],
+        stack4 = []
 
-    var squareV,
-        triangleV,
-        circleV,
-        diamondV;
+    // stack 1
+    for (i = 0; i < 10; i++) {
+        var id = "stack-1-" + i;
+        var path = document.getElementById(id);
+        stack1.push(path);
+    }
 
-    const squarePath = document.getElementById("squarePath");
-    squareV = Bodies.fromVertices(
-        150,
+    // stack 2
+    for (i = 0; i < 10; i++) {
+        var id = "stack-2-" + i;
+        var path = document.getElementById(id);
+        stack2.push(path);
+    }
+
+    // stack 3
+    for (i = 0; i < 10; i++) {
+        var id = "stack-3-" + i;
+        var path = document.getElementById(id);
+        stack3.push(path);
+    }
+
+    // stack 4
+    for (i = 0; i < 10; i++) {
+        var id = "stack-4-" + i;
+        var path = document.getElementById(id);
+        stack4.push(path);
+    }
+
+    // stacks
+    const gap = 0;
+    const positionEnd = (canvas.width - gap) - (134 * 10);
+
+    var stack1 = Composites.stack(
+        positionEnd,
+        0,
+        10,
+        1,
         134,
-        Svg.pathToVertices(squarePath, 1),
-        {
-            render: {
-                fillStyle: "#F05A67",
-                strokeStyle: "#F05A67",
+        134,
+        function (x, y) {
+            foreach(path in stack1) {
+                var color = "#FFFFFF";
+                if (path.getAttribute("class").Contains("square")) {
+                    color = "#F05A67";
+                }
+                if (path.getAttribute("class").Contains("triangle")) {
+                    color = "#4D4ADF";
+                }
+                if (path.getAttribute("class").Contains("circle")) {
+                    color = "#E2A30D";
+                }
+                if (path.getAttribute("class").Contains("diamond")) {
+                    color = "#3BD7FF";
+                }
+
+                var body = Bodies.fromVertices(
+                    x,
+                    y,
+                    Svg.pathToVertices(path, 1),
+                    {
+                        render: {
+                            fillStyle: color,
+                            strokeStyle: color,
+                        }
+                    },
+                    true
+                );
+                return body;
             }
-        },
-        true
+        }
     );
 
-    const trianglePath = document.getElementById("trianglePath");
-    triangleV = Bodies.fromVertices(
-        200,
+    var stack2 = Composites.stack(
+        positionEnd,
+        0,
+        10,
+        1,
         134,
-        Svg.pathToVertices(trianglePath, 1),
-        {
-            render: {
-                fillStyle: "#4D4ADF",
-                strokeStyle: "#4D4ADF",
-                lineWidth: 1
+        134,
+        function (x, y) {
+            foreach(path in stack2) {
+                var color = "#FFFFFF";
+                if (path.getAttribute("class").Contains("square")) {
+                    color = "#F05A67";
+                }
+                if (path.getAttribute("class").Contains("triangle")) {
+                    color = "#4D4ADF";
+                }
+                if (path.getAttribute("class").Contains("circle")) {
+                    color = "#E2A30D";
+                }
+                if (path.getAttribute("class").Contains("diamond")) {
+                    color = "#3BD7FF";
+                }
+
+                var body = Bodies.fromVertices(
+                    x,
+                    y,
+                    Svg.pathToVertices(path, 1),
+                    {
+                        render: {
+                            fillStyle: color,
+                            strokeStyle: color,
+                        }
+                    },
+                    true
+                );
+                return body;
             }
-        },
-        true
+        }
     );
 
-    const circlePath = document.getElementById("circlePath");
-    circleV = Bodies.fromVertices(
+    var stack3 = Composites.stack(
+        positionEnd,
+        0,
+        10,
+        1,
         134,
         134,
-        Svg.pathToVertices(circlePath, 1),
-        {
-            render: {
-                fillStyle: "#E2A30D",
-                strokeStyle: "#E2A30D",
-                lineWidth: 1
+        function (x, y) {
+            foreach(path in stack3) {
+                var color = "#FFFFFF";
+                if (path.getAttribute("class").Contains("square")) {
+                    color = "#F05A67";
+                }
+                if (path.getAttribute("class").Contains("triangle")) {
+                    color = "#4D4ADF";
+                }
+                if (path.getAttribute("class").Contains("circle")) {
+                    color = "#E2A30D";
+                }
+                if (path.getAttribute("class").Contains("diamond")) {
+                    color = "#3BD7FF";
+                }
+
+                var body = Bodies.fromVertices(
+                    x,
+                    y,
+                    Svg.pathToVertices(path, 1),
+                    {
+                        render: {
+                            fillStyle: color,
+                            strokeStyle: color,
+                        }
+                    },
+                    true
+                );
+                return body;
             }
-        },
-        true
+        }
     );
 
-    const diamondPath = document.getElementById("diamondPath");
-    diamondV = Bodies.fromVertices(
-        500,
+    var stack4 = Composites.stack(
+        positionEnd,
+        0,
+        10,
+        1,
         134,
-        Svg.pathToVertices(diamondPath ,1),
-        {
-            render: {
-                fillStyle: "#3BD7FF",
-                strokeStyle: "#3BD7FF",
-                lineWidth: 1
+        134,
+        function (x, y) {
+            foreach(path in stack4) {
+                var color = "#FFFFFF";
+                if (path.getAttribute("class").Contains("square")) {
+                    color = "#F05A67";
+                }
+                if (path.getAttribute("class").Contains("triangle")) {
+                    color = "#4D4ADF";
+                }
+                if (path.getAttribute("class").Contains("circle")) {
+                    color = "#E2A30D";
+                }
+                if (path.getAttribute("class").Contains("diamond")) {
+                    color = "#3BD7FF";
+                }
+
+                var body = Bodies.fromVertices(
+                    x,
+                    y,
+                    Svg.pathToVertices(path, 1),
+                    {
+                        render: {
+                            fillStyle: color,
+                            strokeStyle: color,
+                        }
+                    },
+                    true
+                );
+                return body;
             }
-        },
-        true
+        }
     );
 
-    bodies.push(squareV, triangleV, circleV, diamondV);
-    World.add(world, bodies);
+    Composite.add(world, [stack1, ground]);
+    Composite.add(world, [stack2, ground]);
+    Composite.add(world, [stack3, ground]);
+    Composite.add(world, [stack4, ground]);
+
+    //const squarePath = document.getElementById("squarePath"),
+    //    trianglePath = document.getElementById("trianglePath"),
+    //    circlePath = document.getElementById("circlePath"),
+    //    diamondPath = document.getElementById("diamondPath");
+
+    //var squareV,
+    //    triangleV,
+    //    circleV,
+    //    diamondV;
+
+    //squareV = Bodies.fromVertices(
+    //    134,
+    //    134,
+    //    Svg.pathToVertices(squarePath, 1),
+    //    {
+    //        render: {
+    //            fillStyle: "#F05A67",
+    //            strokeStyle: "#F05A67",
+    //        }
+    //    },
+    //    true
+    //);
+
+    //triangleV = Bodies.fromVertices(
+    //    134,
+    //    134,
+    //    Svg.pathToVertices(trianglePath, 1),
+    //    {
+    //        render: {
+    //            fillStyle: "#4D4ADF",
+    //            strokeStyle: "#4D4ADF"
+    //        }
+    //    },
+    //    true
+    //);
+
+    //circleV = Bodies.fromVertices(
+    //    134,
+    //    134,
+    //    Svg.pathToVertices(circlePath, 1),
+    //    {
+    //        render: {
+    //            fillStyle: "#E2A30D",
+    //            strokeStyle: "#E2A30D"
+    //        }
+    //    },
+    //    true
+    //);
+
+    //diamondV = Bodies.fromVertices(
+    //    134,
+    //    134,
+    //    Svg.pathToVertices(diamondPath ,1),
+    //    {
+    //        render: {
+    //            fillStyle: "#3BD7FF",
+    //            strokeStyle: "#3BD7FF"
+    //        }
+    //    },
+    //    true
+    //);
+
+    //bodies.push(squareV, triangleV, circleV, diamondV);
+    //World.add(world, bodies);
 
     // mouse control
     let mouse = Mouse.create(render.canvas),
