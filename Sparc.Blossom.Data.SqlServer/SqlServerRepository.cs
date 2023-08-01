@@ -96,7 +96,22 @@ public class SqlServerRepository<T> : RepositoryBase<T>, IRepository<T> where T 
         return Include(Command, path);
     }
 
+    public IQueryable<T> Include<TProperty>(params Expression<Func<T, TProperty>>[] path)
+    {
+        return Include(Command, path);
+    }
+
     private IQueryable<T> Include(IQueryable<T> source, params string[] path)
+    {
+        foreach (var item in path)
+        {
+            source = source.Include(item);
+        }
+
+        return source;
+    }
+
+    private IQueryable<T> Include<TProperty>(IQueryable<T> source, params Expression<Func<T, TProperty>>[] path)
     {
         foreach (var item in path)
         {
