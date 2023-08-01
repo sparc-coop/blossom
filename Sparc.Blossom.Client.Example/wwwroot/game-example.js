@@ -117,19 +117,22 @@
         134,
         134,
         function (x, y) {
-            foreach(path in stack1) {
+            stack1.forEach(path => {
                 var color = "#FFFFFF";
-                if (path.getAttribute("class").Contains("square")) {
-                    color = "#F05A67";
-                }
-                if (path.getAttribute("class").Contains("triangle")) {
-                    color = "#4D4ADF";
-                }
-                if (path.getAttribute("class").Contains("circle")) {
-                    color = "#E2A30D";
-                }
-                if (path.getAttribute("class").Contains("diamond")) {
-                    color = "#3BD7FF";
+                var cls = path.getAttribute("class");
+                if (cls) {
+                    if (cls.includes("square")) {
+                        color = "#F05A67";
+                    }
+                    if (cls.includes("triangle")) {
+                        color = "#4D4ADF";
+                    }
+                    if (cls.includes("circle")) {
+                        color = "#E2A30D";
+                    }
+                    if (cls.includes("diamond")) {
+                        color = "#3BD7FF";
+                    }
                 }
 
                 var body = Bodies.fromVertices(
@@ -145,7 +148,7 @@
                     true
                 );
                 return body;
-            }
+            });
         }
     );
 
@@ -157,19 +160,22 @@
         134,
         134,
         function (x, y) {
-            foreach(path in stack2) {
+            stack2.forEach(path => {
                 var color = "#FFFFFF";
-                if (path.getAttribute("class").Contains("square")) {
-                    color = "#F05A67";
-                }
-                if (path.getAttribute("class").Contains("triangle")) {
-                    color = "#4D4ADF";
-                }
-                if (path.getAttribute("class").Contains("circle")) {
-                    color = "#E2A30D";
-                }
-                if (path.getAttribute("class").Contains("diamond")) {
-                    color = "#3BD7FF";
+                var cls = path.getAttribute("class");
+                if (cls) {
+                    if (cls.includes("square")) {
+                        color = "#F05A67";
+                    }
+                    if (cls.includes("triangle")) {
+                        color = "#4D4ADF";
+                    }
+                    if (cls.includes("circle")) {
+                        color = "#E2A30D";
+                    }
+                    if (cls.includes("diamond")) {
+                        color = "#3BD7FF";
+                    }
                 }
 
                 var body = Bodies.fromVertices(
@@ -185,7 +191,7 @@
                     true
                 );
                 return body;
-            }
+            });
         }
     );
 
@@ -197,19 +203,22 @@
         134,
         134,
         function (x, y) {
-            foreach(path in stack3) {
+            stack3.forEach(path => {
                 var color = "#FFFFFF";
-                if (path.getAttribute("class").Contains("square")) {
-                    color = "#F05A67";
-                }
-                if (path.getAttribute("class").Contains("triangle")) {
-                    color = "#4D4ADF";
-                }
-                if (path.getAttribute("class").Contains("circle")) {
-                    color = "#E2A30D";
-                }
-                if (path.getAttribute("class").Contains("diamond")) {
-                    color = "#3BD7FF";
+                var cls = path.getAttribute("class");
+                if (cls) {
+                    if (cls.includes("square")) {
+                        color = "#F05A67";
+                    }
+                    if (cls.includes("triangle")) {
+                        color = "#4D4ADF";
+                    }
+                    if (cls.includes("circle")) {
+                        color = "#E2A30D";
+                    }
+                    if (cls.includes("diamond")) {
+                        color = "#3BD7FF";
+                    }
                 }
 
                 var body = Bodies.fromVertices(
@@ -225,7 +234,7 @@
                     true
                 );
                 return body;
-            }
+            });
         }
     );
 
@@ -237,19 +246,22 @@
         134,
         134,
         function (x, y) {
-            foreach(path in stack4) {
+            stack4.forEach(path => {
                 var color = "#FFFFFF";
-                if (path.getAttribute("class").Contains("square")) {
-                    color = "#F05A67";
-                }
-                if (path.getAttribute("class").Contains("triangle")) {
-                    color = "#4D4ADF";
-                }
-                if (path.getAttribute("class").Contains("circle")) {
-                    color = "#E2A30D";
-                }
-                if (path.getAttribute("class").Contains("diamond")) {
-                    color = "#3BD7FF";
+                var cls = path.getAttribute("class");
+                if (cls) {
+                    if (cls.includes("square")) {
+                        color = "#F05A67";
+                    }
+                    if (cls.includes("triangle")) {
+                        color = "#4D4ADF";
+                    }
+                    if (cls.includes("circle")) {
+                        color = "#E2A30D";
+                    }
+                    if (cls.includes("diamond")) {
+                        color = "#3BD7FF";
+                    }
                 }
 
                 var body = Bodies.fromVertices(
@@ -265,7 +277,7 @@
                     true
                 );
                 return body;
-            }
+            });
         }
     );
 
