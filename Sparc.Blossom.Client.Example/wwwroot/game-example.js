@@ -72,37 +72,37 @@
 
     // create bodies from shapes and add to world
 
-    var stack1 = [],
-        stack2 = [],
-        stack3 = [],
-        stack4 = []
+    var array1 = [],
+        array2 = [],
+        array3 = [],
+        array4 = []
 
     // stack 1
     for (i = 0; i < 10; i++) {
         var id = "stack-1-" + i;
         var path = document.getElementById(id);
-        stack1.push(path);
+        array1.push(path);
     }
 
     // stack 2
     for (i = 0; i < 10; i++) {
         var id = "stack-2-" + i;
         var path = document.getElementById(id);
-        stack2.push(path);
+        array2.push(path);
     }
 
     // stack 3
     for (i = 0; i < 10; i++) {
         var id = "stack-3-" + i;
         var path = document.getElementById(id);
-        stack3.push(path);
+        array3.push(path);
     }
 
     // stack 4
     for (i = 0; i < 10; i++) {
         var id = "stack-4-" + i;
         var path = document.getElementById(id);
-        stack4.push(path);
+        array4.push(path);
     }
 
     // stacks
@@ -114,28 +114,27 @@
         0,
         10,
         1,
-        134,
-        134,
+        0,
+        0,
         function (x, y) {
-            stack1.forEach(path => {
-                var color = "#FFFFFF";
-                var cls = path.getAttribute("class");
-                if (cls) {
-                    if (cls.includes("square")) {
-                        color = "#F05A67";
-                    }
-                    if (cls.includes("triangle")) {
-                        color = "#4D4ADF";
-                    }
-                    if (cls.includes("circle")) {
-                        color = "#E2A30D";
-                    }
-                    if (cls.includes("diamond")) {
-                        color = "#3BD7FF";
-                    }
+            var color = "#FFFFFF";
+            var path = document.getElementById("squarePath");
+            var cls = path.getAttribute("class");
+            if (cls) {
+                if (cls.includes("square")) {
+                    color = "#F05A67";
                 }
-
-                var body = Bodies.fromVertices(
+                if (cls.includes("triangle")) {
+                    color = "#4D4ADF";
+                }
+                if (cls.includes("circle")) {
+                    color = "#E2A30D";
+                }
+                if (cls.includes("diamond")) {
+                    color = "#3BD7FF";
+                }
+            }
+            var body = Bodies.fromVertices(
                     x,
                     y,
                     Svg.pathToVertices(path, 1),
@@ -147,8 +146,39 @@
                     },
                     true
                 );
-                return body;
-            });
+            return body;
+            //array1.forEach(path => {
+            //    var color = "#FFFFFF";
+            //    var cls = path.getAttribute("class");
+            //    if (cls) {
+            //        if (cls.includes("square")) {
+            //            color = "#F05A67";
+            //        }
+            //        if (cls.includes("triangle")) {
+            //            color = "#4D4ADF";
+            //        }
+            //        if (cls.includes("circle")) {
+            //            color = "#E2A30D";
+            //        }
+            //        if (cls.includes("diamond")) {
+            //            color = "#3BD7FF";
+            //        }
+            //    }
+
+            //    var body = Bodies.fromVertices(
+            //        x,
+            //        y,
+            //        Svg.pathToVertices(path, 1),
+            //        {
+            //            render: {
+            //                fillStyle: color,
+            //                strokeStyle: color,
+            //            }
+            //        },
+            //        true
+            //    );
+            //    return body;
+            //});
         }
     );
 
@@ -157,41 +187,72 @@
         0,
         10,
         1,
-        134,
-        134,
+        0,
+        0,
         function (x, y) {
-            stack2.forEach(path => {
-                var color = "#FFFFFF";
-                var cls = path.getAttribute("class");
-                if (cls) {
-                    if (cls.includes("square")) {
-                        color = "#F05A67";
-                    }
-                    if (cls.includes("triangle")) {
-                        color = "#4D4ADF";
-                    }
-                    if (cls.includes("circle")) {
-                        color = "#E2A30D";
-                    }
-                    if (cls.includes("diamond")) {
-                        color = "#3BD7FF";
-                    }
+            var color = "#FFFFFF";
+            var path = document.getElementById("trianglePath");
+            var cls = path.getAttribute("class");
+            if (cls) {
+                if (cls.includes("square")) {
+                    color = "#F05A67";
                 }
+                if (cls.includes("triangle")) {
+                    color = "#4D4ADF";
+                }
+                if (cls.includes("circle")) {
+                    color = "#E2A30D";
+                }
+                if (cls.includes("diamond")) {
+                    color = "#3BD7FF";
+                }
+            }
+            var body = Bodies.fromVertices(
+                x,
+                y,
+                Svg.pathToVertices(path, 1),
+                {
+                    render: {
+                        fillStyle: color,
+                        strokeStyle: color,
+                    }
+                },
+                true
+            );
+            return body;
 
-                var body = Bodies.fromVertices(
-                    x,
-                    y,
-                    Svg.pathToVertices(path, 1),
-                    {
-                        render: {
-                            fillStyle: color,
-                            strokeStyle: color,
-                        }
-                    },
-                    true
-                );
-                return body;
-            });
+    //        array2.forEach(path => {
+    //            var color = "#FFFFFF";
+    //            var cls = path.getAttribute("class");
+    //            if (cls) {
+    //                if (cls.includes("square")) {
+    //                    color = "#F05A67";
+    //                }
+    //                if (cls.includes("triangle")) {
+    //                    color = "#4D4ADF";
+    //                }
+    //                if (cls.includes("circle")) {
+    //                    color = "#E2A30D";
+    //                }
+    //                if (cls.includes("diamond")) {
+    //                    color = "#3BD7FF";
+    //                }
+    //            }
+
+    //            var body = Bodies.fromVertices(
+    //                x,
+    //                y,
+    //                Svg.pathToVertices(path, 1),
+    //                {
+    //                    render: {
+    //                        fillStyle: color,
+    //                        strokeStyle: color,
+    //                    }
+    //                },
+    //                true
+    //            );
+    //            return body;
+    //        });
         }
     );
 
@@ -200,41 +261,72 @@
         0,
         10,
         1,
-        134,
-        134,
+        0,
+        0,
         function (x, y) {
-            stack3.forEach(path => {
-                var color = "#FFFFFF";
-                var cls = path.getAttribute("class");
-                if (cls) {
-                    if (cls.includes("square")) {
-                        color = "#F05A67";
-                    }
-                    if (cls.includes("triangle")) {
-                        color = "#4D4ADF";
-                    }
-                    if (cls.includes("circle")) {
-                        color = "#E2A30D";
-                    }
-                    if (cls.includes("diamond")) {
-                        color = "#3BD7FF";
-                    }
+            var color = "#FFFFFF";
+            var path = document.getElementById("circlePath");
+            var cls = path.getAttribute("class");
+            if (cls) {
+                if (cls.includes("square")) {
+                    color = "#F05A67";
                 }
+                if (cls.includes("triangle")) {
+                    color = "#4D4ADF";
+                }
+                if (cls.includes("circle")) {
+                    color = "#E2A30D";
+                }
+                if (cls.includes("diamond")) {
+                    color = "#3BD7FF";
+                }
+            }
+            var body = Bodies.fromVertices(
+                x,
+                y,
+                Svg.pathToVertices(path, 1),
+                {
+                    render: {
+                        fillStyle: color,
+                        strokeStyle: color,
+                    }
+                },
+                true
+            );
+            return body;
 
-                var body = Bodies.fromVertices(
-                    x,
-                    y,
-                    Svg.pathToVertices(path, 1),
-                    {
-                        render: {
-                            fillStyle: color,
-                            strokeStyle: color,
-                        }
-                    },
-                    true
-                );
-                return body;
-            });
+    //        array3.forEach(path => {
+    //            var color = "#FFFFFF";
+    //            var cls = path.getAttribute("class");
+    //            if (cls) {
+    //                if (cls.includes("square")) {
+    //                    color = "#F05A67";
+    //                }
+    //                if (cls.includes("triangle")) {
+    //                    color = "#4D4ADF";
+    //                }
+    //                if (cls.includes("circle")) {
+    //                    color = "#E2A30D";
+    //                }
+    //                if (cls.includes("diamond")) {
+    //                    color = "#3BD7FF";
+    //                }
+    //            }
+
+    //            var body = Bodies.fromVertices(
+    //                x,
+    //                y,
+    //                Svg.pathToVertices(path, 1),
+    //                {
+    //                    render: {
+    //                        fillStyle: color,
+    //                        strokeStyle: color,
+    //                    }
+    //                },
+    //                true
+    //            );
+    //            return body;
+    //        });
         }
     );
 
@@ -243,48 +335,79 @@
         0,
         10,
         1,
-        134,
-        134,
+        0,
+        0,
         function (x, y) {
-            stack4.forEach(path => {
-                var color = "#FFFFFF";
-                var cls = path.getAttribute("class");
-                if (cls) {
-                    if (cls.includes("square")) {
-                        color = "#F05A67";
-                    }
-                    if (cls.includes("triangle")) {
-                        color = "#4D4ADF";
-                    }
-                    if (cls.includes("circle")) {
-                        color = "#E2A30D";
-                    }
-                    if (cls.includes("diamond")) {
-                        color = "#3BD7FF";
-                    }
+            var color = "#FFFFFF";
+            var path = document.getElementById("diamondPath");
+            var cls = path.getAttribute("class");
+            if (cls) {
+                if (cls.includes("square")) {
+                    color = "#F05A67";
                 }
+                if (cls.includes("triangle")) {
+                    color = "#4D4ADF";
+                }
+                if (cls.includes("circle")) {
+                    color = "#E2A30D";
+                }
+                if (cls.includes("diamond")) {
+                    color = "#3BD7FF";
+                }
+            }
+            var body = Bodies.fromVertices(
+                x,
+                y,
+                Svg.pathToVertices(path, 1),
+                {
+                    render: {
+                        fillStyle: color,
+                        strokeStyle: color,
+                    }
+                },
+                true
+            );
+            return body;
 
-                var body = Bodies.fromVertices(
-                    x,
-                    y,
-                    Svg.pathToVertices(path, 1),
-                    {
-                        render: {
-                            fillStyle: color,
-                            strokeStyle: color,
-                        }
-                    },
-                    true
-                );
-                return body;
-            });
+    //        array4.forEach(path => {
+    //            var color = "#FFFFFF";
+    //            var cls = path.getAttribute("class");
+    //            if (cls) {
+    //                if (cls.includes("square")) {
+    //                    color = "#F05A67";
+    //                }
+    //                if (cls.includes("triangle")) {
+    //                    color = "#4D4ADF";
+    //                }
+    //                if (cls.includes("circle")) {
+    //                    color = "#E2A30D";
+    //                }
+    //                if (cls.includes("diamond")) {
+    //                    color = "#3BD7FF";
+    //                }
+    //            }
+
+    //            var body = Bodies.fromVertices(
+    //                x,
+    //                y,
+    //                Svg.pathToVertices(path, 1),
+    //                {
+    //                    render: {
+    //                        fillStyle: color,
+    //                        strokeStyle: color,
+    //                    }
+    //                },
+    //                true
+    //            );
+    //            return body;
+    //        });
         }
     );
 
-    Composite.add(world, [stack1, ground]);
-    Composite.add(world, [stack2, ground]);
-    Composite.add(world, [stack3, ground]);
-    Composite.add(world, [stack4, ground]);
+    Composite.add(world, stack1);
+    Composite.add(world, stack2);
+    Composite.add(world, stack3);
+    Composite.add(world, stack4);
 
     //const squarePath = document.getElementById("squarePath"),
     //    trianglePath = document.getElementById("trianglePath"),
