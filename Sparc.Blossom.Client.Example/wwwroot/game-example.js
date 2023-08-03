@@ -71,45 +71,11 @@
     bodies.push(rightWall);
     bodies.push(leftWall);
 
-    // create bodies from shapes and add to world
-
-    var array1 = [],
-        array2 = [],
-        array3 = [],
-        array4 = []
-
-    // stack 1
-    for (i = 0; i < 10; i++) {
-        var id = "stack-1-" + i;
-        var path = document.getElementById(id);
-        array1.push(path);
-    }
-
-    // stack 2
-    for (i = 0; i < 10; i++) {
-        var id = "stack-2-" + i;
-        var path = document.getElementById(id);
-        array2.push(path);
-    }
-
-    // stack 3
-    for (i = 0; i < 10; i++) {
-        var id = "stack-3-" + i;
-        var path = document.getElementById(id);
-        array3.push(path);
-    }
-
-    // stack 4
-    for (i = 0; i < 10; i++) {
-        var id = "stack-4-" + i;
-        var path = document.getElementById(id);
-        array4.push(path);
-    }
-
     // stacks
     const gap = 0;
-    //const positionEnd = (canvas.width - gap) - (134 * 10);
     const positionEnd = canvas.width;
+    var row = 1;
+    var index = 0;
 
     var myStack = Composites.stack(
         positionEnd,
@@ -119,82 +85,21 @@
         0,
         0,
         function (x, y) {
-            var num = Common.random(0, 4);
-            if (num > 0 && num < 1) {
-                var path = document.getElementById("squarePath");
-                var color = "#F05A67";
-                return Bodies.fromVertices(
-                    x,
-                    y,
-                    Svg.pathToVertices(path, 1),
-                    {
-                        render: {
-                            fillStyle: color,
-                            strokeStyle: color,
-                        }
-                    },
-                    true
-                );
-            } else if (num > 1 && num < 2) {
-                var path = document.getElementById("trianglePath");
-                var color = "#4D4ADF";
-                return Bodies.fromVertices(
-                    x,
-                    y,
-                    Svg.pathToVertices(path, 1),
-                    {
-                        render: {
-                            fillStyle: color,
-                            strokeStyle: color,
-                        }
-                    },
-                    true
-                );
-            } else if (num > 2 && num < 3) {
-                var path = document.getElementById("circlePath");
-                var color = "#E2A30D";
-                return Bodies.fromVertices(
-                    x,
-                    y,
-                    Svg.pathToVertices(path, 1),
-                    {
-                        render: {
-                            fillStyle: color,
-                            strokeStyle: color,
-                        }
-                    },
-                    true
-                );
-            } else if (num > 3) {
-                var path = document.getElementById("diamondPath");
-                var color = "#3BD7FF";
-                return Bodies.fromVertices(
-                    x,
-                    y,
-                    Svg.pathToVertices(path, 1),
-                    {
-                        render: {
-                            fillStyle: color,
-                            strokeStyle: color,
-                        }
-                    },
-                    true
-                );
+            if (index > 9) {
+                index = 0;
+                row++;
             }
-        }
-    );
 
-    var stack1 = Composites.stack(
-        positionEnd,
-        0,
-        10,
-        1,
-        0,
-        0,
-        function (x, y) {
+            var string = "stack-" + row + "-";
+            var id = string + index;
+            index++;
+
+            var path = document.getElementById(id);
+            if (path) {
+                var cls = path.getAttribute("class");
+            }
+
             var color = "#FFFFFF";
-            var path = document.getElementById("squarePath");
-            var cls = path.getAttribute("class");
             if (cls) {
                 if (cls.includes("square")) {
                     color = "#F05A67";
@@ -209,80 +114,8 @@
                     color = "#3BD7FF";
                 }
             }
-            var body = Bodies.fromVertices(
-                    x,
-                    y,
-                    Svg.pathToVertices(path, 1),
-                    {
-                        render: {
-                            fillStyle: color,
-                            strokeStyle: color,
-                        }
-                    },
-                    true
-                );
-            return body;
-            //array1.forEach(path => {
-            //    var color = "#FFFFFF";
-            //    var cls = path.getAttribute("class");
-            //    if (cls) {
-            //        if (cls.includes("square")) {
-            //            color = "#F05A67";
-            //        }
-            //        if (cls.includes("triangle")) {
-            //            color = "#4D4ADF";
-            //        }
-            //        if (cls.includes("circle")) {
-            //            color = "#E2A30D";
-            //        }
-            //        if (cls.includes("diamond")) {
-            //            color = "#3BD7FF";
-            //        }
-            //    }
 
-            //    var body = Bodies.fromVertices(
-            //        x,
-            //        y,
-            //        Svg.pathToVertices(path, 1),
-            //        {
-            //            render: {
-            //                fillStyle: color,
-            //                strokeStyle: color,
-            //            }
-            //        },
-            //        true
-            //    );
-            //    return body;
-            //});
-        }
-    );
-
-    var stack2 = Composites.stack(
-        positionEnd,
-        0,
-        10,
-        1,
-        0,
-        0,
-        function (x, y) {
-            var color = "#FFFFFF";
-            var path = document.getElementById("trianglePath");
-            var cls = path.getAttribute("class");
-            if (cls) {
-                if (cls.includes("square")) {
-                    color = "#F05A67";
-                }
-                if (cls.includes("triangle")) {
-                    color = "#4D4ADF";
-                }
-                if (cls.includes("circle")) {
-                    color = "#E2A30D";
-                }
-                if (cls.includes("diamond")) {
-                    color = "#3BD7FF";
-                }
-            }
-            var body = Bodies.fromVertices(
+            return Bodies.fromVertices(
                 x,
                 y,
                 Svg.pathToVertices(path, 1),
@@ -294,195 +127,9 @@
                 },
                 true
             );
-            return body;
-
-    //        array2.forEach(path => {
-    //            var color = "#FFFFFF";
-    //            var cls = path.getAttribute("class");
-    //            if (cls) {
-    //                if (cls.includes("square")) {
-    //                    color = "#F05A67";
-    //                }
-    //                if (cls.includes("triangle")) {
-    //                    color = "#4D4ADF";
-    //                }
-    //                if (cls.includes("circle")) {
-    //                    color = "#E2A30D";
-    //                }
-    //                if (cls.includes("diamond")) {
-    //                    color = "#3BD7FF";
-    //                }
-    //            }
-
-    //            var body = Bodies.fromVertices(
-    //                x,
-    //                y,
-    //                Svg.pathToVertices(path, 1),
-    //                {
-    //                    render: {
-    //                        fillStyle: color,
-    //                        strokeStyle: color,
-    //                    }
-    //                },
-    //                true
-    //            );
-    //            return body;
-    //        });
         }
     );
 
-    var stack3 = Composites.stack(
-        positionEnd,
-        0,
-        10,
-        1,
-        0,
-        0,
-        function (x, y) {
-            var color = "#FFFFFF";
-            var path = document.getElementById("circlePath");
-            var cls = path.getAttribute("class");
-            if (cls) {
-                if (cls.includes("square")) {
-                    color = "#F05A67";
-                }
-                if (cls.includes("triangle")) {
-                    color = "#4D4ADF";
-                }
-                if (cls.includes("circle")) {
-                    color = "#E2A30D";
-                }
-                if (cls.includes("diamond")) {
-                    color = "#3BD7FF";
-                }
-            }
-            var body = Bodies.fromVertices(
-                x,
-                y,
-                Svg.pathToVertices(path, 1),
-                {
-                    render: {
-                        fillStyle: color,
-                        strokeStyle: color,
-                    }
-                },
-                true
-            );
-            return body;
-
-    //        array3.forEach(path => {
-    //            var color = "#FFFFFF";
-    //            var cls = path.getAttribute("class");
-    //            if (cls) {
-    //                if (cls.includes("square")) {
-    //                    color = "#F05A67";
-    //                }
-    //                if (cls.includes("triangle")) {
-    //                    color = "#4D4ADF";
-    //                }
-    //                if (cls.includes("circle")) {
-    //                    color = "#E2A30D";
-    //                }
-    //                if (cls.includes("diamond")) {
-    //                    color = "#3BD7FF";
-    //                }
-    //            }
-
-    //            var body = Bodies.fromVertices(
-    //                x,
-    //                y,
-    //                Svg.pathToVertices(path, 1),
-    //                {
-    //                    render: {
-    //                        fillStyle: color,
-    //                        strokeStyle: color,
-    //                    }
-    //                },
-    //                true
-    //            );
-    //            return body;
-    //        });
-        }
-    );
-
-    var stack4 = Composites.stack(
-        positionEnd,
-        0,
-        10,
-        1,
-        0,
-        0,
-        function (x, y) {
-            var color = "#FFFFFF";
-            var path = document.getElementById("diamondPath");
-            var cls = path.getAttribute("class");
-            if (cls) {
-                if (cls.includes("square")) {
-                    color = "#F05A67";
-                }
-                if (cls.includes("triangle")) {
-                    color = "#4D4ADF";
-                }
-                if (cls.includes("circle")) {
-                    color = "#E2A30D";
-                }
-                if (cls.includes("diamond")) {
-                    color = "#3BD7FF";
-                }
-            }
-            var body = Bodies.fromVertices(
-                x,
-                y,
-                Svg.pathToVertices(path, 1),
-                {
-                    render: {
-                        fillStyle: color,
-                        strokeStyle: color,
-                    }
-                },
-                true
-            );
-            return body;
-
-    //        array4.forEach(path => {
-    //            var color = "#FFFFFF";
-    //            var cls = path.getAttribute("class");
-    //            if (cls) {
-    //                if (cls.includes("square")) {
-    //                    color = "#F05A67";
-    //                }
-    //                if (cls.includes("triangle")) {
-    //                    color = "#4D4ADF";
-    //                }
-    //                if (cls.includes("circle")) {
-    //                    color = "#E2A30D";
-    //                }
-    //                if (cls.includes("diamond")) {
-    //                    color = "#3BD7FF";
-    //                }
-    //            }
-
-    //            var body = Bodies.fromVertices(
-    //                x,
-    //                y,
-    //                Svg.pathToVertices(path, 1),
-    //                {
-    //                    render: {
-    //                        fillStyle: color,
-    //                        strokeStyle: color,
-    //                    }
-    //                },
-    //                true
-    //            );
-    //            return body;
-    //        });
-        }
-    );
-
-    //Composite.add(world, stack1);
-    //Composite.add(world, stack2);
-    //Composite.add(world, stack3);
-    //Composite.add(world, stack4);
     Composite.add(world, [myStack, ceiling, floor, leftWall, rightWall]);
 
     // mouse control
