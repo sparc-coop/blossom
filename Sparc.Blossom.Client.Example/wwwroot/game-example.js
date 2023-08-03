@@ -19,6 +19,7 @@
         Render = Matter.Render,
         Runner = Matter.Runner,
         Bodies = Matter.Bodies,
+        Common = Matter.Common,
         Svg = Matter.Svg,
         Composite = Matter.Composite,
         Composites = Matter.Composites,
@@ -107,7 +108,81 @@
 
     // stacks
     const gap = 0;
-    const positionEnd = (canvas.width - gap) - (134 * 10);
+    //const positionEnd = (canvas.width - gap) - (134 * 10);
+    const positionEnd = canvas.width;
+
+    var myStack = Composites.stack(
+        positionEnd,
+        0,
+        6,
+        4,
+        0,
+        0,
+        function (x, y) {
+            var num = Common.random(0, 4);
+            if (num > 0 && num < 1) {
+                var path = document.getElementById("squarePath");
+                var color = "#F05A67";
+                return Bodies.fromVertices(
+                    x,
+                    y,
+                    Svg.pathToVertices(path, 1),
+                    {
+                        render: {
+                            fillStyle: color,
+                            strokeStyle: color,
+                        }
+                    },
+                    true
+                );
+            } else if (num > 1 && num < 2) {
+                var path = document.getElementById("trianglePath");
+                var color = "#4D4ADF";
+                return Bodies.fromVertices(
+                    x,
+                    y,
+                    Svg.pathToVertices(path, 1),
+                    {
+                        render: {
+                            fillStyle: color,
+                            strokeStyle: color,
+                        }
+                    },
+                    true
+                );
+            } else if (num > 2 && num < 3) {
+                var path = document.getElementById("circlePath");
+                var color = "#E2A30D";
+                return Bodies.fromVertices(
+                    x,
+                    y,
+                    Svg.pathToVertices(path, 1),
+                    {
+                        render: {
+                            fillStyle: color,
+                            strokeStyle: color,
+                        }
+                    },
+                    true
+                );
+            } else if (num > 3) {
+                var path = document.getElementById("diamondPath");
+                var color = "#3BD7FF";
+                return Bodies.fromVertices(
+                    x,
+                    y,
+                    Svg.pathToVertices(path, 1),
+                    {
+                        render: {
+                            fillStyle: color,
+                            strokeStyle: color,
+                        }
+                    },
+                    true
+                );
+            }
+        }
+    );
 
     var stack1 = Composites.stack(
         positionEnd,
@@ -404,75 +479,11 @@
         }
     );
 
-    Composite.add(world, stack1);
-    Composite.add(world, stack2);
-    Composite.add(world, stack3);
-    Composite.add(world, stack4);
-
-    //const squarePath = document.getElementById("squarePath"),
-    //    trianglePath = document.getElementById("trianglePath"),
-    //    circlePath = document.getElementById("circlePath"),
-    //    diamondPath = document.getElementById("diamondPath");
-
-    //var squareV,
-    //    triangleV,
-    //    circleV,
-    //    diamondV;
-
-    //squareV = Bodies.fromVertices(
-    //    134,
-    //    134,
-    //    Svg.pathToVertices(squarePath, 1),
-    //    {
-    //        render: {
-    //            fillStyle: "#F05A67",
-    //            strokeStyle: "#F05A67",
-    //        }
-    //    },
-    //    true
-    //);
-
-    //triangleV = Bodies.fromVertices(
-    //    134,
-    //    134,
-    //    Svg.pathToVertices(trianglePath, 1),
-    //    {
-    //        render: {
-    //            fillStyle: "#4D4ADF",
-    //            strokeStyle: "#4D4ADF"
-    //        }
-    //    },
-    //    true
-    //);
-
-    //circleV = Bodies.fromVertices(
-    //    134,
-    //    134,
-    //    Svg.pathToVertices(circlePath, 1),
-    //    {
-    //        render: {
-    //            fillStyle: "#E2A30D",
-    //            strokeStyle: "#E2A30D"
-    //        }
-    //    },
-    //    true
-    //);
-
-    //diamondV = Bodies.fromVertices(
-    //    134,
-    //    134,
-    //    Svg.pathToVertices(diamondPath ,1),
-    //    {
-    //        render: {
-    //            fillStyle: "#3BD7FF",
-    //            strokeStyle: "#3BD7FF"
-    //        }
-    //    },
-    //    true
-    //);
-
-    //bodies.push(squareV, triangleV, circleV, diamondV);
-    //World.add(world, bodies);
+    //Composite.add(world, stack1);
+    //Composite.add(world, stack2);
+    //Composite.add(world, stack3);
+    //Composite.add(world, stack4);
+    Composite.add(world, [myStack, ceiling, floor, leftWall, rightWall]);
 
     // mouse control
     let mouse = Mouse.create(render.canvas),
