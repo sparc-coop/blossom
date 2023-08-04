@@ -3,8 +3,8 @@
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
     window.addEventListener("resize", function () {
-        document.getElementById("game-container").width = window.innerWidth;
-        document.getElementById("game-container").height = window.innerHeight;
+        document.getElementById("game-container").width = canvas.width;
+        document.getElementById("game-container").height = canvas.height;
     });
 
     function percentX(percent) {
@@ -20,7 +20,6 @@
         Runner = Matter.Runner,
         Body = Matter.Body,
         Bodies = Matter.Bodies,
-        Common = Matter.Common,
         Svg = Matter.Svg,
         Composite = Matter.Composite,
         Composites = Matter.Composites,
@@ -37,7 +36,8 @@
     Runner.run(runner, engine);
 
     // gravity
-    world.gravity.y = 0, 000001;
+    world.gravity.y = 1;
+    world.gravity.scale = 0.0003;
 
     // create a renderer
     const render = Render.create({
@@ -46,35 +46,82 @@
         options: {
             wireframes: false,
             showInternalEdges: false,
-            width: percentX(100) - 2,
-            height: percentY(100) - 2,
-            borderRadius: 40,
+            width: percentX(100),
+            height: percentY(100),
             background: "transparent",
         }
     });
 
     Render.run(render);
 
-    // boundaries
-
+    // walls
     const bodies = []
 
-    var ceiling = Bodies.rectangle(percentX(100) / 2, percentY(0) - 10, percentX(100), 20, { isStatic: true, label: "wall" });
-    var floor = Bodies.rectangle(percentX(100) / 2, percentY(100) + 10, percentX(100), 20, { isStatic: true, label: "wall" });
-    var rightWall = Bodies.rectangle(percentX(100) + 10, percentY(100) / 2, 20, percentY(100), { isStatic: true, label: "wall" });
-    var leftWall = Bodies.rectangle(percentX(0) - 10, percentY(100) / 2, 20, percentY(100), { isStatic: true, label: "wall" });
-    ceiling.render.visible = false;
-    floor.render.visible = false;
-    rightWall.render.visible = false;
-    leftWall.render.visible = false;
+    var ceiling = Bodies.rectangle(
+        percentX(100) / 2,
+        percentY(0) - 10,
+        percentX(100),
+        20,
+        {
+            isStatic: true,
+            label: "wall",
+            slop: 0,
+            render: {
+                visible: false
+            }
+        }
+    );
+
+    var floor = Bodies.rectangle(
+        percentX(100) / 2,
+        percentY(100) + 10,
+        percentX(100),
+        20,
+        {
+            isStatic: true,
+            label: "wall",
+            slop: 0,
+            render: {
+                visible: false
+            }
+        }
+    );
+
+    var rightWall = Bodies.rectangle(
+        percentX(100) + 10,
+        percentY(100) / 2,
+        20,
+        percentY(100),
+        {
+            isStatic: true,
+            label: "wall",
+            slop: 0,
+            render: {
+                visible: false
+            }
+        }
+    );
+
+    var leftWall = Bodies.rectangle(
+        percentX(0) - 10,
+        percentY(100) / 2,
+        20, percentY(100),
+        {
+            isStatic: true,
+            label: "wall",
+            slop: 0,
+            render: {
+                visible: false
+            }
+        }
+    );
+
     bodies.push(ceiling);
     bodies.push(floor);
     bodies.push(rightWall);
     bodies.push(leftWall);
 
-    // stacks
-    const gap = 67;
-    const positionEnd = (canvas.width - gap) - (134 * 6);
+    // stack
     var row = 1;
     var index = 0; 
     
@@ -84,7 +131,7 @@
         10,
         4,
         0,
-        2,
+        0,
         function (x, y) {
             if (index > 9) {
                 index = 0;
@@ -104,39 +151,66 @@
                 if (cls) {
                     if (cls.includes("square")) {
                         color = "#F05A67";
-                        return Bodies.rectangle(x, y, 86, 86, {
+                        return Bodies.rectangle(x, y, 85, 85, {
+                            isStatic: true,
+                            slop: 0,
+                            restitution: 0.75,
                             chamfer: { radius: 23 },
                             render: {
                                 fillStyle: color,
                                 strokeStyle: color
-                            },
-                            /*isStatic: true*/
+                            }
                         });
                     }
-                    if (cls.includes("triangle")) {
+                    if (cls.includes("triangle-down")) {
                         color = "#4D4ADF";
+                        var positionY = y - 4;
                         return Bodies.fromVertices(
                             x,
-                            y,
+                            positionY,
                             Svg.pathToVertices(path, 1),
                             {
+                                isStatic: true,
+                                slop: 0,
+                                restitution: 0.75,
                                 render: {
                                     fillStyle: color,
                                     strokeStyle: color,
-                                },
-                                /*isStatic: true*/
+                                }
                             },
                             true
                         );
                     }
+                    if (cls.includes("triangle-up")) {
+                        color = "#4D4ADF";
+                        var positionY = y + 15;
+                        return Bodies.fromVertices(
+                            x,
+                            positionY,
+                            Svg.pathToVertices(path, 1),
+                            {
+                                isStatic: true,
+                                slop: 0,
+                                restitution: 0.75,
+                                render: {
+                                    fillStyle: color,
+                                    strokeStyle: color,
+                                }
+                            },
+                            true
+                        );
+                    }
+
                     if (cls.includes("circle")) {
                         color = "#E2A30D";
-                        return Bodies.circle(x, y, 43, {
+                        return Bodies.circle(x, y, 42.5, {
+                            isStatic: true,
+                            slop: 0,
+                            restitution: 0.75,
                             render: {
                                 fillStyle: color,
                                 strokeStyle: color
-                            },
-                            /*isStatic: true*/
+                            }
                         });
                     }
                     if (cls.includes("diamond")) {
@@ -146,11 +220,13 @@
                             y,
                             Svg.pathToVertices(path, 1),
                             {
+                                isStatic: true,
+                                slop: 0,
+                                restitution: 0.75,
                                 render: {
                                     fillStyle: color,
                                     strokeStyle: color,
-                                },
-                                /*isStatic: true*/
+                                }
                             },
                             true
                         );
@@ -163,22 +239,23 @@
     bodies.push(myStack);
     Composite.add(world, bodies);
 
-    //ScrollTrigger.create({
-    //    trigger: ".game-container",
-    //    start: "center bottom",
-    //    once: true,
-    //    // markers: true,
-    //    onEnter: () => {
-    //        const allBodies = Matter.Composite.allBodies(world);
-    //        allBodies.forEach(body => {
-    //            console.log(body);
-    //            console.log(Body);
-    //            if (body.label !== "wall") {
-    //                Body.setStatic(body, false);
-    //            }
-    //        });
-    //    },
-    //});
+    // bodies (not walls) set to not static on scroll
+    ScrollTrigger.create({
+        trigger: ".game-container",
+        start: "center bottom",
+        once: true,
+        // markers: true,
+        onEnter: () => {
+            const allBodies = Matter.Composite.allBodies(world);
+            allBodies.forEach(body => {
+                console.log(body);
+                console.log(Body);
+                if (body.label !== "wall") {
+                    Body.setStatic(body, false);
+                }
+            });
+        },
+    });
 
     // mouse control
     let mouse = Mouse.create(render.canvas),
