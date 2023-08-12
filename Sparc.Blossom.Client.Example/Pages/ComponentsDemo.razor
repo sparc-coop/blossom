@@ -1,0 +1,46 @@
+﻿@page "/components-demo"
+
+<div class="components-demo">
+    <header> 
+        <h1>Component Library</h1>
+    </header>
+
+    <div class="components-list">
+        <Dropdown />
+        <Tooltip 
+            Label="CreateAvatar"
+            Title="Create your Avatar" 
+            Text="You can change your display name, default language, voice, and avatar anytime you want! Check out your profile settings."
+            CloseType="Text"
+            ClosePosition="CenterBottom"
+            CloseText="Dismiss"
+            CarrotPosition="Top"
+            />
+        <Tooltip 
+            Label="InviteFriends"
+            Title="Invite friends here!" 
+            Text="You can invite your friends by sending an invitation email to them."
+            CloseType="Icon"
+            ClosePosition="RightTop"
+            CloseText="Dismiss"
+            CarrotPosition="Left"
+            />
+        <BlossomModal />
+    </div>
+</div>
+
+<style>
+    .components-demo {
+        font-family: 'CircularStd', sans-serif;
+    }
+
+    .components-list {
+        display: flex;
+        flex-direction: column;
+        gap: 60px;
+    }
+</style>
+
+@code {
+
+}

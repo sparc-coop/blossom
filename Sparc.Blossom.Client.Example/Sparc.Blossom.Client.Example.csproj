@@ -7,6 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\Close.svg" />
+    <Content Remove="wwwroot\Components.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\icons\Close.svg" />
+    <None Include="wwwroot\css\components.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Sparc.Blossom.Client\Sparc.Blossom.Client.csproj" />
   </ItemGroup>
 

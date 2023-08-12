@@ -1,0 +1,14 @@
+﻿@inherits ModalModel
+
+<div class="example-modal">
+    <p>Are you sure you want to delete this room? <br> You can't undo this action.</p>
+    <button @onclick="Cancel" class="cancel">Cancel</button>
+    <button @onclick="CloseModal" class="close">Close</button>
+</div>
+
+@code {
+    async void CloseModal()
+    {
+        await Ok();
+    }
+}

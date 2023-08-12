@@ -1,0 +1,49 @@
+﻿<div class="blossom-tooltip @Show blossom-tooltip--@Label">
+    @if (Title != null) {
+        <div class="tooltip-title">
+            @Title
+        </div>
+    }
+
+    @if (Text != null) {
+        <div class="tooltip-text">
+            @Text
+        </div>
+    }
+
+    <button @onclick=Close class="tooltip-close tooltip-close--@CloseType tooltip-close--@ClosePosition" aria-label="close">
+        @if (CloseType == "Text")
+        {
+            @CloseText
+        }
+
+        @if (CloseType == "Icon")
+        {
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12.0002 10.586L16.9502 5.63599L18.3642 7.04999L13.4142 12L18.3642 16.95L16.9502 18.364L12.0002 13.414L7.05023 18.364L5.63623 16.95L10.5862 12L5.63623 7.04999L7.05023 5.63599L12.0002 10.586Z" fill="#7EB0D1"/>
+            </svg>
+        }
+    </button>
+    
+    @if (ShowCarrot != null) {
+        <div class="tooltip-carrot--@CarrotPosition"></div>
+    }
+</div>
+
+@code {
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? CloseType { get; set; }
+    [Parameter] public string? CloseText { get; set; }
+    [Parameter] public string? ClosePosition { get; set; }
+    [Parameter] public string? CloseIconUrl { get; set; }
+    [Parameter] public bool? ShowCarrot { get; set; } = true;
+    [Parameter] public string? CarrotPosition { get; set; }
+
+    public string Show;
+
+    private void Close() {
+        Show = "hide";
+    }
+}

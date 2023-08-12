@@ -1,0 +1,7 @@
+﻿@code {
+    [CascadingParameter] BlazoredModalInstance ModalInstance { get; set; } = default!;
+
+    protected async Task Cancel() => await ModalInstance.CancelAsync();
+    protected async Task Ok() => await ModalInstance.CloseAsync();
+    protected async Task Ok<T>(T result) => await ModalInstance.CloseAsync(ModalResult.Ok(result));
+}

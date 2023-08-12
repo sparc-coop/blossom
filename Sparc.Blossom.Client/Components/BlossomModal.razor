@@ -1,0 +1,18 @@
+﻿@inherits ModalModel
+
+<div class="blossom-modal">
+    <p>This is an  <br> You can't undo this action.</p>
+    <button @onclick="Cancel" class="cancel">Cancel</button>
+    <button @onclick="CloseModal" class="close">Close</button>
+</div>
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? Type { get; set; }
+
+    async void CloseModal()
+    {
+        await Ok();
+    }
+}

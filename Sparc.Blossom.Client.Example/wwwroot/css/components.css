@@ -1,0 +1,115 @@
+﻿/* Blossom Components */
+
+.blossom-dropdown {
+
+}
+
+.hide {
+    display: none;
+}
+
+.blossom-tooltip {
+    max-width: 204px;
+    padding: 16px 10px;
+    border-radius: 8px;
+    background: #003B5F;
+    font-family: 'CircularStd', sans-serif;
+    color: #FFFFFF;
+    text-align: center;
+    position: relative;
+}
+
+    .blossom-tooltip .tooltip-title {
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 120%;
+        margin-bottom: 8px;
+    }
+
+    .blossom-tooltip .tooltip-text {
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 150%;
+    }
+
+    .blossom-tooltip button {
+        padding: 0;
+        background: none;
+        border: none;
+    }
+
+    .tooltip-close--Text {
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 150%;
+        color: #7EB0D1;
+    }
+
+    .tooltip-close--Text.tooltip-close--CenterBottom {
+        margin-top: 16px;
+    }
+
+    .tooltip-close--Icon {
+
+    }
+
+    .tooltip-close--CenterBottom {
+    }
+
+    .tooltip-close--RightTop {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+    }
+
+    .blossom-tooltip .tooltip-close:hover {
+        cursor: pointer;
+    }
+
+    .blossom-tooltip .tooltip-carrot--Top {
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-bottom: 5px solid #003B5F;
+        position: absolute;
+        top: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .blossom-tooltip .tooltip-carrot--Bottom {
+        width: 0;
+        height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 5px solid #003B5F;
+        position: absolute;
+        bottom: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .blossom-tooltip .tooltip-carrot--Right {
+        width: 0;
+        height: 0;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 5px solid #003B5F;
+        position: absolute;
+        right: -5px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .blossom-tooltip .tooltip-carrot--Left {
+        width: 0;
+        height: 0;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-right: 5px solid #003B5F;
+        position: absolute;
+        left: -5px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
