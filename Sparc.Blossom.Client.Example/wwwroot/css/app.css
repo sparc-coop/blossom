@@ -1,0 +1,168 @@
+﻿/* Blossom Components */
+.hide {
+  display: none;
+}
+
+.blossom-tooltip {
+  max-width: 204px;
+  padding: 16px 10px;
+  border-radius: 8px;
+  background: #003B5F;
+  font-family: "CircularStd", sans-serif;
+  color: #FFFFFF;
+  text-align: center;
+  position: relative;
+}
+.blossom-tooltip .tooltip-title {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 120%;
+  margin-bottom: 8px;
+}
+.blossom-tooltip .tooltip-text {
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 150%;
+}
+.blossom-tooltip button {
+  padding: 0;
+  background: none;
+  border: none;
+}
+.blossom-tooltip .tooltip-close--Text {
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 150%;
+  color: #7EB0D1;
+}
+.blossom-tooltip .tooltip-close--CenterBottom {
+  margin-top: 16px;
+}
+.blossom-tooltip .tooltip-close--RightTop {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+.blossom-tooltip .tooltip-close:hover {
+  cursor: pointer;
+}
+.blossom-tooltip .tooltip-carrot--Top {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #003B5F;
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.blossom-tooltip .tooltip-carrot--Bottom {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid #003B5F;
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.blossom-tooltip .tooltip-carrot--Right {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 5px solid #003B5F;
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.blossom-tooltip .tooltip-carrot--Left {
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 5px solid #003B5F;
+  position: absolute;
+  left: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.open-modal {
+  display: block;
+  width: 100px;
+  padding: 8px;
+  background: white;
+  border: 1px solid black;
+  border-radius: 8px;
+  box-shadow: none;
+  color: black;
+}
+.open-modal:hover {
+  cursor: pointer;
+}
+
+.blazored-modal {
+  box-shadow: 0px 16px 24px rgba(0, 0, 0, 0.06), 0px 2px 6px rgba(0, 0, 0, 0.04), 0px 0px 1px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 16px !important;
+  padding: 24px;
+}
+.blazored-modal .blossom-modal--button-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+}
+.blazored-modal .blossom-modal--button-container button {
+  padding: 8px 16px;
+  color: white;
+  border: 1px solid #003B5F;
+  border-radius: 8px;
+  background: #003B5F;
+  font-family: "CircularStd";
+  font-weight: 400;
+  transition: 200ms ease-in-out;
+}
+.blazored-modal .blossom-modal--button-container button:hover {
+  cursor: pointer;
+}
+.blazored-modal .blossom-modal--button-container button.modal-confirm:hover {
+  background: #D3E4F1;
+  color: #003B5F;
+}
+.blazored-modal .blossom-modal--button-container button.modal-cancel {
+  background: white;
+  color: #003B5F;
+}
+.blazored-modal .blossom-modal--button-container button.modal-cancel:hover {
+  background: #D3E4F1;
+}
+
+/* FONTS */
+@font-face {
+  font-family: "CircularStd";
+  font-weight: 400;
+  src: url(../fonts/CircularStd-Book.ttf) format("truetype");
+}
+@font-face {
+  font-family: "CircularStd";
+  font-weight: 500;
+  src: url(../fonts/CircularStd-Medium.ttf) format("truetype");
+}
+@font-face {
+  font-family: "CircularStd";
+  font-weight: 600;
+  src: url(../fonts/CircularStd-Bold.ttf) format("truetype");
+}
+@font-face {
+  font-family: "CircularStd";
+  font-weight: 900;
+  src: url(../fonts/CircularStd-Black.ttf) format("truetype");
+}
+body {
+  font-family: "CircularStd";
+  font-weight: 400;
+}

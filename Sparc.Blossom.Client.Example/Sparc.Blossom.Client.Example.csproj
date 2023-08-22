@@ -13,7 +13,10 @@
 
   <ItemGroup>
     <None Include="wwwroot\icons\Close.svg" />
-    <None Include="wwwroot\css\components.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazored.Modal" Version="7.1.0" />
   </ItemGroup>
 
   <ItemGroup>

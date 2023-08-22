@@ -1,0 +1,31 @@
+﻿@import 'Pages/ComponentsDemo';
+
+/* FONTS */
+@font-face {
+    font-family: 'CircularStd';
+    font-weight: 400;
+    src: url(wwwroot/fonts/CircularStd-Book.ttf) format('truetype');
+}
+
+@font-face {
+    font-family: 'CircularStd';
+    font-weight: 500;
+    src: url(wwwroot/fonts/CircularStd-Medium.ttf) format('truetype');
+}
+
+@font-face {
+    font-family: 'CircularStd';
+    font-weight: 600;
+    src: url(wwwroot/fonts/CircularStd-Bold.ttf) format('truetype');
+}
+
+@font-face {
+    font-family: 'CircularStd';
+    font-weight: 900;
+    src: url(wwwroot/fonts/CircularStd-Black.ttf) format('truetype');
+}
+
+body {
+    font-family: 'CircularStd';
+    font-weight: 400;
+}

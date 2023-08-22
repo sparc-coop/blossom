@@ -1,7 +1,5 @@
 ﻿/* Blossom Components */
-
 .blossom-dropdown {
-
 }
 
 .hide {
@@ -17,22 +15,21 @@
     color: #FFFFFF;
     text-align: center;
     position: relative;
-}
 
-    .blossom-tooltip .tooltip-title {
+    .tooltip-title {
         font-weight: 600;
         font-size: 16px;
         line-height: 120%;
         margin-bottom: 8px;
     }
 
-    .blossom-tooltip .tooltip-text {
+    .tooltip-text {
         font-weight: 400;
         font-size: 13px;
         line-height: 150%;
     }
 
-    .blossom-tooltip button {
+    button {
         padding: 0;
         background: none;
         border: none;
@@ -45,15 +42,8 @@
         color: #7EB0D1;
     }
 
-    .tooltip-close--Text.tooltip-close--CenterBottom {
-        margin-top: 16px;
-    }
-
-    .tooltip-close--Icon {
-
-    }
-
     .tooltip-close--CenterBottom {
+        margin-top: 16px;
     }
 
     .tooltip-close--RightTop {
@@ -62,11 +52,11 @@
         top: 5px;
     }
 
-    .blossom-tooltip .tooltip-close:hover {
+    .tooltip-close:hover {
         cursor: pointer;
     }
 
-    .blossom-tooltip .tooltip-carrot--Top {
+    .tooltip-carrot--Top {
         width: 0;
         height: 0;
         border-left: 5px solid transparent;
@@ -78,7 +68,7 @@
         transform: translateX(-50%);
     }
 
-    .blossom-tooltip .tooltip-carrot--Bottom {
+    .tooltip-carrot--Bottom {
         width: 0;
         height: 0;
         border-left: 5px solid transparent;
@@ -90,7 +80,7 @@
         transform: translateX(-50%);
     }
 
-    .blossom-tooltip .tooltip-carrot--Right {
+    .tooltip-carrot--Right {
         width: 0;
         height: 0;
         border-top: 5px solid transparent;
@@ -102,7 +92,7 @@
         transform: translateY(-50%);
     }
 
-    .blossom-tooltip .tooltip-carrot--Left {
+    .tooltip-carrot--Left {
         width: 0;
         height: 0;
         border-top: 5px solid transparent;
@@ -113,3 +103,65 @@
         top: 50%;
         transform: translateY(-50%);
     }
+}
+
+.open-modal {
+    display: block;
+    width: 100px;
+    padding: 8px;
+    background: white;
+    border: 1px solid black;
+    border-radius: 8px;
+    box-shadow: none;
+    color: black;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.blazored-modal {
+    box-shadow: 0px 16px 24px rgba(0, 0, 0, 0.06), 0px 2px 6px rgba(0, 0, 0, 0.04), 0px 0px 1px rgba(0, 0, 0, 0.04) !important;
+    border-radius: 16px !important;
+    padding: 24px;
+
+    .blossom-modal {
+        &--button-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+
+            button {
+                padding: 8px 16px;
+                color: white;
+                border: 1px solid #003B5F;
+                border-radius: 8px;
+                background: #003B5F;
+                font-family: 'CircularStd';
+                font-weight: 400;
+                transition: 200ms ease-in-out;
+
+                &:hover {
+                    cursor: pointer;
+                }
+
+                &.modal-confirm {
+                    &:hover {
+                        background: #D3E4F1;
+                        color: #003B5F;
+                    }
+                }
+
+                &.modal-cancel {
+                    background: white;
+                    color: #003B5F;
+
+                    &:hover {
+                        background: #D3E4F1;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -8,8 +8,9 @@
 <head>
     <meta charset="utf-8" />
     <base href="~/" />
+    <link href="css/app.css" rel="stylesheet" />
     <link href="css/site.css" rel="stylesheet" />
-    <link href="css/components.css" rel="stylesheet" />
+    <link href="Sparc.Blossom.Client.Example.styles.css" rel="stylesheet">
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
@@ -26,6 +27,7 @@
         <a class="dismiss">🗙</a>
     </div>
 
+    <script src="_framework/blazor.server.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js" integrity="sha512-0z8URjGET6GWnS1xcgiLBZBzoaS8BNlKayfZyQNKz4IRp+s7CKXx0yz7Eco2+TcwoeMBa5KMwmTX7Kus7Fa5Uw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/ScrollTrigger.min.js"></script>
@@ -34,7 +36,6 @@
     <script>
         gsap.RegisterPlugin(ScrollTrigger);
     </script>
-    <script src="_framework/blazor.server.js"></script>
     <script src="./js/game-example.js"></script>
 </body>
 </html>

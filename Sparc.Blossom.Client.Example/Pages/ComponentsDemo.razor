@@ -25,7 +25,8 @@
             CloseText="Dismiss"
             CarrotPosition="Left"
             />
-        <BlossomModal />
+        @*<BlossomModal Title="Example Modal" Text="Are you sure?" Type="Delete" />*@
+        <button class="open-modal" @onclick=OpenModal>Open</button>
     </div>
 </div>
 
@@ -42,5 +43,8 @@
 </style>
 
 @code {
-
+    void OpenModal()
+    {
+        Modal.Show<BlossomModal>("Example Modal");
+    }
 }
