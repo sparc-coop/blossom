@@ -6,7 +6,6 @@
     </header>
 
     <div class="components-list">
-        <Dropdown />
         <Tooltip 
             Label="CreateAvatar"
             Title="Create your Avatar" 
@@ -25,8 +24,23 @@
             CloseText="Dismiss"
             CarrotPosition="Left"
             />
+
         @*<BlossomModal Title="Example Modal" Text="Are you sure?" Type="Delete" />*@
         <button class="open-modal" @onclick=OpenModal>Open</button>
+
+        <Dropdown>
+            <DropdownSearch />
+            <DropdownGroup Header="Group 1">
+                <DropdownItem Value="1" Name="Option 1" />
+                <DropdownItem Value="2" Name="Option 2" />
+            </DropdownGroup>
+            <DropdownGroup Header="Group 2">
+                <DropdownItem Value="1" Name="Option 1" />
+                <DropdownItem Value="2" Name="Option 2" />
+                <DropdownItem Value="3" Name="Option 3" />
+            </DropdownGroup>
+        </Dropdown>
+
     </div>
 </div>
 
@@ -43,6 +57,8 @@
 </style>
 
 @code {
+    string[] stringArray = { "one", "two", "three", "four" };
+
     void OpenModal()
     {
         Modal.Show<BlossomModal>("Example Modal");

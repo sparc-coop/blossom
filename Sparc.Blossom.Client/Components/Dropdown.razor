@@ -1,6 +1,47 @@
-﻿<select class="blossom-dropdown">
+﻿<div class="blossom-dropdown">
+    @if (Placeholder != null)
+    {
+        <div class="dropdown-placeholder" @onclick=Expand>
+            <span>@Placeholder</span>
+            <svg class="@DropdownArrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M11.9997 13.172L16.9497 8.22198L18.3637 9.63598L11.9997 16L5.63574 9.63598L7.04974 8.22198L11.9997 13.172Z" fill="#070C14" />
+            </svg>
+        </div>
 
-</select>
+    } else
+    {
+        <div class="dropdown-placeholder" @onclick=Expand>
+            <span>Select an option</span>
+            <svg class="@DropdownArrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M11.9997 13.172L16.9497 8.22198L18.3637 9.63598L11.9997 16L5.63574 9.63598L7.04974 8.22198L11.9997 13.172Z" fill="#070C14" />
+            </svg>
+        </div>
+    }
+    <div class="dropdown-list @ShowOptions">
+        @ChildContent
+    </div>
+</div>
 
 @code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string? Placeholder { get; set; }
+
+    bool ExpandDropdown;
+    string? ShowOptions;
+    string? DropdownArrow = "arrow-expand";
+
+    void Expand()
+    {
+        ExpandDropdown = !ExpandDropdown;
+        if (ExpandDropdown == true)
+        {
+            ShowOptions = "show-options";
+            DropdownArrow = "arrow-collapse";
+
+        } else
+        {
+            ShowOptions = "";
+            DropdownArrow = "arrow-expand";
+        }
+    }
 }

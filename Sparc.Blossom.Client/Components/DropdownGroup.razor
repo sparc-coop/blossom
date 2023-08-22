@@ -1,0 +1,9 @@
+﻿<div class="dropdown-group">
+    <div class="dropdown-group--header">@Header</div>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string Header { get; set; }
+}
