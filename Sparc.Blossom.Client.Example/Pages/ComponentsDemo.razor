@@ -28,19 +28,14 @@
         @*<BlossomModal Title="Example Modal" Text="Are you sure?" Type="Delete" />*@
         <button class="open-modal" @onclick=OpenModal>Open</button>
 
-        <Dropdown>
-            <DropdownSearch />
-            <DropdownGroup Header="Group 1">
-                <DropdownItem Value="1" Name="Option 1" />
-                <DropdownItem Value="2" Name="Option 2" />
-            </DropdownGroup>
-            <DropdownGroup Header="Group 2">
-                <DropdownItem Value="1" Name="Option 1" />
-                <DropdownItem Value="2" Name="Option 2" />
-                <DropdownItem Value="3" Name="Option 3" />
-            </DropdownGroup>
-        </Dropdown>
+        <span>Selected Value: @SelectedValue</span>
+        <Dropdown Values="SimpleFish" @bind-SelectedValue="SelectedValue" Search="true" />
 
+        <span>Selected Value 2: @SelectedValue2?.Name</span>
+        <Dropdown Values="Fish" Value="f => f.Id" Name="f => f.Description" @bind-SelectedValue="SelectedValue2" Search="true" />
+
+        <span>Selected Grouped Value: @SelectedValue3?.Name</span>
+        <Dropdown Values="Fish" Value="f => f.Id" Name="f => f.Description" GroupBy="x => x.Category" @bind-SelectedValue="SelectedValue3" Search="true" />
     </div>
 </div>
 
@@ -58,6 +53,29 @@
 
 @code {
     string[] stringArray = { "one", "two", "three", "four" };
+    string? SelectedValue;
+    ExampleFish? SelectedValue2;
+    ExampleFish? SelectedValue3;
+    record ExampleFish(int Id, string Name, string Description, int Length, string Category);
+
+    List<ExampleFish> Fish = new()
+    {
+        new(1, "Bass", "Sea Bass", 48, "Sea"),
+        new(2, "Trout", "Rainbow Trout", 24, "River"),
+        new(3, "Salmon", "Atlantic Salmon", 36, "River"),
+        new(4, "Tuna", "Bluefin Tuna", 84, "Sea"),
+        new(5, "Cod", "Atlantic Cod", 36, "No Idea")
+    };
+
+    List<string> SimpleFish = new()
+    {
+        "Bass", "Trout", "Salmon", "Tuna", "Cod"
+    };
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
 
     void OpenModal()
     {

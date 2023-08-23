@@ -1,4 +1,6 @@
 ﻿<div class="blossom-dropdown">
+    @typeparam TItem
+    
     @if (Placeholder != null)
     {
         <div class="dropdown-placeholder" @onclick=Expand>
@@ -18,17 +20,48 @@
         </div>
     }
     <div class="dropdown-list @ShowOptions">
-        @ChildContent
+        @if (Search)
+        {
+            <DropdownSearch />
+        }
+
+        @if (GroupBy != null)
+        {
+            foreach (var group in Values.GroupBy(GroupBy))
+            {
+                <DropdownGroup Header="@group.Key">
+                    @foreach (var item in group)
+                    {
+                        <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
+                    }
+                </DropdownGroup>
+            }
+        }
+        else if (Values != null)
+        {
+            foreach (var item in Values)
+            {
+                <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
+            }
+        }
     </div>
 </div>
 
 @code {
-    [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public string? Placeholder { get; set; }
 
-    bool ExpandDropdown;
+    [Parameter] public TItem? SelectedValue { get; set; }
+    [Parameter] public EventCallback<TItem?> SelectedValueChanged { get; set; }
+    [Parameter] public IEnumerable<TItem> Values { get; set; } = null!;
+    [Parameter] public Func<TItem, object> Value { get; set; } = (item) => item;
+    [Parameter] public Func<TItem, object> Name { get; set; } = (item) => item;
+    [Parameter] public Func<TItem, string?>? GroupBy { get; set; }
+
+    [Parameter] public bool Search { get; set; }
+
     string? ShowOptions;
     string? DropdownArrow = "arrow-expand";
+    bool ExpandDropdown = false;
 
     void Expand()
     {
@@ -43,5 +76,13 @@
             ShowOptions = "";
             DropdownArrow = "arrow-expand";
         }
+    }
+
+    async Task Select(TItem item)
+    {
+        await SelectedValueChanged.InvokeAsync(item);
+        SelectedValue = item;
+        Placeholder = Name(item).ToString();
+        Expand();
     }
 }
