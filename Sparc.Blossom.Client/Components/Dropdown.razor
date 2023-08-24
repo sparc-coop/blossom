@@ -19,55 +19,56 @@
             </svg>
         </div>
     }
-    <div class="bd-list @ShowOptions">
+    <div class="bd-content @ShowOptions">
         @if (ShowSearch)
         {
             <DropdownSearch OnSearch="Search" />
         }
+        <div class="bd-list">
+            @if (GroupBy != null)
+            {
+                @if (FilteredValues != null)
+                {
+                    foreach (var group in FilteredValues.GroupBy(GroupBy))
+                    {
+                        <DropdownGroup Header="@group.Key">
+                            @foreach (var item in group)
+                            {
+                                <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
+                            }
+                        </DropdownGroup>
+                    }
+                } else
+                {
+                    foreach (var group in Values.GroupBy(GroupBy))
+                    {
+                        <DropdownGroup Header="@group.Key">
+                            @foreach (var item in group)
+                            {
+                                <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
+                            }
+                        </DropdownGroup>
+                    }
 
-        @if (GroupBy != null)
-        {
-            @if (FilteredValues != null)
-            {
-                foreach (var group in FilteredValues.GroupBy(GroupBy))
-                {
-                    <DropdownGroup Header="@group.Key">
-                        @foreach (var item in group)
-                        {
-                            <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
-                        }
-                    </DropdownGroup>
-                }
-            } else
-            {
-                foreach (var group in Values.GroupBy(GroupBy))
-                {
-                    <DropdownGroup Header="@group.Key">
-                        @foreach (var item in group)
-                        {
-                            <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
-                        }
-                    </DropdownGroup>
-                }
-
-            }
-        }
-        else if (Values != null)
-        {
-            if (FilteredValues != null)
-            {
-                foreach (var item in FilteredValues)
-                {
-                    <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
-                }
-            } else
-            {
-                foreach (var item in Values)
-                {
-                    <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
                 }
             }
-        }
+            else if (Values != null)
+            {
+                if (FilteredValues != null)
+                {
+                    foreach (var item in FilteredValues)
+                    {
+                        <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
+                    }
+                } else
+                {
+                    foreach (var item in Values)
+                    {
+                        <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
+                    }
+                }
+            }
+        </div>
     </div>
 </div>
 
