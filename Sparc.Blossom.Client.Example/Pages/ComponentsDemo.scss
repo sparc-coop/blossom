@@ -171,7 +171,7 @@
     width: 200px;
     max-height: 100%;
     transition: max-height 250ms ease-in;
-    padding: 8px;
+    padding: 8px 16px;
     border: 1px solid black;
     border-radius: 8px;
 
@@ -184,8 +184,12 @@
         justify-content: space-between;
         align-items: center;
 
-        svg path {
-            fill: rgba(0, 0, 0, 0.6);
+        svg {
+            margin-right: -8px;
+
+            path {
+                fill: rgba(0, 0, 0, 0.6);
+            }
         }
 
         .arrow-expand {
@@ -235,7 +239,8 @@
             gap: 8px;
             max-height: 200px;
             margin-top: 8px;
-            padding: 0 8px;
+            margin-right: -8px;
+            padding: 8px;
             overflow-y: auto;
             overflow-x: hidden;
 
@@ -256,7 +261,7 @@
                 }
 
                 .bd-item {
-                    margin-left: 20px;
+                    margin-left: 16px;
                 }
             }
 
@@ -305,5 +310,5 @@
 
 ::-webkit-scrollbar-thumb {
     border-radius: 5px;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.5);
 }
