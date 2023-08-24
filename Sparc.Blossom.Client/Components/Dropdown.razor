@@ -20,28 +20,52 @@
         </div>
     }
     <div class="dropdown-list @ShowOptions">
-        @if (Search)
+        @if (ShowSearch)
         {
-            <DropdownSearch />
+            <DropdownSearch OnSearch="Search" />
         }
 
         @if (GroupBy != null)
         {
-            foreach (var group in Values.GroupBy(GroupBy))
+            @if (FilteredValues != null)
             {
-                <DropdownGroup Header="@group.Key">
-                    @foreach (var item in group)
-                    {
-                        <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
-                    }
-                </DropdownGroup>
+                foreach (var group in FilteredValues.GroupBy(GroupBy))
+                {
+                    <DropdownGroup Header="@group.Key">
+                        @foreach (var item in group)
+                        {
+                            <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
+                        }
+                    </DropdownGroup>
+                }
+            } else
+            {
+                foreach (var group in Values.GroupBy(GroupBy))
+                {
+                    <DropdownGroup Header="@group.Key">
+                        @foreach (var item in group)
+                        {
+                            <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
+                        }
+                    </DropdownGroup>
+                }
+
             }
         }
         else if (Values != null)
         {
-            foreach (var item in Values)
+            if (FilteredValues != null)
             {
-                <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
+                foreach (var item in FilteredValues)
+                {
+                    <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
+                }
+            } else
+            {
+                foreach (var item in Values)
+                {
+                    <DropdownItem Value="@Value(item).ToString()" Name="@Name(item).ToString()" OnClick="@(() => Select(item))" />
+                }
             }
         }
     </div>
@@ -57,11 +81,14 @@
     [Parameter] public Func<TItem, object> Name { get; set; } = (item) => item;
     [Parameter] public Func<TItem, string?>? GroupBy { get; set; }
 
-    [Parameter] public bool Search { get; set; }
+    [Parameter] public bool ShowSearch { get; set; }
 
     string? ShowOptions;
     string? DropdownArrow = "arrow-expand";
     bool ExpandDropdown = false;
+
+    string? SearchTerm;
+    IEnumerable<TItem>? FilteredValues;
 
     void Expand()
     {
@@ -84,5 +111,11 @@
         SelectedValue = item;
         Placeholder = Name(item).ToString();
         Expand();
+    }
+
+    void Search(string searchTerm)
+    {
+        SearchTerm = searchTerm;
+        FilteredValues = Values.Where(x => Name(x).ToString().ToLower().Contains(SearchTerm.ToLower()));
     }
 }

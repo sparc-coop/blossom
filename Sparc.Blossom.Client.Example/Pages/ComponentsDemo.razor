@@ -29,13 +29,13 @@
         <button class="open-modal" @onclick=OpenModal>Open</button>
 
         <span>Selected Value: @SelectedValue</span>
-        <Dropdown Values="SimpleFish" @bind-SelectedValue="SelectedValue" Search="true" />
+        <Dropdown Values="SimpleFish" @bind-SelectedValue="SelectedValue" ShowSearch="true" />
 
         <span>Selected Value 2: @SelectedValue2?.Name</span>
-        <Dropdown Values="Fish" Value="f => f.Id" Name="f => f.Description" @bind-SelectedValue="SelectedValue2" Search="true" />
+        <Dropdown Values="Fish" Value="f => f.Id" Name="f => f.Description" @bind-SelectedValue="SelectedValue2" ShowSearch="true" />
 
         <span>Selected Grouped Value: @SelectedValue3?.Name</span>
-        <Dropdown Values="Fish" Value="f => f.Id" Name="f => f.Description" GroupBy="x => x.Category" @bind-SelectedValue="SelectedValue3" Search="true" />
+        <Dropdown Values="Fish" Value="f => f.Id" Name="f => f.Description" GroupBy="x => x.Category" @bind-SelectedValue="SelectedValue3" ShowSearch="true" />
     </div>
 </div>
 
