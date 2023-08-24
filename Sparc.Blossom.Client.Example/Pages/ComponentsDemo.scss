@@ -172,7 +172,7 @@
     border-radius: 8px;
 
 
-    .dropdown-placeholder {
+    .bd-placeholder {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -192,7 +192,7 @@
         }
     }
 
-    .dropdown-list {
+    .bd-list {
         display: none;
 
         &.show-options {
@@ -203,7 +203,7 @@
         }
     }
 
-    .dropdown-search {
+    .bd-search {
         position: relative;
         width: 90%;
         padding: 4px;
@@ -225,7 +225,7 @@
         }
     }
 
-    .dropdown-group {
+    .bd-group {
         display: flex;
         flex-direction: column;
         gap: 4px;
@@ -235,7 +235,7 @@
         }
     }
 
-    .dropdown-item {
+    .bd-item {
         margin-left: 20px;
     }
 }
