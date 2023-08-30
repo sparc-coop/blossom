@@ -16,7 +16,7 @@
                 Create your Avatar
             </div>
             <div class="tooltip-text">
-                "You can change your display name, default language, voice, and avatar anytime you want! Check out your profile settings."
+                You can change your display name, default language, voice, and avatar anytime you want! Check out your profile settings.
             </div>
         </Tooltip>
             
@@ -31,6 +31,10 @@
             />
 
         @*<BlossomModal Title="Example Modal" Text="Are you sure?" Type="Delete" />*@
+        <BlossomModal ShowModal=ShowModal CloseModal=CloseModal>
+            <header>Example Modal</header>
+            <p>This is a Modal description</p>
+        </BlossomModal>
         <button class="open-modal" @onclick=OpenModal>Open</button>
 
         <span>Selected Value: @SelectedValue</span>
@@ -63,6 +67,8 @@
     ExampleFish? SelectedValue3;
     record ExampleFish(int Id, string Name, string Description, int Length, string Category);
 
+    bool ShowModal = false;
+
     List<ExampleFish> Fish = new()
     {
         new(1, "Bass", "Sea Bass", 48, "Sea"),
@@ -84,6 +90,13 @@
 
     void OpenModal()
     {
-        Modal.Show<BlossomModal>("Example Modal");
+        //Modal.Show<BlossomModal>("Example Modal");
+        ShowModal = !ShowModal;
+    }
+
+    void CloseModal()
+    {
+        Console.WriteLine("close modal");
+        ShowModal = false;
     }
 }

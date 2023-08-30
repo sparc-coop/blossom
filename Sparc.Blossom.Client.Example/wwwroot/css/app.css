@@ -37,6 +37,7 @@
   transition: 200ms ease-in-out;
 }
 .blossom-tooltip .tooltip-close--Text {
+  font-family: "CircularStd", sans-serif;
   font-weight: 400;
   font-size: 13px;
   line-height: 150%;
@@ -116,18 +117,108 @@
   cursor: pointer;
 }
 
-.blazored-modal {
+/*.blazored-modal {
+    box-shadow: 0px 16px 24px rgba(0, 0, 0, 0.06), 0px 2px 6px rgba(0, 0, 0, 0.04), 0px 0px 1px rgba(0, 0, 0, 0.04) !important;
+    border-radius: 16px !important;
+    padding: 24px;
+
+    .blossom-modal {
+        &--button-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+
+            button {
+                padding: 8px 16px;
+                color: white;
+                border: 1px solid #003B5F;
+                border-radius: 8px;
+                background: #003B5F;
+                font-family: 'CircularStd';
+                font-weight: 400;
+                transition: 200ms ease-in-out;
+
+                &:hover {
+                    cursor: pointer;
+                }
+
+                &.modal-confirm {
+                    &:hover {
+                        background: #D3E4F1;
+                        color: #003B5F;
+                    }
+                }
+
+                &.modal-cancel {
+                    background: white;
+                    color: #003B5F;
+
+                    &:hover {
+                        background: #D3E4F1;
+                    }
+                }
+            }
+        }
+    }
+}
+*/
+.blossom-modal {
+  display: none;
+  position: relative;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 550px;
+  padding: 24px;
   box-shadow: 0px 16px 24px rgba(0, 0, 0, 0.06), 0px 2px 6px rgba(0, 0, 0, 0.04), 0px 0px 1px rgba(0, 0, 0, 0.04) !important;
   border-radius: 16px !important;
-  padding: 24px;
+  background: white;
+  font-family: "CircularStd", sans-serif;
+  z-index: 2;
+  transition: 500ms ease-in-out;
 }
-.blazored-modal .blossom-modal--button-container {
+.blossom-modal.show {
+  display: block;
+}
+.blossom-modal--overlay {
+  display: none;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 0;
+  transition: 500ms ease-in-out;
+}
+.blossom-modal--overlay.show {
+  display: block;
+}
+.blossom-modal header {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 150%;
+}
+.blossom-modal p {
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 150%;
+}
+.blossom-modal .bm-close {
+  position: absolute;
+  right: 25px;
+  top: 25px;
+  width: 24px;
+  height: 24px;
+}
+.blossom-modal .bm-buttons {
   margin-top: 20px;
   display: flex;
   justify-content: center;
   gap: 40px;
 }
-.blazored-modal .blossom-modal--button-container button {
+.blossom-modal .bm-buttons button {
   padding: 8px 16px;
   color: white;
   border: 1px solid #003B5F;
@@ -137,18 +228,18 @@
   font-weight: 400;
   transition: 200ms ease-in-out;
 }
-.blazored-modal .blossom-modal--button-container button:hover {
+.blossom-modal .bm-buttons button:hover {
   cursor: pointer;
 }
-.blazored-modal .blossom-modal--button-container button.modal-confirm:hover {
+.blossom-modal .bm-buttons button.bm-confirm:hover {
   background: #D3E4F1;
   color: #003B5F;
 }
-.blazored-modal .blossom-modal--button-container button.modal-cancel {
+.blossom-modal .bm-buttons button.bm-cancel {
   background: white;
   color: #003B5F;
 }
-.blazored-modal .blossom-modal--button-container button.modal-cancel:hover {
+.blossom-modal .bm-buttons button.bm-cancel:hover {
   background: #D3E4F1;
 }
 
