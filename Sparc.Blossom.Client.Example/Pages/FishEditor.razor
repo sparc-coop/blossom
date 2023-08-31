@@ -1,0 +1,25 @@
+﻿<BlossomModal @ref=ExampleModal OnOk="Save" OkText="All done!" OnCancel="Restore">
+    <header>Edit @Fish.Name</header>
+    <p>@Fish.Category, @Fish.Description, @Fish.Length inches</p>
+    <input type="number" @bind="NewLength" placeholder="New inches..." />
+</BlossomModal>
+
+@code {
+    [Parameter] public ExampleFish Fish { get; set; }
+    [Parameter] public EventCallback<ExampleFish> FishChanged { get; set; }
+    public BlossomModal ExampleModal = null!;
+    int NewLength;
+
+    async Task Save()
+    {
+        await Task.Delay(1000);
+        Fish = Fish with { Length = NewLength };
+        await FishChanged.InvokeAsync(Fish);
+    }
+
+    async Task Restore()
+    {
+        NewLength = 0;
+        Console.WriteLine("User cancelled");
+    }
+}

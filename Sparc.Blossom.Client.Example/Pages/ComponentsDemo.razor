@@ -32,12 +32,14 @@
 
         @*<BlossomModal Title="Example Modal" Text="Are you sure?" Type="Delete" />*@
         <BlossomModal @ref=ExampleModal OnOk="Save" OkText="All done!" OnCancel="Restore">
-            <header>Edit @ModalValue.Name</header>
-            <p>@ModalValue.Category, @ModalValue.Description, @ModalValue.Length inches</p>
+            <header>Edit @Nemo.Name</header>
+            <p>@Nemo.Category, @Nemo.Description, @Nemo.Length inches</p>
             <input type="number" @bind="NewLength" placeholder="New inches..." />
         </BlossomModal>
+        <button class="open-modal" @onclick=EditNemo>Edit @Nemo.Length inch Nemo</button>
 
-        <button class="open-modal" @onclick=Edit>Edit Nemo</button>
+        <FishEditor @ref=DoryModal @bind-Fish="Dory" />
+        <button class="open-modal" @onclick=EditDory>Edit @Dory.Length inch Dory</button>
 
         <span>Selected Value: @SelectedValue</span>
         <Dropdown Values="SimpleFish" @bind-SelectedValue="SelectedValue" ShowSearch="true" />
@@ -67,10 +69,12 @@
     string? SelectedValue;
     ExampleFish? SelectedValue2;
     ExampleFish? SelectedValue3;
-    ExampleFish ModalValue = new(10, "Clownfish", "Nemo", 10, "Ocean");
-    record ExampleFish(int Id, string Name, string Description, int Length, string Category);
+    ExampleFish Nemo = new(10, "Clownfish", "Nemo", 10, "Ocean");
     BlossomModal ExampleModal = null!;
+    FishEditor DoryModal = null!;
     int NewLength = 0;
+
+    ExampleFish Dory = new(10, "Blue Tang", "Dory", 11, "Ocean");
 
     List<ExampleFish> Fish = new()
     {
@@ -86,12 +90,13 @@
         "Bass", "Trout", "Salmon", "Tuna", "Cod"
     };
 
-    void Edit() => ExampleModal.Show();
+    void EditNemo() => ExampleModal.Show();
+    void EditDory() => DoryModal.ExampleModal.Show();
 
     async Task Save()
     {
         await Task.Delay(1000);
-        ModalValue = ModalValue with { Length = NewLength };
+        Nemo = Nemo with { Length = NewLength };
     }
 
     async Task Restore()
