@@ -31,11 +31,13 @@
             />
 
         @*<BlossomModal Title="Example Modal" Text="Are you sure?" Type="Delete" />*@
-        <BlossomModal ShowModal=ShowModal CloseModal=CloseModal>
-            <header>Example Modal</header>
-            <p>This is a Modal description</p>
+        <BlossomModal @ref=ExampleModal OnOk="Save" OkText="All done!" OnCancel="Restore">
+            <header>Edit @ModalValue.Name</header>
+            <p>@ModalValue.Category, @ModalValue.Description, @ModalValue.Length inches</p>
+            <input type="number" @bind="NewLength" placeholder="New inches..." />
         </BlossomModal>
-        <button class="open-modal" @onclick=OpenModal>Open</button>
+
+        <button class="open-modal" @onclick=Edit>Edit Nemo</button>
 
         <span>Selected Value: @SelectedValue</span>
         <Dropdown Values="SimpleFish" @bind-SelectedValue="SelectedValue" ShowSearch="true" />
@@ -65,9 +67,10 @@
     string? SelectedValue;
     ExampleFish? SelectedValue2;
     ExampleFish? SelectedValue3;
+    ExampleFish ModalValue = new(10, "Clownfish", "Nemo", 10, "Ocean");
     record ExampleFish(int Id, string Name, string Description, int Length, string Category);
-
-    bool ShowModal = false;
+    BlossomModal ExampleModal = null!;
+    int NewLength = 0;
 
     List<ExampleFish> Fish = new()
     {
@@ -83,20 +86,22 @@
         "Bass", "Trout", "Salmon", "Tuna", "Cod"
     };
 
+    void Edit() => ExampleModal.Show();
+
+    async Task Save()
+    {
+        await Task.Delay(1000);
+        ModalValue = ModalValue with { Length = NewLength };
+    }
+
+    async Task Restore()
+    {
+        NewLength = 0;
+        Console.WriteLine("User cancelled");
+    }
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
-    }
-
-    void OpenModal()
-    {
-        //Modal.Show<BlossomModal>("Example Modal");
-        ShowModal = !ShowModal;
-    }
-
-    void CloseModal()
-    {
-        Console.WriteLine("close modal");
-        ShowModal = false;
     }
 }
