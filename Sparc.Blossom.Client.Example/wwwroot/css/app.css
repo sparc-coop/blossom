@@ -176,7 +176,7 @@
   background: white;
   font-family: "CircularStd", sans-serif;
   z-index: 2;
-  transition: 500ms ease-in-out;
+  animation: fadeIn 300ms ease-in-out;
 }
 .blossom-modal.show {
   display: block;
@@ -188,9 +188,8 @@
   position: fixed;
   top: 0;
   left: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
   z-index: 0;
-  transition: 500ms ease-in-out;
 }
 .blossom-modal--overlay.show {
   display: block;
@@ -211,6 +210,9 @@
   top: 25px;
   width: 24px;
   height: 24px;
+}
+.blossom-modal .bm-close:hover {
+  cursor: pointer;
 }
 .blossom-modal .bm-buttons {
   margin-top: 20px;
@@ -352,6 +354,22 @@
   }
   100% {
     transform: rotate(0deg);
+  }
+}
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
   }
 }
 ::-webkit-scrollbar {

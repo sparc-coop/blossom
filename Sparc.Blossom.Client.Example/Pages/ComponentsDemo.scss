@@ -193,7 +193,7 @@
     background: white;
     font-family: 'CircularStd', sans-serif;
     z-index: 2;
-    transition: 500ms ease-in-out;
+    animation: fadeIn 300ms ease-in-out;
 
     &.show {
         display: block;
@@ -206,9 +206,8 @@
         position: fixed;
         top: 0;
         left: 0;
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(0, 0, 0, 0.5);
         z-index: 0;
-        transition: 500ms ease-in-out;
 
         &.show {
             display: block;
@@ -233,6 +232,10 @@
         top: 25px;
         width: 24px;
         height: 24px;
+
+        &:hover {
+            cursor: pointer;
+        }
     }
 
     .bm-buttons {
@@ -385,6 +388,17 @@
                 }
             }
         }
+    }
+}
+
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
     }
 }
 
