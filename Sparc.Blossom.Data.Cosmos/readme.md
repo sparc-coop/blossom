@@ -21,11 +21,12 @@ In Your Features Project:
 	}
 	```
 
-3. Create an Entity Framework `DbContext` class, configuring all root entities as necessary. Example:
+3. Create a `SparcContext` class, configuring all root entities as necessary. Example:
     ```csharp
-	public class MyAppContext : DbContext
+	public class MyAppContext : SparcContext
     {
-      public MyAppContext(DbContextOptions options) : base(options)
+      public DbSet<User> Users => Set<User>();
+      public MyAppContext(DbContextOptions options, Publisher publisher) : base(options, publisher)
       { }
 
 	  protected override void OnModelCreating(ModelBuilder builder)
@@ -35,9 +36,9 @@ In Your Features Project:
 	}
 	```
 
-4. Add the following line of code to your `Startup.cs` file in your Features Project to register the `Sparc.Database.Cosmos` plugin. Pass in the `DbContext` class type you created, the connection string from your `appsettings.json` file, and the name of your database.
+4. Add the following line of code to your `Program.cs` file in your Features Project to register the `Sparc.Database.Cosmos` plugin. Pass in the `DbContext` class type you created, the connection string from your `appsettings.json` file, and the name of your database.
     ```csharp
-    services.AddCosmos<MyAppContext>(Configuration.GetConnectionString("CosmosDb"), "[your Database Name]");
+    buider.Services.AddCosmos<MyAppContext>(builder.Configuration.GetConnectionString("CosmosDb"), "[your Database Name]");
 	```
 
 5. Inject `IRepository<T>` into any feature that needs to load from or save data to the database. All typically necessary database operations exist within this interface. The Cosmos DB Repository you configured will automatically be used.
@@ -46,4 +47,11 @@ In Your Features Project:
 
 For more information on root entities, or how to use `IRepository<T>`, see the [Sparc.Blossom.Core documentation](/Sparc.Blossom.Core).
 
-For an example on using `IRepository<T>` inside a Feature, see the examples in the [Sparc.Features documentation](/Sparc.Features).
+For an example on using `IRepository<T>` inside a Feature, see the examples in the [Sparc.Kernel documentation](/Sparc.Kernel).
+
+For an example of an app using Cosmos check the Ibis Features Project:
+
+- [Project](https://github.com/sparc-coop/ibis/tree/main/Ibis.Features)
+- [appsettings.json](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/appsettings.json)
+- [IbisContext Class](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/_Plugins/IbisContext.cs)
+- [Program.cs](https://github.com/sparc-coop/ibis/blob/main/Ibis.Features/Program.cs)

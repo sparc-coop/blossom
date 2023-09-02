@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageType>Template</PackageType>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>BlossomFeatures.Test</PackageId>
+    <Version>1.1.1</Version>
+    <Authors>Antonio Correia</Authors>
+    <Company>Sparc Coop</Company>
+    <Product>Blossom</Product>
+
+    <IncludeContentInPack>true</IncludeContentInPack>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <ContentTargetFolders>content</ContentTargetFolders>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="TemplateWebNET7\**\*" Exclude="TemplateWebNET7\**\bin\**;TemplateWebNET7\**\obj\**" />
+    <Compile Remove="**\*" />
+  </ItemGroup>
+</Project>

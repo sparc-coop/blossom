@@ -11,11 +11,16 @@ public static class ServiceCollectionExtensions
     {
         builder.UseMauiApp<App>();
 
-        builder.Services.AddBlazorWebView();
+        builder.Services.AddMauiBlazorWebView();
         builder.Services.AddAuthorizationCore();
         builder.Services.AddScoped<IErrorBoundaryLogger, ConsoleErrorBoundaryLogger>()
             .AddScoped<LayoutComponentBase, TMainLayout>()
             .AddSingleton<RootScope>();
+
+#if DEBUG
+		builder.Services.AddBlazorWebViewDeveloperTools();
+		builder.Logging.AddDebug();
+#endif
 
 #if ANDROID
         builder.Services.AddSingleton<Device, AndroidDevice>();

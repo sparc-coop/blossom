@@ -1,8 +1,8 @@
-# Contributing to Sparc
-Please review this document before creating a pull request. Thank you for your interest in Sparc!
+# Contributing to Blossom
+Please review this document before creating a pull request. Thank you for your interest in Blossom!
 
 ## Documentation
-Learn more about how to use Sparc by visiting TODO.
+Learn more about how to use Blossom by [reading our documentation and exploring our examples](/README.md).
 
 ## Getting Started
 Create a fork of the project.

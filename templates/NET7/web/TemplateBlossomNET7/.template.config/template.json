@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Sparc Coop",
+  "classifications": [ "Web", "Features" ],
+  "identity": "TemplateWebNET7",
+  "name": "Blossom Project",
+  "description": "Creates a Blossom Web or Features only project",
+  "shortName": "blossom-template",
+  "sourceName": "TemplateWebNET7",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "preferNameDirectory": true,
+  "symbols":{
+    "SolutionType":{
+      "type": "parameter",
+      "displayName": "Solution Type",
+      "description": "Select what to include",
+      "datatype":"choice",
+      "choices": [
+        {
+          "choice": "onlyfeatures",
+          "description": "Creates a solution only with the Features project",
+          "displayName": "Features"
+        },
+        {
+          "choice": "featuresweb",
+          "description": "Creates a solution with the Features + Web project",
+          "displayName": "Web Project"
+        }
+      ],
+      "defaultValue": "featuresweb"
+    },
+    "AddSQL":{
+      "type": "parameter",
+      "displayName": "Add a SQL Server database",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
+    },
+    "AddCosmos":{
+      "type": "parameter",
+      "displayName": "Add Cosmosdb",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
+    },
+    "AddAzureStorage":{
+      "type": "parameter",
+      "displayName": "Add Azure Storage Plugin",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
+    },
+    "AddAzureADAuth":{
+      "type": "parameter",
+      "displayName": "Add Azure AD B2C Plugin",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
+    },
+    "AddTwilio":{
+      "type": "parameter",
+      "displayName": "Add Twilio Notifications Plugin",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
+    },
+    "AddAzureNotifications":{
+      "type": "parameter",
+      "displayName": "Add Azure Notifications Plugin",
+      "description": "",
+      "datatype": "bool",
+      "defaultValue": "false"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        {
+          "condition": "(SolutionType == 'onlyfeatures')",
+          "exclude": [
+            "TemplateWebNET7.Web/**/*",
+            "TemplateWebNET7.sln"
+          ]
+        }
+      ]
+    }
+  ]
+}

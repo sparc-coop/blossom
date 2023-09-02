@@ -4,9 +4,15 @@
 
 The `Sparc.Blossom.Core` library contains a few shared classes and interfaces that are used by many libraries in Sparc.Kernel.
 
-You should not normally need to add this project directly to your Sparc Solution. Other libraries and plugins will bring it in as needed.
+This readme will serve as an architectural guide for best practices on Entities, Roots, and Repositories, and how to design them the Blossom way.
 
-This readme will serve as an architectural guide for best practices on Entities, Roots, and Repositories, and how to design them the Sparc.Kernel way.
+# Table of contents
+- [The Blossom Core Architecture](#the-blossom-core-architecture)
+	- [Entities vs. Database Schemas](#entities-vs-database-schemas)
+	- [Write your Entities as Normal C# Classes](#write-your-entities-as-normal-c#-classes)
+	- [Features and Repositories](#features-and-repositories)
+	- [IFileRepository](#ifilerepository)
+	- [ISqlRepository](#isqlrepository)
 
 ## The Sparc.Blossom Core Architecture
 
@@ -15,7 +21,7 @@ This readme will serve as an architectural guide for best practices on Entities,
 Almost all applications need some form of data persistence. When we use a typical 3-layer architecture, we tend to let the database schema define the entire design
 of every entity and behavior throughout the app. Many developers design the entire database schema first, and only then do they start thinking about the application itself.
 
-With Sparc.Kernel, we want to challenge that assumption.
+With Blossom, we want to challenge that assumption.
 
 We want you to think of the database as just a detail -- a detail that doesn't even have to be decided upon until the very end.
 
@@ -120,4 +126,12 @@ It's just this: get a piece of data, and save the result once we do something ne
 
 We have to let the app do *everything else*. We have to design the app so it can fully do everything it is designed to do, without even needing a database at all.
 
-*More to come...*
+### IFileRepository
+
+Following the same idea we have the IFileRepository, so you'll have it available in case you need to implement your own or use one of our plugins, like for example the [![Nuget](https://img.shields.io/nuget/v/Sparc.Storage.Azure?label=Sparc.Storage.Azure)](https://www.nuget.org/packages/Sparc.Storage.Azure/). 
+
+In case you want to check how it implements the interface here is the [AzureBlobRepository.cs](/Sparc.Storage.Azure/AzureBlobRepository.cs)
+
+### ISqlRepository
+
+This one is an example of when you already have your infrastructure defined or at least an idea that your project will use a SQL database, for example. So here we extended the [IRepository](Data/IRepository.cs) to have specific SQL operations (`FromSqlAsync`) check the [ISqlRepository](Data/ISqlRepository.cs) and one of its implementations at [SqlServerRepository.cs](/Sparc.Database.SqlServer/SqlServerRepository.cs)

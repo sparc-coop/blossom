@@ -1,0 +1,14 @@
+﻿{
+  "dependentFileProviders": {
+    "add": {
+      "extensionToExtension": {
+        "add": {
+          ".scss": [
+            ".razor",
+            ".cshtml"
+          ]
+        }
+      }
+    }
+  }
+}

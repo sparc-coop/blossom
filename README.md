@@ -1,10 +1,30 @@
-[![MIT License](https://img.shields.io/github/license/sparc-coop/Sparc.Kernel)](https://github.com/sparc-coop/Sparc.Kernel/blob/main/LICENSE)
+[![MIT License](https://img.shields.io/github/license/sparc-coop/blossom)](https://github.com/sparc-coop/blossom/blob/main/LICENSE)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="Sparc.Blossom.Core/Files/blossom_logo_white.png">
   <source media="(prefers-color-scheme: light)" srcset="Sparc.Blossom.Core/Files/blossom_logo_black.png">
   <img alt="Shows logo in light/dark mode." src="Sparc.Blossom.Core/Files/blossom_logo_black.png">
 </picture>
+
+# Table of contents
+
+- :blossom: [What is Blossom?](#what-is-blossom)
+  - [OK, what is it really?](#ok-what-is-it-really)
+  - [How is a Blossom solution structured?](#how-is-a-blossom-solution-structured)
+- :rocket: [Get Started with Blossom](#get-started-with-blossom)
+  - [Step 1. Create a Blossom Solution with a Features and Web Project](#step-1-create-a-blossom-solution-with-a-features-and-web-project)
+  - [Step 2. Write your app](#step-2-write-your-app)
+  - [Step 3. Add Sparc plugins as you need them](#step-3-add-sparc-plugins-as-you-need-them)
+    - [Database](#database)
+    - [Authentication](#authentication)
+    - [Notifications](#notifications)
+    - [Storage](#storage)
+  - [Step 4. Deploy your solution](#step-4-deploy-your-solution)
+- :notebook: [Documentation](#documentation)
+- :computer: [Examples / Templates](#examples--templates)
+- :hammer_and_wrench: [Built With](#built-with)
+- :handshake: [Contributing](#contributing)
+
 
 
 # What is Blossom?
@@ -28,42 +48,40 @@ A typical Blossom solution has three main components:
 
 - one **Features** project. This project is the main back end API for the application, and contains the vast majority of the application's logic.
 - one **UI** project. This project is the shared front end for Web, Mobile, and Desktop, using Blazor as its underlying architecture. 
-- *(optional)* one or more **Platforms** projects, if you're deploying to multiple platforms. These projects are the deployable units for Web (using Sparc.Platforms.Web) and Android/iOS/Mac/Windows (using Sparc.Platforms.Maui). They are typically very small projects with only platform-specific startup code and platform overrides. The vast majority of the UI code should still exist in the shared UI project.
+- *(optional)* one or more **Platforms** projects, if you're deploying to multiple platforms. These projects are the deployable units for Web and Android/iOS/Mac/Windows (using Sparc.Blossom). They are typically very small projects with only platform-specific startup code and platform overrides. The vast majority of the UI code should still exist in the shared UI project.
 
 # Get Started with Blossom
 
 ## Step 1. Create a Blossom Solution with a Features and Web Project
 
 1. **Features Project:** Create a new .NET 7.0 solution with an *ASP.NET Core Empty* project (preferably called *[YourProject]*.Features).
-> Follow the [Sparc.Kernel documentation](/Sparc.Kernel) for setup.
+> Follow the [Sparc.Kernel documentation](/Sparc.Kernel#get-started-with-a-features-project) for setup.
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Kernel?label=Sparc.Kernel)](https://www.nuget.org/packages/Sparc.Kernel/)
 
 
 2. **Web Project:** Add a *Blazor Web Assembly App* project to your solution (preferably called *[YourProject]*.Web). 
-> Follow the [Sparc.Platforms.Web documentation](/Sparc.Platforms.Web) for setup.
-[![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Web?label=Sparc.Platforms.Web)](https://www.nuget.org/packages/Sparc.Platforms.Web/)
+> Follow the [Sparc.Blossom documentation](/Sparc.Blossom) for setup.
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Blossom?label=Sparc.Blossom)](https://www.nuget.org/packages/Sparc.Blossom/)
 
-## Step 1a *(optional, if you're targeting mobile/desktop platforms)*: Add a Shared UI project and a MAUI Desktop/Mobile project
+### Step 1a *(optional, if you're targeting mobile/desktop platforms)*: Add a Shared UI project and a MAUI Desktop/Mobile project
 
 1. **Shared UI Project:** Add a *Razor Class Library* project to your solution (preferably called *[YourProject]*.UI).
-> Follow the [Sparc.UI documentation](/Sparc.UI) for setup.
-[![Nuget](https://img.shields.io/nuget/v/Sparc.UI?label=Sparc.UI)](https://www.nuget.org/packages/Sparc.UI/)
 
 2. **Mobile/Desktop Project:** Add a *.NET MAUI Blazor App* project to your solution (preferably called *[YourProject]*.Maui).
-> Follow the [Sparc.Platforms.Maui documentation](/Sparc.UI) for setup.
-[![Nuget](https://img.shields.io/nuget/v/Sparc.Platforms.Maui?label=Sparc.Platforms.Maui)](https://www.nuget.org/packages/Sparc.Platforms.Maui/)
+> Follow the [Sparc.Blossom documentation](/Sparc.Blossom) for setup.
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Blossom?label=Sparc.Blossom)](https://www.nuget.org/packages/Sparc.Blossom/)
 
 
 ## Step 2. Write your app
 
 1. Create your base entity classes in the Sparc.Features project. Entities are the core classes that your app uses. 
-> Examples of entities are `Order`, `User`, `Product`, `OrderDetail`, etc. See [Sparc.Core documentation](/Sparc.Core) for architectural guidance.
+> Examples of entities are `Order`, `User`, `Product`, `OrderDetail`, etc. See [Sparc.Kernel documentation](/Sparc.Kernel) for architectural guidance.
 
 2. Create a Feature for each "feature" that your app needs. Features are operations that your app can perform and all of the necessary dependencies around that operation (including database retrieval and persistence and other plugins). Each Feature automatically becomes a separate API endpoint.
-> Examples of Features are `GetOrder`, `SaveOrder`, `GetUserProfile`, etc. See [Sparc.Features documentation](/Sparc.Features) for architectural guidance.
+> Examples of Features are `GetOrder`, `SaveOrder`, `GetUserProfile`, etc. See [Sparc.Kernel documentation](/Sparc.Kernel) for architectural guidance.
 
-3. Create a Blazor Page/Component for each UI Page/Component that your app needs, and place them in the Sparc.UI project (or Sparc.Platforms.Web for web-only projects).
-> Examples of Pages are `Orders/Index.razor`, `ProductDetail.razor`, `Profile.razor`, etc. Examples of Components are `ProductSummary.razor`, `OrdersList.razor`, `Avatar.razor`, etc. See [Sparc.UI documentation](/Sparc.UI) for architectural guidance.
+3. Create a Blazor Page/Component for each UI Page/Component that your app needs, and place them in the UI project (or Web for web-only projects).
+> Examples of Pages are `Orders/Index.razor`, `ProductDetail.razor`, `Profile.razor`, etc. Examples of Components are `ProductSummary.razor`, `OrdersList.razor`, `Avatar.razor`, etc. See [Sparc.Blossom documentation](/Sparc.Blossom) for architectural guidance.
 
 4. Call your Features from your UI, using the auto-generated `Api` class that the framework creates for you.
 > An `Api` class is automatically regenerated on each build using the `swagger.json` file from your Features project, which is *also* automatically regenerated on each build. This class is typically called *[YourProject]Api*, eg. `PointOfSaleApi`, and it automatically contains a method for every Feature you've implemented, eg. `await Api.GetOrdersAsync(CustomerId)`.
@@ -74,11 +92,11 @@ A typical Blossom solution has three main components:
 
 ### Database
 
-The Sparc.Features library comes with a default in-memory implementation of `IRepository`, so you likely don't even need to set up a database in the initial stages of development. Just inject `IRepository<Entity>` everywhere as needed, and all data will be loaded from/saved to local memory.
+The Sparc.Kernel library comes with a default in-memory implementation of `IRepository`, so you likely don't even need to set up a database in the initial stages of development. Just inject `IRepository<Entity>` everywhere as needed, and all data will be loaded from/saved to local memory.
 
-When you are ready to add a real database, simply add the appropriate NuGet package to the `Sparc.Features` project and configure it in the Startup class. 
+When you are ready to add a real database, simply add the appropriate NuGet package to the `Features` project and configure it in the Startup class. 
 
-Sparc currently offers libraries for two database providers:
+Blossom currently offers libraries for two database providers:
 
 - Azure Cosmos DB: [Sparc.Database.Cosmos](/Sparc.Database.Cosmos)
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Database.Cosmos?label=Sparc.Database.Cosmos)](https://www.nuget.org/packages/Sparc.Database.Cosmos/)
@@ -90,26 +108,22 @@ You may also implement your own instance of `IRepository<T>` if you desire a cus
 
 ### Authentication 
 
-All Features by default require some form of authentication, as most real-world API endpoints are private, not public. However, Sparc includes a feature type called `PublicFeature` which opens up anonymous access to the feature. If you wish to defer user authentication to a later point in the development of your app, you can simply use `PublicFeature` for all features until you're ready.
+All Features by default require some form of authentication, as most real-world API endpoints are private, not public. However, Blossom includes a feature type called `PublicFeature` which opens up anonymous access to the feature. If you wish to defer user authentication to a later point in the development of your app, you can simply use `PublicFeature` for all features until you're ready.
 
-When you're ready, simply add the appropriate NuGet package to the `Sparc.Features` project and configure it per the documentation. 
+When you're ready, simply add the appropriate NuGet package to the `Features` project and configure it per the documentation. 
 
-Sparc includes three main options for authentication:
+Blossom includes two main options for authentication:
 
 - Azure AD B2C (good for secure OAuth2.0 consumer apps): 
 [Sparc.Authentication.AzureADB2C](/Sparc.Authentication.AzureADB2C) 
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Authentication.AzureADB2C?label=Sparc.Authentication.AzureADB2C)](https://www.nuget.org/packages/Sparc.Authentication.AzureADB2C/)
-
-- Active Directory (good for internal apps): [Sparc.Authentication.ActiveDirectory](/Sparc.Authentication.ActiveDirectory)
-[![Nuget](https://img.shields.io/nuget/v/Sparc.Authentication.ActiveDirectory?label=Sparc.Authentication.ActiveDirectory)](https://www.nuget.org/packages/Sparc.Authentication.ActiveDirectory/)
-
 
 - Self-Hosted Identity Server (good for custom authentication flows): [Sparc.Authentication.SelfHosted](/Sparc.Authentication.SelfHosted)
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Authentication.SelfHosted?label=Sparc.Authentication.SelfHosted)](https://www.nuget.org/packages/Sparc.Authentication.SelfHosted/)
 
 ### Notifications
 
-To send emails, text messages, and push notifications, Sparc offers two libraries:
+To send emails, text messages, and push notifications, Blossom offers two libraries:
 
 - Twilio (for emails and SMS messages): [Sparc.Notifications.Twilio](/Sparc.Notifications.Twilio)
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Notifications.Twilio?label=Sparc.Notifications.Twilio)](https://www.nuget.org/packages/Sparc.Notifications.Twilio/)
@@ -117,28 +131,35 @@ To send emails, text messages, and push notifications, Sparc offers two librarie
 - Azure Notification Hub (for web and mobile push notifications): [Sparc.Notifications.Azure](/Sparc.Notifications.Azure)
 [![Nuget](https://img.shields.io/nuget/v/Sparc.Notifications.Azure?label=Sparc.Notifications.Azure)](https://www.nuget.org/packages/Sparc.Notifications.Azure/)
 
+### Storage
+
+To upload and download blob files using a modern storage solution, Blossom offers:
+
+- Azure Storage Plugin: [Sparc.Storage.Azure](Sparc.Storage.Azure)
+[![Nuget](https://img.shields.io/nuget/v/Sparc.Storage.Azure?label=Sparc.Storage.Azure)](https://www.nuget.org/packages/Sparc.Storage.Azure/)
+
 ## Step 4. Deploy your solution
 
-1. Deploy the Features project to any .NET 6.0 ASP.NET Core-compatible host (eg. Azure App Services).
+1. Deploy the Features project to any .NET 7.0 ASP.NET Core-compatible host (eg. Azure App Services).
 2. Deploy the Web Platform project to any Web Assembly-compatible host (eg. Azure App Services).
 3. Deploy the MAUI Platform project to Google, Apple, and Windows stores, or as desired.
 
 # Documentation
 
-Learn more about how to use Sparc.Kernel by visiting the source folder for each package (linked above). 
+Learn more about how to use Blossom by visiting the source folder for each package (linked above). 
 Each package contains its own readme for installing and getting started.
 
 # Examples / Templates
 
-Sparc.Kernel is the architecture for all of [Sparc Cooperative](https://www.sparc.coop)'s ongoing projects, including:
+Blossom is the architecture for all of [Sparc Cooperative](https://www.sparc.coop)'s ongoing projects, including:
 
-- [Law of 100](https://github.com/sparc-coop/law-of-100) (Features, Platforms.Web, Authentication.AzureADB2C, Database.Cosmos, Notifications.Azure)
-- [Kodekit](https://github.com/sparc-coop/kodekit) (Features, Platforms.Web, Authentication.AzureADB2C, Database.Cosmos)
-- [Ibis](https://github.com/sparc-coop/ibis) (Features, Platforms.Web, Authentication.AzureADB2C, Notifications.Twilio, Storage.Azure, Database.Cosmos)
+- [Law of 100](https://github.com/sparc-coop/law-of-100) (Features, Web, Authentication.AzureADB2C, Database.Cosmos, Notifications.Azure)
+- [Kodekit](https://github.com/sparc-coop/kodekit) (Features, Web, Authentication.AzureADB2C, Database.Cosmos)
+- [Ibis](https://github.com/sparc-coop/ibis) (Features, Web, Authentication.AzureADB2C, Notifications.Twilio, Storage.Azure, Database.Cosmos)
 
 # Built With
 
-Sparc.Kernel is built on the shoulders of giants:
+Blossom is built on the shoulders of giants:
 
 - [Ardalis.ApiEndpoints](https://github.com/ardalis/ApiEndpoints) by [@ardalis](https://twitter.com/ardalis)
 - [IdentityServer](https://github.com/IdentityServer) by [Duende](https://twitter.com/DuendeIdentity)
