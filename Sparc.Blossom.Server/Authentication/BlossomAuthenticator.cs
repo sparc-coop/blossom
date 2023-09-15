@@ -1,8 +1,6 @@
-﻿using MediatR;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Configuration;
 using System.Net.Mail;
 using System.Security.Claims;
 
@@ -14,12 +12,8 @@ public abstract class BlossomAuthenticator
     public abstract Task<BlossomUser?> RefreshClaimsAsync(ClaimsPrincipal principal);
 }
 
-public class BlossomAuthenticator<TUser>(IConfiguration config, UserManager<TUser> userManager, SignInManager<TUser> signInManager) : BlossomAuthenticator where TUser : BlossomUser, new()
+public class BlossomAuthenticator<TUser>(UserManager<TUser> UserManager, SignInManager<TUser> SignInManager) : BlossomAuthenticator where TUser : BlossomUser, new()
 {
-    public IConfiguration Config { get; } = config;
-    public UserManager<TUser> UserManager { get; } = userManager;
-    public SignInManager<TUser> SignInManager { get; } = signInManager;
-
     public override async Task<BlossomUser?> LoginAsync(string userName, string password, string? tokenProvider = null)
     {
         var success = tokenProvider switch

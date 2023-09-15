@@ -3,10 +3,8 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomUserRepository<T>(IRepository<T> users) : IUserSecurityStampStore<T>, IUserEmailStore<T> where T : BlossomUser, new()
+public class BlossomUserRepository<T>(IRepository<T> Users) : IUserSecurityStampStore<T>, IUserEmailStore<T> where T : BlossomUser, new()
 {
-    public IRepository<T> Users { get; } = users;
-
     public async Task<IdentityResult> CreateAsync(T user, CancellationToken cancellationToken)
     {
         await Users.UpdateAsync(user);
