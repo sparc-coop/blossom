@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Identity.Client;
-using Sparc.Blossom;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;

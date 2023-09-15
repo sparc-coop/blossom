@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Sparc.Blossom;
-using Device = Sparc.Blossom.Authentication.Device;
 
 namespace Sparc.Blossom;
 
@@ -14,20 +12,20 @@ public static class ServiceCollectionExtensions
         builder.Services.AddBlazorWebView();
         builder.Services.AddAuthorizationCore();
         builder.Services.AddScoped<IErrorBoundaryLogger, ConsoleErrorBoundaryLogger>()
-            .AddScoped<LayoutComponentBase, TMainLayout>()
-            .AddSingleton<RootScope>();
+            .AddScoped<LayoutComponentBase, TMainLayout>();
+// .AddSingleton<RootScope>();
 
-#if ANDROID
-        builder.Services.AddSingleton<Device, AndroidDevice>();
-#elif IOS
-        builder.Services.AddSingleton<Device, IosDevice>();
-#elif MAC
-        builder.Services.AddSingleton<Device, MacDevice>();
-#elif WINDOWS
-        builder.Services.AddSingleton<Device, WindowsDevice>();
-#else
-        builder.Services.AddSingleton<Device, WebDevice>();
-#endif
+//#if ANDROID
+//        builder.Services.AddSingleton<Device, AndroidDevice>();
+//#elif IOS
+//        builder.Services.AddSingleton<Device, IosDevice>();
+//#elif MAC
+//        builder.Services.AddSingleton<Device, MacDevice>();
+//#elif WINDOWS
+//        builder.Services.AddSingleton<Device, WindowsDevice>();
+//#else
+//        builder.Services.AddSingleton<Device, WebDevice>();
+//#endif
 
         return builder;
     }
