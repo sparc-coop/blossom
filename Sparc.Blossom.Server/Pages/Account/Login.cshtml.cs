@@ -10,20 +10,15 @@ namespace Sparc.Blossom.Authentication;
 [BindProperties]
 [Authorize]
 [AllowAnonymous]
-public class LoginModel : PageModel
+public class LoginModel(BlossomAuthenticator authenticator) : PageModel
 {
-    public LoginModel(BlossomAuthenticator authenticator)
-    {
-        Authenticator = authenticator;
-    }
-
     public string? Email { get; set; }
     public string? Password { get; set; }
     public string? Error { get; set; }
     [BindProperty(SupportsGet = true)]
     public string? ReturnUrl { get; set; }
 
-    private BlossomAuthenticator Authenticator { get; }
+    private BlossomAuthenticator Authenticator { get; } = authenticator;
 
     public async Task<IActionResult> OnGet()
     {

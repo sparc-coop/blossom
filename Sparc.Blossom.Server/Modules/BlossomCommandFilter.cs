@@ -3,14 +3,9 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom;
 
-internal class BlossomCommandFilter<T> : IEndpointFilter
+internal class BlossomCommandFilter<T>(IRepository<T> repository) : IEndpointFilter
 {
-    private readonly IRepository<T> _repository;
-
-    public BlossomCommandFilter(IRepository<T> repository)
-    {
-        _repository = repository;
-    }
+    private readonly IRepository<T> _repository = repository;
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {

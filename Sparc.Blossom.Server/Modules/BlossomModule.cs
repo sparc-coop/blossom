@@ -8,21 +8,14 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom;
 
-public abstract class BlossomModule<T, TId, TSafe> where T : Entity<TId> where TId : notnull
+public abstract class BlossomModule<T, TId, TSafe>(IRepository<T> repository, IHttpContextAccessor http, string? baseUrl = null) where T : Entity<TId> where TId : notnull
 {
-    public BlossomModule(IRepository<T> repository, IHttpContextAccessor http, string? baseUrl = null)
-    {
-        Repository = repository;
-        Http = http;
-        Name = baseUrl?.Trim('/') ?? (typeof(T).Name + "s");
-    }
-
-    public IRepository<T> Repository { get; }
+    public IRepository<T> Repository { get; } = repository;
     public ClaimsPrincipal User => Http?.HttpContext?.User ?? new ClaimsPrincipal(new ClaimsIdentity());
     protected RouteGroupBuilder Endpoints = null!;
     protected string BaseUrl => $"/api/{Name.ToLower()}";
-    IHttpContextAccessor Http { get; }
-    public string Name { get; set; }
+    IHttpContextAccessor Http { get; } = http;
+    public string Name { get; set; } = baseUrl?.Trim('/') ?? (typeof(T).Name + "s");
 
     protected virtual void OnModelCreating(IEndpointRouteBuilder endpoints)
     {

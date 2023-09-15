@@ -14,18 +14,11 @@ public abstract class BlossomAuthenticator
     public abstract Task<BlossomUser?> RefreshClaimsAsync(ClaimsPrincipal principal);
 }
 
-public class BlossomAuthenticator<TUser> : BlossomAuthenticator where TUser : BlossomUser, new()
+public class BlossomAuthenticator<TUser>(IConfiguration config, UserManager<TUser> userManager, SignInManager<TUser> signInManager) : BlossomAuthenticator where TUser : BlossomUser, new()
 {
-    public BlossomAuthenticator(IConfiguration config, UserManager<TUser> userManager, SignInManager<TUser> signInManager)
-    {
-        Config = config;
-        UserManager = userManager;
-        SignInManager = signInManager;
-    }
-
-    public IConfiguration Config { get; }
-    public UserManager<TUser> UserManager { get; }
-    public SignInManager<TUser> SignInManager { get; }
+    public IConfiguration Config { get; } = config;
+    public UserManager<TUser> UserManager { get; } = userManager;
+    public SignInManager<TUser> SignInManager { get; } = signInManager;
 
     public override async Task<BlossomUser?> LoginAsync(string userName, string password, string? tokenProvider = null)
     {

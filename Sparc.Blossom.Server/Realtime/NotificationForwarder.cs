@@ -2,14 +2,9 @@
 
 namespace Sparc.Blossom.Realtime;
 
-public class NotificationForwarder<TNotification> : RealtimeFeature<TNotification> where TNotification : Notification
+public class NotificationForwarder<TNotification>(IHubContext<BlossomHub> hub) : RealtimeFeature<TNotification> where TNotification : Notification
 {
-    public NotificationForwarder(IHubContext<BlossomHub> hub)
-    {
-        Hub = hub; 
-    }
-
-    public IHubContext<BlossomHub> Hub { get; }
+    public IHubContext<BlossomHub> Hub { get; } = hub;
 
     public override async Task ExecuteAsync(TNotification notification)
     {
