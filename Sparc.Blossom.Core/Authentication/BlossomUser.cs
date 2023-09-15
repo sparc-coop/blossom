@@ -1,14 +1,10 @@
-﻿using Sparc.Blossom.Data;
+﻿using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomUser : Entity<string>
+public class BlossomUser : IdentityUser
 {
-    public string? SecurityStamp { get; set; }
-
-    public string? UserName { get; set; }
-
     public string? LoginProviderKey { get; set; }
 
     public Dictionary<string, string> Claims { get; set; } = new();
@@ -30,10 +26,8 @@ public class BlossomUser : Entity<string>
         if (values == null || !values.Any())
             return;
 
-        if (MultiClaims.ContainsKey(type))
+        if (!MultiClaims.TryAdd(type, values))
             MultiClaims[type] = values;
-        else
-            MultiClaims.Add(type, values);
     }
 
     protected virtual void RegisterClaims()
