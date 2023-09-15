@@ -22,8 +22,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Ardalis.Specification" Version="6.1.0" />
-	  <PackageReference Include="MediatR.Contracts" Version="1.0.1" />
+	  <PackageReference Include="Ardalis.Specification" Version="7.0.0" />
+	  <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
