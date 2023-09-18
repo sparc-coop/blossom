@@ -2,6 +2,9 @@
 @hostname=localhost
 @port=7282
 @host={{hostname}}:{{port}}
+@id=a1b3c97b-1841-4307-9f7c-49759d635021
+
+### Get all todo items
 
 GET https://{{host}}/todoitems
 
@@ -16,7 +19,9 @@ Content-Type: application/json
 }
 
 ### Mark a todo item done
-PATCH https://{{host}}/todoitems/a1b3c97b-1841-4307-9f7c-49759d635021/MarkDone
+
+PATCH https://{{host}}/todoitems/{{id}}/MarkDone
 
 ### Move to new list
-PATCH https://{{host}}/todoitems/a1b3c97b-1841-4307-9f7c-49759d635021/MoveToNewList?listId=list2
+
+PATCH https://{{host}}/todoitems/{{id}}/MoveToNewList?listId=list2
