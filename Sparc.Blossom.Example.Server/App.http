@@ -16,4 +16,7 @@ Content-Type: application/json
 }
 
 ### Mark a todo item done
-PUT https://{{host}}/todoitems/4040635a-af24-4bc4-8232-94244d040cc1/MarkDone
+PATCH https://{{host}}/todoitems/a1b3c97b-1841-4307-9f7c-49759d635021/MarkDone
+
+### Move to new list
+PATCH https://{{host}}/todoitems/a1b3c97b-1841-4307-9f7c-49759d635021/MoveToNewList?listId=list2

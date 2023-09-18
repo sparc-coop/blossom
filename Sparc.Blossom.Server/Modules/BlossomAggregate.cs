@@ -45,8 +45,8 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity
         var commands = typeof(T).GetMethods(bindingFlags).Where(m => !m.IsSpecialName);
         foreach (var command in commands)
         {
-            var factory = RequestDelegateFactory.Create(command, context => (T)context.Items["entity"]!, null);
-            EntityEndpoints.MapPut(command.Name, factory.RequestDelegate).WithName(command.Name).WithOpenApi();
+            var factory = RequestDelegateFactory.Create(command, context => (T)context.Items["entity"]!);
+            EntityEndpoints.MapPatch(command.Name, factory.RequestDelegate).WithName(command.Name).WithOpenApi();
         }
 
         //EntityEndpoints.MapGet("", DefaultGetAsync).WithName($"Get{typeof(T).Name}").WithOpenApi();

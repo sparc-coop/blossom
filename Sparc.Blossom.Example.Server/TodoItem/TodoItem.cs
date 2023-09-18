@@ -4,7 +4,7 @@ namespace Sparc.Blossom.Example.Single.TodoItem;
 
 public class TodoItem(string title, string description) : Entity<string>(Guid.NewGuid().ToString())
 {
-    private string? _listId;
+    public string? ListId { get; set; }
     public string Title { get; set; } = title;
     public string Description { get; set; } = description;
     public bool IsDone { get; set; }
@@ -14,8 +14,8 @@ public class TodoItem(string title, string description) : Entity<string>(Guid.Ne
         IsDone = true;
     }
 
-    internal void MoveToNewList(string listId)
+    public void MoveToNewList(string listId)
     {
-        _listId = listId;
+        ListId = listId;
     }
 }
