@@ -2,19 +2,25 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Diagnostics;
 using Sparc.Blossom.Data;
 using System.Globalization;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components;
+using Sparc.Blossom.Server;
 
 namespace Sparc.Blossom;
 
 public static class ServiceCollectionExtensions
 {
-    public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, string? clientUrl = null)
+    public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, IComponentRenderMode? renderMode = null, string? clientUrl = null)
     {
-        builder.Services.AddControllers(); // for API
+        var razor = builder.Services.AddRazorComponents();
+        if (renderMode == RenderMode.Server || renderMode == RenderMode.Auto)
+            razor.AddServerComponents();
+        if (renderMode == RenderMode.WebAssembly || renderMode == RenderMode.Auto)
+            razor.AddWebAssemblyComponents();
 
         //builder.Services.AddGrpc().AddJsonTranscoding();
         //builder.Services.AddGrpcSwagger();
@@ -36,29 +42,55 @@ public static class ServiceCollectionExtensions
         if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))
             builder.Services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
 
-        builder.Services.AddRazorPages();
-        builder.Services.AddHttpContextAccessor();
+        //builder.Services.AddRazorPages();
+        //builder.Services.AddHttpContextAccessor();
+        builder.Services.AddOutputCache();
+        builder.Services.AddSingleton<AdditionalAssembliesProvider>();
 
         return builder;
     }
 
-    public static WebApplication BuildBlossom(this WebApplicationBuilder builder)
+    public static WebApplication UseBlossom<T>(this WebApplicationBuilder builder, params System.Reflection.Assembly[] additionalAssemblies)
     {
-        builder.Services.AddServerSideBlazor();
-        builder.Services.AddOutputCache();
-
         var app = builder.Build();
 
         app.UseBlossom();
-        app.MapControllers();
-        app.MapBlazorHub();
-        app.MapFallbackToFile("index.html");
 
         if (builder.Environment.IsDevelopment())
+        {
             app.UseDeveloperExceptionPage();
+            if (builder.IsWebAssembly())
+                app.UseWebAssemblyDebugging();
+        }
+        else
+        {
+            app.UseExceptionHandler("/Error");
+            app.UseHsts();
+        }
+
+        app.UseHttpsRedirection();
+        app.UseStaticFiles();
+
+        var razor = app.MapRazorComponents<T>();
+
+        if (additionalAssemblies?.Length > 0)
+        {
+            razor.AddAdditionalAssemblies(additionalAssemblies);
+            app.Services.GetRequiredService<AdditionalAssembliesProvider>().Assemblies = additionalAssemblies;
+        }
+
+        if (builder.IsServer())
+            razor.AddServerRenderMode();
+
+        if (builder.IsWebAssembly())
+            razor.AddWebAssemblyRenderMode();
 
         return app;
     }
+
+    public static bool IsWebAssembly(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ServiceType.Name.Contains("WebAssemblyEndpointProvider"));
+
+    public static bool IsServer(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ServiceType.Name.Contains("CircuitEndpointProvider"));
 
     public static WebApplication UseBlossom(this WebApplication app)
     {
@@ -87,7 +119,6 @@ public static class ServiceCollectionExtensions
 
         app.UseCors();
 
-        app.UseRouting();
         app.UseOutputCache();
         app.UseAuthorization();
 
