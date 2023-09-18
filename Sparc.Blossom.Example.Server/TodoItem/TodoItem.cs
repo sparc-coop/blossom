@@ -2,7 +2,7 @@
 
 namespace Sparc.Blossom.Example.Single.TodoItem;
 
-public class TodoItem(string title, string description) : Entity<string>
+public class TodoItem(string title, string description) : Entity<string>(Guid.NewGuid().ToString())
 {
     private string? _listId;
     public string Title { get; set; } = title;

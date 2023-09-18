@@ -1,0 +1,19 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+@hostname=localhost
+@port=7282
+@host={{hostname}}:{{port}}
+
+GET https://{{host}}/todoitems
+
+### Create a new todo item
+
+POST https://{{host}}/todoitems
+Content-Type: application/json
+
+{
+  "title": "Do laundry",
+  "description": "Do the laundry"
+}
+
+### Mark a todo item done
+PUT https://{{host}}/todoitems/4040635a-af24-4bc4-8232-94244d040cc1/MarkDone

@@ -9,13 +9,16 @@ internal class BlossomCommandFilter<T>(IRepository<T> repository) : IEndpointFil
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-        var id = context.GetArgument<string>(0);
+        var id = context.HttpContext.Request.RouteValues["id"];
+        if (id == null)
+            return Results.BadRequest();
+
         var entity = await _repository.FindAsync(id);
         if (entity == null)
             return Results.NotFound();
 
-        context.Arguments.Remove(id);
-        context.Arguments.Insert(0, entity);
+        //context.Arguments.Remove(id);
+        //context.Arguments.Add(entity);
         context.HttpContext.Items.Add("entity", entity);
 
         var result = await next(context);
