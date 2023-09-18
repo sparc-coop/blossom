@@ -14,9 +14,9 @@ public static class BlossomAggregateExtensions
         return result as T ?? throw new InvalidOperationException("Invalid return type");
     }
 
-    public static IServiceCollection RegisterAggregates(this IServiceCollection services)
+    public static IServiceCollection RegisterAggregates<T>(this IServiceCollection services)
     {
-        var modules = DiscoverAggregates();
+        var modules = DiscoverAggregates<T>();
         foreach (var module in modules)
         {
             //var entity = module.GetGenericArguments().First();
@@ -27,18 +27,17 @@ public static class BlossomAggregateExtensions
         return services;
     }
 
-    private static IEnumerable<Type> DiscoverAggregates()
+    private static IEnumerable<Type> DiscoverAggregates<T>()
     {
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        var aggregates = assemblies.Distinct().SelectMany(x => x.GetTypes())
+        var aggregates = typeof(T).Assembly.GetTypes()
             .Where(x => typeof(IBlossomAggregate).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
 
         return aggregates;
     }
 
-    public static void MapAggregates(this WebApplication app)
+    public static void MapAggregates<T>(this WebApplication app)
     {
-        var aggregates = DiscoverAggregates();
+        var aggregates = DiscoverAggregates<T>();
         foreach (var aggregate in aggregates)
         {
             var instance = app.Services.GetRequiredService(aggregate) as IBlossomAggregate;

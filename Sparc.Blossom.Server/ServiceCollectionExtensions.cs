@@ -14,9 +14,11 @@ namespace Sparc.Blossom;
 
 public static class ServiceCollectionExtensions
 {
-    public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, IComponentRenderMode? renderMode = null, string? clientUrl = null)
+    public static WebApplicationBuilder AddBlossom<T>(this WebApplicationBuilder builder, IComponentRenderMode? renderMode = null, string? clientUrl = null)
     {
         var razor = builder.Services.AddRazorComponents();
+        renderMode ??= RenderMode.Server;
+
         if (renderMode == RenderMode.Server || renderMode == RenderMode.Auto)
             razor.AddServerComponents();
         if (renderMode == RenderMode.WebAssembly || renderMode == RenderMode.Auto)
@@ -35,7 +37,7 @@ public static class ServiceCollectionExtensions
                 .AllowCredentials());
             });
 
-        builder.Services.RegisterAggregates();
+        builder.Services.RegisterAggregates<T>();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
@@ -53,8 +55,6 @@ public static class ServiceCollectionExtensions
     public static WebApplication UseBlossom<T>(this WebApplicationBuilder builder, params System.Reflection.Assembly[] additionalAssemblies)
     {
         var app = builder.Build();
-
-        app.UseBlossom();
 
         if (builder.Environment.IsDevelopment())
         {
@@ -88,44 +88,9 @@ public static class ServiceCollectionExtensions
         return app;
     }
 
-    public static bool IsWebAssembly(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ServiceType.Name.Contains("WebAssemblyEndpointProvider"));
+    public static bool IsWebAssembly(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ImplementationType?.Name.Contains("WebAssemblyEndpointProvider") == true);
 
-    public static bool IsServer(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ServiceType.Name.Contains("CircuitEndpointProvider"));
-
-    public static WebApplication UseBlossom(this WebApplication app)
-    {
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{app.Environment.ApplicationName} v1"));
-        }
-        else
-        {
-            app.UseHsts();
-        }
-
-        app.UseCookiePolicy();
-        app.MapAggregates();
-
-        app.UseExceptionHandler(x => x.Run(async context =>
-        {
-            var exception = context.Features.Get<IExceptionHandlerPathFeature>()?.Error;
-            await context.Response.WriteAsJsonAsync(exception);
-        }));
-
-        app.UseHttpsRedirection();
-
-        app.UseStaticFiles();
-
-        app.UseCors();
-
-        app.UseOutputCache();
-        app.UseAuthorization();
-
-        app.MapRazorPages();
-
-        return app;
-    }
+    public static bool IsServer(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ImplementationType?.Name.Contains("CircuitEndpointProvider") == true);
 
     public static IApplicationBuilder UseCultures(this IApplicationBuilder app, string[] supportedCultures)
     {
