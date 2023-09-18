@@ -2,18 +2,11 @@
 
 namespace Sparc.Blossom.Example.Single.TodoItem;
 
-public class TodoItem : Entity<string>
+public class TodoItem(string title, string description) : Entity<string>
 {
-    public TodoItem(string title, string description)
-    {
-        Title = title;
-        Description = description;
-    }
-
-    internal string UserId { get; set; }
     private string? _listId;
-    public string Title { get; set; }
-    public string Description { get; set; }
+    public string Title { get; set; } = title;
+    public string Description { get; set; } = description;
     public bool IsDone { get; set; }
 
     public void MarkDone()

@@ -59,6 +59,9 @@ public static class ServiceCollectionExtensions
         if (builder.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{app.Environment.ApplicationName} v1"));
+
             if (builder.IsWebAssembly())
                 app.UseWebAssemblyDebugging();
         }
@@ -84,6 +87,8 @@ public static class ServiceCollectionExtensions
 
         if (builder.IsWebAssembly())
             razor.AddWebAssemblyRenderMode();
+
+        app.MapAggregates<T>();
 
         return app;
     }
