@@ -2,11 +2,15 @@
 @hostname=localhost
 @port=7282
 @host={{hostname}}:{{port}}
-@id=a1b3c97b-1841-4307-9f7c-49759d635021
+@id=b9f06dc9-64dc-4469-a709-3a3b8fc1b2d9
 
 ### Get all todo items
 
 GET https://{{host}}/todoitems
+
+### Get only open todo items
+
+GET https://{{host}}/todoitems/Open
 
 ### Create a new todo item
 

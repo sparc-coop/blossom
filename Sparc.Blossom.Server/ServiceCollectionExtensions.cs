@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Diagnostics;
 using Sparc.Blossom.Data;
 using System.Globalization;
 using Microsoft.AspNetCore.Components.Web;
@@ -17,12 +15,12 @@ public static class ServiceCollectionExtensions
     public static WebApplicationBuilder AddBlossom<T>(this WebApplicationBuilder builder, IComponentRenderMode? renderMode = null, string? clientUrl = null)
     {
         var razor = builder.Services.AddRazorComponents();
-        renderMode ??= RenderMode.Server;
+        renderMode ??= RenderMode.InteractiveServer;
 
-        if (renderMode == RenderMode.Server || renderMode == RenderMode.Auto)
-            razor.AddServerComponents();
-        if (renderMode == RenderMode.WebAssembly || renderMode == RenderMode.Auto)
-            razor.AddWebAssemblyComponents();
+        if (renderMode == RenderMode.InteractiveServer || renderMode == RenderMode.InteractiveAuto)
+            razor.AddInteractiveServerComponents();
+        if (renderMode == RenderMode.InteractiveWebAssembly || renderMode == RenderMode.InteractiveAuto)
+            razor.AddInteractiveWebAssemblyComponents();
 
         //builder.Services.AddGrpc().AddJsonTranscoding();
         //builder.Services.AddGrpcSwagger();
@@ -83,10 +81,10 @@ public static class ServiceCollectionExtensions
         }
 
         if (builder.IsServer())
-            razor.AddServerRenderMode();
+            razor.AddInteractiveServerRenderMode();
 
         if (builder.IsWebAssembly())
-            razor.AddWebAssemblyRenderMode();
+            razor.AddInteractiveWebAssemblyRenderMode();
 
         app.MapAggregates<T>();
 

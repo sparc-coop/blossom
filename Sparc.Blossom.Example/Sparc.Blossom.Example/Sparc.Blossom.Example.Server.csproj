@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -9,7 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Sparc.Blossom.Server\Sparc.Blossom.Server.csproj" />
     <ProjectReference Include="..\Sparc.Blossom.Example.Client\Sparc.Blossom.Example.Client.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0-rc.1.23421.29" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0-rc.2.23480.2" />
   </ItemGroup>
 
 </Project>

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Sparc.Blossom.Data;
 using System.Reflection;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Sparc.Blossom;
 
@@ -38,10 +39,18 @@ public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity
         AggregateEndpoints.MapGet("", GetAllAsync ?? DefaultGetAllAsync).WithName($"GetAll{Name}").WithOpenApi();
         AggregateEndpoints.MapPost("", CreateAsync ?? DefaultCreateAsync).WithName($"Create{typeof(T).Name}").WithOpenApi();
 
+        var bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
+        var queries = GetType().GetMethods(bindingFlags).Where(m => !m.IsSpecialName);
+        foreach (var query in queries)
+        {
+            var factory = RequestDelegateFactory.Create(query);
+            AggregateEndpoints.MapGet(query.Name, factory.RequestDelegate).WithName(query.Name).WithOpenApi();
+        }
+
+
         EntityEndpoints = AggregateEndpoints.MapGroup("{id}");
         EntityEndpoints.AddEndpointFilter<BlossomCommandFilter<T>>();
 
-        var bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         var commands = typeof(T).GetMethods(bindingFlags).Where(m => !m.IsSpecialName);
         foreach (var command in commands)
         {
