@@ -6,18 +6,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Sparc.Blossom.Data;
 using System.Reflection;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Sparc.Blossom;
 
-public interface IBlossomAggregate
+public interface IBlossomRepository
 {
     public void MapEndpoints(IEndpointRouteBuilder endpoints);
 }
 
-public abstract class BlossomAggregate<T> : IBlossomAggregate where T : Entity
+public abstract class BlossomRepository<T> : IBlossomRepository where T : Entity
 {
-    public BlossomAggregate()
+    public BlossomRepository()
     {
     }
 

@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
-		<Version>8.0.0-pre.11</Version>
+		<Version>8.0.0-pre.14</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Sparc Cooperative</Authors>
@@ -22,7 +22,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0-rc.2.23480.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Grpc.Swagger" Version="0.8.0-rc.2.23480.2" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0-rc.2.23480.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0-rc.2.23480.1" />

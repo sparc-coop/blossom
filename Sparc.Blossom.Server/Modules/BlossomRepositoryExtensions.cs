@@ -1,11 +1,10 @@
 ﻿using Ardalis.Specification;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom;
 
-public static class BlossomAggregateExtensions
+public static class BlossomRepositoryExtensions
 {
     public static async Task<T> InvokeAsync<T>(this Delegate method, params object?[]? args) where T : class
     {
@@ -30,7 +29,7 @@ public static class BlossomAggregateExtensions
     private static IEnumerable<Type> DiscoverAggregates<T>()
     {
         var aggregates = typeof(T).Assembly.GetTypes()
-            .Where(x => typeof(IBlossomAggregate).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
+            .Where(x => typeof(IBlossomRepository).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
 
         return aggregates;
     }
@@ -40,7 +39,7 @@ public static class BlossomAggregateExtensions
         var aggregates = DiscoverAggregates<T>();
         foreach (var aggregate in aggregates)
         {
-            var instance = app.Services.GetRequiredService(aggregate) as IBlossomAggregate;
+            var instance = app.Services.GetRequiredService(aggregate) as IBlossomRepository;
             instance?.MapEndpoints(app);
         }
     }

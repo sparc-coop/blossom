@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Realtime;

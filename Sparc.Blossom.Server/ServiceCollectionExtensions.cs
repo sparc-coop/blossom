@@ -19,8 +19,8 @@ public static class ServiceCollectionExtensions
 
         if (renderMode == RenderMode.InteractiveServer || renderMode == RenderMode.InteractiveAuto)
             razor.AddInteractiveServerComponents();
-        if (renderMode == RenderMode.InteractiveWebAssembly || renderMode == RenderMode.InteractiveAuto)
-            razor.AddInteractiveWebAssemblyComponents();
+        //if (renderMode == RenderMode.InteractiveWebAssembly || renderMode == RenderMode.InteractiveAuto)
+        //    razor.AddInteractiveWebAssemblyComponents();
 
         //builder.Services.AddGrpc().AddJsonTranscoding();
         //builder.Services.AddGrpcSwagger();
@@ -60,8 +60,8 @@ public static class ServiceCollectionExtensions
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{app.Environment.ApplicationName} v1"));
 
-            if (builder.IsWebAssembly())
-                app.UseWebAssemblyDebugging();
+            //if (builder.IsWebAssembly())
+            //    app.UseWebAssemblyDebugging();
         }
         else
         {
@@ -83,8 +83,8 @@ public static class ServiceCollectionExtensions
         if (builder.IsServer())
             razor.AddInteractiveServerRenderMode();
 
-        if (builder.IsWebAssembly())
-            razor.AddInteractiveWebAssemblyRenderMode();
+        //if (builder.IsWebAssembly())
+        //    razor.AddInteractiveWebAssemblyRenderMode();
 
         app.MapAggregates<T>();
 
