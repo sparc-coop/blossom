@@ -1,12 +1,16 @@
 ﻿using MediatR;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Realtime;
 
-public class Publisher
+public class BlossomNotifier
 {
     private readonly ServiceFactory _serviceFactory;
 
-    public Publisher(ServiceFactory serviceFactory)
+    public PublishStrategy PublishStrategy { get; private set; } = PublishStrategy.ParallelNoWait;
+
+    public BlossomNotifier(ServiceFactory serviceFactory)
     {
         _serviceFactory = serviceFactory;
 
@@ -19,11 +23,28 @@ public class Publisher
     }
 
     public IDictionary<PublishStrategy, IMediator> PublishStrategies = new Dictionary<PublishStrategy, IMediator>();
-    public PublishStrategy DefaultStrategy { get; set; } = PublishStrategy.ParallelNoWait;
+
+    public void SetPublishStrategy(PublishStrategy strategy)
+    {
+        PublishStrategy = strategy;
+    }
+
+    public async Task NotifyAsync(IEnumerable<Entity> entities)
+    {
+        var domainEvents = entities.SelectMany(x => x.Publish());
+
+        var tasks = domainEvents
+            .Select(async (domainEvent) =>
+            {
+                await Publish(domainEvent);
+            });
+
+        await Task.WhenAll(tasks);
+    }
 
     public Task Publish<TNotification>(TNotification notification)
     {
-        return Publish(notification, DefaultStrategy, default);
+        return Publish(notification, PublishStrategy, default);
     }
 
     public Task Publish<TNotification>(TNotification notification, PublishStrategy strategy)
@@ -33,7 +54,7 @@ public class Publisher
 
     public Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken)
     {
-        return Publish(notification, DefaultStrategy, cancellationToken);
+        return Publish(notification, PublishStrategy, cancellationToken);
     }
 
     public Task Publish<TNotification>(TNotification notification, PublishStrategy strategy, CancellationToken cancellationToken)

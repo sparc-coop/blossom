@@ -7,43 +7,31 @@ using System.Globalization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
 using Sparc.Blossom.Server;
+using Microsoft.AspNetCore.Identity;
+using Sparc.Blossom.Api;
+using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom;
 
 public static class ServiceCollectionExtensions
 {
-    public static WebApplicationBuilder AddBlossom<T>(this WebApplicationBuilder builder, IComponentRenderMode? renderMode = null, string? clientUrl = null)
+    public static WebApplicationBuilder AddBlossom<T, TUser>(this WebApplicationBuilder builder, IComponentRenderMode? renderMode = null) where TUser : BlossomUser, new() where T : Entity
     {
         var razor = builder.Services.AddRazorComponents();
-        renderMode ??= RenderMode.InteractiveServer;
+        renderMode ??= RenderMode.InteractiveAuto;
 
         if (renderMode == RenderMode.InteractiveServer || renderMode == RenderMode.InteractiveAuto)
             razor.AddInteractiveServerComponents();
-        //if (renderMode == RenderMode.InteractiveWebAssembly || renderMode == RenderMode.InteractiveAuto)
-        //    razor.AddInteractiveWebAssemblyComponents();
+        if (renderMode == RenderMode.InteractiveWebAssembly || renderMode == RenderMode.InteractiveAuto)
+            razor.AddInteractiveWebAssemblyComponents();
 
-        //builder.Services.AddGrpc().AddJsonTranscoding();
-        //builder.Services.AddGrpcSwagger();
-        if (clientUrl != null)
-            builder.Services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(builder =>
-                builder.WithOrigins(clientUrl)
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .SetIsOriginAllowed(x => true)
-                .AllowCredentials());
-            });
-
-        builder.Services.RegisterAggregates<T>();
+        builder.AddBlossomAuthentication<TUser>();
+        builder.Services.AddBlossomContexts<T>();
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))
-            builder.Services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
+        builder.AddBlossomRepository();
 
-        //builder.Services.AddRazorPages();
-        //builder.Services.AddHttpContextAccessor();
         builder.Services.AddOutputCache();
         builder.Services.AddSingleton<AdditionalAssembliesProvider>();
 

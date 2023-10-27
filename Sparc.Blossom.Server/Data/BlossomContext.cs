@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Data;
 
-public class BlossomContext<T>(DbContextOptions options, Publisher publisher, IHttpContextAccessor http) : BlossomContext(options, publisher, http) where T : class
+public class BlossomContext<T>(DbContextOptions options, BlossomNotifier publisher, IHttpContextAccessor http) : BlossomContext(options, publisher, http) where T : class
 {
     public DbSet<T> All => Set<T>();
 
@@ -15,9 +15,9 @@ public class BlossomContext<T>(DbContextOptions options, Publisher publisher, IH
     }
 }
 
-public class BlossomContext(DbContextOptions options, Publisher publisher, IHttpContextAccessor http) : DbContext(options)
+public class BlossomContext(DbContextOptions options, BlossomNotifier publisher, IHttpContextAccessor http) : DbContext(options)
 {
-    public Publisher Publisher { get; } = publisher;
+    public BlossomNotifier Publisher { get; } = publisher;
     protected IHttpContextAccessor Http { get; } = http;
     protected ClaimsPrincipal? User => Http.HttpContext?.User;
 

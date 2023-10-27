@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
         //.AddMessagePackProtocol();
 
         services.AddMediatR(typeof(THub).Assembly, typeof(Notification).Assembly, typeof(NotificationForwarder<>).Assembly);
-        services.AddSingleton<Publisher>();
+        services.AddSingleton<BlossomNotifier>();
 
         // Use the User ID as the SignalR user identifier    
         services.AddSingleton<IUserIdProvider, UserIdProvider>();

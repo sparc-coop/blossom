@@ -4,19 +4,23 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Components.Authorization;
+using Sparc.Blossom.Server.Authentication;
 
 namespace Sparc.Blossom.Authentication;
 
 public static class ServiceCollectionExtensions
 {
-    public static AuthenticationBuilder AddBlossomAuthentication<TUser>(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddBlossomAuthentication<TUser>(this WebApplicationBuilder builder)
         where TUser : BlossomUser, new()
     {
-        var auth = builder.Services.AddAuthentication().AddCookie(opt =>
-        {
-            opt.Cookie.Name = "__Host-blossom";
-            opt.Cookie.SameSite = SameSiteMode.Strict;
-        });
+        builder.Services.AddCascadingAuthenticationState();
+        builder.Services.AddScoped<AuthenticationStateProvider, BlossomAuthenticationStateProvider<TUser>>();
+        builder.Services.AddScoped<BlossomAuthenticator<TUser>>();
+        builder.Services.AddScoped(typeof(BlossomAuthenticator), typeof(BlossomAuthenticator<TUser>));
+
+        builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+            .AddIdentityCookies();
 
         builder.Services.AddScoped<IUserStore<TUser>, BlossomUserRepository<TUser>>()
             .AddScoped<IRoleStore<BlossomRole>, BlossomRoleStore>();
@@ -24,22 +28,7 @@ public static class ServiceCollectionExtensions
         builder.Services.AddIdentity<TUser, BlossomRole>()
             .AddDefaultTokenProviders();
 
-        builder.Services.ConfigureApplicationCookie(options =>
-        {
-            options.Cookie.Name = "__Host-blossom";
-            options.Cookie.SameSite = SameSiteMode.Strict;
-            options.LoginPath = new PathString("/_auth/login");
-            options.LogoutPath = new PathString("/_auth/logout");
-            options.SlidingExpiration = true;
-            options.Cookie.MaxAge = options.ExpireTimeSpan;
-        });
-        
-        builder.Services.AddAuthorization();
-
-        builder.Services.AddScoped<BlossomAuthenticator<TUser>>();
-        builder.Services.AddScoped(typeof(BlossomAuthenticator), typeof(BlossomAuthenticator<TUser>));
-
-        return auth;
+        return builder;
     }
 
     public static void UseBlossomAuthentication<TUser>(this WebApplication app) where TUser : BlossomUser, new()

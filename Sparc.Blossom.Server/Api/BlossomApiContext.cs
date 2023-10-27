@@ -1,5 +1,4 @@
-﻿using Ardalis.Specification;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -7,23 +6,20 @@ using Microsoft.AspNetCore.Routing;
 using Sparc.Blossom.Data;
 using System.Reflection;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Api;
 
-public interface IBlossomRepository
+public interface IBlossomApiContext
 {
     public void MapEndpoints(IEndpointRouteBuilder endpoints);
 }
 
-public abstract class BlossomRepository<T> : IBlossomRepository where T : Entity
+public class BlossomApiContext<T> : IBlossomApiContext where T : Entity
 {
-    public BlossomRepository()
-    {
-    }
-
     public virtual string Name => typeof(T).Name + "s";
 
-    protected RouteGroupBuilder AggregateEndpoints = null!;
-    protected RouteGroupBuilder EntityEndpoints = null!;
+    protected RouteGroupBuilder Entities = null!;
+    protected RouteGroupBuilder Commands = null!;
+
     protected string BaseUrl => $"/{Name.ToLower()}";
 
     public virtual void MapEndpoints(IEndpointRouteBuilder endpoints)
@@ -33,34 +29,35 @@ public abstract class BlossomRepository<T> : IBlossomRepository where T : Entity
 
     protected void MapBaseEndpoints(IEndpointRouteBuilder endpoints)
     {
-        AggregateEndpoints = endpoints.MapGroup(BaseUrl);
+        Entities = endpoints.MapGroup(BaseUrl);
 
-        AggregateEndpoints.MapGet("", GetAllAsync ?? DefaultGetAllAsync).WithName($"GetAll{Name}").WithOpenApi();
-        AggregateEndpoints.MapPost("", CreateAsync ?? DefaultCreateAsync).WithName($"Create{typeof(T).Name}").WithOpenApi();
+        Entities.MapGet("", GetAllAsync ?? DefaultGetAllAsync).WithName($"GetAll{Name}").WithOpenApi();
+        Entities.MapPost("", CreateAsync ?? DefaultCreateAsync).WithName($"Create{typeof(T).Name}").WithOpenApi();
 
         var bindingFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
         var queries = GetType().GetMethods(bindingFlags).Where(m => !m.IsSpecialName);
         foreach (var query in queries)
         {
             var factory = RequestDelegateFactory.Create(query);
-            AggregateEndpoints.MapGet(query.Name, factory.RequestDelegate).WithName(query.Name).WithOpenApi();
+            Entities.MapGet(query.Name, factory.RequestDelegate).WithName(query.Name).WithOpenApi();
         }
 
 
-        EntityEndpoints = AggregateEndpoints.MapGroup("{id}");
-        EntityEndpoints.AddEndpointFilter<BlossomCommandFilter<T>>();
+        Commands = Entities.MapGroup("{id}");
+        Commands.AddEndpointFilter<BlossomCommandFilter<T>>();
 
         var commands = typeof(T).GetMethods(bindingFlags).Where(m => !m.IsSpecialName);
         foreach (var command in commands)
         {
             var factory = RequestDelegateFactory.Create(command, context => (T)context.Items["entity"]!);
-            EntityEndpoints.MapPatch(command.Name, factory.RequestDelegate).WithName(command.Name).WithOpenApi();
+            Commands.MapPatch(command.Name, factory.RequestDelegate).WithName(command.Name).WithOpenApi();
         }
 
         //EntityEndpoints.MapGet("", DefaultGetAsync).WithName($"Get{typeof(T).Name}").WithOpenApi();
         //EntityEndpoints.MapPut("", UpdateAsync ?? DefaultUpdateAsync).WithName($"Update{typeof(T).Name}").WithOpenApi();
         //EntityEndpoints.MapDelete("", DeleteAsync ?? DefaultDeleteAsync).WithName($"Delete{typeof(T).Name}").WithOpenApi();
     }
+
 
     protected async Task<Ok<T>> DefaultGetAsync(string id, IRepository<T> repository)
     {

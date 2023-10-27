@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Api;
 
-public static class BlossomRepositoryExtensions
+public static class ServiceCollectionExtensions
 {
     public static async Task<T> InvokeAsync<T>(this Delegate method, params object?[]? args) where T : class
     {
@@ -13,9 +13,9 @@ public static class BlossomRepositoryExtensions
         return result as T ?? throw new InvalidOperationException("Invalid return type");
     }
 
-    public static IServiceCollection RegisterAggregates<T>(this IServiceCollection services)
+    public static IServiceCollection AddBlossomContexts<T>(this IServiceCollection services)
     {
-        var modules = DiscoverAggregates<T>();
+        var modules = DiscoverContexts<T>();
         foreach (var module in modules)
         {
             //var entity = module.GetGenericArguments().First();
@@ -23,23 +23,26 @@ public static class BlossomRepositoryExtensions
             services.AddSingleton(module);
         }
 
+        services.AddGrpc().AddJsonTranscoding();
+        services.AddGrpcSwagger();
+
         return services;
     }
 
-    private static IEnumerable<Type> DiscoverAggregates<T>()
+    private static IEnumerable<Type> DiscoverContexts<T>()
     {
         var aggregates = typeof(T).Assembly.GetTypes()
-            .Where(x => typeof(IBlossomRepository).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
+            .Where(x => typeof(IBlossomApiContext).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
 
         return aggregates;
     }
 
-    public static void MapAggregates<T>(this WebApplication app)
+    public static void MapBlossomContexts<T>(this WebApplication app)
     {
-        var aggregates = DiscoverAggregates<T>();
+        var aggregates = DiscoverContexts<T>();
         foreach (var aggregate in aggregates)
         {
-            var instance = app.Services.GetRequiredService(aggregate) as IBlossomRepository;
+            var instance = app.Services.GetRequiredService(aggregate) as IBlossomApiContext;
             instance?.MapEndpoints(app);
         }
     }

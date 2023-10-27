@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Mail;
@@ -9,11 +10,20 @@ namespace Sparc.Blossom.Authentication;
 public abstract class BlossomAuthenticator
 {
     public abstract Task<BlossomUser?> LoginAsync(string userName, string password, string? tokenProvider = null);
-    public abstract Task<BlossomUser?> RefreshClaimsAsync(ClaimsPrincipal principal);
+    public abstract Task<BlossomUser?> GetAsync();
 }
 
-public class BlossomAuthenticator<TUser>(UserManager<TUser> UserManager, SignInManager<TUser> SignInManager) : BlossomAuthenticator where TUser : BlossomUser, new()
+public class BlossomAuthenticator<TUser>(UserManager<TUser> UserManager, SignInManager<TUser> SignInManager, IHttpContextAccessor http) : BlossomAuthenticator where TUser : BlossomUser, new()
 {
+    public override async Task<BlossomUser?> GetAsync()
+    {
+        var principal = http.HttpContext?.User ??
+                throw new InvalidOperationException($"{nameof(GetAsync)} requires access to an {nameof(HttpContext)}.");
+
+        var user = await UserManager.GetUserAsync(principal) ?? throw new NavigationException("/");
+        return user;
+    }
+    
     public override async Task<BlossomUser?> LoginAsync(string userName, string password, string? tokenProvider = null)
     {
         var success = tokenProvider switch
@@ -32,11 +42,6 @@ public class BlossomAuthenticator<TUser>(UserManager<TUser> UserManager, SignInM
         }
 
         return null;
-    }
-
-    public override async Task<BlossomUser?> RefreshClaimsAsync(ClaimsPrincipal principal)
-    {
-        return await UserManager.FindByIdAsync(principal.Id());
     }
 
     public async Task<string> CreateOneTimeCodeAsync(string userName)

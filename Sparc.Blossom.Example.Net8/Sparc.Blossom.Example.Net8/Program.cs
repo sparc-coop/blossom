@@ -2,12 +2,15 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Sparc.Blossom;
 using Sparc.Blossom.Example.Net8.Client.Pages;
 using Sparc.Blossom.Example.Net8.Components;
 using Sparc.Blossom.Example.Net8.Data;
 using Sparc.Blossom.Example.Net8.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddBlossom<BlossomContext>();
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -31,8 +34,6 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
-
-builder.Services.AddSingleton<IEmailSender, NoOpEmailSender>();
 
 var app = builder.Build();
 
