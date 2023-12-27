@@ -96,9 +96,9 @@ public class BlossomApiContext<T> : IBlossomApiContext where T : Entity
         return TypedResults.NoContent();
     }
 
-    protected Delegate? GetAsync;
-    protected Delegate? GetAllAsync;
-    protected Delegate? CreateAsync;
-    protected Delegate? UpdateAsync;
-    protected Delegate? DeleteAsync;
+    public Delegate? GetAsync;
+    public Delegate? GetAllAsync;
+    public Delegate? CreateAsync;
+    public Delegate? UpdateAsync;
+    public Delegate? DeleteAsync;
 }
