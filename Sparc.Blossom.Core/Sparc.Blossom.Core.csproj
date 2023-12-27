@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net8.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
-		<Version>8.0.0-pre.11</Version>
+		<Version>8.0.0-pre.15</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
@@ -22,9 +22,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Ardalis.Specification" Version="7.0.0" />
+	  <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
 	  <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
-	  <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.0-rc.2.23480.2" />
+	  <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
