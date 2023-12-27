@@ -9,12 +9,15 @@ using Microsoft.AspNetCore.Components;
 using Sparc.Blossom.Server;
 using Sparc.Blossom.Api;
 using Sparc.Blossom.Authentication;
+using System.Reflection;
+using Microsoft.Extensions.Configuration;
 
 namespace Sparc.Blossom;
 
 public static class ServiceCollectionExtensions
 {
-    public static WebApplicationBuilder AddBlossom<T, TUser>(this WebApplicationBuilder builder, IComponentRenderMode? renderMode = null) where TUser : BlossomUser, new() where T : Entity
+    public static WebApplicationBuilder AddBlossom<TUser>(this WebApplicationBuilder builder, Action<IServiceCollection, IConfiguration>? services = null, IComponentRenderMode? renderMode = null) 
+        where TUser : BlossomUser, new() 
     {
         var razor = builder.Services.AddRazorComponents();
         renderMode ??= RenderMode.InteractiveAuto;
@@ -25,20 +28,24 @@ public static class ServiceCollectionExtensions
             razor.AddInteractiveWebAssemblyComponents();
 
         builder.AddBlossomAuthentication<TUser>();
-        builder.Services.AddBlossomContexts<T>();
+
+        services?.Invoke(builder.Services, builder.Configuration);
+
+        builder.Services.AddBlossomContexts(Assembly.GetCallingAssembly());
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddSingleton<AdditionalAssembliesProvider>();
 
         builder.AddBlossomRepository();
-
-        builder.Services.AddOutputCache();
-        builder.Services.AddSingleton<AdditionalAssembliesProvider>();
 
         return builder;
     }
 
-    public static WebApplication UseBlossom<T>(this WebApplicationBuilder builder, params System.Reflection.Assembly[] additionalAssemblies)
+    public static WebApplication UseBlossom<T>(this WebApplicationBuilder builder, params Assembly[] additionalAssemblies)
     {
+        builder.Services.AddServerSideBlazor();
+        builder.Services.AddOutputCache();
+
         var app = builder.Build();
 
         if (builder.Environment.IsDevelopment())
@@ -47,19 +54,26 @@ public static class ServiceCollectionExtensions
             app.UseSwagger();
             app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{app.Environment.ApplicationName} v1"));
 
-            //if (builder.IsWebAssembly())
-            //    app.UseWebAssemblyDebugging();
+            if (builder.IsWebAssembly())
+                app.UseWebAssemblyDebugging();
         }
         else
         {
-            app.UseExceptionHandler("/Error");
+            app.UseExceptionHandler("/Error", createScopeForErrors: true);
             app.UseHsts();
         }
 
         app.UseHttpsRedirection();
         app.UseStaticFiles();
+        app.UseAntiforgery();
 
         var razor = app.MapRazorComponents<T>();
+
+        if (builder.IsServer())
+            razor.AddInteractiveServerRenderMode();
+
+        if (builder.IsWebAssembly())
+            razor.AddInteractiveWebAssemblyRenderMode();
 
         if (additionalAssemblies?.Length > 0)
         {
@@ -67,13 +81,7 @@ public static class ServiceCollectionExtensions
             app.Services.GetRequiredService<AdditionalAssembliesProvider>().Assemblies = additionalAssemblies;
         }
 
-        if (builder.IsServer())
-            razor.AddInteractiveServerRenderMode();
-
-        //if (builder.IsWebAssembly())
-        //    razor.AddInteractiveWebAssemblyRenderMode();
-
-        app.MapAggregates<T>();
+        app.MapBlossomContexts(Assembly.GetCallingAssembly());
 
         return app;
     }

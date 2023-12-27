@@ -1,6 +1,7 @@
 ﻿using Ardalis.Specification;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace Sparc.Blossom.Api;
 
@@ -13,9 +14,9 @@ public static class ServiceCollectionExtensions
         return result as T ?? throw new InvalidOperationException("Invalid return type");
     }
 
-    public static IServiceCollection AddBlossomContexts<T>(this IServiceCollection services)
+    public static IServiceCollection AddBlossomContexts(this IServiceCollection services, Assembly assembly)
     {
-        var modules = DiscoverContexts<T>();
+        var modules = DiscoverContexts(assembly);
         foreach (var module in modules)
         {
             //var entity = module.GetGenericArguments().First();
@@ -29,20 +30,20 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IEnumerable<Type> DiscoverContexts<T>()
+    private static IEnumerable<Type> DiscoverContexts(Assembly assembly)
     {
-        var aggregates = typeof(T).Assembly.GetTypes()
+        var aggregates = assembly.GetTypes()
             .Where(x => typeof(IBlossomApiContext).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
 
         return aggregates;
     }
 
-    public static void MapBlossomContexts<T>(this WebApplication app)
+    public static void MapBlossomContexts(this WebApplication app, Assembly assembly)
     {
-        var aggregates = DiscoverContexts<T>();
-        foreach (var aggregate in aggregates)
+        var contexts = DiscoverContexts(assembly);
+        foreach (var context in contexts)
         {
-            var instance = app.Services.GetRequiredService(aggregate) as IBlossomApiContext;
+            var instance = app.Services.GetRequiredService(context) as IBlossomApiContext;
             instance?.MapEndpoints(app);
         }
     }

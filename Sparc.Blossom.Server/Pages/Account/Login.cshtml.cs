@@ -24,7 +24,7 @@ public class LoginModel(BlossomAuthenticator authenticator) : PageModel
     {
         if (User.Identity?.IsAuthenticated == true && ReturnUrl != null)
         {
-            var user = await Authenticator.RefreshClaimsAsync(User);
+            var user = await Authenticator.GetAsync();
             if (user != null)
                 return await LoginAsync(user.CreatePrincipal());
         }

@@ -13,7 +13,8 @@ public abstract class BlossomAuthenticator
     public abstract Task<BlossomUser?> GetAsync();
 }
 
-public class BlossomAuthenticator<TUser>(UserManager<TUser> UserManager, SignInManager<TUser> SignInManager, IHttpContextAccessor http) : BlossomAuthenticator where TUser : BlossomUser, new()
+public class BlossomAuthenticator<TUser>(UserManager<TUser> UserManager, SignInManager<TUser> SignInManager, IHttpContextAccessor http) 
+    : BlossomAuthenticator where TUser : BlossomUser, new()
 {
     public override async Task<BlossomUser?> GetAsync()
     {

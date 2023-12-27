@@ -25,8 +25,11 @@ public static class ServiceCollectionExtensions
         builder.Services.AddScoped<IUserStore<TUser>, BlossomUserRepository<TUser>>()
             .AddScoped<IRoleStore<BlossomRole>, BlossomRoleStore>();
 
-        builder.Services.AddIdentity<TUser, BlossomRole>()
+        builder.Services.AddIdentityCore<TUser>()
+            .AddSignInManager()
             .AddDefaultTokenProviders();
+
+        builder.Services.AddIdentityApiEndpoints<TUser>();
 
         return builder;
     }
