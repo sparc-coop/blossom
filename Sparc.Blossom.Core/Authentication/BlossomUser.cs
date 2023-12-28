@@ -5,9 +5,10 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomUser : IdentityUser
+public class BlossomUser : Entity<string>
 {
     public string? LoginProviderKey { get; set; }
+    public IdentityUser Identity { get; } = new();
 
     public Dictionary<string, string> Claims { get; set; } = new();
     public Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = new();
@@ -41,7 +42,7 @@ public class BlossomUser : IdentityUser
     public virtual ClaimsPrincipal CreatePrincipal()
     {
         AddClaim(ClaimTypes.NameIdentifier, Id);
-        AddClaim(ClaimTypes.Name, UserName);
+        AddClaim(ClaimTypes.Name, Identity.UserName);
         RegisterClaims();
 
         var claims = Claims.Select(x => new Claim(x.Key, x.Value)).ToList();
