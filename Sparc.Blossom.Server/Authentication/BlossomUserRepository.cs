@@ -34,7 +34,7 @@ public class BlossomUserRepository<T>(IRepository<T> Users) : IUserSecurityStamp
 
     public Task<T?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
     {
-        var user = Users.Query.FirstOrDefault(x => x.UserName == normalizedUserName);
+        var user = Users.Query.FirstOrDefault(x => x.Identity.UserName == normalizedUserName);
         return Task.FromResult(user);
     }
 
@@ -55,12 +55,12 @@ public class BlossomUserRepository<T>(IRepository<T> Users) : IUserSecurityStamp
 
     public Task<string?> GetNormalizedUserNameAsync(T user, CancellationToken cancellationToken)
     {
-        return Task.FromResult(user.UserName);
+        return Task.FromResult(user.Identity.UserName);
     }
 
     public Task<string?> GetSecurityStampAsync(T user, CancellationToken cancellationToken)
     {
-        return Task.FromResult((string?)user.SecurityStamp);
+        return Task.FromResult((string?)user.Identity.SecurityStamp);
     }
 
     public Task<string> GetUserIdAsync(T user, CancellationToken cancellationToken)
@@ -70,7 +70,7 @@ public class BlossomUserRepository<T>(IRepository<T> Users) : IUserSecurityStamp
 
     public Task<string?> GetUserNameAsync(T user, CancellationToken cancellationToken)
     {
-        return Task.FromResult(user.UserName);
+        return Task.FromResult(user.Identity.UserName);
     }
 
     public async Task SetEmailAsync(T user, string? email, CancellationToken cancellationToken)
@@ -90,19 +90,19 @@ public class BlossomUserRepository<T>(IRepository<T> Users) : IUserSecurityStamp
 
     public async Task SetNormalizedUserNameAsync(T user, string? normalizedName, CancellationToken cancellationToken)
     {
-        user.UserName = normalizedName;
+        user.Identity.UserName = normalizedName;
         await UpdateAsync(user, cancellationToken);
     }
 
     public async Task SetSecurityStampAsync(T user, string stamp, CancellationToken cancellationToken)
     {
-        user.SecurityStamp = stamp;
+        user.Identity.SecurityStamp = stamp;
         await UpdateAsync(user, cancellationToken);
     }
 
     public async Task SetUserNameAsync(T user, string? userName, CancellationToken cancellationToken)
     {
-        user.UserName = userName;
+        user.Identity.UserName = userName;
         await UpdateAsync(user, cancellationToken);
     }
 

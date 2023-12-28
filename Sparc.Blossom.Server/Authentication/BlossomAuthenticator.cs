@@ -102,10 +102,8 @@ public class BlossomAuthenticator<TUser>(UserManager<TUser> UserManager, SignInM
             if (id != Guid.Empty)
                 throw new ArgumentException($"User ID {id} not found.");
 
-            user = new()
-            {
-                UserName = username
-            };
+            user = new();
+            user.Identity.UserName = username;
             await UserManager.CreateAsync(user);
         }
 

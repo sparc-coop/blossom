@@ -92,8 +92,7 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
             {
                 _state.PersistAsJson(nameof(BlossomUser), new BlossomUser
                 {
-                    Id = userId,
-                    Email = email,
+                    Id = userId
                 });
             }
         }
