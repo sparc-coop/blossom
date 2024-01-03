@@ -41,7 +41,7 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
-    public static WebApplication UseBlossom<T>(this WebApplicationBuilder builder, params Assembly[] additionalAssemblies)
+    public static WebApplication UseBlossom<T>(this WebApplicationBuilder builder)
     {
         builder.Services.AddServerSideBlazor();
         builder.Services.AddOutputCache();
@@ -75,11 +75,8 @@ public static class ServiceCollectionExtensions
         if (builder.IsWebAssembly())
             razor.AddInteractiveWebAssemblyRenderMode();
 
-        if (additionalAssemblies?.Length > 0)
-        {
-            razor.AddAdditionalAssemblies(additionalAssemblies);
-            app.Services.GetRequiredService<AdditionalAssembliesProvider>().Assemblies = additionalAssemblies;
-        }
+        if (Assembly.GetCallingAssembly() != typeof(T).Assembly)
+            razor.AddAdditionalAssemblies(typeof(T).Assembly);
 
         app.MapBlossomContexts(Assembly.GetCallingAssembly());
 
