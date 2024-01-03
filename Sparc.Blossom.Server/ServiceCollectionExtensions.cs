@@ -75,10 +75,12 @@ public static class ServiceCollectionExtensions
         if (builder.IsWebAssembly())
             razor.AddInteractiveWebAssemblyRenderMode();
 
-        if (Assembly.GetCallingAssembly() != typeof(T).Assembly)
-            razor.AddAdditionalAssemblies(typeof(T).Assembly);
+        var server = Assembly.GetEntryAssembly();
+        var client = typeof(T).Assembly;
+        if (server != null && server != client)
+            razor.AddAdditionalAssemblies(server);
 
-        app.MapBlossomContexts(Assembly.GetCallingAssembly());
+        app.MapBlossomContexts(server!);
 
         return app;
     }

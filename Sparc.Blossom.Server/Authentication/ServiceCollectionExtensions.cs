@@ -19,8 +19,8 @@ public static class ServiceCollectionExtensions
         builder.Services.AddScoped<BlossomAuthenticator<TUser>>();
         builder.Services.AddScoped(typeof(BlossomAuthenticator), typeof(BlossomAuthenticator<TUser>));
 
-        builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
-            .AddIdentityCookies();
+        //builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+        //    .AddIdentityCookies();
 
         builder.Services.AddScoped<IUserStore<TUser>, BlossomUserRepository<TUser>>()
             .AddScoped<IRoleStore<BlossomRole>, BlossomRoleStore>();
