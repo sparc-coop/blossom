@@ -1,0 +1,30 @@
+<form action="_auth/logout" method="post">
+    <AntiforgeryToken />
+    <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+    <button type="submit" class="nav-link">
+        Logout
+    </button>
+</form>
+
+@inject NavigationManager Nav
+
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = Nav.ToBaseRelativePath(Nav.Uri);
+        Nav.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = Nav.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        Nav.LocationChanged -= OnLocationChanged;
+    }
+}

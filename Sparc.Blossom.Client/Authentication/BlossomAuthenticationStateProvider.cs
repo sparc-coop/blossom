@@ -1,62 +1,55 @@
-﻿using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
+// This is a client-side AuthenticationStateProvider that determines the user's authentication state by
+// looking for data persisted in the page when it was rendered on the server. This authentication state will
+// be fixed for the lifetime of the WebAssembly application. So, if the user needs to log in or out, a full
+// page reload is required.
+//
+// This only provides a user name and email for display purposes. It does not actually include any tokens
+// that authenticate to the server when making subsequent requests. That works separately using a
+// cookie that will be included on HttpClient requests to the server.
 public class BlossomAuthenticationStateProvider : AuthenticationStateProvider
 {
-    private ClaimsPrincipal _user = new(new ClaimsIdentity());
-    private static readonly TimeSpan _userCacheRefreshInterval = TimeSpan.FromSeconds(60);
-    private DateTimeOffset _userLastCheck = DateTimeOffset.FromUnixTimeSeconds(0);
+    private static readonly Task<AuthenticationState> defaultUnauthenticatedTask =
+        Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
 
-    public BlossomAuthenticationStateProvider(NavigationManager navigation, BlossomAuthenticationClient client, IConfiguration config)
+    private readonly Task<AuthenticationState> authenticationStateTask = defaultUnauthenticatedTask;
+
+    public BlossomAuthenticationStateProvider(PersistentComponentState state, NavigationManager nav)
     {
-        Navigation = navigation;
-        Config = config;
-        Client = client;
-    }
+        Nav = nav;
 
-    public NavigationManager Navigation { get; }
-    public IConfiguration Config { get; }
-    public BlossomAuthenticationClient Client { get; }
-
-    public override async Task<AuthenticationState> GetAuthenticationStateAsync() 
-        => new AuthenticationState(await GetUser(true));
-
-    private async ValueTask<ClaimsPrincipal> GetUser(bool useCache = false)
-    {
-        var now = DateTimeOffset.Now;
-        if (useCache && now < _userLastCheck + _userCacheRefreshInterval)
+        if (!state.TryTakeFromJson<BlossomUser>(nameof(BlossomUser), out var userInfo) || userInfo is null)
         {
-            return _user;
+            return;
         }
-        _user = await Client.GetUserAsync();
-        _userLastCheck = now;
-        return _user;
+
+        List<Claim> claims = [
+            new Claim(ClaimTypes.NameIdentifier, userInfo.Id)
+        ];
+
+        if (userInfo.Identity?.Email is not null)
+        {
+            claims.Add(new Claim(ClaimTypes.Name, userInfo.Identity.UserName ?? userInfo.Identity.Email));
+            claims.Add(new Claim(ClaimTypes.Email, userInfo.Identity.Email));
+        }
+
+        authenticationStateTask = Task.FromResult(
+            new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(claims,
+                authenticationType: nameof(BlossomAuthenticationStateProvider)))));
     }
 
-    public virtual Task LoginAsync(bool forceLogin = false)
+    public NavigationManager Nav { get; }
+
+    public override Task<AuthenticationState> GetAuthenticationStateAsync() => authenticationStateTask;
+
+    public void Login()
     {
-        if (forceLogin)
-            _user = Anonymous();
-        
-        var loginUrl = $"{Config["Blossom:Authority"]}/_auth/login?returnUrl={Navigation.Uri}";
-        Navigation.NavigateTo(loginUrl, true);
-
-        return Task.CompletedTask;
+        var loginUrl = $"_auth/login?returnUrl={Uri.EscapeDataString(Nav.Uri)}";
+        Nav.NavigateTo(loginUrl, true);
     }
-
-    public virtual Task LogoutAsync()
-    {
-        _user = Anonymous();
-        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-        Navigation.NavigateTo(Config["Blossom:Authority"] + "/_auth/logout", true);
-
-        return Task.CompletedTask;
-    }
-
-    public static ClaimsPrincipal Anonymous() => new(new ClaimsIdentity());
-
 }

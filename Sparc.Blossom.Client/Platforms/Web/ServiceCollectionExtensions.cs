@@ -18,10 +18,10 @@ public static class ServiceCollectionExtensions
             || configuration["Oidc:Authority"] != null
             || configuration["Blossom:Authority"] != null;
         
-        if (configuration["AzureAdB2C:Authority"] != null)
-            services.AddB2CApi<T>(configuration);
-        if (configuration["Oidc:Authority"] != null)
-            services.AddOidcApi<T>(configuration);
+        //if (configuration["AzureAdB2C:Authority"] != null)
+        //    services.AddB2CApi<T>(configuration);
+        //if (configuration["Oidc:Authority"] != null)
+        //    services.AddOidcApi<T>(configuration);
         if (configuration["Blossom:Authority"] != null)
             services.AddBlossomApi<T>(configuration);
 
@@ -31,38 +31,40 @@ public static class ServiceCollectionExtensions
             services.AddScoped<AuthenticationStateProvider, AnonymousAuthenticationStateProvider>();
         }
 
+        services.AddCascadingAuthenticationState();
+
         services.AddBlossomHttpClient<T>(baseUrl);
         
         return services;
     }
 
-    public static IServiceCollection AddB2CApi<T>(this IServiceCollection services, IConfiguration configuration) where T : class
-    {
-        services.AddMsalAuthentication(options =>
-        {
-            configuration.Bind("AzureAdB2C", options.ProviderOptions.Authentication);
-            options.UserOptions.NameClaim = "http://schemas.microsoft.com/identity/claims/objectidentifier";
+    //public static IServiceCollection AddB2CApi<T>(this IServiceCollection services, IConfiguration configuration) where T : class
+    //{
+    //    services.AddMsalAuthentication(options =>
+    //    {
+    //        configuration.Bind("AzureAdB2C", options.ProviderOptions.Authentication);
+    //        options.UserOptions.NameClaim = "http://schemas.microsoft.com/identity/claims/objectidentifier";
 
-            if (configuration["AzureAdB2C:Scope"] != null)
-                options.ProviderOptions.DefaultAccessTokenScopes.Add(configuration["AzureAdB2C:Scope"]!);
-        });
+    //        if (configuration["AzureAdB2C:Scope"] != null)
+    //            options.ProviderOptions.DefaultAccessTokenScopes.Add(configuration["AzureAdB2C:Scope"]!);
+    //    });
 
-        return services;
-    }
+    //    return services;
+    //}
 
-    public static IServiceCollection AddOidcApi<T>(this IServiceCollection services, IConfiguration configuration) where T : class
-    {
-        // Add Blazor WebAssembly auth
-        services.AddOidcAuthentication(options =>
-        {
-            configuration.Bind("Oidc", options.ProviderOptions);
-            options.ProviderOptions.ResponseType = "code";
-            if (configuration["Oidc:Scope"] != null)
-                options.ProviderOptions.DefaultScopes.Add(configuration["Oidc:Scope"]!.Replace(" ", "."));
-        });
+    //public static IServiceCollection AddOidcApi<T>(this IServiceCollection services, IConfiguration configuration) where T : class
+    //{
+    //    // Add Blazor WebAssembly auth
+    //    services.AddOidcAuthentication(options =>
+    //    {
+    //        configuration.Bind("Oidc", options.ProviderOptions);
+    //        options.ProviderOptions.ResponseType = "code";
+    //        if (configuration["Oidc:Scope"] != null)
+    //            options.ProviderOptions.DefaultScopes.Add(configuration["Oidc:Scope"]!.Replace(" ", "."));
+    //    });
 
-        return services;
-    }
+    //    return services;
+    //}
 
     public static IServiceCollection AddBlossomApi<T>(this IServiceCollection services, IConfiguration configuration) where T : class
     {
@@ -103,17 +105,17 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
-    public static WebAssemblyHostBuilder AddB2CApi<T>(this WebAssemblyHostBuilder builder) where T : class
-    {
-        builder.Services.AddB2CApi<T>(builder.Configuration);
-        return builder;
-    }
+    //public static WebAssemblyHostBuilder AddB2CApi<T>(this WebAssemblyHostBuilder builder) where T : class
+    //{
+    //    builder.Services.AddB2CApi<T>(builder.Configuration);
+    //    return builder;
+    //}
 
-    public static WebAssemblyHostBuilder AddOidcApi<T>(this WebAssemblyHostBuilder builder) where T : class
-    {
-        builder.Services.AddOidcApi<T>(builder.Configuration);
-        return builder;
-    }
+    //public static WebAssemblyHostBuilder AddOidcApi<T>(this WebAssemblyHostBuilder builder) where T : class
+    //{
+    //    builder.Services.AddOidcApi<T>(builder.Configuration);
+    //    return builder;
+    //}
 
     public static WebAssemblyHostBuilder AddBlossomApi<T>(this WebAssemblyHostBuilder builder) where T : class
     {
