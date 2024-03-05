@@ -1,16 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Sparc.Blossom.Data;
 using Sparc.Blossom.Realtime;
-using System.Security.Claims;
 
 namespace Sparc.Blossom;
 
-public class BlossomContext(DbContextOptions options, BlossomNotifier notifier, IHttpContextAccessor http) : DbContext(options)
+public class BlossomContext(DbContextOptions options, BlossomNotifier notifier) : DbContext(options)
 {
     public BlossomNotifier Notifier { get; } = notifier;
-    protected IHttpContextAccessor Http { get; } = http;
-    protected ClaimsPrincipal? User => Http.HttpContext?.User;
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
