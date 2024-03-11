@@ -38,7 +38,7 @@ public static class ServiceCollectionExtensions
     public record BlossomRegistrationRequest(string Email);
     public record BlossomRegistrationResponse(string Token);
     public record BlossomLoginRequest(string Token);
-    public static void UseBlossomAuthentication<TUser>(this WebApplication app) where TUser : BlossomUser, new()
+    public static void MapBlossomAuthentication<TUser>(this WebApplication app) where TUser : BlossomUser, new()
     {
         app.MapGet("/_auth/userinfo", async (UserManager<TUser> users, ClaimsPrincipal principal) =>
         {
@@ -62,18 +62,6 @@ public static class ServiceCollectionExtensions
         {
             var user = await authenticator.LoginAsync(request.Token);
             return Results.Ok(user);
-        });
-
-        app.MapGet("/_auth/login-silent",
-            async (string userId, string token, string returnUrl, HttpContext context, BlossomAuthenticator<TUser> authenticator) =>
-        {
-            var user = await authenticator.LoginAsync(userId, token, "Link");
-
-            if (user == null)
-                return Results.Unauthorized();
-
-            await context.SignInAsync(IdentityConstants.ApplicationScheme, user.CreatePrincipal());
-            return Results.Redirect(returnUrl);
         });
     }
 }

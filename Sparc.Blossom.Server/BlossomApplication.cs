@@ -10,6 +10,25 @@ namespace Sparc.Blossom;
 
 public static class BlossomApplication
 {
+    public static WebApplication Run<TApp, TUser>(
+        string[] args,
+        Action<IServiceCollection, IConfiguration>? services = null,
+        Action<WebApplication>? app = null,
+        IComponentRenderMode? renderMode = null)
+        where TUser : BlossomUser, new()
+    {
+        var builder = WebApplication.CreateBuilder(args);
+        builder.AddBlossom<TUser>(services, renderMode);
+
+        var blossomApp = builder.UseBlossom<TApp>();
+        blossomApp.MapBlossomAuthentication<TUser>();
+
+        app?.Invoke(blossomApp);
+        blossomApp.Run();
+
+        return blossomApp;
+    }
+
     public static WebApplication Run<TApp, TUser, THub>(
         string[] args, 
         Action<IServiceCollection, IConfiguration>? services = null,
@@ -24,7 +43,7 @@ public static class BlossomApplication
         
         var blossomApp = builder.UseBlossom<TApp>();
         blossomApp.MapHub<THub>("/_realtime");
-        blossomApp.MapIdentityApi<TUser>();
+        blossomApp.MapBlossomAuthentication<TUser>();
 
         app?.Invoke(blossomApp);
         blossomApp.Run();
