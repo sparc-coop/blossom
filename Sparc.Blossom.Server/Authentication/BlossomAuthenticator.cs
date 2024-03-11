@@ -3,15 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Net.Mail;
-using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
-
-public abstract class BlossomAuthenticator
-{
-    public abstract Task<BlossomUser?> LoginAsync(string userName, string password, string? tokenProvider = null);
-    public abstract Task<BlossomUser?> GetAsync();
-}
 
 public class BlossomAuthenticator<TUser>(UserManager<TUser> UserManager, SignInManager<TUser> SignInManager, IHttpContextAccessor http) 
     : BlossomAuthenticator where TUser : BlossomUser, new()
