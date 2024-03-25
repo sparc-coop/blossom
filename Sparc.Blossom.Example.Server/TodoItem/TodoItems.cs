@@ -2,7 +2,8 @@
 
 namespace Sparc.Blossom.Example.Single.TodoItem;
 
-public partial class TodoItems
+public partial class TodoItems(ICommandRunner<TodoItem> commandRunner, IQueryRunner<TodoItem> queryRunner)
+    : Aggregate<TodoItem>(commandRunner, queryRunner)
 {
-    public IEnumerable<TodoItem> Open(IRepository<TodoItem> items) => items.Query.Where(x => x.IsDone == false);
+    public async Task<IEnumerable<TodoItem>> Open() => await Where(x => x.IsDone == false);
 }

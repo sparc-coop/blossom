@@ -45,6 +45,11 @@ public class CosmosDbQueryRunner<T> : RepositoryBase<T>, IQueryRunner<T> where T
         return await Query.ToListAsync();
     }
 
+    public async Task<IEnumerable<T>> GetAllAsync(Func<T, bool> predicate)
+    {
+        return await Query.Where(predicate).AsQueryable().ToListAsync();
+    }
+
     public async Task<U?> GetAsync<U>(ISpecification<T, U> spec)
     {
         return await ApplySpecification(spec).FirstOrDefaultAsync();

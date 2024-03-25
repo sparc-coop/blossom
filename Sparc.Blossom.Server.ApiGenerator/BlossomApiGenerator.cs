@@ -36,10 +36,14 @@ public class BlossomApiGenerator : IIncrementalGenerator
         var usings = string.Join("\n", source.Usings);
         
         var interfaces = new StringBuilder();
-        var methods = source.Methods;
-        foreach (var method in methods)
+        foreach (var method in source.Methods)
         {
             interfaces.AppendLine($@"public {method.ReturnType} {method.Name}({method.Parameters});");
+        }
+
+        foreach (var property in source.Properties)
+        {
+            interfaces.AppendLine($@"public {property.Type} {property.Name} {{ get; set; }}");
         }
 
         var code = new StringBuilder();

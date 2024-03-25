@@ -13,10 +13,17 @@ internal class BlossomApiInfo
             ?? cls.FirstAncestorOrSelf<NamespaceDeclarationSyntax>()?.Name.ToString()
             ?? "";
         Route = cls.Identifier.Text;
+        
         Methods = cls.Members.OfType<MethodDeclarationSyntax>()
             .Where(x => x.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword)))
             .Select(x => new BlossomApiMethodInfo(x))
             .ToArray();
+
+        Properties = cls.Members.OfType<PropertyDeclarationSyntax>()
+            .Where(x => x.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword)))
+            .Select(x => new BlossomApiPropertyInfo(x))
+            .ToArray();
+        
         Usings = cls.SyntaxTree.GetRoot().DescendantNodes().OfType<UsingDirectiveSyntax>().Select(x => x.ToString()).ToArray();
     }
     
@@ -25,18 +32,5 @@ internal class BlossomApiInfo
     internal string Route { get; set; }
     internal string[] Usings { get; set; }
     public BlossomApiMethodInfo[] Methods { get; internal set; }
-}
-
-internal class BlossomApiMethodInfo
-{
-    internal BlossomApiMethodInfo(MethodDeclarationSyntax method)
-    {
-        ReturnType = method.ReturnType.ToString();
-        Name = method.Identifier.Text;
-        Parameters = string.Join(", ", method.ParameterList.Parameters.Select(p => $"{p.Type} {p.Identifier}"));
-    }
-    
-    internal string ReturnType { get; set; }
-    internal string Name { get; set; }
-    internal string Parameters { get; set; }
+    public BlossomApiPropertyInfo[] Properties { get; }
 }

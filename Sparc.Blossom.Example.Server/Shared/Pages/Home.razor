@@ -1,7 +1,43 @@
 ﻿@page "/"
+@using Sparc.Blossom.Example.Single.TodoItem
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+@if (items != null)
+{
+    @foreach (var todo in items.Where(x => !x.IsDone))
+    {
+        <div>
+            <span>@todo.Title</span>
+            <button @onclick="() => ToggleTodoItem(todo)">Toggle</button>
+        </div>
+    }
+}
+
+<button @onclick="AddTodoItem">Add Todo Item</button>
+
+@inject ITodoItems TodoItems
+@code
+{
+    IEnumerable<ITodoItem> items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await TodoItems.Open();
+    }
+
+    async Task AddTodoItem()
+    {
+        await TodoItems.AddAsync("New Todo Item", "New Todo Item Description");
+        items = await TodoItems.Open();
+    }
+
+    async Task ToggleTodoItem(ITodoItem todoItem)
+    {
+        todoItem.MarkDone();
+    }
+}
