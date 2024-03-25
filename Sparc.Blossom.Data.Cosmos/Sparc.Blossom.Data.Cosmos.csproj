@@ -31,6 +31,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+	  <ProjectReference Include="..\Sparc.Blossom.Data.AzureStorage\Sparc.Blossom.Data.AzureStorage.csproj" />
 	</ItemGroup>
 
 </Project>

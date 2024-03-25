@@ -23,8 +23,7 @@ public class Entity
         _events!.Add(notification);
     }
 
-    
-    protected void On(INotification notification) => ((dynamic)this).On(notification);
+    //protected void On(INotification notification) => ((dynamic)this).On(notification);
 
     public virtual object GenericId { get; } = null!;
 }

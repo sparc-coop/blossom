@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<Version>8.0.0-pre.15</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
+		<LangVersion>latest</LangVersion>
 		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Blossom Core package</Description>

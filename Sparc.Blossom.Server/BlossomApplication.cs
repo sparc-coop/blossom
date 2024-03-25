@@ -10,6 +10,15 @@ namespace Sparc.Blossom;
 
 public static class BlossomApplication
 {
+    public static WebApplication Run<TApp>(
+        string[] args,
+        Action<IServiceCollection, IConfiguration>? services = null,
+        Action<WebApplication>? app = null,
+        IComponentRenderMode? renderMode = null)
+    {
+        return Run<TApp, BlossomUser>(args, services, app, renderMode);
+    }
+
     public static WebApplication Run<TApp, TUser>(
         string[] args,
         Action<IServiceCollection, IConfiguration>? services = null,

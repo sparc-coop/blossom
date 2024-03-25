@@ -44,7 +44,7 @@ public class LoginModel(BlossomAuthenticator authenticator) : PageModel
         if (string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(Email)) 
             return Page();
 
-        var user = await Authenticator.LoginAsync(Email, Password);
+        var user = await Authenticator.LoginAsync(Email);
 
         if (user != null)
             return await LoginAsync(user.CreatePrincipal());

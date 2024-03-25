@@ -28,7 +28,9 @@ public class BlossomUser : Entity<string>
         if (values == null || !values.Any())
             return;
 
-        if (!MultiClaims.TryAdd(type, values))
+        if (!MultiClaims.ContainsKey(type))
+            MultiClaims.Add(type, values);
+        else
             MultiClaims[type] = values;
     }
 
