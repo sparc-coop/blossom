@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Sparc.Blossom.Data;
-using Sparc.Blossom.Realtime;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
@@ -49,24 +48,5 @@ public class BlossomUser : Entity<string>
         claims.AddRange(MultiClaims.SelectMany(x => x.Value.Select(v => new Claim(x.Key, v))));
 
         return new ClaimsPrincipal(new ClaimsIdentity(claims, "Blossom"));
-    }
-
-    internal List<INotification>? _events;
-
-    public void Broadcast(INotification notification)
-    {
-        _events ??= new List<INotification>();
-        _events!.Add(notification);
-    }
-
-    public List<INotification> Publish()
-    {
-        if (_events == null || !_events.Any())
-            return new();
-
-        var domainEvents = _events.ToList();
-        _events.Clear();
-
-        return domainEvents;
     }
 }
