@@ -23,7 +23,7 @@ Welcome to your new app.
 @inject ITodoItems TodoItems
 @code
 {
-    IEnumerable<ITodoItem> items;
+    IEnumerable<ITodoItem>? items;
 
     protected override async Task OnInitializedAsync()
     {
@@ -32,12 +32,12 @@ Welcome to your new app.
 
     async Task AddTodoItem()
     {
-        await TodoItems.AddAsync("New Todo Item", "New Todo Item Description");
+        //await TodoItems.New("New Todo Item", "New Todo Item Description");
         items = await TodoItems.Open();
     }
 
     async Task ToggleTodoItem(ITodoItem todoItem)
     {
-        todoItem.MarkDone();
+        await todoItem.MarkDone();
     }
 }

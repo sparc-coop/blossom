@@ -31,7 +31,9 @@ public static class ServiceCollectionExtensions
 
         services?.Invoke(builder.Services, builder.Configuration);
 
-        builder.Services.AddBlossomContexts(Assembly.GetCallingAssembly());
+        builder.Services.AddScoped(typeof(IRunner<>), typeof(BlossomServerRunner<>));
+        builder.Services.AddScoped(typeof(BlossomApiContext<>));
+
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddSingleton<AdditionalAssembliesProvider>();

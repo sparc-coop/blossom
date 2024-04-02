@@ -6,17 +6,17 @@ using System.Text;
 namespace Sparc.Blossom.Server.ApiGenerator;
 
 [Generator]
-public class BlossomApiGenerator : IIncrementalGenerator
+public class BlossomApiContextGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var entities = context.SyntaxProvider
+        var specifications = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (s, _) => Where(s, "Entity"),
+                predicate: static (s, _) => Where(s, "Specification"),
                 transform: static (ctx, _) => Select(ctx)
-            ).Where(static m => m is not null);
+        ).Where(static m => m is not null);
 
-        context.RegisterSourceOutput(entities, static (spc, source) => Generate(source, spc));
+        context.RegisterSourceOutput(specifications, static (spc, source) => Generate(source, spc));
     }
 
     static bool Where(SyntaxNode syntax, string baseType)
@@ -33,36 +33,29 @@ public class BlossomApiGenerator : IIncrementalGenerator
 
     static void Generate(BlossomApiInfo source, SourceProductionContext spc)
     {
-        var usings = string.Join("\n", source.Usings);
-        
-        var properties = new StringBuilder();
-        foreach (var property in source.Properties)
-            properties.AppendLine($@"public {property.Type} {property.Name} {{ get; set; }}");
-
-        var commands = new StringBuilder();
+        var queries = new StringBuilder();
         foreach (var method in source.Methods)
         {
             var parameterPrefix = method.Parameters.Length > 0 ? ", " : "";
-            commands.AppendLine($@"public async Task {method.Name}({method.Parameters}) => await Runner.ExecuteAsync(Id, ""{method.Name}""{parameterPrefix}{method.Parameters});");
+            queries.AppendLine($@"public async Task<IEnumerable<{source.Name}>> {source.Name}({method.Parameters}) => await Runner.QueryAsync(""{source.Name}""{parameterPrefix}{method.Parameters});");
         }
+
+        var records = new StringBuilder();
+        var properties = string.Join(", ", source.Properties.Select(x => $"{x.Type} {x.Name}"));
+        records.AppendLine($@"public record {source.Name}({properties});");
+
         var code = new StringBuilder();
         code.Append($$"""
-{{usings}}
 namespace {{source.Namespace}}.Client
 {
-    public partial class {{source.PluralName}} : BlossomApiContext<{{source.Name}}>
+    {{records}}
+    public partial class {{source.BasePluralName}} : BlossomApiContext<{{source.BaseName}}>
     {
-        public {{source.PluralName}}(IRunner<{{source.Name}}> runner) : base(runner) { }
-    }
-
-    public partial class {{source.Name}}
-    {
-        {{properties}}
-        {{commands}}
+        {{queries}}
     }
 }
 """);
         
-        spc.AddSource($"{source.Name}.g.cs", code.ToString());
+        spc.AddSource($"{source.BaseName}.{source.Name}.g.cs", code.ToString());
     }
 }
