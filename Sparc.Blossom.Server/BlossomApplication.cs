@@ -11,22 +11,22 @@ public static class BlossomApplication
 {
     public static WebApplication Run<TApp>(
         string[] args,
-        Action<IServiceCollection, IConfiguration>? services = null,
+        Action<WebApplicationBuilder>? builderOptions = null,
         Action<WebApplication>? app = null,
         IComponentRenderMode? renderMode = null)
     {
-        return Run<TApp, BlossomUser>(args, services, app, renderMode);
+        return Run<TApp, BlossomUser>(args, builderOptions, app, renderMode);
     }
 
     public static WebApplication Run<TApp, TUser>(
         string[] args,
-        Action<IServiceCollection, IConfiguration>? services = null,
+        Action<WebApplicationBuilder>? builderOptions = null,
         Action<WebApplication>? app = null,
         IComponentRenderMode? renderMode = null)
         where TUser : BlossomUser, new()
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.AddBlossom<TUser>(services, renderMode);
+        builder.AddBlossom<TUser>(builderOptions, renderMode);
 
         var blossomApp = builder.UseBlossom<TApp>();
         blossomApp.MapBlossomAuthentication<TUser>();
@@ -39,14 +39,14 @@ public static class BlossomApplication
 
     public static WebApplication Run<TApp, TUser, THub>(
         string[] args, 
-        Action<IServiceCollection, IConfiguration>? services = null,
+        Action<WebApplicationBuilder>? builderOptions = null,
         Action<WebApplication>? app = null,
         IComponentRenderMode? renderMode = null)
         where TUser : BlossomUser, new()
         where THub : BlossomHub
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.AddBlossom<TUser>(services, renderMode);
+        builder.AddBlossom<TUser>(builderOptions, renderMode);
         builder.Services.AddBlossomRealtime<THub>();
         
         var blossomApp = builder.UseBlossom<TApp>();

@@ -10,14 +10,13 @@ using Sparc.Blossom.Server;
 using Sparc.Blossom.Api;
 using Sparc.Blossom.Authentication;
 using System.Reflection;
-using Microsoft.Extensions.Configuration;
 
 namespace Sparc.Blossom;
 
 public static class ServiceCollectionExtensions
 {
-    public static WebApplicationBuilder AddBlossom<TUser>(this WebApplicationBuilder builder, Action<IServiceCollection, IConfiguration>? services = null, IComponentRenderMode? renderMode = null) 
-        where TUser : BlossomUser, new() 
+    public static WebApplicationBuilder AddBlossom<TUser>(this WebApplicationBuilder builder, Action<WebApplicationBuilder>? options = null, IComponentRenderMode? renderMode = null)
+        where TUser : BlossomUser, new()
     {
         var razor = builder.Services.AddRazorComponents();
         renderMode ??= RenderMode.InteractiveAuto;
@@ -29,7 +28,7 @@ public static class ServiceCollectionExtensions
 
         builder.AddBlossomAuthentication<TUser>();
 
-        services?.Invoke(builder.Services, builder.Configuration);
+        options?.Invoke(builder);
 
         builder.Services.AddScoped(typeof(IRunner<>), typeof(BlossomServerRunner<>));
         builder.Services.AddScoped(typeof(BlossomApiContext<>));
@@ -87,6 +86,14 @@ public static class ServiceCollectionExtensions
         return app;
     }
 
+    public static IServiceCollection AddBlossomService<T>(this IServiceCollection services) where T : class
+    {
+        services.AddSingleton(typeof(BlossomQueue<>))
+                .AddHostedService<BlossomRunner<T>>();
+
+        return services;
+    }
+
     public static bool IsWebAssembly(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ImplementationType?.Name.Contains("WebAssemblyEndpointProvider") == true);
 
     public static bool IsServer(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ImplementationType?.Name.Contains("CircuitEndpointProvider") == true);
@@ -104,10 +111,10 @@ public static class ServiceCollectionExtensions
         var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures)
             .Select(x => x.Name)
             .ToArray();
-        
+
         app.UseCultures(allCultures);
 
         return app;
     }
-   
+
 }
