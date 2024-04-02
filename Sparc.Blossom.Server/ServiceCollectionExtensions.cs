@@ -89,7 +89,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBlossomService<T>(this IServiceCollection services) where T : class
     {
         services.AddSingleton(typeof(BlossomQueue<>))
-                .AddHostedService<BlossomRunner<T>>();
+                .AddHostedService<BlossomRunner<T>>()
+                .AddScoped<T>();
 
         return services;
     }
