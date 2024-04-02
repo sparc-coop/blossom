@@ -50,17 +50,25 @@ public class BlossomApiGenerator : IIncrementalGenerator
 {{usings}}
 namespace {{source.Namespace}}.Client
 {
-    public partial class {{source.PluralName}} : BlossomApiContext<{{source.Name}}>
+    public partial class {{source.PluralName}} : BlossomApiContext<I{{source.Name}}>
     {
-        public {{source.PluralName}}(IRunner<{{source.Name}}> runner) : base(runner) { }
+        public {{source.PluralName}}(IRunner<I{{source.Name}}> runner) : base(runner) { }
     }
 
-    public partial class {{source.Name}}
+    public interface I{{source.Name}}
     {
+        public IRunner<I{{source.Name}}> Runner { get; set; }
         {{properties}}
         {{commands}}
     }
-}
+
+    public class {{source.Name}} : I{{source.Name}}
+    {
+        public IRunner<I{{source.Name}}> Runner { get; set; }
+        public string Id { get; set; }
+        {{properties}}
+    }
+}    
 """);
         
         spc.AddSource($"{source.Name}.g.cs", code.ToString());

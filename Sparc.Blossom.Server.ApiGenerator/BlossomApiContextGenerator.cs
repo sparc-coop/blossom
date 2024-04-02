@@ -46,10 +46,10 @@ public class BlossomApiContextGenerator : IIncrementalGenerator
 
         var code = new StringBuilder();
         code.Append($$"""
-namespace {{source.Namespace}}.Client
+namespace {{source.Namespace}}
 {
     {{records}}
-    public partial class {{source.BasePluralName}} : BlossomApiContext<{{source.BaseName}}>
+    public partial class {{source.BasePluralName}} : BlossomApiContext<I{{source.BaseName}}>
     {
         {{queries}}
     }
