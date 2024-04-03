@@ -15,6 +15,33 @@ namespace Sparc.Blossom;
 
 public static class ServiceCollectionExtensions
 {
+    public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, Action<WebApplicationBuilder>? options = null, IComponentRenderMode? renderMode = null)
+    {
+        var razor = builder.Services.AddRazorComponents();
+        renderMode ??= RenderMode.InteractiveAuto;
+
+        if (renderMode == RenderMode.InteractiveServer || renderMode == RenderMode.InteractiveAuto)
+            razor.AddInteractiveServerComponents();
+        if (renderMode == RenderMode.InteractiveWebAssembly || renderMode == RenderMode.InteractiveAuto)
+            razor.AddInteractiveWebAssemblyComponents();
+
+        //builder.AddBlossomAuthentication<TUser>();
+
+        options?.Invoke(builder);
+
+        builder.Services.AddScoped(typeof(BlossomApiContext<>));
+        builder.RegisterBlossomContexts(Assembly.GetEntryAssembly()!);
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+        builder.Services.AddSingleton<AdditionalAssembliesProvider>();
+
+        builder.AddBlossomRepository();
+
+        return builder;
+
+    }
+
     public static WebApplicationBuilder AddBlossom<TUser>(this WebApplicationBuilder builder, Action<WebApplicationBuilder>? options = null, IComponentRenderMode? renderMode = null)
         where TUser : BlossomUser, new()
     {
@@ -45,6 +72,7 @@ public static class ServiceCollectionExtensions
     public static WebApplication UseBlossom<T>(this WebApplicationBuilder builder)
     {
         builder.Services.AddServerSideBlazor();
+        builder.Services.AddHttpContextAccessor();
         builder.Services.AddOutputCache();
 
         var app = builder.Build();

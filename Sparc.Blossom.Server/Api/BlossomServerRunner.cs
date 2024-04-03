@@ -25,7 +25,7 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAcces
     public async Task<IEnumerable<T>> QueryAsync(string name, params object[] parameters)
     {
         // Find the Specification<T> that matches the name
-        var specType = typeof(T).Assembly.GetTypes().FirstOrDefault(x => x.Name == name && x.IsAssignableFrom(typeof(ISpecification<T>)))
+        var specType = typeof(T).Assembly.GetTypes().FirstOrDefault(x => x.Name == name && x.BaseType == typeof(Specification<T>))
             ?? throw new Exception($"Specification {name} not found.");
 
         var spec = (ISpecification<T>)Activator.CreateInstance(specType, parameters)!;
@@ -47,7 +47,7 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAcces
     {
         var baseUrl = $"/{Name.ToLower()}";
         var group = endpoints.MapGroup(baseUrl);
-        group.MapGet("{id}", async (BlossomServerRunner<T> runner, string id) => await runner.GetAsync(id));
+        group.MapGet("{id}", async (IRunner<T> runner, string id) => await runner.GetAsync(id));
         group.MapPost("{name}", async (IRunner<T> runner, string name, object[] parameters) => await runner.QueryAsync(name, parameters));
         group.MapPut("{id}/{name}", async (IRunner<T> runner, string id, string name, object[] parameters) => await runner.ExecuteAsync(id, name, parameters));
     }

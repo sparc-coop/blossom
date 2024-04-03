@@ -15,7 +15,14 @@ public static class BlossomApplication
         Action<WebApplication>? app = null,
         IComponentRenderMode? renderMode = null)
     {
-        return Run<TApp, BlossomUser>(args, builderOptions, app, renderMode);
+        var builder = WebApplication.CreateBuilder(args);
+        builder.AddBlossom(builderOptions, renderMode);
+
+        var blossomApp = builder.UseBlossom<TApp>();
+        app?.Invoke(blossomApp);
+        blossomApp.Run();
+
+        return blossomApp;
     }
 
     public static WebApplication Run<TApp, TUser>(

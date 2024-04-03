@@ -55,10 +55,8 @@ namespace {{source.Namespace}}.Client
         public {{source.PluralName}}(IRunner<{{source.Name}}> runner) : base(runner) { }
     }
 
-    public class {{source.Name}}
+    public class {{source.Name}} : BlossomEntityProxy<{{source.Name}}, {{source.BaseName}}>
     {
-        public IRunner<{{source.Name}}> Runner { get; set; }
-        public {{source.BaseName}} Id { get; set; }
         {{properties}}
         {{commands}}
     }
