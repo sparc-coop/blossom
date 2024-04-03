@@ -1,5 +1,4 @@
-﻿using Humanizer;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -16,7 +15,7 @@ internal class BlossomApiInfo
             ?? "";
 
         Name = cls.Identifier.Text;
-        PluralName = Name.Pluralize();
+        PluralName = Name + "Api";
 
         if (cls.BaseList != null)
         {
@@ -27,7 +26,7 @@ internal class BlossomApiInfo
                 var genericArgument = baseType.Split('<', ',', '>')[1];
 
                 BaseName = genericArgument;
-                BasePluralName = genericArgument.Pluralize();
+                BasePluralName = genericArgument + "Api";
             }
         }
 
@@ -39,7 +38,7 @@ internal class BlossomApiInfo
             .Select(x => new BlossomApiPropertyInfo(x))
             .ToArray();
 
-        Records = Public<ConstructorDeclarationSyntax>(cls)
+        Constructors = Public<ConstructorDeclarationSyntax>(cls)
             .Select(x => new BlossomApiMethodInfo(cls, x))
             .ToList();
     }
@@ -51,11 +50,14 @@ internal class BlossomApiInfo
     internal string Namespace { get; }
     internal string[] Usings { get; }
     public List<BlossomApiMethodInfo> Methods { get; }
-    public List<BlossomApiMethodInfo> Records { get; }
+    public List<BlossomApiMethodInfo> Constructors { get; }
     public BlossomApiPropertyInfo[] Properties { get; }
 
     private IEnumerable<T> Public<T>(ClassDeclarationSyntax cls) where T : MemberDeclarationSyntax
     {
+        foreach (var member in cls.Members)
+            Console.WriteLine("Member: " + member);
+        
         return cls.Members.OfType<T>().Where(x => x.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword)));
     }
 }

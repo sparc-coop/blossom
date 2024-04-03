@@ -1,6 +1,6 @@
 ﻿namespace Sparc.Blossom.Data;
 
-public interface IRunner<T> where T : Entity<string>
+public interface IRunner<T>
 {
     Task<T?> GetAsync(object id);
     Task<IEnumerable<T>> QueryAsync(string name, params object[] parameters);  

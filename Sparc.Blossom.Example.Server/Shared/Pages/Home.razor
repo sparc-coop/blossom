@@ -1,5 +1,5 @@
 ﻿@page "/"
-@using Sparc.Blossom.Example.Single.TodoItem
+@using Sparc.Blossom.Example.Single.TodoItem.Client
 
 <PageTitle>Home</PageTitle>
 
@@ -20,10 +20,10 @@ Welcome to your new app.
 
 <button @onclick="AddTodoItem">Add Todo Item</button>
 
-@inject ITodoItems TodoItems
+@inject TodoItemApi TodoItems
 @code
 {
-    IEnumerable<ITodoItem>? items;
+    IEnumerable<TodoItem>? items;
 
     protected override async Task OnInitializedAsync()
     {
@@ -36,7 +36,7 @@ Welcome to your new app.
         items = await TodoItems.Open();
     }
 
-    async Task ToggleTodoItem(ITodoItem todoItem)
+    async Task ToggleTodoItem(TodoItem todoItem)
     {
         await todoItem.MarkDone();
     }

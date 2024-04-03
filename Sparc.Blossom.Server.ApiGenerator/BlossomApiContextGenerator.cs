@@ -33,23 +33,25 @@ public class BlossomApiContextGenerator : IIncrementalGenerator
 
     static void Generate(BlossomApiInfo source, SourceProductionContext spc)
     {
-        var queries = new StringBuilder();
-        foreach (var method in source.Methods)
-        {
-            var parameterPrefix = method.Parameters.Length > 0 ? ", " : "";
-            queries.AppendLine($@"public async Task<IEnumerable<{source.Name}>> {source.Name}({method.Parameters}) => await Runner.QueryAsync(""{source.Name}""{parameterPrefix}{method.Parameters});");
-        }
-
         var records = new StringBuilder();
         var properties = string.Join(", ", source.Properties.Select(x => $"{x.Type} {x.Name}"));
-        records.AppendLine($@"public record {source.Name}({properties});");
+        if (properties.Length > 0)
+            records.AppendLine($@"public record {source.Name}({properties});");
+
+        var queries = new StringBuilder();
+        foreach (var constructor in source.Constructors)
+        {
+            var parameterPrefix = constructor.Parameters.Length > 0 ? ", " : "";
+            var returnType = properties.Length > 0 ? source.Name : source.BaseName;
+            queries.AppendLine($@"public async Task<IEnumerable<{returnType}>> {source.Name}({constructor.Parameters}) => await Runner.QueryAsync(""{source.Name}""{parameterPrefix}{constructor.Parameters});");
+        }
 
         var code = new StringBuilder();
         code.Append($$"""
-namespace {{source.Namespace}}
+namespace {{source.Namespace}}.Client
 {
     {{records}}
-    public partial class {{source.BasePluralName}} : BlossomApiContext<I{{source.BaseName}}>
+    public partial class {{source.BasePluralName}} : BlossomApiContext<{{source.BaseName}}>
     {
         {{queries}}
     }

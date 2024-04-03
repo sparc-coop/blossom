@@ -7,15 +7,16 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Data;
 
-public interface IBlossomServerRunner
+public interface IBlossomEndpointMapper
 {
     void MapEndpoints(IEndpointRouteBuilder endpoints);
 }
 
-public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAccessor http) : IRunner<T>, IBlossomServerRunner where T : Entity<string>
+public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAccessor http) : IRunner<T>, IBlossomEndpointMapper
+    where T : Entity<string>
 {
     public string Name => typeof(T).Name.Pluralize();
-    
+
     public IRepository<T> Repository { get; } = repository;
     protected IHttpContextAccessor Http { get; } = http;
     protected ClaimsPrincipal? User => Http.HttpContext?.User;
@@ -46,7 +47,7 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAcces
     {
         var baseUrl = $"/{Name.ToLower()}";
         var group = endpoints.MapGroup(baseUrl);
-        group.MapGet("{id}", async (IRunner<T> runner, string id) => await runner.GetAsync(id));
+        group.MapGet("{id}", async (BlossomServerRunner<T> runner, string id) => await runner.GetAsync(id));
         group.MapPost("{name}", async (IRunner<T> runner, string name, object[] parameters) => await runner.QueryAsync(name, parameters));
         group.MapPut("{id}/{name}", async (IRunner<T> runner, string id, string name, object[] parameters) => await runner.ExecuteAsync(id, name, parameters));
     }

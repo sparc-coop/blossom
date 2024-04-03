@@ -30,8 +30,8 @@ public static class ServiceCollectionExtensions
 
         options?.Invoke(builder);
 
-        builder.Services.AddScoped(typeof(IRunner<>), typeof(BlossomServerRunner<>));
         builder.Services.AddScoped(typeof(BlossomApiContext<>));
+        builder.RegisterBlossomContexts(Assembly.GetEntryAssembly()!);
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
