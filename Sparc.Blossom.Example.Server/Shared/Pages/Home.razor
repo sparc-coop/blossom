@@ -19,16 +19,30 @@ Welcome to your new app.
     }
 }
 
+@if (closedItems != null)
+{
+    @foreach (var todo in closedItems)
+    {
+        <p>Closed Items</p>
+        <div>
+            <span>@todo.Title</span>
+        </div>
+    }
+}
+
+
 <button @onclick="AddTodoItem">Add Todo Item</button>
 
 @inject TodoItemApi TodoItems
 @code
 {
     IEnumerable<TodoItem>? items;
+    IEnumerable<TodoItem>? closedItems;
 
     protected override async Task OnInitializedAsync()
     {
         items = await TodoItems.Open();
+        closedItems = await TodoItems.Closed();
     }
 
     async Task AddTodoItem()

@@ -23,4 +23,9 @@ public partial class TodoItem(string title, string description) : Entity<string>
     {
         IsDone = false;
     }
+
+    public void ClearTitle()
+    {
+        Title = "";
+    }
 }
