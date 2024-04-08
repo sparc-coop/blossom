@@ -33,6 +33,8 @@ public class BlossomApiContextGenerator : IIncrementalGenerator
 
     static void Generate(BlossomApiInfo source, SourceProductionContext spc)
     {
+        var usings = string.Join("\n", source.Usings);
+        
         var records = new StringBuilder();
         var properties = string.Join(", ", source.Properties.Select(x => $"{x.Type} {x.Name}"));
         if (properties.Length > 0)
@@ -41,13 +43,14 @@ public class BlossomApiContextGenerator : IIncrementalGenerator
         var queries = new StringBuilder();
         foreach (var constructor in source.Constructors)
         {
-            var parameterPrefix = constructor.Parameters.Length > 0 ? ", " : "";
+            var parameterPrefix = constructor.Arguments.Length > 0 ? ", " : "";
             var returnType = properties.Length > 0 ? source.Name : source.BaseName;
-            queries.AppendLine($@"public async Task<IEnumerable<{returnType}>> {source.Name}({constructor.Parameters}) => await Runner.QueryAsync(""{source.Name}""{parameterPrefix}{constructor.Parameters});");
+            queries.AppendLine($@"public async Task<IEnumerable<{returnType}>> {source.Name}({constructor.Arguments}) => await Runner.QueryAsync(""{source.Name}""{parameterPrefix}{constructor.Parameters});");
         }
 
         var code = new StringBuilder();
         code.Append($$"""
+{{usings}}
 namespace {{source.Namespace}}.Client
 {
     {{records}}

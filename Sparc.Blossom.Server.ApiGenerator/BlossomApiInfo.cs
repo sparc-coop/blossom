@@ -9,6 +9,9 @@ internal class BlossomApiInfo
     internal BlossomApiInfo(ClassDeclarationSyntax cls)
     {
         Usings = cls.SyntaxTree.GetRoot().DescendantNodes().OfType<UsingDirectiveSyntax>().Select(x => x.ToString()).ToArray();
+        if (!Usings.Contains("using Sparc.Blossom;"))
+            Usings = Usings.Append("using Sparc.Blossom;").ToArray();
+
 
         Namespace = cls.FirstAncestorOrSelf<FileScopedNamespaceDeclarationSyntax>()?.Name.ToString() 
             ?? cls.FirstAncestorOrSelf<NamespaceDeclarationSyntax>()?.Name.ToString()

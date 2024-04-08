@@ -42,8 +42,8 @@ public class BlossomApiGenerator : IIncrementalGenerator
         var commands = new StringBuilder();
         foreach (var method in source.Methods)
         {
-            var parameterPrefix = method.Parameters.Length > 0 ? ", " : "";
-            commands.AppendLine($@"public async Task {method.Name}({method.Parameters}) => await Runner.ExecuteAsync(Id, ""{method.Name}""{parameterPrefix}{method.Parameters});");
+            var parameterPrefix = method.Arguments.Length > 0 ? ", " : "";
+            commands.AppendLine($@"public async Task {method.Name}({method.Arguments}) => await Runner.ExecuteAsync(Id, ""{method.Name}""{parameterPrefix}{method.Parameters});");
         }
         var code = new StringBuilder();
         code.Append($$"""
