@@ -28,7 +28,7 @@ public class BlossomNotifier
         PublishStrategy = strategy;
     }
 
-    public async Task NotifyAsync(IEnumerable<Entity> entities)
+    public async Task NotifyAsync(IEnumerable<BlossomEntity> entities)
     {
         var domainEvents = entities.SelectMany(x => x.Publish());
 

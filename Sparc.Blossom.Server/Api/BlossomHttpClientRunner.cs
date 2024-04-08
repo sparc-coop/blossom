@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 
 namespace Sparc.Blossom.Data;
 
-public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T : Entity<string>
+public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T : BlossomEntity<string>
 {
     private HttpClient Client { get; } = client;
 

@@ -12,7 +12,7 @@ public class BlossomApiGenerator : IIncrementalGenerator
     {
         var entities = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (s, _) => Where(s, "Entity"),
+                predicate: static (s, _) => Where(s, "BlossomEntity"),
                 transform: static (ctx, _) => Select(ctx)
             ).Where(static m => m is not null);
 

@@ -2,7 +2,7 @@
 
 namespace Sparc.Blossom.Data;
 
-public class Entity
+public class BlossomEntity
 {
     internal List<INotification>? _events;
 
@@ -28,14 +28,14 @@ public class Entity
     public virtual object GenericId { get; } = null!;
 }
 
-public class Entity<T> : Entity where T : notnull
+public class BlossomEntity<T> : BlossomEntity where T : notnull
 {
-    public Entity()
+    public BlossomEntity()
     {
         Id = default!;
     }
 
-    public Entity(T id) => Id = id;
+    public BlossomEntity(T id) => Id = id;
     public override object GenericId => Id;
 
     public virtual T Id { get; set; }

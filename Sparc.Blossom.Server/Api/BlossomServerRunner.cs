@@ -13,7 +13,7 @@ public interface IBlossomEndpointMapper
 }
 
 public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAccessor http) : IRunner<T>, IBlossomEndpointMapper
-    where T : Entity<string>
+    where T : BlossomEntity<string>
 {
     public string Name => typeof(T).Name.Pluralize();
 

@@ -1,13 +1,14 @@
-﻿using Ardalis.Specification;
+﻿using Sparc.Blossom.Data;
+using Ardalis.Specification;
 
 namespace Sparc.Blossom.Example.Single.TodoItem;
 
-public class Open : Specification<TodoItem>
+public class Open : BlossomQuery<TodoItem>
 {
     public Open() => Query.Where(x => x.IsDone == false);
 }
 
-public class Closed : Specification<TodoItem>
+public class Closed : BlossomQuery<TodoItem>
 {
     public Closed() => Query.Where(x => x.IsDone == true);
 }

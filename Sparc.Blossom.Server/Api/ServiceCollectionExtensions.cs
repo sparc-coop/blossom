@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
         => assembly.GetTypes().Where(x => x.BaseType?.IsGenericType == true && x.BaseType.GetGenericTypeDefinition() == baseType);
 
     public static IEnumerable<Type> GetEntities(this Assembly assembly)
-        => assembly.GetDerivedTypes(typeof(Entity<>));
+        => assembly.GetDerivedTypes(typeof(BlossomEntity<>));
 
     public static IEnumerable<Type> GetDtos(this Assembly assembly)
         => assembly.GetDerivedTypes(typeof(BlossomApiContext<>))

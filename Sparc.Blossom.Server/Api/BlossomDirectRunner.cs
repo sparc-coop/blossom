@@ -6,7 +6,7 @@ namespace Sparc.Blossom.Data;
 public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> serverRunner) 
     : IRunner<T>
     where T : IBlossomEntityProxy<T>
-    where TEntity : Entity<string>
+    where TEntity : BlossomEntity<string>
 {
     public IRunner<TEntity> ServerRunner { get; } = serverRunner;
 

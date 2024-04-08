@@ -12,7 +12,7 @@ public class BlossomApiContextGenerator : IIncrementalGenerator
     {
         var specifications = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (s, _) => Where(s, "Specification"),
+                predicate: static (s, _) => Where(s, "BlossomQuery"),
                 transform: static (ctx, _) => Select(ctx)
         ).Where(static m => m is not null);
 

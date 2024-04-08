@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomUser : Entity<string>
+public class BlossomUser : BlossomEntity<string>
 {
     public string? LoginProviderKey { get; set; }
     public IdentityUser Identity { get; } = new();
