@@ -7,9 +7,9 @@
 
 Welcome to your new app.
 
-@if (items != null)
+@if (openItems != null)
 {
-    @foreach (var todo in items.Where(x => !x.IsDone))
+    @foreach (var todo in openItems)
     {
         <div>
             <span>@todo.Title</span>
@@ -20,9 +20,9 @@ Welcome to your new app.
 
 @if (closedItems != null)
 {
+    <p>Closed Items</p>
     @foreach (var todo in closedItems)
     {
-        <p>Closed Items</p>
         <div>
             <span>@todo.Title</span>
             <button @onclick="() => Delete(todo)">Delete</button>
@@ -36,29 +36,35 @@ Welcome to your new app.
 @inject TodoItemApi TodoItems
 @code
 {
-    IEnumerable<TodoItem>? items;
+    IEnumerable<TodoItem>? openItems;
     IEnumerable<TodoItem>? closedItems;
 
     protected override async Task OnInitializedAsync()
     {
-        items = await TodoItems.Open();
+        await GetItems();
+    }
+
+    async Task GetItems()
+    {
+        openItems = await TodoItems.Open();
         closedItems = await TodoItems.Closed();
     }
 
     async Task AddTodoItem()
     {
         var newItem = await TodoItems.Create("New Todo Item", "New Todo Item Description");
-        items = await TodoItems.Open();
+        await GetItems();
     }
 
     async Task ToggleTodoItem(TodoItem todoItem)
     {
         await todoItem.MarkDone();
+        await GetItems();
     }
 
     async Task Delete(TodoItem todoItem)
     {
         await TodoItems.Delete(todoItem.Id);
-        closedItems = await TodoItems.Closed();
+        await GetItems();
     }
 }
