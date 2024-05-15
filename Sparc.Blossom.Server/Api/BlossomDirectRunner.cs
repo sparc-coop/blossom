@@ -1,7 +1,8 @@
 ﻿using Ardalis.Specification;
 using Mapster;
+using Sparc.Blossom.Data;
 
-namespace Sparc.Blossom.Data;
+namespace Sparc.Blossom.Api;
 
 public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> serverRunner) 
     : IRunner<T>

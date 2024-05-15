@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
 using System.Text;
 
 namespace Sparc.Blossom.Server.ApiGenerator;
@@ -50,14 +49,12 @@ public class BlossomApiContextGenerator : IIncrementalGenerator
 
         var code = new StringBuilder();
         code.Append($$"""
-{{usings}}
-namespace {{source.Namespace}}.Client
+namespace Sparc.Blossom.Api;
+
+{{records}}
+public partial class {{source.BasePluralName}} : BlossomApiContext<{{source.BaseName}}>
 {
-    {{records}}
-    public partial class {{source.BasePluralName}} : BlossomApiContext<{{source.BaseName}}>
-    {
-        {{queries}}
-    }
+    {{queries}}
 }
 """);
         

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Sparc.Blossom.Data;
 using System.Net.Http.Json;
 
-namespace Sparc.Blossom.Data;
+namespace Sparc.Blossom.Api;
 
 public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T : BlossomEntity<string>
 {

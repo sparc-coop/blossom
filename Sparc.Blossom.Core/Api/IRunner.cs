@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom.Data;
+﻿namespace Sparc.Blossom.Api;
 
 public interface IRunner<T>
 {

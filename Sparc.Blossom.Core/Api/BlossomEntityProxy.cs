@@ -1,6 +1,6 @@
 ﻿using Sparc.Blossom.Data;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Api;
 
 public interface IBlossomEntityProxy<T>
 {

@@ -54,23 +54,21 @@ public class BlossomApiGenerator : IIncrementalGenerator
 
         var code = new StringBuilder();
         code.Append($$"""
-{{usings}}
-namespace {{source.Namespace}}.Client
+namespace Sparc.Blossom.Api;
+
+public partial class {{source.PluralName}} : BlossomApiContext<{{source.Name}}>
 {
-    public partial class {{source.PluralName}} : BlossomApiContext<{{source.Name}}>
-    {
-        public {{source.PluralName}}(IRunner<{{source.Name}}> runner) : base(runner) { }
+    public {{source.PluralName}}(IRunner<{{source.Name}}> runner) : base(runner) { }
 
-        {{constructors}}
-        public async Task Delete(object id) => await Runner.DeleteAsync(id);
-    }
+    {{constructors}}
+    public async Task Delete(object id) => await Runner.DeleteAsync(id);
+}
 
-    public class {{source.Name}} : BlossomEntityProxy<{{source.Name}}, {{source.BaseName}}>
-    {
-        {{properties}}
-        {{commands}}
-    }
-}    
+public class {{source.Name}} : BlossomEntityProxy<{{source.Name}}, {{source.BaseName}}>
+{
+    {{properties}}
+    {{commands}}
+}
 """);
         
         spc.AddSource($"{source.Name}.g.cs", code.ToString());

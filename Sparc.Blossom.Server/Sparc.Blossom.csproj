@@ -11,7 +11,7 @@
 
 		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
-		<Description>Sparc Blossom Server package</Description>
+		<Description>Sparc Blossom package</Description>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReadmeFile>readme.md</PackageReadmeFile>
 		<PackageTags>Features;API;Web;Sparc;Blossom</PackageTags>
