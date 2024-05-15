@@ -47,6 +47,14 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAcces
         await Repository.ExecuteAsync(id, action);
     }
 
+    public async Task DeleteAsync(object id)
+    {
+        var entity = await Repository.FindAsync(id) 
+            ?? throw new Exception($"Entity {id} not found.");
+        
+        await Repository.DeleteAsync(entity);
+    }
+
     public Task OnAsync(object id, string name, params object[] parameters)
     {
         throw new NotImplementedException();
@@ -60,5 +68,6 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAcces
         group.MapPost("", async (IRunner<T> runner, object[] parameters) => await runner.CreateAsync(parameters));
         group.MapPost("{name}", async (IRunner<T> runner, string name, object[] parameters) => await runner.QueryAsync(name, parameters));
         group.MapPut("{id}/{name}", async (IRunner<T> runner, string id, string name, object[] parameters) => await runner.ExecuteAsync(id, name, parameters));
+        group.MapDelete("{id}", async (IRunner<T> runner, string id) => await runner.DeleteAsync(id));
     }
 }

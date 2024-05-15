@@ -62,6 +62,7 @@ namespace {{source.Namespace}}.Client
         public {{source.PluralName}}(IRunner<{{source.Name}}> runner) : base(runner) { }
 
         {{constructors}}
+        public async Task Delete(object id) => await Runner.DeleteAsync(id);
     }
 
     public class {{source.Name}} : BlossomEntityProxy<{{source.Name}}, {{source.BaseName}}>

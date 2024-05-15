@@ -26,6 +26,7 @@ Welcome to your new app.
         <p>Closed Items</p>
         <div>
             <span>@todo.Title</span>
+            <button @onclick="() => Delete(todo)">Delete</button>
         </div>
     }
 }
@@ -54,5 +55,11 @@ Welcome to your new app.
     async Task ToggleTodoItem(TodoItem todoItem)
     {
         await todoItem.MarkDone();
+    }
+
+    async Task Delete(TodoItem todoItem)
+    {
+        await TodoItems.Delete(todoItem.Id);
+        closedItems = await TodoItems.Closed();
     }
 }

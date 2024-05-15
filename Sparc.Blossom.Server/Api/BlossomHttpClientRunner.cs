@@ -20,6 +20,8 @@ public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T 
         request.EnsureSuccessStatusCode();
     }
 
+    public async Task DeleteAsync(object id) => await Client.DeleteAsync(id.ToString());
+
     public Task OnAsync(object id, string name, params object[] parameters)
     {
         throw new NotImplementedException();

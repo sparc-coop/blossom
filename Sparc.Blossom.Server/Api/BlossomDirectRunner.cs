@@ -30,6 +30,8 @@ public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> serverRunner)
     public async Task ExecuteAsync(object id, string name, params object[] parameters) => 
         await ServerRunner.ExecuteAsync(id, name, parameters);
 
+    public async Task DeleteAsync(object id) => await ServerRunner.DeleteAsync(id);
+
     public Task OnAsync(object id, string name, params object[] parameters)
     {
         throw new NotImplementedException();
