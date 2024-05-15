@@ -1,7 +1,7 @@
 ﻿using Sparc.Blossom.Data;
 using Ardalis.Specification;
 
-namespace Sparc.Blossom.Example.Single.TodoItem;
+namespace TodoItems;
 
 public class Open : BlossomQuery<TodoItem>
 {

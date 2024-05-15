@@ -1,7 +1,7 @@
 using Sparc.Blossom;
 using Sparc.Blossom.Data;
 using Sparc.Blossom.Example.Single;
-using Sparc.Blossom.Example.Single.TodoItem;
+using TodoItems;
 
 BlossomApplication.Run<App>(args, app: async x =>
 {

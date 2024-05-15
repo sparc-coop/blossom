@@ -1,6 +1,6 @@
 ﻿using Sparc.Blossom.Data;
 
-namespace Sparc.Blossom.Example.Single.TodoItem;
+namespace TodoItems;
 
 public partial class TodoItem(string title, string description) : BlossomEntity<string>(Guid.NewGuid().ToString())
 {
