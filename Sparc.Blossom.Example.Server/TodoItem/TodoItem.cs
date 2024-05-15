@@ -2,11 +2,18 @@
 
 namespace TodoItems;
 
-public partial class TodoItem(string title, string description) : BlossomEntity<string>(Guid.NewGuid().ToString())
+public partial class TodoItem : BlossomEntity<string>
 {
+    public TodoItem(string title, string description) : base(Guid.NewGuid().ToString())
+    {
+        Title = title;
+        Description = description;
+    }
+
+
     internal string? ListId { get; set; }
-    public string Title { get; set; } = title;
-    public string Description { get; set; } = description;
+    public string Title { get; set; }
+    public string Description { get; set; }
     public bool IsDone { get; set; }
 
     public void MarkDone()

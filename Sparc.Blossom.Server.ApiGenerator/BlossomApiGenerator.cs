@@ -45,6 +45,13 @@ public class BlossomApiGenerator : IIncrementalGenerator
             var parameterPrefix = method.Arguments.Length > 0 ? ", " : "";
             commands.AppendLine($@"public async Task {method.Name}({method.Arguments}) => await Runner.ExecuteAsync(Id, ""{method.Name}""{parameterPrefix}{method.Parameters});");
         }
+
+        var constructors = new StringBuilder();
+        foreach (var constructor in source.Constructors)
+        {
+            constructors.AppendLine($@"public async Task<{source.Name}> Create({constructor.Arguments}) => await Runner.CreateAsync({constructor.Parameters});");
+        }
+
         var code = new StringBuilder();
         code.Append($$"""
 {{usings}}
@@ -53,6 +60,8 @@ namespace {{source.Namespace}}.Client
     public partial class {{source.PluralName}} : BlossomApiContext<{{source.Name}}>
     {
         public {{source.PluralName}}(IRunner<{{source.Name}}> runner) : base(runner) { }
+
+        {{constructors}}
     }
 
     public class {{source.Name}} : BlossomEntityProxy<{{source.Name}}, {{source.BaseName}}>

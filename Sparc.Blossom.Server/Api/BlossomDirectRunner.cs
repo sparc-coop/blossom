@@ -10,6 +10,12 @@ public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> serverRunner)
 {
     public IRunner<TEntity> ServerRunner { get; } = serverRunner;
 
+    public async Task<T> CreateAsync(params object[] parameters)
+    {
+        var result = await ServerRunner.CreateAsync(parameters);
+        return Adapt(result);
+    }
+
     public async Task<T?> GetAsync(object id)
     {
         var result = await ServerRunner.GetAsync(id);

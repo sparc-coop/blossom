@@ -47,7 +47,7 @@ Welcome to your new app.
 
     async Task AddTodoItem()
     {
-        //await TodoItems.New("New Todo Item", "New Todo Item Description");
+        var newItem = await TodoItems.Create("New Todo Item", "New Todo Item Description");
         items = await TodoItems.Open();
     }
 
