@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sparc.Blossom.Server.ApiGenerator\Sparc.Blossom.Server.ApiGenerator.csproj" OutputItemType="Analyzer" />
+    <ProjectReference Include="..\Sparc.Blossom.Server.ApiGenerator\Sparc.Blossom.ApiGenerator.csproj" OutputItemType="Analyzer" />
     <ProjectReference Include="..\Sparc.Blossom.Server\Sparc.Blossom.csproj" />
   </ItemGroup>
 

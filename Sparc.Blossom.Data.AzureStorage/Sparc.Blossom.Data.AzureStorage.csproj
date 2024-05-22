@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
-		<Version>8.0.0-pre.15</Version>
+		<Version>8.0.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Sparc Cooperative</Authors>
@@ -26,9 +26,9 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.20.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
