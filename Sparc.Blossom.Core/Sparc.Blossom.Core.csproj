@@ -30,6 +30,5 @@
 
 	<ItemGroup>
 		<None Update="readme.md" Pack="true" PackagePath="\" />
-		<None Include="buildTransitive\**" Pack="True" PackagePath="buildTransitive\" />
 	</ItemGroup>
 </Project>

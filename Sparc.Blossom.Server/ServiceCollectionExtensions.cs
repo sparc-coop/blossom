@@ -33,7 +33,6 @@ public static class ServiceCollectionExtensions
         builder.RegisterBlossomContexts(Assembly.GetEntryAssembly()!);
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
         builder.Services.AddSingleton<AdditionalAssembliesProvider>();
 
         builder.AddBlossomRepository();
@@ -61,7 +60,6 @@ public static class ServiceCollectionExtensions
         builder.RegisterBlossomContexts(Assembly.GetEntryAssembly()!);
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
         builder.Services.AddSingleton<AdditionalAssembliesProvider>();
 
         builder.AddBlossomRepository();
@@ -80,8 +78,6 @@ public static class ServiceCollectionExtensions
         if (builder.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{app.Environment.ApplicationName} v1"));
 
             if (builder.IsWebAssembly())
                 app.UseWebAssemblyDebugging();

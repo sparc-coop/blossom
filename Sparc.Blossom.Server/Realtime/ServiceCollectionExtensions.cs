@@ -9,12 +9,6 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBlossomRealtime<THub>(this IServiceCollection services) where THub : BlossomHub
     {
-        services.AddSwaggerGen(options =>
-        {
-            options.DocumentFilter<PolymorphismDocumentFilter<Notification, THub>>();
-            options.SchemaFilter<PolymorphismSchemaFilter<Notification, THub>>();
-        });
-
         var signalR = services.AddSignalR()
             .AddJsonProtocol(options =>
             {
