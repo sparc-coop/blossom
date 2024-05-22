@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
 using System.Text;
 
 namespace Sparc.Blossom.Server.ApiGenerator;
@@ -62,6 +61,9 @@ public partial class {{source.PluralName}} : BlossomApiContext<{{source.Name}}>
 
     {{constructors}}
     public async Task Delete(object id) => await Runner.DeleteAsync(id);
+    public async Task<{{source.Name}}> Get(object id) => await Runner.GetAsync(id);
+
+    {{commands}}
 }
 
 public class {{source.Name}} : BlossomEntityProxy<{{source.Name}}, {{source.BaseName}}>
