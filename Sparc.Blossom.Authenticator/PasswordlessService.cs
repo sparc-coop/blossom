@@ -1,14 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
-using Newtonsoft.Json;
 using Passwordless.Net;
-using Shape.Schemas;
+using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Json;
@@ -16,11 +13,10 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authenticator;
 
-public class PasswordlessService
+public class PasswordlessService<T> : IPasswordlessService where T : BlossomUser, new()
 {
     IPasswordlessClient PasswordlessClient { get; }
-    IRepository<User> Users { get; }
-    IRepository<UserRole> UserRoles { get; }
+    IRepository<T> Users { get; }
     public AuthenticationStateProvider Auth { get; }
     public NavigationManager Nav { get; }
     //public IHttpContextAccessor Http { get; }
@@ -29,23 +25,21 @@ public class PasswordlessService
     public LoginStates LoginState { get; set; } = LoginStates.LoggedOut;
     public string? ErrorMessage { get; private set; }
     readonly Lazy<Task<IJSObjectReference>> Js;
-    public User? User { get; private set; }
+    public BlossomUser? User { get; private set; }
 
     readonly string publicKey;
 
     public PasswordlessService(
         IPasswordlessClient _passwordlessClient,
-        IRepository<User> users,
-        IRepository<UserRole> userRole,
+        IRepository<T> users,
         IOptions<PasswordlessOptions> options,
         AuthenticationStateProvider auth,
         NavigationManager nav,
         IJSRuntime js)
-        //IHttpContextAccessor http)
+    //IHttpContextAccessor http)
     {
         PasswordlessClient = _passwordlessClient;
         Users = users;
-        UserRoles = userRole;
         Auth = auth;
         Nav = nav;
         //Http = http;
@@ -75,7 +69,7 @@ public class PasswordlessService
             yield return LoginState;
 
             // Email login
-            User = await GetOrCreateUserAsync(emailOrToken);
+            User = await GetOrCreateUserAsync(emailOrToken) as T;
             yield return LoginState;
 
             if (LoginState == LoginStates.AwaitingMagicLink)
@@ -87,7 +81,7 @@ public class PasswordlessService
         LoginState = LoginStates.VerifyingToken;
         yield return LoginState;
 
-        User = await LoginWithTokenAsync(emailOrToken);
+        User = await LoginWithTokenAsync(emailOrToken) as T;
 
         if (User != null)
         {
@@ -121,35 +115,43 @@ public class PasswordlessService
         LoginState = LoginStates.Error;
     }
 
-    public async Task<User> GetOrCreateUserAsync(string email)
+    public async Task<BlossomUser> GetOrCreateUserAsync(string username)
     {
         var js = await Js.Value;
 
-        var user = await Users.Query.Where(x => x.Email == email).FirstOrDefaultAsync();
+        var user = await Users.Query.Where(x => x.UserName == username).FirstOrDefaultAsync();
         if (user == null)
         {
-            user = new User(email);
+            user = new T() { UserName = username };
             await Users.AddAsync(user);
         }
 
-        if (!user.IsActive)
+        if (!await HasPasskeys(user))
         {
-            await SendMagicLinkAsync(email, $"{Nav.Uri}?token=$TOKEN", user.ExternalId);
+            await SendMagicLinkAsync(username, $"{Nav.Uri}?token=$TOKEN", user.LoginProviderKey);
             LoginState = LoginStates.AwaitingMagicLink;
         }
 
         return user;
     }
 
-    private async Task<string> GetOrCreatePasswordlessUserAsync(User user)
+    private async Task<bool> HasPasskeys(BlossomUser user)
+    {
+        if (user.LoginProviderKey == null)
+            return false;
+
+        var credentials = await PasswordlessClient.ListCredentialsAsync(user.LoginProviderKey);
+        return credentials.Any();
+    }
+
+    private async Task<string> GetOrCreatePasswordlessUserAsync(BlossomUser user)
     {
         var js = await Js.Value;
 
         try
         {
-            var credentials = await PasswordlessClient.ListCredentialsAsync(user.ExternalId);
-            return credentials.Any()
-                ? await js.InvokeAsync<string>("signInWithPasskey", user.Email)
+            return await HasPasskeys(user)
+                ? await js.InvokeAsync<string>("signInWithPasskey", user.UserName)
                 : await SignUpWithPasskeyAsync(user);
         }
         catch
@@ -158,12 +160,12 @@ public class PasswordlessService
         }
     }
 
-    private async Task<string> SignUpWithPasskeyAsync(User user)
+    private async Task<string> SignUpWithPasskeyAsync(BlossomUser user)
     {
         var js = await Js.Value;
-        var registerToken = await PasswordlessClient.CreateRegisterTokenAsync(new RegisterOptions(user.ExternalId, user.Email)
+        var registerToken = await PasswordlessClient.CreateRegisterTokenAsync(new RegisterOptions(user.LoginProviderKey, user.UserName)
         {
-            Aliases = [user.Email]
+            Aliases = [user.UserName]
         });
 
         return await js.InvokeAsync<string>("signUpWithPasskey", registerToken.Token);
@@ -178,7 +180,7 @@ public class PasswordlessService
             timeToLive
         });
 
-    public async Task<User?> LoginWithTokenAsync(string token)
+    public async Task<BlossomUser?> LoginWithTokenAsync(string token)
     {
         var verifiedUser = await PasswordlessClient.VerifyTokenAsync(token);
         if (verifiedUser?.Success != true)
@@ -195,12 +197,7 @@ public class PasswordlessService
         //if (Http.HttpContext != null)
         //    await Http.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
-        var user = await Users.Query.Where(x => x.ExternalId == verifiedUser.UserId).FirstAsync();
-        if (!user.IsActive)
-        {
-            user.IsActive = true;
-            await Users.UpdateAsync(user);
-        }
+        var user = await Users.Query.Where(x => x.LoginProviderKey == verifiedUser.UserId).FirstAsync();
         return user;
     }
 

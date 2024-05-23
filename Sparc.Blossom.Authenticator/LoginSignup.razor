@@ -1,12 +1,12 @@
 ﻿@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
-@inject PasswordlessService PasswordlessService
 @using System.Threading.Tasks
 @using System.Web
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using Microsoft.AspNetCore.Components.Authorization
+@using Sparc.Blossom.Authentication
 
 <div class="login-component">
     @switch (Passwordless.LoginState)
@@ -50,7 +50,7 @@
                 <div class="icon">
                     <UserIcon />
                 </div>
-                <figcaption>Hi @PasswordlessService.User?.Email</figcaption>
+                <figcaption>Hi @Passwordless.User?.UserName</figcaption>
                 <div class="icon submit" @onclick=LogoutAsync>
                     &#10006;
                 </div>
@@ -59,7 +59,7 @@
     }
 </div>
 
-@inject PasswordlessService Passwordless
+@inject IPasswordlessService Passwordless
 @code {
     [Parameter]
     [SupplyParameterFromQuery]
@@ -70,6 +70,7 @@
     ElementReference? LoginInput;
     string errorMessage = "";
     string? currentPageUrl;
+    
 
     protected override async Task OnInitializedAsync()
     {
