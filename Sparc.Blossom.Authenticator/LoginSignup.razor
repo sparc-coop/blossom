@@ -1,0 +1,113 @@
+﻿@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+@inject PasswordlessService PasswordlessService
+@using System.Threading.Tasks
+@using System.Web
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Components.Authorization
+
+<div class="login-component">
+    @switch (Passwordless.LoginState)
+    {
+        case LoginStates.LoggedOut:
+            <button class="loggedout" @onclick="BeginLogin">
+                <div class="icon">
+                    <UserIcon />
+                </div>
+                <span>Sign In</span>
+            </button>
+            break;
+        case LoginStates.ReadyForLogin:
+        case LoginStates.VerifyingEmail:
+        case LoginStates.AwaitingMagicLink:
+        case LoginStates.VerifyingToken:
+        case LoginStates.Error:
+            <label @onclick="LoginAsync" class="@Passwordless.LoginState">
+                <div class="icon">
+                    <UserIcon />
+                </div>
+                @if (Passwordless.LoginState == LoginStates.ReadyForLogin)
+                {
+                    <input @ref=LoginInput type="text" @bind="Email" name="username" placeholder="Enter your email" autocomplete="username webauthn" @onclick:stopPropagation="true" />
+                    <div class="icon submit">
+                        OK
+                    </div>
+                }
+                else if (Passwordless.LoginState == LoginStates.VerifyingEmail || Passwordless.LoginState == LoginStates.VerifyingToken)
+                {
+                    <span>Signing you in...</span>
+                }
+                else if (Passwordless.LoginState == LoginStates.AwaitingMagicLink)
+                {
+                    <span>Click the link in your email!</span>
+                }
+            </label>
+            break;
+        case LoginStates.LoggedIn:
+            <figure class="loggedin">
+                <div class="icon">
+                    <UserIcon />
+                </div>
+                <figcaption>Hi @PasswordlessService.User?.Email</figcaption>
+                <div class="icon submit" @onclick=LogoutAsync>
+                    &#10006;
+                </div>
+            </figure>
+            break;
+    }
+</div>
+
+@inject PasswordlessService Passwordless
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Token { get; set; }
+
+    public string? Email;
+
+    ElementReference? LoginInput;
+    string errorMessage = "";
+    string? currentPageUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Token))
+        {
+            await foreach (var state in Passwordless.LoginAsync(Token))
+                StateHasChanged();
+        }
+    }
+
+    async Task BeginLogin()
+    {
+        // Attempt autofill signin
+        await foreach (var state in Passwordless.LoginAsync())
+            StateHasChanged();
+
+        if (Passwordless.LoginState == LoginStates.LoggedIn)
+            return;
+        
+        Passwordless.LoginState = LoginStates.ReadyForLogin;
+        StateHasChanged();
+        await Task.Delay(1);
+        if (LoginInput.HasValue)
+            await LoginInput.Value.FocusAsync();
+    }
+
+    async Task LoginAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Email))
+            return;
+
+        await foreach (var state in Passwordless.LoginAsync(Email))
+            StateHasChanged();
+    }
+
+    async Task LogoutAsync()
+    {
+        await foreach (var state in Passwordless.LogoutAsync())
+            StateHasChanged();
+    }
+}

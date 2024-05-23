@@ -1,0 +1,102 @@
+button, label, figure {
+    display: flex;
+    align-items: center;
+    height: 2rem;
+    background: #FFEAC2;
+    border-radius: 0.5rem;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+
+    .icon {
+        height: 2rem;
+        padding: 0.625rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &.submit {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+    }
+
+    span, input, figcaption {
+        display: flex;
+        padding: 0rem 1rem;
+        align-items: center;
+        align-self: stretch;
+        background: #FFFAF0;
+        font-weight: 600;
+        font-size: 0.875rem;
+        border-radius: 0rem 0.5rem 0.5rem 0rem;
+        border: 0;
+
+        &::placeholder {
+            color: #BDBDBD;
+            font-weight: 400;
+        }
+    }
+
+    input {
+        border-radius: 0;
+        font-weight: 500;
+
+        &:focus, &:focus-visible {
+            outline: 2px solid#EBA214;
+        }
+    }
+
+    &.loggedout {
+        span {
+            font-weight: 500;
+        }
+
+        ::deep svg path {
+            fill: darken(#FFFAF0, 25%);
+            stroke: darken(#FFFAF0, 25%);
+        }
+
+        &:hover {
+            ::deep svg path {
+                fill: #EBA214;
+                stroke: #EBA214;
+            }
+        }
+    }
+}
+
+
+.login-component {
+    position: relative;
+
+    .form-container {
+        /*position: absolute;
+        top: 99%;
+        left: 0;
+        background-color: white;
+        border: 1px solid black;
+        border-radius: 0.29rem;
+        padding: 10px;*/
+
+        .form-div {
+            position: absolute;
+            top: 99%;
+            left: 0;
+            background-color: white;
+            border: 1px solid black;
+            border-radius: 0.29rem;
+            padding: 10px;
+            width: 190px;
+            height: 104px;
+
+            .submit-btn {
+                display: flex;
+                align-items: center;
+                height: 2rem;
+                margin-top: 0.5rem;
+                float: right;
+            }            
+        }
+    }
+}
