@@ -43,7 +43,7 @@ public class PasswordlessService<T> : IPasswordlessService where T : BlossomUser
         Auth = auth;
         Nav = nav;
         //Http = http;
-        Js = new(() => js.InvokeAsync<IJSObjectReference>("import", "./Auth/LoginSignup.razor.js").AsTask());
+        Js = new(() => js.InvokeAsync<IJSObjectReference>("import", "./LoginSignup.js").AsTask());
 
         Client = new HttpClient
         {
