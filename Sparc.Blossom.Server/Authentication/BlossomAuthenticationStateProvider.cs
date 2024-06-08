@@ -90,7 +90,7 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
 
             if (userId != null && email != null)
             {
-                _state.PersistAsJson(nameof(BlossomUser), new BlossomUser
+                _state.PersistAsJson(nameof(BlossomUser), new BlossomUser(email, userId)
                 {
                     Id = userId
                 });
