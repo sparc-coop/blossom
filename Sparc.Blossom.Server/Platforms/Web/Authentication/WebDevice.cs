@@ -4,13 +4,16 @@ namespace Sparc.Blossom.Authentication;
 
 public class WebDevice(IJSRuntime js) : IDevice
 {
+    const string _deviceId = "_blossomdeviceid";
+    const string _pushTokenId = "_blossomdevicepushToken";
+    
     private string? _id;
-    public string? Id
+    public string Id
     {
         get
         {
-            _id ??= GetOrSet("blossom-device-id", Guid.NewGuid().ToString());
-            return _id;
+            _id ??= GetOrSet(_deviceId, Guid.NewGuid().ToString());
+            return _id!;
         }
         set { _id = value; }
     }
@@ -20,13 +23,13 @@ public class WebDevice(IJSRuntime js) : IDevice
     {
         get
         {
-            _pushToken ??= GetOrSet("blossom-device-pushtoken");            
+            _pushToken ??= GetOrSet(_pushTokenId);            
             return _pushToken;
         }
         set
         {
             _pushToken = value;
-            GetOrSet("blossom-device-pushtoken", value, true);
+            GetOrSet(_pushTokenId, value, true);
         }
     }
 

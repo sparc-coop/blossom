@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
@@ -21,14 +21,19 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="compilerconfig.json" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.5" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
 		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="compilerconfig.json" />
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 		<None Update="readme.md" Pack="true" PackagePath="\" />
 		<None Include="..\Sparc.Blossom.Server.ApiGenerator\bin\$(Configuration)\netstandard2.0\Sparc.Blossom.Server.ApiGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />

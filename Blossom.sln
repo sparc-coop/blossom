@@ -51,19 +51,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Example.NET8R
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Example.NET8RTM.Client", "Sparc.Blossom.Example.NET8RTM\Sparc.Blossom.Example.NET8RTM.Client\Sparc.Blossom.Example.NET8RTM.Client.csproj", "{A83C2FFB-AB63-4AA4-9DED-E4314B86B05E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Authenticator", "Sparc.Blossom.Authenticator\Sparc.Blossom.Authenticator.csproj", "{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example - Passwordless Authentication", "Example - Passwordless Authentication", "{E4004076-AFB4-43FB-8656-071112EAB01E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PasswordlessExample", "PasswordlessExample\PasswordlessExample\PasswordlessExample.csproj", "{25207743-48BB-4CE3-AB6B-173E46FEAB33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PasswordlessExample", "PasswordlessExample\PasswordlessExample\PasswordlessExample.csproj", "{25207743-48BB-4CE3-AB6B-173E46FEAB33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PasswordlessExample.Client", "PasswordlessExample\PasswordlessExample.Client\PasswordlessExample.Client.csproj", "{15B19810-8BF3-490F-B92A-0893C5E8F938}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PasswordlessExample.Client", "PasswordlessExample\PasswordlessExample.Client\PasswordlessExample.Client.csproj", "{15B19810-8BF3-490F-B92A-0893C5E8F938}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom", "Sparc.Blossom.Server\Sparc.Blossom.csproj", "{85B675EC-9E21-4205-97C1-A494E8FD7CFE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{9B2106B7-4D61-411A-B9AE-46ECA3055F42}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.ApiGenerator", "Sparc.Blossom.Server.ApiGenerator\Sparc.Blossom.ApiGenerator.csproj", "{DF697DC6-3888-4861-955F-557239D6AA6B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Authentication.Passwordless", "Sparc.Blossom.Authentication.Passwordless\Sparc.Blossom.Authentication.Passwordless.csproj", "{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Authenticator", "Sparc.Blossom.Authenticator\Sparc.Blossom.Authenticator.csproj", "{0EF01172-4A47-4677-B07D-95D219CC4BEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -333,22 +335,6 @@ Global
 		{A83C2FFB-AB63-4AA4-9DED-E4314B86B05E}.Release|x64.Build.0 = Release|Any CPU
 		{A83C2FFB-AB63-4AA4-9DED-E4314B86B05E}.Release|x86.ActiveCfg = Release|Any CPU
 		{A83C2FFB-AB63-4AA4-9DED-E4314B86B05E}.Release|x86.Build.0 = Release|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Debug|arm64.ActiveCfg = Debug|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Debug|arm64.Build.0 = Debug|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Debug|x64.Build.0 = Debug|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Debug|x86.Build.0 = Debug|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Release|arm64.ActiveCfg = Release|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Release|arm64.Build.0 = Release|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Release|x64.ActiveCfg = Release|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Release|x64.Build.0 = Release|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Release|x86.ActiveCfg = Release|Any CPU
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39}.Release|x86.Build.0 = Release|Any CPU
 		{25207743-48BB-4CE3-AB6B-173E46FEAB33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{25207743-48BB-4CE3-AB6B-173E46FEAB33}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{25207743-48BB-4CE3-AB6B-173E46FEAB33}.Debug|arm64.ActiveCfg = Debug|Any CPU
@@ -413,6 +399,38 @@ Global
 		{DF697DC6-3888-4861-955F-557239D6AA6B}.Release|x64.Build.0 = Release|Any CPU
 		{DF697DC6-3888-4861-955F-557239D6AA6B}.Release|x86.ActiveCfg = Release|Any CPU
 		{DF697DC6-3888-4861-955F-557239D6AA6B}.Release|x86.Build.0 = Release|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Debug|arm64.Build.0 = Debug|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Debug|x64.Build.0 = Debug|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Debug|x86.Build.0 = Debug|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|arm64.ActiveCfg = Release|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|arm64.Build.0 = Release|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x64.ActiveCfg = Release|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x64.Build.0 = Release|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x86.ActiveCfg = Release|Any CPU
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x86.Build.0 = Release|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Debug|arm64.Build.0 = Debug|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Debug|x64.Build.0 = Debug|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Debug|x86.Build.0 = Debug|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Release|arm64.ActiveCfg = Release|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Release|arm64.Build.0 = Release|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Release|x64.ActiveCfg = Release|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Release|x64.Build.0 = Release|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Release|x86.ActiveCfg = Release|Any CPU
+		{0EF01172-4A47-4677-B07D-95D219CC4BEC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -439,11 +457,11 @@ Global
 		{1AF4BAB6-73F8-426A-833A-5FD589A9EEBE} = {9B2106B7-4D61-411A-B9AE-46ECA3055F42}
 		{B14C1BB5-DAC9-4AE1-B2F8-F5BE8C945204} = {1AF4BAB6-73F8-426A-833A-5FD589A9EEBE}
 		{A83C2FFB-AB63-4AA4-9DED-E4314B86B05E} = {1AF4BAB6-73F8-426A-833A-5FD589A9EEBE}
-		{6C703887-EEEE-43A0-89D6-A1E7C8C1BC39} = {F4760C1E-ABB6-4355-A42E-311BD30A1313}
 		{E4004076-AFB4-43FB-8656-071112EAB01E} = {9B2106B7-4D61-411A-B9AE-46ECA3055F42}
 		{25207743-48BB-4CE3-AB6B-173E46FEAB33} = {E4004076-AFB4-43FB-8656-071112EAB01E}
 		{15B19810-8BF3-490F-B92A-0893C5E8F938} = {E4004076-AFB4-43FB-8656-071112EAB01E}
 		{DF697DC6-3888-4861-955F-557239D6AA6B} = {F4760C1E-ABB6-4355-A42E-311BD30A1313}
+		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123} = {83F7C43B-B59D-4A53-9A86-23491B5AAC40}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1426913A-7024-4877-8B12-97D36034EDC9}

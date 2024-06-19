@@ -6,10 +6,11 @@
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Web
 @using Sparc.Blossom.Authentication
 
 <div class="login-component">
-    @switch (Passwordless.LoginState)
+    @switch (Auth.LoginState)
     {
         case LoginStates.LoggedOut:
             <button class="loggedout" @onclick="BeginLogin">
@@ -24,22 +25,22 @@
         case LoginStates.AwaitingMagicLink:
         case LoginStates.VerifyingToken:
         case LoginStates.Error:
-            <label @onclick="LoginAsync" class="@Passwordless.LoginState">
+            <label @onclick="LoginAsync" class="@Auth.LoginState">
                 <div class="icon">
                     <UserIcon />
                 </div>
-                @if (Passwordless.LoginState == LoginStates.ReadyForLogin)
+                @if (Auth.LoginState == LoginStates.ReadyForLogin)
                 {
                     <input @ref=LoginInput type="text" @bind="Email" name="username" placeholder="Enter your email" autocomplete="username webauthn" @onclick:stopPropagation="true" />
                     <div class="icon submit">
                         OK
                     </div>
                 }
-                else if (Passwordless.LoginState == LoginStates.VerifyingEmail || Passwordless.LoginState == LoginStates.VerifyingToken)
+                else if (Auth.LoginState == LoginStates.VerifyingEmail || Auth.LoginState == LoginStates.VerifyingToken)
                 {
                     <span>Signing you in...</span>
                 }
-                else if (Passwordless.LoginState == LoginStates.AwaitingMagicLink)
+                else if (Auth.LoginState == LoginStates.AwaitingMagicLink)
                 {
                     <span>Click the link in your email!</span>
                 }
@@ -50,7 +51,7 @@
                 <div class="icon">
                     <UserIcon />
                 </div>
-                <figcaption>Hi @Passwordless.User?.UserName</figcaption>
+                <figcaption>Hi @Auth.User?.Username</figcaption>
                 <div class="icon submit" @onclick=LogoutAsync>
                     &#10006;
                 </div>
@@ -59,7 +60,7 @@
     }
 </div>
 
-@inject IPasswordlessService Passwordless
+@inject IBlossomAuthenticator Auth
 @code {
     [Parameter]
     [SupplyParameterFromQuery]
@@ -69,14 +70,12 @@
 
     ElementReference? LoginInput;
     string errorMessage = "";
-    string? currentPageUrl;
-    
 
     protected override async Task OnInitializedAsync()
     {
         if (!string.IsNullOrEmpty(Token))
         {
-            await foreach (var state in Passwordless.LoginAsync(Token))
+            await foreach (var state in Auth.LoginAsync(Token))
                 StateHasChanged();
         }
     }
@@ -84,13 +83,13 @@
     async Task BeginLogin()
     {
         // Attempt autofill signin
-        await foreach (var state in Passwordless.LoginAsync())
+        await foreach (var state in Auth.LoginAsync())
             StateHasChanged();
 
-        if (Passwordless.LoginState == LoginStates.LoggedIn)
+        if (Auth.LoginState == LoginStates.LoggedIn)
             return;
         
-        Passwordless.LoginState = LoginStates.ReadyForLogin;
+        Auth.LoginState = LoginStates.ReadyForLogin;
         StateHasChanged();
         await Task.Delay(1);
         if (LoginInput.HasValue)
@@ -102,13 +101,13 @@
         if (string.IsNullOrWhiteSpace(Email))
             return;
 
-        await foreach (var state in Passwordless.LoginAsync(Email))
+        await foreach (var state in Auth.LoginAsync(Email))
             StateHasChanged();
     }
 
     async Task LogoutAsync()
     {
-        await foreach (var state in Passwordless.LogoutAsync())
+        await foreach (var state in Auth.LogoutAsync())
             StateHasChanged();
     }
 }

@@ -34,8 +34,6 @@ public static class BlossomApplication
         builder.AddBlossom<TUser>(builderOptions, renderMode);
 
         var blossomApp = builder.UseBlossom<TApp>();
-        blossomApp.MapBlossomAuthentication<TUser>();
-
         app?.Invoke(blossomApp);
         blossomApp.Run();
 
@@ -56,7 +54,6 @@ public static class BlossomApplication
         
         var blossomApp = builder.UseBlossom<TApp>();
         blossomApp.MapHub<THub>("/_realtime");
-        blossomApp.MapBlossomAuthentication<TUser>();
 
         app?.Invoke(blossomApp);
         blossomApp.Run();

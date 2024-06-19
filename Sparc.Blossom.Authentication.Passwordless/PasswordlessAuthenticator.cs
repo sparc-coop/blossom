@@ -1,19 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
-using Passwordless.Net;
-using Sparc.Blossom.Authentication;
+using Passwordless;
 using Sparc.Blossom.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Json;
 using System.Security.Claims;
 
-namespace Sparc.Blossom.Authenticator;
+namespace Sparc.Blossom.Authentication;
 
-public class PasswordlessService<T> : IPasswordlessService where T : BlossomUser, new()
+public class PasswordlessAuthenticator<T> : IBlossomAuthenticator where T : BlossomUser, new()
 {
     IPasswordlessClient PasswordlessClient { get; }
     IRepository<T> Users { get; }
@@ -29,21 +27,20 @@ public class PasswordlessService<T> : IPasswordlessService where T : BlossomUser
 
     readonly string publicKey;
 
-    public PasswordlessService(
+    public PasswordlessAuthenticator(
         IPasswordlessClient _passwordlessClient,
         IRepository<T> users,
         IOptions<PasswordlessOptions> options,
         AuthenticationStateProvider auth,
         NavigationManager nav,
         IJSRuntime js)
-    //IHttpContextAccessor http)
     {
         PasswordlessClient = _passwordlessClient;
         Users = users;
         Auth = auth;
         Nav = nav;
         //Http = http;
-        Js = new(() => js.InvokeAsync<IJSObjectReference>("import", "./LoginSignup.js").AsTask());
+        Js = new(() => js.InvokeAsync<IJSObjectReference>("import", "./PasswordlessAuthenticator.js").AsTask());
 
         Client = new HttpClient
         {
@@ -69,7 +66,7 @@ public class PasswordlessService<T> : IPasswordlessService where T : BlossomUser
             yield return LoginState;
 
             // Email login
-            User = await GetOrCreateUserAsync(emailOrToken) as T;
+            User = await GetAsync(emailOrToken) as T;
             yield return LoginState;
 
             if (LoginState == LoginStates.AwaitingMagicLink)
@@ -115,20 +112,28 @@ public class PasswordlessService<T> : IPasswordlessService where T : BlossomUser
         LoginState = LoginStates.Error;
     }
 
-    public async Task<BlossomUser> GetOrCreateUserAsync(string username)
+    public async Task<BlossomUser?> GetAsync(ClaimsPrincipal principal)
+    {
+        if (principal?.Identity?.IsAuthenticated != true)
+            return null;
+
+        return await GetAsync(principal.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    }
+
+    public async Task<BlossomUser> GetAsync(string username)
     {
         var js = await Js.Value;
 
-        var user = await Users.Query.Where(x => x.UserName == username).FirstOrDefaultAsync();
+        var user = Users.Query.FirstOrDefault(x => x.Username == username);
         if (user == null)
         {
-            user = new T() { UserName = username };
+            user = new T() { Username = username };
             await Users.AddAsync(user);
         }
 
         if (!await HasPasskeys(user))
         {
-            await SendMagicLinkAsync(username, $"{Nav.Uri}?token=$TOKEN", user.LoginProviderKey);
+            await SendMagicLinkAsync(username, $"{Nav.Uri}?token=$TOKEN", user.ExternalId);
             LoginState = LoginStates.AwaitingMagicLink;
         }
 
@@ -137,10 +142,7 @@ public class PasswordlessService<T> : IPasswordlessService where T : BlossomUser
 
     private async Task<bool> HasPasskeys(BlossomUser user)
     {
-        if (user.LoginProviderKey == null)
-            return false;
-
-        var credentials = await PasswordlessClient.ListCredentialsAsync(user.LoginProviderKey);
+        var credentials = await PasswordlessClient.ListCredentialsAsync(user.ExternalId);
         return credentials.Any();
     }
 
@@ -151,7 +153,7 @@ public class PasswordlessService<T> : IPasswordlessService where T : BlossomUser
         try
         {
             return await HasPasskeys(user)
-                ? await js.InvokeAsync<string>("signInWithPasskey", user.UserName)
+                ? await js.InvokeAsync<string>("signInWithPasskey", user.Username)
                 : await SignUpWithPasskeyAsync(user);
         }
         catch
@@ -163,9 +165,9 @@ public class PasswordlessService<T> : IPasswordlessService where T : BlossomUser
     private async Task<string> SignUpWithPasskeyAsync(BlossomUser user)
     {
         var js = await Js.Value;
-        var registerToken = await PasswordlessClient.CreateRegisterTokenAsync(new RegisterOptions(user.LoginProviderKey, user.UserName)
+        var registerToken = await PasswordlessClient.CreateRegisterTokenAsync(new RegisterOptions(user.ExternalId, user.Username)
         {
-            Aliases = [user.UserName]
+            Aliases = [user.Username]
         });
 
         return await js.InvokeAsync<string>("signUpWithPasskey", registerToken.Token);
@@ -197,7 +199,7 @@ public class PasswordlessService<T> : IPasswordlessService where T : BlossomUser
         //if (Http.HttpContext != null)
         //    await Http.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
 
-        var user = await Users.Query.Where(x => x.LoginProviderKey == verifiedUser.UserId).FirstAsync();
+        var user = Users.Query.First(x => x.ExternalId == verifiedUser.UserId);
         return user;
     }
 

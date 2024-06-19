@@ -1,18 +1,16 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Sparc.Blossom.Data;
+﻿using Sparc.Blossom.Data;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomUser(string userName, string loginProviderKey) : BlossomEntity<string>
-{    
-    public string? SecurityStamp { get; set; }
-    public string? UserName { get; set; } = userName;
-    public string? LoginProviderKey { get; set; } = loginProviderKey;
-    public IdentityUser Identity { get; } = new();
+public class BlossomUser(string username, string authenticationType, string externalId) : BlossomEntity<string>
+{
+    public string Username { get; set; } = username;
+    public string AuthenticationType { get; set; } = authenticationType;
+    public string ExternalId { get; set; } = externalId;
 
-    public Dictionary<string, string> Claims { get; set; } = new();
-    public Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = new();
+    public Dictionary<string, string> Claims { get; set; } = [];
+    public Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
 
     protected void AddClaim(string type, string? value)
     {
@@ -45,12 +43,23 @@ public class BlossomUser(string userName, string loginProviderKey) : BlossomEnti
     public virtual ClaimsPrincipal CreatePrincipal()
     {
         AddClaim(ClaimTypes.NameIdentifier, Id);
-        AddClaim(ClaimTypes.Name, Identity.UserName);
+        AddClaim(ClaimTypes.Name, Username);
         RegisterClaims();
 
         var claims = Claims.Select(x => new Claim(x.Key, x.Value)).ToList();
         claims.AddRange(MultiClaims.SelectMany(x => x.Value.Select(v => new Claim(x.Key, v))));
 
         return new ClaimsPrincipal(new ClaimsIdentity(claims, "Blossom"));
+    }
+
+    public void ChangeUsername(string username)
+    {
+        Username = username;
+    }
+
+    public void ChangeAuthenticationType(string authenticationType, string externalId)
+    {
+        AuthenticationType = authenticationType;
+        ExternalId = externalId;
     }
 }

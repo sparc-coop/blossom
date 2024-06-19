@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Diagnostics;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Components.Web;
 using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Data;
+using System.Security.Claims;
 
 namespace Sparc.Blossom.Server.Authentication;
 
@@ -17,7 +15,6 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly PersistentComponentState _state;
-    private readonly IdentityOptions _options;
 
     private readonly PersistingComponentStateSubscription _subscription;
 
@@ -26,16 +23,14 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
     public BlossomAuthenticationStateProvider(
         ILoggerFactory loggerFactory,
         IServiceScopeFactory scopeFactory,
-        PersistentComponentState state,
-        IOptions<IdentityOptions> options)
+        PersistentComponentState state)
         : base(loggerFactory)
     {
         _scopeFactory = scopeFactory;
         _state = state;
-        _options = options.Value;
 
         AuthenticationStateChanged += OnAuthenticationStateChanged;
-        _subscription = state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveWebAssembly);
+        _subscription = state.RegisterOnPersisting(OnPersistingAsync);
     }
 
     protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
@@ -43,29 +38,16 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
     protected override async Task<bool> ValidateAuthenticationStateAsync(
         AuthenticationState authenticationState, CancellationToken cancellationToken)
     {
-        // Get the user manager from a new scope to ensure it fetches fresh data
-        await using var scope = _scopeFactory.CreateAsyncScope();
-        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<T>>();
-        return await ValidateSecurityStampAsync(userManager, authenticationState.User);
+        return await GetAsync(authenticationState.User) != null;
     }
 
-    private async Task<bool> ValidateSecurityStampAsync(UserManager<T> userManager, ClaimsPrincipal principal)
+    private async Task<BlossomUser?> GetAsync(ClaimsPrincipal principal)
     {
-        var user = await userManager.GetUserAsync(principal);
-        if (user == null)
-        {
-            return false;
-        }
-        else if (!userManager.SupportsUserSecurityStamp)
-        {
-            return true;
-        }
-        else
-        {
-            var principalStamp = principal.FindFirstValue(_options.ClaimsIdentity.SecurityStampClaimType);
-            var userStamp = await userManager.GetSecurityStampAsync(user);
-            return principalStamp == userStamp;
-        }
+        // Get the user from a new scope to ensure it fetches fresh data
+        await using var scope = _scopeFactory.CreateAsyncScope();
+        var users = scope.ServiceProvider.GetRequiredService<IRepository<T>>();
+        return await users.FindAsync(principal.Id());
+
     }
 
     private void OnAuthenticationStateChanged(Task<AuthenticationState> authenticationStateTask)
@@ -84,18 +66,7 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
         var principal = authenticationState.User;
 
         if (principal.Identity?.IsAuthenticated == true)
-        {
-            var userId = principal.FindFirst(_options.ClaimsIdentity.UserIdClaimType)?.Value;
-            var email = principal.FindFirst(_options.ClaimsIdentity.EmailClaimType)?.Value;
-
-            if (userId != null && email != null)
-            {
-                _state.PersistAsJson(nameof(BlossomUser), new BlossomUser(email, userId)
-                {
-                    Id = userId
-                });
-            }
-        }
+            _state.PersistAsJson(nameof(BlossomUser), await GetAsync(principal));
     }
 
     protected override void Dispose(bool disposing)
