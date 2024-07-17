@@ -18,6 +18,7 @@
 		<PackageProjectUrl>https://github.com/sparc-coop/blossom</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/sparc-coop/blossom</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<NoWarn>NU5100</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
