@@ -18,6 +18,7 @@ internal class BlossomApiInfo
             ?? "";
 
         Name = cls.Identifier.Text;
+        OfName = cls.TypeParameterList?.Parameters.FirstOrDefault()?.ToString();
         PluralName = Name + "Api";
 
         if (cls.BaseList != null)
@@ -48,6 +49,7 @@ internal class BlossomApiInfo
     
     internal string Name { get; }
     public string PluralName { get; }
+    internal string? OfName { get; set; }
     internal string? BaseName { get; set; }
     internal string? BasePluralName { get; set; }
     internal string Namespace { get; }
@@ -55,7 +57,6 @@ internal class BlossomApiInfo
     public List<BlossomApiMethodInfo> Methods { get; }
     public List<BlossomApiMethodInfo> Constructors { get; }
     public BlossomApiPropertyInfo[] Properties { get; }
-    public BlossomApiMethodInfo[] Records { get; }
 
     private IEnumerable<T> Public<T>(ClassDeclarationSyntax cls) where T : MemberDeclarationSyntax
     {
