@@ -11,5 +11,5 @@ internal class BlossomApiPropertyInfo
     }
 
     internal string Name { get; set; }
-    internal string Type { get; set;}
+    internal string Type { get; set; }
 }

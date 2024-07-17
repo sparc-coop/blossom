@@ -55,6 +55,7 @@ internal class BlossomApiInfo
     public List<BlossomApiMethodInfo> Methods { get; }
     public List<BlossomApiMethodInfo> Constructors { get; }
     public BlossomApiPropertyInfo[] Properties { get; }
+    public BlossomApiMethodInfo[] Records { get; }
 
     private IEnumerable<T> Public<T>(ClassDeclarationSyntax cls) where T : MemberDeclarationSyntax
     {

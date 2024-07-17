@@ -51,6 +51,11 @@ public class BlossomApiGenerator : IIncrementalGenerator
             constructors.AppendLine($@"public async Task<{source.Name}> Create({constructor.Arguments}) => await Runner.CreateAsync({constructor.Parameters});");
         }
 
+        foreach (var record in records)
+        {
+
+        }
+
         var code = new StringBuilder();
         code.Append($$"""
 namespace Sparc.Blossom.Api;
@@ -71,6 +76,8 @@ public class {{source.Name}} : BlossomEntityProxy<{{source.Name}}, {{source.Base
     {{properties}}
     {{commands}}
 }
+
+{{records}}
 """);
         
         spc.AddSource($"{source.Name}.g.cs", code.ToString());
