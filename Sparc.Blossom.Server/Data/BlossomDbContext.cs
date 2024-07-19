@@ -1,12 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom;
 
-public class BlossomContext(DbContextOptions options, BlossomNotifier notifier) : DbContext(options)
+public class BlossomDbContext(DbContextOptions options, IBlossomAuthenticator auth, BlossomNotifier notifier) : DbContext(options)
 {
+    public IBlossomAuthenticator Auth { get; } = auth;
     public BlossomNotifier Notifier { get; } = notifier;
+    protected string UserId => Auth.User?.Id ?? "anonymous";
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
