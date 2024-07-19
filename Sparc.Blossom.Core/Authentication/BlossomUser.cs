@@ -3,11 +3,19 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomUser(string username, string authenticationType, string externalId) : BlossomEntity<string>
+public class BlossomUser : BlossomEntity<string>
 {
-    public string Username { get; set; } = username;
-    public string AuthenticationType { get; set; } = authenticationType;
-    public string ExternalId { get; set; } = externalId;
+    public BlossomUser()
+    {
+        Id = Guid.NewGuid().ToString();
+        AuthenticationType = "Device";
+        Username = "";
+        ExternalId = "";
+    }
+    
+    public string Username { get; set; }
+    public string AuthenticationType { get; set; }
+    public string ExternalId { get; set; }
 
     public Dictionary<string, string> Claims { get; set; } = [];
     public Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
