@@ -7,7 +7,7 @@ internal class BlossomApiPropertyInfo
     internal BlossomApiPropertyInfo(PropertyDeclarationSyntax x)
     {
         Name = x.Identifier.Text;
-        Type = x.Type.ToString();
+        Type = x.Type.ToString().Replace("?", "");
     }
 
     internal string Name { get; set; }

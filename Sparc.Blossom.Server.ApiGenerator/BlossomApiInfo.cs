@@ -46,7 +46,7 @@ internal class BlossomApiInfo
             .Select(x => new BlossomApiMethodInfo(cls, x))
             .ToList();
 
-        Nullable = Properties.Any(x => x.Type.Contains("?")) ? "#nullable enable" : "";
+        Nullable = "#nullable disable";// Properties.Any(x => x.IsNullable) ? "#nullable enable" : "";
     }
     
     internal string Name { get; }
