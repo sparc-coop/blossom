@@ -37,10 +37,12 @@ public class BlossomApiRecordGenerator : IIncrementalGenerator
     {
         var properties = string.Join(", ", source.Properties.Select(x => $"{x.Type} {x.Name}"));
         var ofName = source.OfName == null ? "" : $"<{source.OfName}>";
-        
+
         var code = new StringBuilder();
         code.Append($$"""
 namespace Sparc.Blossom.Api;
+{{source.Nullable}}
+
 public record {{source.Name}}{{ofName}}({{properties}});
 """);
         

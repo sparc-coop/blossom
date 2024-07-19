@@ -45,6 +45,8 @@ internal class BlossomApiInfo
         Constructors = Public<ConstructorDeclarationSyntax>(cls)
             .Select(x => new BlossomApiMethodInfo(cls, x))
             .ToList();
+
+        Nullable = Properties.Any(x => x.Type.Contains("?")) ? "#nullable enable" : "";
     }
     
     internal string Name { get; }
@@ -54,6 +56,7 @@ internal class BlossomApiInfo
     internal string? BasePluralName { get; set; }
     internal string Namespace { get; }
     internal string[] Usings { get; }
+    internal string Nullable { get; } = "";
     public List<BlossomApiMethodInfo> Methods { get; }
     public List<BlossomApiMethodInfo> Constructors { get; }
     public BlossomApiPropertyInfo[] Properties { get; }

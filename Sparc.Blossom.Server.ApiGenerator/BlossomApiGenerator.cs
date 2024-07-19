@@ -54,7 +54,7 @@ public class BlossomApiGenerator : IIncrementalGenerator
         var code = new StringBuilder();
         code.Append($$"""
 namespace Sparc.Blossom.Api;
-
+{{source.Nullable}}
 public partial class {{source.PluralName}} : BlossomApiContext<{{source.Name}}>
 {
     public {{source.PluralName}}(IRunner<{{source.Name}}> runner) : base(runner) { }
