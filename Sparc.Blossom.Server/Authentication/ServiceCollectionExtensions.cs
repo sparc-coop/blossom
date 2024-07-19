@@ -11,7 +11,8 @@ public static class ServiceCollectionExtensions
         where TUser : BlossomUser, new()
     {
         builder.Services.AddCascadingAuthenticationState();
-        builder.Services.AddSingleton<IDevice, WebDevice>();
+        builder.Services.AddScoped<IDevice, WebDevice>();
+        builder.Services.AddScoped<BlossomClaimsPrincipalProvider>();
         builder.Services.AddScoped<AuthenticationStateProvider, BlossomAuthenticationStateProvider<TUser>>();
         builder.Services.AddScoped<BlossomDeviceAuthenticator<TUser>>();
         builder.Services.AddScoped(typeof(IBlossomAuthenticator), typeof(BlossomDeviceAuthenticator<TUser>));

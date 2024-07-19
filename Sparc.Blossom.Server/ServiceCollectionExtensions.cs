@@ -10,6 +10,7 @@ using Sparc.Blossom.Server;
 using Sparc.Blossom.Api;
 using Sparc.Blossom.Authentication;
 using System.Reflection;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom;
 

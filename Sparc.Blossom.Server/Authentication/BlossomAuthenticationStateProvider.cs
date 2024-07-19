@@ -7,6 +7,7 @@ using System.Diagnostics;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Components.Web;
 
 namespace Sparc.Blossom.Server.Authentication;
 
@@ -30,7 +31,7 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
         _state = state;
 
         AuthenticationStateChanged += OnAuthenticationStateChanged;
-        _subscription = state.RegisterOnPersisting(OnPersistingAsync);
+        _subscription = state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveServer);
     }
 
     protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
