@@ -11,14 +11,11 @@ public class BlossomDefaultAuthenticatorMiddleware(RequestDelegate next)
     // IMessageWriter is injected into InvokeAsync
     public async Task InvokeAsync(HttpContext context, IBlossomAuthenticator auth)
     {
-        if (context.User.Identity?.IsAuthenticated != true)
+        var user = await auth.GetAsync(context.User);
+        if (user != null && context.User.Identity?.IsAuthenticated != true)
         {
-            var user = await auth.GetAsync(context.User);
-            if (user != null)
-            {
-                context.User = user!.CreatePrincipal();
-                await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User);
-            }
+            context.User = user!.CreatePrincipal();
+            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User);
         }
 
         await _next(context);

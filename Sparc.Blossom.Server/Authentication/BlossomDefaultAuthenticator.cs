@@ -17,10 +17,12 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users)
         {
             var user = new T() { Username = BlossomTools.FriendlyId() };
             await Users.AddAsync(user);
+            User = user;
             return user;
         }
 
-        return await Users.FindAsync(principal.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        User = await Users.FindAsync(principal.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        return User;
     }
 
     public async IAsyncEnumerable<LoginStates> LoginAsync(string? emailOrToken = null)
