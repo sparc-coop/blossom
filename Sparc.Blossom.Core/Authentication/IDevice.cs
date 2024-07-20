@@ -1,4 +1,5 @@
-﻿namespace Sparc.Blossom.Authentication;
+﻿
+namespace Sparc.Blossom.Authentication;
 
 public interface IDevice
 {

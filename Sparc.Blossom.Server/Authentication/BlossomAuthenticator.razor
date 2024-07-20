@@ -1,6 +1,4 @@
-﻿@rendermode @(new InteractiveServerRenderMode(prerender: false))
-
-@using System.Threading.Tasks
+﻿@using System.Threading.Tasks
 @using System.Web
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Authentication
@@ -73,7 +71,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (!string.IsNullOrEmpty(Token))
+        if (Auth.User != null || !string.IsNullOrEmpty(Token))
         {
             await foreach (var state in Auth.LoginAsync(Token))
                 StateHasChanged();

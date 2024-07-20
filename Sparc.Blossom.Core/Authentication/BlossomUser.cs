@@ -8,17 +8,16 @@ public class BlossomUser : BlossomEntity<string>
     public BlossomUser()
     {
         Id = Guid.NewGuid().ToString();
-        AuthenticationType = "Device";
+        AuthenticationType = "Blossom";
         Username = "";
-        ExternalId = "";
     }
     
     public string Username { get; set; }
     public string AuthenticationType { get; set; }
-    public string ExternalId { get; set; }
+    public string? ExternalId { get; set; }
 
-    public Dictionary<string, string> Claims { get; set; } = [];
-    public Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
+    internal Dictionary<string, string> Claims { get; set; } = [];
+    Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
 
     protected void AddClaim(string type, string? value)
     {

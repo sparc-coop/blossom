@@ -26,8 +26,6 @@ public static class ServiceCollectionExtensions
         if (renderMode == RenderMode.InteractiveWebAssembly || renderMode == RenderMode.InteractiveAuto)
             razor.AddInteractiveWebAssemblyComponents();
 
-        //builder.AddBlossomAuthentication<TUser>();
-
         options?.Invoke(builder);
 
         builder.Services.AddScoped(typeof(BlossomApiContext<>));
@@ -48,9 +46,9 @@ public static class ServiceCollectionExtensions
         var razor = builder.Services.AddRazorComponents();
         renderMode ??= RenderMode.InteractiveAuto;
 
-        if (renderMode == RenderMode.InteractiveServer || renderMode == RenderMode.InteractiveAuto)
+        if (renderMode is InteractiveServerRenderMode || renderMode is InteractiveAutoRenderMode)
             razor.AddInteractiveServerComponents();
-        if (renderMode == RenderMode.InteractiveWebAssembly || renderMode == RenderMode.InteractiveAuto)
+        if (renderMode is InteractiveWebAssemblyRenderMode || renderMode is InteractiveAutoRenderMode)
             razor.AddInteractiveWebAssemblyComponents();
 
         builder.AddBlossomAuthentication<TUser>();
@@ -92,6 +90,8 @@ public static class ServiceCollectionExtensions
         app.UseHttpsRedirection();
         app.UseStaticFiles();
         app.UseAntiforgery();
+
+        app.UseBlossomAuthentication();
 
         var razor = app.MapRazorComponents<T>();
 
