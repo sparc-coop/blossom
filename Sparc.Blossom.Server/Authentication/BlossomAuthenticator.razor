@@ -8,54 +8,53 @@
 @using Sparc.Blossom.Authentication
 
 <div class="blossom-authenticator">
-    @switch (Auth.LoginState)
-    {
-        case LoginStates.LoggedOut:
-            <button class="loggedout" @onclick="BeginLogin">
-                <div class="icon">
-                    <UserIcon />
-                </div>
-                <span>Sign In</span>
-            </button>
-            break;
-        case LoginStates.ReadyForLogin:
-        case LoginStates.VerifyingEmail:
-        case LoginStates.AwaitingMagicLink:
-        case LoginStates.VerifyingToken:
-        case LoginStates.Error:
-            <label @onclick="LoginAsync" class="@Auth.LoginState">
-                <div class="icon">
-                    <UserIcon />
-                </div>
-                @if (Auth.LoginState == LoginStates.ReadyForLogin)
-                {
-                    <input @ref=LoginInput type="text" @bind="Email" name="username" placeholder="Enter your email" autocomplete="username webauthn" @onclick:stopPropagation="true" />
-                    <div class="icon submit">
-                        OK
-                    </div>
-                }
-                else if (Auth.LoginState == LoginStates.VerifyingEmail || Auth.LoginState == LoginStates.VerifyingToken)
-                {
-                    <span>Signing you in...</span>
-                }
-                else if (Auth.LoginState == LoginStates.AwaitingMagicLink)
-                {
-                    <span>Click the link in your email!</span>
-                }
-            </label>
-            break;
-        case LoginStates.LoggedIn:
+    <AuthorizeView>
+        <Authorized>
             <figure class="loggedin">
                 <div class="icon">
                     <UserIcon />
                 </div>
-                <figcaption>Hi @Auth.User?.Username</figcaption>
+                <figcaption>Hi @context.User.Identity?.Name</figcaption>
                 <div class="icon submit" @onclick=LogoutAsync>
                     &#10006;
                 </div>
             </figure>
-            break;
-    }
+        </Authorized>
+        <NotAuthorized>
+            @switch (Auth.LoginState)
+            {
+                case LoginStates.LoggedOut:
+                    <button class="loggedout" @onclick="BeginLogin">
+                        <div class="icon">
+                            <UserIcon />
+                        </div>
+                        <span>Sign In</span>
+                    </button>
+                    break;
+                default:
+                    <label @onclick="LoginAsync" class="@Auth.LoginState">
+                        <div class="icon">
+                            <UserIcon />
+                        </div>
+                        @if (Auth.LoginState == LoginStates.ReadyForLogin)
+                        {
+                            <input @ref=LoginInput type="text" @bind="Email" name="username" placeholder="Enter your email" autocomplete="username webauthn" @onclick:stopPropagation="true" />
+                            <div class="icon submit">
+                                OK
+                            </div>
+                        }
+                        else if (Auth.LoginState == LoginStates.AwaitingMagicLink)
+                        {
+                            <span>Click the link in your email!</span>
+                        }
+                    </label>
+                    break;
+            }
+        </NotAuthorized>
+        <Authorizing>
+            <span>Signing you in...</span>
+        </Authorizing>
+    </AuthorizeView>
 </div>
 
 @inject IBlossomAuthenticator Auth
