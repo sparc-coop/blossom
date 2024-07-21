@@ -2,8 +2,10 @@
 
 namespace Sparc.Blossom.Data;
 
-public class BlossomQuery<T> : Specification<T>
+public class BlossomQuery<T> : Specification<T> where T : class
 {
+    public BlossomQuery() => Query.AsNoTracking();
+    
     protected void ForEach(Action<T> action)
     {
         Query.PostProcessingAction(x =>
