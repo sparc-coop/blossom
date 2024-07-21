@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-using Sparc.Blossom.Data;
+﻿using Sparc.Blossom.Data;
 using System.Globalization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
@@ -10,7 +6,6 @@ using Sparc.Blossom.Server;
 using Sparc.Blossom.Api;
 using Sparc.Blossom.Authentication;
 using System.Reflection;
-using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom;
 
@@ -23,8 +18,8 @@ public static class ServiceCollectionExtensions
 
         if (renderMode == RenderMode.InteractiveServer || renderMode == RenderMode.InteractiveAuto)
             razor.AddInteractiveServerComponents();
-        if (renderMode == RenderMode.InteractiveWebAssembly || renderMode == RenderMode.InteractiveAuto)
-            razor.AddInteractiveWebAssemblyComponents();
+        //if (renderMode == RenderMode.InteractiveWebAssembly || renderMode == RenderMode.InteractiveAuto)
+        //    razor.AddInteractiveWebAssemblyComponents();
 
         options?.Invoke(builder);
 
@@ -48,8 +43,8 @@ public static class ServiceCollectionExtensions
 
         if (renderMode is InteractiveServerRenderMode || renderMode is InteractiveAutoRenderMode)
             razor.AddInteractiveServerComponents();
-        if (renderMode is InteractiveWebAssemblyRenderMode || renderMode is InteractiveAutoRenderMode)
-            razor.AddInteractiveWebAssemblyComponents();
+        //if (renderMode is InteractiveWebAssemblyRenderMode || renderMode is InteractiveAutoRenderMode)
+        //    razor.AddInteractiveWebAssemblyComponents();
 
         builder.AddBlossomAuthentication<TUser>();
 
@@ -78,8 +73,8 @@ public static class ServiceCollectionExtensions
         {
             app.UseDeveloperExceptionPage();
 
-            if (builder.IsWebAssembly())
-                app.UseWebAssemblyDebugging();
+            //if (builder.IsWebAssembly())
+                //app.UseWebAssemblyDebugging();
         }
         else
         {
@@ -98,8 +93,8 @@ public static class ServiceCollectionExtensions
         if (builder.IsServer())
             razor.AddInteractiveServerRenderMode();
 
-        if (builder.IsWebAssembly())
-            razor.AddInteractiveWebAssemblyRenderMode();
+        //if (builder.IsWebAssembly())
+        //    razor.AddInteractiveWebAssemblyRenderMode();
 
         var server = Assembly.GetEntryAssembly();
         var client = typeof(T).Assembly;
