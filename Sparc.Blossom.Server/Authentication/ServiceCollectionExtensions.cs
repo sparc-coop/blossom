@@ -1,68 +1,36 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Components.Authorization;
+using Sparc.Blossom.Server.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Sparc.Blossom.Authentication;
 
 public static class ServiceCollectionExtensions
 {
-    public static AuthenticationBuilder AddBlossomAuthentication<TUser>(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddBlossomAuthentication<TUser>(this WebApplicationBuilder builder)
         where TUser : BlossomUser, new()
     {
-        var auth = builder.Services.AddAuthentication().AddCookie(opt =>
-        {
-            opt.Cookie.Name = "__Host-blossom";
-            opt.Cookie.SameSite = SameSiteMode.Strict;
-        });
+        builder.Services
+            .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie();
 
-        builder.Services.AddScoped<IUserStore<TUser>, BlossomUserRepository<TUser>>()
-            .AddScoped<IRoleStore<BlossomRole>, BlossomRoleStore>();
+        builder.Services.AddCascadingAuthenticationState();
+        builder.Services.AddScoped<AuthenticationStateProvider, BlossomDefaultAuthenticator<TUser>>()
+            .AddScoped<BlossomDefaultAuthenticator<TUser>>()
+            .AddScoped(typeof(IBlossomAuthenticator), typeof(BlossomDefaultAuthenticator<TUser>));
 
-        builder.Services.AddIdentity<TUser, BlossomRole>()
-            .AddDefaultTokenProviders();
-
-        builder.Services.ConfigureApplicationCookie(options =>
-        {
-            options.Cookie.Name = "__Host-blossom";
-            options.Cookie.SameSite = SameSiteMode.Strict;
-            options.LoginPath = new PathString("/_auth/login");
-            options.LogoutPath = new PathString("/_auth/logout");
-            options.SlidingExpiration = true;
-            options.Cookie.MaxAge = options.ExpireTimeSpan;
-        });
-        
-        builder.Services.AddAuthorization();
-
-        builder.Services.AddScoped<BlossomAuthenticator<TUser>>();
-        builder.Services.AddScoped(typeof(BlossomAuthenticator), typeof(BlossomAuthenticator<TUser>));
-
-        return auth;
+        return builder;
     }
 
-    public static void UseBlossomAuthentication<TUser>(this WebApplication app) where TUser : BlossomUser, new()
+    public static IApplicationBuilder UseBlossomAuthentication(this IApplicationBuilder app)
     {
-        app.MapGet("/_auth/userinfo", async (UserManager<TUser> users, ClaimsPrincipal principal) =>
-        {
-            if (principal.Identity?.IsAuthenticated != true)
-                return Results.Unauthorized();
+        app.UseCookiePolicy(new() { MinimumSameSitePolicy = Microsoft.AspNetCore.Http.SameSiteMode.Strict });
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.UseMiddleware<BlossomDefaultAuthenticatorMiddleware>();
 
-            var user = await users.FindByIdAsync(principal.Id());
-            return Results.Ok(user);
-        });
-        
-        app.MapGet("/_auth/login-silent", 
-            async (string userId, string token, string returnUrl, HttpContext context, BlossomAuthenticator<TUser> authenticator) =>
-        {
-            var user = await authenticator.LoginAsync(userId, token, "Link");
-
-            if (user == null)
-                return Results.Unauthorized();
-
-            await context.SignInAsync(IdentityConstants.ApplicationScheme, user.CreatePrincipal());
-            return Results.Redirect(returnUrl);
-        });
+        return app;
     }
 }

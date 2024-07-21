@@ -362,3 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Sparc.Authentication.Client/MSBuild_Logs
+/Sparc.Blossom.Example.Server/Generated

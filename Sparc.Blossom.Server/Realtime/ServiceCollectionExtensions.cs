@@ -1,21 +1,14 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Realtime;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddBlossomRealtime<THub>(this IServiceCollection services, string hubName = "hub") where THub : BlossomHub
+    public static IServiceCollection AddBlossomRealtime<THub>(this IServiceCollection services) where THub : BlossomHub
     {
-        services.AddSwaggerGen(options =>
-        {
-            options.DocumentFilter<PolymorphismDocumentFilter<Notification, THub>>();
-            options.SchemaFilter<PolymorphismSchemaFilter<Notification, THub>>();
-        });
-
         var signalR = services.AddSignalR()
             .AddJsonProtocol(options =>
             {
@@ -25,7 +18,7 @@ public static class ServiceCollectionExtensions
         //.AddMessagePackProtocol();
 
         services.AddMediatR(typeof(THub).Assembly, typeof(Notification).Assembly, typeof(NotificationForwarder<>).Assembly);
-        services.AddSingleton<Publisher>();
+        services.AddSingleton<BlossomNotifier>();
 
         // Use the User ID as the SignalR user identifier    
         services.AddSingleton<IUserIdProvider, UserIdProvider>();

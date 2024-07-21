@@ -3,16 +3,21 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomUser : Root<string>
+public class BlossomUser : BlossomEntity<string>
 {
-    public string? SecurityStamp { get; set; }
+    public BlossomUser()
+    {
+        Id = Guid.NewGuid().ToString();
+        AuthenticationType = "Blossom";
+        Username = "";
+    }
+    
+    public string Username { get; set; }
+    public string AuthenticationType { get; set; }
+    public string? ExternalId { get; set; }
 
-    public string? UserName { get; set; }
-
-    public string? LoginProviderKey { get; set; }
-
-    protected Dictionary<string, string> Claims { get; set; } = new();
-    protected Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = new();
+    internal Dictionary<string, string> Claims { get; set; } = [];
+    Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
 
     protected void AddClaim(string type, string? value)
     {
@@ -30,10 +35,10 @@ public class BlossomUser : Root<string>
         if (values == null || !values.Any())
             return;
 
-        if (MultiClaims.ContainsKey(type))
-            MultiClaims[type] = values;
-        else
+        if (!MultiClaims.ContainsKey(type))
             MultiClaims.Add(type, values);
+        else
+            MultiClaims[type] = values;
     }
 
     protected virtual void RegisterClaims()
@@ -45,12 +50,23 @@ public class BlossomUser : Root<string>
     public virtual ClaimsPrincipal CreatePrincipal()
     {
         AddClaim(ClaimTypes.NameIdentifier, Id);
-        AddClaim(ClaimTypes.Name, UserName);
+        AddClaim(ClaimTypes.Name, Username);
         RegisterClaims();
 
         var claims = Claims.Select(x => new Claim(x.Key, x.Value)).ToList();
         claims.AddRange(MultiClaims.SelectMany(x => x.Value.Select(v => new Claim(x.Key, v))));
 
         return new ClaimsPrincipal(new ClaimsIdentity(claims, "Blossom"));
+    }
+
+    public void ChangeUsername(string username)
+    {
+        Username = username;
+    }
+
+    public void ChangeAuthenticationType(string authenticationType, string externalId)
+    {
+        AuthenticationType = authenticationType;
+        ExternalId = externalId;
     }
 }

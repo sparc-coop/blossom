@@ -2,14 +2,8 @@
 
 namespace Sparc.Blossom.Authentication;
 
-public class WebDevice : IDevice
+public class WebDevice(IJSRuntime js) : IDevice
 {
-    public WebDevice(IJSRuntime js)
-    {
-        Js = js as IJSInProcessRuntime 
-            ?? throw new ArgumentException("WebDevice requires IJSInProcessRuntime", nameof(js));
-    }
-    
     private string? _id;
     public string? Id
     {
@@ -57,5 +51,6 @@ public class WebDevice : IDevice
     public string? Model { get; set; }
     public string? Name { get; set; }
     public string? VersionString { get; set; }
-    public IJSInProcessRuntime Js { get; }
+    public IJSInProcessRuntime Js { get; } = js as IJSInProcessRuntime
+            ?? throw new ArgumentException("WebDevice requires IJSInProcessRuntime", nameof(js));
 }

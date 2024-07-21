@@ -1,0 +1,70 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+@if (openItems != null)
+{
+    @foreach (var todo in openItems)
+    {
+        <div>
+            <span>@todo.Title</span>
+            <button @onclick="() => ToggleTodoItem(todo)">Toggle</button>
+        </div>
+    }
+}
+
+@if (closedItems != null)
+{
+    <p>Closed Items</p>
+    @foreach (var todo in closedItems)
+    {
+        <div>
+            <span>@todo.Title</span>
+            <button @onclick="() => Delete(todo)">Delete</button>
+        </div>
+    }
+}
+
+
+<button @onclick="AddTodoItem">Add Todo Item</button>
+
+@inject TodoItemApi TodoItems
+@code
+{
+    IEnumerable<TodoItem>? openItems;
+    IEnumerable<TodoItem>? closedItems;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetItems();
+    }
+
+    async Task GetItems()
+    {
+        openItems = await TodoItems.Open();
+        closedItems = await TodoItems.Closed();
+    }
+
+    async Task AddTodoItem()
+    {
+        var newItem = await TodoItems.Create("New Todo Item", "New Todo Item Description");
+        await GetItems();
+    }
+
+    async Task ToggleTodoItem(TodoItem todoItem)
+    {
+        await todoItem.MarkDone();
+        await GetItems();
+    }
+
+    async Task Delete(TodoItem todoItem)
+    {
+        await TodoItems.Delete(todoItem.Id);
+        await GetItems();
+    }
+}

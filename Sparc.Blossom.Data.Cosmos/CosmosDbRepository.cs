@@ -1,10 +1,11 @@
 ﻿using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
+using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T : class, IRoot<string>
+public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T : BlossomEntity<string>
 {
     public IQueryable<T> Query { get; }
     public DbContext Context { get; }
@@ -128,7 +129,38 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T :
     {
         return CosmosQueryableExtensions.FromSqlRaw(Context.Set<T>(), sql, parameters);
     }
-    
+
+    public async Task<List<U>> FromSqlAsync<U>(string sql, string? partitionKey, params object[] parameters)
+    {
+        var container = DbProvider.Database.GetContainer(Context.GetType().Name);
+        var requestOptions = partitionKey == null
+            ? null
+            : new QueryRequestOptions { PartitionKey = new PartitionKey(partitionKey) };
+
+        sql = sql.Replace("{", "@").Replace("}", "");
+
+        var query = new QueryDefinition(sql);
+        if (parameters != null)
+        {
+            var i = 0; 
+            foreach (var parameter in parameters)
+            {
+                var key = $"@{i++}";
+                query = query.WithParameter(key, parameter);
+            }
+        }
+
+        var results = container.GetItemQueryIterator<U>(query,
+            requestOptions: requestOptions);
+
+        var list = new List<U>();
+
+        while (results.HasMoreResults)
+            list.AddRange(await results.ReadNextAsync());
+
+        return list;
+    }
+
     public IQueryable<T> PartitionQuery(string partitionKey)
     {
         return Query.WithPartitionKey(partitionKey);
