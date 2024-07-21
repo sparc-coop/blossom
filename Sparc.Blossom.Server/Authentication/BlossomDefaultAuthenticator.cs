@@ -18,10 +18,13 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users)
             var user = new T() { Username = BlossomTools.FriendlyId() };
             await Users.AddAsync(user);
             User = user;
+            LoginState = LoginStates.LoggedIn;
             return user;
         }
 
         User = await Users.FindAsync(principal.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        if (User != null)
+            LoginState = LoginStates.LoggedIn;
         return User;
     }
 

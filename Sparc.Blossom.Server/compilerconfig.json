@@ -1,6 +1,6 @@
 ﻿[
   {
-    "outputFile": "Authentication/BlossomAuthenticator.razor.css",
-    "inputFile": "Authentication/BlossomAuthenticator.razor.scss"
+    "outputFile": "Authentication/BlossomAuthenticator.css",
+    "inputFile": "Authentication/BlossomAuthenticator.scss"
   }
 ]
