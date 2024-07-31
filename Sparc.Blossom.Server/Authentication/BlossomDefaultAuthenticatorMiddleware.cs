@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -15,7 +14,11 @@ public class BlossomDefaultAuthenticatorMiddleware(RequestDelegate next)
         if (user != null && context.User.Identity?.IsAuthenticated != true)
         {
             context.User = user!.CreatePrincipal();
-            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User);
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = true
+            };
+            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User, authProperties);
         }
 
         await _next(context);
