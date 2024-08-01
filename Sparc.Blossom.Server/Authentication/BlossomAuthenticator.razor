@@ -10,13 +10,9 @@
 <div class="blossom-authenticator">
     <AuthorizeView>
         <Authorized>
-            <figure class="loggedin">
+            <figure class="@(context.User.IsAnonymous() ? "loggedout" : "loggedin")">
                 <div class="icon">
-                    <UserIcon />
-                </div>
-                <figcaption>Hi @context.User.Identity?.Name</figcaption>
-                <div class="icon submit" @onclick=LogoutAsync>
-                    &#10006;
+                    <UserIcon LoggedIn="!context.User.IsAnonymous()" />
                 </div>
             </figure>
         </Authorized>
@@ -28,7 +24,6 @@
                         <div class="icon">
                             <UserIcon />
                         </div>
-                        <span>Sign In</span>
                     </button>
                     break;
                 default:
@@ -51,9 +46,6 @@
                     break;
             }
         </NotAuthorized>
-        <Authorizing>
-            <span>Signing you in...</span>
-        </Authorizing>
     </AuthorizeView>
 </div>
 

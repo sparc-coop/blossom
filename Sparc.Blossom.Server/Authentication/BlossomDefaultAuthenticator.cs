@@ -21,7 +21,7 @@ public class BlossomDefaultAuthenticator<T>
     {
         if (principal?.Identity?.IsAuthenticated != true)
         {
-            var user = new T() { Username = BlossomTools.FriendlyId() };
+            var user = new T();
             await Users.AddAsync(user);
             User = user;
             LoginState = LoginStates.LoggedIn;

@@ -9,7 +9,7 @@ public class BlossomUser : BlossomEntity<string>
     {
         Id = Guid.NewGuid().ToString();
         AuthenticationType = "Blossom";
-        Username = "";
+        Username = Id;
     }
     
     public string Username { get; set; }
