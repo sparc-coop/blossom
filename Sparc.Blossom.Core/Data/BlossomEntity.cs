@@ -4,20 +4,22 @@ namespace Sparc.Blossom.Data;
 
 public class BlossomEntity
 {
-    internal List<INotification>? _events;
+    internal List<IBlossomEvent>? _events;
 
-    public List<INotification> Publish()
+    public List<IBlossomEvent> Publish()
     {
-        if (_events == null)
-            return [];
+        _events ??= [];
 
         var domainEvents = _events.ToList();
+        domainEvents.Add(new BlossomEntityChanged(this));
         _events.Clear();
 
         return domainEvents;
     }
 
-    protected void Broadcast(INotification notification)
+    protected void Broadcast<T>() where T : IBlossomEvent => Broadcast((T)Activator.CreateInstance(typeof(T), this));
+
+    protected void Broadcast(IBlossomEvent notification)
     {
         _events ??= [];
         _events!.Add(notification);

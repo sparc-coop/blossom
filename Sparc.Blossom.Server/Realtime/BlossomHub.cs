@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.SignalR;
 using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom.Realtime;
 
-[Authorize]
 public class BlossomHub : Hub
 {
     public override async Task OnConnectedAsync()

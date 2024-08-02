@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Realtime;
 
@@ -15,8 +14,11 @@ public static class BlossomApplication
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddBlossom(builderOptions, renderMode);
+        builder.Services.AddBlossomRealtime<TApp>();
 
         var blossomApp = builder.UseBlossom<TApp>();
+        blossomApp.MapHub<BlossomHub>("/_realtime");
+
         app?.Invoke(blossomApp);
         blossomApp.Run();
 
@@ -32,8 +34,11 @@ public static class BlossomApplication
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddBlossom<TUser>(builderOptions, renderMode);
+        builder.Services.AddBlossomRealtime<TApp>();
 
         var blossomApp = builder.UseBlossom<TApp>();
+        blossomApp.MapHub<BlossomHub>("/_realtime");
+
         app?.Invoke(blossomApp);
         blossomApp.Run();
 
@@ -50,7 +55,7 @@ public static class BlossomApplication
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddBlossom<TUser>(builderOptions, renderMode);
-        builder.Services.AddBlossomRealtime<THub>();
+        builder.Services.AddBlossomRealtime<TApp, THub>();
         
         var blossomApp = builder.UseBlossom<TApp>();
         blossomApp.MapHub<THub>("/_realtime");

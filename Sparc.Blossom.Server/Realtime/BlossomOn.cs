@@ -2,7 +2,7 @@
 
 namespace Sparc.Blossom.Realtime;
 
-public abstract class RealtimeFeature<T> : INotificationHandler<T> where T : Notification
+public abstract class BlossomOn<T> : INotificationHandler<T> where T : BlossomEvent
 {
     public abstract Task ExecuteAsync(T item);
 
