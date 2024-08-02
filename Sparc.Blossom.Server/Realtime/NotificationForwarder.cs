@@ -9,7 +9,10 @@ public class NotificationForwarder<TNotification>(IHubContext<BlossomHub> hub) :
     public override async Task ExecuteAsync(TNotification notification)
     {
         if (notification.SubscriptionId != null)
+        {
+            Console.WriteLine("Notification: " + notification.GetType().Name + " to " + notification.SubscriptionId);
             await Hub.Clients.Group(notification.SubscriptionId).SendAsync(notification.GetType().Name, notification);
+        }
     }
 }
 
