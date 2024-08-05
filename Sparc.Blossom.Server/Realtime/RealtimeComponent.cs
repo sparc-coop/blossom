@@ -20,7 +20,7 @@ public class BlossomRealtime : ComponentBase
             }));
     }
 
-    protected async Task On<T>(string subscriptionId, Action<T> action) where T : IBlossomEvent
+    protected async Task On<T>(string subscriptionId, Action<T> action) where T : BlossomEvent
     {
         if (Hub != null)
         {

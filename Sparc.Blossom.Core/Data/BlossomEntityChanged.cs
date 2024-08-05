@@ -2,7 +2,4 @@
 
 namespace Sparc.Blossom.Data;
 
-public class BlossomEntityChanged(BlossomEntity entity) : IBlossomEvent
-{
-    public string? SubscriptionId { get; set; } = entity.GenericId.ToString();
-}
+public class BlossomEntityChanged(BlossomEntity entity) : BlossomEvent(entity);

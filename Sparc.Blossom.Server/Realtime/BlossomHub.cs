@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom.Realtime;
 
@@ -11,21 +10,13 @@ public class BlossomHub : Hub
             await Clients.User(Context.UserIdentifier).SendAsync("_UserConnected");
     }
 
-    public virtual async Task Watch(string groupId)
+    public virtual async Task Watch(string subscriptionId)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, groupId);
+        await Groups.AddToGroupAsync(Context.ConnectionId, subscriptionId);
     }
 
-    public virtual async Task StopWatching(string groupId)
+    public virtual async Task StopWatching(string subscriptionId)
     {
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupId);
-    }
-}
-
-public class UserIdProvider : IUserIdProvider
-{
-    public string? GetUserId(HubConnectionContext connection)
-    {
-        return connection.User?.Id();
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, subscriptionId);
     }
 }
