@@ -2,15 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
-using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom;
 
-public class BlossomDbContext(DbContextOptions options, IPublisher publisher, IHttpContextAccessor auth) : DbContext(options)
+public class BlossomDbContext(BlossomDbContextOptions options) : DbContext(options.DbContextOptions)
 {
-    public IPublisher Publisher { get; } = publisher;
-    public IHttpContextAccessor Auth { get; } = auth;
-    public string UserId => Auth?.HttpContext?.User?.Identity?.IsAuthenticated == true ? Auth.HttpContext.User.Id() : "anonymous";
+    public IPublisher Publisher { get; } = options.Publisher;
+    public IHttpContextAccessor Http { get; } = options.HttpContextAccessor;
+    public string UserId => Http?.HttpContext?.User?.Identity?.IsAuthenticated == true ? Http.HttpContext.User.Id() : "anonymous";
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -22,11 +21,6 @@ public class BlossomDbContext(DbContextOptions options, IPublisher publisher, IH
         var result = await base.SaveChangesAsync(cancellationToken);
         await NotifyAsync();
         return result;
-    }
-
-    public void SetPublishStrategy(PublishStrategy strategy)
-    {
-        //Notifier.SetPublishStrategy(strategy);
     }
 
     async Task NotifyAsync()
