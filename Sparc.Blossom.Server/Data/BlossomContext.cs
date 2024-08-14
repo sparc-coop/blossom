@@ -5,10 +5,10 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom;
 
-public class BlossomDbContext(BlossomDbContextOptions options) : DbContext(options.DbContextOptions)
+public class BlossomContext(BlossomContextOptions options) : DbContext(options.DbContextOptions)
 {
-    public IPublisher Publisher { get; } = options.Publisher;
-    public IHttpContextAccessor Http { get; } = options.HttpContextAccessor;
+    protected IPublisher Publisher { get; } = options.Publisher;
+    protected IHttpContextAccessor Http { get; } = options.HttpContextAccessor;
     public string UserId => Http?.HttpContext?.User?.Identity?.IsAuthenticated == true ? Http.HttpContext.User.Id() : "anonymous";
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

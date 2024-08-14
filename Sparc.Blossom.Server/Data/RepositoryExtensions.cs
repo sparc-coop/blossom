@@ -8,10 +8,4 @@ public static class RepositoryExtensions
     {
         return EntityFrameworkQueryableExtensions.ToListAsync(queryable);
     }
-
-    public static void ToUrl<T>(this IRepository<T> set, string baseUrl) where T : class
-    {
-        if (set is BlossomSet<T> blossomSet)
-            blossomSet.ToUrl(baseUrl);
-    }
 }

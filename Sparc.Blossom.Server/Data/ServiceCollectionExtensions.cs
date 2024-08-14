@@ -9,4 +9,16 @@ public static class ServiceCollectionExtensions
 
         return builder;
     }
+
+    public static WebApplicationBuilder AddBlossomSet<T>(this WebApplicationBuilder builder, IEnumerable<T> items) where T : class
+    {
+        builder.Services.AddScoped<IRepository<T>>(_ => BlossomSet<T>.FromEnumerable(items));
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddBlossomSet<TResponse, T>(this WebApplicationBuilder builder, string url, Func<TResponse, IEnumerable<T>> transformer) where T : class
+    {
+        builder.Services.AddScoped<IRepository<T>>(_ => BlossomSet<T>.FromUrl(url, transformer));
+        return builder;
+    }
 }
