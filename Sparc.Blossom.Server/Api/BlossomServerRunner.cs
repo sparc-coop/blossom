@@ -1,8 +1,5 @@
 ﻿using Ardalis.Specification;
 using Humanizer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Sparc.Blossom.Data;
 using System.Security.Claims;
 

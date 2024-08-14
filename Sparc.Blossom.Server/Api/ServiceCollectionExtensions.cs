@@ -1,6 +1,4 @@
 ﻿using Ardalis.Specification;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using Sparc.Blossom.Data;
 using System.Reflection;
 
