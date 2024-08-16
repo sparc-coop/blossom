@@ -20,7 +20,6 @@ public static class ServiceCollectionExtensions
         builder.Services.AddScoped<AuthenticationStateProvider, BlossomDefaultAuthenticator<TUser>>()
             .AddScoped<BlossomDefaultAuthenticator<TUser>>()
             .AddScoped(typeof(IBlossomAuthenticator), typeof(BlossomDefaultAuthenticator<TUser>));
-
         return builder;
     }
 

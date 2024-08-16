@@ -14,7 +14,7 @@ public class BlossomDefaultAuthenticator<T>
 {
     public LoginStates LoginState { get; set; } = LoginStates.VerifyingToken;
 
-    public BlossomUser? User { get; private set; }
+    public BlossomUser? User { get; set; }
     public IRepository<T> Users { get; } = users;
 
     public override async Task<BlossomUser?> GetAsync(ClaimsPrincipal principal)
