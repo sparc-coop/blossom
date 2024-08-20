@@ -15,6 +15,7 @@ public class BlossomUser : BlossomEntity<string>
     public string Username { get; set; }
     public string AuthenticationType { get; set; }
     public string? ExternalId { get; set; }
+    public string? ParentUserId { get; set; }
 
     internal Dictionary<string, string> Claims { get; set; } = [];
     Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];

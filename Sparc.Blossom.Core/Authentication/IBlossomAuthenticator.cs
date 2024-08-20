@@ -9,5 +9,6 @@ public interface IBlossomAuthenticator
 
     Task<BlossomUser?> GetAsync(ClaimsPrincipal principal);
     IAsyncEnumerable<LoginStates> LoginAsync(string? emailOrToken = null);
+    IAsyncEnumerable<LoginStates> LoginAsync(ClaimsPrincipal? principal, string? emailOrToken = null);
     IAsyncEnumerable<LoginStates> LogoutAsync();
 }
