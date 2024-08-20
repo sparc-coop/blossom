@@ -5,7 +5,7 @@ namespace Sparc.Blossom.Server.ApiGenerator;
 
 internal class BlossomApiMethodInfo
 {
-    public BlossomApiMethodInfo(ClassDeclarationSyntax cls, ConstructorDeclarationSyntax constructor)
+    public BlossomApiMethodInfo(TypeDeclarationSyntax cls, ConstructorDeclarationSyntax constructor)
     {
         Name = cls.Identifier.Text;
         Arguments = string.Join(", ", constructor.ParameterList.Parameters.Select(p => $"{p.Type} {p.Identifier}"));

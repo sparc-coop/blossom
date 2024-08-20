@@ -6,25 +6,29 @@ namespace Sparc.Blossom.Server.ApiGenerator;
 
 internal class BlossomApiInfo
 {
-    internal BlossomApiInfo(ClassDeclarationSyntax cls)
+    internal BlossomApiInfo(TypeDeclarationSyntax type)
     {
-        Usings = cls.SyntaxTree.GetRoot().DescendantNodes().OfType<UsingDirectiveSyntax>().Select(x => x.ToString()).ToArray();
+        Usings = type.SyntaxTree.GetRoot().DescendantNodes().OfType<UsingDirectiveSyntax>().Select(x => x.ToString()).ToArray();
         if (!Usings.Contains("using Sparc.Blossom;"))
             Usings = Usings.Append("using Sparc.Blossom;").ToArray();
 
-
-        Namespace = cls.FirstAncestorOrSelf<FileScopedNamespaceDeclarationSyntax>()?.Name.ToString() 
-            ?? cls.FirstAncestorOrSelf<NamespaceDeclarationSyntax>()?.Name.ToString()
+        Namespace = type.FirstAncestorOrSelf<FileScopedNamespaceDeclarationSyntax>()?.Name.ToString()
+            ?? type.FirstAncestorOrSelf<NamespaceDeclarationSyntax>()?.Name.ToString()
             ?? "";
 
-        Name = cls.Identifier.Text;
-        OfName = cls.TypeParameterList?.Parameters.FirstOrDefault()?.ToString();
+
+        Name = type.Identifier.Text;
+        OfName = type.TypeParameterList?.Parameters.FirstOrDefault()?.ToString();
         PluralName = Name + "Api";
 
-        if (cls.BaseList != null)
+        if (type.BaseList != null)
         {
-            var baseType = cls.BaseList.Types.FirstOrDefault()?.ToString();
-            if (baseType != null && baseType.Contains("<"))
+            var baseType = type.BaseList.Types.FirstOrDefault()?.ToString();
+            if (baseType != null && baseType.Contains("BlossomRecord"))
+            {
+                BaseName = "BlossomRecord";
+            }
+            else if (baseType != null && baseType.Contains("<"))
             {
                 // get the first generic argument of the base class
                 var genericArgument = baseType.Split('<', ',', '>')[1];
@@ -34,17 +38,20 @@ internal class BlossomApiInfo
             }
         }
 
-        Methods = Public<MethodDeclarationSyntax>(cls)
+        Methods = Public<MethodDeclarationSyntax>(type)
             .Select(x => new BlossomApiMethodInfo(x))
             .ToList();
 
-        Properties = Public<PropertyDeclarationSyntax>(cls)
+        Properties = Public<PropertyDeclarationSyntax>(type)
             .Select(x => new BlossomApiPropertyInfo(x))
-            .ToArray();
-
-        Constructors = Public<ConstructorDeclarationSyntax>(cls)
-            .Select(x => new BlossomApiMethodInfo(cls, x))
             .ToList();
+
+        Constructors = Public<ConstructorDeclarationSyntax>(type)
+            .Select(x => new BlossomApiMethodInfo(type, x))
+            .ToList();
+
+        if (type is RecordDeclarationSyntax rec && !Properties.Any())
+            Properties = rec.ParameterList?.Parameters.Select(x => new BlossomApiPropertyInfo(x)).ToList() ?? [];
 
         Nullable = "#nullable disable";// Properties.Any(x => x.IsNullable) ? "#nullable enable" : "";
     }
@@ -59,13 +66,10 @@ internal class BlossomApiInfo
     internal string Nullable { get; } = "";
     public List<BlossomApiMethodInfo> Methods { get; }
     public List<BlossomApiMethodInfo> Constructors { get; }
-    public BlossomApiPropertyInfo[] Properties { get; }
+    public List<BlossomApiPropertyInfo> Properties { get; }
 
-    private IEnumerable<T> Public<T>(ClassDeclarationSyntax cls) where T : MemberDeclarationSyntax
+    private IEnumerable<T> Public<T>(TypeDeclarationSyntax cls) where T : MemberDeclarationSyntax
     {
-        foreach (var member in cls.Members)
-            Console.WriteLine("Member: " + member);
-        
         return cls.Members.OfType<T>().Where(x => x.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword)));
     }
 }

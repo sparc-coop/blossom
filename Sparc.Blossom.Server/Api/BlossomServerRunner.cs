@@ -12,7 +12,8 @@ public interface IBlossomEndpointMapper
 
 public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAccessor http) 
     : IRunner<T>, IBlossomEndpointMapper
-    where T : BlossomEntity<string>
+    where T : class
+
 {
     public string Name => typeof(T).Name.Pluralize();
 
@@ -28,8 +29,11 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAcces
     }
 
     public async Task<T?> GetAsync(object id) => await Repository.FindAsync(id);
-    public async Task<IEnumerable<T>> QueryAsync(string name, params object[] parameters)
+    public async Task<IEnumerable<T>> QueryAsync(string? name = null, params object[] parameters)
     {
+        if (name == null)
+            return Repository.Query;
+        
         // Find the Specification<T> that matches the name
         var assemblyTypes = typeof(T).Assembly.GetTypes();
         var specType = assemblyTypes.FirstOrDefault(x => x.Name == name && x.BaseType == typeof(BlossomQuery<T>))

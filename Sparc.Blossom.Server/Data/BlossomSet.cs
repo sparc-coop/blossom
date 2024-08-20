@@ -137,7 +137,7 @@ public class BlossomSet<T> : IRepository<T> where T : class
         using var reader = new StreamReader(response.Content.ReadAsStream());
         var json = reader.ReadToEnd();
 
-        var items = JsonSerializer.Deserialize<TResponse>(json);
+        var items = JsonSerializer.Deserialize<TResponse>(json, new JsonSerializerOptions {  PropertyNameCaseInsensitive = true });
         if (items != null)
             return FromEnumerable(transformer(items));
 

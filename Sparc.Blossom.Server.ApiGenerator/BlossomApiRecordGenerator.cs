@@ -20,30 +20,48 @@ public class BlossomApiRecordGenerator : IIncrementalGenerator
 
     static bool Where(SyntaxNode syntax)
     {
+        if (syntax is RecordDeclarationSyntax recordDeclaration && recordDeclaration.BaseList?.Types.Any(x => x.Type.ToString().Contains("BlossomRecord")) == true)
+            return true;
+        
         if (syntax is not ClassDeclarationSyntax classDeclaration)
             return false;
 
-        var baseTypes = new[] { "BlossomEntity", "BlossomQuery" };
+        var baseTypesToExclude = new[] { "BlossomEntity", "BlossomQuery" };
 
         return
             classDeclaration.Modifiers.Any(m => m.Text == "public") &&
             (classDeclaration.BaseList == null ||
-            !classDeclaration.BaseList.Types.Any(t => baseTypes.Any(b => t.Type.ToString().Contains(b))));
+            !classDeclaration.BaseList.Types.Any(t => baseTypesToExclude.Any(b => t.Type.ToString().Contains(b))));
     }
 
-    static BlossomApiInfo Select(GeneratorSyntaxContext ctx) => new((ClassDeclarationSyntax)ctx.Node);
+    static BlossomApiInfo Select(GeneratorSyntaxContext ctx) => new((TypeDeclarationSyntax)ctx.Node);
 
     static void Generate(BlossomApiInfo source, SourceProductionContext spc)
     {
+        if (source.Properties == null)
+            throw new Exception("WHYYY" + source.Properties);
+        
+        var isBlossomRecord = source.BaseName == "BlossomRecord";
         var properties = string.Join(", ", source.Properties.Select(x => $"{x.Type} {x.Name}"));
         var ofName = source.OfName == null ? "" : $"<{source.OfName}>";
 
+        var proxy = isBlossomRecord ? $" : BlossomRecordProxy<{source.Name}>" : "";
+
         var code = new StringBuilder();
-        code.Append($$"""
+        code.AppendLine($$"""
 namespace Sparc.Blossom.Api;
 {{source.Nullable}}
 
-public record {{source.Name}}{{ofName}}({{properties}});
+public record {{source.Name}}{{ofName}}({{properties}}){{proxy}};
+""");
+
+        if (isBlossomRecord)
+            code.AppendLine($$"""
+public partial class {{source.PluralName}} : BlossomApiContext<{{source.Name}}>
+{
+    public {{source.PluralName}}(IRunner<{{source.Name}}> runner) : base(runner) { }    
+    public async Task<IEnumerable<{{source.Name}}>> All() => await Runner.QueryAsync();
+}
 """);
         
         spc.AddSource($"{source.Namespace}.{source.Name}.g.cs", code.ToString());

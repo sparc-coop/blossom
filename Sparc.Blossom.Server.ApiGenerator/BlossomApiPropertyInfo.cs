@@ -10,6 +10,12 @@ internal class BlossomApiPropertyInfo
         Type = x.Type.ToString().Replace("?", "");
     }
 
+    internal BlossomApiPropertyInfo(ParameterSyntax x)
+    {
+        Name = x.Identifier.Text;
+        Type = x.Type!.ToString().Replace("?", "");
+    }
+
     internal string Name { get; set; }
     internal string Type { get; set; }
 }
