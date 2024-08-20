@@ -5,6 +5,11 @@ namespace Sparc.Blossom.Data;
 
 public class BlossomSet<T> : IRepository<T> where T : class
 {
+    public BlossomSet(IEnumerable<T> items)
+    {
+        _items = items.ToList();
+    }
+    
     internal static List<T> _items = [];
 
     public IQueryable<T> Query => _items.AsQueryable();
@@ -87,6 +92,11 @@ public class BlossomSet<T> : IRepository<T> where T : class
         throw new NotImplementedException();
     }
 
+    public Task<List<T>> GetAllAsync()
+    {
+        return Task.FromResult(_items);
+    }
+
     public Task<List<T>> GetAllAsync(ISpecification<T> spec)
     {
         return Task.FromResult(spec.Evaluate(_items).ToList());
@@ -119,28 +129,21 @@ public class BlossomSet<T> : IRepository<T> where T : class
             _items.Add(item);
     }
 
-    internal static BlossomSet<T> FromEnumerable(IEnumerable<T> items)
-    {
-        var set = new BlossomSet<T>();
-        _items = items.ToList();
-        return set;
-    }
-
-    internal static BlossomSet<T> FromUrl<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
+    public static BlossomSet<T> FromUrl<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
     {
         using var client = new HttpClient();
         var webRequest = new HttpRequestMessage(HttpMethod.Get, url);
         var response = client.Send(webRequest);
         if (!response.IsSuccessStatusCode)
-            return new();
+            return new([]);
 
         using var reader = new StreamReader(response.Content.ReadAsStream());
         var json = reader.ReadToEnd();
 
         var items = JsonSerializer.Deserialize<TResponse>(json, new JsonSerializerOptions {  PropertyNameCaseInsensitive = true });
         if (items != null)
-            return FromEnumerable(transformer(items));
+            return new(transformer(items));
 
-        return new();
+        return new([]);
     }
 }

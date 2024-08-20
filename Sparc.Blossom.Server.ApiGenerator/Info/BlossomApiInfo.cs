@@ -2,7 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Sparc.Blossom.Server.ApiGenerator;
+namespace Sparc.Blossom.ApiGenerator;
 
 internal class BlossomApiInfo
 {
@@ -18,8 +18,10 @@ internal class BlossomApiInfo
 
 
         Name = type.Identifier.Text;
-        OfName = type.TypeParameterList?.Parameters.FirstOrDefault()?.ToString();
         PluralName = Name + "Api";
+
+        if (type.TypeParameterList?.Parameters.Any() == true)
+            OfName = $"<{type.TypeParameterList.Parameters.FirstOrDefault()}>";
 
         if (type.BaseList != null)
         {
@@ -38,24 +40,24 @@ internal class BlossomApiInfo
             }
         }
 
-        Methods = Public<MethodDeclarationSyntax>(type)
+        Methods = type.Public<MethodDeclarationSyntax>()
             .Select(x => new BlossomApiMethodInfo(x))
             .ToList();
 
-        Properties = Public<PropertyDeclarationSyntax>(type)
+        Properties = type.Public<PropertyDeclarationSyntax>()
             .Select(x => new BlossomApiPropertyInfo(x))
             .ToList();
 
-        Constructors = Public<ConstructorDeclarationSyntax>(type)
+        Constructors = type.Public<ConstructorDeclarationSyntax>()
             .Select(x => new BlossomApiMethodInfo(type, x))
             .ToList();
 
         if (type is RecordDeclarationSyntax rec && !Properties.Any())
             Properties = rec.ParameterList?.Parameters.Select(x => new BlossomApiPropertyInfo(x)).ToList() ?? [];
 
-        Nullable = "#nullable disable";// Properties.Any(x => x.IsNullable) ? "#nullable enable" : "";
+        Nullable = Properties.Any(x => x.IsNullable) ? "#nullable enable" : "#nullable disable";
     }
-    
+
     internal string Name { get; }
     public string PluralName { get; }
     internal string? OfName { get; set; }
@@ -67,9 +69,17 @@ internal class BlossomApiInfo
     public List<BlossomApiMethodInfo> Methods { get; }
     public List<BlossomApiMethodInfo> Constructors { get; }
     public List<BlossomApiPropertyInfo> Properties { get; }
+}
 
-    private IEnumerable<T> Public<T>(TypeDeclarationSyntax cls) where T : MemberDeclarationSyntax
+public static class BlossomApiInfoExtensions
+{ 
+    public static IEnumerable<T> Public<T>(this TypeDeclarationSyntax cls) where T : MemberDeclarationSyntax
     {
-        return cls.Members.OfType<T>().Where(x => x.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword)));
+        return cls.Members.OfType<T>().Where(x => x.IsPublic());
+    }
+
+    public static bool IsPublic(this MemberDeclarationSyntax member)
+    {
+        return member.Modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword));
     }
 }

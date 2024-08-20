@@ -12,8 +12,7 @@ public static class ServiceCollectionExtensions
             || x.BaseType == baseType);
 
     public static IEnumerable<Type> GetEntities(this Assembly assembly)
-        => assembly.GetDerivedTypes(typeof(BlossomEntity<>))
-        .Union(assembly.GetDerivedTypes(typeof(BlossomRecord)));
+        => assembly.GetDerivedTypes(typeof(BlossomEntity<>));
 
     public static IEnumerable<Type> GetDtos(this Assembly assembly)
         => assembly.GetDerivedTypes(typeof(BlossomApiContext<>))
@@ -25,9 +24,6 @@ public static class ServiceCollectionExtensions
         var apis = assembly.GetDerivedTypes(typeof(BlossomApiContext<>));
         foreach (var api in apis)
             builder.Services.AddScoped(api);
-
-        foreach (var record in assembly.GetDerivedTypes(typeof(BlossomRecord)))
-            Console.WriteLine("THIS IS A RECORD: " + record.Name);
 
         var entities = assembly.GetEntities();
         foreach (var entity in entities)
@@ -43,8 +39,6 @@ public static class ServiceCollectionExtensions
             builder.Services.AddScoped(
                 typeof(IRunner<>).MakeGenericType(dto.Key),
                 typeof(BlossomDirectRunner<,>).MakeGenericType(dto.Key, dto.Value!));
-
-
     }
 
     public static void MapBlossomContexts(this WebApplication app, Assembly assembly)

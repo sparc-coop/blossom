@@ -87,7 +87,7 @@
                 StateHasChanged();
                 return;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 // Failed to connect, trying again in 3000 ms.
                 await Task.Delay(3000);

@@ -21,7 +21,7 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAcces
     protected IHttpContextAccessor Http { get; } = http;
     protected ClaimsPrincipal? User => Http.HttpContext?.User;
 
-    public async Task<T> CreateAsync(params object[] parameters)
+    public async Task<T> CreateAsync(params object?[] parameters)
     {
         var entity = (T)Activator.CreateInstance(typeof(T), parameters)!;
         await Repository.AddAsync(entity);
@@ -29,7 +29,7 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAcces
     }
 
     public async Task<T?> GetAsync(object id) => await Repository.FindAsync(id);
-    public async Task<IEnumerable<T>> QueryAsync(string? name = null, params object[] parameters)
+    public async Task<IEnumerable<T>> QueryAsync(string? name = null, params object?[] parameters)
     {
         if (name == null)
             return Repository.Query;
@@ -43,7 +43,7 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAcces
         return await Repository.GetAllAsync(spec);
     }
 
-    public async Task ExecuteAsync(object id, string name, params object[] parameters)
+    public async Task ExecuteAsync(object id, string name, params object?[] parameters)
     {
         var action = new Action<T>(x => typeof(T).GetMethod(name)?.Invoke(x, parameters));
         await Repository.ExecuteAsync(id, action);
@@ -57,7 +57,7 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAcces
         await Repository.DeleteAsync(entity);
     }
 
-    public Task OnAsync(object id, string name, params object[] parameters)
+    public Task OnAsync(object id, string name, params object?[] parameters)
     {
         throw new NotImplementedException();
     }
