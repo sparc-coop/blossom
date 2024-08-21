@@ -9,4 +9,14 @@ public static class ServiceCollectionExtensions
 
         return builder;
     }
+
+    public static WebApplicationBuilder AddRemoteRepository<T, TResponse>
+        (this WebApplicationBuilder builder, string url, Func<TResponse, IEnumerable<T>> transformer)
+        where T : class
+    {
+        var results = BlossomSet<T>.FromUrl(url, transformer);
+        builder.Services.AddScoped<IRepository<T>>(_ => results);
+
+        return builder;
+    }
 }

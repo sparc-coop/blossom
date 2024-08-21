@@ -5,6 +5,10 @@ namespace Sparc.Blossom.Data;
 
 public class BlossomSet<T> : IRepository<T> where T : class
 {
+    public BlossomSet()
+    {
+    }
+    
     public BlossomSet(IEnumerable<T> items)
     {
         _items = items.ToList();

@@ -18,7 +18,6 @@ internal class BlossomApiInfo
 
 
         Name = type.Identifier.Text;
-        PluralName = Name + "Api";
 
         if (type.TypeParameterList?.Parameters.Any() == true)
             OfName = $"<{type.TypeParameterList.Parameters.FirstOrDefault()}>";
@@ -26,19 +25,17 @@ internal class BlossomApiInfo
         if (type.BaseList != null)
         {
             var baseType = type.BaseList.Types.FirstOrDefault()?.ToString();
-            if (baseType != null && baseType.Contains("BlossomRecord"))
+            if (baseType != null)
             {
-                BaseName = "BlossomRecord";
-            }
-            else if (baseType != null && baseType.Contains("<"))
-            {
-                // get the first generic argument of the base class
-                var genericArgument = baseType.Split('<', ',', '>')[1];
+                var genericArguments = baseType.Split('<', ',', '>');
 
-                BaseName = genericArgument;
-                BasePluralName = genericArgument + "Api";
+                BaseName = genericArguments[0];
+                BaseOfName = genericArguments.Length > 1 ? genericArguments[1] : null;
+                BasePluralName = (BaseOfName ?? BaseName) + "s";
             }
         }
+
+        PluralName = EntityName + "s";
 
         Methods = type.Public<MethodDeclarationSyntax>()
             .Select(x => new BlossomApiMethodInfo(x))
@@ -52,6 +49,11 @@ internal class BlossomApiInfo
             .Select(x => new BlossomApiMethodInfo(type, x))
             .ToList();
 
+        Constants = type.Public<FieldDeclarationSyntax>()
+            .Where(x => x.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)))
+            .Select(x => new BlossomApiFieldInfo(x))
+            .ToList();
+
         if (type is RecordDeclarationSyntax rec && !Properties.Any())
             Properties = rec.ParameterList?.Parameters.Select(x => new BlossomApiPropertyInfo(x)).ToList() ?? [];
 
@@ -61,6 +63,7 @@ internal class BlossomApiInfo
     internal string Name { get; }
     public string PluralName { get; }
     internal string? OfName { get; set; }
+    internal string? BaseOfName { get; set; }
     internal string? BaseName { get; set; }
     internal string? BasePluralName { get; set; }
     internal string Namespace { get; }
@@ -69,6 +72,10 @@ internal class BlossomApiInfo
     public List<BlossomApiMethodInfo> Methods { get; }
     public List<BlossomApiMethodInfo> Constructors { get; }
     public List<BlossomApiPropertyInfo> Properties { get; }
+    public List<BlossomApiFieldInfo> Constants { get; }
+    public bool IsEntity => BaseName?.Contains("BlossomEntity") == true;
+
+    public string EntityName => IsEntity ? Name : (BaseOfName ?? Name);
 }
 
 public static class BlossomApiInfoExtensions
