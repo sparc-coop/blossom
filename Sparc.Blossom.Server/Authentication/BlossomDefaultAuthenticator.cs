@@ -18,7 +18,7 @@ public class BlossomDefaultAuthenticator<T>
     public IRepository<T> Users { get; } = users;
 
     public override async Task<BlossomUser?> GetAsync(ClaimsPrincipal principal)
-    {
+    {      
         if (principal?.Identity?.IsAuthenticated != true)
         {
             var user = new T();
@@ -49,5 +49,10 @@ public class BlossomDefaultAuthenticator<T>
     {
         LoginState = LoginStates.LoggedIn;
         yield return LoginState;
+    }
+
+    public virtual IAsyncEnumerable<LoginStates> LogoutAsync(ClaimsPrincipal? principal)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -11,4 +11,5 @@ public interface IBlossomAuthenticator
     IAsyncEnumerable<LoginStates> LoginAsync(string? emailOrToken = null);
     IAsyncEnumerable<LoginStates> LoginAsync(ClaimsPrincipal? principal, string? emailOrToken = null);
     IAsyncEnumerable<LoginStates> LogoutAsync();
+    IAsyncEnumerable<LoginStates> LogoutAsync(ClaimsPrincipal? principal);
 }
