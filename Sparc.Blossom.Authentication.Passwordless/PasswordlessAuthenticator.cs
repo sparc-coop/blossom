@@ -209,4 +209,13 @@ public class PasswordlessAuthenticator<T> : IBlossomAuthenticator where T : Blos
         return response.IsSuccessStatusCode;
     }
 
+    public IAsyncEnumerable<LoginStates> LoginAsync(ClaimsPrincipal? principal, string? emailOrToken = null)
+    {
+        return LoginAsync(emailOrToken);
+    }
+
+    public IAsyncEnumerable<LoginStates> LogoutAsync(ClaimsPrincipal? principal)
+    {
+        return LogoutAsync();
+    }
 }
