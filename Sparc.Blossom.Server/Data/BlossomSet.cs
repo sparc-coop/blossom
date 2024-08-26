@@ -1,10 +1,20 @@
 ﻿using Ardalis.Specification;
+using System.Text.Json;
 
 namespace Sparc.Blossom.Data;
 
-public class InMemoryRepository<T> : IRepository<T> where T : class
+public class BlossomSet<T> : IRepository<T> where T : class
 {
-    private static readonly List<T> _items = new();
+    public BlossomSet()
+    {
+    }
+    
+    public BlossomSet(IEnumerable<T> items)
+    {
+        _items = items.ToList();
+    }
+    
+    internal static List<T> _items = [];
 
     public IQueryable<T> Query => _items.AsQueryable();
 
@@ -86,6 +96,11 @@ public class InMemoryRepository<T> : IRepository<T> where T : class
         throw new NotImplementedException();
     }
 
+    public Task<List<T>> GetAllAsync()
+    {
+        return Task.FromResult(_items);
+    }
+
     public Task<List<T>> GetAllAsync(ISpecification<T> spec)
     {
         return Task.FromResult(spec.Evaluate(_items).ToList());
@@ -110,5 +125,29 @@ public class InMemoryRepository<T> : IRepository<T> where T : class
     {
         foreach (var item in items)
             await UpdateAsync(item);
+    }
+
+    internal void Add(IEnumerable<T> items)
+    {
+        foreach (var item in items)
+            _items.Add(item);
+    }
+
+    public static BlossomSet<T> FromUrl<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
+    {
+        using var client = new HttpClient();
+        var webRequest = new HttpRequestMessage(HttpMethod.Get, url);
+        var response = client.Send(webRequest);
+        if (!response.IsSuccessStatusCode)
+            return new([]);
+
+        using var reader = new StreamReader(response.Content.ReadAsStream());
+        var json = reader.ReadToEnd();
+
+        var items = JsonSerializer.Deserialize<TResponse>(json, new JsonSerializerOptions {  PropertyNameCaseInsensitive = true });
+        if (items != null)
+            return new(transformer(items));
+
+        return new([]);
     }
 }

@@ -1,6 +1,4 @@
 ﻿using Ardalis.Specification;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using Sparc.Blossom.Data;
 using System.Reflection;
 
@@ -9,7 +7,9 @@ namespace Sparc.Blossom.Api;
 public static class ServiceCollectionExtensions
 {
     public static IEnumerable<Type> GetDerivedTypes(this Assembly assembly, Type baseType)
-        => assembly.GetTypes().Where(x => x.BaseType?.IsGenericType == true && x.BaseType.GetGenericTypeDefinition() == baseType);
+        => assembly.GetTypes().Where(x => 
+            (baseType.IsGenericType && x.BaseType?.IsGenericType == true && x.BaseType.GetGenericTypeDefinition() == baseType)
+            || x.BaseType == baseType);
 
     public static IEnumerable<Type> GetEntities(this Assembly assembly)
         => assembly.GetDerivedTypes(typeof(BlossomEntity<>));
@@ -23,10 +23,9 @@ public static class ServiceCollectionExtensions
     {
         var apis = assembly.GetDerivedTypes(typeof(BlossomApiContext<>));
         foreach (var api in apis)
-            builder.Services.AddScoped(api);    
-        
-        var entities = assembly.GetEntities();
+            builder.Services.AddScoped(api);
 
+        var entities = assembly.GetEntities();
         foreach (var entity in entities)
             builder.Services.AddScoped(
                 typeof(IRunner<>).MakeGenericType(entity),

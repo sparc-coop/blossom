@@ -1,15 +1,13 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom;
 
-public class BlossomDbContext(BlossomDbContextOptions options) : DbContext(options.DbContextOptions)
+public class BlossomContext(BlossomContextOptions options) : DbContext(options.DbContextOptions)
 {
-    public IPublisher Publisher { get; } = options.Publisher;
-    public IHttpContextAccessor Http { get; } = options.HttpContextAccessor;
-    public string UserId => Http?.HttpContext?.User?.Identity?.IsAuthenticated == true ? Http.HttpContext.User.Id() : "anonymous";
+    protected BlossomContextOptions Options { get; } = options;
+    public string UserId => Options.HttpContextAccessor?.HttpContext?.User?.Identity?.IsAuthenticated == true ? Options.HttpContextAccessor.HttpContext.User.Id() : "anonymous";
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -30,7 +28,7 @@ public class BlossomDbContext(BlossomDbContextOptions options) : DbContext(optio
         var tasks = domainEvents
             .Select(async (domainEvent) =>
             {
-                await Publisher.Publish(domainEvent);
+                await Options.Publisher.Publish(domainEvent);
             });
 
         await Task.WhenAll(tasks);

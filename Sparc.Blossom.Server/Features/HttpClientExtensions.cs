@@ -1,6 +1,4 @@
-﻿using System.Net.Http.Json;
-
-namespace Sparc.Blossom;
+﻿namespace Sparc.Blossom;
 
 public static class HttpClientExtensions
 {

@@ -65,7 +65,7 @@ public static class ServiceCollectionExtensions
     {
         builder.Services.AddServerSideBlazor();
         builder.Services.AddHttpContextAccessor();
-        builder.Services.AddScoped<BlossomDbContextOptions>();
+        builder.Services.AddScoped<BlossomContextOptions>();
         builder.Services.AddOutputCache();
 
         var app = builder.Build();
