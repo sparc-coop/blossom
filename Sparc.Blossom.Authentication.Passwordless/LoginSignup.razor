@@ -1,0 +1,146 @@
+﻿@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+@using System.Threading.Tasks
+@using System.Web
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+@using Sparc.Blossom.Authentication
+@using System.Text.RegularExpressions
+
+<div class="login-component">
+    @switch (Auth.LoginState)
+    {
+        case LoginStates.LoggedOut:
+            <button class="loggedout" @onclick="BeginLogin">
+                <div class="icon">
+                    <UserIcon />
+                </div>
+                <span>Sign In</span>
+            </button>
+            break;
+        case LoginStates.ReadyForLogin:
+        case LoginStates.VerifyingEmail:
+        case LoginStates.AwaitingMagicLink:
+        case LoginStates.VerifyingToken:
+        case LoginStates.Error:
+            <label @onclick="LoginAsync" class="@Auth.LoginState">
+                <div class="icon">
+                    <UserIcon />
+                </div>
+                @if (Auth.LoginState == LoginStates.ReadyForLogin)
+                {
+                    <input @ref=LoginInput type="text" @bind="Email" name="username" placeholder="Enter your email" autocomplete="username webauthn" @onclick:stopPropagation="true" />
+                    <div class="icon submit">
+                        OK
+                    </div>
+                }
+                else if (Auth.LoginState == LoginStates.VerifyingEmail || Auth.LoginState == LoginStates.VerifyingToken)
+                {
+                    <span>Signing you in...</span>
+                }
+                else if (Auth.LoginState == LoginStates.AwaitingMagicLink)
+                {
+                    <span>Click the link in your email!</span>
+                }
+            </label>
+            break;
+        case LoginStates.LoggedIn:
+            <figure class="loggedin">
+                <div class="icon">
+                    <UserIcon />
+                </div>
+                <figcaption>Hi @Auth.User?.Username</figcaption>
+                <div class="icon submit" @onclick=LogoutAsync>
+                    &#10006;
+                </div>
+            </figure>
+            break;
+    }
+</div>
+
+@inject IJSRuntime JSRuntime
+@inject IBlossomAuthenticator Auth
+@code {
+    [CascadingParameter] public ClaimsPrincipal? User { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Token { get; set; }
+
+    private IJSObjectReference? module;
+
+    public string? Email;
+
+    ElementReference? LoginInput;
+    string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load the JS module from the RCL
+        // module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./_content/Sparc.Blossom.Passwordless/LoginSignup.js");
+        var test = User;
+
+        // if (Auth.User != null || !string.IsNullOrEmpty(Token))
+        // {
+        //     await foreach (var state in Auth.LoginAsync(Token))
+        //         StateHasChanged();
+        // }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(3000);
+
+            if (Auth.User != null || !string.IsNullOrEmpty(Token))
+            {
+                await foreach (var state in Auth.LoginAsync(User, Token))
+                    StateHasChanged();
+            }
+            var test = await Auth.GetAsync(User);
+            var name = Auth.User.Username;
+            // var name = User.FindFirst(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+            Regex validateGuidRegex = new Regex("^(?:\\{{0,1}(?:[0-9a-fA-F]){8}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){12}\\}{0,1})$");
+            if (!String.IsNullOrEmpty(name) && !validateGuidRegex.IsMatch(name))
+            {
+                Auth.LoginState = LoginStates.LoggedIn;
+                StateHasChanged();
+            }
+        }
+    }
+
+    async Task BeginLogin()
+    {
+        // Attempt autofill signin
+        await foreach (var state in Auth.LoginAsync(User))
+            StateHasChanged();
+
+        if (Auth.LoginState == LoginStates.LoggedIn)
+            return;
+
+        Auth.LoginState = LoginStates.ReadyForLogin;
+        StateHasChanged();
+        await Task.Delay(1);
+        if (LoginInput.HasValue)
+            await LoginInput.Value.FocusAsync();
+    }
+
+    async Task LoginAsync()
+    {
+        await foreach (var state in Auth.LoginAsync(User, Email))
+        {
+            Console.WriteLine($"Current state: {state}");
+            StateHasChanged(); // Update the UI after each state change
+        }
+    }
+
+    async Task LogoutAsync()
+    {
+        await foreach (var state in Auth.LogoutAsync())
+            StateHasChanged();
+    }
+}

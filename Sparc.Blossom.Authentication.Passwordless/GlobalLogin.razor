@@ -1,0 +1,97 @@
+@using System.Net.Http.Json
+
+<div id="login-component" class="login-component kori-ignore">
+    <div class="login-component__toggle show" _="on click toggle .show on .login-component__menu">
+        <button id="user-loggedout" class="login-component__logged-out show" aria-label="user">
+            <img src="/_content/Kori/icons/user-profile-x.svg" />
+        </button>
+        <button id="user-loggedin" class="login-component__logged-in" aria-label="user">
+            <img src="/_content/Kori/icons/user-profile-check.svg" />
+        </button>
+    </div>
+    <div class="login-component__menu">
+        <div class="login-component__user">
+            <p>Username</p>
+            <button class="login-component__logout-btn" aria-label="log-out">
+                <img src="/_content/Kori/icons/Logout.svg" />
+            </button>
+        </div>
+        <div class="login-component__actions">
+            <div class="login-component__btn">
+                <button aria-label="log-in">Log In <img src="/_content/Kori/icons/Arrow right.svg" /></button>
+            </div>
+            <div class="login-component__language">
+                <div class="@(showLanguages ? "show" : "")">
+                    @if (selectedLanguage != null)
+                    {
+                        <button class="toggle-languages selected" _="on click toggle .show on .language-list" aria-label="select language">@selectedLanguage.DisplayName</button>
+                    }
+                    <div class="language-list">
+                        <p class="list-header">Select your language:</p>
+                        <ul>
+                            @if (Languages != null)
+                            {
+                                @foreach (var language in Languages)
+                                {
+                                    <li>
+                                        <button>
+                                            @language.DisplayName
+
+                                            @if (language.DisplayName != language.NativeName)
+                                            {
+                                                <aside>@language.NativeName</aside>
+                                            }
+
+                                            @* @if (User.Language == language.Id)
+                                    {
+                                    <div class="right">
+                                    <img src="icons/Check.svg" />
+                                    </div>
+                                    }
+                                    *@
+                                        </button>
+                                    </li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@inject IJSRuntime Js
+@inject LanguageSelector LanguageSelector
+@using static LanguageSelector
+
+@code {
+    [Parameter] public string? LanguageId { get; set; } = "en";
+    bool isLoggedIn = false;
+    bool showLogin = false;
+    bool showLanguages = false;
+    Language? selectedLanguage;
+    List<Language>? Languages { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Languages = await LanguageSelector.GetLanguagesAsync();
+        Languages = Languages.OrderBy(x => x.DisplayName).ToList();
+        selectedLanguage = Languages.First(x => x.Id == LanguageId);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await Js.InvokeVoidAsync("initHyperScript");
+    }
+
+    void ToggleLogin()
+    {
+        showLogin = !showLogin;
+    }
+
+    void ToggleLanguages()
+    {
+        showLanguages = !showLanguages;
+    }
+}
