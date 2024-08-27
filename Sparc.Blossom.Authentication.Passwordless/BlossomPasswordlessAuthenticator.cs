@@ -32,7 +32,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         : base(users, loggerFactory, scopeFactory, state)
     {
         PasswordlessClient = _passwordlessClient;
-        Js = new(() => js.InvokeAsync<IJSObjectReference>("import", "./_content/Sparc.Blossom.Passwordless/LoginSignup.js").AsTask());
+        Js = new(() => js.InvokeAsync<IJSObjectReference>("import", "./_content/Sparc.Blossom.Authentication.Passwordless/LoginSignup.js").AsTask());
         Client = new HttpClient
         {
             BaseAddress = new Uri("https://v4.passwordless.dev/")
