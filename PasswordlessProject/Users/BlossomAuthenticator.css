@@ -1,0 +1,75 @@
+﻿.blossom-authenticator {
+  position: relative;
+}
+.blossom-authenticator button, .blossom-authenticator label, .blossom-authenticator figure {
+  display: flex;
+  align-items: center;
+  height: 2rem;
+  background: #FFEAC2;
+  border-radius: 0.5rem;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.blossom-authenticator button .icon, .blossom-authenticator label .icon, .blossom-authenticator figure .icon {
+  height: 2rem;
+  padding: 0.625rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.blossom-authenticator button .icon.submit, .blossom-authenticator label .icon.submit, .blossom-authenticator figure .icon.submit {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.blossom-authenticator button span, .blossom-authenticator button input, .blossom-authenticator button figcaption, .blossom-authenticator label span, .blossom-authenticator label input, .blossom-authenticator label figcaption, .blossom-authenticator figure span, .blossom-authenticator figure input, .blossom-authenticator figure figcaption {
+  display: flex;
+  padding: 0rem 1rem;
+  align-items: center;
+  align-self: stretch;
+  background: #FFFAF0;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0rem 0.5rem 0.5rem 0rem;
+  border: 0;
+}
+.blossom-authenticator button span::placeholder, .blossom-authenticator button input::placeholder, .blossom-authenticator button figcaption::placeholder, .blossom-authenticator label span::placeholder, .blossom-authenticator label input::placeholder, .blossom-authenticator label figcaption::placeholder, .blossom-authenticator figure span::placeholder, .blossom-authenticator figure input::placeholder, .blossom-authenticator figure figcaption::placeholder {
+  color: #BDBDBD;
+  font-weight: 400;
+}
+.blossom-authenticator button input, .blossom-authenticator label input, .blossom-authenticator figure input {
+  border-radius: 0;
+  font-weight: 500;
+}
+.blossom-authenticator button input:focus, .blossom-authenticator button input:focus-visible, .blossom-authenticator label input:focus, .blossom-authenticator label input:focus-visible, .blossom-authenticator figure input:focus, .blossom-authenticator figure input:focus-visible {
+  outline: 2px solid #EBA214;
+}
+.blossom-authenticator button.loggedout span, .blossom-authenticator label.loggedout span, .blossom-authenticator figure.loggedout span {
+  font-weight: 500;
+}
+.blossom-authenticator button.loggedout svg path, .blossom-authenticator label.loggedout svg path, .blossom-authenticator figure.loggedout svg path {
+  fill: #ffd071;
+  stroke: #ffd071;
+}
+.blossom-authenticator button.loggedout:hover svg path, .blossom-authenticator label.loggedout:hover svg path, .blossom-authenticator figure.loggedout:hover svg path {
+  fill: #EBA214;
+  stroke: #EBA214;
+}
+.blossom-authenticator .form-div {
+  position: absolute;
+  top: 99%;
+  left: 0;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 0.29rem;
+  padding: 10px;
+  width: 190px;
+  height: 104px;
+}
+.blossom-authenticator .form-div .submit-btn {
+  display: flex;
+  align-items: center;
+  height: 2rem;
+  margin-top: 0.5rem;
+  float: right;
+}
