@@ -55,6 +55,8 @@
     [SupplyParameterFromQuery]
     public string? Token { get; set; }
 
+    [CascadingParameter] public ClaimsPrincipal? User { get; set; }
+
     public string? Email;
 
     ElementReference? LoginInput;
@@ -63,7 +65,7 @@
     {
         if (Auth.User != null || !string.IsNullOrEmpty(Token))
         {
-            await foreach (var state in Auth.LoginAsync(Token))
+            await foreach (var state in Auth.LoginAsync(User, Token))
                 StateHasChanged();
         }
     }
@@ -71,7 +73,7 @@
     async Task BeginLogin()
     {
         // Attempt autofill signin
-        await foreach (var state in Auth.LoginAsync())
+        await foreach (var state in Auth.LoginAsync(User))
             StateHasChanged();
 
         if (Auth.LoginState == LoginStates.LoggedIn)
@@ -89,13 +91,13 @@
         if (string.IsNullOrWhiteSpace(Email))
             return;
 
-        await foreach (var state in Auth.LoginAsync(Email))
+        await foreach (var state in Auth.LoginAsync(User, Email))
             StateHasChanged();
     }
 
     async Task LogoutAsync()
     {
-        await foreach (var state in Auth.LogoutAsync())
+        await foreach (var state in Auth.LogoutAsync(User))
             StateHasChanged();
     }
 }

@@ -1,228 +1,193 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 using Passwordless.Net;
-using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Net.Http.Json;
 
-namespace Sparc.Blossom.Passwordless
+namespace Sparc.Blossom.Authentication.Passwordless;
+
+public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T>
+    where T : BlossomUser, new()
 {
-    public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T>
-        where T : BlossomUser, new()
+    readonly Lazy<Task<IJSObjectReference>> Js;
+    public NavigationManager Nav { get; }
+    IPasswordlessClient PasswordlessClient { get; }
+    public HttpClient Client { get; }
+    readonly string publicKey;
+    public BlossomPasswordlessAuthenticator(
+        IPasswordlessClient _passwordlessClient,
+        IOptions<PasswordlessOptions> options,
+        IRepository<T> users,
+        ILoggerFactory loggerFactory,
+        IServiceScopeFactory scopeFactory,
+        PersistentComponentState state,
+        NavigationManager nav,
+        IJSRuntime js)
+        : base(users, loggerFactory, scopeFactory, state)
     {
-        readonly Lazy<Task<IJSObjectReference>> Js;
-        public NavigationManager Nav { get; }
-        IPasswordlessClient PasswordlessClient { get; }
-        public HttpClient Client { get; }
-        readonly string publicKey;
-        public BlossomPasswordlessAuthenticator(
-            IPasswordlessClient _passwordlessClient,
-            IOptions<PasswordlessOptions> options,
-            IRepository<T> users,
-            ILoggerFactory loggerFactory,
-            IServiceScopeFactory scopeFactory,
-            PersistentComponentState state,
-            NavigationManager nav,
-            IJSRuntime js)
-            : base(users, loggerFactory, scopeFactory, state)
+        PasswordlessClient = _passwordlessClient;
+        Js = new(() => js.InvokeAsync<IJSObjectReference>("import", "./_content/Sparc.Blossom.Authentication.Passwordless/BlossomPasswordlessAuthenticator.js").AsTask());
+        Client = new HttpClient
         {
-            PasswordlessClient = _passwordlessClient;
-            Js = new(() => js.InvokeAsync<IJSObjectReference>("import", "./_content/Sparc.Blossom.Passwordless/LoginSignup.js").AsTask());
-            Client = new HttpClient
-            {
-                BaseAddress = new Uri("https://v4.passwordless.dev/")
-            };
-            Client.DefaultRequestHeaders.Add("ApiSecret", options.Value.ApiSecret);
-            Nav = nav;
+            BaseAddress = new Uri("https://v4.passwordless.dev/")
+        };
+        Client.DefaultRequestHeaders.Add("ApiSecret", options.Value.ApiSecret);
+        Nav = nav;
 
-            publicKey = options.Value.ApiKey!;
+        publicKey = options.Value.ApiKey!;
+    }
+
+    public override async IAsyncEnumerable<LoginStates> LoginAsync(ClaimsPrincipal principal, string? emailOrToken = null)
+    {
+        Message = null;
+        
+        // 1. Convert the ClaimsPrincipal from the cookie into a BlossomUser
+        // If the BlossomUser is already attached to Passwordless, they're logged in because their cookie is valid
+        var user = await GetAsync(principal);
+        if (user.ExternalId != null)
+        {
+            LoginState = LoginStates.LoggedIn;
+            yield return LoginState;
+            yield break;
         }
 
-        public override async Task<BlossomUser?> GetAsync(ClaimsPrincipal principal)
-        {
-            if (principal?.Identity?.IsAuthenticated != true)
-            {
-                var sessionUser = new T();
-                await Users.AddAsync(sessionUser);
-                User = sessionUser;
-                return sessionUser;
-            }
+        await InitPasswordlessAsync();
 
-            User = await Users.FindAsync(principal.Id());
-            return User;
+        // 2. BlossomUser is not yet attached to Passwordless. Look for discoverable passkeys on their device.
+        emailOrToken ??= await SignInWithPasswordlessAsync();
+
+        // 3. No discoverable passkeys. We need an email address from the user to identify them.
+        if (string.IsNullOrEmpty(emailOrToken))
+        {
+            LoginState = LoginStates.ReadyForLogin;
+            yield return LoginState;
+            yield break;
         }
 
-        public override async IAsyncEnumerable<LoginStates> LoginAsync(ClaimsPrincipal? principal, string? emailOrToken = null)
+        // 4. An email address has been supplied. Make this the username, and look it up in Passwordless.
+        if (new EmailAddressAttribute().IsValid(emailOrToken))
         {
-            var js = await Js.Value;
-            await js.InvokeVoidAsync("init", publicKey);
-            var isMagicLinkReturn = emailOrToken?.StartsWith("verify") == true;
+            LoginState = LoginStates.VerifyingEmail;
+            user.ChangeUsername(emailOrToken);
+            await Users.UpdateAsync((T)user);
+            yield return LoginState;
 
-            emailOrToken ??= await js.InvokeAsync<string>("signInWithPasskey", null);
-
-            if (string.IsNullOrEmpty(emailOrToken))
+            // 5. If the user has no passkeys, send them a magic link to log in.
+            var hasPasskeys = await HasPasskeys(user);
+            if (!hasPasskeys)
             {
-                LoginState = LoginStates.ReadyForLogin;
+                await SendMagicLinkAsync(user, $"{Nav.Uri}?token=$TOKEN");
+                LoginState = LoginStates.AwaitingMagicLink;
                 yield return LoginState;
                 yield break;
             }
 
-            if (!string.IsNullOrEmpty(emailOrToken) && new EmailAddressAttribute().IsValid(emailOrToken))
-            {
-                LoginState = LoginStates.VerifyingEmail;
-                User = await GetOrCreateUserAsync(emailOrToken) as T;
-                if (LoginState == LoginStates.AwaitingMagicLink)
-                {
-                    yield return LoginState;
-                    yield break;
-                }
-
-                var passwordlessResult = await GetOrCreatePasswordlessUserAsync(User);
-
-                if (!String.IsNullOrEmpty(passwordlessResult))
-                {
-                    emailOrToken = passwordlessResult;
-                }
-            }
-
-            if (LoginState == LoginStates.AwaitingMagicLink)
-            {
-                yield return LoginState;
-                yield break;
-            }
-
-            LoginState = LoginStates.VerifyingToken;
-            User = await LoginWithTokenAsync(emailOrToken, principal) as T;
-
-            if (User != null)
-            {
-                if (isMagicLinkReturn)
-                {
-                    await GetOrCreatePasswordlessUserAsync(User, isMagicLinkReturn);
-                }
-                LoginState = LoginStates.LoggedIn;
-                yield return LoginState;
-            }
-            else
-            {
-                //SetError("Couldn't log in!");
-                LoginState = LoginStates.Error;
-                yield return LoginState;
-            }
+            // 6. If the user has passkeys, prompt them to sign in with one.
+            emailOrToken = await SignInWithPasswordlessAsync(user);
         }
 
-        public async Task<BlossomUser> GetOrCreateUserAsync(string username)
+        // 7. The user has signed in with a passkey. Verify the token and log them in.
+        LoginState = LoginStates.VerifyingToken;
+        yield return LoginState;
+
+        try
         {
-            var js = await Js.Value;
-
-            var user = await Users.Query.Where(x => x.Username == username).FirstOrDefaultAsync();
-            if (user == null)
-            {
-                user = new T() { Username = username, ExternalId = Guid.NewGuid().ToString() };
-                await Users.AddAsync(user);
-            }
-
-            if (!await HasPasskeys(user))
-            {
-                await SendMagicLinkAsync(username, $"{Nav.Uri}?token=$TOKEN", user.ExternalId);
-                LoginState = LoginStates.AwaitingMagicLink;
-            }
-
-            return user;
+            await LoginWithTokenAsync(emailOrToken);
+            LoginState = LoginStates.LoggedIn;
         }
-        private async Task<string> GetOrCreatePasswordlessUserAsync(BlossomUser user, bool isMagicLinkReturn = false)
+        catch (Exception e)
         {
-            var js = await Js.Value;
-
-            var hasPassKey = await HasPasskeys(user);
-            string token = "";
-
-            if (hasPassKey && !isMagicLinkReturn)
-            {
-                token = await js.InvokeAsync<string>("signInWithPasskey", user.Username);
-            }
-            else
-            {
-                if (!hasPassKey)
-                {
-                    token = await SignUpWithPasskeyAsync(user);
-                }
-            }
-
-            if (token == null && !isMagicLinkReturn)
-            {
-                await SendMagicLinkAsync(user.Username, $"{Nav.Uri}?token=$TOKEN", user.ExternalId);
-                LoginState = LoginStates.AwaitingMagicLink;
-            }
-
-            return token;
+            LoginState = LoginStates.Error;
+            Message = e.Message;
         }
-        private async Task<string> SignUpWithPasskeyAsync(BlossomUser user)
+
+        yield return LoginState;
+    }
+
+    private async Task InitPasswordlessAsync()
+    {
+        var js = await Js.Value;
+        await js.InvokeVoidAsync("init", publicKey);
+    }
+
+    private async Task<string> SignInWithPasswordlessAsync(BlossomUser? user = null)
+    {
+        var js = await Js.Value;
+        return await js.InvokeAsync<string>("signInWithPasskey", user?.Username);
+    }
+
+    private async Task<string> SignUpWithPasswordlessAsync(BlossomUser user)
+    {
+        var js = await Js.Value;
+        var registerToken = await PasswordlessClient.CreateRegisterTokenAsync(new RegisterOptions(user.Id, user.Username)
         {
-            var js = await Js.Value;
-            var registerToken = await PasswordlessClient.CreateRegisterTokenAsync(new RegisterOptions(user.ExternalId, user.Username)
-            {
-                Aliases = [user.Username]
-            });
+            Aliases = [user.Username]
+        });
 
-            return await js.InvokeAsync<string>("signUpWithPasskey", registerToken.Token);
-        }
-        private async Task<bool> HasPasskeys(BlossomUser user)
+        return await js.InvokeAsync<string>("signUpWithPasskey", registerToken.Token);
+    }
+
+    private async Task<bool> HasPasskeys(BlossomUser user)
+    {
+        if (user.ExternalId == null)
+            return false;
+
+        var credentials = await PasswordlessClient.ListCredentialsAsync(user.ExternalId);
+        return credentials.Any();
+    }
+
+    public async Task<bool> SendMagicLinkAsync(BlossomUser user, string urlTemplate, int timeToLive = 3600)
+        => await PostAsync("magic-links/send", new
         {
-            if (user.ExternalId == null)
-                return false;
+            user.Username,
+            urlTemplate,
+            user.Id,
+            timeToLive
+        });
 
-            var credentials = await PasswordlessClient.ListCredentialsAsync(user.ExternalId);
-            return credentials.Any();
-        }
-        public async Task<bool> SendMagicLinkAsync(string emailAddress, string urlTemplate, string userId, int timeToLive = 3600)
-            => await PostAsync("magic-links/send", new
-            {
-                emailAddress,
-                urlTemplate,
-                userId,
-                timeToLive
-            });
-        private async Task<bool> PostAsync(string url, object payload)
+    private async Task<bool> PostAsync(string url, object payload)
+    {
+        var response = await Client.PostAsJsonAsync(url, payload);
+        return response.IsSuccessStatusCode;
+    }
+
+    private async Task LoginWithTokenAsync(string token)
+    {
+        if (User == null)
+            throw new Exception("User not initialized");
+
+        var passwordlessUser = await PasswordlessClient.VerifyTokenAsync(token);
+        if (passwordlessUser?.Success != true)
+            throw new Exception("Unable to verify token");
+
+        var parentUser = Users.Query.FirstOrDefault(x => x.ExternalId == passwordlessUser.UserId && x.ParentUserId == null);
+        if (parentUser != null)
         {
-            var response = await Client.PostAsJsonAsync(url, payload);
-            return response.IsSuccessStatusCode;
+            User.SetParentUser(parentUser);
+            await Users.UpdateAsync((T)User);
+            User = parentUser;
         }
-        public async Task<BlossomUser?> LoginWithTokenAsync(string token, ClaimsPrincipal principal)
+        else
         {
-            var user = await GetAsync(principal);
-
-            var verifiedUser = await PasswordlessClient.VerifyTokenAsync(token);
-            if (verifiedUser?.Success != true)
-                throw new Exception("Unable to verify token");
-
-            var parentUser = await Users.Query.Where(x => x.ExternalId == verifiedUser.UserId && x.ParentUserId == null).FirstAsync();
-
-            User.Username = parentUser.Username;
-            User.ParentUserId = parentUser.Id;
-            User.ExternalId = parentUser.ExternalId;
-
-            await Users.UpdateAsync(User as T);
-
-            return parentUser;
+            User.Login("Passwordless", passwordlessUser.UserId);
         }
-        public override async IAsyncEnumerable<LoginStates> LogoutAsync(ClaimsPrincipal principal)
-        {
-            var user = await GetAsync(principal);
 
-            User.Username = "";
-            User.ParentUserId = null;
-            User.ExternalId = null;
+        await Users.UpdateAsync((T)User);
+    }
 
-            await Users.UpdateAsync(User as T);
+    public override async IAsyncEnumerable<LoginStates> LogoutAsync(ClaimsPrincipal principal)
+    {
+        var user = await GetAsync(principal);
 
-            yield return LoginStates.LoggedOut;
-        }
+        user.Logout();
+
+        await Users.UpdateAsync((T)User);
+
+        yield return LoginStates.LoggedOut;
     }
 }

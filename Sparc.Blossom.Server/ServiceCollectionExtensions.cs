@@ -6,6 +6,8 @@ using Sparc.Blossom.Server;
 using Sparc.Blossom.Api;
 using Sparc.Blossom.Authentication;
 using System.Reflection;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom;
 
@@ -65,7 +67,10 @@ public static class ServiceCollectionExtensions
     {
         builder.Services.AddServerSideBlazor();
         builder.Services.AddHttpContextAccessor();
-        builder.Services.AddScoped<BlossomContextOptions>();
+        
+        if (builder.Services.Any(x => x.ServiceType == typeof(DbContextOptions)))
+            builder.Services.AddScoped<BlossomContextOptions>();
+        
         builder.Services.AddOutputCache();
 
         var app = builder.Build();

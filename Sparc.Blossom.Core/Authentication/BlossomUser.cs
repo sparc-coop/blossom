@@ -65,9 +65,22 @@ public class BlossomUser : BlossomEntity<string>
         Username = username;
     }
 
-    public void ChangeAuthenticationType(string authenticationType, string externalId)
+    public void Login(string authenticationType, string externalId)
     {
         AuthenticationType = authenticationType;
         ExternalId = externalId;
+    }
+
+    public void SetParentUser(BlossomUser parentUser)
+    {
+        Username = parentUser.Username;
+        ParentUserId = parentUser.Id;
+        ExternalId = parentUser.ExternalId;
+    }
+
+    public void Logout()
+    {
+        ParentUserId = null;
+        ExternalId = null;
     }
 }
