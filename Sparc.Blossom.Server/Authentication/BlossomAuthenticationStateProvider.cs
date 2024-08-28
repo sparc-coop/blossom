@@ -29,7 +29,7 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
         _state = state;
 
         AuthenticationStateChanged += OnAuthenticationStateChanged;
-        _subscription = state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveServer);
+        _subscription = state.RegisterOnPersisting(OnPersistingAsync);
     }
 
     protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
@@ -57,9 +57,7 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
     private async Task OnPersistingAsync()
     {
         if (_authenticationStateTask is null)
-        {
-            throw new UnreachableException($"Authentication state not set in {nameof(RevalidatingServerAuthenticationStateProvider)}.{nameof(OnPersistingAsync)}().");
-        }
+            return;
 
         var authenticationState = await _authenticationStateTask;
         var principal = authenticationState.User;
