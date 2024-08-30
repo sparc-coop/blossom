@@ -39,6 +39,9 @@ public static class ServiceCollectionExtensions
             builder.Services.AddScoped(
                 typeof(IRunner<>).MakeGenericType(dto.Key),
                 typeof(BlossomDirectRunner<,>).MakeGenericType(dto.Key, dto.Value!));
+
+        foreach (var api in assembly.GetDerivedTypes(typeof(IBlossomApi)))
+            builder.Services.AddScoped(api);
     }
 
     public static void MapBlossomContexts(this WebApplication app, Assembly assembly)
