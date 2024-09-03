@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
                 typeof(IRunner<>).MakeGenericType(dto.Key),
                 typeof(BlossomDirectRunner<,>).MakeGenericType(dto.Key, dto.Value!));
 
-        foreach (var api in assembly.GetDerivedTypes(typeof(IBlossomApi)))
+        foreach (var api in assembly.GetTypes().Where(t => typeof(IBlossomApi).IsAssignableFrom(t)))
             builder.Services.AddScoped(api);
     }
 
