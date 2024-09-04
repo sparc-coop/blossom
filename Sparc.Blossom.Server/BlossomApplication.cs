@@ -65,4 +65,27 @@ public static class BlossomApplication
 
         return blossomApp;
     }
+
+    public static MauiApp CreateMauiApp<TApp>(Action<MauiAppBuilder>? builderOptions = null, Action<MauiApp>? app = null) where TApp : class, IApplication
+    {
+        var builder = MauiApp.CreateBuilder();
+        builder
+            .UseMauiApp<TApp>()
+            .ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+            });
+
+        builder.Services.AddMauiBlazorWebView();
+
+#if DEBUG
+        builder.Services.AddBlazorWebViewDeveloperTools();
+        builder.Logging.AddDebug();
+#endif
+
+        // Register services
+        //builder.Services.AddBlossomRealtime<TApp>();
+
+        return builder.Build();
+    }
 }

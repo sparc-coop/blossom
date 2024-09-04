@@ -1,0 +1,117 @@
+﻿@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Net.Http.Json
+@using Sparc.Blossom.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using System.Text.RegularExpressions
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+</style>
+
+<div class="login-component kori-ignore">
+    <AuthorizeView>
+        <Authorized>
+            <button @onclick="BeginLogin" class="@(context.User.IsAnonymous() ? "loggedout" : "loggedin")" aria-label="user" _="on click toggle .show on .login-component__menu">
+                <UserIcon LoggedIn="!context.User.IsAnonymous()" />
+            </button>
+
+            <div class="login-component__menu">
+                @switch (Auth.LoginState)
+                {
+                    case LoginStates.ReadyForLogin:
+                        <input @ref=LoginInput type="text" @bind="Email" name="username" placeholder="Enter your email" autocomplete="username webauthn" @onclick:stopPropagation="true" />
+                        <div class="icon submit">
+                            OK
+                        </div>
+                        break;
+                    case LoginStates.VerifyingToken:
+                    case LoginStates.VerifyingEmail:
+                        <span>Signing you in...</span>
+                        break;
+                    case LoginStates.AwaitingMagicLink:
+                        <span>Click the link in your email!</span>
+                        break;
+                    case LoginStates.LoggedIn:
+                    <figcaption>Hi @Auth.User?.Username</figcaption>
+                        <button @onclick=LogoutAsync>
+                            <img src="/_content/Kori/icons/Logout.svg" />
+                        </button>
+                        break;
+                    case LoginStates.Error:
+                        <span>Error: @Auth.Message</span>
+                        break;
+                }
+                
+                <LanguageSelector />
+            </div>
+        </Authorized>
+    </AuthorizeView>
+</div>
+
+@inject IJSRuntime Js
+@inject IBlossomAuthenticator Auth
+@code {
+    [CascadingParameter] public ClaimsPrincipal? User { get; set; }
+    [Parameter][SupplyParameterFromQuery] public string? Token { get; set; }
+
+    public string? Email;
+    ElementReference? LoginInput;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (!string.IsNullOrEmpty(Token))
+            {
+                await foreach (var state in Auth.LoginAsync(User, Token))
+                    StateHasChanged();
+            }
+            else
+            {
+                var test = await Auth.GetAsync(User);
+                var name = Auth.User.Username;
+                Regex validateGuidRegex = new Regex("^(?:\\{{0,1}(?:[0-9a-fA-F]){8}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){4}-(?:[0-9a-fA-F]){12}\\}{0,1})$");
+                if (!String.IsNullOrEmpty(name) && !validateGuidRegex.IsMatch(name))
+                {
+                    Auth.LoginState = LoginStates.LoggedIn;
+                    StateHasChanged();
+                }
+            }
+        }
+    }
+
+    async Task BeginLogin()
+    {
+        // Attempt autofill signin
+        await foreach (var state in Auth.LoginAsync(User))
+            StateHasChanged();
+
+        if (Auth.LoginState == LoginStates.LoggedIn)
+            return;
+
+        Auth.LoginState = LoginStates.ReadyForLogin;
+        StateHasChanged();
+        await Task.Delay(1);
+        if (LoginInput.HasValue)
+            await LoginInput.Value.FocusAsync();
+    }
+
+    async Task LoginAsync()
+    {
+        await foreach (var state in Auth.LoginAsync(User, Email))
+        {
+            Console.WriteLine($"Current state: {state}");
+            StateHasChanged(); // Update the UI after each state change
+        }
+    }
+
+    async Task LogoutAsync()
+    {
+        await foreach (var state in Auth.LogoutAsync(User))
+            StateHasChanged();
+
+        Auth.LoginState = LoginStates.LoggedOut;
+        StateHasChanged();
+    }
+}
