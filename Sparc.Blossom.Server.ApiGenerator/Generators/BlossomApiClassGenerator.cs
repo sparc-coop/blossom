@@ -15,6 +15,8 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
         foreach (var property in source.Properties)
             properties.AppendLine($@"{property.Modifiers} {property.Type} {property.Name} {{ get; set; }}");
 
+        properties.AppendLine($@"public required string Id {{ get; set; }}");
+
         foreach (var constant in source.Constants)
             properties.AppendLine(constant.Body);
 
