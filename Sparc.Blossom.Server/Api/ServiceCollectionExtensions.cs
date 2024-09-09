@@ -19,8 +19,12 @@ public static class ServiceCollectionExtensions
             .Select(x => x.BaseType!.GetGenericArguments().First())
             .Distinct();
 
-    public static void RegisterBlossomContexts(this WebApplicationBuilder builder, Assembly assembly)
+    public static void RegisterBlossomContexts(this WebApplicationBuilder builder, Assembly? assembly = null)
     {
+        assembly ??= Assembly.GetEntryAssembly()!;
+
+        builder.Services.AddScoped(typeof(BlossomApiContext<>));
+
         var apis = assembly.GetDerivedTypes(typeof(BlossomApiContext<>));
         foreach (var api in apis)
             builder.Services.AddScoped(api);
@@ -40,7 +44,7 @@ public static class ServiceCollectionExtensions
                 typeof(IRunner<>).MakeGenericType(dto.Key),
                 typeof(BlossomDirectRunner<,>).MakeGenericType(dto.Key, dto.Value!));
 
-        foreach (var api in assembly.GetDerivedTypes(typeof(IBlossomApi)))
+        foreach (var api in assembly.GetTypes().Where(t => typeof(IBlossomApi).IsAssignableFrom(t)))
             builder.Services.AddScoped(api);
     }
 
