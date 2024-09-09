@@ -144,9 +144,9 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
     public async Task<bool> SendMagicLinkAsync(BlossomUser user, string urlTemplate, int timeToLive = 3600)
         => await PostAsync("magic-links/send", new
         {
-            emailAddress = user.Username,
+            user.Username,
             urlTemplate,
-            userId = user.Id,
+            user.Id,
             timeToLive
         });
 
