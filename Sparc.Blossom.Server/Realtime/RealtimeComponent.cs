@@ -20,6 +20,17 @@ public class BlossomRealtime : ComponentBase
             }));
     }
 
+    protected async Task RawOn<String>(string subscriptionId, Action<String> action) 
+    {
+        if (Hub != null)
+        {
+            Hub.On<String>(subscriptionId, async evt =>
+            {
+                action.Invoke(evt);
+            });
+        }
+    }
+
     protected async Task On<T>(string subscriptionId, Action<T> action) where T : BlossomEvent
     {
         if (Hub != null)
@@ -28,7 +39,9 @@ public class BlossomRealtime : ComponentBase
             {
                 Subscriptions.Add(subscriptionId, 1);
                 if (Hub.State == HubConnectionState.Connected)
+                {
                     await Hub!.InvokeAsync("Watch", subscriptionId);
+                }
                 else
                     Hub.On("_UserConnected", async () =>
                     {
