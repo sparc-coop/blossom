@@ -42,6 +42,22 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         publicKey = options.Value.ApiKey!;
     }
 
+    public override async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
+    {
+        if (principal?.Identity?.IsAuthenticated == true)
+        {
+            User = await Users.FindAsync(principal.Id());
+        }
+
+        if (User == null)
+        {
+            User = new T();
+            await Users.AddAsync((T)User);
+        }
+
+        return User!;
+    }
+
     public override async IAsyncEnumerable<LoginStates> LoginAsync(ClaimsPrincipal principal, string? emailOrToken = null)
     {
         Message = null;
