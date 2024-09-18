@@ -93,15 +93,6 @@ public static class ServiceCollectionExtensions
         return app;
     }
 
-    public static IServiceCollection AddBlossomService<T>(this IServiceCollection services) where T : class
-    {
-        services.AddSingleton(typeof(BlossomQueue<>))
-                .AddHostedService<BlossomRunner<T>>()
-                .AddScoped<T>();
-
-        return services;
-    }
-
     public static bool IsWebAssembly(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ImplementationType?.Name.Contains("WebAssemblyEndpointProvider") == true);
 
     public static bool IsServer(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ImplementationType?.Name.Contains("CircuitEndpointProvider") == true);
