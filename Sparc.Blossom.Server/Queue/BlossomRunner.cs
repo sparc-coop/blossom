@@ -20,7 +20,7 @@ public class BlossomRunner<T> : BackgroundService where T : class
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation($"Shape Runner is running.");
+        _logger.LogInformation($"Blossom Runner is running.");
 
         for (var i = 0; i < _executorsCount; i++)
         {
@@ -57,7 +57,7 @@ public class BlossomRunner<T> : BackgroundService where T : class
 
     public override Task StopAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Queued Hosted Service is stopping.");
+        _logger.LogInformation("Blossom Runner is stopping.");
 
         if (_executors != null)
         {

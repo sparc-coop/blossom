@@ -2,6 +2,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Data;
 using System.Linq.Expressions;
 
@@ -159,5 +160,10 @@ public class SqlServerRepository<T> : RepositoryBase<T>, IRepository<T> where T 
             Command.Remove(item);
 
         await CommitAsync();
+    }
+
+    public async Task UpdateWhereAsync(Expression<Func<T, bool>> where, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> update)
+    {
+        await Command.Where(where).ExecuteUpdateAsync(update);
     }
 }

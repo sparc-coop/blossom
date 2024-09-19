@@ -6,7 +6,6 @@ using Sparc.Blossom.Server;
 using Sparc.Blossom.Api;
 using Sparc.Blossom.Authentication;
 using System.Reflection;
-using System.Linq;
 using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom;
@@ -15,29 +14,12 @@ public static class ServiceCollectionExtensions
 {
     public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, Action<WebApplicationBuilder>? options = null, IComponentRenderMode? renderMode = null)
     {
-        var razor = builder.Services.AddRazorComponents();
-        renderMode ??= RenderMode.InteractiveAuto;
-
-        if (renderMode == RenderMode.InteractiveServer || renderMode == RenderMode.InteractiveAuto)
-            razor.AddInteractiveServerComponents();
-        //if (renderMode == RenderMode.InteractiveWebAssembly || renderMode == RenderMode.InteractiveAuto)
-        //    razor.AddInteractiveWebAssemblyComponents();
-
-        options?.Invoke(builder);
-
-        builder.Services.AddScoped(typeof(BlossomApiContext<>));
-        builder.RegisterBlossomContexts(Assembly.GetEntryAssembly()!);
-
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSingleton<AdditionalAssembliesProvider>();
-
-        builder.AddBlossomRepository();
-
+        builder.AddBlossom<BlossomUser>();
         return builder;
 
     }
 
-    public static WebApplicationBuilder AddBlossom<TUser>(this WebApplicationBuilder builder, Action<WebApplicationBuilder>? options = null, IComponentRenderMode? renderMode = null)
+    public static WebApplicationBuilder AddBlossom<TUser>(this WebApplicationBuilder builder, Action<WebApplicationBuilder>? options = null, IComponentRenderMode? renderMode = null, Assembly? apiAssembly = null)
         where TUser : BlossomUser, new()
     {
         var razor = builder.Services.AddRazorComponents();
@@ -52,8 +34,7 @@ public static class ServiceCollectionExtensions
 
         options?.Invoke(builder);
 
-        builder.Services.AddScoped(typeof(BlossomApiContext<>));
-        builder.RegisterBlossomContexts(Assembly.GetEntryAssembly()!);
+        builder.RegisterBlossomContexts(apiAssembly);
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSingleton<AdditionalAssembliesProvider>();
@@ -110,15 +91,6 @@ public static class ServiceCollectionExtensions
         app.MapBlossomContexts(server!);
 
         return app;
-    }
-
-    public static IServiceCollection AddBlossomService<T>(this IServiceCollection services) where T : class
-    {
-        services.AddSingleton(typeof(BlossomQueue<>))
-                .AddHostedService<BlossomRunner<T>>()
-                .AddScoped<T>();
-
-        return services;
     }
 
     public static bool IsWebAssembly(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ImplementationType?.Name.Contains("WebAssemblyEndpointProvider") == true);

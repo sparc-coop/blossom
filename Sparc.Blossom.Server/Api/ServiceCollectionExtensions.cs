@@ -19,8 +19,12 @@ public static class ServiceCollectionExtensions
             .Select(x => x.BaseType!.GetGenericArguments().First())
             .Distinct();
 
-    public static void RegisterBlossomContexts(this WebApplicationBuilder builder, Assembly assembly)
+    public static void RegisterBlossomContexts(this WebApplicationBuilder builder, Assembly? assembly = null)
     {
+        assembly ??= Assembly.GetEntryAssembly()!;
+
+        builder.Services.AddScoped(typeof(BlossomApiContext<>));
+
         var apis = assembly.GetDerivedTypes(typeof(BlossomApiContext<>));
         foreach (var api in apis)
             builder.Services.AddScoped(api);

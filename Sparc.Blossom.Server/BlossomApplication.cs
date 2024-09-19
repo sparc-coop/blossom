@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Data;
 using Sparc.Blossom.Realtime;
+using System.Reflection;
 
 namespace Sparc.Blossom;
 
@@ -10,10 +12,12 @@ public static class BlossomApplication
         string[] args,
         Action<WebApplicationBuilder>? builderOptions = null,
         Action<WebApplication>? app = null,
-        IComponentRenderMode? renderMode = null)
+        IComponentRenderMode? renderMode = null,
+        Assembly? apiAssembly = null)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.AddBlossom(builderOptions, renderMode);
+        builder.Services.AddScoped<IRepository<BlossomUser>, BlossomSet<BlossomUser>>();
+        builder.AddBlossom<BlossomUser>(builderOptions, renderMode, apiAssembly);
         builder.Services.AddBlossomRealtime<TApp>();
 
         var blossomApp = builder.UseBlossom<TApp>();
