@@ -12,8 +12,9 @@ public class NotificationForwarder<TNotification>(IHubContext<BlossomHub> hub) :
         {
             Console.WriteLine("Notification: " + notification.GetType().Name + " to " + notification.SubscriptionId);
             //await Hub.Clients.Group(notification.SubscriptionId).SendAsync(notification.GetType().Name, notification);
-
-            await Hub.Clients.All.SendAsync(notification.SubscriptionId, notification.SubscriptionId);
+            var methodName = notification.GetType().Name;
+            await Hub.Clients.Group(notification.SubscriptionId).SendAsync(methodName, notification.SubscriptionId);
+            //await Hub.Clients.All.SendAsync(notification.SubscriptionId, notification.SubscriptionId);
         }
     }
 }
