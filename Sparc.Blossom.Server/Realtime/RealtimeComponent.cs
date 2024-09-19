@@ -1,18 +1,13 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Sparc.Blossom.Api;
 using Sparc.Blossom.Data;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters;
 
 namespace Sparc.Blossom.Realtime;
 
 public class BlossomRealtime : ComponentBase
 {
-    [CascadingParameter]
-    public object Parent { get; set; }
-
     [CascadingParameter] public HubConnection? Hub { get; set; }
     readonly List<IDisposable> Events = [];
     protected readonly static Dictionary<string, int> Subscriptions = [];
