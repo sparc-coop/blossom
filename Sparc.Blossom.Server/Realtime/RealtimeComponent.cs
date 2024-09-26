@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Newtonsoft.Json;
 using Sparc.Blossom.Data;
 using System.Reflection;
 
@@ -16,102 +16,83 @@ public class BlossomRealtime : ComponentBase
 
     protected override async Task OnInitializedAsync()
     {
+        await SubscribeToBlossomEntityChanges();
+    }
+
+    private async Task SubscribeToBlossomEntityChanges()
+    {
         var childComponentType = this.GetType();
 
         var properties = childComponentType.GetProperties();
 
         foreach (var property in properties)
         {
-            // Check if the property has the [Parameter] attribute - future check how we could handle this
-            if (property.GetCustomAttributes(typeof(ParameterAttribute), false).Any())
+            var value = property.GetValue(this);
+            var valueType = value?.GetType();
+
+            if (IsNamespaceBlossomApi(valueType))
             {
-                var value = property.GetValue(this); 
-                var valueType = value?.GetType(); 
+                var typeName = valueType.Name;
 
-                if (valueType != null && valueType.Namespace != null)
+                var idProperty = valueType.GetProperty("Id",
+                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+                if (idProperty != null)
                 {
-                    if (valueType.Namespace.StartsWith("Sparc.Blossom.Api"))
+                    var idValue = idProperty.GetValue(value);
+
+                    await BlossomOn<BlossomEntityChanged>($"{typeName}-{idValue}", async (res) =>
                     {
-                        var typeName = valueType.Name;
-
-                        var idProperty = valueType.GetProperty("Id",
-                            BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-                        if (idProperty != null)
+                        if (res.Entity != null)
                         {
-                            var idValue = idProperty.GetValue(value);
-
-                            var result = $"{typeName} - Id: {idValue}";
-                            Console.WriteLine(result);
-
-                            await RegisterBlossomSubscriberAsync(property, childComponentType, typeName, idValue);
-
+                            UpdateModifiedProperties(property, this, res.Entity);
+                            InvokeAsync(StateHasChanged);
                         }
-                        else
-                        {
-                            Console.WriteLine($"The type {typeName} does not contain an 'Id' property.");
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private async Task RegisterBlossomSubscriberAsync(PropertyInfo property, Type childComponentType, string typeName, object? idValue)
-    {
-        var apiFieldInfo = childComponentType.GetRuntimeFields().Where(x => x.Name.Contains("<Api>")).FirstOrDefault();
-
-        if (apiFieldInfo != null)
-        {
-            var apiField = apiFieldInfo.GetValue(this);
-
-            if (apiField != null)
-            {
-                var relevantProperty = apiField.GetType().GetProperty(typeName + "s");
-
-                if (relevantProperty != null)
-                {
-                    var relevantInstance = relevantProperty.GetValue(apiField);
-
-                    if (relevantInstance != null)
-                    {
-                        var getMethod = relevantInstance.GetType().GetMethod("Get");
-
-                        if (getMethod != null)
-                        {
-                            await BlossomOn<BlossomEntityChanged>($"{typeName}-{idValue}", async (res) =>
-                            {
-                                Console.WriteLine("Post updated from raw On", res);
-                                var fetchedTask = (Task)getMethod.Invoke(relevantInstance, new object[] { idValue });
-
-                                await fetchedTask.ConfigureAwait(false);
-                                var resultProperty = fetchedTask.GetType().GetProperty("Result");
-                                var fetchedObject = resultProperty?.GetValue(fetchedTask);
-
-                                if (fetchedObject != null)
-                                {
-                                    property.SetValue(this, fetchedObject);
-                                    InvokeAsync(StateHasChanged);
-                                }
-                                Console.WriteLine($"Fetched object: {fetchedObject}");
-                            });
-                        }
-                        else
-                        {
-                            Console.WriteLine($"No 'Get' method found on '{typeName}s'.");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine($"'{typeName}s' instance not found.");
-                    }
+                    });
                 }
                 else
                 {
-                    Console.WriteLine("'Api' field value is null.");
+                    Console.WriteLine($"The type {typeName} does not contain an 'Id' property.");
                 }
             }
-           
+
+
+        }
+    }
+
+    private bool IsNamespaceBlossomApi(Type? valueType)
+    {
+        if (valueType != null && valueType.Namespace != null && valueType.Namespace.StartsWith("Sparc.Blossom.Api"))
+        {
+            return true;
+        }
+        
+        return false;
+    }
+
+    private void UpdateModifiedProperties(PropertyInfo targetProperty, object targetObject, object sourceObject)
+    {
+        var targetType = targetProperty.PropertyType;
+        var sourceProperties = sourceObject.GetType().GetProperties();
+
+        foreach (var sourceProp in sourceProperties)
+        {
+            if (sourceProp.Name == "Id")
+            {
+                continue; 
+            }
+
+            var targetProp = targetType.GetProperty(sourceProp.Name);
+            if (targetProp != null && targetProp.CanWrite)
+            {
+                var sourceValue = sourceProp.GetValue(sourceObject);
+                var targetValue = targetProp.GetValue(targetProperty.GetValue(targetObject));
+
+                if (!Equals(targetValue, sourceValue))
+                {
+                    targetProp.SetValue(targetProperty.GetValue(targetObject), sourceValue);
+                }
+            }
         }
     }
 
@@ -125,117 +106,50 @@ public class BlossomRealtime : ComponentBase
             }));
     }
 
-    protected async Task RawOn<String>(string subscriptionId, Action<String> action) 
+    protected async Task BlossomOn<T>(string subscriptionId, Action<BlossomEvent> action) where T : BlossomEvent
     {
         if (Hub != null)
         {
             if (Hub.State == HubConnectionState.Connected)
             {
-                await Hub!.InvokeAsync("Watch", subscriptionId);
-
-                Hub.On<String>(subscriptionId, (evt) =>
-                {
-                    action.Invoke(evt);
-                    InvokeAsync(StateHasChanged);
-                });
+                await AddSignalRHandler<T>(subscriptionId, action);
             }
             else
             {
                 Hub.On("_UserConnected", async () =>
                 {
-                    await Hub!.InvokeAsync("Watch", subscriptionId);
-
-                    Hub.On<String>(subscriptionId, (evt) =>
-                    {
-                        action.Invoke(evt);
-                        InvokeAsync(StateHasChanged);
-                    });
+                    await AddSignalRHandler<T>(subscriptionId, action);
                 });
             }
-
-            //if (!Subscriptions.TryGetValue(subscriptionId, out int value))
-            //{
-            //    Subscriptions.Add(subscriptionId, 1);
-            //    if (Hub.State == HubConnectionState.Connected)
-            //    {                    
-            //        await Hub!.InvokeAsync("Watch", subscriptionId);
-            //    }
-            //    else
-            //        Hub.On("_UserConnected", async () =>
-            //        {
-            //            await Hub!.InvokeAsync("Watch", subscriptionId);
-            //        });
-            //}
-            //else
-            //{
-            //    Subscriptions[subscriptionId] = ++value;
-            //}
-
-
-
         }
     }
 
-    protected async Task BlossomOn<T>(string subscriptionId, Action<String> action) where T : BlossomEvent
+    private async Task AddSignalRHandler<T>(string subscriptionId, Action<BlossomEvent> action) where T : BlossomEvent
     {
-        if (Hub != null)
+        await Hub!.InvokeAsync("Watch", subscriptionId);
+
+        Hub.On(typeof(T).Name, (Action<string>)((json) =>
         {
-            if (Hub.State == HubConnectionState.Connected)
+            BlossomEvent? evt = DeserializeNotificationObject(json);
+
+            var equals = evt.SubscriptionId == subscriptionId;
+            if (equals)
             {
-                await Hub!.InvokeAsync("Watch", subscriptionId);
-
-                var test = typeof(T).Name;
-
-                Hub.On<String>(typeof(T).Name, (evt) =>
-                {
-                    //todo check if equals is necessary?
-                    var equals = evt == subscriptionId;
-                    if (equals)
-                    {
-                        action.Invoke(evt);
-                        InvokeAsync(StateHasChanged);
-                    }
-                });
+                action.Invoke(evt);
+                InvokeAsync(StateHasChanged);
             }
-            else
-            {
-                Hub.On("_UserConnected", async () =>
-                {
-                    await Hub!.InvokeAsync("Watch", subscriptionId);
+        }));
+    }
 
-                    Hub.On<String>(typeof(T).Name, (evt) =>
-                    {
-                        var equals = evt == subscriptionId;
-                        if (equals)
-                        {
-                            action.Invoke(evt);
-                            InvokeAsync(StateHasChanged);
-                        }
-                    });
-                });
-            }
+    private static BlossomEvent? DeserializeNotificationObject(string json)
+    {
+        var settings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.All
+        };
 
-            //if (!Subscriptions.TryGetValue(subscriptionId, out int value))
-            //{
-            //    Subscriptions.Add(subscriptionId, 1);
-            //    if (Hub.State == HubConnectionState.Connected)
-            //    {                    
-            //        await Hub!.InvokeAsync("Watch", subscriptionId);
-            //    }
-            //    else
-            //        Hub.On("_UserConnected", async () =>
-            //        {
-            //            await Hub!.InvokeAsync("Watch", subscriptionId);
-            //        });
-            //}
-            //else
-            //{
-            //    Subscriptions[subscriptionId] = ++value;
-            //}
-
-
-
-        }
+        var evt = JsonConvert.DeserializeObject<BlossomEvent>(json, settings);
+        return evt;
     }
 
     protected async Task On<T>(string subscriptionId, Action<T> action) where T : BlossomEvent
