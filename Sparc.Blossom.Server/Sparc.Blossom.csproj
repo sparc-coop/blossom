@@ -1,13 +1,41 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor" InitialTargets="Test">
+	<Target Name="Test">
+		<Message Importance="High" Text="+++++++++ Blossom +++++++++ target framework is $(TargetFramework)" />
+		<Message Importance="High" Text="+++++++++ Blossom +++++++++ Razor Component is $(RazorComponent)" />
+	</Target>
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFrameworks>net8.0;net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
+		
+		<OutputType>Exe</OutputType>
+		<RootNamespace>Sparc.Blossom</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<EnableDefaultCssItems>false</EnableDefaultCssItems>
+
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
 		<Version>8.1.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+		<!-- Display name -->
+		<ApplicationTitle>Sparc.Blossom</ApplicationTitle>
+
+		<!-- App Identifier -->
+		<ApplicationId>com.companyname.sparc.blossom</ApplicationId>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
+		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
 
 		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
@@ -21,11 +49,42 @@
 		<NoWarn>NU5100</NoWarn>
 	</PropertyGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
+
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+	</ItemGroup>
+
 	<ItemGroup>
 	  <Content Remove="compilerconfig.json" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-android'">
+		<Content Remove="BlossomApp.razor" />
+		<None Include="BlossomApp.razor" />
+	</ItemGroup>
+
 	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.App" Version="8.0.8" />
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="MediatR" Version="12.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.7" />
@@ -33,7 +92,7 @@
 		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
 		<None Include="compilerconfig.json" />
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 		<None Update="readme.md" Pack="true" PackagePath="\" />
@@ -42,5 +101,47 @@
 
 	<ItemGroup>
 	  <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+		<RazorComponent Update="Authentication\**\*.razor">
+			<ExcludeFromRazorCompile>true</ExcludeFromRazorCompile>
+		</RazorComponent>
+		<RazorComponent Update="Realtime\**\*.razor">
+			<ExcludeFromRazorCompile>true</ExcludeFromRazorCompile>
+		</RazorComponent>
+		<RazorComponent Update="BlossomApp.razor">
+			<ExcludeFromRazorCompile>true</ExcludeFromRazorCompile>
+		</RazorComponent>
+		<!-- Add any other components you need to exclude -->
+	</ItemGroup>
+	
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<!-- Exclude the Platforms folder -->
+		<Compile Remove="Platforms\**\*.*" />
+		<Compile Remove="Resources\**\*.*" />
+		<Compile Remove="Components\**\*.*" />
+		<Compile Remove="App.xaml" />
+		<Compile Remove="App.xaml.cs" />
+		<Compile Remove="MainPage.xaml" />
+		<Compile Remove="MainPage.xaml.cs" />
+		<None Include="MainPage.xaml" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+		<Compile Remove="MainPage.xaml.cs" />
+		<Compile Remove="MauiProgram.xaml" />
+		<Compile Remove="MauiProgram.xaml.cs" />
+		<!--<None Remove="Platforms\**\*.*" />-->
+		<!-- Exclude other platform-specific files if necessary -->
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="App.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="MainPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Platforms\Windows\App.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	</ItemGroup>
 </Project>
