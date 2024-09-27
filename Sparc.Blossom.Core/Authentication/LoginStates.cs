@@ -2,6 +2,7 @@
 
 public enum LoginStates
 {
+    NotInitialized,
     LoggedOut,
     ReadyForLogin,
     VerifyingEmail,
