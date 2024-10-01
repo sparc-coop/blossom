@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json;
+using Sparc.Blossom.Core.Serialization;
+using Sparc.Blossom.Data;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Realtime;
 
@@ -22,12 +25,16 @@ public class NotificationForwarder<TNotification>(IHubContext<BlossomHub> hub) :
 
     private static string SerializeNotification(TNotification notification)
     {
-        var settings = new JsonSerializerSettings
+        var options = new JsonSerializerOptions
         {
-            TypeNameHandling = TypeNameHandling.All
+            WriteIndented = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            IncludeFields = true
         };
 
-        var serializedNotification = JsonConvert.SerializeObject(notification, settings);
+        options.Converters.Add(new PolymorphicJsonConverter<BlossomEntity>());
+
+        var serializedNotification = JsonSerializer.Serialize(notification, notification.GetType(), options);
         return serializedNotification;
     }
 }

@@ -1,8 +1,7 @@
 ﻿using MediatR;
 using MediatR.NotificationPublishers;
 using Microsoft.AspNetCore.SignalR;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Realtime;
@@ -12,14 +11,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBlossomRealtime<TAssembly>(this IServiceCollection services)
     {
         var signalR = services.AddSignalR()
-            .AddNewtonsoftJsonProtocol(options =>
+            .AddJsonProtocol(options =>
             {
-                options.PayloadSerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                options.PayloadSerializerSettings.ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new CamelCaseNamingStrategy(),
-                    IgnoreSerializableInterface = false
-                };
+                options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.PayloadSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                options.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             });
 
         services.AddMediatR(options =>

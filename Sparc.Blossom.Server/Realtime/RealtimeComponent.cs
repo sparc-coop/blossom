@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
-using Newtonsoft.Json;
+using Sparc.Blossom.Core.Serialization;
 using Sparc.Blossom.Data;
 using System.Reflection;
+using System.Text.Json;
 
 namespace Sparc.Blossom.Realtime;
 
@@ -143,12 +144,12 @@ public class BlossomRealtime : ComponentBase
 
     private static BlossomEvent? DeserializeNotificationObject(string json)
     {
-        var settings = new JsonSerializerSettings
+        var options = new JsonSerializerOptions
         {
-            TypeNameHandling = TypeNameHandling.All
+            IncludeFields = true
         };
-
-        var evt = JsonConvert.DeserializeObject<BlossomEvent>(json, settings);
+        options.Converters.Add(new PolymorphicJsonConverter<BlossomEntity>());
+        var evt = JsonSerializer.Deserialize<BlossomEvent>(json, options);
         return evt;
     }
 
