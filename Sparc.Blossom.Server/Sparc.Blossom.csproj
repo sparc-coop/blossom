@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 	<Target Name="Test" BeforeTargets="Build">
 		<Message Importance="High" Text="+++++++++ Blossom +++++++++ target framework is $(TargetFramework)" />
-		<Message Importance="high" Text="None file:@(None)---Razor files:@(RazorComponent)---Compile files:@(Compile)---Content files:@(Content)---Embedded Resource files:@(EmbeddedResource)---CodeAnalysisDictionary files:@(CodeAnalysisDictionary)---ApplicationDefinition files:@(ApplicationDefinition)---Page files:@(Page)---Resource files:@(Resource)---SplashScreen files:@(SplashScreen)---DesignData files: @(DesignData) Reference dlls :@(Reference)" /> 
+		<Message Importance="high" Text="---Razor files: @(RazorComponent)" /> 
 	</Target>
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
