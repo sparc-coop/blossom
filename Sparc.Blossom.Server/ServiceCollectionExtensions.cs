@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Sparc.Blossom;
 
 public static class ServiceCollectionExtensions
-{
+{  
     public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, Action<WebApplicationBuilder>? options = null, IComponentRenderMode? renderMode = null)
     {
         builder.AddBlossom<BlossomUser>();

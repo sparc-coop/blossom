@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor" InitialTargets="Test">
 	<Target Name="Test">
 		<Message Importance="High" Text="+++++++++ Blossom +++++++++ target framework is $(TargetFramework)" />
-		<Message Importance="High" Text="+++++++++ Blossom +++++++++ Razor Component is $(RazorComponent)" />
+		<Message Importance="High" Text="+++++++++ Blossom +++++++++ Maui version is $(MauiVersion)" />
+		<Message Importance="High" Text="+++++++++ Blossom +++++++++ Runtime identifier is $(RuntimeIdentifier)" />
 	</Target>
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net8.0-android;net8.0-ios;net8.0-maccatalyst</TargetFrameworks>
@@ -51,14 +52,14 @@
 
 	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
 		<!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+		<!--<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />-->
 
 		<!-- Splash Screen -->
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 
 		<!-- Images -->
-		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
+		<!--<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />-->
 
 		<!-- Custom Fonts -->
 		<MauiFont Include="Resources\Fonts\*" />

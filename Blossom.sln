@@ -35,13 +35,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example - Two Project", "Ex
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example - Single Project", "Example - Single Project", "{A17D4BE0-37C5-473B-9C57-ADFEBFF25DD9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example - .NET 8 Project", "Example - .NET 8 Project", "{3E2CFBEF-3776-4875-82D3-E09C2B97F737}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example -", "Example -", "{3E2CFBEF-3776-4875-82D3-E09C2B97F737}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Example.Net8", "Sparc.Blossom.Example.Net8\Sparc.Blossom.Example.Net8\Sparc.Blossom.Example.Net8.csproj", "{BB908AD1-B433-4F4D-A70A-68A48871AC7F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Example.Net8.Client", "Sparc.Blossom.Example.Net8\Sparc.Blossom.Example.Net8.Client\Sparc.Blossom.Example.Net8.Client.csproj", "{AF529810-C893-4A31-9393-D97DACCF1EB9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example - .NET 8 RTM Project", "Example - .NET 8 RTM Project", "{1AF4BAB6-73F8-426A-833A-5FD589A9EEBE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example - (2)", "Example - (2)", "{1AF4BAB6-73F8-426A-833A-5FD589A9EEBE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Example.NET8RTM", "Sparc.Blossom.Example.NET8RTM\Sparc.Blossom.Example.NET8RTM\Sparc.Blossom.Example.NET8RTM.csproj", "{B14C1BB5-DAC9-4AE1-B2F8-F5BE8C945204}"
 EndProject
@@ -60,6 +60,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.ApiGenerator", "Sparc.Blossom.Server.ApiGenerator\Sparc.Blossom.ApiGenerator.csproj", "{DF697DC6-3888-4861-955F-557239D6AA6B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Authentication.Passwordless", "Sparc.Blossom.Authentication.Passwordless\Sparc.Blossom.Authentication.Passwordless.csproj", "{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example - Maui", "Example - Maui", "{CD1E3E23-195F-4A08-A3DE-C44674531D0E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Example.Maui", "Sparc.Blossom.Example.Maui\Sparc.Blossom.Example.Maui.csproj", "{2DF08839-488F-434C-9295-F41DE7940849}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -377,6 +381,29 @@ Global
 		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x64.Build.0 = Release|Any CPU
 		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x86.ActiveCfg = Release|Any CPU
 		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x86.Build.0 = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Debug|Any CPU.Build.0 = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Debug|arm64.Build.0 = Debug|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Debug|arm64.Deploy.0 = Debug|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Debug|x64.Build.0 = Debug|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Debug|x64.Deploy.0 = Debug|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Debug|x86.Build.0 = Debug|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Debug|x86.Deploy.0 = Debug|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|arm64.ActiveCfg = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|arm64.Build.0 = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|arm64.Deploy.0 = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|x64.ActiveCfg = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|x64.Build.0 = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|x64.Deploy.0 = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|x86.ActiveCfg = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|x86.Build.0 = Release|Any CPU
+		{2DF08839-488F-434C-9295-F41DE7940849}.Release|x86.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -407,6 +434,8 @@ Global
 		{15B19810-8BF3-490F-B92A-0893C5E8F938} = {E4004076-AFB4-43FB-8656-071112EAB01E}
 		{DF697DC6-3888-4861-955F-557239D6AA6B} = {F4760C1E-ABB6-4355-A42E-311BD30A1313}
 		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123} = {83F7C43B-B59D-4A53-9A86-23491B5AAC40}
+		{CD1E3E23-195F-4A08-A3DE-C44674531D0E} = {9B2106B7-4D61-411A-B9AE-46ECA3055F42}
+		{2DF08839-488F-434C-9295-F41DE7940849} = {CD1E3E23-195F-4A08-A3DE-C44674531D0E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1426913A-7024-4877-8B12-97D36034EDC9}
