@@ -64,4 +64,4 @@
     public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
         ? new[] { this.GetType().Assembly }
         : new[] { this.GetType().Assembly, typeof(DefaultLayout).Assembly };
-} 
+}
