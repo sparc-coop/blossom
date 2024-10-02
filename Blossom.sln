@@ -61,6 +61,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.ApiGenerator"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Authentication.Passwordless", "Sparc.Blossom.Authentication.Passwordless\Sparc.Blossom.Authentication.Passwordless.csproj", "{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sparc.Blossom.Example.Maui", "Sparc.Blossom.Example.Maui\Sparc.Blossom.Example.Maui.csproj", "{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -377,6 +379,30 @@ Global
 		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x64.Build.0 = Release|Any CPU
 		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x86.ActiveCfg = Release|Any CPU
 		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x86.Build.0 = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|arm64.Build.0 = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|arm64.Deploy.0 = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|x64.Build.0 = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|x64.Deploy.0 = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|x86.Build.0 = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Debug|x86.Deploy.0 = Debug|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|arm64.ActiveCfg = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|arm64.Build.0 = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|arm64.Deploy.0 = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|x64.ActiveCfg = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|x64.Build.0 = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|x64.Deploy.0 = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|x86.ActiveCfg = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|x86.Build.0 = Release|Any CPU
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E}.Release|x86.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -407,6 +433,7 @@ Global
 		{15B19810-8BF3-490F-B92A-0893C5E8F938} = {E4004076-AFB4-43FB-8656-071112EAB01E}
 		{DF697DC6-3888-4861-955F-557239D6AA6B} = {F4760C1E-ABB6-4355-A42E-311BD30A1313}
 		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123} = {83F7C43B-B59D-4A53-9A86-23491B5AAC40}
+		{16DBF8C5-CDAD-4EA2-965D-7C8AC8EF9B5E} = {9B2106B7-4D61-411A-B9AE-46ECA3055F42}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1426913A-7024-4877-8B12-97D36034EDC9}
