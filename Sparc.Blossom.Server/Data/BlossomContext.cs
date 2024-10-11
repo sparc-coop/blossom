@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MediatR;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 
@@ -17,7 +19,9 @@ public class BlossomContext(BlossomContextOptions options) : DbContext(options.D
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var result = await base.SaveChangesAsync(cancellationToken);
+
         await NotifyAsync();
+
         return result;
     }
 
