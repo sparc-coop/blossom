@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.SignalR.Client;
+﻿@using MessagePack
+@using Microsoft.AspNetCore.SignalR.Client;
 @namespace Sparc.Blossom.Realtime
 @implements IAsyncDisposable
 
@@ -52,7 +53,11 @@
         var url = Nav.BaseUri + "_realtime"; 
         Connection = new HubConnectionBuilder()
             .WithUrl(url)
-            //.AddMessagePackProtocol()
+             .AddMessagePackProtocol(options =>
+                {
+                    options.SerializerOptions = MessagePackSerializerOptions.Standard
+                        .WithResolver(BlossomEventResolver.Instance);
+                })
             .WithAutomaticReconnect()
             .Build();
 

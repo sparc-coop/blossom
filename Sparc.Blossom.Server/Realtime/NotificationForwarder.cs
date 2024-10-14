@@ -17,9 +17,9 @@ public class NotificationForwarder<TNotification>(IHubContext<BlossomHub> hub) :
             Console.WriteLine("Notification: " + notification.GetType().Name + " to " + notification.SubscriptionId);
             var methodName = notification.GetType().Name;
 
-            string serializedNotification = SerializeNotification(notification);
+            //string serializedNotification = SerializeNotification(notification);
 
-            await Hub.Clients.Group(notification.SubscriptionId).SendAsync(methodName, serializedNotification);
+            await Hub.Clients.Group(notification.SubscriptionId).SendAsync(methodName, notification);
         }
     }
 

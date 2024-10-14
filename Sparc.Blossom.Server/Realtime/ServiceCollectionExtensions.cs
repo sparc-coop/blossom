@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using MediatR.NotificationPublishers;
+using MessagePack;
 using Microsoft.AspNetCore.SignalR;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -11,12 +12,18 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBlossomRealtime<TAssembly>(this IServiceCollection services)
     {
         var signalR = services.AddSignalR()
-            .AddJsonProtocol(options =>
-            {
-                options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                options.PayloadSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-                options.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-            });
+             //.AddJsonProtocol(options =>
+             //{
+             //    options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+             //    options.PayloadSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+             //    options.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+             //});
+             .AddMessagePackProtocol(options =>
+             {
+                 options.SerializerOptions = MessagePackSerializerOptions.Standard
+                     .WithResolver(BlossomEventResolver.Instance);
+             });
+
 
         services.AddMediatR(options =>
         {

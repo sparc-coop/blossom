@@ -129,9 +129,9 @@ public class BlossomRealtime : ComponentBase
     {
         await Hub!.InvokeAsync("Watch", subscriptionId);
 
-        Hub.On(typeof(T).Name, (Action<string>)((json) =>
+        Hub.On(typeof(T).Name, (Action<T>)((evt) =>
         {
-            BlossomEvent? evt = DeserializeNotificationObject(json);
+            //BlossomEvent? evt = DeserializeNotificationObject(json);
 
             var equals = evt.SubscriptionId == subscriptionId;
             if (equals)
