@@ -70,7 +70,7 @@ public static class ServiceCollectionExtensions
         }
 
         app.UseHttpsRedirection();
-        app.UseStaticFiles();
+        app.MapStaticAssets();
         app.UseAntiforgery();
 
         app.UseBlossomAuthentication();
