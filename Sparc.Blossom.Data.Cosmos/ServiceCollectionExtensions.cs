@@ -42,4 +42,10 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+
+    public static IServiceCollection AddBlossomRevisionTracking<T>(this IServiceCollection services, string revisionContainerName) where T : DbContext
+    {
+        services.AddScoped(typeof(IRevisionRepository<>), typeof(CosmosDbRevisionRepository<>));
+        return services;
+    }
 }

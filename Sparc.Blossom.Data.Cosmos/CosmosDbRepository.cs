@@ -109,14 +109,14 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T :
 
     public async Task DeleteAsync(T item)
     {
-        await DeleteAsync(new[] { item });
+        await DeleteAsync([item]);
     }
 
     public async Task DeleteAsync(IEnumerable<T> items)
     {
         foreach (var item in items)
             Context.Set<T>().Remove(item);
-        
+
         await Context.SaveChangesAsync();
     }
 
@@ -142,7 +142,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T :
         var query = new QueryDefinition(sql);
         if (parameters != null)
         {
-            var i = 0; 
+            var i = 0;
             foreach (var parameter in parameters)
             {
                 var key = $"@{i++}";

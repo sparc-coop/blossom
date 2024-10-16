@@ -2,10 +2,12 @@
 
 namespace Sparc.Blossom.Data;
 
-public class BlossomEntity
+public abstract class BlossomEntity
 {
-    internal List<BlossomEvent>? _events;
-
+    public virtual object GenericId { get; } = null!;
+    protected List<BlossomEvent>? _events;
+    
+    // Event system
     public List<BlossomEvent> Publish()
     {
         _events ??= [];
@@ -27,7 +29,6 @@ public class BlossomEntity
 
     //protected void On(INotification notification) => ((dynamic)this).On(notification);
 
-    public virtual object GenericId { get; } = null!;
 }
 
 public class BlossomEntity<T> : BlossomEntity where T : notnull

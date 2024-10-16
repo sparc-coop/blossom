@@ -1,4 +1,7 @@
-﻿namespace Sparc.Blossom.Data;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore;
+
+namespace Sparc.Blossom.Data;
 
 public static class ServiceCollectionExtensions
 {
@@ -18,5 +21,12 @@ public static class ServiceCollectionExtensions
         builder.Services.AddScoped<IRepository<T>>(_ => results);
 
         return builder;
+    }
+
+    public static EntityTypeBuilder<T> BlossomEntity<T>(this ModelBuilder builder) where T : BlossomEntity
+    {
+        var entity = builder.Entity<T>();
+        builder.Entity<BlossomRevision<T>>();
+        return entity;
     }
 }
