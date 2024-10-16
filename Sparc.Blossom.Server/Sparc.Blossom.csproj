@@ -21,15 +21,15 @@
 		<Version>8.1.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
-		<!-- Display name -->
+		<!-- Display name --><!--
 		<ApplicationTitle>Sparc.Blossom</ApplicationTitle>
 
-		<!-- App Identifier -->
+		--><!-- App Identifier --><!--
 		<ApplicationId>com.companyname.sparc.blossom</ApplicationId>
 
-		<!-- Versions -->
+		--><!-- Versions --><!--
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
-		<ApplicationVersion>1</ApplicationVersion>
+		<ApplicationVersion>1</ApplicationVersion>-->
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
@@ -41,8 +41,8 @@
 		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Sparc Blossom package</Description>
-		<PackageIcon>icon.png</PackageIcon>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
+		<!--<PackageIcon>icon.png</PackageIcon>-->
+		<!--<PackageReadmeFile>readme.md</PackageReadmeFile>-->
 		<PackageTags>Features;API;Web;Sparc;Blossom</PackageTags>
 		<PackageProjectUrl>https://github.com/sparc-coop/blossom</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/sparc-coop/blossom</RepositoryUrl>
@@ -50,26 +50,26 @@
 		<NoWarn>NU5100</NoWarn>
 	</PropertyGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
-		<!-- App Icon -->
-		<!--<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />-->
+	<!--<ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+		--><!-- App Icon --><!--
+		--><!--<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />--><!--
 
-		<!-- Splash Screen -->
+		--><!-- Splash Screen --><!--
 		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 
-		<!-- Images -->
-		<!--<MauiImage Include="Resources\Images\*" />
-		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />-->
+		--><!-- Images --><!--
+		--><!--<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />--><!--
 
-		<!-- Custom Fonts -->
+		--><!-- Custom Fonts --><!--
 		<MauiFont Include="Resources\Fonts\*" />
 
-		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		--><!-- Raw Assets (also remove the "Resources\Raw" prefix) --><!--
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
-	</ItemGroup>
+	</ItemGroup>-->
 
 	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
-		<ProjectReference Include="..\Sparc.Blossom.Maui\Sparc.Blossom.Maui.csproj" />
+		<ProjectReference Include="..\Sparc.Blossom.MauiLib\Sparc.Blossom.MauiLib.csproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
@@ -81,10 +81,6 @@
 		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Remove="compilerconfig.json" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-android'">
@@ -102,7 +98,6 @@
 	</ItemGroup>-->
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-		<None Include="compilerconfig.json" />
 		<None Include="Files\icon.png" Pack="true" PackagePath="\" />
 		<None Update="readme.md" Pack="true" PackagePath="\" />
 		<None Include="..\Sparc.Blossom.Server.ApiGenerator\bin\$(Configuration)\netstandard2.0\Sparc.Blossom.ApiGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
