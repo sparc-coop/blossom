@@ -33,7 +33,6 @@ Welcome to your new app.
 
 <button @onclick="AddTodoItem">Add Todo Item</button>
 
-@inject TodoItemApi TodoItems
 @code
 {
     IEnumerable<TodoItem>? openItems;
@@ -46,13 +45,13 @@ Welcome to your new app.
 
     async Task GetItems()
     {
-        openItems = await TodoItems.Open();
-        closedItems = await TodoItems.Closed();
+        openItems = await Api.TodoItems.Open();
+        closedItems = await Api.TodoItems.Closed();
     }
 
     async Task AddTodoItem()
     {
-        var newItem = await TodoItems.Create("New Todo Item", "New Todo Item Description");
+        var newItem = await Api.TodoItems.Create("New Todo Item", "New Todo Item Description");
         await GetItems();
     }
 
@@ -64,7 +63,7 @@ Welcome to your new app.
 
     async Task Delete(TodoItem todoItem)
     {
-        await TodoItems.Delete(todoItem.Id);
+        await Api.TodoItems.Delete(todoItem.Id);
         await GetItems();
     }
 }

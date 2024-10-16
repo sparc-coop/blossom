@@ -72,11 +72,11 @@ public class BlossomApi({{constructor}}) : IBlossomApi
 
         foreach (var source in sources)
         {
-            foreach (var method in source.Methods)
-            {
-                var parameterPrefix = method.Arguments.Length > 0 ? ", " : "";
-                commands.AppendLine($@"public async Task {method.Name}({method.Arguments}) => await Runner.ExecuteAsync(Id, ""{method.Name}""{parameterPrefix}{method.Parameters});");
-            }
+            //foreach (var method in source.Methods)
+            //{
+            //    var parameterPrefix = method.Arguments.Length > 0 ? ", " : "";
+            //    commands.AppendLine($@"public async Task {method.Name}({method.Arguments}) => await Runner.ExecuteAsync(Id, ""{method.Name}""{parameterPrefix}{method.Parameters});");
+            //}
 
             foreach (var constructor in source.Constructors)
             {
