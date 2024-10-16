@@ -3,13 +3,13 @@ using System.Text.Json;
 
 namespace Sparc.Blossom.Data;
 
-public class BlossomSet<T> : IRepository<T> where T : class
+public class BlossomInMemoryDb<T> : IRepository<T> where T : class
 {
-    public BlossomSet()
+    public BlossomInMemoryDb()
     {
     }
     
-    public BlossomSet(IEnumerable<T> items)
+    public BlossomInMemoryDb(IEnumerable<T> items)
     {
         _items = items.ToList();
     }
@@ -133,7 +133,7 @@ public class BlossomSet<T> : IRepository<T> where T : class
             _items.Add(item);
     }
 
-    public static BlossomSet<T> FromUrl<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
+    public static BlossomInMemoryDb<T> FromUrl<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
     {
         using var client = new HttpClient();
         var webRequest = new HttpRequestMessage(HttpMethod.Get, url);
