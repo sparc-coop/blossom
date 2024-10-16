@@ -22,6 +22,18 @@ public class CosmosDbRevisionRepository<T>(DbContext context)
             .FirstOrDefaultAsync(x => x.Current == revision);
     }
 
+    public async Task<BlossomRevision<T>?> FindAsync(string id, DateTime asOfDate)
+    {
+        var ticks = asOfDate.ToUniversalTime().Ticks;
+
+        return await Context.Set<BlossomRevision<T>>()
+            .WithPartitionKey(id)
+            .AsNoTracking()
+            .Where(x => x.Current <= ticks)
+            .OrderByDescending(x => x.Current)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<IEnumerable<BlossomRevision<T>>> GetAsync(string id, int count)
     {
         return await Context.Set<BlossomRevision<T>>()
