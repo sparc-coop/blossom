@@ -23,10 +23,13 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
-    public static EntityTypeBuilder<T> BlossomEntity<T>(this ModelBuilder builder) where T : BlossomEntity
+    public static ModelBuilder EnableRevisions(this ModelBuilder builder)
     {
-        var entity = builder.Entity<T>();
-        builder.Entity<BlossomRevision<T>>();
-        return entity;
+        var revisionableEntities = builder.Model.GetEntityTypes().Where(x => typeof(IHasRevision).IsAssignableFrom(x.ClrType));
+
+        foreach (var entityType in revisionableEntities)
+            builder.Entity(typeof(BlossomRevision<>).MakeGenericType(entityType.ClrType));
+        
+        return builder;
     }
 }

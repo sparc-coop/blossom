@@ -56,7 +56,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T :
 
     public async Task AddAsync(T item)
     {
-        await AddAsync(new[] { item });
+        await AddAsync([item]);
     }
 
     public async Task AddAsync(IEnumerable<T> items)
@@ -69,7 +69,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T :
 
     public async Task UpdateAsync(T item)
     {
-        await UpdateAsync(new[] { item });
+        await UpdateAsync([item]);
     }
 
     public async Task UpdateAsync(IEnumerable<T> items)
@@ -86,6 +86,12 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T :
             else
             {
                 Context.Add(item);
+            }
+
+            if (typeof(IHasRevision).IsAssignableFrom(typeof(T)))
+            {
+                var revision = new BlossomRevision<T>(item);
+                Context.Add(revision);
             }
         }
 

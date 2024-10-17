@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Sparc.Blossom.Data;
 
@@ -39,13 +40,18 @@ public static class ServiceCollectionExtensions
         services.AddTransient(sp => new CosmosDbDatabaseProvider(sp.GetRequiredService<DbContext>(), databaseName));
 
         services.Add(new ServiceDescriptor(typeof(IRepository<>), typeof(CosmosDbRepository<>), serviceLifetime));
+        services.Add(new ServiceDescriptor(typeof(IRevisionRepository<>), typeof(CosmosDbRevisionRepository<>), serviceLifetime));
 
         return services;
     }
 
-    public static IServiceCollection AddBlossomRevisionTracking<T>(this IServiceCollection services, string revisionContainerName) where T : DbContext
+    public static ModelBuilder EnableRevisions(this ModelBuilder builder, string revisionContainerName)
     {
-        services.AddScoped(typeof(IRevisionRepository<>), typeof(CosmosDbRevisionRepository<>));
-        return services;
+        var revisionableEntities = builder.Model.GetEntityTypes().Where(x => typeof(IHasRevision).IsAssignableFrom(x.ClrType));
+
+        foreach (var entityType in revisionableEntities)
+            builder.Entity(typeof(BlossomRevision<>).MakeGenericType(entityType.ClrType)).ToContainer(revisionContainerName);
+
+        return builder;
     }
 }

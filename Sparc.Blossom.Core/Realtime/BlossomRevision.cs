@@ -17,7 +17,7 @@ public class BlossomRevision<T>(T entity) : BlossomRevision(entity) where T : Bl
 {
     public T Entity { get; private set; } = entity;
 
-    public static BlossomRevision<T> FromPrevious(string userId, BlossomRevision<T> current, BlossomRevision<T> previous)
+    public static BlossomRevision<T> FromPrevious(BlossomRevision<T> current, BlossomRevision<T> previous)
     {
         var revision = new BlossomRevision<T>(previous.Entity)
         {
@@ -28,7 +28,7 @@ public class BlossomRevision<T>(T entity) : BlossomRevision(entity) where T : Bl
         return revision;
     }
 
-    public static BlossomRevision<T> FromFuture(string userId, BlossomRevision<T> current, BlossomRevision<T> future)
+    public static BlossomRevision<T> FromFuture(BlossomRevision<T> current, BlossomRevision<T> future)
     {
         if (current.Future.FirstOrDefault() != future.Current)
             throw new Exception("Future entity revision does not match future reference in current");
