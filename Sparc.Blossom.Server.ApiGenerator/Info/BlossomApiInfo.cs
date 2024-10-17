@@ -33,6 +33,9 @@ internal class BlossomApiInfo
                 BaseOfName = genericArguments.Length > 1 ? genericArguments[1] : null;
                 BasePluralName = (BaseOfName ?? BaseName) + "s";
             }
+
+            if (type.BaseList.Types.Any(x => x.ToString().Contains("IHasRevision")))
+                HasRevisions = true;
         }
 
         PluralName = EntityName + "s";
@@ -75,6 +78,7 @@ internal class BlossomApiInfo
     public List<BlossomApiPropertyInfo> Properties { get; }
     public List<BlossomApiFieldInfo> Constants { get; }
     public bool IsEntity => BaseName?.Contains("BlossomEntity") == true;
+    public bool HasRevisions { get; } 
 
     public string EntityName => IsEntity ? Name : (BaseOfName ?? Name);
 }

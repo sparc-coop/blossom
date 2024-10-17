@@ -2,19 +2,17 @@
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbRevisionRepository<T>(DbContext context)
-    : IRevisionRepository<T>
-    where T : BlossomEntity<string>
+public class CosmosDbRevisionRepository<T>(DbContext context) : IRevisionRepository<T> where T : BlossomEntity<string>
 {
     public DbContext Context { get; } = context;
 
-    public async Task<BlossomRevision<T>?> FindAsync(string id)
+    public async Task<BlossomRevision<T>?> GetLatestAsync(string id)
     {
-        var current = await GetAsync(id, 1);
+        var current = await GetRevisionsAsync(id, 1);
         return current.FirstOrDefault();
     }
 
-    public async Task<BlossomRevision<T>?> FindAsync(string id, long revision)
+    public async Task<BlossomRevision<T>?> GetAsync(string id, long revision)
     {
         return await Context.Set<BlossomRevision<T>>()
             .AsNoTracking()
@@ -22,7 +20,7 @@ public class CosmosDbRevisionRepository<T>(DbContext context)
             .FirstOrDefaultAsync(x => x.Current == revision);
     }
 
-    public async Task<BlossomRevision<T>?> FindAsync(string id, DateTime asOfDate)
+    public async Task<BlossomRevision<T>?> GetAsync(string id, DateTime asOfDate)
     {
         var ticks = asOfDate.ToUniversalTime().Ticks;
 
@@ -34,7 +32,7 @@ public class CosmosDbRevisionRepository<T>(DbContext context)
             .FirstOrDefaultAsync();
     }
 
-    public async Task<IEnumerable<BlossomRevision<T>>> GetAsync(string id, int count)
+    public async Task<IEnumerable<BlossomRevision<T>>> GetRevisionsAsync(string id, int count)
     {
         return await Context.Set<BlossomRevision<T>>()
             .WithPartitionKey(id)
@@ -44,12 +42,12 @@ public class CosmosDbRevisionRepository<T>(DbContext context)
             .ToListAsync();
     }
 
-    public async Task<BlossomRevision<T>> ReplaceAsync(string id, long replaceWithRevisionId)
+    public async Task<BlossomRevision<T>> RevertAsync(string id, long replaceWithRevisionId)
     {
-        var currentEntity = await FindAsync(id)
+        var currentEntity = await GetLatestAsync(id)
             ?? throw new Exception("Current revision not found");
 
-        var replaceWith = await FindAsync(id, replaceWithRevisionId)
+        var replaceWith = await GetAsync(id, replaceWithRevisionId)
             ?? throw new Exception("Revision to replace with not found");
 
         var newRevision = currentEntity.Future.Contains(replaceWithRevisionId)
@@ -65,7 +63,7 @@ public class CosmosDbRevisionRepository<T>(DbContext context)
     {
         var existing = await Context.Set<T>().FindAsync(revision.Id);
         if (existing != null)
-        { 
+        {
             Context.Entry(existing).State = EntityState.Detached;
             Context.Add(revision.Entity);
             Context.Update(revision.Entity);
@@ -73,7 +71,7 @@ public class CosmosDbRevisionRepository<T>(DbContext context)
 
         Context.Set<BlossomRevision<T>>().Add(revision);
         await Context.SaveChangesAsync();
-        
+
         return revision;
     }
 }

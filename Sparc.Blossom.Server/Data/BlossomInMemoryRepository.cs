@@ -3,13 +3,13 @@ using System.Text.Json;
 
 namespace Sparc.Blossom.Data;
 
-public class BlossomInMemoryDb<T> : IRepository<T> where T : class
+public class BlossomInMemoryRepository<T> : IRepository<T>, IRevisionRepository<T> where T : class
 {
-    public BlossomInMemoryDb()
+    public BlossomInMemoryRepository()
     {
     }
     
-    public BlossomInMemoryDb(IEnumerable<T> items)
+    public BlossomInMemoryRepository(IEnumerable<T> items)
     {
         _items = items.ToList();
     }
@@ -133,7 +133,7 @@ public class BlossomInMemoryDb<T> : IRepository<T> where T : class
             _items.Add(item);
     }
 
-    public static BlossomInMemoryDb<T> FromUrl<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
+    public static BlossomInMemoryRepository<T> FromUrl<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
     {
         using var client = new HttpClient();
         var webRequest = new HttpRequestMessage(HttpMethod.Get, url);
@@ -149,5 +149,30 @@ public class BlossomInMemoryDb<T> : IRepository<T> where T : class
             return new(transformer(items));
 
         return new([]);
+    }
+
+    public Task<BlossomRevision<T>?> GetLatestAsync(string id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<BlossomRevision<T>?> GetAsync(string id, long revision)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<BlossomRevision<T>?> GetAsync(string id, DateTime asOfDate)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<IEnumerable<BlossomRevision<T>>> GetRevisionsAsync(string id, int count)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<BlossomRevision<T>> RevertAsync(string id, long revision)
+    {
+        throw new NotImplementedException();
     }
 }

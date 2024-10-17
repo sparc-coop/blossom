@@ -8,7 +8,7 @@ public static class ServiceCollectionExtensions
     public static WebApplicationBuilder AddBlossomRepository(this WebApplicationBuilder builder)
     {
         if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))
-            builder.Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryDb<>));
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
 
         return builder;
     }
@@ -17,7 +17,7 @@ public static class ServiceCollectionExtensions
         (this WebApplicationBuilder builder, string url, Func<TResponse, IEnumerable<T>> transformer)
         where T : class
     {
-        var results = BlossomInMemoryDb<T>.FromUrl(url, transformer);
+        var results = BlossomInMemoryRepository<T>.FromUrl(url, transformer);
         builder.Services.AddScoped<IRepository<T>>(_ => results);
 
         return builder;

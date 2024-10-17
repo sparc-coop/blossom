@@ -5,18 +5,22 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T : BlossomEntity<string>
+public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
+    where T : BlossomEntity<string>
 {
     public IQueryable<T> Query { get; }
     public DbContext Context { get; }
     protected CosmosDbDatabaseProvider DbProvider { get; }
+    public IRevisionRepository<T> Revisions { get; }
 
     private static bool IsCreated;
 
-    public CosmosDbRepository(DbContext context, CosmosDbDatabaseProvider dbProvider) : base(context)
+    public CosmosDbRepository(DbContext context, CosmosDbDatabaseProvider dbProvider, IRevisionRepository<T> revisions) : base(context)
     {
         Context = context;
         DbProvider = dbProvider;
+        Revisions = revisions;
+
         if (!IsCreated)
         {
             Context.Database.EnsureCreatedAsync().Wait();
