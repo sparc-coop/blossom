@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:local="clr-namespace:Sparc.Blossom.Maui"
-             x:Class="Sparc.Blossom.Maui.MainPage"
+             xmlns:local="clr-namespace:Sparc.Blossom"
+             x:Class="Sparc.Blossom.BlossomMainPage"
              BackgroundColor="{DynamicResource PageBackgroundColor}">
 
     <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
         <BlazorWebView.RootComponents>
-            <RootComponent Selector="#app" ComponentType="{x:Type local:Components.Routes}" />
+            <RootComponent Selector="#app" ComponentType="{x:Type local:BlossomApp}" />
         </BlazorWebView.RootComponents>
     </BlazorWebView>
 

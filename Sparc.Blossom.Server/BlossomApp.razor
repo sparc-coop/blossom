@@ -1,13 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Components.Routing
 
-@typeparam Program
-@typeparam DefaultLayout
-
-<Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@AdditionalAssemblies">
+<Router AppAssembly="@AssemblyProvider.AppAssembly" AdditionalAssemblies="@AssemblyProvider.AdditionalAssemblies">
     <Found Context="routeData">
         <Sparc.Blossom.Realtime.BlossomRealtimeHub>
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@AssemblyProvider.DefaultLayout">
                 <NotAuthorized>
                     @if (!context.User.Identity?.IsAuthenticated == true)
                     {
@@ -42,7 +38,7 @@
         </Sparc.Blossom.Realtime.BlossomRealtimeHub>
     </Found>
     <NotFound>
-        <LayoutView Layout="@typeof(DefaultLayout)">
+        <LayoutView Layout="@AssemblyProvider.DefaultLayout">
             @if (NotFound is not null)
             {
                 @NotFound
@@ -55,13 +51,10 @@
     </NotFound>
 </Router>
 
+@inject BlossomAssemblyProvider AssemblyProvider
 @code {
     [Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
     [Parameter] public RenderFragment Authorizing { get; set; } = null!;
     [Parameter] public RenderFragment NotFound { get; set; } = null!;
     [Parameter] public RenderFragment Loading { get; set; } = null!;
-
-    public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
-        ? new[] { this.GetType().Assembly }
-        : new[] { this.GetType().Assembly, typeof(DefaultLayout).Assembly };
-} 
+}
