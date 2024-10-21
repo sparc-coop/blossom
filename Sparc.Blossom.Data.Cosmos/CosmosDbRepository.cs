@@ -11,7 +11,6 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
     public IQueryable<T> Query { get; }
     public DbContext Context { get; }
     protected CosmosDbDatabaseProvider DbProvider { get; }
-    public IRevisionRepository<T> Revisions { get; }
 
     private static bool IsCreated;
 
@@ -19,7 +18,6 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         Context = context;
         DbProvider = dbProvider;
-        Revisions = revisions;
 
         if (!IsCreated)
         {
