@@ -8,7 +8,7 @@ public class BlossomInMemoryRevisionRepository<T>(IRepository<T> repository) : I
 {
     // This dictionary's keys are UserId, EntityId
     readonly Dictionary<string, Dictionary<string, List<BlossomRevision<T>>>> _items = [];
-    const int MaxRevisions = 100;
+    const int MaxRevisions = 10;
 
     IRepository<T> Repository { get; } = repository;
 
