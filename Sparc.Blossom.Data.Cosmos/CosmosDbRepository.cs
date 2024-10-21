@@ -89,12 +89,6 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
             {
                 Context.Add(item);
             }
-
-            if (typeof(IHasRevision).IsAssignableFrom(typeof(T)))
-            {
-                var revision = new BlossomRevision<T>(item);
-                Context.Add(revision);
-            }
         }
 
         await Context.SaveChangesAsync();

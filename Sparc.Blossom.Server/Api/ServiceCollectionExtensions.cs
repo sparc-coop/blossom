@@ -17,9 +17,11 @@ public static class ServiceCollectionExtensions
 
         var entities = assembly.GetEntities();
         foreach (var entity in entities)
+        {
             builder.Services.AddScoped(
                 typeof(IRunner<>).MakeGenericType(entity),
                 typeof(BlossomServerRunner<>).MakeGenericType(entity));
+        }
 
         var dtos = assembly.GetDtos()
             .ToDictionary(x => x, x => entities.FirstOrDefault(y => y.Name == x.Name))

@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Sparc.Blossom.Data;
 
-public class BlossomInMemoryRepository<T> : IRepository<T>, IRevisionRepository<T> where T : class
+public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
 {
     public BlossomInMemoryRepository()
     {
@@ -149,30 +149,5 @@ public class BlossomInMemoryRepository<T> : IRepository<T>, IRevisionRepository<
             return new(transformer(items));
 
         return new([]);
-    }
-
-    public Task<BlossomRevision<T>?> GetLatestAsync(string id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<BlossomRevision<T>?> GetAsync(string id, long revision)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<BlossomRevision<T>?> GetAsync(string id, DateTime asOfDate)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<IEnumerable<BlossomRevision<T>>> GetRevisionsAsync(string id, int count)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<BlossomRevision<T>> RevertAsync(string id, long revision)
-    {
-        throw new NotImplementedException();
     }
 }

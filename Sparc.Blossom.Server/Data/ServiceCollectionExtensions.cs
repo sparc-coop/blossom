@@ -8,7 +8,10 @@ public static class ServiceCollectionExtensions
     public static WebApplicationBuilder AddBlossomRepository(this WebApplicationBuilder builder)
     {
         if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))
+        {
             builder.Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
+            builder.Services.AddScoped(typeof(IRevisionRepository<>), typeof(BlossomInMemoryRevisionRepository<>)); 
+        }
 
         return builder;
     }
@@ -23,13 +26,9 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
-    public static ModelBuilder EnableRevisions(this ModelBuilder builder)
+    public static EntityTypeBuilder Revisions<T>(this ModelBuilder model) where T : BlossomEntity
     {
-        var revisionableEntities = builder.Model.GetEntityTypes().Where(x => typeof(IHasRevision).IsAssignableFrom(x.ClrType));
-
-        foreach (var entityType in revisionableEntities)
-            builder.Entity(typeof(BlossomRevision<>).MakeGenericType(entityType.ClrType));
-        
+        var builder = model.Entity<BlossomRevision<T>>();
         return builder;
     }
 }

@@ -44,14 +44,4 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
-
-    public static ModelBuilder EnableRevisions(this ModelBuilder builder, string revisionContainerName)
-    {
-        var revisionableEntities = builder.Model.GetEntityTypes().Where(x => typeof(IHasRevision).IsAssignableFrom(x.ClrType));
-
-        foreach (var entityType in revisionableEntities)
-            builder.Entity(typeof(BlossomRevision<>).MakeGenericType(entityType.ClrType)).ToContainer(revisionContainerName);
-
-        return builder;
-    }
 }
