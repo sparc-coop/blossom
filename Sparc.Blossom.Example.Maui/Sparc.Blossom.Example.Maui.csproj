@@ -72,9 +72,9 @@
 	  <ProjectReference Include="..\Sparc.Blossom.Server\Sparc.Blossom.csproj" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
+	<!--<ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
 		<ProjectReference Include="..\Sparc.Blossom.MauiLib\Sparc.Blossom.MauiLib.csproj" />
-	</ItemGroup>
+	</ItemGroup>-->
 
 	<ItemGroup>
 		<MauiXaml Update="App.xaml">
