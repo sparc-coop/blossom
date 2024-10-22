@@ -1,4 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Sparc.Blossom.Core.Serialization;
+using Sparc.Blossom.Data;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Realtime;
 
@@ -11,8 +15,27 @@ public class NotificationForwarder<TNotification>(IHubContext<BlossomHub> hub) :
         if (notification.SubscriptionId != null)
         {
             Console.WriteLine("Notification: " + notification.GetType().Name + " to " + notification.SubscriptionId);
-            await Hub.Clients.Group(notification.SubscriptionId).SendAsync(notification.GetType().Name, notification);
+            var methodName = notification.GetType().Name;
+
+            string serializedNotification = SerializeNotification(notification);
+
+            await Hub.Clients.Group(notification.SubscriptionId).SendAsync(methodName, serializedNotification);
         }
+    }
+
+    private static string SerializeNotification(TNotification notification)
+    {
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = false,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            IncludeFields = true
+        };
+
+        options.Converters.Add(new PolymorphicJsonConverter<BlossomEntity>());
+
+        var serializedNotification = JsonSerializer.Serialize(notification, notification.GetType(), options);
+        return serializedNotification;
     }
 }
 

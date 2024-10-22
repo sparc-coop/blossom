@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using MediatR.NotificationPublishers;
 using Microsoft.AspNetCore.SignalR;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Realtime;
@@ -12,10 +13,10 @@ public static class ServiceCollectionExtensions
         var signalR = services.AddSignalR()
             .AddJsonProtocol(options =>
             {
-                options.PayloadSerializerOptions.PropertyNamingPolicy = null;
+                options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+                options.PayloadSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                 options.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             });
-        //.AddMessagePackProtocol();
 
         services.AddMediatR(options =>
         {

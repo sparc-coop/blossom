@@ -1,4 +1,5 @@
 ﻿using Sparc.Blossom.Realtime;
+using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Data;
 
@@ -40,6 +41,6 @@ public class BlossomEntity<T> : BlossomEntity where T : notnull
 
     public BlossomEntity(T id) => Id = id;
     public override object GenericId => Id;
-
+    
     public virtual T Id { get; set; }
 }
