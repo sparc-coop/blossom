@@ -5,7 +5,7 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Realtime;
 
-public class BlossomEventRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher) 
+public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher) 
     : IRealtimeRepository<T> 
     where T : BlossomEntity
 {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Data;
 
@@ -10,9 +11,9 @@ public static class ServiceCollectionExtensions
         if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))
         {
             builder.Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
-            builder.Services.AddScoped(typeof(IEventRepository<>), typeof(BlossomInMemoryRevisionRepository<>)); 
         }
 
+        builder.Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
         return builder;
     }
 
@@ -23,12 +24,6 @@ public static class ServiceCollectionExtensions
         var results = BlossomInMemoryRepository<T>.FromUrl(url, transformer);
         builder.Services.AddScoped<IRepository<T>>(_ => results);
 
-        return builder;
-    }
-
-    public static EntityTypeBuilder Revisions<T>(this ModelBuilder model) where T : BlossomEntity
-    {
-        var builder = model.Entity<BlossomRevision<T>>();
         return builder;
     }
 }

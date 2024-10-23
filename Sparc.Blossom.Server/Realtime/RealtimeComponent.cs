@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
-using Sparc.Blossom.Core.Serialization;
-using Sparc.Blossom.Data;
-using System.Reflection;
-using System.Text.Json;
+using Sparc.Blossom.Api;
 
 namespace Sparc.Blossom.Realtime;
 
@@ -14,7 +11,6 @@ public class BlossomRealtime : ComponentBase
     protected readonly static Dictionary<string, int> Subscriptions = [];
     protected List<string> LocalSubscriptions = [];
 
-
     protected override async Task OnInitializedAsync()
     {
         await SubscribeToBlossomEntityChanges();
@@ -22,172 +18,44 @@ public class BlossomRealtime : ComponentBase
 
     private async Task SubscribeToBlossomEntityChanges()
     {
-        var childComponentType = this.GetType();
-
-        var properties = childComponentType.GetProperties();
-
-        foreach (var property in properties)
+        var properties = GetType().GetProperties();
+        foreach (var property in properties.OfType<IBlossomEntityProxy>())
         {
-            var value = property.GetValue(this);
-            var valueType = value?.GetType();
-
-            if (IsNamespaceBlossomApi(valueType))
-            {
-                var typeName = valueType.Name;
-
-                var idProperty = valueType.GetProperty("Id",
-                    BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-                if (idProperty != null)
-                {
-                    var idValue = idProperty.GetValue(value);
-
-                    await BlossomOn<BlossomEntityChanged>($"{typeName}-{idValue}", async (res) =>
-                    {
-                        if (res.Entity != null)
-                        {
-                            UpdateModifiedProperties(property, this, res.Entity);
-                            InvokeAsync(StateHasChanged);
-                        }
-                    });
-                }
-                else
-                {
-                    Console.WriteLine($"The type {typeName} does not contain an 'Id' property.");
-                }
-            }
-
-
+            var subscriptionId = $"{property.GetType().Name}-{property.GenericId}";
+            await On(subscriptionId, (ev) => property.Update(ev.Changes));
         }
     }
 
-    private bool IsNamespaceBlossomApi(Type? valueType)
+    protected async Task On(string subscriptionId, Action<BlossomEvent> action)
     {
-        if (valueType != null && valueType.Namespace != null && valueType.Namespace.StartsWith("Sparc.Blossom.Api"))
+        if (Hub == null)
+            return;
+
+        if (!Subscriptions.TryGetValue(subscriptionId, out int value))
         {
-            return true;
-        }
-        
-        return false;
-    }
-
-    private void UpdateModifiedProperties(PropertyInfo targetProperty, object targetObject, object sourceObject)
-    {
-        var targetType = targetProperty.PropertyType;
-        var sourceProperties = sourceObject.GetType().GetProperties();
-
-        foreach (var sourceProp in sourceProperties)
-        {
-            if (sourceProp.Name == "Id")
-            {
-                continue; 
-            }
-
-            var targetProp = targetType.GetProperty(sourceProp.Name);
-            if (targetProp != null && targetProp.CanWrite)
-            {
-                var sourceValue = sourceProp.GetValue(sourceObject);
-                var targetValue = targetProp.GetValue(targetProperty.GetValue(targetObject));
-
-                if (!Equals(targetValue, sourceValue))
-                {
-                    targetProp.SetValue(targetProperty.GetValue(targetObject), sourceValue);
-                }
-            }
-        }
-    }
-
-    protected void On<T>(Action<T> action)
-    {
-        if (Hub != null)
-            Events.Add(Hub.On<T>(typeof(T).Name, evt =>
-            {
-                action(evt);
-                StateHasChanged();
-            }));
-    }
-
-    protected async Task BlossomOn<T>(string subscriptionId, Action<BlossomEvent> action) where T : BlossomEvent
-    {
-        if (Hub != null)
-        {
+            Subscriptions.Add(subscriptionId, 1);
             if (Hub.State == HubConnectionState.Connected)
             {
-                await AddSignalRHandler<T>(subscriptionId, action);
+                await Hub!.InvokeAsync("Watch", subscriptionId);
             }
             else
-            {
                 Hub.On("_UserConnected", async () =>
                 {
-                    await AddSignalRHandler<T>(subscriptionId, action);
-                });
-            }
-        }
-    }
-
-    private async Task AddSignalRHandler<T>(string subscriptionId, Action<BlossomEvent> action) where T : BlossomEvent
-    {
-        await Hub!.InvokeAsync("Watch", subscriptionId);
-
-        Hub.On(typeof(T).Name, (Action<string>)((json) =>
-        {
-            BlossomEvent? evt = DeserializeNotificationObject(json);
-
-            var equals = evt.SubscriptionId == subscriptionId;
-            if (equals)
-            {
-                action.Invoke(evt);
-                InvokeAsync(StateHasChanged);
-            }
-        }));
-    }
-
-    private static BlossomEvent? DeserializeNotificationObject(string json)
-    {
-        var options = new JsonSerializerOptions
-        {
-            IncludeFields = true
-        };
-        options.Converters.Add(new PolymorphicJsonConverter<BlossomEntity>());
-        var evt = JsonSerializer.Deserialize<BlossomEvent>(json, options);
-        return evt;
-    }
-
-    protected async Task On<T>(string subscriptionId, Action<T> action) where T : BlossomEvent
-    {
-        if (Hub != null)
-        {
-            if (!Subscriptions.TryGetValue(subscriptionId, out int value))
-            {
-                Subscriptions.Add(subscriptionId, 1);
-                if (Hub.State == HubConnectionState.Connected)
-                {
                     await Hub!.InvokeAsync("Watch", subscriptionId);
-                }
-                else
-                    Hub.On("_UserConnected", async () =>
-                    {
-                        await Hub!.InvokeAsync("Watch", subscriptionId);
-                    });
-            }
-            else
-            {
-                Subscriptions[subscriptionId] = ++value;
-            }
-
-            LocalSubscriptions.Add(subscriptionId);
-
-            Events.Add(Hub.On<T>(typeof(T).Name, evt =>
-            {
-
-                var equals = evt.SubscriptionId == subscriptionId;
-                if (equals)
-                {
-                    action(evt);
-                    StateHasChanged();
-                }
-            }));
+                });
         }
+        else
+        {
+            Subscriptions[subscriptionId] = ++value;
+        }
+
+        LocalSubscriptions.Add(subscriptionId);
+
+        Events.Add(Hub.On<BlossomEvent>(subscriptionId, evt =>
+        {
+            action(evt);
+            StateHasChanged();
+        }));
     }
 
     public async ValueTask DisposeAsync()

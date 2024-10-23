@@ -23,7 +23,7 @@ public class BlossomHub : Hub
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, subscriptionId);
     }
 
-    public override async Task OnDisconnectedAsync(Exception e)
+    public override async Task OnDisconnectedAsync(Exception? e)
     {
         Console.WriteLine($"Disconnected {e?.Message} {Context.ConnectionId}");
         await base.OnDisconnectedAsync(e);
