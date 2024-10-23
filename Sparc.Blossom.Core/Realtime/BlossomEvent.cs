@@ -31,6 +31,7 @@ public class BlossomEvent : MediatR.INotification
     public string? SubscriptionId { get; protected set; }
     public string Name { get; protected set; }
     public string UserId { get; protected set; }
+    public List<BlossomPatch> Changes { get; protected set; } = [];
     public long? PreviousId { get; protected set; }
     public List<long> FutureIds { get; protected set; } = [];
 }
@@ -51,5 +52,7 @@ public class BlossomEvent<T>(T entity) : BlossomEvent(entity) where T : BlossomE
     public BlossomEvent(T entity, BlossomEvent<T> previous) : this(entity)
     {
         PreviousId = previous.Id;
+        Changes = BlossomPatch.Create(previous.Entity, entity);
+
     }
 }
