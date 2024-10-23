@@ -1,5 +1,4 @@
 ﻿using Sparc.Blossom.Realtime;
-using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Data;
 
@@ -14,7 +13,6 @@ public abstract class BlossomEntity
         _events ??= [];
 
         var domainEvents = _events.ToList();
-        domainEvents.Add(new BlossomEntityChanged(this));
         _events.Clear();
 
         return domainEvents;

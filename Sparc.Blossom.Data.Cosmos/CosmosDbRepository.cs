@@ -14,7 +14,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
 
     private static bool IsCreated;
 
-    public CosmosDbRepository(DbContext context, CosmosDbDatabaseProvider dbProvider, IRevisionRepository<T> revisions) : base(context)
+    public CosmosDbRepository(DbContext context, CosmosDbDatabaseProvider dbProvider) : base(context)
     {
         Context = context;
         DbProvider = dbProvider;
@@ -61,7 +61,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         await AddAsync([item]);
     }
 
-    public async Task AddAsync(IEnumerable<T> items)
+    public virtual async Task AddAsync(IEnumerable<T> items)
     {
         foreach (var item in items)
             Context.Add(item);
@@ -74,7 +74,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         await UpdateAsync([item]);
     }
 
-    public async Task UpdateAsync(IEnumerable<T> items)
+    public virtual async Task UpdateAsync(IEnumerable<T> items)
     {
         foreach (var item in items)
         {

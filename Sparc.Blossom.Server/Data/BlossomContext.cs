@@ -28,6 +28,7 @@ public class BlossomContext(BlossomContextOptions options) : DbContext(options.D
     async Task NotifyAsync()
     {
         var domainEvents = ChangeTracker.Entries<BlossomEntity>().SelectMany(x => x.Entity.Publish());
+        
 
         var tasks = domainEvents
             .Select(async (domainEvent) =>

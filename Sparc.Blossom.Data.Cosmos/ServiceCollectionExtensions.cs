@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient(sp => new CosmosDbDatabaseProvider(sp.GetRequiredService<DbContext>(), databaseName));
 
         services.Add(new ServiceDescriptor(typeof(IRepository<>), typeof(CosmosDbRepository<>), serviceLifetime));
-        services.Add(new ServiceDescriptor(typeof(IRevisionRepository<>), typeof(CosmosDbRevisionRepository<>), serviceLifetime));
+        services.Add(new ServiceDescriptor(typeof(IEventRepository<>), typeof(CosmosDbEventRepository<>), serviceLifetime));
 
         return services;
     }

@@ -1,6 +1,7 @@
 ﻿using Ardalis.Specification;
 using Humanizer;
 using Sparc.Blossom.Data;
+using Sparc.Blossom.Realtime;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Api;
@@ -10,23 +11,17 @@ public interface IBlossomEndpointMapper
     void MapEndpoints(IEndpointRouteBuilder endpoints);
 }
 
-public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAccessor http) 
+public class BlossomServerRunner<T>(IRepository<T> repository, IRealtimeRepository<T> events, IHttpContextAccessor http) 
     : IRunner<T>, IBlossomEndpointMapper
-    where T : class
+    where T : BlossomEntity
 
 {
     public string Name => typeof(T).Name.Pluralize();
 
     public IRepository<T> Repository { get; } = repository;
+    public IRealtimeRepository<T> Events { get; } = events;
     protected IHttpContextAccessor Http { get; } = http;
     protected ClaimsPrincipal? User => Http.HttpContext?.User;
-
-    public async Task<T> CreateAsync(params object?[] parameters)
-    {
-        var entity = (T)Activator.CreateInstance(typeof(T), parameters)!;
-        await Repository.AddAsync(entity);
-        return entity;
-    }
 
     public async Task<T?> GetAsync(object id) => await Repository.FindAsync(id);
     public async Task<IEnumerable<T>> QueryAsync(string? name = null, params object?[] parameters)
@@ -43,18 +38,32 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IHttpContextAcces
         return await Repository.GetAllAsync(spec);
     }
 
+    public async Task<T> CreateAsync(params object?[] parameters)
+    {
+        var entity = (T)Activator.CreateInstance(typeof(T), parameters)!;
+        await Events.BroadcastAsync(new BlossomEntityAdded<T>(entity));
+        // await Repository.AddAsync(entity);
+        return entity;
+    }
+
     public async Task ExecuteAsync(object id, string name, params object?[] parameters)
     {
+        var entity = await Repository.FindAsync(id)
+            ?? throw new Exception($"Entity {id} not found.");
+
         var action = new Action<T>(x => typeof(T).GetMethod(name)?.Invoke(x, parameters));
-        await Repository.ExecuteAsync(id, action);
+        action(entity);
+        await Events.BroadcastAsync(name, entity);
+        // await Repository.ExecuteAsync(id, action);
     }
 
     public async Task DeleteAsync(object id)
     {
         var entity = await Repository.FindAsync(id) 
             ?? throw new Exception($"Entity {id} not found.");
-        
-        await Repository.DeleteAsync(entity);
+
+        await Events.BroadcastAsync(new BlossomEntityDeleted<T>(entity));
+        // await Repository.DeleteAsync(entity);
     }
 
     public Task OnAsync(object id, string name, params object?[] parameters)

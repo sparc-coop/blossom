@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
         if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))
         {
             builder.Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
-            builder.Services.AddScoped(typeof(IRevisionRepository<>), typeof(BlossomInMemoryRevisionRepository<>)); 
+            builder.Services.AddScoped(typeof(IEventRepository<>), typeof(BlossomInMemoryRevisionRepository<>)); 
         }
 
         return builder;
