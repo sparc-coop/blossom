@@ -13,10 +13,4 @@ public static class AssemblyExtensions
 
     public static IEnumerable<Type> GetEntities(this Assembly assembly)
         => assembly.GetDerivedTypes(typeof(BlossomEntity<>));
-
-    public static IEnumerable<Type> GetDtos(this Assembly assembly)
-        => assembly.GetDerivedTypes(typeof(BlossomApiContext<>))
-            .Select(x => x.BaseType!.GetGenericArguments().First())
-            .Distinct();
-
 }

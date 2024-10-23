@@ -2,107 +2,52 @@
 @namespace Sparc.Blossom.Realtime
 @implements IAsyncDisposable
 
-<CascadingValue Value="Connection">
-    @ChildContent
-
-    @if (Connection != null)
-    {
-        <aside class="realtime-hub realtime-hub-@Connection.State.ToString()">
-            @switch (Connection.State)
-            {
-                case HubConnectionState.Connecting:
-                    <span>Connecting...</span>
-                    break;
-                case HubConnectionState.Reconnecting:
-                    <span class="">Connection lost, attempting to reconnect...</span>
-                    break;
-                case HubConnectionState.Disconnected:
-                    if (HasError)
-                    {
-                        <span>
-                            Unable to connect to room! Check your internet connection.
-                            <button @onclick="ConnectAsync">Try again</button>
-                        </span>
-                    }
-                    else
-                    {
-                        <span></span>
-                    }
-                    break;
-                case HubConnectionState.Connected:
+@if (Realtime.Connection != null)
+{
+    <aside class="realtime-hub realtime-hub-@Realtime.Connection.State.ToString()">
+        @switch (Realtime.Connection.State)
+        {
+            case HubConnectionState.Connecting:
+                <span>Connecting...</span>
+                break;
+            case HubConnectionState.Reconnecting:
+                <span class="">Connection lost, attempting to reconnect...</span>
+                break;
+            case HubConnectionState.Disconnected:
+                if (Realtime.HasError)
+                {
                     <span>
+                        Unable to connect to room! Check your internet connection.
+                        <button @onclick="ConnectAsync">Try again</button>
                     </span>
-                    break;
-            }
-        </aside>
-    }
-</CascadingValue>
+                }
+                else
+                {
+                    <span></span>
+                }
+                break;
+            case HubConnectionState.Connected:
+                <span>
+                </span>
+                break;
+        }
+    </aside>
+}
 
 @inject NavigationManager Nav
+@inject BlossomRealtimeContext Realtime
+
 @code {
     [Parameter] public RenderFragment ChildContent { get; set; } = null!;
     [Parameter] public EventCallback<HubConnection> OnConnected { get; set; } = default;
 
-    HubConnection? Connection { get; set; }
-    bool IsConnected => Connection?.State == HubConnectionState.Connected;
-    bool HasError;
-
     protected override void OnInitialized()
     {
-        var url = Nav.BaseUri + "_realtime"; 
-        Connection = new HubConnectionBuilder()
-            .WithUrl(url)
-            //.AddMessagePackProtocol()
-            .WithAutomaticReconnect()
-            .Build();
-
-        //Connection.On("ReceiveMessage", () => { }); // placeholder event so that we can add more On events afterward
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (Connection?.State == HubConnectionState.Disconnected)
-        {
-            await ConnectAsync();
-
-            if (Connection.State == HubConnectionState.Connected && OnConnected.HasDelegate)
-                await OnConnected.InvokeAsync(Connection);
-        }
-    }
-
-    async Task ConnectAsync()
-    {
-        if (Connection == null)
-            return;
-
-        var attempts = 5;
-        HasError = false;
-
-        // Keep trying to connect until we can start or the token is canceled.
-        while (attempts > 0)
-        {
-            try
-            {
-                await Connection.StartAsync();
-                StateHasChanged();
-                return;
-            }
-            catch (Exception)
-            {
-                // Failed to connect, trying again in 3000 ms.
-                await Task.Delay(3000);
-                attempts--;
-            }
-        }
-
-        HasError = true;
+        Realtime.Initialize(OnConnected);
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (Connection is not null)
-        {
-            await Connection.DisposeAsync();
-        }
+        await Realtime.GoOffline();
     }
 }

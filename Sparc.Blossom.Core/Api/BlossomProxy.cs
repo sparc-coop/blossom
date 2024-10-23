@@ -4,7 +4,7 @@ namespace Sparc.Blossom.Api;
 
 public interface IBlossomEntityProxy
 {
-    object GenericId { get; }
+    string SubscriptionId { get; }
     void Update(IEnumerable<BlossomPatch> patches);
 }
 
@@ -21,7 +21,7 @@ public class BlossomProxy<T> : IBlossomProxy<T>
 public class BlossomEntityProxy<T, TId> : BlossomProxy<T>, IBlossomEntityProxy
 {
     public TId Id { get; set; } = default!;
-    public object GenericId => Id;
+    public string SubscriptionId => $"{GetType().Name}-{Id}";
 
     public void Update(IEnumerable<BlossomPatch> patches)
     {

@@ -5,6 +5,11 @@ namespace Sparc.Blossom.Api;
 
 public static class ServiceCollectionExtensions
 {
+    public static IEnumerable<Type> GetDtos(this Assembly assembly)
+       => assembly.GetDerivedTypes(typeof(BlossomApiContext<>))
+           .Select(x => x.BaseType!.GetGenericArguments().First())
+           .Distinct();
+
     public static void RegisterBlossomContexts(this WebApplicationBuilder builder, Assembly? assembly = null)
     {
         assembly ??= Assembly.GetEntryAssembly()!;
