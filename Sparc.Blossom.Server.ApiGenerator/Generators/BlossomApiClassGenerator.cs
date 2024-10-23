@@ -33,12 +33,6 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
             }
         }
 
-        if (source.HasRevisions)
-        {
-            commands.AppendLine($@"public async Task<IEnumerable<{source.Name}{source.OfName}>> GetRevisions(int count) => await Runner.QueryAsync(""BlossomRevisions"", count);");
-            commands.AppendLine($@"public async Task RevertTo(long revision) => await Runner.RevertAsync(Id, revision);");
-        }
-
         return $$"""
 namespace Sparc.Blossom.Api;
 {{source.Nullable}}
