@@ -43,4 +43,16 @@ public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> serverRunner)
         dto.Runner = this;
         return dto;
     }
+
+    public async Task<T?> UndoAsync(object id, long? revision)
+    {
+        var result = await ServerRunner.UndoAsync(id, revision);
+        return result == null ? default : Adapt(result);
+    }
+
+    public async Task<T?> RedoAsync(object id, long? revision)
+    {
+        var result = await ServerRunner.RedoAsync(id, revision);
+        return result == null ? default : Adapt(result);
+    }
 }

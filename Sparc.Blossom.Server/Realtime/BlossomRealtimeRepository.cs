@@ -5,8 +5,8 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Realtime;
 
-public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher) 
-    : IRealtimeRepository<T> 
+public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher)
+    : IRealtimeRepository<T>
     where T : BlossomEntity
 {
     public IRepository<BlossomEvent<T>> Repository { get; } = repository;
@@ -89,5 +89,13 @@ public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repositor
 
         await BroadcastAsync(changed);
         return changed.Entity;
+    }
+
+    public async Task<T> ReplaceAsync(string id, long revision)
+    {
+        var current = await GetAsync(id)
+            ?? throw new Exception("No current revision to replace");
+
+        return await ReplaceAsync(current, revision);
     }
 }

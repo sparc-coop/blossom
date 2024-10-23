@@ -32,4 +32,7 @@ public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T 
         var result = await request.Content.ReadFromJsonAsync<TResult>();
         return result == null ? throw new Exception("Result is null") : result;
     }
+
+    public async Task<T?> UndoAsync(object id, long? revision) => await PostAsJsonAsync<T?>("_undo", id, revision);
+    public async Task<T?> RedoAsync(object id, long? revision) => await PostAsJsonAsync<T?>("_redo", id, revision);
 }

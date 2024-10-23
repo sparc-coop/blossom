@@ -6,18 +6,16 @@ namespace Sparc.Blossom.Realtime;
 
 public class BlossomEvent : MediatR.INotification
 {
-    private BlossomEvent()
+    private BlossomEvent(string name)
     {
+        Name = name;
     }
 
-    public BlossomEvent(BlossomEntity entity)
+    public BlossomEvent(BlossomEntity entity) : this(entity.GetType().Name)
     {
-        Id = DateTime.UtcNow.Ticks;
-        Name = GetType().Name;
         EntityType = entity.GetType().FullName;
         EntityId = entity.GenericId.ToString();
         SubscriptionId = $"{entity.GetType().Name}-{EntityId}";
-        UserId = ClaimsPrincipal.Current.Id();
     }
     
     public BlossomEvent(string name, BlossomEntity entity) : this(entity)
@@ -25,12 +23,12 @@ public class BlossomEvent : MediatR.INotification
         Name = name;
     }
 
-    public string EntityType { get; protected set; }
-    public string EntityId { get; protected set; }
-    public long Id { get; protected set; }
+    public string EntityType { get; protected set; } = "";
+    public string EntityId { get; protected set; } = "";
+    public long Id { get; protected set; } = DateTime.UtcNow.Ticks;
     public string? SubscriptionId { get; protected set; }
     public string Name { get; protected set; }
-    public string UserId { get; protected set; }
+    public string UserId { get; protected set; } = ClaimsPrincipal.Current.Id();
     public List<BlossomPatch> Changes { get; protected set; } = [];
     public long? PreviousId { get; protected set; }
     public List<long> FutureIds { get; protected set; } = [];

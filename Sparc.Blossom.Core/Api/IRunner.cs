@@ -8,4 +8,6 @@ public interface IRunner<T>
     Task ExecuteAsync(object id, string name, params object?[] parameters);
     Task DeleteAsync(object id);
     Task OnAsync(object id, string name, params object?[] parameters);
+    Task<T?> UndoAsync(object id, long? revision);
+    Task<T?> RedoAsync(object id, long? revision);
 }

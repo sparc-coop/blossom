@@ -77,8 +77,28 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IRealtimeReposito
         var group = endpoints.MapGroup(baseUrl);
         group.MapGet("{id}", async (IRunner<T> runner, string id) => await runner.GetAsync(id));
         group.MapPost("", async (IRunner<T> runner, object[] parameters) => await runner.CreateAsync(parameters));
+        group.MapPost("_undo", async (IRunner<T> runner, string id, long? revision) => await runner.UndoAsync(id, revision));
+        group.MapPost("_redo", async (IRunner<T> runner, string id, long? revision) => await runner.RedoAsync(id, revision));
         group.MapPost("{name}", async (IRunner<T> runner, string name, object[] parameters) => await runner.QueryAsync(name, parameters));
         group.MapPut("{id}/{name}", async (IRunner<T> runner, string id, string name, object[] parameters) => await runner.ExecuteAsync(id, name, parameters));
         group.MapDelete("{id}", async (IRunner<T> runner, string id) => await runner.DeleteAsync(id));
+    }
+
+    public async Task<T?> UndoAsync(object id, long? revision)
+    {
+        var strId = id.ToString()!;
+
+        return !revision.HasValue
+            ? await Events.UndoAsync(strId)
+            : await Events.ReplaceAsync(strId, revision.Value);
+    }
+
+    public async Task<T?> RedoAsync(object id, long? revision)
+    {
+        var strId = id.ToString()!;
+
+        return !revision.HasValue
+            ? await Events.RedoAsync(strId)
+            : await Events.ReplaceAsync(strId, revision.Value);
     }
 }
