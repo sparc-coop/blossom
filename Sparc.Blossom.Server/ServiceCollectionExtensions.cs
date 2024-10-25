@@ -37,7 +37,6 @@ public static class ServiceCollectionExtensions
         builder.RegisterBlossomContexts(apiAssembly);
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSingleton<AdditionalAssembliesProvider>();
 
         builder.AddBlossomRepository();
 
