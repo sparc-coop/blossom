@@ -11,7 +11,8 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
     
     public BlossomInMemoryRepository(IEnumerable<T> items)
     {
-        _items = items.ToList();
+        if (items.Any())
+            _items = items.ToList();
     }
     
     internal static List<T> _items = [];

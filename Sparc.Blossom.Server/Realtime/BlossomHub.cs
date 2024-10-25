@@ -13,13 +13,13 @@ public class BlossomHub : Hub
         }
     }
 
-    public virtual async Task Watch(string[] subscriptionIds)
+    public virtual async Task Watch(List<string> subscriptionIds)
     {
         foreach (var subscriptionId in subscriptionIds)
             await Groups.AddToGroupAsync(Context.ConnectionId, subscriptionId);
     }
 
-    public virtual async Task StopWatching(string[] subscriptionIds)
+    public virtual async Task StopWatching(List<string> subscriptionIds)
     {
         foreach (var subscriptionId in subscriptionIds)
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, subscriptionId);

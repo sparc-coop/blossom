@@ -157,7 +157,8 @@ public class BlossomRealtimeContext(NavigationManager nav)
             }));
         }
 
-        await InvokeAsync("Watch", [subscriptionIds]);
+        if (subscriptionIds.Any())
+            await InvokeAsync("Watch", [subscriptionIds]);
     }
 
     private async Task InvokeAsync(string method, params object[] parameters)
