@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBlossomRealtime<TAssembly>(this IServiceCollection services)
     {
-        var signalR = services.AddSignalR(options => options.EnableDetailedErrors = true)
+        var signalR = services.AddSignalR()
             .AddJsonProtocol(options =>
             {
                 options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
@@ -34,7 +34,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddBlossomRealtime<TAssembly, THub>(this IServiceCollection services) where THub : BlossomHub
     {
-        var signalR = services.AddSignalR(options => options.EnableDetailedErrors = true)
+        var signalR = services.AddSignalR()
             .AddJsonProtocol(options =>
             {
                 options.PayloadSerializerOptions.PropertyNamingPolicy = null;
