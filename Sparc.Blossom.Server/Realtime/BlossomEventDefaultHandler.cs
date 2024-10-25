@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using MediatR;
+using Microsoft.AspNetCore.SignalR;
 using Sparc.Blossom.Data;
 namespace Sparc.Blossom.Realtime;
 
@@ -27,5 +28,3 @@ public class BlossomEventDefaultHandler<T>(IHubContext<BlossomHub> hub, IReposit
         }
     }
 }
-
-

@@ -28,10 +28,15 @@ public class BlossomEvent : MediatR.INotification
     public long Id { get; protected set; } = DateTime.UtcNow.Ticks;
     public string? SubscriptionId { get; protected set; }
     public string Name { get; protected set; }
-    public string UserId { get; protected set; } = ClaimsPrincipal.Current.Id();
+    public string? UserId { get; protected set; }
     public List<BlossomPatch> Changes { get; protected set; } = [];
     public long? PreviousId { get; protected set; }
     public List<long> FutureIds { get; protected set; } = [];
+
+    public void SetUser(ClaimsPrincipal? user)
+    {
+        UserId = user?.Id();
+    }
 }
 
 public class BlossomEvent<T>(T entity) : BlossomEvent(entity) where T : BlossomEntity

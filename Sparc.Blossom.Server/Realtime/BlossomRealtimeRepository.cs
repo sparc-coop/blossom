@@ -1,17 +1,18 @@
-﻿using System.Security.Claims;
-using MediatR;
+﻿using MediatR;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
+using System.Security.Claims;
 
 namespace Sparc.Blossom.Realtime;
 
-public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher)
+public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher, IHttpContextAccessor http)
     : IRealtimeRepository<T>
     where T : BlossomEntity
 {
     public IRepository<BlossomEvent<T>> Repository { get; } = repository;
     public IPublisher Publisher { get; } = publisher;
-    string? UserId => ClaimsPrincipal.Current?.Id();
+    ClaimsPrincipal? User => http?.HttpContext?.User;
+    string? UserId => User?.Id();
     IQueryable<BlossomEvent<T>> UserEvents => Repository.Query.Where(x => x.UserId == UserId);
 
     public async Task<BlossomEvent<T>?> GetAsync(string id)
@@ -52,6 +53,7 @@ public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repositor
 
     public async Task BroadcastAsync(BlossomEvent<T> newEvent)
     {
+        newEvent.SetUser(User);
         await Repository.AddAsync(newEvent);
         await Publisher.Publish(newEvent);
     }

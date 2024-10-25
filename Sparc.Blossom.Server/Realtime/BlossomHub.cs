@@ -16,7 +16,10 @@ public class BlossomHub : Hub
     public virtual async Task Watch(List<string> subscriptionIds)
     {
         foreach (var subscriptionId in subscriptionIds)
+        {
+            Console.WriteLine($"{Context.UserIdentifier} is watching {subscriptionId}");
             await Groups.AddToGroupAsync(Context.ConnectionId, subscriptionId);
+        }
     }
 
     public virtual async Task StopWatching(List<string> subscriptionIds)

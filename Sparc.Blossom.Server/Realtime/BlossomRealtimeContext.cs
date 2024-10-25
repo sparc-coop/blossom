@@ -141,7 +141,7 @@ public class BlossomRealtimeContext(NavigationManager nav)
     {
         await GoOnline();
         
-        var subscriptionIds = entities.Select(x => x.SubscriptionId);
+        var subscriptionIds = entities.Select(x => x.SubscriptionId).ToList();
         var newSubscriptions = subscriptionIds.Except(Subscriptions.Keys);
         foreach (var subscriptionId in newSubscriptions)
             Subscriptions.Add(subscriptionId, 0);
@@ -157,11 +157,11 @@ public class BlossomRealtimeContext(NavigationManager nav)
             }));
         }
 
-        if (subscriptionIds.Any())
-            await InvokeAsync("Watch", [subscriptionIds]);
+        if (subscriptionIds.Count != 0)
+            await InvokeAsync("Watch", subscriptionIds);
     }
 
-    private async Task InvokeAsync(string method, params object[] parameters)
+    private async Task InvokeAsync<T>(string method, T parameters)
     {
         if (IsConnected)
             await Connection!.InvokeAsync(method, parameters);

@@ -72,14 +72,14 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
     {
         if (typeof(T).IsAssignableTo(typeof(BlossomEntity<string>)))
         {
-            var itemsWithStringIds = _items.Cast<BlossomEntity<string>>();
+            var itemsWithStringIds = _items.Cast<BlossomEntity<string>>().ToList();
             var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
             return Task.FromResult(item);
         }
 
         if (typeof(T).IsAssignableTo(typeof(BlossomEntity<int>)))
         {
-            var itemsWithStringIds = _items.Cast<BlossomEntity<int>>();
+            var itemsWithStringIds = _items.Cast<BlossomEntity<int>>().ToList();
             var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
             return Task.FromResult(item);
         }

@@ -1,4 +1,6 @@
 ﻿using Ardalis.Specification;
+using MediatR;
+using Sparc.Blossom.Realtime;
 using System.Reflection;
 
 namespace Sparc.Blossom.Api;
@@ -26,6 +28,10 @@ public static class ServiceCollectionExtensions
             builder.Services.AddScoped(
                 typeof(IRunner<>).MakeGenericType(entity),
                 typeof(BlossomServerRunner<>).MakeGenericType(entity));
+
+            builder.Services.AddTransient(
+                typeof(INotificationHandler<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)), 
+                typeof(BlossomEventDefaultHandler<>).MakeGenericType(entity));
         }
 
         var dtos = assembly.GetDtos()
