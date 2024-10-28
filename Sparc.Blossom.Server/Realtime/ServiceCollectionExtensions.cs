@@ -1,6 +1,5 @@
 ﻿using MediatR.NotificationPublishers;
 using Microsoft.AspNetCore.SignalR;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Realtime;
@@ -9,27 +8,7 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBlossomRealtime<TAssembly>(this IServiceCollection services)
     {
-        var signalR = services.AddSignalR()
-            .AddJsonProtocol(options =>
-            {
-                options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-                options.PayloadSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
-                options.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-            });
-
-        services.AddMediatR(options =>
-        {
-            options.RegisterServicesFromAssemblyContaining<TAssembly>();
-            options.RegisterServicesFromAssemblyContaining<BlossomEvent>();
-            options.RegisterServicesFromAssemblyContaining<BlossomHub>();
-            options.NotificationPublisher = new TaskWhenAllPublisher();
-            options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
-        });
-
-        // Use the User ID as the SignalR user identifier    
-        services.AddSingleton<IUserIdProvider, UserIdProvider>();
-
-        return services;
+        return services.AddBlossomRealtime<TAssembly, BlossomHub>();
     }
 
     public static IServiceCollection AddBlossomRealtime<TAssembly, THub>(this IServiceCollection services) where THub : BlossomHub
