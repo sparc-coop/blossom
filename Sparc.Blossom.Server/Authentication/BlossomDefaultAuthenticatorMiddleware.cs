@@ -9,15 +9,19 @@ public class BlossomDefaultAuthenticatorMiddleware(RequestDelegate next)
 
     public async Task InvokeAsync(HttpContext context, IBlossomAuthenticator auth)
     {
-        var user = await auth.GetAsync(context.User);
-        if (user != null && context.User.Identity?.IsAuthenticated != true)
+        if (context.Request.Path.StartsWithSegments("/_blazor") || context.Request.Path.StartsWithSegments("/_framework"))
         {
-            context.User = user!.CreatePrincipal();
-            var authProperties = new AuthenticationProperties
-            {
-                IsPersistent = true
-            };
-            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User, authProperties);
+            await _next(context);
+            return;
+        }
+
+        var priorUser = BlossomUser.FromPrincipal(context.User);
+        var user = await auth.GetAsync(context.User);
+
+        if (user != null && (context.User.Identity?.IsAuthenticated != true || !priorUser.Equals(user)))
+        {
+            context.User = user.Login();
+            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User, new() { IsPersistent = true });
         }
 
         await _next(context);

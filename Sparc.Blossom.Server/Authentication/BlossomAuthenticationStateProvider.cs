@@ -40,12 +40,12 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
         return await GetAsync(authenticationState.User) != null;
     }
 
-    public virtual async Task<BlossomUser?> GetAsync(ClaimsPrincipal principal)
+    public virtual async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
     {
         // Get the user from a new scope to ensure it fetches fresh data
         await using var scope = _scopeFactory.CreateAsyncScope();
         var users = scope.ServiceProvider.GetRequiredService<IRepository<T>>();
-        return await users.FindAsync(principal.Id());
+        return await users.FindAsync(principal.Id()) ?? BlossomUser.FromPrincipal(principal);
 
     }
 
