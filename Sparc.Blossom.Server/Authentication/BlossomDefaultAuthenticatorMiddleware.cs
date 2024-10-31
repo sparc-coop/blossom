@@ -20,7 +20,8 @@ public class BlossomDefaultAuthenticatorMiddleware(RequestDelegate next)
 
         if (user != null && (context.User.Identity?.IsAuthenticated != true || !priorUser.Equals(user)))
         {
-            context.User = user.Login();
+            context.User = await auth.LoginAsync(context.User);
+            await context.SignOutAsync();
             await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User, new() { IsPersistent = true });
         }
 

@@ -42,6 +42,14 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
             MultiClaims[type] = values;
     }
 
+    protected void RemoveClaim(string type)
+    {
+        if (Claims.ContainsKey(type))
+            Claims.Remove(type);
+        if (MultiClaims.ContainsKey(type))
+            MultiClaims.Remove(type);
+    }
+
     protected virtual void RegisterClaims()
     {
         // Do nothing in base class. This should be overridden in derived classes to
@@ -57,13 +65,17 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         var claims = Claims.Select(x => new Claim(x.Key, x.Value)).ToList();
         claims.AddRange(MultiClaims.SelectMany(x => x.Value.Select(v => new Claim(x.Key, v))));
 
-        return new ClaimsPrincipal(new ClaimsIdentity(claims, "Blossom"));
+        return new ClaimsPrincipal(new ClaimsIdentity(claims, AuthenticationType ?? "Blossom"));
     }
 
-    public void Login(string authenticationType, string externalId)
+    public ClaimsPrincipal Login(string authenticationType, string externalId)
     {
         AuthenticationType = authenticationType;
         ExternalId = externalId;
+        AddClaim(ClaimTypes.AuthenticationMethod, authenticationType);
+        AddClaim("externalId", externalId);
+
+        return Login();
     }
 
     public void ChangeUsername(string username)
@@ -78,20 +90,26 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         ExternalId = parentUser.ExternalId;
     }
 
-    public void Logout()
+    public ClaimsPrincipal Logout()
     {
         ParentUserId = null;
         ExternalId = null;
+        AuthenticationType = "Blossom";
+        RemoveClaim(ClaimTypes.AuthenticationMethod);
+        RemoveClaim("externalId");
+        return Login();
     }
 
     public static BlossomUser FromPrincipal(ClaimsPrincipal principal)
     {
         var user = new BlossomUser();
         var id = principal.Id();
-        if (id != null)
+        if (!string.IsNullOrWhiteSpace(id))
         {
             user.Id = id;
-            user.ChangeUsername(id);
+            user.ChangeUsername(principal.Get(ClaimTypes.Name) ?? id);
+            user.AuthenticationType = principal.Get(ClaimTypes.AuthenticationMethod) ?? "Blossom";
+            user.ExternalId = principal.Get("externalId");
         }
 
         foreach (var claim in principal.Claims)
@@ -104,6 +122,8 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         if (Id != other.Id) return false;
         if (Username != other.Username) return false;
+        if (AuthenticationType != other.AuthenticationType) return false;
+        if (ExternalId != other.ExternalId) return false;
 
         var orderedPriorClaims = Claims.OrderBy(x => x.Key).ThenBy(x => x.Value);
         var orderedClaims = other.Claims.OrderBy(x => x.Key).ThenBy(x => x.Value);
