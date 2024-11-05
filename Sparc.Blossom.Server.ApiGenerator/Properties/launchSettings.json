@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Profile 1": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\..\\kodekit\\Sparc.Blossom.Server.ApiGenerator.Test\\Sparc.Blossom.Server.ApiGenerator.Test.csproj"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+# For more info on HTTP files go to https://aka.ms/vs/httpfile
+@hostname=localhost
+@port=7282
+@host={{hostname}}:{{port}}
+@id=b9f06dc9-64dc-4469-a709-3a3b8fc1b2d9
+
+### Get all todo items
+
+GET https://{{host}}/todoitems
+
+### Get only open todo items
+
+GET https://{{host}}/todoitems/Open
+
+### Create a new todo item
+
+POST https://{{host}}/todoitems
+Content-Type: application/json
+
+{
+  "title": "Do laundry",
+  "description": "Do the laundry"
+}
+
+### Mark a todo item done
+
+PATCH https://{{host}}/todoitems/{{id}}/MarkDone
+
+### Move to new list
+
+PATCH https://{{host}}/todoitems/{{id}}/MoveToNewList?listId=list2

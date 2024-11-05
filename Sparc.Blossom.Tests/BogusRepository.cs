@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Sparc.Blossom.Data;
 
-public class BogusRepository<T> : IRepository<T> where T : class, IRoot<string>
+public class BogusRepository<T> : IRepository<T> where T : class, IEntity<string>
 {
     private readonly List<T> _data;
 

@@ -1,8 +1,9 @@
-﻿namespace Sparc.Blossom.Authentication;
+﻿
+namespace Sparc.Blossom.Authentication;
 
 public interface IDevice
 {
-    public string? Id { get; set; }
+    public string Id { get; set; }
     public string? PushToken { get; set; }
     public string? DeviceType { get; set; }
     public string? Platform { get; set;  }

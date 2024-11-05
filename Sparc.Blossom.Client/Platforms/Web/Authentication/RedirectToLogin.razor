@@ -1,12 +1,7 @@
 @namespace Sparc.Blossom.Authentication
 
 @inject BlossomAuthenticationStateProvider Auth
-@inject NavigationManager Navigation
 
 @code {
-
-    protected override async Task OnInitializedAsync()
-    {
-        await Auth.LoginAsync();
-    }
+    protected override void OnInitialized() => Auth.Login();
 }

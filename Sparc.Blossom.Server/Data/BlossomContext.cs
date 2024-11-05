@@ -1,44 +1,34 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Sparc.Blossom.Realtime;
-using System.Security.Claims;
+﻿using Microsoft.EntityFrameworkCore;
+using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Data;
 
-namespace Sparc.Blossom.Data;
+namespace Sparc.Blossom;
 
-public class BlossomContext : DbContext
+public class BlossomContext(BlossomContextOptions options) : DbContext(options.DbContextOptions)
 {
-    public BlossomContext(DbContextOptions options, Publisher publisher, IHttpContextAccessor http) : base(options)
-    {
-        Publisher = publisher;
-        Http = http;
-    }
-    
-    public Publisher Publisher { get; }
-    protected IHttpContextAccessor Http { get; }
-    protected ClaimsPrincipal? User => Http.HttpContext?.User;
+    protected BlossomContextOptions Options { get; } = options;
+    public string UserId => Options.HttpContextAccessor?.HttpContext?.User?.Identity?.IsAuthenticated == true ? Options.HttpContextAccessor.HttpContext.User.Id() : "anonymous";
 
-    PublishStrategy PublishStrategy = PublishStrategy.ParallelNoWait;
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Conventions.Add(_ => new BlossomPropertyDiscoveryConvention());
+    }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var result = await base.SaveChangesAsync(cancellationToken);
-        await DispatchDomainEventsAsync();
+        await NotifyAsync();
         return result;
     }
 
-    public void SetPublishStrategy(PublishStrategy strategy)
+    async Task NotifyAsync()
     {
-        PublishStrategy = strategy;
-    }
-
-    async Task DispatchDomainEventsAsync()
-    {
-        var domainEvents = ChangeTracker.Entries<Root>().SelectMany(x => x.Entity.Publish());
+        var domainEvents = ChangeTracker.Entries<BlossomEntity>().SelectMany(x => x.Entity.Publish());
 
         var tasks = domainEvents
             .Select(async (domainEvent) =>
             {
-                await Publisher.Publish(domainEvent, PublishStrategy);
+                await Options.Publisher.Publish(domainEvent);
             });
 
         await Task.WhenAll(tasks);

@@ -1,7 +1,0 @@
-﻿<Project>
-	<Target Name="BlossomSwaggerGenerator" AfterTargets="PostBuildEvent">
-		<Exec Condition="!Exists('.config\dotnet-tools.json')" Command="dotnet new tool-manifest" />
-		<Exec Command="dotnet tool update Swashbuckle.AspNetCore.Cli" />
-		<Exec Command="dotnet swagger tofile --output &quot;swagger.json&quot; &quot;$(MSBuildProjectDirectory)/$(OutputPath)$(AssemblyName).dll&quot; v1" />
-	</Target>
-</Project>

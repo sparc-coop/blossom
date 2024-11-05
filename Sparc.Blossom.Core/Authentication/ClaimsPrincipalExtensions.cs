@@ -9,6 +9,8 @@ public static class ClaimsPrincipalExtensions
         ?? principal.FindFirst(x => x.Type == "sub")?.Value
         ?? string.Empty;
 
+    public static bool IsAnonymous(this ClaimsPrincipal principal) => Guid.TryParse(principal.Identity?.Name, out _);
+
     public static string? Email(this ClaimsPrincipal principal) =>
         principal.Get(ClaimTypes.Email)
         ?? principal.Get("emails");

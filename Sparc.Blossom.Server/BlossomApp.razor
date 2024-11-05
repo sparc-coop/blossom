@@ -1,0 +1,86 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
+@using System.Security.Claims
+
+@typeparam Program
+@typeparam DefaultLayout
+
+<CascadingValue Value="User">
+    <Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@AdditionalAssemblies">
+        <Found Context="routeData">
+            <Sparc.Blossom.Realtime.BlossomRealtimeHub>
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
+                    <NotAuthorized>
+                        @if (!context.User.Identity?.IsAuthenticated == true)
+                        {
+                            @*                     <RedirectToLogin />
+                        *@  }
+                        else if (NotAuthorized is not null)
+                        {
+                            @NotAuthorized
+                        }
+                        else
+                        {
+                            <div class="blossom-authentication">
+                                You are not authorized to access
+                                this resource.
+                            </div>
+                        }
+                    </NotAuthorized>
+                    <Authorizing>
+                        @if (Authorizing is not null)
+                        {
+                            @Authorizing
+                        }
+                        else
+                        {
+                            <div class="blossom-authentication">
+                                Logging you in...
+                            </div>
+                        }
+                    </Authorizing>
+                </AuthorizeRouteView>
+                <FocusOnNavigate RouteData="routeData" Selector="h1" />
+            </Sparc.Blossom.Realtime.BlossomRealtimeHub>
+        </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof(DefaultLayout)">
+                @if (NotFound is not null)
+                {
+                    @NotFound
+                }
+                else
+                {
+                    <p>Sorry, there's nothing at this address.</p>
+                }
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingValue>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+    [Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
+    [Parameter] public RenderFragment Authorizing { get; set; } = null!;
+    [Parameter] public RenderFragment NotFound { get; set; } = null!;
+    [Parameter] public RenderFragment Loading { get; set; } = null!;
+    public ClaimsPrincipal User { get; set; } = new ClaimsPrincipal();
+
+    public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
+        ? new[] { this.GetType().Assembly }
+        : new[] { this.GetType().Assembly, typeof(DefaultLayout).Assembly };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            User = authState?.User;
+        }
+        else 
+        { 
+            User = new ClaimsPrincipal(new ClaimsIdentity()); 
+        }
+    }
+} 

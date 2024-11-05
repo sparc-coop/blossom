@@ -1,103 +1,101 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Diagnostics;
-using Sparc.Blossom.Data;
+﻿using Sparc.Blossom.Data;
 using System.Globalization;
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components;
+using Sparc.Blossom.Server;
+using Sparc.Blossom.Api;
+using Sparc.Blossom.Authentication;
+using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom;
 
 public static class ServiceCollectionExtensions
 {
-    public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, string? clientUrl = null)
+    public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, Action<WebApplicationBuilder>? options = null, IComponentRenderMode? renderMode = null)
     {
-        builder.Services.AddControllers(); // for API
-        builder.Services.AddSingleton<FeatureRouteTransformer>(); // is this necessary? yes
+        builder.AddBlossom<BlossomUser>();
+        return builder;
 
-        if (clientUrl != null)
-            builder.Services.AddCors(options =>
-            {
-                options.AddDefaultPolicy(builder =>
-                builder.WithOrigins(clientUrl)
-                .AllowAnyHeader()
-                .AllowAnyMethod()
-                .SetIsOriginAllowed(x => true)
-                .AllowCredentials());
-            });
+    }
 
-        builder.Services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = builder.Environment.ApplicationName, Version = "v1" });
-            c.MapType(typeof(IFormFile), () => new OpenApiSchema { Type = "file", Format = "binary" });
-            c.UseAllOfToExtendReferenceSchemas();
-            c.EnableAnnotations();
-        });
+    public static WebApplicationBuilder AddBlossom<TUser>(this WebApplicationBuilder builder, Action<WebApplicationBuilder>? options = null, IComponentRenderMode? renderMode = null, Assembly? apiAssembly = null)
+        where TUser : BlossomUser, new()
+    {
+        var razor = builder.Services.AddRazorComponents();
+        renderMode ??= RenderMode.InteractiveAuto;
 
-        if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))
-            builder.Services.AddScoped(typeof(IRepository<>), typeof(InMemoryRepository<>));
+        if (renderMode is InteractiveServerRenderMode || renderMode is InteractiveAutoRenderMode)
+            razor.AddInteractiveServerComponents();
+        //if (renderMode is InteractiveWebAssemblyRenderMode || renderMode is InteractiveAutoRenderMode)
+        //    razor.AddInteractiveWebAssemblyComponents();
 
-        builder.Services.AddRazorPages();
-        builder.Services.AddHttpContextAccessor();
+        builder.AddBlossomAuthentication<TUser>();
+
+        options?.Invoke(builder);
+
+        builder.RegisterBlossomContexts(apiAssembly);
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSingleton<AdditionalAssembliesProvider>();
+
+        builder.AddBlossomRepository();
 
         return builder;
     }
 
-    public static WebApplication BuildBlossom(this WebApplicationBuilder builder)
+    public static WebApplication UseBlossom<T>(this WebApplicationBuilder builder)
     {
         builder.Services.AddServerSideBlazor();
+        builder.Services.AddHttpContextAccessor();
+        
+        if (builder.Services.Any(x => x.ServiceType == typeof(DbContextOptions)))
+            builder.Services.AddScoped<BlossomContextOptions>();
+        
         builder.Services.AddOutputCache();
 
         var app = builder.Build();
 
-        app.UseBlossom();
-        app.MapControllers();
-        app.MapBlazorHub();
-        app.MapFallbackToFile("index.html");
-
         if (builder.Environment.IsDevelopment())
+        {
             app.UseDeveloperExceptionPage();
 
-        return app;
-    }
-
-    public static WebApplication UseBlossom(this WebApplication app)
-    {
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{app.Environment.ApplicationName} v1"));
+            //if (builder.IsWebAssembly())
+                //app.UseWebAssemblyDebugging();
         }
         else
         {
+            app.UseExceptionHandler("/Error", createScopeForErrors: true);
             app.UseHsts();
         }
 
-        app.UseCookiePolicy();
-
-        app.UseExceptionHandler(x => x.Run(async context =>
-        {
-            var exception = context.Features.Get<IExceptionHandlerPathFeature>()?.Error;
-            await context.Response.WriteAsJsonAsync(exception);
-        }));
-
         app.UseHttpsRedirection();
+        app.MapStaticAssets();
+        app.UseAntiforgery();
 
-        app.UseStaticFiles();
+        app.UseBlossomAuthentication();
 
-        app.UseCors();
+        var razor = app.MapRazorComponents<T>();
 
-        app.UseRouting();
-        app.UseOutputCache();
-        app.UseAuthorization();
+        if (builder.IsServer())
+            razor.AddInteractiveServerRenderMode();
 
-        app.MapDynamicControllerRoute<FeatureRouteTransformer>("{namespace}/{controller}");
-        app.MapRazorPages();
+        //if (builder.IsWebAssembly())
+        //    razor.AddInteractiveWebAssemblyRenderMode();
+
+        var server = Assembly.GetEntryAssembly();
+        var client = typeof(T).Assembly;
+        if (server != null && server != client)
+            razor.AddAdditionalAssemblies(server);
+
+        app.MapBlossomContexts(server!);
 
         return app;
     }
+
+    public static bool IsWebAssembly(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ImplementationType?.Name.Contains("WebAssemblyEndpointProvider") == true);
+
+    public static bool IsServer(this WebApplicationBuilder builder) => builder.Services.Any(x => x.ImplementationType?.Name.Contains("CircuitEndpointProvider") == true);
 
     public static IApplicationBuilder UseCultures(this IApplicationBuilder app, string[] supportedCultures)
     {
@@ -112,10 +110,10 @@ public static class ServiceCollectionExtensions
         var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures)
             .Select(x => x.Name)
             .ToArray();
-        
+
         app.UseCultures(allCultures);
 
         return app;
     }
-   
+
 }

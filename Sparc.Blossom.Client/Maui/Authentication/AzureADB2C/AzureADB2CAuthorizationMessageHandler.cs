@@ -1,11 +1,10 @@
 ﻿using Microsoft.Identity.Client;
-using Sparc.Blossom;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomAuthorizationMessageHandler : DelegatingHandler
+public class BlossomADB2CAuthorizationMessageHandler : DelegatingHandler
 {
-    public BlossomAuthorizationMessageHandler(IAuthenticator authenticator)
+    public BlossomADB2CAuthorizationMessageHandler(IAuthenticator authenticator)
     {
         Authenticator = authenticator;
     }
