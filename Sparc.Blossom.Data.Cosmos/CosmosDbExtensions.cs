@@ -23,7 +23,7 @@ public static class CosmosDbExtensions
         }
     }
 
-    public static IQueryable<T> Query<T>(this IRepository<T> repository, string? partitionKey) where T : BlossomEntity<string>
+    public static IQueryable<T> Query<T>(this IRepository<T> repository, string? partitionKey) where T : BlossomEntity
     {
         if (repository is CosmosDbRepository<T> cosmosRepository && partitionKey != null)
             return cosmosRepository.PartitionQuery(partitionKey);
@@ -32,7 +32,7 @@ public static class CosmosDbExtensions
     }
 
     public static async Task<List<U>> GetAllAsync<T, U>(this IRepository<T> repository, string? partitionKey, string sql, params object[] parameters) 
-        where T : BlossomEntity<string>
+        where T : BlossomEntity
     {
         if (repository is CosmosDbRepository<T> cosmosRepository)
             return await cosmosRepository.FromSqlAsync<U>(sql, partitionKey, parameters);

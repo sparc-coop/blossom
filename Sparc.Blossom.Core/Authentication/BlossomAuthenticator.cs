@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public abstract class BlossomAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator
+public class BlossomAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator
     where T : BlossomUser, new()
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;

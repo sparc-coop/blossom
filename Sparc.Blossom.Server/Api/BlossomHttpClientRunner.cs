@@ -2,7 +2,7 @@
 
 namespace Sparc.Blossom.Api;
 
-public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T : BlossomEntity<string>
+public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T : BlossomEntity
 {
     private HttpClient Client { get; } = client;
 

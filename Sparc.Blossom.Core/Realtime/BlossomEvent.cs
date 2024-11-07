@@ -4,10 +4,11 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Realtime;
 
-public class BlossomEvent : MediatR.INotification
+public class BlossomEvent : BlossomEntity<long>, MediatR.INotification
 {
     private BlossomEvent(string name)
     {
+        Id = DateTime.UtcNow.Ticks;
         Name = name;
     }
 
@@ -25,7 +26,6 @@ public class BlossomEvent : MediatR.INotification
 
     public string EntityType { get; protected set; } = "";
     public string EntityId { get; protected set; } = "";
-    public long Id { get; protected set; } = DateTime.UtcNow.Ticks;
     public string? SubscriptionId { get; protected set; }
     public string Name { get; protected set; }
     public string? UserId { get; protected set; }
