@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
-		<Version>9.0.0-pre.1</Version>
+		<Version>9.0.0-rc.2</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>latest</LangVersion>
@@ -25,7 +25,7 @@
 	  <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
 	  <PackageReference Include="Humanizer.Core" Version="2.14.1" />
 	  <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
-	  <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
+	  <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0-rc.2.24473.5" />
 	</ItemGroup>
 
 	<ItemGroup>

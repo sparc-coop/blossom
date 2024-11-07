@@ -38,6 +38,7 @@ internal class BlossomApiInfo
         PluralName = EntityName + "s";
 
         Methods = type.Public<MethodDeclarationSyntax>()
+            .Where(x => x.Identifier.Text != "ToString")
             .Select(x => new BlossomApiMethodInfo(x))
             .ToList();
 

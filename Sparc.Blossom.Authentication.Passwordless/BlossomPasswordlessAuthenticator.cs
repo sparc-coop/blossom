@@ -42,6 +42,22 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         publicKey = options.Value.ApiKey!;
     }
 
+    public override async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
+    {
+        if (principal?.Identity?.IsAuthenticated == true)
+        {
+            User = await Users.FindAsync(principal.Id());
+        }
+
+        if (User == null)
+        {
+            User = new T();
+            await Users.AddAsync((T)User);
+        }
+
+        return User!;
+    }
+
     public override async IAsyncEnumerable<LoginStates> LoginAsync(ClaimsPrincipal principal, string? emailOrToken = null)
     {
         Message = null;
@@ -49,11 +65,21 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         // 1. Convert the ClaimsPrincipal from the cookie into a BlossomUser
         // If the BlossomUser is already attached to Passwordless, they're logged in because their cookie is valid
         var user = await GetAsync(principal);
+
         if (user.ExternalId != null)
         {
             LoginState = LoginStates.LoggedIn;
             yield return LoginState;
             yield break;
+        }
+        else
+        {
+            if (LoginState == LoginStates.NotInitialized && string.IsNullOrEmpty(emailOrToken))
+            {
+                LoginState = LoginStates.LoggedOut;
+                yield return LoginState;
+                yield break;
+            }
         }
 
         await InitPasswordlessAsync();
@@ -78,7 +104,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
             yield return LoginState;
 
             // 5. If the user has no passkeys, send them a magic link to log in.
-            var hasPasskeys = await HasPasskeys(user);
+            var hasPasskeys = await HasPasskeys(user.ExternalId);
             if (!hasPasskeys)
             {
                 await SendMagicLinkAsync(user, $"{Nav.Uri}?token=$TOKEN");
@@ -132,21 +158,21 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         return await js.InvokeAsync<string>("signUpWithPasskey", registerToken.Token);
     }
 
-    private async Task<bool> HasPasskeys(BlossomUser user)
+    private async Task<bool> HasPasskeys(string? externalId)
     {
-        if (user.ExternalId == null)
+        if (externalId == null)
             return false;
 
-        var credentials = await PasswordlessClient.ListCredentialsAsync(user.ExternalId);
+        var credentials = await PasswordlessClient.ListCredentialsAsync(externalId);
         return credentials.Any();
     }
 
     public async Task<bool> SendMagicLinkAsync(BlossomUser user, string urlTemplate, int timeToLive = 3600)
         => await PostAsync("magic-links/send", new
         {
-            user.Username,
+            emailAddress = user.Username,
             urlTemplate,
-            user.Id,
+            userId = user.Id,
             timeToLive
         });
 
@@ -164,6 +190,12 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         var passwordlessUser = await PasswordlessClient.VerifyTokenAsync(token);
         if (passwordlessUser?.Success != true)
             throw new Exception("Unable to verify token");
+
+        var hasPasskeys = await HasPasskeys(passwordlessUser.UserId);
+        if (!hasPasskeys)
+        {
+            var result = await SignUpWithPasswordlessAsync(User);
+        }
 
         var parentUser = Users.Query.FirstOrDefault(x => x.ExternalId == passwordlessUser.UserId && x.ParentUserId == null);
         if (parentUser != null)

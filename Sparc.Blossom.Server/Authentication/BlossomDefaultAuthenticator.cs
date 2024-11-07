@@ -11,7 +11,7 @@ public class BlossomDefaultAuthenticator<T>
     : BlossomAuthenticationStateProvider<T>(loggerFactory, scopeFactory, state), IBlossomAuthenticator 
     where T : BlossomUser, new()
 {
-    public LoginStates LoginState { get; set; } = LoginStates.LoggedOut;
+    public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
 
     public BlossomUser? User { get; set; }
     public IRepository<T> Users { get; } = users;
