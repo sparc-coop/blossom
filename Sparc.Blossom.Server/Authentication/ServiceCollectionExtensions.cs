@@ -13,9 +13,9 @@ public static class ServiceCollectionExtensions
             .AddCookie(options => options.ExpireTimeSpan = TimeSpan.FromDays(30));
 
         builder.Services.AddCascadingAuthenticationState();
-        builder.Services.AddScoped<AuthenticationStateProvider, BlossomDefaultAuthenticator<TUser>>()
-            .AddScoped<BlossomDefaultAuthenticator<TUser>>()
-            .AddScoped(typeof(IBlossomAuthenticator), typeof(BlossomDefaultAuthenticator<TUser>));
+        builder.Services.AddScoped<AuthenticationStateProvider, BlossomAuthenticationStateProvider<TUser>>()
+            .AddScoped<BlossomAuthenticator<TUser>>()
+            .AddScoped<IBlossomAuthenticator, BlossomAuthenticator<TUser>>();
         return builder;
     }
 

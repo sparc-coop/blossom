@@ -1,23 +1,17 @@
-﻿using Microsoft.AspNetCore.Components;
-using Sparc.Blossom.Data;
-using Sparc.Blossom.Server.Authentication;
-using System.Diagnostics;
+﻿using Sparc.Blossom.Data;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomDefaultAuthenticator<T>
-    (IRepository<T> users, ILoggerFactory loggerFactory, IServiceScopeFactory scopeFactory, PersistentComponentState state) 
-    : BlossomAuthenticationStateProvider<T>(loggerFactory, scopeFactory, state), IBlossomAuthenticator 
+public abstract class BlossomAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator
     where T : BlossomUser, new()
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
-
-    public BlossomUser? User { get; set; }
-    public IRepository<T> Users { get; } = users;
+    public BlossomUser? User { get; protected set; }
     public string? Message { get; set; }
+    protected IRepository<T> Users { get; } = users;
 
-    public override async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
+    public virtual async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
     {
         return await GetUserAsync(principal);
     }
@@ -29,7 +23,7 @@ public class BlossomDefaultAuthenticator<T>
         await Users.UpdateAsync((T)user);
         return principal;
     }
-    
+
     public virtual async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId)
     {
         var user = await GetUserAsync(principal);
@@ -73,5 +67,4 @@ public class BlossomDefaultAuthenticator<T>
 
         return User!;
     }
-
 }

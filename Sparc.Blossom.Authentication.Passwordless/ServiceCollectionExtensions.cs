@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components.Authorization;
-using Passwordless.Net;
+using Passwordless;
 using Microsoft.Extensions.Configuration;
 namespace Sparc.Blossom.Authentication.Passwordless;
 
@@ -14,9 +13,8 @@ public static class ServiceCollectionExtensions
         builder.Services.Configure<PasswordlessOptions>(passwordlessSettings);
         builder.Services.AddPasswordlessSdk(passwordlessSettings.Bind);
 
-        builder.Services.AddScoped<AuthenticationStateProvider, BlossomPasswordlessAuthenticator<TUser>>()
-            .AddScoped<BlossomPasswordlessAuthenticator<TUser>>()
-            .AddScoped(typeof(IBlossomAuthenticator), typeof(BlossomPasswordlessAuthenticator<TUser>));
+        builder.Services.AddScoped<BlossomPasswordlessAuthenticator<TUser>>()
+            .AddScoped<IBlossomAuthenticator, BlossomPasswordlessAuthenticator<TUser>>();
 
         return builder;
     }

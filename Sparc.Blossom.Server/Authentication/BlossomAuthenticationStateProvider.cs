@@ -2,13 +2,13 @@
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components;
 using Sparc.Blossom.Authentication;
-using Sparc.Blossom.Data;
 using System.Security.Claims;
 
-namespace Sparc.Blossom.Server.Authentication;
+namespace Sparc.Blossom.Authentication;
 
 // Adapted from MS PersistingRevalidatingAuthenticationStateProvider
-public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthenticationStateProvider where T : BlossomUser
+public class BlossomAuthenticationStateProvider<T> 
+    : RevalidatingServerAuthenticationStateProvider where T : BlossomUser
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly PersistentComponentState _state;
@@ -42,8 +42,8 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
     {
         // Get the user from a new scope to ensure it fetches fresh data
         await using var scope = _scopeFactory.CreateAsyncScope();
-        var users = scope.ServiceProvider.GetRequiredService<IRepository<T>>();
-        return await users.FindAsync(principal.Id()) ?? BlossomUser.FromPrincipal(principal);
+        var users = scope.ServiceProvider.GetRequiredService<IBlossomAuthenticator>();
+        return await users.GetAsync(principal) ?? BlossomUser.FromPrincipal(principal);
 
     }
 

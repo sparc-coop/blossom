@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
-using Passwordless.Net;
+using Passwordless;
 using Sparc.Blossom.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -11,24 +9,22 @@ using System.Net.Http.Json;
 
 namespace Sparc.Blossom.Authentication.Passwordless;
 
-public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T>
+public class BlossomPasswordlessAuthenticator<T> : BlossomAuthenticator<T>
     where T : BlossomUser, new()
 {
     readonly Lazy<Task<IJSObjectReference>> Js;
     public NavigationManager Nav { get; }
     IPasswordlessClient PasswordlessClient { get; }
     public HttpClient Client { get; }
+
     readonly string publicKey;
     public BlossomPasswordlessAuthenticator(
         IPasswordlessClient _passwordlessClient,
         IOptions<PasswordlessOptions> options,
         IRepository<T> users,
-        ILoggerFactory loggerFactory,
-        IServiceScopeFactory scopeFactory,
-        PersistentComponentState state,
         NavigationManager nav,
         IJSRuntime js)
-        : base(users, loggerFactory, scopeFactory, state)
+        : base(users)
     {
         PasswordlessClient = _passwordlessClient;
         Js = new(() => js.InvokeAsync<IJSObjectReference>("import", "./_content/Sparc.Blossom.Authentication.Passwordless/BlossomPasswordlessAuthenticator.js").AsTask());
@@ -42,23 +38,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         publicKey = options.Value.ApiKey!;
     }
 
-    public override async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
-    {
-        if (principal?.Identity?.IsAuthenticated == true)
-        {
-            User = await Users.FindAsync(principal.Id());
-        }
-
-        if (User == null)
-        {
-            User = new T();
-            await Users.AddAsync((T)User);
-        }
-
-        return User!;
-    }
-
-    public override async IAsyncEnumerable<LoginStates> LoginAsync(ClaimsPrincipal principal, string? emailOrToken = null)
+    public override async IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal principal, string? emailOrToken = null)
     {
         Message = null;
         
@@ -187,7 +167,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         if (User == null)
             throw new Exception("User not initialized");
 
-        var passwordlessUser = await PasswordlessClient.VerifyTokenAsync(token);
+        var passwordlessUser = await PasswordlessClient.VerifyAuthenticationTokenAsync(token);
         if (passwordlessUser?.Success != true)
             throw new Exception("Unable to verify token");
 
@@ -210,16 +190,5 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         }
 
         await Users.UpdateAsync((T)User);
-    }
-
-    public override async IAsyncEnumerable<LoginStates> LogoutAsync(ClaimsPrincipal principal)
-    {
-        var user = await GetAsync(principal);
-
-        user.Logout();
-
-        await Users.UpdateAsync((T)User);
-
-        yield return LoginStates.LoggedOut;
     }
 }
