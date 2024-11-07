@@ -2,6 +2,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Data;
 
@@ -39,7 +42,16 @@ public static class ServiceCollectionExtensions
         services.AddTransient(sp => new CosmosDbDatabaseProvider(sp.GetRequiredService<DbContext>(), databaseName));
 
         services.Add(new ServiceDescriptor(typeof(IRepository<>), typeof(CosmosDbRepository<>), serviceLifetime));
-
         return services;
+    }
+
+    public static EntityTypeBuilder<T> RealtimeEntity<T>(this ModelBuilder model, string? eventContainerName = null) where T : BlossomEntity
+    {
+        var entity = model.Entity<T>();
+        var eventEntity = model.Entity<BlossomEvent<T>>();
+        if (eventContainerName != null)
+            eventEntity.ToContainer(eventContainerName);
+
+        return entity;
     }
 }

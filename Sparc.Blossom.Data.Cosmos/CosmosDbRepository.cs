@@ -5,7 +5,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T : BlossomEntity<string>
+public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
+    where T : BlossomEntity<string>
 {
     public IQueryable<T> Query { get; }
     public DbContext Context { get; }
@@ -17,6 +18,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T :
     {
         Context = context;
         DbProvider = dbProvider;
+
         if (!IsCreated)
         {
             Context.Database.EnsureCreatedAsync().Wait();
@@ -56,10 +58,10 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T :
 
     public async Task AddAsync(T item)
     {
-        await AddAsync(new[] { item });
+        await AddAsync([item]);
     }
 
-    public async Task AddAsync(IEnumerable<T> items)
+    public virtual async Task AddAsync(IEnumerable<T> items)
     {
         foreach (var item in items)
             Context.Add(item);
@@ -69,10 +71,10 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T :
 
     public async Task UpdateAsync(T item)
     {
-        await UpdateAsync(new[] { item });
+        await UpdateAsync([item]);
     }
 
-    public async Task UpdateAsync(IEnumerable<T> items)
+    public virtual async Task UpdateAsync(IEnumerable<T> items)
     {
         foreach (var item in items)
         {
@@ -109,14 +111,14 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T :
 
     public async Task DeleteAsync(T item)
     {
-        await DeleteAsync(new[] { item });
+        await DeleteAsync([item]);
     }
 
     public async Task DeleteAsync(IEnumerable<T> items)
     {
         foreach (var item in items)
             Context.Set<T>().Remove(item);
-        
+
         await Context.SaveChangesAsync();
     }
 
@@ -142,7 +144,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T> where T :
         var query = new QueryDefinition(sql);
         if (parameters != null)
         {
-            var i = 0; 
+            var i = 0;
             foreach (var parameter in parameters)
             {
                 var key = $"@{i++}";

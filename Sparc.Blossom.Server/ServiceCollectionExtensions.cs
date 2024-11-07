@@ -2,7 +2,6 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
-using Sparc.Blossom.Server;
 using Sparc.Blossom.Api;
 using Sparc.Blossom.Authentication;
 using System.Reflection;
@@ -37,7 +36,6 @@ public static class ServiceCollectionExtensions
         builder.RegisterBlossomContexts(apiAssembly);
 
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSingleton<AdditionalAssembliesProvider>();
 
         builder.AddBlossomRepository();
 

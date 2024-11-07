@@ -3,15 +3,16 @@ using System.Text.Json;
 
 namespace Sparc.Blossom.Data;
 
-public class BlossomSet<T> : IRepository<T> where T : class
+public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
 {
-    public BlossomSet()
+    public BlossomInMemoryRepository()
     {
     }
     
-    public BlossomSet(IEnumerable<T> items)
+    public BlossomInMemoryRepository(IEnumerable<T> items)
     {
-        _items = items.ToList();
+        if (items.Any())
+            _items = items.ToList();
     }
     
     internal static List<T> _items = [];
@@ -71,14 +72,14 @@ public class BlossomSet<T> : IRepository<T> where T : class
     {
         if (typeof(T).IsAssignableTo(typeof(BlossomEntity<string>)))
         {
-            var itemsWithStringIds = _items.Cast<BlossomEntity<string>>();
+            var itemsWithStringIds = _items.Cast<BlossomEntity<string>>().ToList();
             var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
             return Task.FromResult(item);
         }
 
         if (typeof(T).IsAssignableTo(typeof(BlossomEntity<int>)))
         {
-            var itemsWithStringIds = _items.Cast<BlossomEntity<int>>();
+            var itemsWithStringIds = _items.Cast<BlossomEntity<int>>().ToList();
             var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
             return Task.FromResult(item);
         }
@@ -133,7 +134,7 @@ public class BlossomSet<T> : IRepository<T> where T : class
             _items.Add(item);
     }
 
-    public static BlossomSet<T> FromUrl<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
+    public static BlossomInMemoryRepository<T> FromUrl<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
     {
         using var client = new HttpClient();
         var webRequest = new HttpRequestMessage(HttpMethod.Get, url);

@@ -2,16 +2,17 @@
 
 namespace Sparc.Blossom.Data;
 
-public class BlossomEntity
+public abstract class BlossomEntity
 {
-    internal List<BlossomEvent>? _events;
-
+    public virtual object GenericId { get; } = null!;
+    protected List<BlossomEvent>? _events;
+    
+    // Event system
     public List<BlossomEvent> Publish()
     {
         _events ??= [];
 
         var domainEvents = _events.ToList();
-        domainEvents.Add(new BlossomEntityChanged(this));
         _events.Clear();
 
         return domainEvents;
@@ -27,7 +28,6 @@ public class BlossomEntity
 
     //protected void On(INotification notification) => ((dynamic)this).On(notification);
 
-    public virtual object GenericId { get; } = null!;
 }
 
 public class BlossomEntity<T> : BlossomEntity where T : notnull
@@ -39,6 +39,6 @@ public class BlossomEntity<T> : BlossomEntity where T : notnull
 
     public BlossomEntity(T id) => Id = id;
     public override object GenericId => Id;
-
+    
     public virtual T Id { get; set; }
 }
