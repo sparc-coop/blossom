@@ -2,6 +2,9 @@
 @namespace Sparc.Blossom.Realtime
 @implements IAsyncDisposable
 
+
+@ChildContent
+
 @if (Realtime.Connection != null)
 {
     <aside class="realtime-hub realtime-hub-@Realtime.Connection.State.ToString()">
