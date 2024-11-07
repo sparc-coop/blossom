@@ -1,8 +1,6 @@
-﻿using Sparc.Blossom.Data;
+﻿namespace Sparc.Blossom.Api;
 
-namespace Sparc.Blossom.Api;
-
-public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T : BlossomEntity
+public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T>
 {
     private HttpClient Client { get; } = client;
 

@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
 
     public static WebApplicationBuilder AddRemoteRepository<T, TResponse>
         (this WebApplicationBuilder builder, string url, Func<TResponse, IEnumerable<T>> transformer)
-        where T : class
+        where T : BlossomEntity
     {
         var results = BlossomInMemoryRepository<T>.FromUrl(url, transformer);
         builder.Services.AddScoped<IRepository<T>>(_ => results);

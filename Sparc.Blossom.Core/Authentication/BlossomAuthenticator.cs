@@ -61,7 +61,7 @@ public class BlossomAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticat
 
         if (User == null)
         {
-            User = BlossomUser.FromPrincipal(principal);
+            User = BlossomUser.FromPrincipal<T>(principal);
             await Users.AddAsync((T)User);
         }
 
