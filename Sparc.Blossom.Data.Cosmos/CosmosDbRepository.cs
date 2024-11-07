@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Sparc.Blossom.Data;
 
 public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
-    where T : BlossomEntity<string>
+    where T : BlossomEntity
 {
     public IQueryable<T> Query { get; }
     public DbContext Context { get; }
@@ -30,9 +30,6 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
 
     public async Task<T?> FindAsync(object id)
     {
-        if (id is string sid)
-            return Context.Set<T>().FirstOrDefault(x => x.Id == sid);
-
         return await Context.Set<T>().FindAsync(id);
     }
 
@@ -78,7 +75,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         foreach (var item in items)
         {
-            var existing = await FindAsync(item.Id);
+            var existing = await FindAsync(item.GenericId);
             if (existing != null)
             {
                 Context.Entry(existing).State = EntityState.Detached;
