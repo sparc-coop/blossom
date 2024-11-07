@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
-using Passwordless.Net;
+using Passwordless;
 using Microsoft.Extensions.Configuration;
 namespace Sparc.Blossom.Authentication.Passwordless;
 
