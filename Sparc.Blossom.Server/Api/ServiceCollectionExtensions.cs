@@ -1,23 +1,16 @@
 ﻿using Ardalis.Specification;
-using Sparc.Blossom.Data;
+using MediatR;
+using Sparc.Blossom.Realtime;
 using System.Reflection;
 
 namespace Sparc.Blossom.Api;
 
 public static class ServiceCollectionExtensions
 {
-    public static IEnumerable<Type> GetDerivedTypes(this Assembly assembly, Type baseType)
-        => assembly.GetTypes().Where(x => 
-            (baseType.IsGenericType && x.BaseType?.IsGenericType == true && x.BaseType.GetGenericTypeDefinition() == baseType)
-            || x.BaseType == baseType);
-
-    public static IEnumerable<Type> GetEntities(this Assembly assembly)
-        => assembly.GetDerivedTypes(typeof(BlossomEntity<>));
-
     public static IEnumerable<Type> GetDtos(this Assembly assembly)
-        => assembly.GetDerivedTypes(typeof(BlossomApiContext<>))
-            .Select(x => x.BaseType!.GetGenericArguments().First())
-            .Distinct();
+       => assembly.GetDerivedTypes(typeof(BlossomApiContext<>))
+           .Select(x => x.BaseType!.GetGenericArguments().First())
+           .Distinct();
 
     public static void RegisterBlossomContexts(this WebApplicationBuilder builder, Assembly? assembly = null)
     {
@@ -31,9 +24,15 @@ public static class ServiceCollectionExtensions
 
         var entities = assembly.GetEntities();
         foreach (var entity in entities)
+        {
             builder.Services.AddScoped(
                 typeof(IRunner<>).MakeGenericType(entity),
                 typeof(BlossomServerRunner<>).MakeGenericType(entity));
+
+            builder.Services.AddTransient(
+                typeof(INotificationHandler<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)), 
+                typeof(BlossomEventDefaultHandler<>).MakeGenericType(entity));
+        }
 
         var dtos = assembly.GetDtos()
             .ToDictionary(x => x, x => entities.FirstOrDefault(y => y.Name == x.Name))

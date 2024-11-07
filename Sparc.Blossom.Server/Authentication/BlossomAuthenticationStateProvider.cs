@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components;
-using System.Diagnostics;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Components.Web;
 
 namespace Sparc.Blossom.Server.Authentication;
 
@@ -40,12 +38,12 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
         return await GetAsync(authenticationState.User) != null;
     }
 
-    public virtual async Task<BlossomUser?> GetAsync(ClaimsPrincipal principal)
+    public virtual async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
     {
         // Get the user from a new scope to ensure it fetches fresh data
         await using var scope = _scopeFactory.CreateAsyncScope();
         var users = scope.ServiceProvider.GetRequiredService<IRepository<T>>();
-        return await users.FindAsync(principal.Id());
+        return await users.FindAsync(principal.Id()) ?? BlossomUser.FromPrincipal(principal);
 
     }
 

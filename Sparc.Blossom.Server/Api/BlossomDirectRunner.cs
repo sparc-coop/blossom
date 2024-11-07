@@ -1,14 +1,15 @@
 ﻿using Ardalis.Specification;
 using Mapster;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Api;
 
-public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> serverRunner) 
+public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> serverRunner, BlossomRealtimeContext realtime) 
     : IRunner<T>
-    where T : IBlossomProxy<T>
-    //where TEntity : BlossomEntity<string>
+    where T : IBlossomProxy<T>, IBlossomEntityProxy
 {
     public IRunner<TEntity> ServerRunner { get; } = serverRunner;
+    public BlossomRealtimeContext Realtime { get; } = realtime;
 
     public async Task<T> CreateAsync(params object?[] parameters)
     {
@@ -19,12 +20,14 @@ public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> serverRunner)
     public async Task<T?> GetAsync(object id)
     {
         var result = await ServerRunner.GetAsync(id);
-        return result == null ? default : Adapt(result);
+        return result == null ? default : await AdaptAndWatch(result);
     }
     public async Task<IEnumerable<T>> QueryAsync(string? name = null, params object?[] parameters)
     {
         var results = await ServerRunner.QueryAsync(name, parameters);
-        return results.Select(Adapt);
+        var dtos = results.Select(Adapt);
+        await Realtime.Watch((IEnumerable<IBlossomEntityProxy>)dtos);
+        return dtos;
     }
 
     public async Task ExecuteAsync(object id, string name, params object?[] parameters) => 
@@ -42,5 +45,24 @@ public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> serverRunner)
         var dto = entity.Adapt<T>();
         dto.Runner = this;
         return dto;
+    }
+
+    private async Task<T> AdaptAndWatch(TEntity entity)
+    {
+        var dto = Adapt(entity);
+        await Realtime.Watch(dto);
+        return dto;
+    }
+
+    public async Task<T?> UndoAsync(object id, long? revision)
+    {
+        var result = await ServerRunner.UndoAsync(id, revision);
+        return result == null ? default : Adapt(result);
+    }
+
+    public async Task<T?> RedoAsync(object id, long? revision)
+    {
+        var result = await ServerRunner.RedoAsync(id, revision);
+        return result == null ? default : Adapt(result);
     }
 }

@@ -65,7 +65,7 @@
     {
         if (Auth.User != null || !string.IsNullOrEmpty(Token))
         {
-            await foreach (var state in Auth.LoginAsync(User, Token))
+            await foreach (var state in Auth.Login(User, Token))
                 StateHasChanged();
         }
     }
@@ -73,7 +73,7 @@
     async Task BeginLogin()
     {
         // Attempt autofill signin
-        await foreach (var state in Auth.LoginAsync(User))
+        await foreach (var state in Auth.Login(User))
             StateHasChanged();
 
         if (Auth.LoginState == LoginStates.LoggedIn)
@@ -91,13 +91,13 @@
         if (string.IsNullOrWhiteSpace(Email))
             return;
 
-        await foreach (var state in Auth.LoginAsync(User, Email))
+        await foreach (var state in Auth.Login(User, Email))
             StateHasChanged();
     }
 
     async Task LogoutAsync()
     {
-        await foreach (var state in Auth.LogoutAsync(User))
+        await foreach (var state in Auth.Logout(User))
             StateHasChanged();
     }
 }

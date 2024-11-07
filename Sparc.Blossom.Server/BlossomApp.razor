@@ -5,16 +5,16 @@
 @typeparam Program
 @typeparam DefaultLayout
 
-<CascadingValue Value="User">
-    <Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@AdditionalAssemblies">
-        <Found Context="routeData">
+<Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@AdditionalAssemblies">
+    <Found Context="routeData">
+        <CascadingValue Value="User">
             <Sparc.Blossom.Realtime.BlossomRealtimeHub>
                 <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
                     <NotAuthorized>
                         @if (!context.User.Identity?.IsAuthenticated == true)
                         {
                             @*                     <RedirectToLogin />
-                        *@  }
+                    *@      }
                         else if (NotAuthorized is not null)
                         {
                             @NotAuthorized
@@ -42,45 +42,36 @@
                 </AuthorizeRouteView>
                 <FocusOnNavigate RouteData="routeData" Selector="h1" />
             </Sparc.Blossom.Realtime.BlossomRealtimeHub>
-        </Found>
-        <NotFound>
-            <LayoutView Layout="@typeof(DefaultLayout)">
-                @if (NotFound is not null)
-                {
-                    @NotFound
-                }
-                else
-                {
-                    <p>Sorry, there's nothing at this address.</p>
-                }
-            </LayoutView>
-        </NotFound>
-    </Router>
-</CascadingValue>
+        </CascadingValue>
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(DefaultLayout)">
+            @if (NotFound is not null)
+            {
+                @NotFound
+            }
+            else
+            {
+                <p>Sorry, there's nothing at this address.</p>
+            }
+        </LayoutView>
+    </NotFound>
+</Router>
 
+@inject AuthenticationStateProvider Auth
 @code {
-    [CascadingParameter]
-    private Task<AuthenticationState>? authenticationState { get; set; }
     [Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
     [Parameter] public RenderFragment Authorizing { get; set; } = null!;
     [Parameter] public RenderFragment NotFound { get; set; } = null!;
     [Parameter] public RenderFragment Loading { get; set; } = null!;
-    public ClaimsPrincipal User { get; set; } = new ClaimsPrincipal();
-
-    public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
-        ? new[] { this.GetType().Assembly }
-        : new[] { this.GetType().Assembly, typeof(DefaultLayout).Assembly };
+    ClaimsPrincipal User = new(new ClaimsIdentity());
 
     protected override async Task OnInitializedAsync()
     {
-        if (authenticationState is not null)
-        {
-            var authState = await authenticationState;
-            User = authState?.User;
-        }
-        else 
-        { 
-            User = new ClaimsPrincipal(new ClaimsIdentity()); 
-        }
+        User = (await Auth.GetAuthenticationStateAsync()).User;
     }
+
+    public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
+    ? new[] { this.GetType().Assembly }
+        : new[] { this.GetType().Assembly, typeof(DefaultLayout).Assembly };
 } 
