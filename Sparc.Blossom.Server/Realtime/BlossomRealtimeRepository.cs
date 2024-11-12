@@ -5,11 +5,11 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Realtime;
 
-public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher, IHttpContextAccessor http)
+public class BlossomRealtimeRepository<T>(BlossomInMemoryRepository<BlossomEvent<T>> repository, IPublisher publisher, IHttpContextAccessor http)
     : IRealtimeRepository<T>
     where T : BlossomEntity
 {
-    public IRepository<BlossomEvent<T>> Repository { get; } = repository;
+    public BlossomInMemoryRepository<BlossomEvent<T>> Repository { get; } = repository;
     public IPublisher Publisher { get; } = publisher;
     ClaimsPrincipal? User => http?.HttpContext?.User;
     string? UserId => User?.Id();

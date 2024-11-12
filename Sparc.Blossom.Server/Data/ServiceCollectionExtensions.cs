@@ -11,6 +11,7 @@ public static class ServiceCollectionExtensions
             builder.Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
         }
 
+        builder.Services.AddScoped(typeof(BlossomInMemoryRepository<>));
         builder.Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
         builder.Services.AddScoped<BlossomRealtimeContext>();
         return builder;
