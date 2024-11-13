@@ -30,8 +30,14 @@ public static class ServiceCollectionExtensions
                 typeof(BlossomServerRunner<>).MakeGenericType(entity));
 
             builder.Services.AddTransient(
-                typeof(INotificationHandler<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)), 
+                typeof(INotificationHandler<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)),
                 typeof(BlossomEventDefaultHandler<>).MakeGenericType(entity));
+        }
+
+        var openEndpoints = assembly.GetTypes().Where(t => typeof(IBlossomEndpointMapper).IsAssignableFrom(t));
+        foreach (var endpoint in openEndpoints)
+        {
+            builder.Services.AddScoped(typeof(IBlossomEndpointMapper), endpoint);
         }
 
         var dtos = assembly.GetDtos()
@@ -49,12 +55,10 @@ public static class ServiceCollectionExtensions
 
     public static void MapBlossomContexts(this WebApplication app, Assembly assembly)
     {
-        var entities = assembly.GetEntities();
+        app.MapOpenApi();
+
         using var scope = app.Services.CreateScope();
-        foreach (var entity in entities)
-        {
-            var instance = scope.ServiceProvider.GetRequiredService(typeof(IRunner<>).MakeGenericType(entity)) as IBlossomEndpointMapper;
-            instance?.MapEndpoints(app);
-        }
+        foreach (var endpointMapper in scope.ServiceProvider.GetServices<IBlossomEndpointMapper>())
+            endpointMapper.MapEndpoints(app);
     }
 }

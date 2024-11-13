@@ -6,11 +6,6 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Api;
 
-public interface IBlossomEndpointMapper
-{
-    void MapEndpoints(IEndpointRouteBuilder endpoints);
-}
-
 public class BlossomServerRunner<T>(IRepository<T> repository, IRealtimeRepository<T> events, IHttpContextAccessor http) 
     : IRunner<T>, IBlossomEndpointMapper
     where T : BlossomEntity
@@ -71,7 +66,7 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IRealtimeReposito
         throw new NotImplementedException();
     }
 
-    public void MapEndpoints(IEndpointRouteBuilder endpoints)
+    public virtual void MapEndpoints(IEndpointRouteBuilder endpoints)
     {
         var baseUrl = $"/{Name.ToLower()}";
         var group = endpoints.MapGroup(baseUrl);

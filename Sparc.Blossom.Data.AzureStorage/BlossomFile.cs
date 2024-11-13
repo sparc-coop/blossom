@@ -1,8 +1,8 @@
 ﻿namespace Sparc.Blossom.Data;
 
-public class File
+public class BlossomFile
 {
-    public File(string folderName, string fileName, AccessTypes? accessType = null, Stream? stream = null)
+    public BlossomFile(string folderName, string fileName, AccessTypes? accessType = null, Stream? stream = null)
     {
         FolderName = folderName;
         FileName = fileName;
@@ -10,7 +10,7 @@ public class File
         Stream = stream;
     }
 
-    public File(string fileName, AccessTypes? accessType = null, Stream? stream = null)
+    public BlossomFile(string fileName, AccessTypes? accessType = null, Stream? stream = null)
     {
         FolderName = Path.GetDirectoryName(fileName) ?? string.Empty;
         FileName = Path.GetFileName(fileName);

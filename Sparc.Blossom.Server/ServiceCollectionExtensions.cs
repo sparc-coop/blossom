@@ -51,6 +51,7 @@ public static class ServiceCollectionExtensions
             builder.Services.AddScoped<BlossomContextOptions>();
         
         builder.Services.AddOutputCache();
+        builder.Services.AddOpenApi();
 
         var app = builder.Build();
 
