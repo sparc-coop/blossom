@@ -36,8 +36,8 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IRealtimeReposito
     public async Task<T> CreateAsync(params object?[] parameters)
     {
         var entity = (T)Activator.CreateInstance(typeof(T), parameters)!;
-        await Events.BroadcastAsync(new BlossomEntityAdded<T>(entity));
-        // await Repository.AddAsync(entity);
+        //await Events.BroadcastAsync(new BlossomEntityAdded<T>(entity));
+        await Repository.AddAsync(entity);
         return entity;
     }
 
@@ -48,8 +48,8 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IRealtimeReposito
 
         var action = new Action<T>(x => typeof(T).GetMethod(name)?.Invoke(x, parameters));
         action(entity);
-        await Events.BroadcastAsync(name, entity);
-        // await Repository.ExecuteAsync(id, action);
+        // await Events.BroadcastAsync(name, entity);
+        await Repository.ExecuteAsync(id, action);
     }
 
     public async Task DeleteAsync(object id)
@@ -57,8 +57,8 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IRealtimeReposito
         var entity = await Repository.FindAsync(id) 
             ?? throw new Exception($"Entity {id} not found.");
 
-        await Events.BroadcastAsync(new BlossomEntityDeleted<T>(entity));
-        // await Repository.DeleteAsync(entity);
+        // Events.BroadcastAsync(new BlossomEntityDeleted<T>(entity));
+        await Repository.DeleteAsync(entity);
     }
 
     public Task OnAsync(object id, string name, params object?[] parameters)
