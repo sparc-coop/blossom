@@ -19,5 +19,6 @@ internal class BlossomApiPropertyInfo
     internal string Name { get; set; }
     internal string Type { get; set; }
     internal bool IsNullable => Type.EndsWith("?");
-    internal string Modifiers => "public" + (IsNullable ? "" : " required");
+    internal string Modifiers => "public";
+    internal string PostModifiers => IsNullable ? "" : " = default!;";
 }

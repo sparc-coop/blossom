@@ -84,12 +84,13 @@ public class SqlServerRepository<T> : RepositoryBase<T>, IRepository<T> where T 
             throw new Exception($"Item with id {id} not found");
 
         action(entity);
+        await CommitAsync();
     }
 
-    public Task ExecuteAsync(T entity, Action<T> action)
+    public async Task ExecuteAsync(T entity, Action<T> action)
     {
         action(entity);
-        return Task.CompletedTask;
+        await CommitAsync();
     }
 
     public IQueryable<T> Include(params string[] path)

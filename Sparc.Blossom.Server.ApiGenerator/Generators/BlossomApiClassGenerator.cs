@@ -13,7 +13,7 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
         var commands = new StringBuilder();
 
         foreach (var property in source.Properties)
-            properties.AppendLine($@"{property.Modifiers} {property.Type} {property.Name} {{ get; set; }}");
+            properties.AppendLine($@"{property.Modifiers} {property.Type} {property.Name} {{ get; set; }}{property.PostModifiers}");
 
         //properties.AppendLine($@"public required string Id {{ get; set; }}");
 
