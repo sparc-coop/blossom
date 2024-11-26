@@ -16,8 +16,8 @@ public static class BlossomApplication
         Assembly? apiAssembly = null)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.Services.AddSingleton<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
         builder.AddBlossom<BlossomUser>(builderOptions, renderMode, apiAssembly);
+        builder.Services.AddSingleton<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
         builder.Services.AddBlossomRealtime<TApp>();
 
         var blossomApp = builder.UseBlossom<TApp>();

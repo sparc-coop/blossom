@@ -38,6 +38,18 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IRealtimeReposito
         return await Repository.GetAllAsync(spec);
     }
 
+    public async Task<BlossomQueryResult<T>> FlexQueryAsync(string name, BlossomQueryOptions options, params object?[] parameters)
+    {
+        var assemblyTypes = typeof(T).Assembly.GetTypes();
+        var specType = assemblyTypes.FirstOrDefault(x => x.Name == name && x.BaseType == typeof(BlossomQuery<T>))
+            ?? throw new Exception($"Specification {name} not found.");
+        var optionsAndParameters = new object[] { options }.Concat(parameters).ToArray();
+        var spec = (ISpecification<T>)Activator.CreateInstance(specType, optionsAndParameters)!;
+        var results = await Repository.GetAllAsync(spec);
+        var count = await Repository.CountAsync(spec);
+        return new BlossomQueryResult<T>(results, count);
+    }
+
     public async Task<T> CreateAsync(params object?[] parameters)
     {
         var entity = (T)Activator.CreateInstance(typeof(T), parameters)!;
@@ -79,6 +91,7 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IRealtimeReposito
         group.MapPost("_undo", async (IRunner<T> runner, string id, long? revision) => await runner.UndoAsync(id, revision));
         group.MapPost("_redo", async (IRunner<T> runner, string id, long? revision) => await runner.RedoAsync(id, revision));
         group.MapPost("{name}", async (IRunner<T> runner, string name, object[] parameters) => await runner.QueryAsync(name, parameters));
+        group.MapGet("{name}_flex", async (IRunner<T> runner, string name, BlossomQueryOptions options, object[] parameters) => await runner.FlexQueryAsync(name, options, parameters));
         group.MapPut("{id}/{name}", async (IRunner<T> runner, string id, string name, object[] parameters) => await runner.ExecuteAsync(id, name, parameters));
         group.MapDelete("{id}", async (IRunner<T> runner, string id) => await runner.DeleteAsync(id));
     }

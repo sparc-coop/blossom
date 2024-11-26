@@ -87,8 +87,16 @@ public class BlossomApi({{constructor}}) : IBlossomApi
                 else
                 {
                     var parameterPrefix = constructor.Arguments.Length > 0 ? ", " : "";
-                    //var returnType = properties.Length > 0 ? source.Name : source.BaseName;
-                    queries.AppendLine($@"public async Task<IEnumerable<{source.BaseOfName}>> {source.Name}({constructor.Arguments}) => await Runner.QueryAsync(""{source.Name}""{parameterPrefix}{constructor.Parameters});");
+                    var isFlexQuery = constructor.Arguments.Contains("BlossomQueryOptions");
+
+                    if (isFlexQuery)
+                    {
+                        queries.AppendLine($@"public async Task<BlossomQueryResult<{source.BaseOfName}>> {source.Name}({constructor.Arguments}) => await Runner.FlexQueryAsync(""{source.Name}""{parameterPrefix}{constructor.Parameters});");
+                    }
+                    else
+                    {
+                        queries.AppendLine($@"public async Task<IEnumerable<{source.BaseOfName}>> {source.Name}({constructor.Arguments}) => await Runner.QueryAsync(""{source.Name}""{parameterPrefix}{constructor.Parameters});");
+                    }
                 }
             }
         }

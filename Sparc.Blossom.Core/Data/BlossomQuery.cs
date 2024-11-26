@@ -7,7 +7,7 @@ public class BlossomQuery();
 public class BlossomQuery<T> : Specification<T> where T : class
 {
     public BlossomQuery() => Query.AsNoTracking();
-    
+
     protected void ForEach(Action<T> action)
     {
         Query.PostProcessingAction(x =>
@@ -31,5 +31,16 @@ public class BlossomQuery<T, TResult> : Specification<T, TResult>
 
             return x;
         });
+    }
+}
+
+public static class BlossomQueryExtensions
+{
+    public static ISpecificationBuilder<T> WithOptions<T>(this ISpecificationBuilder<T> query, Api.BlossomQueryOptions options) where T : class
+    {
+        query.Skip(options.Skip);
+        if (options.Take.HasValue)
+            query.Take(options.Take.Value);
+        return query;
     }
 }
