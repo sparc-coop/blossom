@@ -37,6 +37,11 @@ public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> serverRunner, Blos
         return new BlossomQueryResult<T>(results.Items.Select(Adapt), results.TotalCount);
     }
 
+    public async Task PatchAsync<U>(object id, U item)
+    {
+        await ServerRunner.PatchAsync(id, item);
+    }
+
     public async Task ExecuteAsync(object id, string name, params object?[] parameters) => 
         await ServerRunner.ExecuteAsync(id, name, parameters);
 

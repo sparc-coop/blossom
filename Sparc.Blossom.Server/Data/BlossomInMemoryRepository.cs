@@ -128,6 +128,22 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
             await UpdateAsync(item);
     }
 
+    public async Task PatchAsync<U>(object id, U patch)
+    {
+        var item = await FindAsync(id) ?? throw new Exception("Item not found");
+
+        // Update matching properties on the item with the patch
+        var json = JsonSerializer.Serialize(patch);
+        var patchItem = JsonSerializer.Deserialize<U>(json);
+        var properties = typeof(U).GetProperties();
+        foreach (var property in properties)
+        {
+            var value = property.GetValue(patchItem);
+            if (value != null)
+                property.SetValue(item, value);
+        }
+    }
+
     internal void Add(IEnumerable<T> items)
     {
         foreach (var item in items)

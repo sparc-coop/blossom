@@ -5,7 +5,7 @@ namespace Sparc.Blossom.Api;
 public interface IBlossomEntityProxy
 {
     string SubscriptionId { get; }
-    void Update(IEnumerable<BlossomPatch> patches);
+    Task Update(IEnumerable<BlossomPatch> patches);
 }
 
 public interface IBlossomProxy<T>
@@ -23,9 +23,13 @@ public class BlossomEntityProxy<T, TId> : BlossomProxy<T>, IBlossomEntityProxy
     public TId Id { get; set; } = default!;
     public string SubscriptionId => $"{GetType().Name}-{Id}";
 
-    public void Update(IEnumerable<BlossomPatch> patches)
+    public Task Update(IEnumerable<BlossomPatch> patches)
     {
         foreach (var patch in patches)
             patch.ApplyTo(this);
+
+        return Task.CompletedTask;
     }
+
+    public async Task Update() => await Runner.PatchAsync(Id, this);
 }

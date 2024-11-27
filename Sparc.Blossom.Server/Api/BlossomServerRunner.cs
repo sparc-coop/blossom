@@ -50,6 +50,11 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IRealtimeReposito
         return new BlossomQueryResult<T>(results, count);
     }
 
+    public async Task PatchAsync<U>(object id, U item)
+    {
+        await Repository.PatchAsync(id, item);
+    }
+
     public async Task<T> CreateAsync(params object?[] parameters)
     {
         var entity = (T)Activator.CreateInstance(typeof(T), parameters)!;
@@ -91,6 +96,7 @@ public class BlossomServerRunner<T>(IRepository<T> repository, IRealtimeReposito
         group.MapPost("_undo", async (IRunner<T> runner, string id, long? revision) => await runner.UndoAsync(id, revision));
         group.MapPost("_redo", async (IRunner<T> runner, string id, long? revision) => await runner.RedoAsync(id, revision));
         group.MapPost("{name}", async (IRunner<T> runner, string name, object[] parameters) => await runner.QueryAsync(name, parameters));
+        group.MapPatch("{id}", async (IRunner<T> runner, string id, object patch) => await runner.PatchAsync(id, patch));
         group.MapGet("{name}_flex", async (IRunner<T> runner, string name, BlossomQueryOptions options, object[] parameters) => await runner.FlexQueryAsync(name, options, parameters));
         group.MapPut("{id}/{name}", async (IRunner<T> runner, string id, string name, object[] parameters) => await runner.ExecuteAsync(id, name, parameters));
         group.MapDelete("{id}", async (IRunner<T> runner, string id) => await runner.DeleteAsync(id));

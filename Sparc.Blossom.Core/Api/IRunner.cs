@@ -8,6 +8,7 @@ public interface IRunner<T>
     Task<T?> GetAsync(object id);
     Task<IEnumerable<T>> QueryAsync(string? name = null, params object?[] parameters);
     Task<BlossomQueryResult<T>> FlexQueryAsync(string name, BlossomQueryOptions options, params object?[] parameters);
+    Task PatchAsync<U>(object id, U item);
     Task ExecuteAsync(object id, string name, params object?[] parameters);
     Task DeleteAsync(object id);
     Task OnAsync(object id, string name, params object?[] parameters);

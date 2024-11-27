@@ -17,6 +17,9 @@ public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T 
     public async Task<BlossomQueryResult<T>> FlexQueryAsync(string name, BlossomQueryOptions options, params object?[] parameters)
     => await PostAsJsonAsync<BlossomQueryResult<T>>(name + "_flex", [options, parameters]);
 
+    public async Task PatchAsync<U>(object id, U item)
+        => await Client.PatchAsJsonAsync($"{id}", item);
+
     public async Task ExecuteAsync(object id, string name, params object?[] parameters)
     {
         var request = await Client.PutAsJsonAsync($"{id}/{name}", parameters);

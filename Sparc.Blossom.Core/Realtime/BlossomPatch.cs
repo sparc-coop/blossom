@@ -40,8 +40,12 @@ public class BlossomPatch(string op, string path, object? value)
 
             foreach (var property in propertiesToCompare)
             {
+                var updatedProperty = updated.GetType().GetRuntimeProperty(property.Name);
+                if (updatedProperty == null)
+                    continue;
+
                 var originalValue = property.GetValue(original);
-                var updatedValue = property.GetValue(updated);
+                var updatedValue = updatedProperty.GetValue(updated);
                 var path = currentPath + "/" + property.Name;
                 DeepCompare(originalValue, updatedValue, patches, path);
             }
