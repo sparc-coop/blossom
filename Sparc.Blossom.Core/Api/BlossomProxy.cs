@@ -6,6 +6,8 @@ public interface IBlossomEntityProxy
 {
     string SubscriptionId { get; }
     Task Update(IEnumerable<BlossomPatch> patches);
+    Task Update();
+    Task Delete();
 }
 
 public interface IBlossomProxy<T>
@@ -32,4 +34,5 @@ public class BlossomEntityProxy<T, TId> : BlossomProxy<T>, IBlossomEntityProxy
     }
 
     public async Task Update() => await Runner.PatchAsync(Id, this);
+    public async Task Delete() => await Runner.DeleteAsync(Id);
 }
