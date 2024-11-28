@@ -14,6 +14,8 @@ internal class BlossomApiPropertyInfo
         {
             SetModifiers = string.Join(" ", set.Modifiers.Select(y => y.Text));
         }
+        else if (set == null)
+            SetModifiers = "private";
     }
 
     internal BlossomApiPropertyInfo(ParameterSyntax x)
