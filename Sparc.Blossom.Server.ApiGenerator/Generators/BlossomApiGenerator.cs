@@ -12,7 +12,7 @@ internal class BlossomApiGenerator() : IIncrementalGenerator
     {
         var entities = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: (s, _) => Where(s, "BlossomEntity", "BlossomQuery"),
+                predicate: (s, _) => Where(s, "BlossomEntity", "BlossomAggregate"),
                 transform: static (ctx, _) => new BlossomApiInfo((TypeDeclarationSyntax)ctx.Node)
             ).Where(static m => m is not null)
             .Collect();
@@ -35,7 +35,8 @@ internal class BlossomApiGenerator() : IIncrementalGenerator
         context.AddSource($"BlossomApi.g.cs", Surface(baseTypes));
         foreach (var baseType in baseTypes)
         {
-            context.AddSource($"{baseType.Key}.g.cs", Code(baseType));
+            var name = baseType.OrderBy(x => x.IsAggregate ? 0 : 1).First().PluralName;
+            context.AddSource($"{name}.g.cs", Code(baseType));
         }
     }
 
@@ -46,7 +47,7 @@ internal class BlossomApiGenerator() : IIncrementalGenerator
 
         foreach (var source in sources)
         {
-            var api = source.OrderBy(x => x.IsEntity ? 0 : 1).First();
+            var api = source.OrderBy(x => x.IsAggregate ? 0 : 1).First();
             apis.AppendLine($@"public {api.PluralName} {api.PluralName} {{ get; }} = {api.PluralName.ToLower()};");
             injectors.Add($"{api.PluralName} {api.PluralName.ToLower()}");
         }
@@ -68,36 +69,22 @@ public class BlossomApi({{constructor}}) : IBlossomApi
         var commands = new StringBuilder();
         var constructors = new StringBuilder();
         var queries = new StringBuilder();
-        var api = sources.OrderBy(x => x.IsEntity ? 0 : 1).First();
+        var api = sources.OrderBy(x => x.IsAggregate ? 0 : 1).First();
 
-        foreach (var source in sources)
+        foreach (var source in sources.Where(x => x.IsEntity))
         {
-            //foreach (var method in source.Methods)
-            //{
-            //    var parameterPrefix = method.Arguments.Length > 0 ? ", " : "";
-            //    commands.AppendLine($@"public async Task {method.Name}({method.Arguments}) => await Runner.ExecuteAsync(Id, ""{method.Name}""{parameterPrefix}{method.Parameters});");
-            //}
-
             foreach (var constructor in source.Constructors)
             {
-                if (source.IsEntity)
-                {
-                    constructors.AppendLine($@"public async Task<{source.Name}> Create({constructor.Arguments}) => await Runner.CreateAsync({constructor.Parameters});");
-                }
-                else
-                {
-                    var parameterPrefix = constructor.Arguments.Length > 0 ? ", " : "";
-                    var isFlexQuery = constructor.Arguments.Contains("BlossomQueryOptions");
+                constructors.AppendLine($@"public async Task<{source.Name}> Create({constructor.Arguments}) => await Runner.Create({constructor.Parameters});");
+            }
+        }
 
-                    if (isFlexQuery)
-                    {
-                        queries.AppendLine($@"public async Task<BlossomQueryResult<{source.BaseOfName}>> {source.Name}({constructor.Arguments}) => await Runner.FlexQueryAsync(""{source.Name}""{parameterPrefix}{constructor.Parameters});");
-                    }
-                    else
-                    {
-                        queries.AppendLine($@"public async Task<IEnumerable<{source.BaseOfName}>> {source.Name}({constructor.Arguments}) => await Runner.QueryAsync(""{source.Name}""{parameterPrefix}{constructor.Parameters});");
-                    }
-                }
+        foreach (var source in sources.Where(x => !x.IsEntity))
+        {
+            foreach (var query in source.Methods.Where(x => x.IsQuery))
+            { 
+                var parameterPrefix = query.Arguments.Length > 0 ? ", " : "";
+                    queries.AppendLine($@"public async Task<IEnumerable<{source.BaseOfName}>> {query.Name}({query.Arguments}) => await Runner.ExecuteQuery(""{query.Name}""{parameterPrefix}{query.Parameters});");
             }
         }
 

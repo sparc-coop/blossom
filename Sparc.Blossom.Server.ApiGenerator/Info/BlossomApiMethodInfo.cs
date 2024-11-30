@@ -15,11 +15,14 @@ internal class BlossomApiMethodInfo
     internal BlossomApiMethodInfo(MethodDeclarationSyntax method)
     {
         Name = method.Identifier.Text;
+        ReturnType = method.ReturnType.ToString();
         Arguments = string.Join(", ", method.ParameterList.Parameters.Select(p => $"{p.Type} {p.Identifier}"));
         Parameters = string.Join(", ", method.ParameterList.Parameters.Select(p => p.Identifier));
     }
 
+    public bool IsQuery => ReturnType?.Contains("BlossomQuery") ?? false;
     internal string Name { get; set; }
+    public string? ReturnType { get; }
     internal string Arguments { get; set; }
     internal string Parameters { get; set; }
 }

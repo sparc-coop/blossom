@@ -1,5 +1,6 @@
 ﻿using Ardalis.Specification;
 using MediatR;
+using Sparc.Blossom.Data;
 using Sparc.Blossom.Realtime;
 using System.Reflection;
 
@@ -22,15 +23,21 @@ public static class ServiceCollectionExtensions
         foreach (var api in apis)
             builder.Services.AddScoped(api);
 
+        var aggregates = assembly.GetAggregates();
+        builder.Services.AddScoped(typeof(BlossomAggregateOptions<>));
+        builder.Services.AddScoped(typeof(BlossomAggregate<>));
+        foreach (var aggregate in aggregates)
+            builder.Services.AddScoped(typeof(BlossomAggregate<>).MakeGenericType(aggregate), aggregate);
+
         var entities = assembly.GetEntities();
         foreach (var entity in entities)
         {
             builder.Services.AddScoped(
                 typeof(IRunner<>).MakeGenericType(entity),
-                typeof(BlossomServerRunner<>).MakeGenericType(entity));
+                typeof(BlossomAggregate<>).MakeGenericType(entity));
 
             builder.Services.AddTransient(
-                typeof(INotificationHandler<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)), 
+                typeof(INotificationHandler<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)),
                 typeof(BlossomEventDefaultHandler<>).MakeGenericType(entity));
         }
 

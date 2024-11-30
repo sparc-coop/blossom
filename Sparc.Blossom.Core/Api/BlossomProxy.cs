@@ -33,6 +33,6 @@ public class BlossomEntityProxy<T, TId> : BlossomProxy<T>, IBlossomEntityProxy
         return Task.CompletedTask;
     }
 
-    public async Task Update() => await Runner.PatchAsync(Id, this);
-    public async Task Delete() => await Runner.DeleteAsync(Id);
+    public async Task Update() => await Runner.Patch(Id, this);
+    public async Task Delete() => await Runner.Delete(Id);
 }

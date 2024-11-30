@@ -6,29 +6,29 @@ public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T 
 {
     private HttpClient Client { get; } = client;
 
-    public async Task<T> CreateAsync(params object?[] parameters) 
+    public async Task<T> Create(params object?[] parameters) 
         => await PostAsJsonAsync<T>("", parameters);
 
-    public async Task<T?> GetAsync(object id) => await Client.GetFromJsonAsync<T>(id.ToString());
+    public async Task<T?> Get(object id) => await Client.GetFromJsonAsync<T>(id.ToString());
 
-    public async Task<IEnumerable<T>> QueryAsync(string? name = null, params object?[] parameters) 
+    public async Task<IEnumerable<T>> ExecuteQuery(string? name = null, params object?[] parameters) 
         => await PostAsJsonAsync<IEnumerable<T>>(name, parameters);
 
-    public async Task<BlossomQueryResult<T>> FlexQueryAsync(string name, BlossomQueryOptions options, params object?[] parameters)
-    => await PostAsJsonAsync<BlossomQueryResult<T>>(name + "_flex", [options, parameters]);
+    public async Task<BlossomQueryResult<T>> ExecuteQuery(BlossomQueryOptions options)
+    => await PostAsJsonAsync<BlossomQueryResult<T>>("_query", options);
 
-    public async Task PatchAsync<U>(object id, U item)
+    public async Task Patch<U>(object id, U item)
         => await Client.PatchAsJsonAsync($"{id}", item);
 
-    public async Task ExecuteAsync(object id, string name, params object?[] parameters)
+    public async Task Execute(object id, string name, params object?[] parameters)
     {
         var request = await Client.PutAsJsonAsync($"{id}/{name}", parameters);
         request.EnsureSuccessStatusCode();
     }
 
-    public async Task DeleteAsync(object id) => await Client.DeleteAsync(id.ToString());
+    public async Task Delete(object id) => await Client.DeleteAsync(id.ToString());
 
-    public Task OnAsync(object id, string name, params object?[] parameters)
+    public Task On(object id, string name, params object?[] parameters)
     {
         throw new NotImplementedException();
     }
@@ -40,6 +40,6 @@ public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T 
         return result == null ? throw new Exception("Result is null") : result;
     }
 
-    public async Task<T?> UndoAsync(object id, long? revision) => await PostAsJsonAsync<T?>("_undo", id, revision);
-    public async Task<T?> RedoAsync(object id, long? revision) => await PostAsJsonAsync<T?>("_redo", id, revision);
+    public async Task<T?> Undo(object id, long? revision) => await PostAsJsonAsync<T?>("_undo", id, revision);
+    public async Task<T?> Redo(object id, long? revision) => await PostAsJsonAsync<T?>("_redo", id, revision);
 }

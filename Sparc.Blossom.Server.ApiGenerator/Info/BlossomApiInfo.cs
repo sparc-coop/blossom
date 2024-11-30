@@ -35,7 +35,7 @@ internal class BlossomApiInfo
             }
         }
 
-        PluralName = EntityName + "s";
+        PluralName = IsAggregate ? Name : EntityName + "s";
 
         Methods = type.Public<MethodDeclarationSyntax>()
             .Where(x => x.Identifier.Text != "ToString")
@@ -75,6 +75,7 @@ internal class BlossomApiInfo
     public List<BlossomApiPropertyInfo> Properties { get; }
     public List<BlossomApiFieldInfo> Constants { get; }
     public bool IsEntity => BaseName?.Contains("BlossomEntity") == true;
+    public bool IsAggregate => BaseName?.Contains("BlossomAggregate") == true;
     public string EntityName => IsEntity ? Name : (BaseOfName ?? Name);
 }
 

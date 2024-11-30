@@ -29,7 +29,7 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
             foreach (var method in source.Methods)
             {
                 var parameterPrefix = method.Arguments.Length > 0 ? ", " : "";
-                commands.AppendLine($@"public async Task {method.Name}({method.Arguments}) => await Runner.ExecuteAsync(Id, ""{method.Name}""{parameterPrefix}{method.Parameters});");
+                commands.AppendLine($@"public async Task {method.Name}({method.Arguments}) => await Runner.Execute(Id, ""{method.Name}""{parameterPrefix}{method.Parameters});");
             }
         }
 
