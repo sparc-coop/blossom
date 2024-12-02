@@ -20,6 +20,8 @@ public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T 
     public async Task Patch<U>(object id, U item)
         => await Client.PatchAsJsonAsync($"{id}", item);
 
+    public async Task<BlossomAggregateMetadata> Metadata() => await Client.GetFromJsonAsync<BlossomAggregateMetadata>("_metadata");
+
     public async Task Execute(object id, string name, params object?[] parameters)
     {
         var request = await Client.PutAsJsonAsync($"{id}/{name}", parameters);

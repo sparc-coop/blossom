@@ -1,14 +1,15 @@
 ﻿
 using System.Collections;
+using System.Reflection;
 
 namespace Sparc.Blossom.Api;
 
-public class BlossomProperty(string name, Type type)
+public class BlossomProperty(PropertyInfo property)
 {
-    public string Name { get; } = name;
-    public string Type { get; } = !type.IsPrimitive && type != typeof(string) && typeof(IEnumerable).IsAssignableFrom(type) ? (type.GenericTypeArguments?.First().Name ?? type.Name) : type.Name;
-    public bool IsPrimitive { get; } = type.IsPrimitive || type == typeof(string) || type == typeof(DateTime) || type == typeof(decimal);
-    public bool IsEnumerable { get; } = !type.IsPrimitive && type != typeof(string) && typeof(IEnumerable).IsAssignableFrom(type);
+    public string Name { get; } = property.Name;
+    public string Type { get; } = !property.PropertyType.IsPrimitive && property.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType) ? (property.PropertyType.GenericTypeArguments?.First().Name ?? property.PropertyType.Name) : property.PropertyType.Name;
+    public bool IsPrimitive { get; } = property.PropertyType.IsPrimitive || property.PropertyType == typeof(string) || property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(decimal);
+    public bool IsEnumerable { get; } = !property.PropertyType.IsPrimitive && property.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType);
     public string EditorType => Type switch
     {
         "Int32" => "number",
