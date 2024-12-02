@@ -1,6 +1,7 @@
 ﻿using Sparc.Blossom.Data;
 using Sparc.Blossom.Realtime;
 using System.Security.Claims;
+using System.Linq.Dynamic.Core;
 
 namespace Sparc.Blossom.Api;
 
@@ -32,7 +33,28 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var query = Query(options);
         var results = await query.Execute();
         var count = await Repository.CountAsync(query);
+
+        BlossomAggregateOptions<T>.Metadata ??= LoadMetadata();
+
         return new BlossomQueryResult<T>(results, count);
+    }
+
+    private BlossomAggregateMetadata LoadMetadata()
+    {
+        var metadata = new BlossomAggregateMetadata(typeof(T));
+        foreach (var property in metadata.Properties.Where(x => x.IsPrimitive))
+        {
+            var query = Repository.Query.GroupBy(property.Name).Select("new { Key, Count() as Count }");
+            property.SetAvailableValues(query.ToDynamicList().ToDictionary(x => (object)x.Key ?? "", x => (int)x.Count));
+        }
+
+        foreach (var relationship in metadata.Properties.Where(x => x.IsEnumerable))
+        {
+            var query = Repository.Query.SelectMany(relationship.Name).GroupBy("Id").Select("new { Key, Count() as Count, First() as First }").ToDynamicList();
+            relationship.SetAvailableValues(query.Sum(x => (int)x.Count), query.ToDictionary(x => $"{x.Key}", x => (string)x.First.ToString()));
+        }
+
+        return metadata;
     }
 
     public async Task<IEnumerable<T>> ExecuteQuery(string? name = null, params object?[] parameters)
@@ -120,4 +142,5 @@ public class BlossomAggregateOptions<T>(IRepository<T> repository, IRealtimeRepo
     public IRepository<T> Repository { get; } = repository;
     public IRealtimeRepository<T> Events { get; } = events;
     public IHttpContextAccessor Http { get; } = http;
+    public static BlossomAggregateMetadata? Metadata { get; set; }
 }
