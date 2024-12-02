@@ -10,6 +10,7 @@ public class BlossomRealtimeContext(NavigationManager nav)
 {
     public HubConnection? Connection { get; set; }
 
+    public bool IsOn { get; private set; }
     public bool IsConnected => Connection?.State == HubConnectionState.Connected;
     public bool HasError;
 
@@ -20,9 +21,11 @@ public class BlossomRealtimeContext(NavigationManager nav)
     
     public void StateHasChanged() => Changed?.Invoke(this, EventArgs.Empty);
 
-    public void Initialize(EventCallback<HubConnection>? onConnected = null)
+    public void Initialize(bool isOn, EventCallback<HubConnection>? onConnected = null)
     {
-         Connection ??= new HubConnectionBuilder()
+        IsOn = isOn;
+        
+        Connection ??= new HubConnectionBuilder()
             .WithUrl($"{nav.BaseUri}_realtime")
             //.AddMessagePackProtocol()
             .WithAutomaticReconnect()
@@ -34,7 +37,7 @@ public class BlossomRealtimeContext(NavigationManager nav)
 
     public async Task InitializeAsync(ComponentBase component)
     {
-        Initialize();
+        Initialize(true);
         var properties = component.GetType().GetProperties();
         foreach (var property in properties.OfType<IBlossomEntityProxy>())
             await Watch(property);
@@ -72,8 +75,11 @@ public class BlossomRealtimeContext(NavigationManager nav)
 
     public async Task GoOnline()
     {
-        if (Connection == null)
-            Initialize();
+        if (!IsOn)
+            return;
+        
+        if (Connection == null && IsOn)
+            Initialize(IsOn);
         
         if (Connection?.State != HubConnectionState.Disconnected)
             return;
@@ -118,6 +124,9 @@ public class BlossomRealtimeContext(NavigationManager nav)
 
     public async Task On(IBlossomEntityProxy entity, Action<BlossomEvent> action)
     {
+        if (!IsOn)
+            return;
+        
         await GoOnline();
         
         if (!Subscriptions.TryGetValue(entity.SubscriptionId, out int value))
@@ -139,6 +148,9 @@ public class BlossomRealtimeContext(NavigationManager nav)
 
     public async Task On(IEnumerable<IBlossomEntityProxy> entities, Action<IBlossomEntityProxy, BlossomEvent> action)
     {
+        if (!IsOn)
+            return;
+        
         await GoOnline();
         
         var subscriptionIds = entities.Select(x => x.SubscriptionId).ToList();
