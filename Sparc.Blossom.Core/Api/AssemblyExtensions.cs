@@ -14,5 +14,5 @@ public static class AssemblyExtensions
         => assembly.GetDerivedTypes(typeof(BlossomEntity<>));
 
     public static IEnumerable<Type> GetAggregates(this Assembly assembly)
-        => assembly.GetDerivedTypes(typeof(IBlossomAggregate));
+        => assembly.GetTypes().Where(x => typeof(IBlossomAggregate).IsAssignableFrom(x));
 }

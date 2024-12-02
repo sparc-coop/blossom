@@ -26,8 +26,6 @@ public static class ServiceCollectionExtensions
         var aggregates = assembly.GetAggregates();
         builder.Services.AddScoped(typeof(BlossomAggregateOptions<>));
         builder.Services.AddScoped(typeof(BlossomAggregate<>));
-        foreach (var aggregate in aggregates)
-            builder.Services.AddScoped(typeof(BlossomAggregate<>).MakeGenericType(aggregate), aggregate);
 
         var entities = assembly.GetEntities();
         foreach (var entity in entities)
@@ -39,6 +37,13 @@ public static class ServiceCollectionExtensions
             builder.Services.AddTransient(
                 typeof(INotificationHandler<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)),
                 typeof(BlossomEventDefaultHandler<>).MakeGenericType(entity));
+        }
+
+        foreach (var aggregate in aggregates)
+        {
+            var baseOfType = aggregate.BaseType!.GenericTypeArguments.First();
+            builder.Services.AddScoped(typeof(BlossomAggregate<>).MakeGenericType(baseOfType), aggregate);
+            builder.Services.AddScoped(typeof(IRunner<>).MakeGenericType(baseOfType), aggregate);
         }
 
         var dtos = assembly.GetDtos()
