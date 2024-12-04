@@ -91,7 +91,7 @@ public class BlossomApi({{constructor}}) : IBlossomApi
         return $$"""
 namespace Sparc.Blossom.Api;
 #nullable enable
-public partial class {{api.PluralName}} : BlossomApiContext<{{api.EntityName}}>
+public partial class {{api.PluralName}} : BlossomAggregateProxy<{{api.EntityName}}>
 {
     public {{api.PluralName}}(IRunner<{{api.EntityName}}> runner) : base(runner) { }
 

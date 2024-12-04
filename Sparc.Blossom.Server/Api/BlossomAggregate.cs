@@ -1,7 +1,6 @@
 ﻿using Sparc.Blossom.Data;
 using Sparc.Blossom.Realtime;
 using System.Security.Claims;
-using System.Linq.Dynamic.Core;
 
 namespace Sparc.Blossom.Api;
 
@@ -35,29 +34,6 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var count = await Repository.CountAsync(query);
 
         return new BlossomQueryResult<T>(results, count);
-    }
-
-    public Task<BlossomAggregateMetadata> Metadata()
-    {
-        if (BlossomAggregateOptions<T>.Metadata != null)
-            return Task.FromResult(BlossomAggregateOptions<T>.Metadata);
-
-        var metadata = new BlossomAggregateMetadata(typeof(T));
-        foreach (var property in metadata.EditProperties.Where(x => x.IsPrimitive))
-        {
-            var query = Repository.Query.GroupBy(property.Name).Select("new { Key, Count() as Count }");
-            property.SetAvailableValues(query.ToDynamicList().ToDictionary(x => (object)x.Key ?? "", x => (int)x.Count));
-        }
-
-        foreach (var relationship in metadata.EditProperties.Where(x => x.IsEnumerable))
-        {
-            var query = Repository.Query.SelectMany(relationship.Name).GroupBy("Id").Select("new { Key, Count() as Count, First() as First }").ToDynamicList();
-            relationship.SetAvailableValues(query.Sum(x => (int)x.Count), query.ToDictionary(x => $"{x.Key}", x => (string)x.First.ToString()));
-        }
-
-        BlossomAggregateOptions<T>.Metadata = metadata;
-
-        return Task.FromResult(metadata);
     }
 
     public async Task<IEnumerable<T>> ExecuteQuery(string? name = null, params object?[] parameters)
@@ -128,7 +104,6 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var baseUrl = $"/{Name.ToLower()}";
         var group = endpoints.MapGroup(baseUrl);
         group.MapGet("{id}", async (IRunner<T> runner, string id) => await runner.Get(id));
-        group.MapGet("_metadata", async (IRunner<T> runner, string id) => await runner.Metadata());
         group.MapPost("", async (IRunner<T> runner, object[] parameters) => await runner.Create(parameters));
         group.MapPost("_undo", async (IRunner<T> runner, string id, long? revision) => await runner.Undo(id, revision));
         group.MapPost("_redo", async (IRunner<T> runner, string id, long? revision) => await runner.Redo(id, revision));
@@ -146,5 +121,4 @@ public class BlossomAggregateOptions<T>(IRepository<T> repository, IRealtimeRepo
     public IRepository<T> Repository { get; } = repository;
     public IRealtimeRepository<T> Events { get; } = events;
     public IHttpContextAccessor Http { get; } = http;
-    public static BlossomAggregateMetadata? Metadata { get; set; }
 }

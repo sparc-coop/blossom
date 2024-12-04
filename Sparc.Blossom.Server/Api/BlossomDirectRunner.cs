@@ -37,8 +37,6 @@ public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> serverRunner, Blos
         return new BlossomQueryResult<T>(results.Items.Select(Adapt), results.TotalCount);
     }
 
-    public async Task<BlossomAggregateMetadata> Metadata() => await ServerRunner.Metadata();
-
     public async Task Patch<U>(object id, U item)
     {
         await ServerRunner.Patch(id, item);

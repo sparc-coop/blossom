@@ -9,7 +9,7 @@ namespace Sparc.Blossom.Api;
 public static class ServiceCollectionExtensions
 {
     public static IEnumerable<Type> GetDtos(this Assembly assembly)
-       => assembly.GetDerivedTypes(typeof(BlossomApiContext<>))
+       => assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>))
            .Select(x => x.BaseType!.GetGenericArguments().First())
            .Distinct();
 
@@ -17,9 +17,9 @@ public static class ServiceCollectionExtensions
     {
         assembly ??= Assembly.GetEntryAssembly()!;
 
-        builder.Services.AddScoped(typeof(BlossomApiContext<>));
+        builder.Services.AddScoped(typeof(BlossomAggregateProxy<>));
 
-        var apis = assembly.GetDerivedTypes(typeof(BlossomApiContext<>));
+        var apis = assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>));
         foreach (var api in apis)
             builder.Services.AddScoped(api);
 
@@ -55,17 +55,17 @@ public static class ServiceCollectionExtensions
                 typeof(IRunner<>).MakeGenericType(dto.Key),
                 typeof(BlossomDirectRunner<,>).MakeGenericType(dto.Key, dto.Value!));
 
-        foreach (var api in assembly.GetTypes().Where(t => typeof(IBlossomApi).IsAssignableFrom(t)))
+        foreach (var api in assembly.GetTypes<IBlossomApi>())
             builder.Services.AddScoped(api);
     }
 
     public static void MapBlossomContexts(this WebApplication app, Assembly assembly)
     {
-        var entities = assembly.GetEntities();
+        var endpoints = assembly.GetTypes<IBlossomEndpointMapper>();
         using var scope = app.Services.CreateScope();
-        foreach (var entity in entities)
+        foreach (var endpoint in endpoints)
         {
-            var instance = scope.ServiceProvider.GetRequiredService(typeof(IRunner<>).MakeGenericType(entity)) as IBlossomEndpointMapper;
+            var instance = scope.ServiceProvider.GetRequiredService(endpoint) as IBlossomEndpointMapper;
             instance?.MapEndpoints(app);
         }
     }
