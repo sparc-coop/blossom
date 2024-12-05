@@ -2,6 +2,8 @@
 using Sparc.Blossom.Realtime;
 using System.Security.Claims;
 using System.Linq.Dynamic.Core;
+using Mapster;
+using System.Reflection;
 
 namespace Sparc.Blossom.Api;
 
@@ -75,7 +77,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         foreach (var relationship in metadata.Properties.Where(x => x.CanEdit && x.IsEnumerable))
         {
             var query = Repository.Query.SelectMany(relationship.Name).GroupBy("Id").Select("new { Key, Count() as Count, First() as First }").ToDynamicList();
-            relationship.SetAvailableValues(query.Sum(x => (int)x.Count), query.ToDictionary(x => $"{x.Key}", x => x.First));
+            relationship.SetAvailableValues(query.Sum(x => (int)x.Count), query.ToDictionary(x => $"{x.Key}", x => ToDto(x.First)));
         }
 
         return Task.FromResult(metadata);
@@ -134,6 +136,13 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         return !revision.HasValue
             ? await Events.RedoAsync(strId)
             : await Events.ReplaceAsync(strId, revision.Value);
+    }
+
+    public object? ToDto<TItem>(TItem entity)
+    {
+        var dtoTypeName = $"Sparc.Blossom.Api.{typeof(TItem).Name}";
+        var dtoType = AppDomain.CurrentDomain.FindType(dtoTypeName);
+        return dtoType == null ? null : entity.Adapt(typeof(TItem), dtoType);
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)

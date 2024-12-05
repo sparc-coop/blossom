@@ -18,4 +18,16 @@ public static class AssemblyExtensions
 
     public static IEnumerable<Type> GetAggregates(this Assembly assembly)
         => assembly.GetTypes().Where(x => typeof(IBlossomAggregate).IsAssignableFrom(x));
+
+    public static Type? FindType(this AppDomain domain, string typeName)
+    {
+        foreach (var assembly in domain.GetAssemblies())
+        {
+            var type = assembly.GetType(typeName);
+            if (type != null)
+                return type;
+        }
+
+        return null;
+    }
 }

@@ -70,8 +70,8 @@ public abstract class BlossomEntity
         throw new Exception($"Relationship {typeof(T).Name} on entity {GetType().Name} not found.");
     }
 
-    PropertyInfo? GetCollectionProperty<T>() => 
-        GetType().GetProperties().FirstOrDefault(x => typeof(ICollection<T>).IsAssignableFrom(x.PropertyType));
+    PropertyInfo? GetCollectionProperty<T>() =>
+    GetType().GetProperties().FirstOrDefault(x => typeof(ICollection<T>).IsAssignableFrom(x.PropertyType));
 
     PropertyInfo? GetSingleProperty<T>() =>
         GetType().GetProperties().FirstOrDefault(x => typeof(T).IsAssignableFrom(x.PropertyType));
