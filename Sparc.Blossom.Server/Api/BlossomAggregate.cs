@@ -75,7 +75,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         foreach (var relationship in metadata.Properties.Where(x => x.CanEdit && x.IsEnumerable))
         {
             var query = Repository.Query.SelectMany(relationship.Name).GroupBy("Id").Select("new { Key, Count() as Count, First() as First }").ToDynamicList();
-            relationship.SetAvailableValues(query.Sum(x => (int)x.Count), query.ToDictionary(x => $"{x.Key}", x => (string)x.First.ToString()));
+            relationship.SetAvailableValues(query.Sum(x => (int)x.Count), query.ToDictionary(x => $"{x.Key}", x => x.First));
         }
 
         return Task.FromResult(metadata);

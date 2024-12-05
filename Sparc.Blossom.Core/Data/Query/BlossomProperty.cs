@@ -26,7 +26,7 @@ public class BlossomProperty(PropertyInfo property)
     public int? DistinctValues { get; set; }
     public int? TotalCount { get; set; }
     public decimal? DistinctPercentage => TotalCount == 0 ? 0 : DistinctValues / (decimal?)TotalCount;
-    public Dictionary<string, string> AvailableValues { get; set; } = [];
+    public Dictionary<string, dynamic> AvailableValues { get; set; } = [];
 
     public void SetAvailableValues(Dictionary<object, int> results)
     {
@@ -37,14 +37,14 @@ public class BlossomProperty(PropertyInfo property)
             DistinctValues = (DistinctValues - 1) + results["<null>"];
 
         if (DistinctValues < 25)
-            AvailableValues = results.ToDictionary(x => x.Key.ToString(), x => $"{x.Key} (Used {x.Value}x)");
+            AvailableValues = results.ToDictionary(x => x.Key.ToString(), x => (dynamic)$"{x.Key} (Used {x.Value}x)");
     }
 
-    public void SetAvailableValues(int totalCount, Dictionary<string, string> results)
+    public void SetAvailableValues(int totalCount, Dictionary<string, dynamic> results)
     {
         TotalCount = totalCount;
         DistinctValues = results.Count;
         if (DistinctValues < 25)
-            AvailableValues = results.ToDictionary(x => x.Key.ToString(), x => x.Value.ToString());
+            AvailableValues = results.ToDictionary(x => x.Key.ToString(), x => x.Value);
     }
 }

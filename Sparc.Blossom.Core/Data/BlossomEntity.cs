@@ -29,6 +29,9 @@ public abstract class BlossomEntity
 
     public void Add<T>(T relationship)
     {
+        if (typeof(T).IsPrimitive || typeof(T) == typeof(string))
+            throw new Exception($"Relationship {typeof(T).Name} on entity {GetType().Name} not found.");
+
         var collectionProperty = GetCollectionProperty<T>();
         if (collectionProperty != null)
         {

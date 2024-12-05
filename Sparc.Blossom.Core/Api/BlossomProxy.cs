@@ -5,11 +5,11 @@ namespace Sparc.Blossom.Api;
 public interface IBlossomEntityProxy
 {
     string SubscriptionId { get; }
-    Task Create<T>(T item);
+    Task Add<T>(T item);
     Task Update(IEnumerable<BlossomPatch> patches);
     Task Update();
     Task Delete();
-    Task Delete<T>(T item);
+    Task Remove<T>(T item);
 }
 
 public interface IBlossomProxy<T>
@@ -27,7 +27,7 @@ public class BlossomEntityProxy<T, TId> : BlossomProxy<T>, IBlossomEntityProxy
     public TId Id { get; set; } = default!;
     public string SubscriptionId => $"{GetType().Name}-{Id}";
 
-    public async Task Create<TItem>(TItem item) => await Runner.Add(Id, item);
+    public async Task Add<TItem>(TItem item) => await Runner.Add(Id, item);
 
     public Task Update(IEnumerable<BlossomPatch> patches)
     {
@@ -39,5 +39,5 @@ public class BlossomEntityProxy<T, TId> : BlossomProxy<T>, IBlossomEntityProxy
 
     public async Task Update() => await Runner.Patch(Id, this);
     public async Task Delete() => await Runner.Delete(Id);
-    public async Task Delete<TItem>(TItem item) => await Runner.Remove(Id, item);
+    public async Task Remove<TItem>(TItem item) => await Runner.Remove(Id, item);
 }
