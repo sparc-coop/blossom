@@ -27,7 +27,7 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
         if (source.IsEntity)
         {
             commands.AppendLine($@"public async Task Add<TItem>(TItem item) => await Runner.Add(Id, item);");
-            commands.AppendLine($@"public async Task Remove<TItem>(TIem item) => await Runner.Remove(Id, item);");
+            commands.AppendLine($@"public async Task Remove<TItem>(TItem item) => await Runner.Remove(Id, item);");
 
             foreach (var method in source.Methods)
             {
