@@ -24,6 +24,15 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         return entity;
     }
 
+    public async Task<T> Add<U>(object id, U item)
+    {
+        var entity = await Get(id)
+            ?? throw new Exception($"Entity {id} not found!");
+
+        await Repository.ExecuteAsync(entity, x => x.Add(item));    
+        return entity;
+    }
+
     protected BlossomQuery<T> Query() => new(Repository);
 
     protected virtual BlossomQuery<T> Query(BlossomQueryOptions options) => Query().WithOptions(options);
@@ -94,6 +103,14 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
 
         // await Events.BroadcastAsync(new BlossomEntityDeleted<T>(entity));
         await Repository.DeleteAsync(entity);
+    }
+
+    public async Task Remove<U>(object id, U item)
+    {
+        var entity = await Repository.FindAsync(id)
+            ?? throw new Exception($"Entity {id} not found.");
+
+        await Repository.ExecuteAsync(entity, x => x.Remove(item));
     }
 
     public Task On(object id, string name, params object?[] parameters)

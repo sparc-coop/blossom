@@ -9,6 +9,9 @@ public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T 
     public async Task<T> Create(params object?[] parameters) 
         => await PostAsJsonAsync<T>("", parameters);
 
+    public async Task<T> Add<U>(object id, U item)
+        => await PostAsJsonAsync<T>($"{id}/{typeof(U).Name}", item);
+
     public async Task<T?> Get(object id) => await Client.GetFromJsonAsync<T>(id.ToString());
 
     public async Task<IEnumerable<T>> ExecuteQuery(string? name = null, params object?[] parameters) 
@@ -30,6 +33,8 @@ public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T 
     }
 
     public async Task Delete(object id) => await Client.DeleteAsync(id.ToString());
+
+    public async Task Remove<U>(object id, U item) => await Client.PostAsJsonAsync($"{id}/{typeof(U).Name}/Delete", item);
 
     public Task On(object id, string name, params object?[] parameters)
     {
