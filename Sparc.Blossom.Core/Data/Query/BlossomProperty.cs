@@ -20,7 +20,7 @@ public class BlossomProperty(PropertyInfo property)
         "Decimal" => "number",
         "DateTime" => "date",
         "Boolean" => "checkbox",
-        "String" => DistinctPercentage < 0.5M ? (DistinctValues < 5 ? "radio" : DistinctValues < 25 ? "select" : "search") : "text", 
+        "String" => DistinctPercentage < 0.5M ? (DistinctValues < 5 ? "radio" : DistinctValues < 25 ? "select" : "search") : "text",
         _ => IsEnumerable ? DistinctPercentage == 1 ? "onetomany" : "manytomany" : "search"
     };
     public int? DistinctValues { get; set; }
@@ -35,8 +35,8 @@ public class BlossomProperty(PropertyInfo property)
 
         if (results.ContainsKey("<null>"))
             DistinctValues = (DistinctValues - 1) + results["<null>"];
-        
-            if (DistinctValues < 25)
+
+        if (DistinctValues < 25)
             AvailableValues = results.ToDictionary(x => x.Key.ToString(), x => $"{x.Key} (Used {x.Value}x)");
     }
 

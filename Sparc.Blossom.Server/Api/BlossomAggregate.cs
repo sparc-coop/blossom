@@ -1,6 +1,7 @@
 ﻿using Sparc.Blossom.Data;
 using Sparc.Blossom.Realtime;
 using System.Security.Claims;
+using System.Linq.Dynamic.Core;
 
 namespace Sparc.Blossom.Api;
 
@@ -50,6 +51,25 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
             ?? throw new Exception($"Specification {name} not found.");
 
         return await spec.Execute();
+    }
+
+    public Task<BlossomAggregateMetadata> Metadata()
+    {
+        var metadata = new BlossomAggregateMetadata(typeof(T));
+
+        foreach (var property in metadata.Properties.Where(x => x.CanEdit && x.IsPrimitive))
+        {
+            var query = Repository.Query.GroupBy(property.Name).Select("new { Key, Count() as Count }");
+            property.SetAvailableValues(query.ToDynamicList().ToDictionary(x => (object)x.Key ?? "<null>", x => (int)x.Count));
+        }
+
+        foreach (var relationship in metadata.Properties.Where(x => x.CanEdit && x.IsEnumerable))
+        {
+            var query = Repository.Query.SelectMany(relationship.Name).GroupBy("Id").Select("new { Key, Count() as Count, First() as First }").ToDynamicList();
+            relationship.SetAvailableValues(query.Sum(x => (int)x.Count), query.ToDictionary(x => $"{x.Key}", x => (string)x.First.ToString()));
+        }
+
+        return Task.FromResult(metadata);
     }
 
     public async Task Patch<U>(object id, U item)
@@ -107,6 +127,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         group.MapPost("", async (IRunner<T> runner, object[] parameters) => await runner.Create(parameters));
         group.MapPost("_undo", async (IRunner<T> runner, string id, long? revision) => await runner.Undo(id, revision));
         group.MapPost("_redo", async (IRunner<T> runner, string id, long? revision) => await runner.Redo(id, revision));
+        group.MapGet("_metadata", async (IRunner<T> runner) => await runner.Metadata());
         group.MapPost("{name}", async (IRunner<T> runner, string name, object[] parameters) => await runner.ExecuteQuery(name, parameters));
         group.MapPatch("{id}", async (IRunner<T> runner, string id, object patch) => await runner.Patch(id, patch));
         group.MapGet("{name}_flex", async (IRunner<T> runner, string name, BlossomQueryOptions options, object[] parameters) => await runner.ExecuteQuery(name, options, parameters));

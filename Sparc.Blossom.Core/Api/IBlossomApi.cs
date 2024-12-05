@@ -2,5 +2,4 @@
 
 public interface IBlossomApi
 {
-    //public Task<BlossomAggregateMetadata> Metadata();
 }

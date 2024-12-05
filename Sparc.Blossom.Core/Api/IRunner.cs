@@ -6,6 +6,7 @@ public interface IRunner<T>
     Task<T?> Get(object id);
     Task<IEnumerable<T>> ExecuteQuery(string? name = null, params object?[] parameters);
     Task<BlossomQueryResult<T>> ExecuteQuery(BlossomQueryOptions options);
+    Task<BlossomAggregateMetadata> Metadata();
     Task Patch<U>(object id, U item);
     Task Execute(object id, string name, params object?[] parameters);
     Task Delete(object id);

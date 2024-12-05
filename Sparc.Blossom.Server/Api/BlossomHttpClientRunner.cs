@@ -17,6 +17,9 @@ public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T 
     public async Task<BlossomQueryResult<T>> ExecuteQuery(BlossomQueryOptions options)
     => await PostAsJsonAsync<BlossomQueryResult<T>>("_query", options);
 
+    public async Task<BlossomAggregateMetadata> Metadata()
+        => await Client.GetFromJsonAsync<BlossomAggregateMetadata>("_metadata") ?? new(typeof(T));
+
     public async Task Patch<U>(object id, U item)
         => await Client.PatchAsJsonAsync($"{id}", item);
 

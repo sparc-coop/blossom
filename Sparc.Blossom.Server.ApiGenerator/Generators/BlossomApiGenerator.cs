@@ -57,7 +57,7 @@ internal class BlossomApiGenerator() : IIncrementalGenerator
         return $$"""
 using Sparc.Blossom.Data;
 namespace Sparc.Blossom.Api;
-public class BlossomApi({{constructor}}) : IBlossomApi
+public class BlossomApi({{constructor}}) : BlossomApiProxy
 {
     {{apis}}
 }
