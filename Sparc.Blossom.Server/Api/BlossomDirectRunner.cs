@@ -17,12 +17,6 @@ public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> aggregate, Blossom
         return Adapt(result);
     }
 
-    public async Task<T> Add<U>(object id, U item)
-    {
-        var result = await Aggregate.Add(id, item);
-        return Adapt(result);
-    }
-
     public async Task<T?> Get(object id)
     {
         var result = await Aggregate.Get(id);
@@ -54,8 +48,6 @@ public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> aggregate, Blossom
         await Aggregate.Execute(id, name, parameters);
 
     public async Task Delete(object id) => await Aggregate.Delete(id);
-
-    public async Task Remove<U>(object id, U item) => await Aggregate.Remove(id, item);
 
     public Task On(object id, string name, params object?[] parameters)
     {

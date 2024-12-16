@@ -3,7 +3,6 @@ using Sparc.Blossom.Realtime;
 using System.Security.Claims;
 using System.Linq.Dynamic.Core;
 using Mapster;
-using System.Reflection;
 
 namespace Sparc.Blossom.Api;
 
@@ -23,15 +22,6 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var entity = (T)Activator.CreateInstance(typeof(T), parameters)!;
         // await Events.BroadcastAsync(new BlossomEntityAdded<T>(entity));
         await Repository.AddAsync(entity);
-        return entity;
-    }
-
-    public async Task<T> Add<U>(object id, U item)
-    {
-        var entity = await Get(id)
-            ?? throw new Exception($"Entity {id} not found!");
-
-        await Repository.ExecuteAsync(entity, x => x.Add(item));    
         return entity;
     }
 
@@ -107,14 +97,6 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         await Repository.DeleteAsync(entity);
     }
 
-    public async Task Remove<U>(object id, U item)
-    {
-        var entity = await Repository.FindAsync(id)
-            ?? throw new Exception($"Entity {id} not found.");
-
-        await Repository.ExecuteAsync(entity, x => x.Remove(item));
-    }
-
     public Task On(object id, string name, params object?[] parameters)
     {
         throw new NotImplementedException();
@@ -142,7 +124,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
     {
         var dtoTypeName = $"Sparc.Blossom.Api.{typeof(TItem).Name}";
         var dtoType = AppDomain.CurrentDomain.FindType(dtoTypeName);
-        return dtoType == null ? null : entity.Adapt(typeof(TItem), dtoType);
+        return dtoType == null ? null : entity!.Adapt(typeof(TItem), dtoType);
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)
