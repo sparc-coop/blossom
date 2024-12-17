@@ -56,7 +56,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
 
     public Task<BlossomAggregateMetadata> Metadata()
     {
-        var metadata = new BlossomAggregateMetadata(typeof(T));
+        var metadata = new BlossomAggregateMetadata(DtoType!);
 
         foreach (var property in metadata.Properties.Where(x => x.CanEdit && x.IsPrimitive))
         {
@@ -119,6 +119,8 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
             ? await Events.RedoAsync(strId)
             : await Events.ReplaceAsync(strId, revision.Value);
     }
+
+    public Type? DtoType => AppDomain.CurrentDomain.FindType($"Sparc.Blossom.Api.{typeof(T).Name}");
 
     public object? ToDto<TItem>(TItem entity)
     {

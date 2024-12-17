@@ -27,19 +27,21 @@ public class BlossomProperty(PropertyInfo property)
     public int? TotalCount { get; set; }
     public decimal? DistinctPercentage => TotalCount == 0 ? 0 : DistinctValues / (decimal?)TotalCount;
     public Dictionary<string, dynamic> AvailableValues { get; set; } = [];
+    public List<T> GetAvailableValues<T>() => AvailableValues.Values.Cast<T>().ToList();
 
     public object? Value(object entity) => CanRead ? property.GetValue(entity) : null;
-    public object? DisplayValue(object? entity)
+    public string? ToString(object? entity)
     {
         if (entity == null)
             return null;
 
         var value = Value(entity);
         if (value is IList list)
-            return list.Count;
+            return list.Count.ToString();
         
-        return value;
+        return value?.ToString();
     }
+
     public void SetValue(object entity, object? value) => property.SetValue(entity, value);
 
 
