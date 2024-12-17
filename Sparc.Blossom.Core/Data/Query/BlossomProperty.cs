@@ -1,18 +1,42 @@
 ﻿
 using System.Collections;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Sparc.Blossom.Api;
 
-public class BlossomProperty(PropertyInfo property)
+public class BlossomProperty
 {
-    public string Name { get; } = property.Name;
-    public string Type { get; } = !property.PropertyType.IsPrimitive && property.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType) ? (property.PropertyType.GenericTypeArguments?.First().Name ?? property.PropertyType.Name) : property.PropertyType.Name;
-    public bool IsPrimitive { get; } = property.PropertyType.IsPrimitive || property.PropertyType == typeof(string) || property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(decimal);
-    public bool IsEnumerable { get; } = !property.PropertyType.IsPrimitive && property.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType);
-    public bool CanRead => property.Name != "SubscriptionId" && property.Name != "Runner" && property.Name != "GenericId";
-    public bool CanAdd { get; }
-    public bool CanEdit => property.DeclaringType == property.ReflectedType && property.SetMethod?.IsPublic == true;
+    public BlossomProperty(PropertyInfo property)
+    {
+        Property = property;
+        Name = property.Name;
+        Type = !property.PropertyType.IsPrimitive && property.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType) ? (property.PropertyType.GenericTypeArguments?.First().Name ?? property.PropertyType.Name) : property.PropertyType.Name;
+        IsPrimitive = property.PropertyType.IsPrimitive || property.PropertyType == typeof(string) || property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(decimal);
+        IsEnumerable = !property.PropertyType.IsPrimitive && property.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType);
+        CanRead = property.Name != "SubscriptionId" && property.Name != "Runner" && property.Name != "GenericId";
+        CanEdit = property.DeclaringType == property.ReflectedType && property.SetMethod?.IsPublic == true;
+    }
+
+    public BlossomProperty(ParameterInfo parameter)
+    {
+        Name = parameter.Name;
+        Type = parameter.ParameterType.Name;
+        IsPrimitive = parameter.ParameterType.IsPrimitive || parameter.ParameterType == typeof(string) || parameter.ParameterType == typeof(DateTime) || parameter.ParameterType == typeof(decimal);
+        IsEnumerable = !parameter.ParameterType.IsPrimitive && parameter.ParameterType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(parameter.ParameterType);
+        CanRead = true;
+        CanEdit = true;
+    }
+
+    PropertyInfo? Property { get; }
+    public string Name { get; }
+    public string FriendlyName =>
+        Regex.Replace(Name, @"(?<!^)([A-Z][a-z]|(?<=[a-z])[A-Z])", " $1");
+    public string Type { get; }
+    public bool IsPrimitive { get; }
+    public bool IsEnumerable { get; }
+    public bool CanRead { get; }
+    public bool CanEdit { get; }
     public string? EditorType => !CanEdit ? null : Type switch
     {
         "Int32" => "number",
@@ -29,7 +53,7 @@ public class BlossomProperty(PropertyInfo property)
     public Dictionary<string, dynamic> AvailableValues { get; set; } = [];
     public List<T> GetAvailableValues<T>() => AvailableValues.Values.Cast<T>().ToList();
 
-    public object? Value(object entity) => CanRead ? property.GetValue(entity) : null;
+    public object? Value(object entity) => CanRead ? Property?.GetValue(entity) : null;
     public string? ToString(object? entity)
     {
         if (entity == null)
@@ -42,7 +66,7 @@ public class BlossomProperty(PropertyInfo property)
         return value?.ToString();
     }
 
-    public void SetValue(object entity, object? value) => property.SetValue(entity, value);
+    public void SetValue(object entity, object? value) => Property?.SetValue(entity, value);
 
 
     public void SetAvailableValues(Dictionary<object, int> results)
