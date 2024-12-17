@@ -53,7 +53,8 @@ public class BlossomProperty
     public Dictionary<string, dynamic> AvailableValues { get; set; } = [];
     public List<T> GetAvailableValues<T>() => AvailableValues.Values.Cast<T>().ToList();
 
-    public object? Value(object entity) => CanRead ? Property?.GetValue(entity) : null;
+    public object? _value;
+    public object? Value(object entity) => _value ?? (CanRead ? Property?.GetValue(entity) : null);
     public string? ToString(object? entity)
     {
         if (entity == null)
@@ -66,7 +67,13 @@ public class BlossomProperty
         return value?.ToString();
     }
 
-    public void SetValue(object entity, object? value) => Property?.SetValue(entity, value);
+    public void SetValue(object entity, object? value)
+    {
+        if (Property == null)
+            _value = value;
+        else if (CanEdit) 
+            Property.SetValue(entity, value);
+    }
 
 
     public void SetAvailableValues(Dictionary<object, int> results)
