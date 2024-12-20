@@ -1,12 +1,10 @@
-﻿using System.Text.Json.Serialization;
-using System.Text.Json;
-using SystemTextJsonPatch;
+﻿using SystemTextJsonPatch;
 
 namespace Sparc.Blossom.Realtime;
 
 public record BlossomPatch
 {
-    public JsonPatchDocument JsonPatchDocument { get; }
+    public JsonPatchDocument JsonPatchDocument { get; set; }
     public bool IsLocked { get; internal set; }
 
     public BlossomPatch()

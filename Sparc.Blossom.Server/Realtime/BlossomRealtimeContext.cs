@@ -25,9 +25,10 @@ public class BlossomRealtimeContext(NavigationManager nav)
     public void Initialize(bool isOn, EventCallback<HubConnection>? onConnected = null)
     {
         IsOn = isOn;
-        
+
         Connection ??= new HubConnectionBuilder()
             .WithUrl($"{nav.BaseUri}_realtime")
+            .ConfigureLogging(x => { x.AddConsole(); x.AddDebug(); })
             //.AddMessagePackProtocol()
             .WithAutomaticReconnect()
             .Build();

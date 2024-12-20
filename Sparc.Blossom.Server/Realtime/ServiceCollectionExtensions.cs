@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
         {
             options.RegisterServicesFromAssemblyContaining<TAssembly>();
             options.RegisterServicesFromAssemblyContaining<BlossomEvent>();
+            options.RegisterServicesFromAssemblyContaining<BlossomHub>();
             options.RegisterServicesFromAssemblyContaining<THub>();
             options.NotificationPublisher = new TaskWhenAllPublisher();
             options.NotificationPublisherType = typeof(TaskWhenAllPublisher);

@@ -34,7 +34,9 @@ public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> aggregate, Blossom
     public async Task<BlossomQueryResult<T>> ExecuteQuery(BlossomQueryOptions options)
     {
         var results = await Aggregate.ExecuteQuery(options);
-        return new BlossomQueryResult<T>(results.Items.Select(Adapt), results.TotalCount);
+        var dtos = results.Items.Select(Adapt);
+        await Realtime.Watch((IEnumerable<IBlossomEntityProxy>)dtos);
+        return new BlossomQueryResult<T>(dtos, results.TotalCount);
     }
 
     public async Task<BlossomAggregateMetadata> Metadata() => await Aggregate.Metadata();

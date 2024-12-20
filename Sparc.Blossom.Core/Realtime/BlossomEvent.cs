@@ -7,6 +7,11 @@ namespace Sparc.Blossom.Realtime;
 
 public class BlossomEvent : MediatR.INotification
 {
+    public BlossomEvent()
+    { 
+        // for JSON deserialization
+    }
+    
     private BlossomEvent(string name)
     {
         Name = name;
@@ -28,14 +33,14 @@ public class BlossomEvent : MediatR.INotification
         SubscriptionId = proxy.SubscriptionId;
     }
 
-    public string Name { get; protected set; }
-    public string EntityId { get; protected set; } = "";
-    public long Id { get; protected set; } = DateTime.UtcNow.Ticks;
-    public string? SubscriptionId { get; protected set; }
-    public string? UserId { get; protected set; }
-    public BlossomPatch? Changes { get; protected set; } = null;
-    public long? PreviousId { get; protected set; }
-    public List<long> FutureIds { get; protected set; } = [];
+    public string Name { get; set; }
+    public string EntityId { get; set; } = "";
+    public long Id { get; set; } = DateTime.UtcNow.Ticks;
+    public string? SubscriptionId { get; set; }
+    public string? UserId { get; set; }
+    public BlossomPatch? Changes { get; set; } = null;
+    public long? PreviousId { get; set; }
+    public List<long> FutureIds { get; set; } = [];
 
     public void SetUser(ClaimsPrincipal? user)
     {
