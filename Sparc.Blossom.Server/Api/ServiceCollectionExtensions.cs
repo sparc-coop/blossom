@@ -1,5 +1,4 @@
 ﻿using Ardalis.Specification;
-using MediatR;
 using Sparc.Blossom.Data;
 using Sparc.Blossom.Realtime;
 using System.Reflection;
