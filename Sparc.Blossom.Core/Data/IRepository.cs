@@ -1,4 +1,5 @@
 using Ardalis.Specification;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Data;
 
@@ -12,7 +13,6 @@ public interface IRepository<T>
     Task AddAsync(IEnumerable<T> items);
     Task UpdateAsync(T item);
     Task UpdateAsync(IEnumerable<T> items);
-    Task PatchAsync<U>(object id, U patch);
     Task DeleteAsync(T item);
     Task DeleteAsync(IEnumerable<T> items);
     Task ExecuteAsync(object id, Action<T> action);

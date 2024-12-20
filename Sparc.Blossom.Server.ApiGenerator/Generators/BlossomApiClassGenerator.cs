@@ -13,7 +13,17 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
         var commands = new StringBuilder();
 
         foreach (var property in source.Properties)
-            properties.AppendLine($@"{property.Modifiers} {property.Type} {property.Name} {{ get; {property.SetModifiers} set; }}{property.PostModifiers}");
+        {
+            if (source.IsEntity)
+            {
+                properties.AppendLine($@"{property.Type} {property.FieldName}{property.PostModifiers(true)}");
+                properties.AppendLine($@"{property.Modifiers} {property.Type} {property.Name} {{ get => {property.FieldName}; {property.SetModifiers} set => Patch(ref {property.FieldName}, value); }}");
+            }
+            else
+            {
+                properties.AppendLine($@"{property.Modifiers} {property.Type} {property.Name} {{ get; set; }}{property.PostModifiers(false)}");
+            }
+        }
 
         //properties.AppendLine($@"public required string Id {{ get; set; }}");
 
@@ -21,7 +31,7 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
             properties.AppendLine(constant.Body);
 
         var proxy = source.IsEntity
-            ? $" : BlossomEntityProxy<{source.Name}, {source.BaseOfName}>" 
+            ? $" : BlossomEntityProxy<{source.Name}, {source.BaseOfName}>"
             : "";
 
         if (source.IsEntity)

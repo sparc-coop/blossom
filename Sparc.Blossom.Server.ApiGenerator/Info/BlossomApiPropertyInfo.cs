@@ -25,9 +25,10 @@ internal class BlossomApiPropertyInfo
     }
 
     internal string Name { get; set; }
+    internal string FieldName => $"_{char.ToLower(Name[0])}{Name.Substring(1)}";
     internal string Type { get; set; }
     internal bool IsNullable => Type.EndsWith("?");
     internal string Modifiers => "public";
     internal string SetModifiers { get; set; } = "";
-    internal string PostModifiers => IsNullable ? "" : " = default!;";
+    internal string PostModifiers(bool isPrivateMember) => IsNullable ? isPrivateMember ? ";" : "" : " = default!;";
 }

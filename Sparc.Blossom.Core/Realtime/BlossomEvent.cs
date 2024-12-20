@@ -1,4 +1,5 @@
-﻿using Sparc.Blossom.Authentication;
+﻿using Sparc.Blossom.Api;
+using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 using System.Security.Claims;
 
@@ -13,7 +14,6 @@ public class BlossomEvent : MediatR.INotification
 
     public BlossomEvent(BlossomEntity entity) : this(entity.GetType().Name)
     {
-        EntityType = entity.GetType().FullName;
         EntityId = entity.GenericId.ToString();
         SubscriptionId = $"{entity.GetType().Name}-{EntityId}";
     }
@@ -23,13 +23,17 @@ public class BlossomEvent : MediatR.INotification
         Name = name;
     }
 
-    public string EntityType { get; protected set; } = "";
+    public BlossomEvent(IBlossomEntityProxy proxy) : this(proxy.GetType().Name)
+    {
+        SubscriptionId = proxy.SubscriptionId;
+    }
+
+    public string Name { get; protected set; }
     public string EntityId { get; protected set; } = "";
     public long Id { get; protected set; } = DateTime.UtcNow.Ticks;
     public string? SubscriptionId { get; protected set; }
-    public string Name { get; protected set; }
     public string? UserId { get; protected set; }
-    public List<BlossomPatch> Changes { get; protected set; } = [];
+    public BlossomPatch? Changes { get; protected set; } = null;
     public long? PreviousId { get; protected set; }
     public List<long> FutureIds { get; protected set; } = [];
 
@@ -55,7 +59,7 @@ public class BlossomEvent<T>(T entity) : BlossomEvent(entity) where T : BlossomE
     public BlossomEvent(T entity, BlossomEvent<T> previous) : this(entity)
     {
         PreviousId = previous.Id;
-        Changes = BlossomPatch.Create(previous.Entity, entity);
+        Changes = new BlossomPatch(previous.Entity, entity);
 
     }
 }

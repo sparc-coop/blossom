@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Sparc.Blossom.Api;
+using System.Reflection;
 
 namespace Sparc.Blossom.Realtime;
 
@@ -35,52 +36,14 @@ public class BlossomRealtimeContext(NavigationManager nav)
             OnConnected = onConnected;
     }
 
-    public async Task InitializeAsync(ComponentBase component)
-    {
-        Initialize(true);
-        var properties = component.GetType().GetProperties();
-        foreach (var property in properties.OfType<IBlossomEntityProxy>())
-            await Watch(property);
-    }
-
-    public async Task Watch(IBlossomEntityProxy entity)
-    {
-        await On(entity, (ev) => entity.Update(ev.Changes));
-    }
-
-    public async Task Watch(IEnumerable<IBlossomEntityProxy> entities)
-    {
-        await On(entities, (e, ev) => e.Update(ev.Changes));
-    }
-
-    public async Task StopWatching(IBlossomEntityProxy entity)
-    {
-        if (Subscriptions.TryGetValue(entity.SubscriptionId, out int value))
-        {
-            Subscriptions[entity.SubscriptionId] = --value;
-            if (value <= 0)
-            {
-                Subscriptions.Remove(entity.SubscriptionId);
-                await InvokeAsync("StopWatching", entity.SubscriptionId);
-            }
-        }
-    }
-
-    public async Task DisposeAsync(ComponentBase component)
-    {
-        var properties = component.GetType().GetProperties();
-        foreach (var property in properties.OfType<IBlossomEntityProxy>())
-            await StopWatching(property);
-    }
-
     public async Task GoOnline()
     {
         if (!IsOn)
             return;
-        
+
         if (Connection == null && IsOn)
             Initialize(IsOn);
-        
+
         if (Connection?.State != HubConnectionState.Disconnected)
             return;
 
@@ -110,40 +73,42 @@ public class BlossomRealtimeContext(NavigationManager nav)
         HasError = true;
     }
 
-    public async Task GoOffline()
+    public async Task GoOnline(ComponentBase component)
     {
-        if (Connection != null)
-            await Connection.DisposeAsync();
+        Initialize(true);
+        var type = component.GetType();
 
-        foreach (var evt in Events)
-            evt.Dispose();
+        var properties = type.GetProperties().OfType<IBlossomEntityProxy>();
+        await Watch(properties);
 
-        Events.Clear();
-        Subscriptions.Clear();
+        var stateHasChanged = type.GetMethod("StateHasChanged", BindingFlags.NonPublic | BindingFlags.Instance);
+        Changed += (sender, args) => stateHasChanged!.Invoke(component, null);
     }
 
-    public async Task On(IBlossomEntityProxy entity, Action<BlossomEvent> action)
+    public Task GoOnline(IBlossomEntityProxy entity)
     {
-        if (!IsOn)
-            return;
-        
-        await GoOnline();
-        
-        if (!Subscriptions.TryGetValue(entity.SubscriptionId, out int value))
-        {
-            Subscriptions.Add(entity.SubscriptionId, 1);
-            await InvokeAsync("Watch", entity.SubscriptionId);
-        }
-        else
-        {
-            Subscriptions[entity.SubscriptionId] = ++value;
-        }
+        entity.IsLive = true;
+        return Task.CompletedTask;
+    }
 
-        Events.Add(Connection!.On<BlossomEvent>(entity.SubscriptionId, evt =>
+    public async Task Watch(IBlossomEntityProxy entity) => await Watch([entity]);
+
+    public async Task Watch(IEnumerable<IBlossomEntityProxy> entities)
+    {
+        await On(entities, (e, ev) => e.Patch(ev.Changes!));
+    }
+
+    public async Task StopWatching(IBlossomEntityProxy entity)
+    {
+        if (Subscriptions.TryGetValue(entity.SubscriptionId, out int value))
         {
-            action(evt);
-            StateHasChanged();
-        }));
+            Subscriptions[entity.SubscriptionId] = --value;
+            if (value <= 0)
+            {
+                Subscriptions.Remove(entity.SubscriptionId);
+                await InvokeAsync("StopWatching", entity.SubscriptionId);
+            }
+        }
     }
 
     public async Task On(IEnumerable<IBlossomEntityProxy> entities, Action<IBlossomEntityProxy, BlossomEvent> action)
@@ -182,5 +147,30 @@ public class BlossomRealtimeContext(NavigationManager nav)
             {
                 await Connection!.InvokeAsync(method, parameters);
             });
+    }
+
+    public async Task GoOffline()
+    {
+        if (Connection != null)
+            await Connection.DisposeAsync();
+
+        foreach (var evt in Events)
+            evt.Dispose();
+
+        Events.Clear();
+        Subscriptions.Clear();
+    }
+
+    public async Task GoOffline(ComponentBase component)
+    {
+        var properties = component.GetType().GetProperties();
+        foreach (var property in properties.OfType<IBlossomEntityProxy>())
+            await StopWatching(property);
+    }
+
+    public Task GoOffline(IBlossomEntityProxy entity)
+    {
+        entity.IsLive = false;
+        return Task.CompletedTask;
     }
 }

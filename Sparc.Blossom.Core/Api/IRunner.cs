@@ -1,4 +1,6 @@
-﻿namespace Sparc.Blossom.Api;
+﻿using Sparc.Blossom.Realtime;
+
+namespace Sparc.Blossom.Api;
 
 public interface IRunner<T>
 {
@@ -7,7 +9,7 @@ public interface IRunner<T>
     Task<IEnumerable<T>> ExecuteQuery(string? name = null, params object?[] parameters);
     Task<BlossomQueryResult<T>> ExecuteQuery(BlossomQueryOptions options);
     Task<BlossomAggregateMetadata> Metadata();
-    Task Patch<U>(object id, U item);
+    Task Patch(object id, BlossomPatch changes);
     Task Execute(object id, string name, params object?[] parameters);
     Task Delete(object id);
     Task On(object id, string name, params object?[] parameters);

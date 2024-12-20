@@ -73,9 +73,14 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         return Task.FromResult(metadata);
     }
 
-    public async Task Patch<U>(object id, U item)
+    public async Task Patch(object id, BlossomPatch changes)
     {
-        await Repository.PatchAsync(id, item);
+        var entity = await Get(id);
+        if (entity == null)
+            return;
+
+        changes.ApplyTo(entity);
+        await Repository.UpdateAsync(entity);
     }
 
     public async Task Execute(object id, string name, params object?[] parameters)
@@ -139,7 +144,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         group.MapPost("_redo", async (IRunner<T> runner, string id, long? revision) => await runner.Redo(id, revision));
         group.MapGet("_metadata", async (IRunner<T> runner) => await runner.Metadata());
         group.MapPost("{name}", async (IRunner<T> runner, string name, object[] parameters) => await runner.ExecuteQuery(name, parameters));
-        group.MapPatch("{id}", async (IRunner<T> runner, string id, object patch) => await runner.Patch(id, patch));
+        group.MapPatch("{id}", async (IRunner<T> runner, string id, BlossomPatch patch) => await runner.Patch(id, patch));
         group.MapGet("{name}_flex", async (IRunner<T> runner, string name, BlossomQueryOptions options, object[] parameters) => await runner.ExecuteQuery(name, options, parameters));
         group.MapPut("{id}/{name}", async (IRunner<T> runner, string id, string name, object[] parameters) => await runner.Execute(id, name, parameters));
         group.MapDelete("{id}", async (IRunner<T> runner, string id) => await runner.Delete(id));

@@ -1,4 +1,5 @@
 ﻿using Sparc.Blossom.Data;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Api;
 
@@ -20,8 +21,8 @@ public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T 
     public async Task<BlossomAggregateMetadata> Metadata()
         => await Client.GetFromJsonAsync<BlossomAggregateMetadata>("_metadata") ?? new(typeof(T));
 
-    public async Task Patch<U>(object id, U item)
-        => await Client.PatchAsJsonAsync($"{id}", item);
+    public async Task Patch(object id, BlossomPatch changes)
+        => await Client.PatchAsJsonAsync($"{id}", changes);
 
     public async Task Execute(object id, string name, params object?[] parameters)
     {

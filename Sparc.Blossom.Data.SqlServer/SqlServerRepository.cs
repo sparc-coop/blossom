@@ -71,23 +71,6 @@ public class SqlServerRepository<T> : RepositoryBase<T>, IRepository<T> where T 
         await CommitAsync();
     }
 
-    public async Task PatchAsync<U>(object id, U patch)
-    {
-        var entity = await FindAsync(id)
-            ?? throw new Exception("Entity not found");
-
-        var entry = context.Entry(entity);
-        if (patch != null)
-        {
-            entry.CurrentValues.SetValues(patch);
-            // Ignore null values
-            foreach (var property in entry.Properties.Where(x => x.CurrentValue == null))
-                property.IsModified = false;
-        }
-
-        await CommitAsync();
-    }
-
     public async Task DeleteAsync(T item)
     {
         Command.Remove(item);

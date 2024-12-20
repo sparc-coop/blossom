@@ -6,7 +6,7 @@ namespace Sparc.Blossom.Api;
 
 public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomRealtimeContext realtime) 
     : IRunner<T>
-    where T : IBlossomProxy<T>, IBlossomEntityProxy
+    where T : IBlossomEntityProxy<T>, IBlossomEntityProxy
 {
     public IRunner<TEntity> Aggregate { get; } = aggregate;
     public BlossomRealtimeContext Realtime { get; } = realtime;
@@ -39,9 +39,9 @@ public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> aggregate, Blossom
 
     public async Task<BlossomAggregateMetadata> Metadata() => await Aggregate.Metadata();
 
-    public async Task Patch<U>(object id, U item)
+    public async Task Patch(object id, BlossomPatch changes)
     {
-        await Aggregate.Patch(id, item);
+        await Aggregate.Patch(id, changes);
     }
 
     public async Task Execute(object id, string name, params object?[] parameters) => 

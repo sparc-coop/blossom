@@ -58,7 +58,7 @@ public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repositor
         await Publisher.Publish(newEvent);
     }
 
-    public async Task<T> UndoAsync(string id)
+    public async Task<T?> UndoAsync(string id)
     {
         var current = await GetAsync(id)
             ?? throw new Exception("No current revision to undo");
@@ -69,7 +69,7 @@ public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repositor
         return await ReplaceAsync(current, current.PreviousId.Value);
     }
 
-    public async Task<T> RedoAsync(string id)
+    public async Task<T?> RedoAsync(string id)
     {
         var current = await GetAsync(id)
             ?? throw new Exception("No current revision to redo");
