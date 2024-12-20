@@ -45,7 +45,7 @@
 
     protected override void OnInitialized()
     {
-        Realtime.Initialize(false, OnConnected);
+        Realtime.Initialize(true, OnConnected);
     }
 
     public async ValueTask DisposeAsync()

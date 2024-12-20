@@ -37,6 +37,11 @@ public static class ServiceCollectionExtensions
             builder.Services.AddTransient(
                 typeof(INotificationHandler<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)),
                 typeof(BlossomEventDefaultHandler<>).MakeGenericType(entity));
+
+            builder.Services.AddScoped(
+                typeof(IRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)),
+                typeof(BlossomInMemoryRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)));
+
         }
 
         foreach (var aggregate in aggregates)

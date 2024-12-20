@@ -4,6 +4,7 @@ namespace Sparc.Blossom.Realtime;
 
 public class BlossomEntityAdded<T>(T Entity) : BlossomEvent<T>(Entity) where T : BlossomEntity;
 public class BlossomEntityUpdated<T>(string commandName, T Entity) : BlossomEvent<T>(commandName, Entity) where T : BlossomEntity;
+public class BlossomEntityPatched<T>(T Entity, BlossomPatch changes) : BlossomEvent<T>(Entity, changes) where T : BlossomEntity;
 public class BlossomEntityDeleted<T>(T Entity) : BlossomEvent<T>(Entity) where T : BlossomEntity;
 
 public class BlossomEntityUndone<T> : BlossomEvent<T> where T : BlossomEntity

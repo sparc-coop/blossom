@@ -56,6 +56,11 @@ public class BlossomEvent<T>(T entity) : BlossomEvent(entity) where T : BlossomE
         Name = name;
     }
 
+    public BlossomEvent(T entity, BlossomPatch changes) : this(entity)
+    {
+        Changes = changes;
+    }
+
     public BlossomEvent(T entity, BlossomEvent<T> previous) : this(entity)
     {
         PreviousId = previous.Id;

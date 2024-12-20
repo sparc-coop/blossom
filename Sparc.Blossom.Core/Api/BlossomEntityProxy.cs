@@ -23,7 +23,7 @@ public class BlossomEntityProxy<T, TId> : IBlossomEntityProxy<T>, IBlossomEntity
     public string SubscriptionId => $"{GetType().Name}-{Id}";
     public bool IsLive { get; set; }
 
-    public BlossomPatch? Changes { get; private set; }
+    public List<BlossomPatch> Changes { get; private set; } = [];
     public IRunner<T> Runner { get; set; } = null!;
 
     bool _isSyncingFromBlossom;
@@ -36,12 +36,15 @@ public class BlossomEntityProxy<T, TId> : IBlossomEntityProxy<T>, IBlossomEntity
 
     private async Task SyncToBlossom()
     {
-        if (Changes == null)
+        if (!Changes.Any())
             return;
 
-        var changes = Clone(Changes);
-        Changes = null;
-        await Runner.Patch(Id!, changes);
+        foreach (var change in Changes.Where(x => !x.IsLocked).ToList())
+        {
+            change.IsLocked = true;
+            await Runner.Patch(Id!, change);
+            Changes.Remove(change);
+        }
     }
 
     protected void Patch<TField>(ref TField field, TField value, [CallerMemberName] string propertyName = "")
@@ -51,26 +54,24 @@ public class BlossomEntityProxy<T, TId> : IBlossomEntityProxy<T>, IBlossomEntity
             field = value;
             return;
         }
-        
-        Changes ??= new BlossomPatch();
-        var patch = Changes.From(propertyName, field, value);
-        if (patch != null)
+
+        var change = CurrentChange().From(propertyName, field, value);
+        if (change != null)
         {
-            patch.ApplyTo(this);
+            Patch(change);
             _ = SyncToBlossom();
         }
     }
 
-    static readonly JsonSerializerOptions CloneOptions = new()
+    private BlossomPatch CurrentChange()
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        WriteIndented = false,
-        Converters = { new JsonStringEnumConverter() },
-        IncludeFields = true
-    };
+        var change = Changes.FirstOrDefault(x => !x.IsLocked);
+        if (change == null)
+        {
+            change = new BlossomPatch();
+            Changes.Add(change);
+        }
 
-    private static TItem Clone<TItem>(TItem item)
-    {
-        return JsonSerializer.Deserialize<TItem>(JsonSerializer.Serialize(item, CloneOptions))!;
+        return change;
     }
 }

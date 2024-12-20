@@ -80,6 +80,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
             return;
 
         changes.ApplyTo(entity);
+        await Events.BroadcastAsync(new BlossomEntityPatched<T>(entity, changes));
         await Repository.UpdateAsync(entity);
     }
 
