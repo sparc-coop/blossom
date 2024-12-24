@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom.Api;
+﻿namespace Sparc.Blossom;
 
 public class BlossomAggregateMetadata(Type type)
 {

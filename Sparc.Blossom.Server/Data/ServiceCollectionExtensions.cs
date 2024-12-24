@@ -1,8 +1,6 @@
-﻿using Sparc.Blossom.Realtime;
+﻿namespace Sparc.Blossom;
 
-namespace Sparc.Blossom.Data;
-
-public static class ServiceCollectionExtensions
+public static partial class ServiceCollectionExtensions
 {
     public static WebApplicationBuilder AddBlossomRepository(this WebApplicationBuilder builder)
     {

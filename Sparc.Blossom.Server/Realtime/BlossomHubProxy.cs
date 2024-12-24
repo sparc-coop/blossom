@@ -2,11 +2,10 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
-using Sparc.Blossom.Api;
 using System.ComponentModel;
 using System.Reflection;
 
-namespace Sparc.Blossom.Realtime;
+namespace Sparc.Blossom;
 
 public class BlossomHubProxy(NavigationManager nav) : IAsyncDisposable
 {

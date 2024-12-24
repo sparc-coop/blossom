@@ -1,8 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.Globalization;
-using System.Net.Http.Json;
+﻿using System.Globalization;
 
-namespace Sparc.Kori;
+namespace Sparc.Blossom.Kori;
 
 public record KoriLanguage(string Id, string DisplayName, string NativeName, bool IsRightToLeft);
 public record AzureLanguageList(Dictionary<string, AzureLanguageItem> translation);//dictionary of languages //List<LanguageItem>> translation);//

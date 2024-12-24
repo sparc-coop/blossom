@@ -1,7 +1,6 @@
-﻿using MediatR;
-using System.Text;
+﻿using System.Text;
 
-namespace Sparc.Kori;
+namespace Sparc.Blossom.Kori;
 
 public record KoriPage(string Name, string Domain, string Path, List<string> Languages, ICollection<KoriTextContent> Content, string Id);
 public record KoriTextContent(string Id, string Tag, string Language, string Text, string Html, string ContentType, KoriAudio? Audio, List<object>? Nodes, bool Submitted = true);

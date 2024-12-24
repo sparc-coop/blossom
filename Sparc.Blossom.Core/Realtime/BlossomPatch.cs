@@ -1,8 +1,7 @@
-﻿using Sparc.Blossom.Data;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using SystemTextJsonPatch;
 
-namespace Sparc.Blossom.Realtime;
+namespace Sparc.Blossom;
 
 public class BlossomPropertyChangedEventArgs(string propertyName, BlossomPatch patch) : PropertyChangedEventArgs(propertyName)
 {

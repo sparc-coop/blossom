@@ -1,9 +1,8 @@
 ﻿using MediatR;
 using Sparc.Blossom.Authentication;
-using Sparc.Blossom.Data;
 using System.Security.Claims;
 
-namespace Sparc.Blossom.Realtime;
+namespace Sparc.Blossom;
 
 public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher, IHttpContextAccessor http)
     : IRealtimeRepository<T>

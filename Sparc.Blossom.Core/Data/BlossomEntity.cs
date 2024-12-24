@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
-using Sparc.Blossom.Realtime;
 
-namespace Sparc.Blossom.Data;
+namespace Sparc.Blossom;
 
 public abstract class BlossomEntity
 {

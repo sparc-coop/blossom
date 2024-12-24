@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.SignalR;
 using System.Text.Json.Serialization;
 
-namespace Sparc.Blossom.Realtime;
+namespace Sparc.Blossom;
 
-public static class ServiceCollectionExtensions
+public static partial class ServiceCollectionExtensions
 {
     public static IServiceCollection AddBlossomRealtime<TAssembly>(this IServiceCollection services)
     {

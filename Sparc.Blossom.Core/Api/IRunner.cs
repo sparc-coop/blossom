@@ -1,6 +1,4 @@
-﻿using Sparc.Blossom.Realtime;
-
-namespace Sparc.Blossom.Api;
+﻿namespace Sparc.Blossom;
 
 public interface IRunner
 {

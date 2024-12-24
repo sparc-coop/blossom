@@ -1,15 +1,13 @@
-﻿using Sparc.Blossom.Data;
-using System.Globalization;
+﻿using System.Globalization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
-using Sparc.Blossom.Api;
 using Sparc.Blossom.Authentication;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom;
 
-public static class ServiceCollectionExtensions
+public static partial class ServiceCollectionExtensions
 {
     public static WebApplicationBuilder AddBlossom(this WebApplicationBuilder builder, Action<WebApplicationBuilder>? options = null, IComponentRenderMode? renderMode = null)
     {

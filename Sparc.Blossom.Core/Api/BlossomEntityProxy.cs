@@ -1,8 +1,7 @@
-﻿using Sparc.Blossom.Realtime;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace Sparc.Blossom.Api;
+namespace Sparc.Blossom;
 
 public interface IBlossomEntityProxy : INotifyPropertyChanged
 {

@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Sparc.Blossom.Data;
-using Sparc.Blossom.Server.Authentication;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;

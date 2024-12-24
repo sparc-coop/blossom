@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom.Api;
+﻿namespace Sparc.Blossom;
 
 public abstract class BlossomApiProxy : IBlossomApi
 {

@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using System.Globalization;
-using System.Net.Http.Json;
+﻿using System.Globalization;
 using System.Text.Json;
 
-namespace Sparc.Kori;
+namespace Sparc.Blossom.Kori;
 
 public static class ServiceCollectionExtensions
 {

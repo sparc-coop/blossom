@@ -3,7 +3,7 @@ using System.Collections;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace Sparc.Blossom.Api;
+namespace Sparc.Blossom;
 
 public class BlossomProperty
 {

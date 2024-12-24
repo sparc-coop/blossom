@@ -1,11 +1,9 @@
 ﻿using Ardalis.Specification;
-using Sparc.Blossom.Data;
-using Sparc.Blossom.Realtime;
 using System.Reflection;
 
-namespace Sparc.Blossom.Api;
+namespace Sparc.Blossom;
 
-public static class ServiceCollectionExtensions
+public static partial class ServiceCollectionExtensions
 {
     public static IEnumerable<Type> GetDtos(this Assembly assembly)
        => assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>))

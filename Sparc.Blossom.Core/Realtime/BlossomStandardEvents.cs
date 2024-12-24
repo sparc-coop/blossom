@@ -1,6 +1,4 @@
-﻿using Sparc.Blossom.Data;
-
-namespace Sparc.Blossom.Realtime;
+﻿namespace Sparc.Blossom;
 
 public class BlossomEntityAdded<T>(T Entity) : BlossomEvent<T>(Entity) where T : BlossomEntity;
 public class BlossomEntityUpdated<T>(string commandName, T Entity) : BlossomEvent<T>(commandName, Entity) where T : BlossomEntity;

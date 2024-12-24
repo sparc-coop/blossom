@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom.Api;
+﻿namespace Sparc.Blossom;
 
 public class BlossomQueryOptions(int skip = 0, int? take = null, string? searchTerm = null)
 {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace Sparc.Blossom.Realtime;
+namespace Sparc.Blossom;
 
 public class BlossomHub : Hub
 {

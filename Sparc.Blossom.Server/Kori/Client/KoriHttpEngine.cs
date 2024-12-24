@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 
-namespace Sparc.Kori;
+namespace Sparc.Blossom.Kori;
 
 public record KoriContentRequest(string Domain, string Language, string Path);
 public record TranslateContentResponse(string Domain, string Path, string Id, string Language, Dictionary<string, KoriTextContent> Content);

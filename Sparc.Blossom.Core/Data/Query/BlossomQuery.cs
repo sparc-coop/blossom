@@ -1,7 +1,7 @@
 ﻿using Ardalis.Specification;
 using System.Linq.Expressions;
 
-namespace Sparc.Blossom.Data;
+namespace Sparc.Blossom;
 
 public class BlossomQuery();
 
@@ -48,7 +48,7 @@ public class BlossomQuery<T> : Specification<T> where T : class
         return this;
     }
 
-    public BlossomQuery<T> WithOptions(Api.BlossomQueryOptions options)
+    public BlossomQuery<T> WithOptions(BlossomQueryOptions options)
     {
         Query.WithOptions(options);
         return this;
@@ -84,7 +84,7 @@ public class BlossomQuery<T, TResult> : Specification<T, TResult>
 
 public static class BlossomQueryExtensions
 {
-    public static ISpecificationBuilder<T> WithOptions<T>(this ISpecificationBuilder<T> query, Api.BlossomQueryOptions options) where T : class
+    public static ISpecificationBuilder<T> WithOptions<T>(this ISpecificationBuilder<T> query, BlossomQueryOptions options) where T : class
     {
         query.Skip(options.Skip);
         if (options.Take.HasValue)

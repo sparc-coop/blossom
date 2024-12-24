@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom.Realtime;
+﻿namespace Sparc.Blossom;
 
 public enum PublishStrategy
 {

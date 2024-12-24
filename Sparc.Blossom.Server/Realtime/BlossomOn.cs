@@ -1,7 +1,6 @@
 ﻿using MediatR;
-using Sparc.Blossom.Data;
 
-namespace Sparc.Blossom.Realtime;
+namespace Sparc.Blossom;
 
 public abstract class BlossomOn<T> : INotificationHandler<T> where T : BlossomEvent
 {

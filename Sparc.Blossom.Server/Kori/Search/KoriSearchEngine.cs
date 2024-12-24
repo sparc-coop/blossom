@@ -1,4 +1,4 @@
-﻿namespace Sparc.Kori;
+﻿namespace Sparc.Blossom.Kori;
 
 public record KoriSearch(string Id, string Tag, string Text, string Domain, string Path, string Source);
 

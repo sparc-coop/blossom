@@ -44,7 +44,7 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
         }
 
         return $$"""
-namespace Sparc.Blossom.Api;
+namespace Sparc.Blossom;
 {{source.Nullable}}
         
 public partial class {{source.Name}}{{source.OfName}} {{proxy}}

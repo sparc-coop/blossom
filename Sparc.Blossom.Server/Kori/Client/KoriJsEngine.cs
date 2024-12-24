@@ -1,6 +1,6 @@
 ﻿using Microsoft.JSInterop;
 
-namespace Sparc.Kori;
+namespace Sparc.Blossom.Kori;
 
 public class KoriJsEngine(IJSRuntime js) : IAsyncDisposable
 {

@@ -1,11 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components;
-using Sparc.Blossom.Authentication;
-using Sparc.Blossom.Data;
 using System.Security.Claims;
 
-namespace Sparc.Blossom.Server.Authentication;
+namespace Sparc.Blossom.Authentication;
 
 // Adapted from MS PersistingRevalidatingAuthenticationStateProvider
 public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthenticationStateProvider where T : BlossomUser

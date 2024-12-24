@@ -1,10 +1,8 @@
-﻿using Sparc.Blossom.Data;
-using Sparc.Blossom.Realtime;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Linq.Dynamic.Core;
 using Mapster;
 
-namespace Sparc.Blossom.Api;
+namespace Sparc.Blossom;
 
 public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
     : IRunner<T>, IBlossomEndpointMapper, IBlossomAggregate where T : BlossomEntity

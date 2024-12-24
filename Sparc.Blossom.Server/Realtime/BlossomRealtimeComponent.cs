@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 
-namespace Sparc.Blossom.Realtime;
+namespace Sparc.Blossom;
 
 public class BlossomRealtimeComponent : ComponentBase, IAsyncDisposable
 {

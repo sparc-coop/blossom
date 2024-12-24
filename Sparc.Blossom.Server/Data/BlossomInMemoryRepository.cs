@@ -1,7 +1,7 @@
 ﻿using Ardalis.Specification;
 using System.Text.Json;
 
-namespace Sparc.Blossom.Data;
+namespace Sparc.Blossom;
 
 public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
 {

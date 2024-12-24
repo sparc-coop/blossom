@@ -1,8 +1,7 @@
 ﻿using Ardalis.Specification;
 using Mapster;
-using Sparc.Blossom.Realtime;
 
-namespace Sparc.Blossom.Api;
+namespace Sparc.Blossom;
 
 public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomHubProxy realtime) 
     : IRunner<T>

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 
-namespace Sparc.Kori;
+namespace Sparc.Blossom.Kori;
 
 public class KoriImageEngine(KoriHttpEngine http, KoriJsEngine js)
 {

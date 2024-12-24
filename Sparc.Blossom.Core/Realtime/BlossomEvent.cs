@@ -1,9 +1,7 @@
-﻿using Sparc.Blossom.Api;
-using Sparc.Blossom.Authentication;
-using Sparc.Blossom.Data;
+﻿using Sparc.Blossom.Authentication;
 using System.Security.Claims;
 
-namespace Sparc.Blossom.Realtime;
+namespace Sparc.Blossom;
 
 public class BlossomEvent : MediatR.INotification
 {

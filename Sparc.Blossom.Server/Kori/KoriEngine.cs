@@ -1,7 +1,6 @@
 ﻿using Microsoft.JSInterop;
-using Microsoft.AspNetCore.Http;
 
-namespace Sparc.Kori;
+namespace Sparc.Blossom.Kori;
 
 public class KoriEngine(
     KoriLanguageEngine language,

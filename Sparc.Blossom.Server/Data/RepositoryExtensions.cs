@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace Sparc.Blossom.Data;
+namespace Sparc.Blossom;
 
 public static class RepositoryExtensions
 {
