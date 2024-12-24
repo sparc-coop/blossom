@@ -1,0 +1,66 @@
+﻿[
+  {
+    "outputFile": "Login/KoriLogin.razor.css",
+    "inputFile": "Login/KoriLogin.razor.scss"
+  },
+  {
+    "outputFile": "Language/LanguageSelector.razor.css",
+    "inputFile": "Language/LanguageSelector.razor.scss"
+  },
+  {
+    "outputFile": "KoriWidget.razor.css",
+    "inputFile": "KoriWidget.razor.scss"
+  },
+  {
+    "outputFile": "KoriApp.razor.css",
+    "inputFile": "KoriApp.razor.scss"
+  },
+  {
+    "outputFile": "Content/EditTextMode.razor.css",
+    "inputFile": "Content/EditTextMode.razor.scss"
+  },
+  {
+    "outputFile": "Images/EditImageMode.razor.css",
+    "inputFile": "Images/EditImageMode.razor.scss"
+  },
+  {
+    "outputFile": "ABTesting/ABTestingMode.razor.css",
+    "inputFile": "ABTesting/ABTestingMode.razor.scss"
+  },
+  {
+    "outputFile": "Blog/BlogMode.razor.css",
+    "inputFile": "Blog/BlogMode.razor.scss"
+  },
+  {
+    "outputFile": "Content/HistoryMode.razor.css",
+    "inputFile": "Content/HistoryMode.razor.scss"
+  },
+  {
+    "outputFile": "Language/LanguageMode.razor.css",
+    "inputFile": "Language/LanguageMode.razor.scss"
+  },
+  {
+    "outputFile": "Search/SearchMode.razor.css",
+    "inputFile": "Search/SearchMode.razor.scss"
+  },
+  {
+    "outputFile": "DefaultMode.razor.css",
+    "inputFile": "DefaultMode.razor.scss"
+  },
+  {
+    "outputFile": "KoriTopBar.razor.css",
+    "inputFile": "KoriTopBar.razor.scss"
+  },
+  {
+    "outputFile": "KoriTopBarButton.razor.css",
+    "inputFile": "KoriTopBarButton.razor.scss"
+  },
+  {
+    "outputFile": "Search/BetterSearch.razor.css",
+    "inputFile": "Search/BetterSearch.razor.scss"
+  },
+  {
+    "outputFile": "Text/EditTextMode.razor.css",
+    "inputFile": "Text/EditTextMode.razor.scss"
+  }
+]

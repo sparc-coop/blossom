@@ -1,0 +1,106 @@
+﻿#kori-history {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+#kori-history button .icon-btn {
+  width: 32px;
+}
+#kori-history button .icon-btn svg {
+  margin-top: 0 !important;
+}
+#kori-history .kori-btn__primary {
+  display: flex;
+  height: 32px;
+  padding: 8px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--Blue-500, #4162DC);
+  background: var(--Blue-400, #5377FC);
+  color: var(--White, #FFF);
+  font-family: "ArticulatCF";
+  font-size: 14px;
+  font-weight: 500;
+  line-height: normal;
+  font-style: normal;
+  transition: all 0.3s ease-in-out;
+}
+#kori-history .kori-btn__primary:hover {
+  border-radius: 8px;
+  border: 1px solid var(--Blue-500, #4162DC);
+  background: var(--Blue-300, #708DF6);
+}
+#kori-history .kori-btn__primary:active {
+  border-radius: 8px;
+  border: 1px solid var(--Blue-500, #4162DC);
+  background: var(--Blue-500, #4162DC);
+}
+#kori-history .kori-btn__primary:disabled, #kori-history .kori-btn__primary[disabled] {
+  border: 1px solid var(--Blue-500, #4162DC);
+  background: var(--Blue-400, #5377FC);
+  opacity: 0.5;
+}
+#kori-history .kori-btn__secondary {
+  display: flex;
+  height: 32px;
+  padding: 8px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--Gray-800, #363E51);
+  background: var(--White, #FFF);
+  color: var(--Gray-800, #363E51);
+  font-family: "ArticulatCF";
+  font-size: 14px;
+  font-weight: 500;
+  line-height: normal;
+  font-style: normal;
+  transition: all 0.3s ease-in-out;
+}
+#kori-history .kori-btn__secondary:hover {
+  border: 1px solid var(--Gray-800, #363E51);
+  background: var(--Gray-50, #EEF2FA);
+}
+#kori-history .kori-btn__secondary:active {
+  border: 1px solid var(--Gray-800, #363E51);
+  background: var(--Gray-100, #DDE5F5);
+}
+#kori-history .kori-btn__secondary:disabled, #kori-history .kori-btn__secondary[disabled] {
+  border: 1px solid var(--Gray-800, #363E51);
+  background: var(--White, #FFF);
+  opacity: 0.5;
+}
+#kori-history .kori-btn__tertiary {
+  display: flex;
+  height: 32px;
+  padding: 8px 16px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  border: 0px solid var(--Blue-50, #F1F3FE);
+  background: var(--White, #FFF);
+  color: var(--Gray-800, #363E51);
+  font-family: "ArticulatCF";
+  font-size: 14px;
+  font-weight: 500;
+  line-height: normal;
+  font-style: normal;
+  transition: all 0.3s ease-in-out;
+}
+#kori-history .kori-btn__tertiary:hover {
+  border: 0px solid var(--Blue-100, #B7C6FF);
+  background: var(--Gray-50, #EEF2FA);
+}
+#kori-history .kori-btn__tertiary:active {
+  border: 0px solid var(--Blue-100, #B7C6FF);
+  background: var(--Gray-100, #DDE5F5);
+}
+#kori-history .kori-btn__tertiary:disabled, #kori-history .kori-btn__tertiary[disabled] {
+  border: 1px solid var(--Blue-50, #F1F3FE);
+  background: var(--White, #FFF);
+  opacity: 0.5;
+}

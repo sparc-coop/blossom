@@ -1,0 +1,77 @@
+#kori-search {
+    width: 317px;
+    padding: 20px 0px;
+    background: var(--white);
+    align-items: flex-start;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    height: 100vh;
+    gap: 20px;
+    flex-direction: column;
+    font-family: 'ArticulatCF';
+    font-weight: 500;
+    display: none;
+    overflow: auto;
+
+    &.show {
+        display: flex;
+    }
+
+    header {
+        display: flex;
+        padding: 0px 24px;
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        margin-bottom: 0;
+
+        div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+
+            h5 {
+                font-size: 14px;
+                color: #1F232B;
+            }
+
+            button {
+                background: transparent;
+                padding: 0;
+            }
+        }
+    }
+
+    article {
+        div {
+            cursor: pointer;
+
+            &:hover {
+                background: #EEF2FA;
+            }
+        }
+
+        div:nth-of-type(1) {
+            display: flex;
+            padding: 4px 8px 4px 30px;
+            align-items: center;
+            gap: 6px;
+        }
+
+        div:nth-of-type(n+2) {
+            display: flex;
+            padding: 4px 8px 4px 48px;
+            align-items: center;
+            gap: 6px;
+        }
+    }
+
+    span {
+        font-family: "Articulat CF";
+        font-size: 14px;
+        color: #363E51;
+    }
+}

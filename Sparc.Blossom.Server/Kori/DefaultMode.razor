@@ -1,0 +1,22 @@
+﻿<div id="kori-default">
+    <p>@Nav.Uri</p>
+    <hr />
+    <p>@GetPageName()</p>
+</div>
+
+@code {
+    private string GetPageName()
+    {
+        var cleanUri = Nav.Uri.Split('?')[0].Split('#')[0];
+
+        var lastSegment = cleanUri.Split('/').Last();
+
+        if (string.IsNullOrEmpty(lastSegment) || cleanUri == Nav.BaseUri)
+        {
+            return "Home";
+        }
+
+        return lastSegment;
+    }
+}
+
