@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
         }
 
         builder.Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
-        builder.Services.AddScoped<BlossomRealtimeContext>();
+        builder.Services.AddScoped<BlossomHubProxy>();
         return builder;
     }
 

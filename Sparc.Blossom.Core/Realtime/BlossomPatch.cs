@@ -1,6 +1,13 @@
-﻿using SystemTextJsonPatch;
+﻿using Sparc.Blossom.Data;
+using System.ComponentModel;
+using SystemTextJsonPatch;
 
 namespace Sparc.Blossom.Realtime;
+
+public class BlossomPropertyChangedEventArgs(string propertyName, BlossomPatch patch) : PropertyChangedEventArgs(propertyName)
+{
+    public BlossomPatch Patch { get; private set; } = patch;
+}
 
 public record BlossomPatch
 {
@@ -12,7 +19,7 @@ public record BlossomPatch
         JsonPatchDocument = new();
     }
     
-    public BlossomPatch(object previousEntity, object currentEntity) : this()
+    public BlossomPatch(BlossomEntity previousEntity, BlossomEntity currentEntity) : this()
     {
         var properties = previousEntity.GetType().GetProperties();
         foreach (var property in properties)
@@ -25,55 +32,29 @@ public record BlossomPatch
             JsonPatchDocument.ApplyTo(target);
     }
 
-    public BlossomPatch Add(string path, object value)
+    public BlossomPatch Combine(BlossomPatch patch)
     {
-        JsonPatchDocument.Add(path, value);
+        foreach (var operation in patch.JsonPatchDocument.Operations)
+            JsonPatchDocument.Operations.Add(operation);
+        
         return this;
     }
 
-    public BlossomPatch Replace(string path, object value)
+    public static BlossomPatch? From<TField>(string propertyName, TField? previousValue, TField? value)
     {
-        JsonPatchDocument.Replace(path, value);
-        return this;
-    }
+        var patch = new BlossomPatch();
 
-    public BlossomPatch Remove(string path)
-    {
-        JsonPatchDocument.Remove(path);
-        return this;
-    }
-
-    public BlossomPatch Move(string from, string path)
-    {
-        JsonPatchDocument.Move(from, path);
-        return this;
-    }
-
-    public BlossomPatch Copy(string from, string path)
-    {
-        JsonPatchDocument.Copy(from, path);
-        return this;
-    }
-
-    public BlossomPatch Test(string path, object value)
-    {
-        JsonPatchDocument.Test(path, value);
-        return this;
-    }
-
-    public BlossomPatch? From<TField>(string propertyName, TField? previousValue, TField? value)
-    {
         var path = $"/{propertyName}";
 
         if (previousValue == null)
         {
             if (value == null)
                 return null;
-            Add(path, value);
+            patch.JsonPatchDocument.Add(path, value);
         }
         else if (value == null)
         {
-            Remove(path);
+            patch.JsonPatchDocument.Remove(path);
         }
         else if (EqualityComparer<TField>.Default.Equals(previousValue, value))
         {
@@ -81,9 +62,9 @@ public record BlossomPatch
         }
         else
         {
-            Replace(path, value);
+            patch.JsonPatchDocument.Replace(path, value);
         }
 
-        return this;
+        return patch;
     }
 }

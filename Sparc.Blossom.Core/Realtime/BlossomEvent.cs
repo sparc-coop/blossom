@@ -20,7 +20,7 @@ public class BlossomEvent : MediatR.INotification
     public BlossomEvent(BlossomEntity entity) : this(entity.GetType().Name)
     {
         EntityId = entity.GenericId.ToString();
-        SubscriptionId = $"{entity.GetType().Name}-{EntityId}";
+        EntityType = entity.GetType().Name;
     }
     
     public BlossomEvent(string name, BlossomEntity entity) : this(entity)
@@ -30,21 +30,27 @@ public class BlossomEvent : MediatR.INotification
 
     public BlossomEvent(IBlossomEntityProxy proxy) : this(proxy.GetType().Name)
     {
-        SubscriptionId = proxy.SubscriptionId;
+        EntityType = proxy.GetType().Name;
     }
 
     public string Name { get; set; }
+    public string EntityType { get; set; } = "";
     public string EntityId { get; set; } = "";
     public long Id { get; set; } = DateTime.UtcNow.Ticks;
-    public string? SubscriptionId { get; set; }
     public string? UserId { get; set; }
     public BlossomPatch? Changes { get; set; } = null;
     public long? PreviousId { get; set; }
     public List<long> FutureIds { get; set; } = [];
+    public string? SubscriptionId => string.IsNullOrWhiteSpace(EntityId) ? null : $"{EntityType}-{EntityId}";
 
     public void SetUser(ClaimsPrincipal? user)
     {
         UserId = user?.Id();
+    }
+
+    public void ApplyTo(IBlossomEntityProxy entity)
+    {
+        Changes?.ApplyTo(entity);
     }
 }
 
@@ -69,7 +75,7 @@ public class BlossomEvent<T>(T entity) : BlossomEvent(entity) where T : BlossomE
     public BlossomEvent(T entity, BlossomEvent<T> previous) : this(entity)
     {
         PreviousId = previous.Id;
-        Changes = new BlossomPatch(previous.Entity, entity);
+        Changes = new(previous.Entity, entity);
 
     }
 }

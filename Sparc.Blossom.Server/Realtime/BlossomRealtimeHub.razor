@@ -19,7 +19,7 @@
                 if (Realtime.HasError)
                 {
                     <span>
-                        Unable to connect to room! Check your internet connection.
+                        Unable to connect to realtime service! Check your internet connection.
                         <button @onclick="ConnectAsync">Try again</button>
                     </span>
                 }
@@ -37,19 +37,25 @@
 }
 
 @inject NavigationManager Nav
-@inject BlossomRealtimeContext Realtime
+@inject BlossomHubProxy Realtime
 
 @code {
     [Parameter] public RenderFragment ChildContent { get; set; } = null!;
     [Parameter] public EventCallback<HubConnection> OnConnected { get; set; } = default;
+    [Parameter] public bool IsActive { get; set; } = true;
 
     protected override void OnInitialized()
     {
-        Realtime.Initialize(true, OnConnected);
+        Realtime.Initialize(IsActive, OnConnected);
+    }
+
+    async Task ConnectAsync()
+    {
+        await Realtime.ConnectAsync();
     }
 
     public async ValueTask DisposeAsync()
     {
-        await Realtime.GoOffline();
+        await Realtime.DisposeAsync();
     }
 }

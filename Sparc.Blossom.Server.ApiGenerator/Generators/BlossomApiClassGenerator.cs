@@ -17,7 +17,7 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
             if (source.IsEntity)
             {
                 properties.AppendLine($@"{property.Type} {property.FieldName}{property.PostModifiers(true)}");
-                properties.AppendLine($@"{property.Modifiers} {property.Type} {property.Name} {{ get => {property.FieldName}; {property.SetModifiers} set => Patch(ref {property.FieldName}, value); }}");
+                properties.AppendLine($@"{property.Modifiers} {property.Type} {property.Name} {{ get => {property.FieldName}; {property.SetModifiers} set => _set(ref {property.FieldName}, value); }}");
             }
             else
             {

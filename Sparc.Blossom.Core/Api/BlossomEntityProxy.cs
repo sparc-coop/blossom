@@ -1,13 +1,13 @@
 ﻿using Sparc.Blossom.Realtime;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace Sparc.Blossom.Api;
 
-public interface IBlossomEntityProxy
+public interface IBlossomEntityProxy : INotifyPropertyChanged
 {
-    string SubscriptionId { get; }
-    bool IsLive { get; set; }
-    void Patch(BlossomPatch patch);
+    object GenericId { get; }
+    IRunner GenericRunner { get; }
 }
 
 public interface IBlossomEntityProxy<T>
@@ -18,58 +18,28 @@ public interface IBlossomEntityProxy<T>
 public class BlossomEntityProxy<T, TId> : IBlossomEntityProxy<T>, IBlossomEntityProxy
 {
     public TId Id { get; set; } = default!;
-    public string SubscriptionId => $"{GetType().Name}-{Id}";
-    public bool IsLive { get; set; }
+    public object GenericId => Id!;
 
-    public List<BlossomPatch> Changes { get; private set; } = [];
     public IRunner<T> Runner { get; set; } = null!;
+    public IRunner GenericRunner => Runner;
 
-    bool _isSyncingFromBlossom;
-    public void Patch(BlossomPatch patch)
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnPropertyChanged<TField>(string propertyName, TField currentValue, TField newValue)
     {
-        _isSyncingFromBlossom = true;
-        patch.ApplyTo(this);
-        _isSyncingFromBlossom = false;
+        var patch = BlossomPatch.From(propertyName, currentValue, newValue);
+        if (patch != null)
+            PropertyChanged?.Invoke(this, new BlossomPropertyChangedEventArgs(propertyName, patch));
     }
 
-    private async Task SyncToBlossom()
+    protected bool _set<TField>(ref TField currentValue, TField newValue, [CallerMemberName] string propertyName = "")
     {
-        if (!Changes.Any())
-            return;
+        if (EqualityComparer<TField>.Default.Equals(currentValue, newValue)) return false;
 
-        foreach (var change in Changes.Where(x => !x.IsLocked).ToList())
-        {
-            change.IsLocked = true;
-            await Runner.Patch(Id!, change);
-            Changes.Remove(change);
-        }
+        currentValue = newValue;
+        OnPropertyChanged(propertyName, currentValue, newValue);
+        return true;
     }
 
-    protected void Patch<TField>(ref TField field, TField value, [CallerMemberName] string propertyName = "")
-    {
-        if (_isSyncingFromBlossom || !IsLive)
-        {
-            field = value;
-            return;
-        }
-
-        var change = CurrentChange().From(propertyName, field, value);
-        if (change != null)
-        {
-            Patch(change);
-            _ = SyncToBlossom();
-        }
-    }
-
-    private BlossomPatch CurrentChange()
-    {
-        var change = Changes.FirstOrDefault(x => !x.IsLocked);
-        if (change == null)
-        {
-            change = new BlossomPatch();
-            Changes.Add(change);
-        }
-
-        return change;
-    }
+    public override int GetHashCode() => GenericId.GetHashCode();
+    public override bool Equals(object obj) => obj is IBlossomEntityProxy other && GenericId.Equals(other.GenericId);
 }

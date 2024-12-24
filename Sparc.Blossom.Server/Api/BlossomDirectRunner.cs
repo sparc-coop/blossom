@@ -4,12 +4,12 @@ using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Api;
 
-public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomRealtimeContext realtime) 
+public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomHubProxy realtime) 
     : IRunner<T>
     where T : IBlossomEntityProxy<T>, IBlossomEntityProxy
 {
     public IRunner<TEntity> Aggregate { get; } = aggregate;
-    public BlossomRealtimeContext Realtime { get; } = realtime;
+    public BlossomHubProxy Realtime { get; } = realtime;
 
     public async Task<T> Create(params object?[] parameters)
     {
