@@ -5,25 +5,25 @@ namespace Sparc.Blossom.Kori;
 public class KoriJsEngine(IJSRuntime js) : IAsyncDisposable
 {
     public IJSRuntime Js { get; } = js;
-    readonly Lazy<Task<IJSObjectReference>> Value = new(() => js.InvokeAsync<IJSObjectReference>("import", "./_content/Sparc.Blossom/KoriApp.razor.js").AsTask());
+    readonly Lazy<Task<IJSObjectReference>> koriApp = js.Import("./_content/Sparc.Blossom/KoriApp.razor.js");
 
     public async Task<T> InvokeAsync<T>(string identifier, params object[] args)
     {
-        var module = await Value.Value;
+        var module = await koriApp.Value;
         return await module.InvokeAsync<T>(identifier, args);
     }
 
     public async Task InvokeVoidAsync(string identifier, params object[] args)
     {
-        var module = await Value.Value;
+        var module = await koriApp.Value;
         await module.InvokeVoidAsync(identifier, args);
     }
 
     public async ValueTask DisposeAsync()
     {
-        if (Value.IsValueCreated)
+        if (koriApp.IsValueCreated)
         {
-            var module = await Value.Value;
+            var module = await koriApp.Value;
             await module.DisposeAsync();
         }
     }

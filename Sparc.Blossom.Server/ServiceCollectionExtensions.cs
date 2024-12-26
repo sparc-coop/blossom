@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Components;
 using Sparc.Blossom.Authentication;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Sparc.Blossom.Kori.Content;
 
 namespace Sparc.Blossom;
 
@@ -42,7 +43,10 @@ public static partial class ServiceCollectionExtensions
 
     public static WebApplication UseBlossom<T>(this WebApplicationBuilder builder)
     {
-        builder.Services.AddServerSideBlazor();
+        builder.Services.AddServerSideBlazor(options =>
+        {
+            options.RootComponents.RegisterForJavaScript<KoriContent>("kori-content");
+        });
         builder.Services.AddHttpContextAccessor();
         
         if (builder.Services.Any(x => x.ServiceType == typeof(DbContextOptions)))
