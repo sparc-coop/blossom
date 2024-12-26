@@ -5,7 +5,7 @@ namespace Sparc.Blossom.Kori;
 public class KoriJsEngine(IJSRuntime js) : IAsyncDisposable
 {
     public IJSRuntime Js { get; } = js;
-    readonly Lazy<Task<IJSObjectReference>> koriApp = js.Import("./_content/Sparc.Blossom/KoriApp.razor.js");
+    readonly Lazy<Task<IJSObjectReference>> koriApp = js.Import("./_content/Sparc.Blossom/Kori/KoriApp.razor.js");
 
     public async Task<T> InvokeAsync<T>(string identifier, params object[] args)
     {

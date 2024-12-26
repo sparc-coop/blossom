@@ -45,7 +45,7 @@ public static partial class ServiceCollectionExtensions
     {
         builder.Services.AddServerSideBlazor(options =>
         {
-            options.RootComponents.RegisterForJavaScript<KoriContent>("kori-content");
+            options.RootComponents.RegisterCustomElement<KoriContent>("kori-content");
         });
         builder.Services.AddHttpContextAccessor();
         

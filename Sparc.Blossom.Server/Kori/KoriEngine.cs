@@ -21,11 +21,11 @@ public class KoriEngine(
     {
         var url = new Uri(currentUrl);
 
-        CurrentRequest = new KoriContentRequest(BaseUri.Host, language.Value.Id, url.PathAndQuery);
+        // CurrentRequest = new KoriContentRequest(BaseUri.Host, language.Value.Id, url.PathAndQuery);
 
-        await http.InitializeAsync(CurrentRequest);
-        await content.InitializeAsync(CurrentRequest);
-        await images.InitializeAsync();
+        // await http.InitializeAsync(CurrentRequest);
+        //await content.InitializeAsync(CurrentRequest);
+        //await images.InitializeAsync();
     }
 
     public async Task InitializeAsync(HttpContext context)
@@ -36,11 +36,7 @@ public class KoriEngine(
     public async Task InitializeAsync(string currentUrl, string elementId)
     {
         await InitializeAsync(currentUrl);
-        await js.InvokeVoidAsync("init",
-            elementId,
-            language.Value.Id,
-            DotNetObjectReference.Create(this),
-            content.Value);
+        await js.InvokeVoidAsync("init", elementId);
     }
 
     public async Task ChangeMode(string mode)
