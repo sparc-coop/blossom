@@ -42,6 +42,7 @@ public static partial class ServiceCollectionExtensions
             var baseOfType = aggregate.BaseType!.GenericTypeArguments.First();
             builder.Services.AddScoped(typeof(BlossomAggregate<>).MakeGenericType(baseOfType), aggregate);
             builder.Services.AddScoped(typeof(IRunner<>).MakeGenericType(baseOfType), aggregate);
+            builder.Services.AddScoped(aggregate);
         }
 
         var dtos = assembly.GetDtos()
