@@ -1,5 +1,21 @@
-﻿@Text?.ToUpper()
+﻿@Text
 
+@inject DexieRepository<KoriTextContent> Translations
 @code {
     [Parameter] public string? Text { get; set; }
+    private KoriTextContent? _content;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Text))
+            return;
+
+        _content = await Translations.FindAsync(Text);
+
+        if (_content == null)
+        {
+            _content = new KoriTextContent(Text);
+            await Translations.AddAsync(_content);
+        }
+    }
 }

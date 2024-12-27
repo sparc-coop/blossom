@@ -106,7 +106,7 @@ public class KoriHttpEngine(HttpClient client)
 
         var result = await client.GetFromJsonAsync<ICollection<KoriTextContent>>(requestUri);
 
-        return result?.ToDictionary(x => x.Tag, x => x with { Nodes = [] });
+        return result?.ToDictionary(x => x.Id, x => x);
     }    
 
     internal async Task<KoriTextContent> GetContentByIdAsync(string id)

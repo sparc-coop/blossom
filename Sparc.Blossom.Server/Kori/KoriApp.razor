@@ -1,8 +1,10 @@
+@using Sparc.Blossom.Kori.Users
+
 <section id="@_id" class="kori-content @ModeClass">
     @ChildContent
 </section>
 
-<Sparc.Kori.Login.KoriLogin />
+<KoriLogin />
 <KoriTopBar OnModeChanged="HandleModeChanged" @rendermode="RenderMode.InteractiveServer" />
 
 @code {

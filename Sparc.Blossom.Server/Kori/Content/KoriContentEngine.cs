@@ -3,14 +3,13 @@
 namespace Sparc.Blossom.Kori;
 
 public record KoriPage(string Name, string Domain, string Path, List<string> Languages, ICollection<KoriTextContent> Content, string Id);
-public record KoriTextContent(string Id, string Tag, string Language, string Text, string Html, string ContentType, KoriAudio? Audio, List<object>? Nodes, bool Submitted = true);
+public record KoriTextContent(string Id, string? Language = null, string? Text = null, string? Html = null, string? ContentType = null, KoriAudio? Audio = null);
 public record KoriAudio(string Url, long Duration, string Voice, ICollection<KoriWord> Subtitles);
 public record KoriWord(string Text, long Duration, long Offset);
 
 public class KoriContentEngine(KoriHttpEngine http, KoriJsEngine js)
 {
     public Dictionary<string, KoriTextContent> Value { get; set; } = [];
-    public string EditMode { get; set; } = "Edit";
 
     public async Task InitializeAsync(KoriContentRequest request)
     {
@@ -23,13 +22,8 @@ public class KoriContentEngine(KoriHttpEngine http, KoriJsEngine js)
 
     private async Task<KoriPage> GetOrCreatePage(KoriContentRequest request)
     {
-        var page = await http.GetPageByDomainAndPathAsync(request.Domain, request.Path);
-
-        if (page == null)
-        {
-            page = await http.CreatePage(request.Domain, request.Path, "new page");
-        }
-
+        var page = await http.GetPageByDomainAndPathAsync(request.Domain, request.Path)
+            ?? await http.CreatePage(request.Domain, request.Path, "new page");
         return page;
     }
 
@@ -53,7 +47,7 @@ public class KoriContentEngine(KoriHttpEngine http, KoriJsEngine js)
 
         foreach (var item in content)
         {
-            Value[item.Value.Tag] = item.Value with { Nodes = [] };
+            Value[item.Value.Id] = item.Value;
         }
 
         foreach (var key in nodes.Keys.ToList())

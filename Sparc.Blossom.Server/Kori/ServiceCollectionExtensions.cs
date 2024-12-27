@@ -15,7 +15,8 @@ public static class ServiceCollectionExtensions
             .AddScoped<KoriContentEngine>()
             .AddScoped<KoriSearchEngine>()
             .AddScoped<KoriImageEngine>()
-            .AddScoped<KoriJsEngine>();
+            .AddScoped<KoriJsEngine>()
+            .AddScoped(typeof(DexieRepository<>));
 
         KoriEngine.BaseUri = baseUri;
         return builder;
