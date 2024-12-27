@@ -79,7 +79,10 @@ function observeCallback(mutations) {
     console.log("Observe callback", mutations);
 
     mutations.forEach(function (mutation) {
-        if (mutation.target.classList?.contains('kori-ignore') || mutation.target.parentElement?.classList.contains('kori-ignore'))
+        if (mutation.target.tagName == "KORI-CONTENT"
+            || mutation.target.parentElement?.tagName == "KORI-CONTENT"
+            || mutation.target.classList?.contains('kori-ignore')
+            || mutation.target.parentElement?.classList.contains('kori-ignore'))
             return;
 
         if (mutation.type == 'characterData') {

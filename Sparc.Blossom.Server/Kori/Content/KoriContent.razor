@@ -1,4 +1,4 @@
-﻿@Text
+﻿@_content?.Text
 
 @inject DexieRepository<KoriTextContent> Translations
 @code {
@@ -14,7 +14,7 @@
 
         if (_content == null)
         {
-            _content = new KoriTextContent(Text);
+            _content = new KoriTextContent(Text, null, Text.ToUpper());
             await Translations.AddAsync(_content);
         }
     }
