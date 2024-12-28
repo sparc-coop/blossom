@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Components;
 using Sparc.Blossom.Authentication;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using Sparc.Blossom.Kori.Content;
 
 namespace Sparc.Blossom;
 
@@ -43,15 +42,12 @@ public static partial class ServiceCollectionExtensions
 
     public static WebApplication UseBlossom<T>(this WebApplicationBuilder builder)
     {
-        builder.Services.AddServerSideBlazor(options =>
-        {
-            options.RootComponents.RegisterCustomElement<KoriContent>("kori-content");
-        });
+        builder.Services.AddServerSideBlazor();
         builder.Services.AddHttpContextAccessor();
-        
+
         if (builder.Services.Any(x => x.ServiceType == typeof(DbContextOptions)))
             builder.Services.AddScoped<BlossomContextOptions>();
-        
+
         builder.Services.AddOutputCache();
 
         var app = builder.Build();
@@ -61,7 +57,7 @@ public static partial class ServiceCollectionExtensions
             app.UseDeveloperExceptionPage();
 
             //if (builder.IsWebAssembly())
-                //app.UseWebAssemblyDebugging();
+            //app.UseWebAssemblyDebugging();
         }
         else
         {
@@ -74,6 +70,9 @@ public static partial class ServiceCollectionExtensions
         app.UseAntiforgery();
 
         app.UseBlossomAuthentication();
+
+        if (builder.Services.Any(x => x.ServiceType.Name.Contains("Kori")))
+            app.UseAllCultures();
 
         var razor = app.MapRazorComponents<T>();
 
@@ -105,6 +104,7 @@ public static partial class ServiceCollectionExtensions
 
         return app;
     }
+
     public static IApplicationBuilder UseAllCultures(this IApplicationBuilder app)
     {
         var allCultures = CultureInfo.GetCultures(CultureTypes.AllCultures)
