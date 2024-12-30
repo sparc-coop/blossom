@@ -1,45 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Sparc.Blossom.Authentication;
-using System.Linq.Dynamic.Core;
+﻿using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom;
 
-public class BlossomContext(BlossomContextOptions options) : DbContext(options.DbContextOptions)
+public class BlossomContext(IHttpContextAccessor http)
 {
-    protected BlossomContextOptions Options { get; } = options;
-    public string UserId => Options.HttpContextAccessor?.HttpContext?.User?.Identity?.IsAuthenticated == true ? Options.HttpContextAccessor.HttpContext.User.Id() : "anonymous";
-
-    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-    {
-        configurationBuilder.Conventions.Add(_ => new BlossomPropertyDiscoveryConvention());
-    }
-
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        var result = await base.SaveChangesAsync(cancellationToken);
-
-        await NotifyAsync();
-
-        return result;
-    }
-
-    async Task NotifyAsync()
-    {
-        var domainEvents = ChangeTracker.Entries<BlossomEntity>().SelectMany(x => x.Entity.Publish());
-
-
-        var tasks = domainEvents
-            .Select(async (domainEvent) =>
-            {
-                await Options.Publisher.Publish(domainEvent);
-            });
-
-        await Task.WhenAll(tasks);
-    }
-
-    //public void MapEndpoints(IEndpointRouteBuilder endpoints)
-    //{
-    //    endpoints.MapGet("/_metadata", (DbContext context) => (context as BlossomContext)?.Metadata()).CacheOutput();
-    //}
+    public string UserId => http?.HttpContext?.User?.Identity?.IsAuthenticated == true ? http.HttpContext.User.Id() : "anonymous";
 }

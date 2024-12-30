@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
 using Sparc.Blossom.Authentication;
 using System.Reflection;
-using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom;
 
@@ -44,9 +43,6 @@ public static partial class ServiceCollectionExtensions
     {
         builder.Services.AddServerSideBlazor();
         builder.Services.AddHttpContextAccessor();
-
-        if (builder.Services.Any(x => x.ServiceType == typeof(DbContextOptions)))
-            builder.Services.AddScoped<BlossomContextOptions>();
 
         builder.Services.AddOutputCache();
 
