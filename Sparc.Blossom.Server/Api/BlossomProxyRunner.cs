@@ -3,7 +3,7 @@ using Mapster;
 
 namespace Sparc.Blossom;
 
-public class BlossomDirectRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomHubProxy realtime) 
+public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomHubProxy realtime) 
     : IRunner<T>
     where T : IBlossomEntityProxy<T>, IBlossomEntityProxy
 {

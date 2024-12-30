@@ -3,10 +3,9 @@ using Microsoft.JSInterop;
 
 namespace Sparc.Blossom;
 
-public class LocalRepository<T>(IJSRuntime js) : IRepository<T>
+public class BlossomLocalRepository<T>(IJSRuntime js) : IRepository<T>
 {
     public IJSRuntime Js { get; } = js;
-    //readonly Lazy<Task<IJSObjectReference>> Pouch = js.Import("./_content/Sparc.Blossom/js/pouchdb-9.0.0.min.js");
     readonly Lazy<Task<IJSObjectReference>> _dexie = js.Import("./_content/Sparc.Blossom/js/DexieRepository.js");
     static string DbName => typeof(T).Name.ToLower();
 

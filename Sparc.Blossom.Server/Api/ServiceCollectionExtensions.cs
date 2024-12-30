@@ -52,7 +52,7 @@ public static partial class ServiceCollectionExtensions
         foreach (var dto in dtos)
             builder.Services.AddScoped(
                 typeof(IRunner<>).MakeGenericType(dto.Key),
-                typeof(BlossomDirectRunner<,>).MakeGenericType(dto.Key, dto.Value!));
+                typeof(BlossomProxyRunner<,>).MakeGenericType(dto.Key, dto.Value!));
 
         foreach (var api in assembly.GetTypes<IBlossomApi>())
             builder.Services.AddScoped(api);
