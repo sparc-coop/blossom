@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Components;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomDefaultAuthenticator<T>
-    (IRepository<T> users, ILoggerFactory loggerFactory, IServiceScopeFactory scopeFactory, PersistentComponentState state) 
-    : BlossomAuthenticationStateProvider<T>(loggerFactory, scopeFactory, state), IBlossomAuthenticator 
+public class BlossomDefaultAuthenticator<T>(IRepository<T> users) 
+    : IBlossomAuthenticator 
     where T : BlossomUser, new()
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
@@ -14,7 +12,7 @@ public class BlossomDefaultAuthenticator<T>
     public IRepository<T> Users { get; } = users;
     public string? Message { get; set; }
 
-    public override async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
+    public async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
     {
         return await GetUserAsync(principal);
     }

@@ -1,7 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.Web" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''" />
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.BlazorWebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />
 
 	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
+		<TargetFrameworks>net9.0;net9.0-browser;net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
+
+		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<OutputType>Library</OutputType>
@@ -23,6 +28,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.4.9" />
 		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
@@ -37,4 +43,48 @@
 	<ItemGroup>
 	  <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
 	</ItemGroup>
+
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+	</ItemGroup>
+
+	<!-- Android -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-android')) != true">
+		<Compile Remove="**\Android\**\*.cs" />
+		<None Include="**\Android\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+	
+	<!-- iOS -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-ios')) != true">
+		<Compile Remove="**\iOS\**\*.cs" />
+		<None Include="**\iOS\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+
+	<!-- Mac Catalyst -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-maccatalyst')) != true">
+		<Compile Remove="**\MacCatalyst\**\*.cs" />
+		<None Include="**\MacCatalyst\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+
+	<!-- Windows -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-windows')) != true">
+		<Compile Remove="**\Windows\**\*.cs" />
+		<None Include="**\Windows\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+
+	<!-- Browser -->
+	<ItemGroup Condition="$(TargetFramework.Contains('-browser')) != true">
+		<Compile Remove="**\Browser\**\*.cs" />
+		<None Include="**\Browser\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+
+	<!-- Server -->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<Compile Remove="**\Server\**\*.cs" />
+		<None Include="**\Server\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.Web" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''" />
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.BlazorWebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />
+
 </Project>

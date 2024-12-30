@@ -6,7 +6,7 @@ using System.Security.Claims;
 namespace Sparc.Blossom.Authentication;
 
 // Adapted from MS PersistingRevalidatingAuthenticationStateProvider
-public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthenticationStateProvider where T : BlossomUser
+public class BlossomWebAuthenticationStateProvider<T> : RevalidatingServerAuthenticationStateProvider where T : BlossomUser
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly PersistentComponentState _state;
@@ -15,7 +15,7 @@ public class BlossomAuthenticationStateProvider<T> : RevalidatingServerAuthentic
 
     private Task<AuthenticationState>? _authenticationStateTask;
 
-    public BlossomAuthenticationStateProvider(
+    public BlossomWebAuthenticationStateProvider(
         ILoggerFactory loggerFactory,
         IServiceScopeFactory scopeFactory,
         PersistentComponentState state)

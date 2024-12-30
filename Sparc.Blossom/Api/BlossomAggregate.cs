@@ -5,13 +5,10 @@ using Mapster;
 namespace Sparc.Blossom;
 
 public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
-    : IRunner<T>, IBlossomEndpointMapper, IBlossomAggregate where T : BlossomEntity
+    : IRunner<T> where T : BlossomEntity
 {
-    public string Name => typeof(T).Name;
-
     public IRepository<T> Repository => options.Repository;
     public IRealtimeRepository<T> Events => options.Events;
-    protected ClaimsPrincipal? User => options.Http.HttpContext?.User;
 
     public virtual async Task<T?> Get(object id) => await Repository.FindAsync(id);
 
@@ -132,28 +129,12 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var dtoType = AppDomain.CurrentDomain.FindType(dtoTypeName);
         return dtoType == null ? null : entity!.Adapt(typeof(TItem), dtoType);
     }
-
-    public void MapEndpoints(IEndpointRouteBuilder endpoints)
-    {
-        var baseUrl = $"/{Name.ToLower()}";
-        var group = endpoints.MapGroup(baseUrl);
-        group.MapGet("{id}", async (IRunner<T> runner, string id) => await runner.Get(id));
-        group.MapPost("", async (IRunner<T> runner, object[] parameters) => await runner.Create(parameters));
-        group.MapPost("_undo", async (IRunner<T> runner, string id, long? revision) => await runner.Undo(id, revision));
-        group.MapPost("_redo", async (IRunner<T> runner, string id, long? revision) => await runner.Redo(id, revision));
-        group.MapGet("_metadata", async (IRunner<T> runner) => await runner.Metadata());
-        group.MapPost("{name}", async (IRunner<T> runner, string name, object[] parameters) => await runner.ExecuteQuery(name, parameters));
-        group.MapPatch("{id}", async (IRunner<T> runner, string id, BlossomPatch patch) => await runner.Patch(id, patch));
-        //group.MapGet("{name}_flex", async (IRunner<T> runner, string name, BlossomQueryOptions options, object[] parameters) => await runner.ExecuteQuery(name, options, parameters));
-        group.MapPut("{id}/{name}", async (IRunner<T> runner, string id, string name, object[] parameters) => await runner.Execute(id, name, parameters));
-        group.MapDelete("{id}", async (IRunner<T> runner, string id) => await runner.Delete(id));
-    }
 }
 
-public class BlossomAggregateOptions<T>(IRepository<T> repository, IRealtimeRepository<T> events, IHttpContextAccessor http)
+public class BlossomAggregateOptions<T>(IRepository<T> repository, IRealtimeRepository<T> events, ClaimsPrincipal principal)
     where T : BlossomEntity
 {
     public IRepository<T> Repository { get; } = repository;
     public IRealtimeRepository<T> Events { get; } = events;
-    public IHttpContextAccessor Http { get; } = http;
+    public ClaimsPrincipal User { get; } = principal;
 }
