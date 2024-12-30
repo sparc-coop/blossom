@@ -6,7 +6,7 @@ public static partial class ServiceCollectionExtensions
     {
         if (!builder.Services.Any(x => x.ServiceType == typeof(IRepository<>)))
         {
-            builder.Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(LocalRepository<>));
         }
 
         builder.Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
