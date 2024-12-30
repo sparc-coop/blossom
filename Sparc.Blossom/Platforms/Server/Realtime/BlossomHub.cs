@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Platforms.Server;
 
 public class BlossomHub : Hub
 {

@@ -5,7 +5,7 @@ public static class QueueServiceCollectionExtensions
     public static IServiceCollection AddBlossomService<T>(this IServiceCollection services) where T : class
     {
         services.AddSingleton(typeof(BlossomQueue<>))
-                .AddHostedService<BlossomRunner<T>>()
+                .AddHostedService<BlossomBackgroundService<T>>()
                 .AddScoped<T>();
 
         return services;
@@ -15,7 +15,7 @@ public static class QueueServiceCollectionExtensions
     {
         services
             .AddScoped<T>()
-            .AddHostedService(x => new BlossomTimedRunner<T>(x.GetRequiredService<IServiceScopeFactory>(), timespan));
+            .AddHostedService(x => new BlossomTimedBackgroundService<T>(x.GetRequiredService<IServiceScopeFactory>(), timespan));
         return services;
     }
 }

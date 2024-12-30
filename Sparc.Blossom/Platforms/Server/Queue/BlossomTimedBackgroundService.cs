@@ -1,7 +1,7 @@
 ﻿
 namespace Sparc.Blossom;
 
-public class BlossomTimedRunner<T>(IServiceScopeFactory scopes, TimeSpan timespan) 
+public class BlossomTimedBackgroundService<T>(IServiceScopeFactory scopes, TimeSpan timespan) 
     : BackgroundService
     where T : IBlossomService
 {

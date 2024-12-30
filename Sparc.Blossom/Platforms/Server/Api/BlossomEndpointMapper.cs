@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Platforms.Server;
 
 public class BlossomEndpointMapper(Assembly assembly)
 {

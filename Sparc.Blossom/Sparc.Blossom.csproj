@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project>
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.Razor" Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''" />
 	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.Web" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''" />
-	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.BlazorWebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0;net9.0-browser;net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks>net9.0;net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
 		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
 
 		<SingleProject>true</SingleProject>
@@ -17,8 +18,6 @@
 		<Authors>Sparc Cooperative</Authors>
 		<Company>Sparc Cooperative</Company>
 		<Description>Sparc Blossom package</Description>
-		<PackageIcon>icon.png</PackageIcon>
-		<PackageReadmeFile>readme.md</PackageReadmeFile>
 		<PackageTags>Features;API;Web;Sparc;Blossom</PackageTags>
 		<PackageProjectUrl>https://github.com/sparc-coop/blossom</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/sparc-coop/blossom</RepositoryUrl>
@@ -31,21 +30,26 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.4.9" />
+		<PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
 		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="icon.png" Pack="true" PackagePath="\" />
-		<None Update="readme.md" Pack="true" PackagePath="\" />
-		<None Include="..\Sparc.Blossom.Server.ApiGenerator\bin\$(Configuration)\netstandard2.0\Sparc.Blossom.ApiGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<None Include="..\Sparc.Blossom.ApiGenerator\bin\$(Configuration)\netstandard2.0\Sparc.Blossom.ApiGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
 	</ItemGroup>
 
-	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'">
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+	<!-- MAUI -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<UseMaui>true</UseMaui>
+	</PropertyGroup>
+	<ItemGroup Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
 	</ItemGroup>
 
 	<!-- Android -->
@@ -73,18 +77,30 @@
 	</ItemGroup>
 
 	<!-- Browser -->
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'">
+		<UseBlazorWebAssembly>true</UseBlazorWebAssembly>
+	</PropertyGroup>
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+	</ItemGroup>
 	<ItemGroup Condition="$(TargetFramework.Contains('-browser')) != true">
 		<Compile Remove="**\Browser\**\*.cs" />
 		<None Include="**\Browser\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 	</ItemGroup>
 
 	<!-- Server -->
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
+		<DefineConstants>SERVER</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />
+	</ItemGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
 		<Compile Remove="**\Server\**\*.cs" />
 		<None Include="**\Server\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 	</ItemGroup>
 
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.Razor" Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''" />
 	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.Web" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''" />
-	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.BlazorWebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />
-
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />
 </Project>

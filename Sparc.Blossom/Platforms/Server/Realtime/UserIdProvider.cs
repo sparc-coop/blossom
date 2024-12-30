@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Sparc.Blossom.Authentication;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Platforms.Server;
 
 public class UserIdProvider : IUserIdProvider
 {

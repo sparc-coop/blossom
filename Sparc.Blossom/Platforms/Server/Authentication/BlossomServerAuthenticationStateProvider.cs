@@ -2,11 +2,12 @@
 using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.Components;
 using System.Security.Claims;
+using Sparc.Blossom.Authentication;
 
-namespace Sparc.Blossom.Authentication;
+namespace Sparc.Blossom.Platforms.Server;
 
 // Adapted from MS PersistingRevalidatingAuthenticationStateProvider
-public class BlossomWebAuthenticationStateProvider<T> : RevalidatingServerAuthenticationStateProvider where T : BlossomUser
+public class BlossomServerAuthenticationStateProvider<T> : RevalidatingServerAuthenticationStateProvider where T : BlossomUser
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly PersistentComponentState _state;
@@ -15,7 +16,7 @@ public class BlossomWebAuthenticationStateProvider<T> : RevalidatingServerAuthen
 
     private Task<AuthenticationState>? _authenticationStateTask;
 
-    public BlossomWebAuthenticationStateProvider(
+    public BlossomServerAuthenticationStateProvider(
         ILoggerFactory loggerFactory,
         IServiceScopeFactory scopeFactory,
         PersistentComponentState state)

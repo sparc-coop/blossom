@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Platforms.Server;
 
-public class BlossomEventDefaultHandler<T>(IHubContext<BlossomHub> hub, IRepository<T> repository) 
+public class BlossomHubBroadcaster<T>(IHubContext<BlossomHub> hub, IRepository<T> repository) 
     : INotificationHandler<T> 
     where T : BlossomEvent
 {

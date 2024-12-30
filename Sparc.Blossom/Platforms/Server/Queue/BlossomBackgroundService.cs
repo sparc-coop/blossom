@@ -1,8 +1,8 @@
 ﻿namespace Sparc.Blossom;
 
-public class BlossomRunner<T> : BackgroundService where T : class
+public class BlossomBackgroundService<T> : BackgroundService where T : class
 {
-    public BlossomRunner(ILogger<BlossomRunner<T>> logger, IServiceScopeFactory scopes, IConfiguration config, BlossomQueue<T> queue)
+    public BlossomBackgroundService(ILogger<BlossomBackgroundService<T>> logger, IServiceScopeFactory scopes, IConfiguration config, BlossomQueue<T> queue)
     {
         _logger = logger;
         Scopes = scopes;
@@ -11,7 +11,7 @@ public class BlossomRunner<T> : BackgroundService where T : class
         _executors = new Task[_executorsCount];
     }
 
-    private readonly ILogger<BlossomRunner<T>> _logger;
+    private readonly ILogger<BlossomBackgroundService<T>> _logger;
     public IServiceScopeFactory Scopes { get; }
     public IConfiguration Config { get; }
     public BlossomQueue<T> Queue { get; }

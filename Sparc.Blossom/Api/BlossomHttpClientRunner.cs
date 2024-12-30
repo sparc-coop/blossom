@@ -1,4 +1,6 @@
-﻿namespace Sparc.Blossom;
+﻿using System.Net.Http.Json;
+
+namespace Sparc.Blossom;
 
 public class BlossomHttpClientRunner<T>(HttpClient client) : IRunner<T> where T : BlossomEntity<string>
 {

@@ -2,8 +2,7 @@
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomDefaultAuthenticator<T>(IRepository<T> users) 
-    : IBlossomAuthenticator 
+public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator 
     where T : BlossomUser, new()
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
@@ -41,6 +40,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users)
         return principal;
     }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public virtual async IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal? principal, string? emailOrToken = null)
     {
         LoginState = LoginStates.LoggedIn;
@@ -52,6 +52,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users)
         LoginState = LoginStates.LoggedOut;
         yield return LoginState;
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
     private async Task<BlossomUser> GetUserAsync(ClaimsPrincipal principal)
     {

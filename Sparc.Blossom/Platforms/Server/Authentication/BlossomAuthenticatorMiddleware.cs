@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Sparc.Blossom.Authentication;
 
-namespace Sparc.Blossom.Authentication;
+namespace Sparc.Blossom.Platforms.Server;
 
-public class BlossomDefaultAuthenticatorMiddleware(RequestDelegate next)
+public class BlossomAuthenticatorMiddleware(RequestDelegate next)
 {
     private readonly RequestDelegate _next = next;
 

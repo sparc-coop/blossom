@@ -4,14 +4,14 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom;
 
-public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher, IHttpContextAccessor http)
+public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher, ClaimsPrincipal principal)
     : IRealtimeRepository<T>
     where T : BlossomEntity
 {
     public IRepository<BlossomEvent<T>> Repository { get; } = repository;
     public IPublisher Publisher { get; } = publisher;
-    ClaimsPrincipal? User => http?.HttpContext?.User;
-    string? UserId => User?.Id();
+    ClaimsPrincipal User => principal;
+    string? UserId => User.Id();
     IQueryable<BlossomEvent<T>> UserEvents => Repository.Query.Where(x => x.UserId == UserId);
 
     public async Task<BlossomEvent<T>?> GetAsync(string id)
