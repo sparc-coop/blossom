@@ -33,11 +33,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example - Single Project", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example - Multiproject", "Example - Multiproject", "{788F1124-7330-4333-B4BC-2C73F00E462F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom", "Sparc.Blossom.Server\Sparc.Blossom.csproj", "{85B675EC-9E21-4205-97C1-A494E8FD7CFE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom", "Sparc.Blossom\Sparc.Blossom.csproj", "{85B675EC-9E21-4205-97C1-A494E8FD7CFE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{9B2106B7-4D61-411A-B9AE-46ECA3055F42}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.ApiGenerator", "Sparc.Blossom.Server.ApiGenerator\Sparc.Blossom.ApiGenerator.csproj", "{DF697DC6-3888-4861-955F-557239D6AA6B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.ApiGenerator", "Sparc.Blossom.ApiGenerator\Sparc.Blossom.ApiGenerator.csproj", "{DF697DC6-3888-4861-955F-557239D6AA6B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Authentication.Passwordless", "Sparc.Blossom.Authentication.Passwordless\Sparc.Blossom.Authentication.Passwordless.csproj", "{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}"
 EndProject
