@@ -14,7 +14,7 @@ namespace Sparc.Blossom.Platforms.Server;
 public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicationBuilder
 {
     public WebApplicationBuilder Builder { get; } = WebApplication.CreateBuilder(args);
-    public IServiceCollection Services => Services;
+    public IServiceCollection Services => Builder.Services;
     bool _isAuthenticationAdded;
 
     public IBlossomApplication Build()
@@ -55,7 +55,7 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
             .AddScoped<BlossomDefaultAuthenticator<TUser>>()
             .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<TUser>>();
 
-        Services.AddTransient<ClaimsPrincipal>(s => 
+        Services.AddTransient(s => 
             s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User 
             ?? new ClaimsPrincipal(new ClaimsIdentity()));
 
