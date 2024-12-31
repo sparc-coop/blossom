@@ -9,6 +9,7 @@ public class BlossomServerApplication : IBlossomApplication
 {
     public WebApplicationBuilder Builder { get; }
     public WebApplication Host { get; set; }
+    public IServiceProvider Services => Host.Services;
 
     public BlossomServerApplication(WebApplicationBuilder builder)
     {
