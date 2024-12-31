@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
-using Microsoft.AspNetCore.Components;
 using System.Security.Claims;
 using Sparc.Blossom.Authentication;
 
@@ -10,23 +9,11 @@ namespace Sparc.Blossom.Platforms.Server;
 public class BlossomServerAuthenticationStateProvider<T> : RevalidatingServerAuthenticationStateProvider where T : BlossomUser
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly PersistentComponentState _state;
 
-    private readonly PersistingComponentStateSubscription _subscription;
-
-    private Task<AuthenticationState>? _authenticationStateTask;
-
-    public BlossomServerAuthenticationStateProvider(
-        ILoggerFactory loggerFactory,
-        IServiceScopeFactory scopeFactory,
-        PersistentComponentState state)
+    public BlossomServerAuthenticationStateProvider(ILoggerFactory loggerFactory, IServiceScopeFactory scopeFactory)
         : base(loggerFactory)
     {
         _scopeFactory = scopeFactory;
-        _state = state;
-
-        AuthenticationStateChanged += OnAuthenticationStateChanged;
-        _subscription = state.RegisterOnPersisting(OnPersistingAsync);
     }
 
     protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
@@ -46,27 +33,8 @@ public class BlossomServerAuthenticationStateProvider<T> : RevalidatingServerAut
 
     }
 
-    private void OnAuthenticationStateChanged(Task<AuthenticationState> authenticationStateTask)
-    {
-        _authenticationStateTask = authenticationStateTask;
-    }
-
-    private async Task OnPersistingAsync()
-    {
-        if (_authenticationStateTask is null)
-            return;
-
-        var authenticationState = await _authenticationStateTask;
-        var principal = authenticationState.User;
-
-        if (principal.Identity?.IsAuthenticated == true)
-            _state.PersistAsJson(nameof(BlossomUser), await GetAsync(principal));
-    }
-
     protected override void Dispose(bool disposing)
     {
-        _subscription.Dispose();
-        AuthenticationStateChanged -= OnAuthenticationStateChanged;
         base.Dispose(disposing);
     }
 }
