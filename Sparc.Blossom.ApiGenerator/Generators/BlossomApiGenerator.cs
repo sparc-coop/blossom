@@ -55,8 +55,7 @@ internal class BlossomApiGenerator() : IIncrementalGenerator
         var constructor = string.Join(", ", injectors);
 
         return $$"""
-using Sparc.Blossom.Data;
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Api;
 public class BlossomApi({{constructor}}) : BlossomApiProxy
 {
     {{apis}}
@@ -70,6 +69,9 @@ public class BlossomApi({{constructor}}) : BlossomApiProxy
         var constructors = new StringBuilder();
         var queries = new StringBuilder();
         var api = sources.OrderBy(x => x.IsAggregate ? 0 : 1).First();
+
+        foreach (var comment in api.Comments)
+            commands.AppendLine("// " + comment);
 
         foreach (var source in sources.Where(x => x.IsEntity))
         {
@@ -89,7 +91,7 @@ public class BlossomApi({{constructor}}) : BlossomApiProxy
         }
 
         return $$"""
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Api;
 #nullable enable
 public partial class {{api.PluralName}} : BlossomAggregateProxy<{{api.EntityName}}>
 {

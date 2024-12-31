@@ -3,26 +3,22 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Sparc.Blossom.ApiGenerator;
 
-internal class BlossomApiMethodInfo
+internal class BlossomApiMethodInfo(ParameterListSyntax parameterList)
 {
-    public BlossomApiMethodInfo(TypeDeclarationSyntax cls, ConstructorDeclarationSyntax constructor)
+    public BlossomApiMethodInfo(TypeDeclarationSyntax cls, ConstructorDeclarationSyntax constructor) : this(constructor.ParameterList)
     {
         Name = cls.Identifier.Text;
-        Arguments = string.Join(", ", constructor.ParameterList.Parameters.Select(p => $"{p.Type} {p.Identifier}"));
-        Parameters = string.Join(", ", constructor.ParameterList.Parameters.Select(p => p.Identifier));
     }
 
-    internal BlossomApiMethodInfo(MethodDeclarationSyntax method)
+    internal BlossomApiMethodInfo(MethodDeclarationSyntax method) : this(method.ParameterList)
     {
         Name = method.Identifier.Text;
         ReturnType = method.ReturnType.ToString();
-        Arguments = string.Join(", ", method.ParameterList.Parameters.Select(p => $"{p.Type} {p.Identifier}"));
-        Parameters = string.Join(", ", method.ParameterList.Parameters.Select(p => p.Identifier));
     }
 
     public bool IsQuery => ReturnType?.Contains("BlossomQuery") ?? false;
-    internal string Name { get; set; }
+    internal string Name { get; set; } = "PrimaryConstructor";
     public string? ReturnType { get; }
-    internal string Arguments { get; set; }
-    internal string Parameters { get; set; }
+    internal string Arguments { get; set; } = string.Join(", ", parameterList.Parameters.Select(p => $"{p.Type} {p.Identifier}"));
+    internal string Parameters { get; set; } = string.Join(", ", parameterList.Parameters.Select(p => p.Identifier));
 }

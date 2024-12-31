@@ -25,8 +25,6 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
             }
         }
 
-        //properties.AppendLine($@"public required string Id {{ get; set; }}");
-
         foreach (var constant in source.Constants)
             properties.AppendLine(constant.Body);
 
@@ -44,7 +42,7 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
         }
 
         return $$"""
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Api;
 {{source.Nullable}}
         
 public partial class {{source.Name}}{{source.OfName}} {{proxy}}

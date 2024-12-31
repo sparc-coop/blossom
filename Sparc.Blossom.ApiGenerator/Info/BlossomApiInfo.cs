@@ -50,6 +50,10 @@ internal class BlossomApiInfo
             .Select(x => new BlossomApiMethodInfo(type, x))
             .ToList();
 
+        // Add class primary constructors as well
+        if (type.ParameterList?.Parameters.Any() == true)
+            Constructors.Add(new BlossomApiMethodInfo(type.ParameterList));
+
         Constants = type.Public<FieldDeclarationSyntax>()
             .Where(x => x.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)))
             .Select(x => new BlossomApiFieldInfo(x))
@@ -74,6 +78,7 @@ internal class BlossomApiInfo
     public List<BlossomApiMethodInfo> Constructors { get; }
     public List<BlossomApiPropertyInfo> Properties { get; }
     public List<BlossomApiFieldInfo> Constants { get; }
+    public List<string> Comments { get; } = [];
     public bool IsEntity => BaseName?.Contains("BlossomEntity") == true;
     public bool IsAggregate => BaseName?.Contains("BlossomAggregate") == true;
     public string EntityName => IsEntity ? Name : (BaseOfName ?? Name);

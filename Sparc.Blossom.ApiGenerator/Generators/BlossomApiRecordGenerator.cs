@@ -11,7 +11,7 @@ internal class BlossomApiRecordGenerator() : BlossomGenerator<RecordDeclarationS
         var properties = string.Join(", ", source.Properties.Select(x => $"{x.Type} {x.Name}"));
 
         return $$"""
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Api;
 {{source.Nullable}}
 
 public record {{source.Name}}{{source.OfName}}({{properties}});
