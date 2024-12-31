@@ -82,7 +82,7 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
         foreach (var api in apis)
             Services.AddScoped(api);
 
-        var aggregates = assembly.GetAggregates();
+        var aggregates = GetAggregates(assembly);
         Services.AddScoped(typeof(BlossomAggregateOptions<>));
         Services.AddScoped(typeof(BlossomAggregate<>));
 
@@ -158,4 +158,7 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
        => assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>))
            .Select(x => x.BaseType!.GetGenericArguments().First())
            .Distinct();
+
+    static IEnumerable<Type> GetAggregates(Assembly assembly)
+        => assembly.GetDerivedTypes(typeof(BlossomAggregate<>));
 }
