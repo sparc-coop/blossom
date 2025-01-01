@@ -35,6 +35,11 @@ public class BlossomServerApplication : IBlossomApplication
             UseAllCultures();
     }
 
+    public async Task RunAsync()
+    {
+        await Host.RunAsync();
+    }
+
     public async Task RunAsync<TApp>()
     {
         var razor = Host.MapRazorComponents<TApp>();
@@ -54,7 +59,7 @@ public class BlossomServerApplication : IBlossomApplication
 
         Host.MapHub<BlossomHub>("/_realtime");
 
-        await Host.RunAsync();
+        await RunAsync();
     }
 
     void UseBlossomAuthentication()

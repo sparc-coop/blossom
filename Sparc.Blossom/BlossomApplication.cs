@@ -14,6 +14,7 @@ public interface IBlossomApplication
 {
     IServiceProvider Services { get; }
     Task RunAsync<TApp>();
+    Task RunAsync();
 }
 
 public class BlossomApplication
