@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using System.Linq.Dynamic.Core;
+﻿using System.Linq.Dynamic.Core;
 using Mapster;
 
 namespace Sparc.Blossom;
@@ -8,14 +7,14 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
     : IRunner<T> where T : BlossomEntity
 {
     public IRepository<T> Repository => options.Repository;
-    public IRealtimeRepository<T> Events => options.Events;
+    public IEventRepository<T> Events => options.Events;
 
     public virtual async Task<T?> Get(object id) => await Repository.FindAsync(id);
 
     public virtual async Task<T> Create(params object?[] parameters)
     {
         var entity = (T)Activator.CreateInstance(typeof(T), parameters)!;
-        // await Events.BroadcastAsync(new BlossomEntityAdded<T>(entity));
+        await Events.AddAsync(new BlossomEntityAdded<T>(entity));
         await Repository.AddAsync(entity);
         return entity;
     }
@@ -75,7 +74,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
             return;
 
         changes.ApplyTo(entity);
-        await Events.BroadcastAsync(new BlossomEntityPatched<T>(entity, changes));
+        await Events.AddAsync(new BlossomEntityPatched<T>(entity, changes));
         await Repository.UpdateAsync(entity);
     }
 
@@ -85,7 +84,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
             ?? throw new Exception($"Entity {id} not found.");
 
         var action = new Action<T>(x => typeof(T).GetMethod(name)?.Invoke(x, parameters));
-        // await Events.BroadcastAsync(name, entity);
+        await Events.AddAsync(name, entity);
         await Repository.ExecuteAsync(id, action);
     }
 
@@ -94,7 +93,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var entity = await Repository.FindAsync(id)
             ?? throw new Exception($"Entity {id} not found.");
 
-        // await Events.BroadcastAsync(new BlossomEntityDeleted<T>(entity));
+        await Events.AddAsync(new BlossomEntityDeleted<T>(entity));
         await Repository.DeleteAsync(entity);
     }
 
@@ -131,10 +130,9 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
     }
 }
 
-public class BlossomAggregateOptions<T>(IRepository<T> repository, IRealtimeRepository<T> events, ClaimsPrincipal principal)
+public class BlossomAggregateOptions<T>(IRepository<T> repository, IEventRepository<T> events)
     where T : BlossomEntity
 {
     public IRepository<T> Repository { get; } = repository;
-    public IRealtimeRepository<T> Events { get; } = events;
-    public ClaimsPrincipal User { get; } = principal;
+    public IEventRepository<T> Events { get; } = events;
 }

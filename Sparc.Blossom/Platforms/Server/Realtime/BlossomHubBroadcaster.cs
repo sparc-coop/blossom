@@ -3,12 +3,10 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Sparc.Blossom.Platforms.Server;
 
-public class BlossomHubBroadcaster<T>(IHubContext<BlossomHub> hub, IRepository<T> repository) 
-    : INotificationHandler<T> 
+public class BlossomHubBroadcaster<T>(IHubContext<BlossomHub> hub) : INotificationHandler<T> 
     where T : BlossomEvent
 {
     public IHubContext<BlossomHub> Hub { get; } = hub;
-    public IRepository<T> Repository { get; } = repository;
 
     public async Task ExecuteAsync(BlossomEvent blossomEvent)
     {

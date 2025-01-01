@@ -1,9 +1,14 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 
 namespace Sparc.Blossom;
 
-public interface IBlossomEntityProxy : INotifyPropertyChanged
+public delegate void BlossomEntityChangedEventHandler(object sender, BlossomPropertyChangedEventArgs e);
+public interface IBlossomNotifyChanged
+{
+    event BlossomEntityChangedEventHandler? EntityChanged;
+}
+
+public interface IBlossomEntityProxy : IBlossomNotifyChanged
 {
     object GenericId { get; }
     IRunner GenericRunner { get; }
@@ -22,12 +27,12 @@ public class BlossomEntityProxy<T, TId> : IBlossomEntityProxy<T>, IBlossomEntity
     public IRunner<T> Runner { get; set; } = null!;
     public IRunner GenericRunner => Runner;
 
-    public event PropertyChangedEventHandler? PropertyChanged;
+    public event BlossomEntityChangedEventHandler? EntityChanged;
     protected void OnPropertyChanged<TField>(string propertyName, TField currentValue, TField newValue)
     {
         var patch = BlossomPatch.From(propertyName, currentValue, newValue);
         if (patch != null)
-            PropertyChanged?.Invoke(this, new BlossomPropertyChangedEventArgs(propertyName, patch));
+            EntityChanged?.Invoke(this, new(propertyName, patch));
     }
 
     protected bool _set<TField>(ref TField currentValue, TField newValue, [CallerMemberName] string propertyName = "")

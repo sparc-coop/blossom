@@ -1,21 +1,20 @@
-﻿@using Microsoft.AspNetCore.SignalR.Client;
-@namespace Sparc.Blossom.Realtime
+﻿@namespace Sparc.Blossom.Realtime
 @implements IAsyncDisposable
 
 @ChildContent
 
-@if (Realtime.Connection != null)
+@if (Realtime.ConnectionState != null)
 {
-    <aside class="realtime-hub realtime-hub-@Realtime.Connection.State.ToString()">
-        @switch (Realtime.Connection.State)
+    <aside class="realtime-hub realtime-hub-@Realtime.ConnectionState.ToString()">
+        @switch (Realtime.ConnectionState)
         {
-            case HubConnectionState.Connecting:
+            case ConnectionStates.Connecting:
                 <span>Connecting...</span>
                 break;
-            case HubConnectionState.Reconnecting:
+            case ConnectionStates.Reconnecting:
                 <span class="">Connection lost, attempting to reconnect...</span>
                 break;
-            case HubConnectionState.Disconnected:
+            case ConnectionStates.Disconnected:
                 if (Realtime.HasError)
                 {
                     <span>
@@ -28,7 +27,7 @@
                     <span></span>
                 }
                 break;
-            case HubConnectionState.Connected:
+            case ConnectionStates.Connected:
                 <span>
                 </span>
                 break;
@@ -37,16 +36,15 @@
 }
 
 @inject NavigationManager Nav
-@inject BlossomHubProxy Realtime
+@inject IRealtimeProxy Realtime
 
 @code {
     [Parameter] public RenderFragment ChildContent { get; set; } = null!;
-    [Parameter] public EventCallback<HubConnection> OnConnected { get; set; } = default;
     [Parameter] public bool IsActive { get; set; } = true;
 
     protected override void OnInitialized()
     {
-        Realtime.Initialize(IsActive, OnConnected);
+        Realtime.Initialize(IsActive);
     }
 
     async Task ConnectAsync()

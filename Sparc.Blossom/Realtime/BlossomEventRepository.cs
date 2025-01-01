@@ -1,18 +1,15 @@
 ﻿using MediatR;
-using Sparc.Blossom.Authentication;
 using System.Security.Claims;
 
 namespace Sparc.Blossom;
 
-public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher, ClaimsPrincipal principal)
-    : IRealtimeRepository<T>
+public class BlossomEventRepository<T>(IRepository<BlossomEvent<T>> repository, IPublisher publisher, ClaimsPrincipal principal)
+    : IEventRepository<T>
     where T : BlossomEntity
 {
-    public IRepository<BlossomEvent<T>> Repository { get; } = repository;
+    public IRepository<BlossomEvent<T>> Events { get; } = repository;
     public IPublisher Publisher { get; } = publisher;
     ClaimsPrincipal User => principal;
-    string? UserId => User.Id();
-    IQueryable<BlossomEvent<T>> UserEvents => Repository.Query.Where(x => x.UserId == UserId);
 
     public async Task<BlossomEvent<T>?> GetAsync(string id)
     {
@@ -21,7 +18,7 @@ public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repositor
 
     public Task<BlossomEvent<T>?> GetAsync(string id, long revision)
     {
-        var item = Repository.Query.FirstOrDefault(x => x.EntityId == id && x.Id == revision);
+        var item = Events.Query.FirstOrDefault(x => x.EntityId == id && x.Id == revision);
         return Task.FromResult(item);
     }
 
@@ -34,7 +31,7 @@ public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repositor
 
     public Task<IEnumerable<BlossomEvent<T>>> GetAllAsync(string id, int? count = null)
     {
-        IQueryable<BlossomEvent<T>> events = Repository.Query
+        IQueryable<BlossomEvent<T>> events = Events.Query
             .Where(x => x.EntityId == id)
             .OrderByDescending(x => x.Id);
 
@@ -44,16 +41,16 @@ public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repositor
         return Task.FromResult<IEnumerable<BlossomEvent<T>>>(events);
     }
 
-    public async Task BroadcastAsync(string eventName, T entity)
+    public async Task AddAsync(string eventName, T entity)
     {
         var newEvent = new BlossomEvent<T>(eventName, entity);
-        await BroadcastAsync(newEvent);
+        await AddAsync(newEvent);
     }
 
-    public async Task BroadcastAsync(BlossomEvent<T> newEvent)
+    public async Task AddAsync(BlossomEvent<T> newEvent)
     {
         newEvent.SetUser(User);
-        await Repository.AddAsync(newEvent);
+        await Events.AddAsync(newEvent);
         await Publisher.Publish(newEvent);
     }
 
@@ -88,7 +85,7 @@ public class BlossomRealtimeRepository<T>(IRepository<BlossomEvent<T>> repositor
             ? new BlossomEntityRedone<T>(current, replaceWith)
             : new BlossomEntityUndone<T>(current, replaceWith);
 
-        await BroadcastAsync(changed);
+        await AddAsync(changed);
         return changed.Entity;
     }
 

@@ -11,11 +11,3 @@ public abstract class BlossomOn<T> : INotificationHandler<T> where T : BlossomEv
         await ExecuteAsync(request);
     }
 }
-
-public class AddBlossomEntity<T>(IRepository<T> repository) : BlossomOn<BlossomEntityAdded<T>> where T : BlossomEntity
-{
-    public override async Task ExecuteAsync(BlossomEntityAdded<T> e)
-    {
-        await repository.AddAsync(e.Entity);
-    }
-}

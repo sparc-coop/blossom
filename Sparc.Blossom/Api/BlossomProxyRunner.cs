@@ -3,12 +3,12 @@ using Mapster;
 
 namespace Sparc.Blossom;
 
-public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomHubProxy realtime) 
+public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate) 
     : IRunner<T>
     where T : IBlossomEntityProxy<T>, IBlossomEntityProxy
+    where TEntity : BlossomEntity
 {
     public IRunner<TEntity> Aggregate { get; } = aggregate;
-    public BlossomHubProxy Realtime { get; } = realtime;
 
     public async Task<T> Create(params object?[] parameters)
     {
@@ -26,7 +26,6 @@ public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomH
     {
         var results = await Aggregate.ExecuteQuery(name, parameters);
         var dtos = results.Select(Adapt);
-        await Realtime.Watch((IEnumerable<IBlossomEntityProxy>)dtos);
         return dtos;
     }
 
@@ -34,7 +33,6 @@ public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomH
     {
         var results = await Aggregate.ExecuteQuery(options);
         var dtos = results.Items.Select(Adapt);
-        await Realtime.Watch((IEnumerable<IBlossomEntityProxy>)dtos);
         return new BlossomQueryResult<T>(dtos, results.TotalCount);
     }
 
@@ -65,7 +63,6 @@ public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomH
     private async Task<T> AdaptAndWatch(TEntity entity)
     {
         var dto = Adapt(entity);
-        await Realtime.Watch(dto);
         return dto;
     }
 

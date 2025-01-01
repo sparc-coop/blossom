@@ -5,7 +5,7 @@ namespace Sparc.Blossom;
 public class BlossomRealtimeComponent : ComponentBase, IAsyncDisposable
 {
     [Inject]
-    public required BlossomHubProxy HubProxy { get; set; }
+    public required BlossomSignalRProxy HubProxy { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

@@ -124,8 +124,8 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
         if (!Services.Any(x => x.ServiceType == typeof(IRepository<>)))
             Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
 
-        Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
-        Services.AddScoped<BlossomHubProxy>();
+        Services.AddScoped(typeof(IEventRepository<>), typeof(BlossomEventRepository<>));
+        Services.AddScoped<BlossomSignalRProxy>();
     }
 
     void AddBlossomRealtime(Assembly assembly) => AddBlossomRealtime<BlossomHub>(assembly);

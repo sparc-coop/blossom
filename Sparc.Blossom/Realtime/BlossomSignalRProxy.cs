@@ -1,42 +1,38 @@
 ﻿using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
+using Sparc.Blossom.Realtime;
 using System.ComponentModel;
 using System.Reflection;
+using System.Threading.Channels;
 
 namespace Sparc.Blossom;
 
-public class BlossomHubProxy(NavigationManager nav) : IAsyncDisposable
+public class BlossomSignalRProxy(NavigationManager nav) : BlossomLocalRealtimeProxy
 {
-    public HubConnection? Connection { get; set; }
-
-    public bool IsActive { get; private set; }
-    public bool IsConnected => Connection?.State == HubConnectionState.Connected;
-    public bool HasError;
-
+    HubConnection? Connection { get; set; }
     public EventCallback<HubConnection>? OnConnected;
-    public event EventHandler<EventArgs>? Changed;
 
-    readonly Dictionary<string, List<IDisposable>> _subscriptions = [];
-    readonly List<object> _broadcastingEntities = [];
-    
-    public void StateHasChanged() => Changed?.Invoke(this, EventArgs.Empty);
-
-    public void Initialize(bool isActive, EventCallback<HubConnection>? onConnected = null)
+    public override ConnectionStates ConnectionState => Connection?.State switch
     {
-        IsActive = isActive;
+        HubConnectionState.Disconnected => ConnectionStates.Disconnected,
+        HubConnectionState.Connecting => ConnectionStates.Connecting,
+        HubConnectionState.Connected => ConnectionStates.Connected,
+        _ => ConnectionStates.Disconnected
+    };
+
+    public override void Initialize(bool isActive)
+    {
+        base.Initialize(isActive);
 
         Connection ??= new HubConnectionBuilder()
             .WithUrl($"{nav.BaseUri}_realtime")
             //.AddMessagePackProtocol()
             .WithAutomaticReconnect()
             .Build();
-
-        if (onConnected != null)
-            OnConnected = onConnected;
     }
 
-    public async Task ConnectAsync()
+    public override async Task ConnectAsync()
     {
         if (!IsActive)
             return;
@@ -73,64 +69,13 @@ public class BlossomHubProxy(NavigationManager nav) : IAsyncDisposable
         HasError = true;
     }
 
-    public async Task Watch(ComponentBase component)
+    
+
+    public override async Task Watch(IEnumerable<IBlossomEntityProxy> entities, Action<IBlossomEntityProxy, BlossomEvent> action)
     {
-        Initialize(true);
-        var type = component.GetType();
+        var newSubscriptions = await base.Watch(entities, action);
 
-        var properties = type.GetProperties().OfType<IBlossomEntityProxy>();
-        await Watch(properties);
-
-        var stateHasChanged = type.GetMethod("StateHasChanged", BindingFlags.NonPublic | BindingFlags.Instance);
-        Changed += (sender, args) => stateHasChanged!.Invoke(component, null);
-    }
-
-    public async Task Watch(IBlossomEntityProxy entity) => await Watch([entity]);
-
-    public async Task Watch(IEnumerable<IBlossomEntityProxy> entities)
-    {
-        await Watch(entities, (entity, ev) => ev.ApplyTo(entity));
-    }
-
-    public async Task StopWatching(ComponentBase component)
-    {
-        var properties = component.GetType().GetProperties();
-        foreach (var property in properties.OfType<IBlossomEntityProxy>())
-            await StopWatching(property);
-    }
-
-    public async Task StopWatching(IBlossomEntityProxy entity)
-    {
-        var subscriptionId = SubscriptionId(entity);
-        var subscriptions = Subscriptions(entity);
-        if (subscriptions == null)
-            return;
-
-        foreach (var subscription in subscriptions)
-        {
-            _subscriptions[subscriptionId].Remove(subscription);
-            subscription.Dispose();
-        }
-
-        if (_subscriptions[subscriptionId].Count == 0)
-        {
-            _subscriptions.Remove(subscriptionId);
-            await InvokeAsync("StopWatching", subscriptionId);
-        }
-    }
-
-    public async Task Watch(IEnumerable<IBlossomEntityProxy> entities, Action<IBlossomEntityProxy, BlossomEvent> action)
-    {
-        if (!IsActive)
-            return;
-        
-        await ConnectAsync();
-        
-        var newSubscriptions = entities.Select(SubscriptionId).Except(_subscriptions.Keys);
-        foreach (var subscriptionId in newSubscriptions)
-            _subscriptions.Add(subscriptionId, []);
-
-        if (newSubscriptions.Any())
+        if (newSubscriptions?.Any() == true)
             await InvokeAsync("Watch", newSubscriptions);
 
         foreach (var entity in entities)
@@ -192,19 +137,12 @@ public class BlossomHubProxy(NavigationManager nav) : IAsyncDisposable
         _ = entity.GenericRunner.Patch(entity.GenericId, patch);
     }
 
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
+        await base.DisposeAsync();
+
         if (Connection != null)
             await Connection.DisposeAsync();
-
-        foreach (var subscription in _subscriptions.SelectMany(x => x.Value))
-            subscription.Dispose();
-
-        _subscriptions.Clear();
     }
     
-    public static string SubscriptionId(IBlossomEntityProxy entity) => $"{entity.GetType().Name}-{entity.GenericId}";
-    List<IDisposable>? Subscriptions(IBlossomEntityProxy entity) => _subscriptions.ContainsKey(SubscriptionId(entity)) 
-        ? _subscriptions[SubscriptionId(entity)].Where(x => x == entity).ToList() 
-        : null;
 }
