@@ -14,7 +14,7 @@ internal class BlossomRecordGenerator() : BlossomGenerator<RecordDeclarationSynt
 namespace Sparc.Blossom.Api;
 {{source.Nullable}}
 
-public record {{source.Name}}{{source.OfName}}({{properties}});
+public record {{source.ProxyName}}{{source.OfName}}({{properties}});
 """;
     }
 }

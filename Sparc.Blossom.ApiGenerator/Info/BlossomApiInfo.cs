@@ -67,6 +67,7 @@ internal class BlossomApiInfo
 
     internal string Name { get; }
     public string PluralName { get; }
+    internal string FullName => $"{Namespace}.{Name}";
     internal string? OfName { get; set; }
     internal string? BaseOfName { get; set; }
     internal string? BaseName { get; set; }
@@ -82,6 +83,8 @@ internal class BlossomApiInfo
     public bool IsEntity => BaseName?.Contains("BlossomEntity") == true;
     public bool IsCollection => BaseName?.Contains("BlossomCollection") == true;
     public string EntityName => IsEntity ? Name : (BaseOfName ?? Name);
+    public string ProxyName => $"{EntityName}Proxy";
+    public string PluralProxyName => $"{PluralName}Proxy";
 }
 
 public static class BlossomApiInfoExtensions

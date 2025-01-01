@@ -48,8 +48,8 @@ internal class BlossomCollectionProxyGenerator() : IIncrementalGenerator
         foreach (var source in sources)
         {
             var api = source.OrderBy(x => x.IsCollection ? 0 : 1).First();
-            apis.AppendLine($@"public {api.PluralName} {api.PluralName} {{ get; }} = {api.PluralName.ToLower()};");
-            injectors.Add($"{api.PluralName} {api.PluralName.ToLower()}");
+            apis.AppendLine($@"public {api.PluralProxyName} {api.PluralName} {{ get; }} = {api.PluralName.ToLower()};");
+            injectors.Add($"{api.PluralProxyName} {api.PluralName.ToLower()}");
         }
 
         var constructor = string.Join(", ", injectors);
@@ -74,18 +74,18 @@ public class BlossomApi({{constructor}}) : IBlossomApi
 
             foreach (var query in source.Methods.Where(x => x.IsQuery))
             {
-                queries.AppendLine($@"public async Task<IEnumerable<BlossomEntityProxy<{source.BaseOfName}>>> {query.Name}({query.Arguments}) => await GetAllAsync(new {query.Name}({query.Parameters}));");
+                queries.AppendLine($@"public async Task<IEnumerable<{api.ProxyName}>> {query.Name}({query.Arguments}) => await GetAllAsync(new {query.Name}({query.Parameters}));");
             }
         }
 
         return $$"""
-namespace Sparc.Blossom.Api;
+using Sparc.Blossom.Api;
+namespace {{api.Namespace}};
 #nullable enable
-public partial class {{api.PluralName}} : BlossomCollectionProxy<{{api.EntityName}}>
+public partial class {{api.PluralProxyName}} : BlossomCollectionProxy<{{api.EntityName}}, {{api.ProxyName}}>
 {
-    public {{api.PluralName}}(IRepository<{{api.EntityName}}> repository) : base(repository) { }
+    public {{api.PluralProxyName}}(IRepository<{{api.EntityName}}> repository) : base(repository) { }
 
-    public async Task<BlossomEntityProxy<{{api.EntityName}}>?> Get(object id) => await Repository.FindAsync(id);
     {{queries}}
 }
 """;

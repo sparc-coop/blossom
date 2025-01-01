@@ -38,7 +38,7 @@ internal class BlossomEntityProxyGenerator() : BlossomGenerator<ClassDeclaration
             properties.AppendLine(constant.Body);
 
         var proxy = source.IsEntity
-            ? $" : BlossomEntityProxy<{source.Name}>"
+            ? $" : BlossomEntityProxy<{source.FullName}>"
             : "";
 
         if (source.IsEntity)
@@ -50,10 +50,11 @@ internal class BlossomEntityProxyGenerator() : BlossomGenerator<ClassDeclaration
         }
 
         return $$"""
-namespace Sparc.Blossom.Api;
+using Sparc.Blossom.Api;
+namespace {{source.Namespace}};
 {{source.Nullable}}
         
-public partial class {{source.Name}}{{source.OfName}} {{proxy}}
+public partial class {{source.ProxyName}}{{source.OfName}} {{proxy}}
 {
     {{properties}}
     {{constructors}}
