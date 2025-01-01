@@ -1,6 +1,5 @@
 ﻿using Ardalis.Specification;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using System.ComponentModel;
 using System.Reflection;
