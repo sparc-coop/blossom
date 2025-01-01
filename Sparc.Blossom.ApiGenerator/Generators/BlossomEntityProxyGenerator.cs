@@ -5,12 +5,21 @@ using System.Text;
 namespace Sparc.Blossom.ApiGenerator;
 
 [Generator]
-internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyntax>(Code)
+internal class BlossomEntityProxyGenerator() : BlossomGenerator<ClassDeclarationSyntax>(Code)
 {
     static string Code(BlossomApiInfo source)
     {
         var properties = new StringBuilder();
         var commands = new StringBuilder();
+        var constructors = new StringBuilder();
+
+        if (source.IsEntity)
+        {
+            foreach (var constructor in source.Constructors)
+            {
+                constructors.AppendLine($@"public static async Task<{source.Name}> Create({constructor.Arguments}) => ToProxy(await Repository.AddAsync(new {source.Name}({constructor.Parameters})));");
+            }
+        }
 
         foreach (var property in source.Properties)
         {
@@ -29,15 +38,14 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
             properties.AppendLine(constant.Body);
 
         var proxy = source.IsEntity
-            ? $" : BlossomEntityProxy<{source.Name}, {source.BaseOfName}>"
+            ? $" : BlossomEntityProxy<{source.Name}>"
             : "";
 
         if (source.IsEntity)
         {
             foreach (var method in source.Methods)
             {
-                var parameterPrefix = method.Arguments.Length > 0 ? ", " : "";
-                commands.AppendLine($@"public async Task {method.Name}({method.Arguments}) => await Runner.Execute(Id, ""{method.Name}""{parameterPrefix}{method.Parameters});");
+                commands.AppendLine($@"public async Task {method.Name}({method.Arguments}) => await Repository.ExecuteAsync(GenericId, entity => entity.{method.Name}({method.Parameters});");
             }
         }
 
@@ -48,6 +56,7 @@ namespace Sparc.Blossom.Api;
 public partial class {{source.Name}}{{source.OfName}} {{proxy}}
 {
     {{properties}}
+    {{constructors}}
     {{commands}}
 }
 """;

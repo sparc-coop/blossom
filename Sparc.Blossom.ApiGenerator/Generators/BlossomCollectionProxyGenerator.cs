@@ -6,13 +6,13 @@ using System.Text;
 namespace Sparc.Blossom.ApiGenerator;
 
 [Generator]
-internal class BlossomApiGenerator() : IIncrementalGenerator
+internal class BlossomCollectionProxyGenerator() : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var entities = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: (s, _) => Where(s, "BlossomEntity", "BlossomAggregate"),
+                predicate: (s, _) => Where(s, "BlossomEntity", "BlossomCollection"),
                 transform: static (ctx, _) => new BlossomApiInfo((TypeDeclarationSyntax)ctx.Node)
             ).Where(static m => m is not null)
             .Collect();
@@ -35,7 +35,7 @@ internal class BlossomApiGenerator() : IIncrementalGenerator
         context.AddSource($"BlossomApi.g.cs", Surface(baseTypes));
         foreach (var baseType in baseTypes)
         {
-            var name = baseType.OrderBy(x => x.IsAggregate ? 0 : 1).First().PluralName;
+            var name = baseType.OrderBy(x => x.IsCollection ? 0 : 1).First().PluralName;
             context.AddSource($"{name}.g.cs", Code(baseType));
         }
     }
@@ -47,7 +47,7 @@ internal class BlossomApiGenerator() : IIncrementalGenerator
 
         foreach (var source in sources)
         {
-            var api = source.OrderBy(x => x.IsAggregate ? 0 : 1).First();
+            var api = source.OrderBy(x => x.IsCollection ? 0 : 1).First();
             apis.AppendLine($@"public {api.PluralName} {api.PluralName} {{ get; }} = {api.PluralName.ToLower()};");
             injectors.Add($"{api.PluralName} {api.PluralName.ToLower()}");
         }
@@ -56,7 +56,7 @@ internal class BlossomApiGenerator() : IIncrementalGenerator
 
         return $$"""
 namespace Sparc.Blossom.Api;
-public class BlossomApi({{constructor}}) : BlossomApiProxy
+public class BlossomApi({{constructor}}) : IBlossomApi
 {
     {{apis}}
 }
@@ -65,40 +65,27 @@ public class BlossomApi({{constructor}}) : BlossomApiProxy
 
     static string Code(IGrouping<string?, BlossomApiInfo> sources)
     {
-        var commands = new StringBuilder();
         var constructors = new StringBuilder();
         var queries = new StringBuilder();
-        var api = sources.OrderBy(x => x.IsAggregate ? 0 : 1).First();
-
-        foreach (var comment in api.Comments)
-            commands.AppendLine("// " + comment);
-
-        foreach (var source in sources.Where(x => x.IsEntity))
-        {
-            foreach (var constructor in source.Constructors)
-            {
-                constructors.AppendLine($@"public async Task<{source.Name}> Create({constructor.Arguments}) => await Runner.Create({constructor.Parameters});");
-            }
-        }
+        var api = sources.OrderBy(x => x.IsCollection ? 0 : 1).First();
 
         foreach (var source in sources.Where(x => !x.IsEntity))
-        {
+        {    // public async Task<T?> Get(object id) => await Repository.FindAsync(id);
+
             foreach (var query in source.Methods.Where(x => x.IsQuery))
-            { 
-                var parameterPrefix = query.Arguments.Length > 0 ? ", " : "";
-                    queries.AppendLine($@"public async Task<IEnumerable<{source.BaseOfName}>> {query.Name}({query.Arguments}) => await Runner.ExecuteQuery(""{query.Name}""{parameterPrefix}{query.Parameters});");
+            {
+                queries.AppendLine($@"public async Task<IEnumerable<BlossomEntityProxy<{source.BaseOfName}>>> {query.Name}({query.Arguments}) => await GetAllAsync(new {query.Name}({query.Parameters}));");
             }
         }
 
         return $$"""
 namespace Sparc.Blossom.Api;
 #nullable enable
-public partial class {{api.PluralName}} : BlossomAggregateProxy<{{api.EntityName}}>
+public partial class {{api.PluralName}} : BlossomCollectionProxy<{{api.EntityName}}>
 {
-    public {{api.PluralName}}(IRunner<{{api.EntityName}}> runner) : base(runner) { }
+    public {{api.PluralName}}(IRepository<{{api.EntityName}}> repository) : base(repository) { }
 
-    {{constructors}}
-    {{commands}}
+    public async Task<BlossomEntityProxy<{{api.EntityName}}>?> Get(object id) => await Repository.FindAsync(id);
     {{queries}}
 }
 """;

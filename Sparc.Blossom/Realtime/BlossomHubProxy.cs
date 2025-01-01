@@ -190,7 +190,7 @@ public class BlossomHubProxy(NavigationManager nav) : IAsyncDisposable
         if (!_broadcastingEntities.Contains(entity.GenericId))
             return;
 
-        _ = entity.GenericRunner.Patch(entity.GenericId, patch);
+        // _ = entity.GenericRunner.Patch(entity.GenericId, patch);
     }
 
     public async ValueTask DisposeAsync()

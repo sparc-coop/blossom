@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Sparc.Blossom.ApiGenerator;
 
 [Generator]
-internal class BlossomApiRecordGenerator() : BlossomGenerator<RecordDeclarationSyntax>(Code)
+internal class BlossomRecordGenerator() : BlossomGenerator<RecordDeclarationSyntax>(Code)
 {
     static string Code(BlossomApiInfo source)
     {

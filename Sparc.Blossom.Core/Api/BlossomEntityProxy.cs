@@ -6,21 +6,17 @@ namespace Sparc.Blossom;
 public interface IBlossomEntityProxy : INotifyPropertyChanged
 {
     object GenericId { get; }
-    IRunner GenericRunner { get; }
 }
 
 public interface IBlossomEntityProxy<T>
 {
-    IRunner<T> Runner { get; set; }
 }
 
-public class BlossomEntityProxy<T, TId> : IBlossomEntityProxy<T>, IBlossomEntityProxy
+public class BlossomEntityProxy<T>(T entity, IRepository<T> repository) 
+    : BlossomProxy<T>(repository), IBlossomEntityProxy<T>, IBlossomEntityProxy
+    where T : BlossomEntity
 {
-    public TId Id { get; set; } = default!;
-    public object GenericId => Id!;
-
-    public IRunner<T> Runner { get; set; } = null!;
-    public IRunner GenericRunner => Runner;
+    public object GenericId { get; } = entity.GenericId!;
 
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged<TField>(string propertyName, TField currentValue, TField newValue)
@@ -37,6 +33,34 @@ public class BlossomEntityProxy<T, TId> : IBlossomEntityProxy<T>, IBlossomEntity
         currentValue = newValue;
         OnPropertyChanged(propertyName, currentValue, newValue);
         return true;
+    }
+
+    public async Task<BlossomEntityProxy<T>> Create(object[] parameters)
+    {
+        var entity = Activator.CreateInstance(typeof(T), parameters) as T;
+        if (entity == null)
+            throw new Exception("Failed to create entity.");
+
+        return new BlossomEntityProxy<T>(entity, Repository);
+    }
+
+    public async Task Patch(BlossomPatch changes)
+    {
+        var entity = await Repository.FindAsync(GenericId);
+        if (entity == null)
+            return;
+
+        changes.ApplyTo(entity);
+        //await Events.BroadcastAsync(new BlossomEntityPatched<T>(entity, changes));
+        await Repository.UpdateAsync(entity);
+    }
+
+    public async Task Delete(object id)
+    {
+        var entity = await Repository.FindAsync(id);
+        if (entity == null)
+            return;
+        await Repository.DeleteAsync(entity);
     }
 
     public override int GetHashCode() => GenericId.GetHashCode();
