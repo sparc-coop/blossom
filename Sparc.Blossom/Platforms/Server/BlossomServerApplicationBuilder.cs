@@ -40,6 +40,7 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
         Services.AddServerSideBlazor();
         Services.AddHttpContextAccessor();
         Services.AddOutputCache();
+        Services.AddOpenApi();
 
         AddBlossomRealtime(callingAssembly);
 

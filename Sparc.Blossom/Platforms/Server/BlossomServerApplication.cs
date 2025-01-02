@@ -32,7 +32,10 @@ public class BlossomServerApplication : IBlossomApplication
         UseBlossomAuthentication();
 
         if (IsDevelopment)
+        {
+            Host.MapOpenApi();
             Host.MapScalarApiReference();
+        }
 
         if (Builder.Services.Any(x => x.ServiceType.Name.Contains("Kori")))
             UseAllCultures();
