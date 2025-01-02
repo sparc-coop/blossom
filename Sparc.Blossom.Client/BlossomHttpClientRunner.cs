@@ -1,9 +1,6 @@
-﻿using System.Net.Http.Json;
-
-namespace Sparc.Blossom;
+﻿namespace Sparc.Blossom;
 
 public class BlossomHttpClientRunner<T>(IBlossomHttpClient<T> client) : IRunner<T>
-    where T : IBlossomEntityProxy
 {
     private IBlossomHttpClient<T> Client { get; } = client;
 

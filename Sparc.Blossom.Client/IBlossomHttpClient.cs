@@ -2,7 +2,7 @@
 
 namespace Sparc.Blossom;
 
-public interface IBlossomHttpClient<T> where T : IBlossomEntityProxy
+public interface IBlossomHttpClient<T>
 {
     [Get("/{id}")]
     Task<T> Get(string id);
