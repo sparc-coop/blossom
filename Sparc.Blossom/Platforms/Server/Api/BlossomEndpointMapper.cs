@@ -24,7 +24,7 @@ public class BlossomEndpointMapper(Assembly assembly)
         group.MapGet("_metadata", async (IRunner<T> runner) => await runner.Metadata());
         group.MapPost("{name}", async (IRunner<T> runner, string name, object[] parameters) => await runner.ExecuteQuery(name, parameters));
         group.MapPatch("{id}", async (IRunner<T> runner, string id, BlossomPatch patch) => await runner.Patch(id, patch));
-        //group.MapGet("{name}_flex", async (IRunner<T> runner, string name, BlossomQueryOptions options, object[] parameters) => await runner.ExecuteQuery(name, options, parameters));
+        //group.MapGet("_query", async (IRunner<T> runner, string name, BlossomQueryOptions options, object[] parameters) => await runner.ExecuteQuery(name, options, parameters));
         group.MapPut("{id}/{name}", async (IRunner<T> runner, string id, string name, object[] parameters) => await runner.Execute(id, name, parameters));
         group.MapDelete("{id}", async (IRunner<T> runner, string id) => await runner.Delete(id));
     }
