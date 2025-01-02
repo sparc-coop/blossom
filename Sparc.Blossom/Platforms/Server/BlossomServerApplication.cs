@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-using Scalar.AspNetCore;
-using Sparc.Blossom.Authentication;
+﻿using Scalar.AspNetCore;
 using System.Globalization;
 using System.Reflection;
 
