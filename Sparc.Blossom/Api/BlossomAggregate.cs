@@ -79,15 +79,19 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         await Repository.UpdateAsync(entity);
     }
 
-    public async Task<T> Execute(object id, string name, params object?[] parameters)
+    public async Task<T> Execute(object id, Action<T> action)
     {
         var entity = await Repository.FindAsync(id)
             ?? throw new Exception($"Entity {id} not found.");
-
-        var action = new Action<T>(x => typeof(T).GetMethod(name)?.Invoke(x, parameters));
-        // await Events.BroadcastAsync(name, entity);
+        // await Events.BroadcastAsync(new BlossomEntityUpdated<T>(entity));
         await Repository.ExecuteAsync(entity, action);
         return entity;
+    }
+
+    public async Task<T> Execute(object id, string name, params object?[] parameters)
+    {
+        var action = new Action<T>(x => typeof(T).GetMethod(name)?.Invoke(x, parameters));
+        return await Execute(id, action);
     }
 
     public async Task Delete(object id)

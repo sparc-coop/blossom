@@ -13,17 +13,17 @@ public interface IBlossomHttpClient<T>
     [Post("")]
     Task<T> Create([Body] object[] parameters);
 
-    [Post("{name}")]
-    Task<IEnumerable<T>> ExecuteQuery(string name, [Body] object[] parameters);
+    [Post("/_queries/{name}")]
+    Task<IEnumerable<T>> ExecuteQuery(string name, [Body] params object[] parameters);
 
-    [Post("/_query")]
+    [Post("/_queries")]
     Task<BlossomQueryResult<T>> ExecuteQuery([Body] BlossomQueryOptions options);
 
     [Patch("{id}")]
     Task Patch(string id, BlossomPatch patch);
 
     [Put("{id}/{name}")]
-    Task<T> Execute(string id, string name, [Body] object[] parameters);
+    Task<T> Execute(string id, string name, [Body] params object[] parameters);
 
     [Delete("{id}")]
     Task Delete(string id);
