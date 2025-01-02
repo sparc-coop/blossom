@@ -62,7 +62,10 @@ public class BlossomServerApplication : IBlossomApplication
 
         MapBlossomContexts(server!);
 
-        Host.MapHub<BlossomHub>("/_realtime");
+        Host.MapHub<BlossomHub>("/_realtime", options =>
+        {
+            options.AllowStatefulReconnects = true;
+        });
 
         await RunAsync();
     }

@@ -28,6 +28,7 @@ public class BlossomHubProxy(NavigationManager nav) : IAsyncDisposable
 
         Connection ??= new HubConnectionBuilder()
             .WithUrl($"{nav.BaseUri}_realtime")
+            .WithStatefulReconnect()
             //.AddMessagePackProtocol()
             .WithAutomaticReconnect()
             .Build();
