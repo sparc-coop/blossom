@@ -23,7 +23,7 @@ public interface IBlossomHttpClient<T>
     Task Patch(string id, BlossomPatch patch);
 
     [Put("{id}/{name}")]
-    Task Execute(string id, string name, [Body] object[] parameters);
+    Task<T> Execute(string id, string name, [Body] object[] parameters);
 
     [Delete("{id}")]
     Task Delete(string id);

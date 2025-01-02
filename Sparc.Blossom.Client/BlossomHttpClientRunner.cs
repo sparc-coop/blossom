@@ -22,7 +22,7 @@ public class BlossomHttpClientRunner<T>(IBlossomHttpClient<T> client) : IRunner<
     public async Task Patch(object id, BlossomPatch changes)
         => await Client.Patch(id.ToString(), changes);
 
-    public async Task Execute(object id, string name, params object?[] parameters)
+    public async Task<T> Execute(object id, string name, params object?[] parameters)
         => await Client.Execute(id.ToString(), name, parameters);
 
     public async Task Delete(object id) 
