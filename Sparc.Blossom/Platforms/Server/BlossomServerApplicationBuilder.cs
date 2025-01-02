@@ -15,6 +15,7 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
 {
     public WebApplicationBuilder Builder { get; } = WebApplication.CreateBuilder(args);
     public IServiceCollection Services => Builder.Services;
+    public IConfiguration Configuration => Builder.Configuration;
     bool _isAuthenticationAdded;
 
     public IBlossomApplication Build()

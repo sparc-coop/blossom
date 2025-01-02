@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Scalar.AspNetCore;
 using Sparc.Blossom.Authentication;
 using System.Globalization;
 using System.Reflection;
@@ -10,6 +11,7 @@ public class BlossomServerApplication : IBlossomApplication
     public WebApplicationBuilder Builder { get; }
     public WebApplication Host { get; set; }
     public IServiceProvider Services => Host.Services;
+    public bool IsDevelopment => Builder.Environment.IsDevelopment();
 
     public BlossomServerApplication(WebApplicationBuilder builder)
     {
@@ -30,6 +32,9 @@ public class BlossomServerApplication : IBlossomApplication
         Host.UseAntiforgery();
 
         UseBlossomAuthentication();
+
+        if (IsDevelopment)
+            Host.MapScalarApiReference();
 
         if (Builder.Services.Any(x => x.ServiceType.Name.Contains("Kori")))
             UseAllCultures();
