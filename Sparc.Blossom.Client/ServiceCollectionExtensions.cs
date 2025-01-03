@@ -33,6 +33,11 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    public static IServiceCollection AddBlossomApi<T, TSpecificInterface>(this IServiceCollection services, Uri baseUri, string path)
+    where TSpecificInterface : IBlossomHttpClient<T>
+        => services.AddBlossomApi<T, TSpecificInterface>(new Uri(baseUri, path));
+
+
     public static Lazy<Task<IJSObjectReference>> Import(this IJSRuntime js, string module)
     {
         return new(() => js.InvokeAsync<IJSObjectReference>("import", module).AsTask());
