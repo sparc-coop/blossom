@@ -7,6 +7,14 @@
 
 Welcome to your new app.
 
+<h2>Random Strings:</h2>
+<ul>
+    @foreach (var item in randomStrings)
+    {
+        <li>@item</li>
+    })
+</ul>
+
 @if (openItems != null)
 {
     @foreach (var todo in openItems)
@@ -37,6 +45,7 @@ Welcome to your new app.
 {
     IEnumerable<TodoItem>? openItems;
     IEnumerable<TodoItem>? closedItems;
+    List<string> randomStrings = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -47,6 +56,7 @@ Welcome to your new app.
     {
         openItems = await Api.TodoItems.Open();
         closedItems = await Api.TodoItems.Closed();
+        randomStrings = (await Api.TodoItems.RandomStrings(10)).ToList();
     }
 
     async Task AddTodoItem()

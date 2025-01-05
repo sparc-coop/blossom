@@ -51,6 +51,12 @@ public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomH
         return Adapt(result);
     }
 
+    public async Task<TResponse?> ExecuteQuery<TResponse>(string name, params object?[] parameters)
+    {
+        var result = await Aggregate.ExecuteQuery<TResponse?>(name, parameters);
+        return result;
+    }
+
     public async Task Delete(object id) => await Aggregate.Delete(id);
 
     public Task On(object id, string name, params object?[] parameters)

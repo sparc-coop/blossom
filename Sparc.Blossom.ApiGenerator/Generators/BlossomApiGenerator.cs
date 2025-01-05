@@ -88,6 +88,12 @@ public class BlossomApi({{constructor}}) : BlossomApiProxy
                 var parameterPrefix = query.Arguments.Length > 0 ? ", " : "";
                     queries.AppendLine($@"public async Task<IEnumerable<{source.BaseOfName}>> {query.Name}({query.Arguments}) => await Runner.ExecuteQuery(""{query.Name}""{parameterPrefix}{query.Parameters});");
             }
+
+            foreach (var query in source.Methods.Where(x => !x.IsQuery))
+            {
+                var parameterPrefix = query.Arguments.Length > 0 ? ", " : "";
+                queries.AppendLine($@"public async {query.ReturnType} {query.Name}({query.Arguments}) => await Runner.ExecuteQuery<{query.ReturnTypeWithoutTask}>(""{query.Name}""{parameterPrefix}{query.Parameters});");
+            }
         }
 
         return $$"""

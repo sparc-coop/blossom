@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using System.Linq.Dynamic.Core;
 using Mapster;
+using System.Reflection;
 
 namespace Sparc.Blossom;
 
@@ -49,6 +50,15 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         return await spec.Execute();
     }
 
+    public async Task<TResponse?> ExecuteQuery<TResponse>(string name, params object?[] parameters)
+    {
+        var func = GetType().GetMethod(name)
+            ?? throw new Exception($"Method {name} returning {typeof(TResponse).Name} not found.");
+
+        var task = (Task<TResponse?>)func.Invoke(this, parameters);
+        return await task;
+    }
+
     public Task<BlossomAggregateMetadata> Metadata()
     {
         var metadata = new BlossomAggregateMetadata(DtoType!);
@@ -93,7 +103,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var action = new Action<T>(x => typeof(T).GetMethod(name)?.Invoke(x, parameters));
         return await Execute(id, action);
     }
-
+   
     public async Task Delete(object id)
     {
         var entity = await Repository.FindAsync(id)
@@ -134,12 +144,43 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var dtoType = AppDomain.CurrentDomain.FindType(dtoTypeName);
         return dtoType == null ? null : entity!.Adapt(typeof(TItem), dtoType);
     }
+
+    private Func<Task<TResponse?>>? FindMatchingMethodWithDependencyInjection<TResponse>(string name, object?[] parameters)
+    {
+        using var scope = options.Services.CreateScope();
+        var allServices = scope.ServiceProvider;
+
+        var methods = GetType().GetMethods().Where(m => m.Name == name);
+        foreach (var method in methods.OrderByDescending(m => m.GetParameters().Length))
+        {
+            var methodParameters = method.GetParameters();
+            var nonServiceParameters = methodParameters.Where(p => !allServices.GetServices(p.ParameterType).Any()).ToList();
+
+            if (nonServiceParameters.Count != parameters.Length)
+                continue;
+
+            var boundParameters = new List<object?>();
+            var j = 0;
+            for (var i = 0; i < methodParameters.Length; i++)
+            {
+                if (allServices.GetServices(methodParameters[i].ParameterType).Any())
+                    boundParameters.Add(allServices.GetRequiredService(methodParameters[i].ParameterType));
+                else
+                    boundParameters.Add(parameters[j++]);
+            }
+
+            return () => (Task<TResponse?>)method.Invoke(this, boundParameters.ToArray());
+        }
+
+        return null;
+    }
 }
 
-public class BlossomAggregateOptions<T>(IRepository<T> repository, IRealtimeRepository<T> events, ClaimsPrincipal principal)
+public class BlossomAggregateOptions<T>(IRepository<T> repository, IRealtimeRepository<T> events, ClaimsPrincipal principal, IServiceScopeFactory services)
     where T : BlossomEntity
 {
     public IRepository<T> Repository { get; } = repository;
     public IRealtimeRepository<T> Events { get; } = events;
+    public IServiceScopeFactory Services { get; } = services;
     public ClaimsPrincipal User { get; } = principal;
 }
