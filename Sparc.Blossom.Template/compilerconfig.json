@@ -1,0 +1,14 @@
+﻿[
+  {
+    "outputFile": "_Shared/MainLayout.razor.css",
+    "inputFile": "_Shared/MainLayout.razor.scss"
+  },
+  {
+    "outputFile": "_Shared/NavMenu.razor.css",
+    "inputFile": "_Shared/NavMenu.razor.scss"
+  },
+  {
+    "outputFile": "wwwroot/app.css",
+    "inputFile": "Html.scss"
+  }
+]
