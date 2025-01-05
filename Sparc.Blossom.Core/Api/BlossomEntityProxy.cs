@@ -25,9 +25,9 @@ public class BlossomEntityProxy<T, TId> : IBlossomEntityProxy<T>, IBlossomEntity
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged<TField>(string propertyName, TField currentValue, TField newValue)
     {
-        var patch = BlossomPatch.From(propertyName, currentValue, newValue);
-        if (patch != null)
-            PropertyChanged?.Invoke(this, new BlossomPropertyChangedEventArgs(propertyName, patch));
+        //var patch = new BlossomPatch().From(propertyName, currentValue, newValue);
+        //if (patch != null)
+        //    PropertyChanged?.Invoke(this, new BlossomPropertyChangedEventArgs(propertyName, patch));
     }
 
     protected bool _set<TField>(ref TField currentValue, TField newValue, [CallerMemberName] string propertyName = "")
@@ -37,6 +37,12 @@ public class BlossomEntityProxy<T, TId> : IBlossomEntityProxy<T>, IBlossomEntity
         currentValue = newValue;
         OnPropertyChanged(propertyName, currentValue, newValue);
         return true;
+    }
+
+    protected void _patch(object target)
+    {
+        var patch = new BlossomPatch(this, target);
+        patch.ApplyTo(this);
     }
 
     public override int GetHashCode() => GenericId.GetHashCode();

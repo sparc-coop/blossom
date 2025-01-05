@@ -18,7 +18,7 @@ public record BlossomPatch
         JsonPatchDocument = new();
     }
     
-    public BlossomPatch(BlossomEntity previousEntity, BlossomEntity currentEntity) : this()
+    public BlossomPatch(object previousEntity, object currentEntity) : this()
     {
         var properties = previousEntity.GetType().GetProperties();
         foreach (var property in properties)
@@ -39,31 +39,29 @@ public record BlossomPatch
         return this;
     }
 
-    public static BlossomPatch? From<TField>(string propertyName, TField? previousValue, TField? value)
+    public BlossomPatch? From<TField>(string propertyName, TField? previousValue, TField? value)
     {
-        var patch = new BlossomPatch();
-
         var path = $"/{propertyName}";
 
         if (previousValue == null)
         {
             if (value == null)
-                return null;
-            patch.JsonPatchDocument.Add(path, value);
+                return this;
+            JsonPatchDocument.Add(path, value);
         }
         else if (value == null)
         {
-            patch.JsonPatchDocument.Remove(path);
+            JsonPatchDocument.Remove(path);
         }
         else if (EqualityComparer<TField>.Default.Equals(previousValue, value))
         {
-            return null;
+            return this;
         }
         else
         {
-            patch.JsonPatchDocument.Replace(path, value);
+            JsonPatchDocument.Replace(path, value);
         }
 
-        return patch;
+        return this;
     }
 }
