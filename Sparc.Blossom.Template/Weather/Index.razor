@@ -6,58 +6,38 @@
 
 <p>This component demonstrates showing data.</p>
 
-@if (forecasts == null)
+@if (Today == null)
 {
     <p><em>Loading...</em></p>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th aria-label="Temperature in Celsius">Temp. (C)</th>
-                <th aria-label="Temperature in Farenheit">Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <h2>Today's Forecast</h2>
+    <button @onclick="Today.UpdateToLatest">Update to Latest Data</button>
+    <h3>Current Temperature: @Today.Temperature</h3>
+    <ForecastTable Forecasts="new[] { Today }" />
+
+    <h2>Upcoming Forecasts</h2>
+    <ForecastTable Forecasts="upcoming" />
+
+    <h2>Historical Forecasts</h2>
+    <ForecastTable Forecasts="historical" />
 }
 
+
 @code {
-    private WeatherForecast[]? forecasts;
+    Forecast? Today;
+    IEnumerable<Forecast> upcoming;
+    IEnumerable<Forecast> historical;
 
     protected override async Task OnInitializedAsync()
     {
         // Simulate asynchronous loading to demonstrate a loading indicator
-        await Task.Delay(500);
+        await Task.Delay(200);
 
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
-    }
-
-    private class WeatherForecast
-    {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+        // Load three different Blossom queries
+        Today = await Api.Forecasts.Get(DateTime.Today);
+        upcoming = await Api.Forecasts.Upcoming();
+        historical = await Api.Forecasts.Historical();
     }
 }
