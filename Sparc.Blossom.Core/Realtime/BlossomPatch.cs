@@ -17,7 +17,7 @@ public record BlossomPatch
     {
         JsonPatchDocument = new();
     }
-    
+
     public BlossomPatch(object previousEntity, object currentEntity) : this()
     {
         var properties = previousEntity.GetType().GetProperties();
@@ -27,15 +27,23 @@ public record BlossomPatch
 
     public void ApplyTo<T>(T target)
     {
-        if (target != null)
+        if (target == null)
+            return;
+
+        try
+        {
             JsonPatchDocument.ApplyTo(target);
+        }
+        catch
+        {
+        }
     }
 
     public BlossomPatch Combine(BlossomPatch patch)
     {
         foreach (var operation in patch.JsonPatchDocument.Operations)
             JsonPatchDocument.Operations.Add(operation);
-        
+
         return this;
     }
 
