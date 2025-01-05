@@ -3,7 +3,11 @@
 public class Counter : BlossomEntity<string>
 {
     public int Value { get; set; } = 0;
+    
+    // The client has no access to this
     int TimesCalled = 0;
+    // or this
+    internal string TimesCalledAsString => TimesCalled.ToString();
 
     public Counter() : base(Guid.NewGuid().ToString())
     {
