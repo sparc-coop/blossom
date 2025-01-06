@@ -6,10 +6,10 @@
 
 <p role="status">Current count: @MyCounter.Value</p>
 
-<button class="btn btn-primary" @onclick="MyCounter.CountUp">+1 me</button>
-<button class="btn btn-primary" @onclick="MyCounter.CountDown">-1 me</button>
-<button class="btn btn-primary" @onclick="MultiplyBy2">*2 me</button>
-<button class="btn btn-primary" @onclick="MultiplyBy5">*5 me</button>
+<button @onclick="MyCounter.CountUp">+1 me</button>
+<button @onclick="MyCounter.CountDown">-1 me</button>
+<button @onclick="MultiplyBy2">*2 me</button>
+<button @onclick="MultiplyBy5">*5 me</button>
 
 @code {
     Counter MyCounter;

@@ -1,18 +1,7 @@
-﻿.page {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-main {
+﻿main {
   flex: 1;
 }
-
-.sidebar {
-  background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
-}
-
-.top-row {
+main > header {
   background-color: #f7f7f7;
   border-bottom: 1px solid #d6d5d5;
   justify-content: flex-end;
@@ -20,51 +9,44 @@ main {
   display: flex;
   align-items: center;
 }
-
-.top-row ::deep a, .top-row ::deep .btn-link {
+main > header ::deep a {
   white-space: nowrap;
   margin-left: 1.5rem;
   text-decoration: none;
 }
-
-.top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+main > header ::deep a:hover {
   text-decoration: underline;
 }
-
-.top-row ::deep a:first-child {
+main > header ::deep a:first-child {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+aside {
+  background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+}
+
 @media (max-width: 640.98px) {
-  .top-row {
+  main > header {
     justify-content: space-between;
   }
-  .top-row ::deep a, .top-row ::deep .btn-link {
+  main > header ::deep a {
     margin-left: 0;
   }
 }
 @media (min-width: 641px) {
-  .page {
-    flex-direction: row;
-  }
-  .sidebar {
+  aside {
     width: 250px;
     height: 100vh;
     position: sticky;
     top: 0;
   }
-  .top-row {
+  main > header {
     position: sticky;
     top: 0;
     z-index: 1;
   }
-  .top-row.auth ::deep a:first-child {
-    flex: 1;
-    text-align: right;
-    width: 0;
-  }
-  .top-row, article {
+  main > header, article {
     padding-left: 2rem !important;
     padding-right: 1.5rem !important;
   }
@@ -82,7 +64,6 @@ main {
   width: 100%;
   z-index: 1000;
 }
-
 #blazor-error-ui .dismiss {
   cursor: pointer;
   position: absolute;

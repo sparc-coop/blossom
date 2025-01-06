@@ -1,30 +1,30 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Sparc.Blossom.Template</a>
-    </div>
-</div>
+﻿<figure>
+    <figcaption>
+        <a href="">Sparc.Blossom.Template</a>
+    </figcaption>
+</figure>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<input type="checkbox" title="Navigation menu" />
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
+<nav onclick="document.querySelector('.navbar-toggler').click()">
+    <ul>
+        <li>
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
-        </div>
+        </li>
 
-        <div class="nav-item px-3">
+        <li>
             <NavLink class="nav-link" href="counter">
                 <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
             </NavLink>
-        </div>
+        </li>
 
-        <div class="nav-item px-3">
+        <li>
             <NavLink class="nav-link" href="weather">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
             </NavLink>
-        </div>
-    </nav>
-</div>
+        </li>
+    </ul>
+</nav>
 
