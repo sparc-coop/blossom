@@ -7,8 +7,9 @@ namespace Sparc.Blossom;
 public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
     : IRunner<T> where T : BlossomEntity
 {
-    public IRepository<T> Repository => options.Repository;
-    public IRealtimeRepository<T> Events => options.Events;
+    protected IRepository<T> Repository => options.Repository;
+    protected IRealtimeRepository<T> Events => options.Events;
+    protected ClaimsPrincipal User => options.User;
 
     public virtual async Task<T?> Get(object id) => await Repository.FindAsync(id);
 
