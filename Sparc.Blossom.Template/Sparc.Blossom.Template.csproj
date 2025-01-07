@@ -9,17 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Remove="compilerconfig.json" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\Sparc.Blossom.ApiGenerator\Sparc.Blossom.ApiGenerator.csproj" OutputItemType="Analyzer" />
-		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
-		<ProjectReference Include="..\Sparc.Blossom\Sparc.Blossom.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="compilerconfig.json" />
+	  <PackageReference Include="Sparc.Blossom" Version="9.0.0" />
 	</ItemGroup>
 
 </Project>
