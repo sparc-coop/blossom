@@ -16,6 +16,9 @@ public class BlossomHttpClientRunner<T>(IBlossomHttpClient<T> client) : IRunner<
     public async Task<BlossomQueryResult<T>> ExecuteQuery(BlossomQueryOptions options)
         => await Client.ExecuteQuery(options);
 
+    public async Task<TResponse?> ExecuteQuery<TResponse>(string name, params object?[] parameters)
+        => await Client.ExecuteQuery<TResponse>(name, parameters);
+
     public async Task<BlossomAggregateMetadata> Metadata() 
         => await Client.Metadata();
 
