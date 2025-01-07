@@ -5,7 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
-		<Version>9.0.0</Version>
+		<Version>10.0.0-preview.1</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		
 		<Authors>Sparc Cooperative</Authors>
