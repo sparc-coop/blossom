@@ -1,69 +1,75 @@
-﻿using System.Collections;
-using System.Reflection;
-using System.Text.Json;
+﻿using System.ComponentModel;
+using SystemTextJsonPatch;
 
-namespace Sparc.Blossom.Realtime;
+namespace Sparc.Blossom;
 
-public class BlossomPatch(string op, string path, object? value)
+public class BlossomPropertyChangedEventArgs(string propertyName, BlossomPatch patch) : PropertyChangedEventArgs(propertyName)
 {
-    public string Op { get; private set; } = op;
-    public string Path { get; private set; } = path;
-    public object? Value { get; private set; } = value;
+    public BlossomPatch Patch { get; private set; } = patch;
+}
 
-    public static List<BlossomPatch> Create(object original, object updated)
+public record BlossomPatch
+{
+    public JsonPatchDocument JsonPatchDocument { get; set; }
+    public bool IsLocked { get; internal set; }
+
+    public BlossomPatch()
     {
-        var patches = new List<BlossomPatch>();
-        DeepCompare(original, updated, patches);
-        return patches;
+        JsonPatchDocument = new();
     }
 
-    static void DeepCompare(object original, object updated, List<BlossomPatch> patches, string currentPath = "/")
+    public BlossomPatch(object previousEntity, object currentEntity) : this()
     {
-        if (!original.GetType().IsClass && !original.Equals(updated))
+        var properties = previousEntity.GetType().GetProperties();
+        foreach (var property in properties)
+            From(property.Name, property.GetValue(previousEntity), property.GetValue(currentEntity));
+    }
+
+    public void ApplyTo<T>(T target)
+    {
+        if (target == null)
+            return;
+
+        try
         {
-            var op = original == null ? "add" : updated == null ? "remove" : "replace";
-            patches.Add(new BlossomPatch(op, currentPath, updated));
+            JsonPatchDocument.ApplyTo(target);
         }
-        else if (original is IEnumerable enumerable)
+        catch
         {
-            var originalList = JsonSerializer.Serialize(original);
-            var updatedList = JsonSerializer.Serialize(updated);
-            if (originalList != updatedList)
-            {
-                patches.Add(new BlossomPatch("replace", currentPath, updated));
-            }
+        }
+    }
+
+    public BlossomPatch Combine(BlossomPatch patch)
+    {
+        foreach (var operation in patch.JsonPatchDocument.Operations)
+            JsonPatchDocument.Operations.Add(operation);
+
+        return this;
+    }
+
+    public BlossomPatch? From<TField>(string propertyName, TField? previousValue, TField? value)
+    {
+        var path = $"/{propertyName}";
+
+        if (previousValue == null)
+        {
+            if (value == null)
+                return this;
+            JsonPatchDocument.Add(path, value);
+        }
+        else if (value == null)
+        {
+            JsonPatchDocument.Remove(path);
+        }
+        else if (EqualityComparer<TField>.Default.Equals(previousValue, value))
+        {
+            return this;
         }
         else
         {
-            var propertiesToCompare = original.GetType().GetRuntimeProperties()
-                .Where(x => x.CanRead && x.CanWrite && (x.SetMethod?.IsPublic == true || x.SetMethod?.IsAssembly == true));
-
-            foreach (var property in propertiesToCompare)
-            {
-                var originalValue = property.GetValue(original);
-                var updatedValue = property.GetValue(updated);
-                var path = currentPath + "/" + property.Name;
-                DeepCompare(originalValue, updatedValue, patches, path);
-            }
+            JsonPatchDocument.Replace(path, value);
         }
-    }
 
-    public T ApplyTo<T>(T original) where T : class
-    {
-        var path = Path.Split('/');
-        object current = original;
-        for (var i = 1; i < path.Length; i++)
-        {
-            var property = current.GetType().GetProperty(path[i]);
-            if (i == path.Length - 1)
-            {
-                property.SetValue(current, Value);
-            }
-            else
-            {
-                current = property.GetValue(current);
-            }
-        }
-        return original;
+        return this;
     }
 }

@@ -1,0 +1,33 @@
+﻿<table class="table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Description</th>
+            <th>Humidity</th>
+            <th>Wind Speed</th>
+            <th>Wind Direction</th>
+            <th>Pressure</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var forecast in Forecasts)
+        {
+            <tr>
+                <td>@forecast.Date.ToShortDateString()</td>
+                <td>@forecast.High</td>
+                <td>@forecast.Low</td>
+                <td>@forecast.Description</td>
+                <td>@(forecast.Humidity)%</td>
+                <td>@forecast.WindSpeed kts</td>
+                <td>@(forecast.WindDirection)°</td>
+                <td>@forecast.Pressure mb</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter] public IEnumerable<Forecast> Forecasts { get; set; }
+}

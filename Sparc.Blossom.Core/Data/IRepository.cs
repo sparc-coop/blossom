@@ -1,6 +1,6 @@
 using Ardalis.Specification;
 
-namespace Sparc.Blossom.Data;
+namespace Sparc.Blossom;
 
 public interface IRepository<T>
 {

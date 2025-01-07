@@ -14,7 +14,7 @@ public interface IBlossomAuthenticator
     Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId);
     Task<ClaimsPrincipal> LogoutAsync(ClaimsPrincipal principal);
 
-    IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal principal, string? emailOrToken = null);
-    IAsyncEnumerable<LoginStates> Logout(ClaimsPrincipal principal);
+    IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal? principal, string? emailOrToken = null);
+    IAsyncEnumerable<LoginStates> Logout(ClaimsPrincipal? principal);
 
 }

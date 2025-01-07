@@ -1,7 +1,4 @@
-﻿
-using Sparc.Blossom.Data;
-
-namespace Sparc.Blossom.Realtime;
+﻿namespace Sparc.Blossom;
 
 public interface IRealtimeRepository<T> where T : BlossomEntity
 {

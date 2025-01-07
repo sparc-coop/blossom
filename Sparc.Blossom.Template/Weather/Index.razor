@@ -1,0 +1,43 @@
+﻿@page "/weather"
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
+
+<p>This component demonstrates showing data.</p>
+
+@if (Today == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h2>Today's Forecast</h2>
+    <button @onclick="Today.UpdateToLatest">Update to Latest Data</button>
+    <h3>Current Temperature: @Today.Temperature</h3>
+    <ForecastTable Forecasts="new[] { Today }" />
+
+    <h2>Upcoming Forecasts</h2>
+    <ForecastTable Forecasts="upcoming" />
+
+    <h2>Historical Forecasts</h2>
+    <ForecastTable Forecasts="historical" />
+}
+
+
+@code {
+    Forecast? Today;
+    IEnumerable<Forecast> upcoming;
+    IEnumerable<Forecast> historical;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulate asynchronous loading to demonstrate a loading indicator
+        await Task.Delay(200);
+
+        // Load three different Blossom queries
+        Today = await Api.Forecasts.Get(DateTime.Today);
+        upcoming = await Api.Forecasts.Upcoming();
+        historical = await Api.Forecasts.Historical();
+    }
+}
