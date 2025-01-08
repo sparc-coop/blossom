@@ -7,7 +7,7 @@ public interface IBlossomHttpClient<T>
     [Get("/{id}")]
     Task<T> Get(string id);
 
-    [Get("_metadata")]
+    [Get("/_metadata")]
     Task<BlossomAggregateMetadata> Metadata();
 
     [Post("")]
@@ -22,18 +22,18 @@ public interface IBlossomHttpClient<T>
     [Post("/_queries/{name}")]
     Task<TResponse?> ExecuteQuery<TResponse>(string name, object?[] parameters);
     
-    [Patch("{id}")]
+    [Patch("/{id}")]
     Task Patch(string id, BlossomPatch patch);
 
-    [Put("{id}/{name}")]
+    [Put("/{id}/{name}")]
     Task<T> Execute(string id, string name, [Body] params object[] parameters);
 
-    [Delete("{id}")]
+    [Delete("/{id}")]
     Task Delete(string id);
 
-    [Post("_undo")]
+    [Post("/_undo")]
     Task<T> Undo(string id, long? revision);
 
-    [Post("_redo")]
+    [Post("/_redo")]
     Task<T> Redo(string id, long? revision);
 }
