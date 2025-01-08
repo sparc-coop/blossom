@@ -2,12 +2,13 @@
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator 
+public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator<T> 
     where T : BlossomUser, new()
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
 
-    public BlossomUser? User { get; set; }
+    public T? User { get; set; }
+    public BlossomUser? Principal { get; set; }
     public IRepository<T> Users { get; } = users;
     public string? Message { get; set; }
 
@@ -54,18 +55,22 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
-    private async Task<BlossomUser> GetUserAsync(ClaimsPrincipal principal)
+    private async Task<T> GetUserAsync(ClaimsPrincipal principal)
     {
+        T? user = null;
         if (principal.Identity?.IsAuthenticated == true)
         {
-            User = await Users.FindAsync(principal.Id());
+            user = await Users.FindAsync(principal.Id());
         }
 
-        if (User == null)
+        if (user == null)
         {
-            User = BlossomUser.FromPrincipal(principal);
-            await Users.AddAsync((T)User);
+            user = BlossomUser.FromPrincipal<T>(principal);
+            await Users.AddAsync(user);
         }
+
+        User = user;
+        Principal = user;
 
         return User!;
     }
