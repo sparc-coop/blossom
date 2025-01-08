@@ -26,4 +26,7 @@ public static class AssemblyExtensions
 
         return null;
     }
+
+    public static IEnumerable<MethodInfo> GetMyMethods(this Type type)
+        => type.GetMethods().Where(x => x.DeclaringType == type && !x.IsSpecialName);
 }

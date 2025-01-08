@@ -1,5 +1,6 @@
 ﻿using Scalar.AspNetCore;
 using System.Globalization;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Sparc.Blossom.Platforms.Server;
@@ -43,6 +44,7 @@ public class BlossomServerApplication : IBlossomApplication
 
     public async Task RunAsync()
     {
+        MapBlossomContexts(Assembly.GetEntryAssembly()!);
         await Host.RunAsync();
     }
 
@@ -60,8 +62,6 @@ public class BlossomServerApplication : IBlossomApplication
         var client = typeof(TApp).Assembly;
         if (server != null && server != client)
             razor.AddAdditionalAssemblies(server);
-
-        MapBlossomContexts(server!);
 
         Host.MapHub<BlossomHub>("/_realtime", options =>
         {
@@ -97,7 +97,58 @@ public class BlossomServerApplication : IBlossomApplication
 
     void MapBlossomContexts(Assembly assembly)
     {
-        var mapper = new BlossomEndpointMapper(assembly);
-        mapper.MapEntityEndpoints(Host);
+        var dtos = assembly.GetDtos();
+        foreach (var dto in dtos)
+        {
+            GetType().GetMethod("MapEndpoints")!.MakeGenericMethod(dto.Key, dto.Value).Invoke(this, [assembly]);
+        }
+    }
+
+    public void MapEndpoints<T, TEntity>(Assembly assembly)
+    {
+        var aggregateProxy = assembly.GetAggregateProxy(typeof(TEntity));
+
+        var name = aggregateProxy?.Name.ToLower() ?? typeof(TEntity).Name.ToLower();
+        var baseUrl = $"/{name}";
+
+        var group = Host.MapGroup(baseUrl);
+        group.MapGet("{id}", async (IRunner<T> runner, string id) => await runner.Get(id));
+        group.MapPost("", async (IRunner<T> runner, object[] parameters) => await runner.Create(parameters));
+        group.MapPost("_undo", async (IRunner<T> runner, string id, long? revision) => await runner.Undo(id, revision));
+        group.MapPost("_redo", async (IRunner<T> runner, string id, long? revision) => await runner.Redo(id, revision));
+        group.MapGet("_metadata", async (IRunner<T> runner) => await runner.Metadata());
+        group.MapPatch("{id}", async (IRunner<T> runner, string id, BlossomPatch patch) => await runner.Patch(id, patch));
+        //group.MapPost("_queries", async (IRunner<T> runner, string name, BlossomQueryOptions options, object[] parameters) => await runner.ExecuteQuery(name, options, parameters));
+        group.MapDelete("{id}", async (IRunner<T> runner, string id) => await runner.Delete(id));
+
+        if (aggregateProxy != null)
+        {
+            var aggregateMethods = aggregateProxy.GetMyMethods();
+            foreach (var method in aggregateMethods)
+            {
+                var actionName = method.ReturnType.IsAssignableTo(typeof(BlossomQuery))
+                    ? $"_queries/{method.Name}"
+                    : method.Name;
+
+                group.MapPost(actionName, CreateDelegate(method, aggregateProxy));
+            }
+        }
+
+        var entityMethods = typeof(T).GetMyMethods();
+        foreach (var method in entityMethods)
+        {
+            group.MapPut("{id}/" + method.Name, CreateDelegate(method, typeof(T)));
+        }
+    }
+
+    public static Delegate CreateDelegate(MethodInfo methodInfo, object target)
+    {
+        var parmTypes = methodInfo.GetParameters().Select(parm => parm.ParameterType);
+        var parmAndReturnTypes = parmTypes.Append(methodInfo.ReturnType).ToArray();
+        var delegateType = Expression.GetDelegateType(parmAndReturnTypes);
+
+        if (methodInfo.IsStatic)
+            return methodInfo.CreateDelegate(delegateType);
+        return methodInfo.CreateDelegate(delegateType, target);
     }
 }

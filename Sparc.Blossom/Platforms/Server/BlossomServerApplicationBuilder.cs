@@ -30,7 +30,7 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
         }
 
         AddBlossomServer();
-        RegisterBlossomEntities(callingAssembly);
+        RegisterBlossomAggregates(callingAssembly);
 
         if (Builder.Environment.IsDevelopment())
             Services.AddEndpointsApiExplorer();
@@ -76,7 +76,7 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
             razor.AddInteractiveWebAssemblyComponents();
     }
 
-    void RegisterBlossomEntities(Assembly assembly)
+    void RegisterBlossomProxies(Assembly assembly)
     {
         Services.AddScoped(typeof(BlossomAggregateProxy<>));
 
@@ -84,7 +84,13 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
         foreach (var api in apis)
             Services.AddScoped(api);
 
-        var aggregates = GetAggregates(assembly);
+        foreach (var api in assembly.GetTypes<IBlossomApi>())
+            Services.AddScoped(api);
+    }
+
+    void RegisterBlossomAggregates(Assembly assembly)
+    {
+        var aggregates = assembly.GetAggregates();
         Services.AddScoped(typeof(BlossomAggregateOptions<>));
         Services.AddScoped(typeof(BlossomAggregate<>));
 
@@ -108,17 +114,14 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
             Services.AddScoped(aggregate);
         }
 
-        var dtos = GetDtos(assembly)
-            .ToDictionary(x => x, x => entities.FirstOrDefault(y => y.Name == x.Name))
-            .Where(x => x.Value != null);
+        var dtos = assembly.GetDtos();
 
         foreach (var dto in dtos)
             Services.AddScoped(
                 typeof(IRunner<>).MakeGenericType(dto.Key),
                 typeof(BlossomProxyRunner<,>).MakeGenericType(dto.Key, dto.Value!));
 
-        foreach (var api in assembly.GetTypes<IBlossomApi>())
-            Services.AddScoped(api);
+        RegisterBlossomProxies(assembly);
     }
 
     void AddBlossomRepository()
@@ -155,12 +158,4 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
         // Use the User ID as the SignalR user identifier    
         Services.AddSingleton<IUserIdProvider, UserIdProvider>();
     }
-
-    static IEnumerable<Type> GetDtos(Assembly assembly)
-       => assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>))
-           .Select(x => x.BaseType!.GetGenericArguments().First())
-           .Distinct();
-
-    static IEnumerable<Type> GetAggregates(Assembly assembly)
-        => assembly.GetDerivedTypes(typeof(BlossomAggregate<>));
 }

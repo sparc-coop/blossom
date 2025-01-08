@@ -19,6 +19,16 @@ public static class ServiceCollectionExtensions
 
         services.AddTransient<IRunner<T>, BlossomHttpClientRunner<T>>();
 
+        services.AddScoped(typeof(BlossomAggregateProxy<>));
+
+        var assembly = typeof(T).Assembly;
+        var apis = assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>));
+        foreach (var api in apis)
+            services.AddScoped(api);
+
+        foreach (var api in assembly.GetTypes<IBlossomApi>())
+            services.AddScoped(api);
+
         return services;
     }
 

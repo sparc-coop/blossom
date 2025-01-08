@@ -2,14 +2,16 @@
 using System.Linq.Dynamic.Core;
 using Mapster;
 using System.Reflection;
+using System.Text.Json;
 
 namespace Sparc.Blossom;
 
 public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
     : IRunner<T> where T : BlossomEntity
 {
-    public IRepository<T> Repository => options.Repository;
-    public IRealtimeRepository<T> Events => options.Events;
+    protected IRepository<T> Repository => options.Repository;
+    protected IRealtimeRepository<T> Events => options.Events;
+    protected ClaimsPrincipal User => options.User;
 
     public virtual async Task<T?> Get(object id) => await Repository.FindAsync(id);
 
@@ -50,14 +52,40 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         return await spec.Execute();
     }
 
+    private static object?[] CleanParameters(MethodInfo query, object?[] parameters)
+    {
+        var methodParams = query.GetParameters();
+
+        // Unwrap each parameter from parameters if it is a System.Text.Json.JsonElement
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            if (parameters[i] is JsonElement jsonElement)
+                parameters[i] = JsonSerializer.Deserialize(jsonElement.GetRawText(), methodParams[i].ParameterType);
+        }
+
+        // Ensure the parameters array matches the method signature, including optional parameters
+        if (parameters.Length < methodParams.Length)
+        {
+            var newParams = new object?[methodParams.Length];
+            parameters.CopyTo(newParams, 0);
+            for (int i = parameters.Length; i < methodParams.Length; i++)
+            {
+                newParams[i] = Type.Missing;
+            }
+            parameters = newParams;
+        }
+
+        return parameters;
+    }
+
     public async Task<TResponse?> ExecuteQuery<TResponse>(string name, params object?[] parameters)
     {
         var func = GetType().GetMethod(name)
             ?? throw new Exception($"Method {name} returning {typeof(TResponse).Name} not found.");
 
-        var task = (Task<TResponse?>?)func.Invoke(this, parameters) 
+        var task = (Task<TResponse?>?)func.Invoke(this, parameters)
             ?? throw new Exception($"Method {name} did not return a Task<{typeof(TResponse).Name}>.");
-        
+
         return await task;
     }
 
