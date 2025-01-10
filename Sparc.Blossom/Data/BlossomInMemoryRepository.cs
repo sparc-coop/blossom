@@ -84,6 +84,13 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
             return Task.FromResult(item);
         }
 
+        if (typeof(T).IsAssignableTo(typeof(BlossomEntity<DateTime>)))
+        {
+            var itemsWithStringIds = _items.Cast<BlossomEntity<DateTime>>().ToList();
+            var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
+            return Task.FromResult(item);
+        }
+
         throw new Exception("The item for this repository is not a Root.");
     }
 

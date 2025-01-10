@@ -99,9 +99,11 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         return Login();
     }
 
-    public static BlossomUser FromPrincipal(ClaimsPrincipal principal)
+    public static BlossomUser FromPrincipal(ClaimsPrincipal principal) => FromPrincipal<BlossomUser>(principal);
+
+    public static T FromPrincipal<T>(ClaimsPrincipal principal) where T : BlossomUser, new()
     {
-        var user = new BlossomUser();
+        var user = new T();
         var id = principal.Id();
         if (!string.IsNullOrWhiteSpace(id))
         {

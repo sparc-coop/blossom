@@ -35,10 +35,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBlossomApi<T, TSpecificInterface>(this IServiceCollection services, Uri baseUri)
         where TSpecificInterface : IBlossomHttpClient<T>
     {
+        services.AddBlossomApi<T>(baseUri);
+
         services.AddRefitClient(typeof(TSpecificInterface))
             .ConfigureHttpClient(c => c.BaseAddress = baseUri);
-
-        services.AddTransient<IRunner<T>, BlossomHttpClientRunner<T>>();
 
         return services;
     }

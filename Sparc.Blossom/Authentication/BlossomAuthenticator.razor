@@ -60,7 +60,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (Auth.User != null || !string.IsNullOrEmpty(Token))
+        if (Auth.Principal != null || !string.IsNullOrEmpty(Token))
         {
             await foreach (var state in Auth.Login(User, Token))
                 StateHasChanged();

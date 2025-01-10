@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
-		<Version>9.0.0-rc.2</Version>
+		<Version>9.0.1</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<LangVersion>latest</LangVersion>
@@ -21,6 +21,7 @@
 		<PackageReference Include="Ardalis.Specification" Version="8.0.0" />
 		<PackageReference Include="MediatR" Version="12.4.1" />
 		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />
 		<PackageReference Include="System.Text.Json" Version="9.0.0" />
 		<PackageReference Include="SystemTextJsonPatch" Version="4.1.0" />
 	</ItemGroup>

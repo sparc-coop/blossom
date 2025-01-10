@@ -25,13 +25,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sparc.Blossom.Realtime", "S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{F4760C1E-ABB6-4355-A42E-311BD30A1313}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Example.Server", "Sparc.Blossom.Example\Sparc.Blossom.Example\Sparc.Blossom.Example.Server.csproj", "{1DC6C6F3-EB3F-4065-9966-A6034B743BF5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Example.Multiproject", "Sparc.Blossom.Example\Sparc.Blossom.Example\Sparc.Blossom.Example.Multiproject.csproj", "{1DC6C6F3-EB3F-4065-9966-A6034B743BF5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Example.Single", "Sparc.Blossom.Example.Server\Sparc.Blossom.Example.Single.csproj", "{B8DD5026-4F0F-491E-8E6E-FB92C188E992}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example - Single Project", "Example - Single Project", "{A17D4BE0-37C5-473B-9C57-ADFEBFF25DD9}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example - Multiproject", "Example - Multiproject", "{788F1124-7330-4333-B4BC-2C73F00E462F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom", "Sparc.Blossom\Sparc.Blossom.csproj", "{85B675EC-9E21-4205-97C1-A494E8FD7CFE}"
 EndProject

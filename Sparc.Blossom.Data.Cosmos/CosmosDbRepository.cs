@@ -31,7 +31,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
     public async Task<T?> FindAsync(object id)
     {
         if (id is string sid)
-            return Context.Set<T>().FirstOrDefault(x => x.Id == sid);
+            return await Context.Set<T>().FirstOrDefaultAsync(x => x.Id == sid);
 
         return await Context.Set<T>().FindAsync(id);
     }
