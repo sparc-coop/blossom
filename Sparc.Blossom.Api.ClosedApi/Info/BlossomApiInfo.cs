@@ -4,9 +4,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Sparc.Blossom.ApiGenerator;
 
-internal class BlossomApiInfo
+public class BlossomApiInfo
 {
-    internal BlossomApiInfo(TypeDeclarationSyntax type)
+    public BlossomApiInfo(TypeDeclarationSyntax type)
     {
         Usings = type.SyntaxTree.GetRoot().DescendantNodes().OfType<UsingDirectiveSyntax>().Select(x => x.ToString()).ToArray();
         if (!Usings.Contains("using Sparc.Blossom;"))
@@ -65,15 +65,15 @@ internal class BlossomApiInfo
         Nullable = Properties.Any(x => x.IsNullable) ? "#nullable enable" : "#nullable disable";
     }
 
-    internal string Name { get; }
+    public string Name { get; }
     public string PluralName { get; }
-    internal string? OfName { get; set; }
-    internal string? BaseOfName { get; set; }
-    internal string? BaseName { get; set; }
-    internal string? BasePluralName { get; set; }
-    internal string Namespace { get; }
-    internal string[] Usings { get; }
-    internal string Nullable { get; } = "";
+    public string? OfName { get; set; }
+    public string? BaseOfName { get; set; }
+    public string? BaseName { get; set; }
+    public string? BasePluralName { get; set; }
+    public string Namespace { get; }
+    public string[] Usings { get; }
+    public string Nullable { get; } = "";
     public List<BlossomApiMethodInfo> Methods { get; }
     public List<BlossomApiMethodInfo> Constructors { get; }
     public List<BlossomApiPropertyInfo> Properties { get; }

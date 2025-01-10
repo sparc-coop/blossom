@@ -2,12 +2,12 @@
 
 namespace Sparc.Blossom.ApiGenerator;
 
-internal class BlossomApiFieldInfo
+public class BlossomApiFieldInfo
 {
-    internal BlossomApiFieldInfo(MemberDeclarationSyntax x)
+    public BlossomApiFieldInfo(MemberDeclarationSyntax x)
     {
         Body = x.ToFullString();
     }
 
-    internal string Body { get; set; }
+    public string Body { get; set; }
 }

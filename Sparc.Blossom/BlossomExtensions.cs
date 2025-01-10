@@ -13,4 +13,7 @@ public static class BlossomExtensions
     public static Type? GetAggregate(this Assembly assembly, Type entityType)
         => assembly.GetDerivedTypes(typeof(BlossomAggregate<>).MakeGenericType(entityType)).FirstOrDefault();
 
+    public static IEnumerable<Type> GetAggregates(this Assembly assembly)
+        => assembly.GetDerivedTypes(typeof(BlossomAggregate<>));
+
 }

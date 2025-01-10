@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Sparc.Blossom.ApiGenerator;
 
-internal abstract class BlossomGenerator(string type, Func<BlossomApiInfo, string> code) : IIncrementalGenerator
+public abstract class BlossomGenerator(string type, Func<BlossomApiInfo, string> code) : IIncrementalGenerator
 {
     internal string Type = type;
     internal Func<BlossomApiInfo, string> CodeGenerator { get; } = code;
@@ -36,7 +36,7 @@ internal abstract class BlossomGenerator(string type, Func<BlossomApiInfo, strin
     }
 }
 
-internal abstract class BlossomGenerator<T>(Func<BlossomApiInfo, string> code) 
+public abstract class BlossomGenerator<T>(Func<BlossomApiInfo, string> code) 
     : BlossomGenerator(typeof(T).Name, code) 
     where T : SyntaxNode
 {

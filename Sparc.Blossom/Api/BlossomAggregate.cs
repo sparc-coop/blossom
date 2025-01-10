@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 using System.Linq.Dynamic.Core;
 using Mapster;
+using System.Reflection;
+using System.Text.Json;
 
 namespace Sparc.Blossom;
 
@@ -81,10 +83,11 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var func = GetType().GetMethod(name)
             ?? throw new Exception($"Method {name} returning {typeof(TResponse).Name} not found.");
 
-        var task = (Task<TResponse?>?)func.Invoke(this, parameters)
+        var task = (Task)func.Invoke(this, CleanParameters(func, parameters))
             ?? throw new Exception($"Method {name} did not return a Task<{typeof(TResponse).Name}>.");
 
-        return await task;
+        await task;
+        return (TResponse?)task.GetType().GetProperty("Result")!.GetValue(task);
     }
 
     public Task<BlossomAggregateMetadata> Metadata()

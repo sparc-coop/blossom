@@ -24,11 +24,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+		<None Include="readme.md" Pack="true" PackagePath="\" />
+		<None Include="icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="readme.md" Pack="true" PackagePath="\" />
-		<None Include="icon.png" Pack="true" PackagePath="\" />
+	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 	</ItemGroup>
 </Project>

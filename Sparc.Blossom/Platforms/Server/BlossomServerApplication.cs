@@ -106,7 +106,7 @@ public class BlossomServerApplication : IBlossomApplication
 
     public void MapEndpoints<T, TEntity>(Assembly assembly)
     {
-        var aggregateProxy = assembly.GetAggregateProxy(typeof(TEntity));
+        var aggregateProxy = assembly.GetAggregateProxy(typeof(T));
 
         var name = aggregateProxy?.Name.ToLower() ?? typeof(TEntity).Name.ToLower();
         var baseUrl = $"/{name}";
@@ -114,6 +114,8 @@ public class BlossomServerApplication : IBlossomApplication
         var group = Host.MapGroup(baseUrl);
         group.MapGet("{id}", async (IRunner<T> runner, string id) => await runner.Get(id));
         group.MapPost("", async (IRunner<T> runner, object[] parameters) => await runner.Create(parameters));
+        group.MapPost("_queries/{name}", async (IRunner<T> runner, string name, object[] parameters) => await runner.ExecuteQuery<object?>(name, parameters));
+        group.MapPut("{id}/{name}", async (IRunner<T> runner, string id, string name, object[] parameters) => await runner.Execute(id, name, parameters));
         group.MapPost("_undo", async (IRunner<T> runner, string id, long? revision) => await runner.Undo(id, revision));
         group.MapPost("_redo", async (IRunner<T> runner, string id, long? revision) => await runner.Redo(id, revision));
         group.MapGet("_metadata", async (IRunner<T> runner) => await runner.Metadata());
@@ -121,34 +123,28 @@ public class BlossomServerApplication : IBlossomApplication
         //group.MapPost("_queries", async (IRunner<T> runner, string name, BlossomQueryOptions options, object[] parameters) => await runner.ExecuteQuery(name, options, parameters));
         group.MapDelete("{id}", async (IRunner<T> runner, string id) => await runner.Delete(id));
 
-        if (aggregateProxy != null)
-        {
-            var aggregateMethods = aggregateProxy.GetMyMethods();
-            foreach (var method in aggregateMethods)
-            {
-                var actionName = method.ReturnType.IsAssignableTo(typeof(BlossomQuery))
-                    ? $"_queries/{method.Name}"
-                    : method.Name;
+        //if (aggregateProxy != null)
+        //{
+        //    var aggregateMethods = aggregateProxy.GetMyMethods();
+        //    foreach (var method in aggregateMethods)
+        //    {
+        //        var proxyParameter = Expression.Parameter(aggregateProxy, aggregateProxy.Name.ToLower());
+        //        var methodParameters = method.GetParameters().Select(x => Expression.Parameter(x.ParameterType, x.Name)).ToArray();
+        //        var allParameters = new[] { proxyParameter }.Concat(methodParameters).ToArray();
 
-                group.MapPost(actionName, CreateDelegate(method, aggregateProxy));
-            }
-        }
+        //        var lambda = Expression.Lambda(
+        //            Expression.Call(proxyParameter, method, methodParameters),
+        //            allParameters.Select(p => Expression.Parameter(p.Type, p.Name)).ToArray()
+        //        );
+        //        var compiled = lambda.Compile()
+        //        group.MapPost(method.Name, compiled);
+        //    }
+        //}
 
-        var entityMethods = typeof(T).GetMyMethods();
-        foreach (var method in entityMethods)
-        {
-            group.MapPut("{id}/" + method.Name, CreateDelegate(method, typeof(T)));
-        }
+        //var entityMethods = typeof(T).GetMyMethods();
+        //foreach (var method in entityMethods)
+        //{
+        //}
     }
 
-    public static Delegate CreateDelegate(MethodInfo methodInfo, object target)
-    {
-        var parmTypes = methodInfo.GetParameters().Select(parm => parm.ParameterType);
-        var parmAndReturnTypes = parmTypes.Append(methodInfo.ReturnType).ToArray();
-        var delegateType = Expression.GetDelegateType(parmAndReturnTypes);
-
-        if (methodInfo.IsStatic)
-            return methodInfo.CreateDelegate(delegateType);
-        return methodInfo.CreateDelegate(delegateType, target);
-    }
 }

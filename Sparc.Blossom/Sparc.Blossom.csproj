@@ -36,7 +36,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\Sparc.Blossom.ApiGenerator\bin\$(Configuration)\netstandard2.0\Sparc.Blossom.ApiGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<None Include="..\Sparc.Blossom.Api.ClosedApi\bin\$(Configuration)\netstandard2.0\Sparc.Blossom.Api.ClosedApi.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 	</ItemGroup>
 
 	<ItemGroup>
