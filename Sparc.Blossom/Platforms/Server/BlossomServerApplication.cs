@@ -97,7 +97,7 @@ public class BlossomServerApplication : IBlossomApplication
 
     void MapBlossomContexts(Assembly assembly)
     {
-        var dtos = assembly.GetDtos();
+        var dtos = BlossomServerApplicationBuilder.GetDtos(assembly);
         foreach (var dto in dtos)
         {
             GetType().GetMethod("MapEndpoints")!.MakeGenericMethod(dto.Key, dto.Value).Invoke(this, [assembly]);
@@ -106,8 +106,7 @@ public class BlossomServerApplication : IBlossomApplication
 
     public void MapEndpoints<T, TEntity>(Assembly assembly)
     {
-        var aggregateProxy = assembly.GetAggregateProxy(typeof(TEntity));
-
+        var aggregateProxy = assembly.GetDerivedTypes(typeof(IRunner<>)).FirstOrDefault()?.MakeGenericType(typeof(TEntity));
         var name = aggregateProxy?.Name.ToLower() ?? typeof(TEntity).Name.ToLower();
         var baseUrl = $"/{name}";
 

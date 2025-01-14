@@ -57,8 +57,8 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
             .AddScoped<BlossomDefaultAuthenticator<TUser>>()
             .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<TUser>>();
 
-        Services.AddTransient(s => 
-            s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User 
+        Services.AddTransient(s =>
+            s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User
             ?? new ClaimsPrincipal(new ClaimsIdentity()));
 
         _isAuthenticationAdded = true;
@@ -78,9 +78,7 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
 
     void RegisterBlossomProxies(Assembly assembly)
     {
-        Services.AddScoped(typeof(BlossomAggregateProxy<>));
-
-        var apis = assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>));
+        var apis = assembly.GetDerivedTypes(typeof(IBlossomAggregateProxy<>));
         foreach (var api in apis)
             Services.AddScoped(api);
 
@@ -90,7 +88,6 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
 
     void RegisterBlossomAggregates(Assembly assembly)
     {
-        var aggregates = assembly.GetAggregates();
         Services.AddScoped(typeof(BlossomAggregateOptions<>));
         Services.AddScoped(typeof(BlossomAggregate<>));
 
@@ -106,6 +103,7 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
                 typeof(BlossomInMemoryRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)));
         }
 
+        var aggregates = assembly.GetDerivedTypes(typeof(BlossomAggregate<>));
         foreach (var aggregate in aggregates)
         {
             var baseOfType = aggregate.BaseType!.GenericTypeArguments.First();
@@ -114,12 +112,12 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
             Services.AddScoped(aggregate);
         }
 
-        var dtos = assembly.GetDtos();
+        var dtos = GetDtos(assembly);
 
         foreach (var dto in dtos)
             Services.AddScoped(
                 typeof(IRunner<>).MakeGenericType(dto.Key),
-                typeof(BlossomProxyRunner<,>).MakeGenericType(dto.Key, dto.Value!));
+                typeof(BlossomServerRunner<,>).MakeGenericType(dto.Key, dto.Value!));
 
         RegisterBlossomProxies(assembly);
     }
@@ -157,5 +155,19 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
 
         // Use the User ID as the SignalR user identifier    
         Services.AddSingleton<IUserIdProvider, UserIdProvider>();
+    }
+
+    public static Dictionary<Type, Type> GetDtos(Assembly assembly)
+    {
+        var entities = assembly.GetEntities();
+
+        var dtos = assembly.GetDerivedTypes(typeof(IBlossomEntityProxy<>))
+           .Select(x => x.BaseType!.GetGenericArguments().First())
+           .Distinct();
+
+        return dtos
+            .ToDictionary(x => x, x => entities.FirstOrDefault(y => y.Name == x.Name))
+            .Where(x => x.Value != null)
+            .ToDictionary(x => x.Key, x => x.Value!);
     }
 }

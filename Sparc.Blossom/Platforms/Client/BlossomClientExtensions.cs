@@ -1,9 +1,10 @@
-﻿using System.Net.Http.Json;
+﻿using Microsoft.JSInterop;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace Sparc.Blossom;
 
-public static class HttpClientExtensions
+public static class BlossomClientExtensions
 {
     static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
     public static async Task<TResponse?> PostAsJsonAsync<TResponse>(this HttpClient client, string url, object request)
@@ -24,5 +25,10 @@ public static class HttpClientExtensions
     {
         var response = await client.PostAsJsonAsync(url, model);
         return await response.Content.ReadFromJsonAsync<TOut>();
+    }
+
+    public static Lazy<Task<IJSObjectReference>> Import(this IJSRuntime js, string module)
+    {
+        return new(() => js.InvokeAsync<IJSObjectReference>("import", module).AsTask());
     }
 }

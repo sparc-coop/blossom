@@ -2,7 +2,7 @@
 using Microsoft.JSInterop;
 using Refit;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Client;
 
 public static class ServiceCollectionExtensions
 {
@@ -19,10 +19,8 @@ public static class ServiceCollectionExtensions
 
         services.AddTransient<IRunner<T>, BlossomHttpClientRunner<T>>();
 
-        services.AddScoped(typeof(BlossomAggregateProxy<>));
-
         var assembly = typeof(T).Assembly;
-        var apis = assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>));
+        var apis = assembly.GetDerivedTypes(typeof(IBlossomAggregateProxy<>));
         foreach (var api in apis)
             services.AddScoped(api);
 
@@ -35,10 +33,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBlossomApi<T, TSpecificInterface>(this IServiceCollection services, Uri baseUri)
         where TSpecificInterface : IBlossomHttpClient<T>
     {
+        services.AddBlossomApi<T>(baseUri);
+
         services.AddRefitClient(typeof(TSpecificInterface))
             .ConfigureHttpClient(c => c.BaseAddress = baseUri);
-
-        services.AddTransient<IRunner<T>, BlossomHttpClientRunner<T>>();
 
         return services;
     }
@@ -46,10 +44,4 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBlossomApi<T, TSpecificInterface>(this IServiceCollection services, Uri baseUri, string path)
     where TSpecificInterface : IBlossomHttpClient<T>
         => services.AddBlossomApi<T, TSpecificInterface>(new Uri(baseUri, path));
-
-
-    public static Lazy<Task<IJSObjectReference>> Import(this IJSRuntime js, string module)
-    {
-        return new(() => js.InvokeAsync<IJSObjectReference>("import", module).AsTask());
-    }
 }

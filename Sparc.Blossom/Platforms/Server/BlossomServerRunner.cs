@@ -3,7 +3,7 @@ using Mapster;
 
 namespace Sparc.Blossom;
 
-public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomHubProxy realtime) 
+public class BlossomServerRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomHubProxy realtime) 
     : IRunner<T>
     where T : IBlossomEntityProxy<T>, IBlossomEntityProxy
 {
@@ -22,7 +22,7 @@ public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomH
         return result == null ? default : await AdaptAndWatch(result);
     }
 
-    public async Task<IEnumerable<T>> ExecuteQuery(string? name = null, params object?[] parameters)
+    public async Task<IEnumerable<T>> ExecuteQuery(string name, params object?[] parameters)
     {
         var results = await Aggregate.ExecuteQuery(name, parameters);
         var dtos = results.Select(Adapt);

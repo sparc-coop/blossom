@@ -6,8 +6,9 @@ namespace Sparc.Blossom;
 public class BlossomEvent : MediatR.INotification
 {
     public BlossomEvent()
-    { 
+    {
         // for JSON deserialization
+        Name = "";
     }
     
     private BlossomEvent(string name)

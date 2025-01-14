@@ -11,13 +11,13 @@ public interface IBlossomHttpClient<T>
     Task<BlossomAggregateMetadata> Metadata();
 
     [Post("")]
-    Task<T> Create([Body] object[] parameters);
+    Task<T> Create([Body] object?[] parameters);
 
     [Post("/_queries")]
     Task<BlossomQueryResult<T>> ExecuteQuery([Body] BlossomQueryOptions options);
 
     [Post("/_queries/{name}")]
-    Task<IEnumerable<T>> ExecuteQuery(string name, [Body] params object[] parameters);
+    Task<IEnumerable<T>> ExecuteQuery(string name, [Body] params object?[] parameters);
 
     [Post("/_queries/{name}")]
     Task<TResponse?> ExecuteQuery<TResponse>(string name, object?[] parameters);
@@ -26,7 +26,7 @@ public interface IBlossomHttpClient<T>
     Task Patch(string id, BlossomPatch patch);
 
     [Put("/{id}/{name}")]
-    Task<T> Execute(string id, string name, [Body] params object[] parameters);
+    Task<T> Execute(string id, string name, [Body] params object?[] parameters);
 
     [Delete("/{id}")]
     Task Delete(string id);
