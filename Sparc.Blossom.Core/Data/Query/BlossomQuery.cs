@@ -30,6 +30,16 @@ public class BlossomQuery<T> : Specification<T> where T : class
         return this;
     }
 
+    public BlossomQuery<T> OrderByDescending(Expression<Func<T, object?>> expression, params Expression<Func<T, object?>>[] thenBy)
+    {
+        var query = Query.OrderByDescending(expression);
+
+        foreach (var then in thenBy)
+            query.ThenBy(then);
+
+        return this;
+    }
+
     public BlossomQuery<T> Include(string path)
     {
         Query.Include(path);
