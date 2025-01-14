@@ -4,19 +4,22 @@ public class BlossomHttpClientRunner<T>(IBlossomHttpClient<T> client) : IRunner<
 {
     private IBlossomHttpClient<T> Client { get; } = client;
 
-    public async Task<T> Create(params object?[] parameters) 
+    public async Task<T> Create(params object?[] parameters)
         => await Client.Create(parameters);
 
-    public async Task<T?> Get(object id) 
+    public async Task<T?> Get(object id)
         => await Client.Get(id.ToString());
 
-    public async Task<IEnumerable<T>> ExecuteQuery(string? name = null, params object?[] parameters) 
+    public async Task<IEnumerable<T>> ExecuteQuery(string? name = null, params object?[] parameters)
         => await Client.ExecuteQuery(name, parameters);
 
     public async Task<BlossomQueryResult<T>> ExecuteQuery(BlossomQueryOptions options)
         => await Client.ExecuteQuery(options);
 
-    public async Task<BlossomAggregateMetadata> Metadata() 
+    public async Task<TResponse?> ExecuteQuery<TResponse>(string name, params object?[] parameters)
+        => await Client.ExecuteQuery<TResponse>(name, parameters);
+
+    public async Task<BlossomAggregateMetadata> Metadata()
         => await Client.Metadata();
 
     public async Task Patch(object id, BlossomPatch changes)
@@ -25,7 +28,7 @@ public class BlossomHttpClientRunner<T>(IBlossomHttpClient<T> client) : IRunner<
     public async Task<T> Execute(object id, string name, params object?[] parameters)
         => await Client.Execute(id.ToString(), name, parameters);
 
-    public async Task Delete(object id) 
+    public async Task Delete(object id)
         => await Client.Delete(id.ToString());
 
     public Task On(object id, string name, params object?[] parameters)
@@ -33,9 +36,9 @@ public class BlossomHttpClientRunner<T>(IBlossomHttpClient<T> client) : IRunner<
         throw new NotImplementedException();
     }
 
-    public async Task<T?> Undo(object id, long? revision) 
+    public async Task<T?> Undo(object id, long? revision)
         => await Client.Undo(id.ToString(), revision);
 
-    public async Task<T?> Redo(object id, long? revision) 
+    public async Task<T?> Redo(object id, long? revision)
         => await Client.Redo(id.ToString(), revision);
 }

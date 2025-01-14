@@ -83,10 +83,11 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var func = GetType().GetMethod(name)
             ?? throw new Exception($"Method {name} returning {typeof(TResponse).Name} not found.");
 
-        var task = (Task<TResponse?>?)func.Invoke(this, parameters)
+        var task = (Task)func.Invoke(this, CleanParameters(func, parameters))
             ?? throw new Exception($"Method {name} did not return a Task<{typeof(TResponse).Name}>.");
 
-        return await task;
+        await task;
+        return (TResponse?)task.GetType().GetProperty("Result")!.GetValue(task);
     }
 
     public Task<BlossomAggregateMetadata> Metadata()
@@ -133,7 +134,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var action = new Action<T>(x => typeof(T).GetMethod(name)?.Invoke(x, parameters));
         return await Execute(id, action);
     }
-   
+
     public async Task Delete(object id)
     {
         var entity = await Repository.FindAsync(id)
