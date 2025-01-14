@@ -3,6 +3,7 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @using Sparc.Blossom.Authentication
+@typeparam TUser
 
 <div class="blossom-authenticator">
     <AuthorizeView>
@@ -60,7 +61,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (Auth.User != null || !string.IsNullOrEmpty(Token))
+        if (Auth.GenericUser != null || !string.IsNullOrEmpty(Token))
         {
             await foreach (var state in Auth.Login(User, Token))
                 StateHasChanged();

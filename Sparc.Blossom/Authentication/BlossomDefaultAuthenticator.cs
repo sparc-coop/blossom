@@ -2,18 +2,32 @@
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator 
+public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator<T>, IBlossomAuthenticator
     where T : BlossomUser, new()
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
 
-    public BlossomUser? User { get; set; }
+    public BlossomUser? GenericUser => User;
+    public T? User { get; set; }
     public IRepository<T> Users { get; } = users;
     public string? Message { get; set; }
 
-    public async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
+    public async Task<BlossomUser> GetGenericAsync(ClaimsPrincipal principal) => await GetAsync(principal);
+
+    public async Task<T> GetAsync(ClaimsPrincipal principal)
     {
-        return await GetUserAsync(principal);
+        if (principal.Identity?.IsAuthenticated == true)
+        {
+            User = await Users.FindAsync(principal.Id());
+        }
+
+        if (User == null)
+        {
+            User = BlossomUser.FromPrincipal<T>(principal);
+            await Users.AddAsync(User);
+        }
+
+        return User!;
     }
 
     public virtual async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
@@ -23,10 +37,10 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
         await Users.UpdateAsync((T)user);
         return principal;
     }
-    
+
     public virtual async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId)
     {
-        var user = await GetUserAsync(principal);
+        var user = await GetAsync(principal);
         principal = user.Login(authenticationType, externalId);
         await Users.UpdateAsync((T)user);
         return principal;
@@ -34,7 +48,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
 
     public virtual async Task<ClaimsPrincipal> LogoutAsync(ClaimsPrincipal principal)
     {
-        var user = await GetUserAsync(principal);
+        var user = await GetAsync(principal);
         principal = user.Logout();
         await Users.UpdateAsync((T)user);
         return principal;
@@ -53,21 +67,4 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
         yield return LoginState;
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-
-    private async Task<BlossomUser> GetUserAsync(ClaimsPrincipal principal)
-    {
-        if (principal.Identity?.IsAuthenticated == true)
-        {
-            User = await Users.FindAsync(principal.Id());
-        }
-
-        if (User == null)
-        {
-            User = BlossomUser.FromPrincipal(principal);
-            await Users.AddAsync((T)User);
-        }
-
-        return User!;
-    }
-
 }

@@ -17,7 +17,7 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
         }
 
         var priorUser = BlossomUser.FromPrincipal(context.User);
-        var user = await auth.GetAsync(context.User);
+        var user = await auth.GetGenericAsync(context.User);
 
         if (user != null && (context.User.Identity?.IsAuthenticated != true || !priorUser.Equals(user)))
         {
