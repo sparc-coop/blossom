@@ -8,13 +8,13 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
     public BlossomInMemoryRepository()
     {
     }
-    
+
     public BlossomInMemoryRepository(IEnumerable<T> items)
     {
         if (items.Any())
             _items = items.ToList();
     }
-    
+
     internal static List<T> _items = [];
 
     public IQueryable<T> Query => _items.AsQueryable();
@@ -70,21 +70,12 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
 
     public Task<T?> FindAsync(object id)
     {
-        if (typeof(T).IsAssignableTo(typeof(BlossomEntity<string>)))
-        {
-            var itemsWithStringIds = _items.Cast<BlossomEntity<string>>().ToList();
-            var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
-            return Task.FromResult(item);
-        }
+        if (!typeof(T).IsAssignableTo(typeof(BlossomEntity)))
+            throw new Exception("The item for this repository is not a BlossomEntity.");
 
-        if (typeof(T).IsAssignableTo(typeof(BlossomEntity<int>)))
-        {
-            var itemsWithStringIds = _items.Cast<BlossomEntity<int>>().ToList();
-            var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
-            return Task.FromResult(item);
-        }
-
-        throw new Exception("The item for this repository is not a Root.");
+        var itemsWithStringIds = _items.Cast<BlossomEntity>().ToList();
+        var item = itemsWithStringIds.FirstOrDefault(x => x.GenericId.Equals(id) == true) as T;
+        return Task.FromResult(item);
     }
 
     public Task<T?> FindAsync(ISpecification<T> spec)
@@ -161,7 +152,7 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
         using var reader = new StreamReader(response.Content.ReadAsStream());
         var json = reader.ReadToEnd();
 
-        var items = JsonSerializer.Deserialize<TResponse>(json, new JsonSerializerOptions {  PropertyNameCaseInsensitive = true });
+        var items = JsonSerializer.Deserialize<TResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         if (items != null)
             return new(transformer(items));
 
