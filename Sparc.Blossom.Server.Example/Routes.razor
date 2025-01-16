@@ -1,8 +1,0 @@
-﻿<Router AppAssembly="@typeof(App).Assembly" AdditionalAssemblies="AdditionalAssembliesProvider.Assemblies">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-</Router>
-
-@inject AdditionalAssembliesProvider AdditionalAssembliesProvider
