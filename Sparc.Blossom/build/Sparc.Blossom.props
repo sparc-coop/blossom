@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.Razor" Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''" />
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.Web" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''" />
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />
+
+	<!-- MAUI -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
+		<UseMaui>true</UseMaui>
+	</PropertyGroup>
+
+	<!-- Android -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('-android')) == true">
+		<BlossomPlatform>Android</BlossomPlatform>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(BlossomPlatform)' != 'Android'">
+		<Compile Remove="**\Android\**\*.cs" />
+		<None Include="**\Android\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+	
+	<!-- iOS -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('-ios')) == true">
+		<BlossomPlatform>iOS</BlossomPlatform>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(BlossomPlatform)' != 'iOS'">
+		<Compile Remove="**\iOS\**\*.cs" />
+		<None Include="**\iOS\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+
+	<!-- Mac Catalyst -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('-maccatalyst')) == true">
+		<BlossomPlatform>MacCatalyst</BlossomPlatform>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(BlossomPlatform)' != 'MacCatalyst'">
+		<Compile Remove="**\MacCatalyst\**\*.cs" />
+		<None Include="**\MacCatalyst\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+
+	<!-- Windows -->
+	<PropertyGroup Condition="$(TargetFramework.Contains('-windows')) == true">
+		<BlossomPlatform>Windows</BlossomPlatform>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(BlossomPlatform)' != 'Windows'">
+		<Compile Remove="**\Windows\**\*.cs" />
+		<None Include="**\Windows\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+
+	<!-- Browser -->
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'">
+		<BlossomPlatform>Browser</BlossomPlatform>
+		<UseBlazorWebAssembly>true</UseBlazorWebAssembly>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(BlossomPlatform)' != 'Browser'">
+		<Compile Remove="**\Browser\**\*.cs" />
+		<None Include="**\Browser\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+
+	<!-- Server -->
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
+		<BlossomPlatform>Server</BlossomPlatform>
+		<DefineConstants>SERVER</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(BlossomPlatform)' != 'Server'">
+		<Compile Remove="**\Server\**\*.cs" />
+		<None Include="**\Server\**\*.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+	</ItemGroup>
+</Project>
