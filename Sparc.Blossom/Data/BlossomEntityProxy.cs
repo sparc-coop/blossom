@@ -3,17 +3,6 @@ using System.Runtime.CompilerServices;
 
 namespace Sparc.Blossom;
 
-public interface IBlossomEntityProxy : INotifyPropertyChanged
-{
-    object GenericId { get; }
-    IRunner GenericRunner { get; }
-}
-
-public interface IBlossomEntityProxy<T>
-{
-    IRunner<T> Runner { get; set; }
-}
-
 public class BlossomEntityProxy<T, TId> : IBlossomEntityProxy<T>, IBlossomEntityProxy
 {
     public TId Id { get; set; } = default!;
