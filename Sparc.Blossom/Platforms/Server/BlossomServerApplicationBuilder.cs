@@ -42,6 +42,9 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
         Services.AddOutputCache();
         Services.AddOpenApi();
 
+        Services.AddLocalization();
+        Services.AddScoped<IBlossomLocalizer, BlossomLocalizer>();
+
         AddBlossomRealtime(callingAssembly);
 
         return new BlossomServerApplication(Builder);

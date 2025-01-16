@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Globalization;
+using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -27,5 +28,10 @@ public static class ClaimsPrincipalExtensions
         ?? principal.Get("surname")
         ?? principal.Get(ClaimTypes.Name);
 
+    public static CultureInfo Culture(this ClaimsPrincipal principal)
+    {
+        var locality = principal.Get(ClaimTypes.Locality);
+        return string.IsNullOrWhiteSpace(locality) ? CultureInfo.InvariantCulture : new CultureInfo(locality);
+    }
     public static string? Get(this ClaimsPrincipal principal, string key) => principal?.FindFirst(key)?.Value;
 }
