@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Globalization;
+using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -9,8 +10,10 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         Id = Guid.NewGuid().ToString();
         AuthenticationType = "Blossom";
         Username = Id;
+        AddClaim(ClaimTypes.NameIdentifier, Id);
+        AddClaim(ClaimTypes.Locality, CultureInfo.CurrentCulture.Name);
     }
-    
+
     public string Username { get; set; }
     public string AuthenticationType { get; set; }
     public string? ExternalId { get; set; }
@@ -57,7 +60,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
     public virtual ClaimsPrincipal Login()
     {
-        AddClaim(ClaimTypes.NameIdentifier, Id);
         AddClaim(ClaimTypes.Name, Username);
         RegisterClaims();
 

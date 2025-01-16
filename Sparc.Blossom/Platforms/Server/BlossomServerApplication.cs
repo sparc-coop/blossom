@@ -31,6 +31,7 @@ public class BlossomServerApplication : IBlossomApplication
         Host.MapStaticAssets();
         Host.UseAntiforgery();
 
+        UseAllCultures();
         UseBlossomAuthentication();
 
         if (IsDevelopment)
@@ -38,9 +39,6 @@ public class BlossomServerApplication : IBlossomApplication
             Host.MapOpenApi();
             Host.MapScalarApiReference();
         }
-
-        if (Builder.Services.Any(x => x.ServiceType.Name.Contains("Kori")))
-            UseAllCultures();
     }
 
     public async Task RunAsync()
@@ -107,7 +105,7 @@ public class BlossomServerApplication : IBlossomApplication
 
     public void MapEndpoints<T, TEntity>(Assembly assembly)
     {
-        var aggregateProxy = assembly.GetDerivedTypes(typeof(IRunner<>)).FirstOrDefault()?.MakeGenericType(typeof(TEntity));
+        var aggregateProxy = assembly.GetDerivedTypes(typeof(IRunner<T>)).FirstOrDefault()?.MakeGenericType(typeof(TEntity));
         var name = aggregateProxy?.Name.ToLower() ?? typeof(TEntity).Name.ToLower();
         var baseUrl = $"/{name}";
 
@@ -123,24 +121,24 @@ public class BlossomServerApplication : IBlossomApplication
         //group.MapPost("_queries", async (IRunner<T> runner, string name, BlossomQueryOptions options, object[] parameters) => await runner.ExecuteQuery(name, options, parameters));
         group.MapDelete("{id}", async (IRunner<T> runner, string id) => await runner.Delete(id));
 
-        if (aggregateProxy != null)
-        {
-            var aggregateMethods = aggregateProxy.GetMyMethods();
-            foreach (var method in aggregateMethods)
-            {
-                var actionName = method.ReturnType.IsAssignableTo(typeof(BlossomQuery))
-                    ? $"_queries/{method.Name}"
-                    : method.Name;
+        //if (aggregateProxy != null)
+        //{
+        //    var aggregateMethods = aggregateProxy.GetMyMethods();
+        //    foreach (var method in aggregateMethods)
+        //    {
+        //        var actionName = method.ReturnType.IsAssignableTo(typeof(BlossomQuery))
+        //            ? $"_queries/{method.Name}"
+        //            : method.Name;
 
-                group.MapPost(actionName, CreateDelegate(method, aggregateProxy));
-            }
-        }
+        //        group.MapPost(actionName, CreateDelegate(method, aggregateProxy));
+        //    }
+        //}
 
-        var entityMethods = typeof(T).GetMyMethods();
-        foreach (var method in entityMethods)
-        {
-            group.MapPut("{id}/" + method.Name, CreateDelegate(method, typeof(T)));
-        }
+        //var entityMethods = typeof(T).GetMyMethods();
+        //foreach (var method in entityMethods)
+        //{
+        //    group.MapPut("{id}/" + method.Name, CreateDelegate(method, typeof(T)));
+        //}
     }
 
     public static Delegate CreateDelegate(MethodInfo methodInfo, object target)

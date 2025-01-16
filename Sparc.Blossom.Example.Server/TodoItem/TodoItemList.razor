@@ -7,6 +7,16 @@
 
 Welcome to your new app.
 
+<p>
+    Your current claims:
+    <ul>
+        @foreach (var claim in Principal.Claims)
+        {
+            <li>@claim.Type: @claim.Value</li>
+        }
+    </ul>
+</p>
+
 <h2>Random Strings:</h2>
 <ul>
     @foreach (var item in randomStrings)
@@ -41,6 +51,7 @@ Welcome to your new app.
 
 <button @onclick="AddTodoItem">Add Todo Item</button>
 
+@inject System.Security.Claims.ClaimsPrincipal Principal
 @code
 {
     IEnumerable<TodoItem>? openItems;
@@ -73,6 +84,6 @@ Welcome to your new app.
 
     async Task Delete(TodoItem todoItem)
     {
-        await Api.TodoItems.Delete(todoItem.Id);
+        // await Api.TodoItems.Delete(todoItem.Id);
     }
 }

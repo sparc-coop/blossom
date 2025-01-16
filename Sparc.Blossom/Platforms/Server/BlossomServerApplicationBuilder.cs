@@ -76,11 +76,12 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
             razor.AddInteractiveServerComponents();
 
         if (renderMode is InteractiveWebAssemblyRenderMode || renderMode is InteractiveAutoRenderMode)
-            razor.AddInteractiveWebAssemblyComponents();
+            razor.AddInteractiveWebAssemblyComponents().AddAuthenticationStateSerialization(x => x.SerializeAllClaims = true);
     }
 
     void RegisterBlossomProxies(Assembly assembly)
     {
+        var types = assembly.GetTypes();
         var apis = assembly.GetDerivedTypes(typeof(IBlossomAggregateProxy<>));
         foreach (var api in apis)
             Services.AddScoped(api);

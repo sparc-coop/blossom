@@ -101,7 +101,9 @@ namespace Sparc.Blossom.Api;
 #nullable enable
 public partial class {{api.PluralName}} : IBlossomAggregateProxy<{{api.EntityName}}>
 {
-    public {{api.PluralName}}(IRunner<{{api.EntityName}}> runner) : base(runner) { }
+    
+    public IRunner<{{api.EntityName}}> Runner { get; }
+    public {{api.PluralName}}(IRunner<{{api.EntityName}}> runner) { Runner = runner; }
 
     {{constructors}}
     {{commands}}

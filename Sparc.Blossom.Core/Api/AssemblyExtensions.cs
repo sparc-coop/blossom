@@ -10,6 +10,7 @@ public static class AssemblyExtensions
     public static IEnumerable<Type> GetDerivedTypes(this Assembly assembly, Type baseType)
         => assembly.GetTypes().Where(x =>
             (baseType.IsGenericType && x.BaseType?.IsGenericType == true && x.BaseType.GetGenericTypeDefinition() == baseType)
+            || (baseType.IsInterface && x.GetInterfaces().Any(y => y.IsGenericType && y.GetGenericTypeDefinition() == baseType))
             || x.BaseType == baseType);
 
     public static IEnumerable<Type> GetEntities(this Assembly assembly)
