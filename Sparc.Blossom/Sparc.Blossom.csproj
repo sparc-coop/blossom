@@ -27,12 +27,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.1" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
-		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.4.9" />
-		<PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
+		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.5.1" />
+		<PackageReference Include="System.Net.Http.Json" Version="9.0.1" />
 		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 	</ItemGroup>
 
@@ -49,9 +49,9 @@
 		<UseMaui>true</UseMaui>
 	</PropertyGroup>
 	<ItemGroup Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
-		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.30" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.30" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.1" />
 	</ItemGroup>
 
 	<!-- Android -->
@@ -95,9 +95,9 @@
 		<DefineConstants>SERVER</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
-		<PackageReference Include="Scalar.AspNetCore" Version="1.2.36" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.1" />
+		<PackageReference Include="Scalar.AspNetCore" Version="1.2.76" />
 	</ItemGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
 		<Compile Remove="**\Server\**\*.cs" />
