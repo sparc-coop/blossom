@@ -23,7 +23,7 @@ public class BlossomMethod(MethodInfo method)
             throw new InvalidOperationException("Entity must be a proxy");
 
         var parameters = Parameters.Select(x => x.Value(entity)).ToArray();
-        var task = (Task)method.Invoke(proxy, parameters);
+        var task = (Task)method.Invoke(proxy, parameters)!;
         await task;
 
         foreach (var property in Parameters)

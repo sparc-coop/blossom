@@ -20,7 +20,7 @@ public class BlossomProperty
 
     public BlossomProperty(ParameterInfo parameter)
     {
-        Name = parameter.Name;
+        Name = parameter.Name ?? "";
         Type = parameter.ParameterType.Name;
         IsPrimitive = parameter.ParameterType.IsPrimitive || parameter.ParameterType == typeof(string) || parameter.ParameterType == typeof(DateTime) || parameter.ParameterType == typeof(decimal);
         IsEnumerable = !parameter.ParameterType.IsPrimitive && parameter.ParameterType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(parameter.ParameterType);
@@ -85,7 +85,7 @@ public class BlossomProperty
             DistinctValues = (DistinctValues - 1) + results["<null>"];
 
         if (DistinctValues < 25)
-            AvailableValues = results.ToDictionary(x => x.Key.ToString(), x => (dynamic)$"{x.Key} (Used {x.Value}x)");
+            AvailableValues = results.ToDictionary(x => x.Key.ToString()!, x => (dynamic)$"{x.Key} (Used {x.Value}x)");
     }
 
     public void SetAvailableValues(int totalCount, Dictionary<string, dynamic> results)

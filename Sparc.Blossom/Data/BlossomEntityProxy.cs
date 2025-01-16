@@ -29,5 +29,5 @@ public class BlossomEntityProxy<T, TId> : IBlossomEntityProxy<T>, IBlossomEntity
     }
 
     public override int GetHashCode() => GenericId.GetHashCode();
-    public override bool Equals(object obj) => obj is IBlossomEntityProxy other && GenericId.Equals(other.GenericId);
+    public override bool Equals(object? obj) => obj is IBlossomEntityProxy other && GenericId.Equals(other.GenericId);
 }

@@ -2,7 +2,6 @@
 
 public interface IRunner
 {
-    Task<BlossomAggregateMetadata> Metadata();
     Task Patch(object id, BlossomPatch changes);
     Task Delete(object id);
     Task On(object id, string name, params object?[] parameters);

@@ -38,8 +38,6 @@ public class BlossomServerRunner<T, TEntity>(IRunner<TEntity> aggregate, Blossom
         return new BlossomQueryResult<T>(dtos, results.TotalCount);
     }
 
-    public async Task<BlossomAggregateMetadata> Metadata() => await Aggregate.Metadata();
-
     public async Task Patch(object id, BlossomPatch changes)
     {
         await Aggregate.Patch(id, changes);
