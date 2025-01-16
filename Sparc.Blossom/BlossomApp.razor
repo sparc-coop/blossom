@@ -7,42 +7,38 @@
 
 <Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@AdditionalAssemblies">
     <Found Context="routeData">
-        <CascadingValue Value="User">
-            <Sparc.Blossom.Realtime.BlossomRealtimeHub>
-                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
-                    <NotAuthorized>
-                        @if (!context.User.Identity?.IsAuthenticated == true)
-                        {
-                            @*                     <RedirectToLogin />
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
+            <NotAuthorized>
+                @if (!context.User.Identity?.IsAuthenticated == true)
+                {
+                    @*                     <RedirectToLogin />
                     *@      }
-                        else if (NotAuthorized is not null)
-                        {
-                            @NotAuthorized
-                        }
-                        else
-                        {
-                            <div class="blossom-authentication">
-                                You are not authorized to access
-                                this resource.
-                            </div>
-                        }
-                    </NotAuthorized>
-                    <Authorizing>
-                        @if (Authorizing is not null)
-                        {
-                            @Authorizing
-                        }
-                        else
-                        {
-                            <div class="blossom-authentication">
-                                Logging you in...
-                            </div>
-                        }
-                    </Authorizing>
-                </AuthorizeRouteView>
-                <FocusOnNavigate RouteData="routeData" Selector="h1" />
-            </Sparc.Blossom.Realtime.BlossomRealtimeHub>
-        </CascadingValue>
+                else if (NotAuthorized is not null)
+                {
+                    @NotAuthorized
+                }
+                else
+                {
+                    <div class="blossom-authentication">
+                        You are not authorized to access
+                        this resource.
+                    </div>
+                }
+            </NotAuthorized>
+            <Authorizing>
+                @if (Authorizing is not null)
+                {
+                    @Authorizing
+                }
+                else
+                {
+                    <div class="blossom-authentication">
+                        Logging you in...
+                    </div>
+                }
+            </Authorizing>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
     <NotFound>
         <LayoutView Layout="@typeof(DefaultLayout)">
@@ -58,18 +54,11 @@
     </NotFound>
 </Router>
 
-@inject AuthenticationStateProvider Auth
 @code {
     [Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
     [Parameter] public RenderFragment Authorizing { get; set; } = null!;
     [Parameter] public RenderFragment NotFound { get; set; } = null!;
     [Parameter] public RenderFragment Loading { get; set; } = null!;
-    ClaimsPrincipal User = new(new ClaimsIdentity());
-
-    protected override async Task OnInitializedAsync()
-    {
-        User = (await Auth.GetAuthenticationStateAsync()).User;
-    }
 
     public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
     ? new[] { this.GetType().Assembly }
