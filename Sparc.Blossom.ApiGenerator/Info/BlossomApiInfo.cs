@@ -79,7 +79,7 @@ internal class BlossomApiInfo
     public List<BlossomApiPropertyInfo> Properties { get; }
     public List<BlossomApiFieldInfo> Constants { get; }
     public List<string> Comments { get; } = [];
-    public bool IsEntity => BaseName?.Contains("BlossomEntity") == true;
+    public bool IsEntity => BaseName?.Contains("BlossomEntity") == true || BaseName?.Contains("BlossomUser") == true;
     public bool IsAggregate => BaseName?.Contains("BlossomAggregate") == true;
     public string EntityName => IsEntity ? Name : (BaseOfName ?? Name);
 }

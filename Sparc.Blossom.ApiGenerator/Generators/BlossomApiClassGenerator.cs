@@ -29,7 +29,7 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
             properties.AppendLine(constant.Body);
 
         var proxy = source.IsEntity
-            ? $" : BlossomEntityProxy<{source.Name}, {source.BaseOfName}>"
+            ? $" : BlossomEntityProxy<{source.Name}, {source.BaseOfName ?? "string"}>"
             : "";
 
         if (source.IsEntity)

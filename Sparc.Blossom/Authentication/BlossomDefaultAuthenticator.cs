@@ -2,12 +2,13 @@
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator 
+public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator<T> 
     where T : BlossomUser, new()
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
 
-    public BlossomUser? User { get; set; }
+    public BlossomUser? Principal { get; set; }
+    public T? User { get; set; }
     public IRepository<T> Users { get; } = users;
     public string? Message { get; set; }
 
@@ -63,7 +64,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
 
         if (User == null)
         {
-            User = BlossomUser.FromPrincipal(principal);
+            User = BlossomUser.FromPrincipal<T>(principal);
             await Users.AddAsync((T)User);
         }
 

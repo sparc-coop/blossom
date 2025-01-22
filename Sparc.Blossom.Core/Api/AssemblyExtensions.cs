@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Sparc.Blossom.Authentication;
+using System.Reflection;
 
 namespace Sparc.Blossom;
 
@@ -13,7 +14,8 @@ public static class AssemblyExtensions
             || x.BaseType == baseType);
 
     public static IEnumerable<Type> GetEntities(this Assembly assembly)
-        => assembly.GetDerivedTypes(typeof(BlossomEntity<>));
+        => assembly.GetDerivedTypes(typeof(BlossomEntity<>))
+        .Union(assembly.GetDerivedTypes(typeof(BlossomUser)));
 
     public static Type? FindType(this AppDomain domain, string typeName)
     {

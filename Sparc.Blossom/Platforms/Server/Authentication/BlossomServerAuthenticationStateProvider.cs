@@ -6,7 +6,7 @@ using Sparc.Blossom.Authentication;
 namespace Sparc.Blossom.Platforms.Server;
 
 // Adapted from MS PersistingRevalidatingAuthenticationStateProvider
-public class BlossomServerAuthenticationStateProvider<T> : RevalidatingServerAuthenticationStateProvider where T : BlossomUser
+public class BlossomServerAuthenticationStateProvider<T> : RevalidatingServerAuthenticationStateProvider where T : BlossomUser, new()
 {
     private readonly IServiceScopeFactory _scopeFactory;
 
@@ -29,8 +29,7 @@ public class BlossomServerAuthenticationStateProvider<T> : RevalidatingServerAut
         // Get the user from a new scope to ensure it fetches fresh data
         await using var scope = _scopeFactory.CreateAsyncScope();
         var users = scope.ServiceProvider.GetRequiredService<IRepository<T>>();
-        return await users.FindAsync(principal.Id()) ?? BlossomUser.FromPrincipal(principal);
-
+        return await users.FindAsync(principal.Id()) ?? BlossomUser.FromPrincipal<T>(principal);
     }
 
     protected override void Dispose(bool disposing)

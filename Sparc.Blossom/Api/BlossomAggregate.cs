@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using System.Linq.Dynamic.Core;
+using Sparc.Blossom.Authentication;
 using Mapster;
 
 namespace Sparc.Blossom;
@@ -9,6 +10,8 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
 {
     public IRepository<T> Repository => options.Repository;
     public IRealtimeRepository<T> Events => options.Events;
+    public ClaimsPrincipal Principal => options.User;
+    public string UserId => Principal.Id();
 
     public virtual async Task<T?> Get(object id) => await Repository.FindAsync(id);
 

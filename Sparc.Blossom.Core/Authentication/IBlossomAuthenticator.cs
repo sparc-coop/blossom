@@ -5,7 +5,7 @@ namespace Sparc.Blossom.Authentication;
 public interface IBlossomAuthenticator
 {
     LoginStates LoginState { get; set; }
-    BlossomUser? User { get; }
+    BlossomUser? Principal { get; }
     public string? Message { get; set; }
 
 
@@ -16,5 +16,9 @@ public interface IBlossomAuthenticator
 
     IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal? principal, string? emailOrToken = null);
     IAsyncEnumerable<LoginStates> Logout(ClaimsPrincipal? principal);
+}
 
+public interface IBlossomAuthenticator<T> : IBlossomAuthenticator where T : BlossomUser
+{
+    T? User { get; }
 }
