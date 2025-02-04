@@ -24,12 +24,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
-	  <ProjectReference Include="..\Sparc.Blossom.Data.AzureStorage\Sparc.Blossom.Data.AzureStorage.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <None Include="readme.md" Pack="true" PackagePath="\" />
+	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 	  <None Update="icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
