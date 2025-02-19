@@ -46,9 +46,9 @@
 
 	<ItemGroup>
 		<Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.10" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.10" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' != 'net8.0'">
