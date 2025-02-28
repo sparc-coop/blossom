@@ -1,6 +1,12 @@
 using Sparc.Blossom;
 using Sparc.Blossom.Data;
 
-var builder = BlossomApplication.CreateBuilder(args);
-// builder.Services.AddCosmos(builder.Configuration);
-await builder.Build().RunAsync();
+namespace Blossom;
+public static class Program
+{
+    public static void Main(string[] args)
+    {
+        var builder = BlossomApplication.CreateBuilder(args);
+        builder.Build().Run();
+    }
+}
