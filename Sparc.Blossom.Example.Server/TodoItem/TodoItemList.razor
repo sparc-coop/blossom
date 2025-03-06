@@ -74,5 +74,6 @@ Welcome to your new app.
     async Task Delete(TodoItem todoItem)
     {
         await Api.TodoItems.Delete(todoItem.Id);
+        await GetItems();
     }
 }
