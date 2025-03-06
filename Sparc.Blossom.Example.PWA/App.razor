@@ -1,0 +1,40 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
+@using System.Security.Claims
+
+<Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@AdditionalAssemblies">
+    <Found Context="routeData">
+        <CascadingValue Value="User">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+            </AuthorizeRouteView>
+        </CascadingValue>
+    </Found>
+    <NotFound>
+        <LayoutView Layout="@typeof(MainLayout)">
+            @if (NotFound is not null)
+            {
+                @NotFound
+            }
+            else
+            {
+                <p>Sorry, there's nothing at this address.</p>
+            }
+        </LayoutView>
+    </NotFound>
+</Router>
+
+@inject AuthenticationStateProvider Auth
+@code {
+    [Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
+    [Parameter] public RenderFragment Authorizing { get; set; } = null!;
+    [Parameter] public RenderFragment NotFound { get; set; } = null!;
+    [Parameter] public RenderFragment Loading { get; set; } = null!;
+    ClaimsPrincipal User = new(new ClaimsIdentity());
+
+    protected override async Task OnInitializedAsync()
+    {
+        User = (await Auth.GetAuthenticationStateAsync()).User;
+    }
+
+    public System.Reflection.Assembly[] AdditionalAssemblies => new[] { this.GetType().Assembly };
+} 

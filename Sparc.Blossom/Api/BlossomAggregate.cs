@@ -145,43 +145,12 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var dtoType = AppDomain.CurrentDomain.FindType(dtoTypeName);
         return dtoType == null ? null : entity!.Adapt(typeof(TItem), dtoType);
     }
-
-    private Func<Task<TResponse?>>? FindMatchingMethodWithDependencyInjection<TResponse>(string name, object?[] parameters)
-    {
-        using var scope = options.Services.CreateScope();
-        var allServices = scope.ServiceProvider;
-
-        var methods = GetType().GetMethods().Where(m => m.Name == name);
-        foreach (var method in methods.OrderByDescending(m => m.GetParameters().Length))
-        {
-            var methodParameters = method.GetParameters();
-            var nonServiceParameters = methodParameters.Where(p => !allServices.GetServices(p.ParameterType).Any()).ToList();
-
-            if (nonServiceParameters.Count != parameters.Length)
-                continue;
-
-            var boundParameters = new List<object?>();
-            var j = 0;
-            for (var i = 0; i < methodParameters.Length; i++)
-            {
-                if (allServices.GetServices(methodParameters[i].ParameterType).Any())
-                    boundParameters.Add(allServices.GetRequiredService(methodParameters[i].ParameterType));
-                else
-                    boundParameters.Add(parameters[j++]);
-            }
-
-            return () => (Task<TResponse?>)method.Invoke(this, boundParameters.ToArray());
-        }
-
-        return null;
-    }
 }
 
-public class BlossomAggregateOptions<T>(IRepository<T> repository, IRealtimeRepository<T> events, ClaimsPrincipal principal, IServiceScopeFactory services)
+public class BlossomAggregateOptions<T>(IRepository<T> repository, IRealtimeRepository<T> events, ClaimsPrincipal principal)
     where T : BlossomEntity
 {
     public IRepository<T> Repository { get; } = repository;
     public IRealtimeRepository<T> Events { get; } = events;
-    public IServiceScopeFactory Services { get; } = services;
     public ClaimsPrincipal User { get; } = principal;
 }

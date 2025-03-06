@@ -11,14 +11,18 @@ using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Platforms.Server;
 
-public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicationBuilder
+public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
 {
-    public WebApplicationBuilder Builder { get; } = WebApplication.CreateBuilder(args);
-    public IServiceCollection Services => Builder.Services;
-    public IConfiguration Configuration => Builder.Configuration;
-    bool _isAuthenticationAdded;
+    public WebApplicationBuilder Builder { get; }
 
-    public IBlossomApplication Build()
+    public BlossomServerApplicationBuilder(string[] args)
+    {
+        Builder = WebApplication.CreateBuilder(args);
+        Services = Builder.Services;
+        Configuration = Builder.Configuration;
+    }
+
+    public override IBlossomApplication Build()
     {
         var callingAssembly = Assembly.GetCallingAssembly();
 
@@ -47,7 +51,7 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
         return new BlossomServerApplication(Builder);
     }
 
-    public void AddAuthentication<TUser>() where TUser : BlossomUser, new()
+    public override void AddAuthentication<TUser>()
     {
         Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options => options.ExpireTimeSpan = TimeSpan.FromDays(30));
@@ -76,64 +80,10 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
             razor.AddInteractiveWebAssemblyComponents();
     }
 
-    void RegisterBlossomEntities(Assembly assembly)
-    {
-        Services.AddScoped(typeof(BlossomAggregateProxy<>));
+    protected override void AddBlossomRealtime(Assembly assembly) => AddBlossomRealtime<BlossomHub>(assembly);
 
-        var apis = assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>));
-        foreach (var api in apis)
-            Services.AddScoped(api);
-
-        var aggregates = GetAggregates(assembly);
-        Services.AddScoped(typeof(BlossomAggregateOptions<>));
-        Services.AddScoped(typeof(BlossomAggregate<>));
-
-        var entities = assembly.GetEntities();
-        foreach (var entity in entities)
-        {
-            Services.AddScoped(
-                typeof(IRunner<>).MakeGenericType(entity),
-                typeof(BlossomAggregate<>).MakeGenericType(entity));
-
-            Services.AddScoped(
-                typeof(IRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)),
-                typeof(BlossomInMemoryRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)));
-        }
-
-        foreach (var aggregate in aggregates)
-        {
-            var baseOfType = aggregate.BaseType!.GenericTypeArguments.First();
-            Services.AddScoped(typeof(BlossomAggregate<>).MakeGenericType(baseOfType), aggregate);
-            Services.AddScoped(typeof(IRunner<>).MakeGenericType(baseOfType), aggregate);
-            Services.AddScoped(aggregate);
-        }
-
-        var dtos = GetDtos(assembly)
-            .ToDictionary(x => x, x => entities.FirstOrDefault(y => y.Name == x.Name))
-            .Where(x => x.Value != null);
-
-        foreach (var dto in dtos)
-            Services.AddScoped(
-                typeof(IRunner<>).MakeGenericType(dto.Key),
-                typeof(BlossomProxyRunner<,>).MakeGenericType(dto.Key, dto.Value!));
-
-        foreach (var api in assembly.GetTypes<IBlossomApi>())
-            Services.AddScoped(api);
-    }
-
-    void AddBlossomRepository()
-    {
-        if (!Services.Any(x => x.ServiceType == typeof(IRepository<>)))
-            Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
-
-        Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
-        Services.AddScoped<BlossomHubProxy>();
-    }
-
-    void AddBlossomRealtime(Assembly assembly) => AddBlossomRealtime<BlossomHub>(assembly);
-
-    void AddBlossomRealtime<THub>(Assembly assembly) where THub : BlossomHub
-    {
+    void AddBlossomRealtime<THub>(Assembly assembly)
+    { 
         var signalR = Services.AddSignalR()
             .AddJsonProtocol(options =>
             {
@@ -155,12 +105,4 @@ public class BlossomServerApplicationBuilder(string[] args) : IBlossomApplicatio
         // Use the User ID as the SignalR user identifier    
         Services.AddSingleton<IUserIdProvider, UserIdProvider>();
     }
-
-    static IEnumerable<Type> GetDtos(Assembly assembly)
-       => assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>))
-           .Select(x => x.BaseType!.GetGenericArguments().First())
-           .Distinct();
-
-    static IEnumerable<Type> GetAggregates(Assembly assembly)
-        => assembly.GetDerivedTypes(typeof(BlossomAggregate<>));
 }

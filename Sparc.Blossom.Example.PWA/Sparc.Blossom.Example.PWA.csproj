@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-browser</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.2" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\kori\Sparc.Kori\Sparc.Kori.csproj" />
+		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+		<ProjectReference Include="..\Sparc.Blossom.ApiGenerator\Sparc.Blossom.ApiGenerator.csproj" OutputItemType="Analyzer" />
+		<ProjectReference Include="..\Sparc.Blossom\Sparc.Blossom.csproj" />
+	</ItemGroup>
+</Project>
