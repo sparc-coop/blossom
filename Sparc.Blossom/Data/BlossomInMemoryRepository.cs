@@ -43,7 +43,12 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
 
     public Task DeleteAsync(T item)
     {
-        _items.Remove(item);
+        try
+        {
+            _items.Remove(item);
+        }
+        catch
+        { }
         return Task.CompletedTask;
     }
 
