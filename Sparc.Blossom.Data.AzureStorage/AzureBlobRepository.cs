@@ -1,16 +1,14 @@
-﻿using Azure.Storage.Blobs;
+﻿using Ardalis.Specification;
+using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
 namespace Sparc.Blossom.Data;
 
-public class AzureBlobRepository : IFileRepository<BlossomFile>
+public class AzureBlobRepository(BlobServiceClient client) : IRepository<BlossomFile>
 {
-    public AzureBlobRepository(BlobServiceClient client)
-    {
-        Client = client;
-    }
+    public BlobServiceClient Client { get; } = client;
 
-    public BlobServiceClient Client { get; }
+    public IQueryable<BlossomFile> Query => throw new NotImplementedException();
 
     public async Task AddAsync(BlossomFile item)
     {
@@ -27,6 +25,16 @@ public class AzureBlobRepository : IFileRepository<BlossomFile>
         await Parallel.ForEachAsync(items, async (item, token) => await AddAsync(item));
     }
 
+    public Task<bool> AnyAsync(ISpecification<BlossomFile> spec)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<int> CountAsync(ISpecification<BlossomFile> spec)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task DeleteAsync(BlossomFile item)
     {
         var container = await GetContainer(item);
@@ -37,6 +45,16 @@ public class AzureBlobRepository : IFileRepository<BlossomFile>
     public async Task DeleteAsync(IEnumerable<BlossomFile> items)
     {
         await Parallel.ForEachAsync(items, async (item, token) => await DeleteAsync(item));
+    }
+
+    public Task ExecuteAsync(object id, Action<BlossomFile> action)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task ExecuteAsync(BlossomFile entity, Action<BlossomFile> action)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<BlossomFile?> FindAsync(object id)
@@ -62,6 +80,22 @@ public class AzureBlobRepository : IFileRepository<BlossomFile>
 
         return null;
     }
+
+    public Task<BlossomFile?> FindAsync(ISpecification<BlossomFile> spec)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IQueryable<BlossomFile> FromSqlRaw(string sql, params object[] parameters)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<List<BlossomFile>> GetAllAsync(ISpecification<BlossomFile> spec)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task UpdateAsync(BlossomFile item)
     {
         var container = await GetContainer(item);

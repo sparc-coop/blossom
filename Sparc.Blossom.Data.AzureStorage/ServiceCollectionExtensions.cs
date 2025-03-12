@@ -9,14 +9,14 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddAzureStorage(this IServiceCollection services, string connectionString)
     {
         services.AddScoped(_ => new BlobServiceClient(connectionString));
-        services.AddScoped<IFileRepository<BlossomFile>, AzureBlobRepository>();
+        services.AddScoped<IRepository<BlossomFile>, AzureBlobRepository>();
         return services;
     }
 
     public static IServiceCollection AddAzureStorage(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped(_ => new BlobServiceClient(configuration.GetConnectionString("Storage")));
-        services.AddScoped<IFileRepository<BlossomFile>, AzureBlobRepository>();
+        services.AddScoped<IRepository<BlossomFile>, AzureBlobRepository>();
         return services;
     }
 }
