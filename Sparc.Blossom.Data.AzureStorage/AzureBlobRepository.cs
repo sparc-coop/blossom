@@ -1,6 +1,7 @@
 ﻿using Ardalis.Specification;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Sparc.Blossom.Data.AzureStorage;
 
 namespace Sparc.Blossom.Data;
 
