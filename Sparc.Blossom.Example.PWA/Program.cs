@@ -1,12 +1,11 @@
 using Sparc.Blossom.Example.PWA;
 using TodoItems;
-using Sparc.Kori;
-using Sparc.Blossom.Example.PWA.Shared;
+using Sparc.Blossom.Data;
 
 var builder = BlossomApplication.CreateBuilder<App>(args);
 
 builder.Services.AddScoped<IRandomStringGenerator, RandomStringGenerator>();
-builder.Services.AddKoriDb();
+builder.Services.AddPouch();
 
 var app = builder.Build();
 
