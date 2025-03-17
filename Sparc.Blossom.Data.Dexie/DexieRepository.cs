@@ -1,8 +1,7 @@
 ﻿using Ardalis.Specification;
 using Microsoft.JSInterop;
-using Sparc.Kori;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Data;
 
 public class DexieRepository<T>(IJSRuntime js) : IRepository<T>
 {
