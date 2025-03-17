@@ -52,6 +52,7 @@ public class BlossomProperty
     public decimal? DistinctPercentage => TotalCount == 0 ? 0 : DistinctValues / (decimal?)TotalCount;
     public Dictionary<string, dynamic> AvailableValues { get; set; } = [];
     public List<T> GetAvailableValues<T>() => AvailableValues.Values.Cast<T>().ToList();
+    public object GetAvailableValues(Type type) => GetType().GetMethod(nameof(GetAvailableValues))!.MakeGenericMethod(type).Invoke(Property, null);
 
     public object? _value;
     public object? Value(object entity) => _value ?? (CanRead ? Property?.GetValue(entity) : null);

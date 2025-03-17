@@ -49,15 +49,6 @@ public abstract class BlossomApplicationBuilder : IBlossomApplicationBuilder
             Services.AddScoped(aggregate);
         }
 
-        var dtos = GetDtos(assembly)
-            .ToDictionary(x => x, x => entities.FirstOrDefault(y => y.Name == x.Name))
-            .Where(x => x.Value != null);
-
-        foreach (var dto in dtos)
-            Services.AddScoped(
-                typeof(IRunner<>).MakeGenericType(dto.Key),
-                typeof(BlossomProxyRunner<,>).MakeGenericType(dto.Key, dto.Value!));
-
         foreach (var api in assembly.GetTypes<IBlossomApi>())
             Services.AddScoped(api);
     }
