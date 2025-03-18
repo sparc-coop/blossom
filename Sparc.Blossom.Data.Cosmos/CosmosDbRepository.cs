@@ -132,6 +132,11 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         return CosmosQueryableExtensions.FromSqlRaw(Context.Set<T>(), sql, parameters);
     }
 
+    public IQueryable<T> FromSql(FormattableString sql)
+    {
+        return CosmosQueryableExtensions.FromSql(Context.Set<T>(), sql);
+    }
+
     public async Task<List<U>> FromSqlAsync<U>(string sql, string? partitionKey, params object[] parameters)
     {
         var container = DbProvider.Database.GetContainer(Context.GetType().Name);
