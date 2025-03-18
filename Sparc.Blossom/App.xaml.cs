@@ -2,9 +2,9 @@
 
 namespace Sparc.Blossom
 {
-    public partial class MobileApp : Application
+    public partial class App : Application
     {
-        public MobileApp()
+        public App()
         {
             InitializeComponent();
         }

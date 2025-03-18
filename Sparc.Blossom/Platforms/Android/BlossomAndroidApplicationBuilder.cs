@@ -22,7 +22,7 @@ public class BlossomAndroidApplicationBuilder : IBlossomApplicationBuilder
         MauiBuilder = MauiApp.CreateBuilder();
 
         MauiBuilder
-            .UseMauiApp<MobileApp>()
+            .UseMauiApp<App>()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

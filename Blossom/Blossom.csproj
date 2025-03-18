@@ -1,10 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFrameworks>net9.0-android</TargetFrameworks>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="MauiProgram.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="MauiProgram.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />

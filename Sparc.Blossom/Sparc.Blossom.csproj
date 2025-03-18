@@ -105,8 +105,8 @@
 		<None Include="**\*.xaml.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 		<Compile Remove="**\*.xaml" />
 		<None Include="**\*.xaml" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
-		<Compile Remove="**\MobileRoutes.cs" />
-		<None Include="**\MobileRoutes.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+		<Compile Remove="**\MauiProgram.cs" />
+		<None Include="**\MauiProgram.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 	</ItemGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''">
 		<Compile Remove="**\Server\**\*.cs" />

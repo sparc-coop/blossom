@@ -1,15 +1,16 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Routing
 @using System.Security.Claims
+@using System.Reflection
 
-@typeparam Program
-@typeparam DefaultLayout
+@* @typeparam Program
+@typeparam DefaultLayout *@
 
-<Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@AdditionalAssemblies">
+<Router AppAssembly="@ProgramType.Assembly" AdditionalAssemblies="@GetAdditionalAssemblies()">
     <Found Context="routeData">
         <CascadingValue Value="User">
             <Sparc.Blossom.Realtime.BlossomRealtimeHub>
-                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@LayoutType">
                     <NotAuthorized>
                         @if (!context.User.Identity?.IsAuthenticated == true)
                         {
@@ -45,7 +46,7 @@
         </CascadingValue>
     </Found>
     <NotFound>
-        <LayoutView Layout="@typeof(DefaultLayout)">
+            <LayoutView Layout="@LayoutType">
             @if (NotFound is not null)
             {
                 @NotFound
@@ -66,12 +67,23 @@
     [Parameter] public RenderFragment Loading { get; set; } = null!;
     ClaimsPrincipal User = new(new ClaimsIdentity());
 
+    [Parameter] public Type ProgramType { get; set; } = default!;
+    [Parameter] public Type LayoutType { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
         User = (await Auth.GetAuthenticationStateAsync()).User;
     }
 
-    public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
-    ? new[] { this.GetType().Assembly }
-        : new[] { this.GetType().Assembly, typeof(DefaultLayout).Assembly };
+    private Assembly[] GetAdditionalAssemblies()
+    {
+        if (LayoutType.Assembly.FullName == ProgramType.Assembly.FullName)
+            return new[] { this.GetType().Assembly };
+
+        return new[] { this.GetType().Assembly, LayoutType.Assembly };
+    }
+
+    // public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
+    // ? new[] { this.GetType().Assembly }
+    //     : new[] { this.GetType().Assembly, typeof(DefaultLayout).Assembly };
 } 
