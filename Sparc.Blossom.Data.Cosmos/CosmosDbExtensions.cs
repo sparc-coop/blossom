@@ -35,7 +35,7 @@ public static class CosmosDbExtensions
         where T : BlossomEntity<string>
     {
         if (repository is CosmosDbRepository<T> cosmosRepository)
-            return await cosmosRepository.FromSqlAsync<U>(sql, partitionKey, parameters);
+            return await cosmosRepository.FromSqlAsync<U>(sql, partitionKey, null, parameters);
 
         return repository.FromSqlRaw(sql, parameters).Cast<U>().ToList();
     }

@@ -18,9 +18,13 @@ public record BlossomPatch
         JsonPatchDocument = new();
     }
 
-    public BlossomPatch(object previousEntity, object currentEntity, bool ignoreNulls = false) : this()
+    public BlossomPatch(object previousEntity, object currentEntity, List<string>? propertiesToSelect = null, bool ignoreNulls = false) : this()
     {
         var properties = previousEntity.GetType().GetProperties();
+        
+        if (propertiesToSelect != null)
+            properties = properties.Where(x => propertiesToSelect.Any(y => y == x.Name)).ToArray();
+
         foreach (var property in properties)
             From(property.Name, property.GetValue(previousEntity), property.GetValue(currentEntity), ignoreNulls);
     }

@@ -19,11 +19,11 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         Context = context;
         DbProvider = dbProvider;
 
-        if (!IsCreated)
-        {
-            Context.Database.EnsureCreatedAsync().Wait();
-            IsCreated = true;
-        }
+        //if (!IsCreated)
+        //{
+        //    Context.Database.EnsureCreatedAsync().Wait();
+        //    IsCreated = true;
+        //}
         //Mediator = mediator;
         Query = context.Set<T>();
     }
@@ -137,9 +137,9 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         return CosmosQueryableExtensions.FromSql(Context.Set<T>(), sql);
     }
 
-    public async Task<List<U>> FromSqlAsync<U>(string sql, string? partitionKey, params object[] parameters)
+    public async Task<List<U>> FromSqlAsync<U>(string sql, string? partitionKey, string? containerName = null, params object[] parameters)
     {
-        var container = DbProvider.Database.GetContainer(Context.GetType().Name);
+        var container = DbProvider.Database.GetContainer(containerName ?? Context.GetType().Name);
         var requestOptions = partitionKey == null
             ? null
             : new QueryRequestOptions { PartitionKey = new PartitionKey(partitionKey) };
