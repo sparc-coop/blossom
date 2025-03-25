@@ -32,6 +32,10 @@ public class BlossomApplication
         return new Platforms.Server.BlossomServerApplicationBuilder(args ?? Array.Empty<string>());
 #elif ANDROID
         return new Platforms.Android.BlossomAndroidApplicationBuilder(args ?? Array.Empty<string>());
+#elif IOS
+        return new Platforms.iOS.BlossomiOSApplicationBuilder(args ?? Array.Empty<string>());
+#elif WINDOWS
+        return new Platforms.Windows.BlossomWindowsApplicationBuilder(args ?? Array.Empty<string>());
 #endif
         throw new NotImplementedException();
     }

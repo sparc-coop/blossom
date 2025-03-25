@@ -21,6 +21,13 @@ public class BlossomWindowsApplicationBuilder : IBlossomApplicationBuilder
     {
         MauiBuilder = MauiApp.CreateBuilder();
 
+        if (!_isAuthenticationAdded)
+        {
+            // No-config Blossom User setup
+            AddAuthentication<BlossomUser>();
+            Services.AddSingleton<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
+        }
+
         MauiBuilder
             .UseMauiApp<App>()
             .ConfigureFonts(fonts =>

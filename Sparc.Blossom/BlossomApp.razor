@@ -9,13 +9,14 @@
 <Router AppAssembly="@ProgramType.Assembly" AdditionalAssemblies="@GetAdditionalAssemblies()">
     <Found Context="routeData">
         <CascadingValue Value="User">
-            <Sparc.Blossom.Realtime.BlossomRealtimeHub>
+            <RouteView RouteData="@routeData" DefaultLayout="@LayoutType" />
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+@*             <Sparc.Blossom.Realtime.BlossomRealtimeHub>
                 <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@LayoutType">
                     <NotAuthorized>
                         @if (!context.User.Identity?.IsAuthenticated == true)
                         {
-                            @*                     <RedirectToLogin />
-                    *@      }
+                          }
                         else if (NotAuthorized is not null)
                         {
                             @NotAuthorized
@@ -42,7 +43,7 @@
                     </Authorizing>
                 </AuthorizeRouteView>
                 <FocusOnNavigate RouteData="routeData" Selector="h1" />
-            </Sparc.Blossom.Realtime.BlossomRealtimeHub>
+            </Sparc.Blossom.Realtime.BlossomRealtimeHub> *@
         </CascadingValue>
     </Found>
     <NotFound>
@@ -59,7 +60,7 @@
     </NotFound>
 </Router>
 
-@inject AuthenticationStateProvider Auth
+@* @inject AuthenticationStateProvider Auth *@
 @code {
     [Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
     [Parameter] public RenderFragment Authorizing { get; set; } = null!;
@@ -69,18 +70,33 @@
 
     [Parameter] public Type ProgramType { get; set; } = default!;
     [Parameter] public Type LayoutType { get; set; } = default!;
+    [Parameter] public IEnumerable<Assembly>? ExtraAssemblies { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        User = (await Auth.GetAuthenticationStateAsync()).User;
+        // User = (await Auth.GetAuthenticationStateAsync()).User;
     }
 
     private Assembly[] GetAdditionalAssemblies()
     {
-        if (LayoutType.Assembly.FullName == ProgramType.Assembly.FullName)
-            return new[] { this.GetType().Assembly };
+        var assemblies = new List<Assembly>();
 
-        return new[] { this.GetType().Assembly, LayoutType.Assembly };
+        if (LayoutType.Assembly.FullName == ProgramType.Assembly.FullName)
+        {
+            assemblies.Add(this.GetType().Assembly);
+        }
+        else
+        {
+            assemblies.Add(this.GetType().Assembly);
+            assemblies.Add(LayoutType.Assembly);
+        }
+
+        if (ExtraAssemblies is not null)
+        {
+            assemblies.AddRange(ExtraAssemblies);
+        }
+
+        return assemblies.Distinct().ToArray();
     }
 
     // public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName

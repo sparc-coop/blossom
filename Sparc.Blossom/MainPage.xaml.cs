@@ -10,6 +10,7 @@ namespace Sparc.Blossom
 
             blazorWebView.RootComponents.Add(new RootComponent
             {
+                Selector = "#app",
                 ComponentType = typeof(BlossomApp),
                 Parameters = new Dictionary<string, object>
                     {

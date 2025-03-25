@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui;
 using Microsoft.Maui.Hosting;
 using Sparc.Blossom.Authentication;
+using System.Security.Claims;
 
 namespace Sparc.Blossom.Platforms.Android;
 
@@ -20,6 +22,13 @@ public class BlossomAndroidApplicationBuilder : IBlossomApplicationBuilder
     public BlossomAndroidApplicationBuilder(string[] args)
     {
         MauiBuilder = MauiApp.CreateBuilder();
+
+        if (!_isAuthenticationAdded)
+        {
+            // No-config Blossom User setup
+            AddAuthentication<BlossomUser>();
+            Services.AddSingleton<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
+        }
 
         MauiBuilder
             .UseMauiApp<App>()
