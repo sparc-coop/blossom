@@ -80,17 +80,11 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         
         foreach (var item in detachedItems)
         {
-            var existing = await FindAsync(item.Id);
-            if (existing != null)
-            {
-                Context.Entry(existing).State = EntityState.Detached;
+            var entry = await FindAsync(item.Id);
+            if (entry == null)
                 Context.Add(item);
-                Context.Update(item);
-            }
             else
-            {
-                Context.Add(item);
-            }
+                Context.Entry(entry).CurrentValues.SetValues(item);
         }
 
         await Context.SaveChangesAsync();
