@@ -76,7 +76,9 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
 
     public virtual async Task UpdateAsync(IEnumerable<T> items)
     {
-        foreach (var item in items)
+        var detachedItems = items.Where(x => !IsTracked(x));
+        
+        foreach (var item in detachedItems)
         {
             var existing = await FindAsync(item.Id);
             if (existing != null)
@@ -93,6 +95,8 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
 
         await Context.SaveChangesAsync();
     }
+
+    private bool IsTracked(T entity) => Context.ChangeTracker.Entries<T>().Any(x => x.Entity.Id == entity.Id);
 
     public async Task ExecuteAsync(object id, Action<T> action)
     {
