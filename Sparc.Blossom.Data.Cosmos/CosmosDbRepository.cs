@@ -76,17 +76,6 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
 
     public virtual async Task UpdateAsync(IEnumerable<T> items)
     {
-        var detachedItems = items.Where(x => !IsTracked(x));
-        
-        foreach (var item in detachedItems)
-        {
-            var entry = await FindAsync(item.Id);
-            if (entry == null)
-                Context.Add(item);
-            else
-                Context.Entry(entry).CurrentValues.SetValues(item);
-        }
-
         await Context.SaveChangesAsync();
     }
 
