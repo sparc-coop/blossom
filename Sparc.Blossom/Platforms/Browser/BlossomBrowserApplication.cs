@@ -10,7 +10,7 @@ public class BlossomBrowserApplication<TLayout>(WebAssemblyHost host) : IBlossom
 
     public void Run()
     {
-        Host.Run();
+
     }
 
     public async Task RunAsync()
