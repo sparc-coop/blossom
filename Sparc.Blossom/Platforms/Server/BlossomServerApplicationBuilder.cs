@@ -46,7 +46,7 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
         Services.AddOutputCache();
         Services.AddOpenApi();
 
-        AddBlossomRealtime(callingAssembly);
+        //AddBlossomRealtime(callingAssembly);
 
         return new BlossomServerApplication(Builder);
     }

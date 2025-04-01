@@ -3,7 +3,6 @@ using Ardalis.Specification.EntityFrameworkCore;
 using MediatR;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 namespace Sparc.Blossom.Data;
 
@@ -24,6 +23,8 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
             throw new Exception($"Container name not found for entity type {typeof(T)}");
 
         Client = context.Database.GetCosmosClient();
+        Client.ClientOptions.Serializer = new CosmosDbSimpleSerializer();
+
         Container = Client.GetContainer(databaseName, containerName);
         Query = Container.GetItemLinqQueryable<T>();
         Mediator = mediator;
@@ -73,11 +74,18 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         await SaveChangesAsync();
     }
 
-    private async Task Publish(T item)
+    private async Task Publish(BlossomEntity item)
     {
         var events = item.Publish();
-        foreach (var ev in events)
-            await Mediator.Publish(ev);
+        try
+        {
+            foreach (var ev in events)
+                await Mediator.Publish(ev);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
     }
 
     public async Task UpdateAsync(T item)
@@ -90,7 +98,13 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         foreach (var item in items)
         {
             await Publish(item);
-            await Container.UpsertItemAsync(item);
+            try
+            {
+                await Container.UpsertItemAsync(item);
+            } catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
     }
 
