@@ -38,6 +38,12 @@ public static class CosmosDbExtensions
         return results;
     }
 
+    public static async Task<T?> CosmosFirstOrDefaultAsync<T>(this IQueryable<T> query)
+    {
+        var results = await query.ToCosmosAsync();
+        return results.FirstOrDefault();
+    }
+
     public static IQueryable<T> Query<T>(this IRepository<T> repository, string? partitionKey) where T : BlossomEntity<string>
     {
         if (repository is CosmosDbRepository<T> cosmosRepository && partitionKey != null)
