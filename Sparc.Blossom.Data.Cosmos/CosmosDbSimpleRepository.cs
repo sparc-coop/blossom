@@ -1,45 +1,45 @@
 ﻿using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
+using MediatR;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
+public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     where T : BlossomEntity<string>
 {
     public IQueryable<T> Query { get; }
-    public DbContext Context { get; }
-    protected CosmosDbDatabaseProvider DbProvider { get; }
+    public CosmosClient Client { get; }
+    public Container Container { get; }
+    public IMediator Mediator { get; }
 
-    private static bool IsCreated;
-
-    public CosmosDbRepository(DbContext context, CosmosDbDatabaseProvider dbProvider) : base(context)
+    public CosmosDbSimpleRepository(DbContext context, IMediator mediator) : base(context)
     {
-        Context = context;
-        DbProvider = dbProvider;
+        var databaseName = context.Database.GetCosmosDatabaseId();
+        var containerName = context.Model.FindEntityType(typeof(T))?.GetContainer();
 
-        //if (!IsCreated)
-        //{
-        //    Context.Database.EnsureCreatedAsync().Wait();
-        //    IsCreated = true;
-        //}
-        //Mediator = mediator;
-        Query = context.Set<T>();
+        if (containerName == null)
+            throw new Exception($"Container name not found for entity type {typeof(T)}");
+
+        Client = context.Database.GetCosmosClient();
+        Container = Client.GetContainer(databaseName, containerName);
+        Query = Container.GetItemLinqQueryable<T>();
+        Mediator = mediator;
     }
 
     public async Task<T?> FindAsync(object id)
     {
-        if (id is string sid)
-            return await Context.Set<T>().FirstOrDefaultAsync(x => x.Id == sid);
-
-        return await Context.Set<T>().FindAsync(id);
+        var strId = id.ToString();
+        var result = await Query.Where(x => x.Id == strId).ToCosmosAsync();
+        return result.FirstOrDefault();
     }
 
     public async Task<T?> FindAsync(ISpecification<T> spec)
     {
-        return await ApplySpecification(spec).FirstOrDefaultAsync();
+        var result = await ApplySpecification(spec).ToCosmosAsync();
+        return result.FirstOrDefault();
     }
 
     public async Task<int> CountAsync(ISpecification<T> spec)
@@ -65,9 +65,19 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
     public virtual async Task AddAsync(IEnumerable<T> items)
     {
         foreach (var item in items)
-            Context.Add(item);
+        {
+            await Publish(item);
+            await Container.CreateItemAsync(item);
+        }
 
         await SaveChangesAsync();
+    }
+
+    private async Task Publish(T item)
+    {
+        var events = item.Publish();
+        foreach (var ev in events)
+            await Mediator.Publish(ev);
     }
 
     public async Task UpdateAsync(T item)
@@ -79,23 +89,10 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         foreach (var item in items)
         {
-            var existing = await FindAsync(item.Id);
-            if (existing != null)
-            {
-                Context.Entry(existing).State = EntityState.Detached;
-                Context.Add(item);
-                Context.Update(item);
-            }
-            else
-            {
-                Context.Add(item);
-            }
+            await Publish(item);
+            await Container.UpsertItemAsync(item);
         }
-
-        await Context.SaveChangesAsync();
     }
-
-    private bool IsTracked(T entity) => Context.ChangeTracker.Entries<T>().Any(x => x.Entity.Id == entity.Id);
 
     public async Task ExecuteAsync(object id, Action<T> action)
     {
@@ -120,29 +117,20 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
     public async Task DeleteAsync(IEnumerable<T> items)
     {
         foreach (var item in items)
-            Context.Set<T>().Remove(item);
-
-        await Context.SaveChangesAsync();
-    }
-
-    private async Task<int> SaveChangesAsync()
-    {
-        return await Context.SaveChangesAsync().ConfigureAwait(false);
+        {
+            await Publish(item);
+            await Container.DeleteItemAsync<T>(item.Id, PartitionKey.None);
+        }
     }
 
     public IQueryable<T> FromSqlRaw(string sql, params object[] parameters)
     {
-        return CosmosQueryableExtensions.FromSqlRaw(Context.Set<T>(), sql, parameters);
+        var results = FromSqlAsync<T>(sql, null, null, parameters).Result;
+        return results.AsQueryable();
     }
 
-    public IQueryable<T> FromSql(FormattableString sql)
+    public async Task<List<U>> FromSqlAsync<U>(string sql, string? partitionKey, params object[] parameters)
     {
-        return CosmosQueryableExtensions.FromSql(Context.Set<T>(), sql);
-    }
-
-    public async Task<List<U>> FromSqlAsync<U>(string sql, string? partitionKey, string? containerName = null, params object[] parameters)
-    {
-        var container = DbProvider.Database.GetContainer(containerName ?? Context.GetType().Name);
         var requestOptions = partitionKey == null
             ? null
             : new QueryRequestOptions { PartitionKey = new PartitionKey(partitionKey) };
@@ -160,7 +148,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
             }
         }
 
-        var results = container.GetItemQueryIterator<U>(query,
+        var results = Container.GetItemQueryIterator<U>(query,
             requestOptions: requestOptions);
 
         var list = new List<U>();
@@ -169,16 +157,5 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
             list.AddRange(await results.ReadNextAsync());
 
         return list;
-    }
-
-    public async Task IncludeAsync<TProperty>(T entity, Expression<Func<T, IEnumerable<TProperty>>> navigationPropertyPath)
-        where TProperty : class
-    {
-        await Context.Entry(entity).Collection(navigationPropertyPath).LoadAsync();
-    }
-
-    public IQueryable<T> PartitionQuery(string partitionKey)
-    {
-        return Query.WithPartitionKey(partitionKey);
     }
 }
