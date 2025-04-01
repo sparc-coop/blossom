@@ -67,8 +67,8 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         foreach (var item in items)
         {
-            await Publish(item);
             await Container.CreateItemAsync(item);
+            await Publish(item);
         }
 
         await SaveChangesAsync();
@@ -97,11 +97,12 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         foreach (var item in items)
         {
-            await Publish(item);
             try
             {
                 await Container.UpsertItemAsync(item);
-            } catch (Exception e)
+                await Publish(item);
+            }
+            catch (Exception e)
             {
                 Console.WriteLine(e);
             }
@@ -132,8 +133,8 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         foreach (var item in items)
         {
-            await Publish(item);
             await Container.DeleteItemAsync<T>(item.Id, PartitionKey.None);
+            await Publish(item);
         }
     }
 
