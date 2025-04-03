@@ -137,6 +137,9 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="buildTransitive\" />
+	</ItemGroup>
 
 	<!-- Android -->
 	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.Razor" Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''" />

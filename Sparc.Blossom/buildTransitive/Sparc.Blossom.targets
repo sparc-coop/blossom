@@ -1,0 +1,5 @@
+﻿<Project>
+  <Target Name="PrintBlossomTargets" AfterTargets="Build">
+    <Message Text="Sparc.Blossom.targets has been imported and executed!" Importance="High" />
+  </Target>
+</Project>
