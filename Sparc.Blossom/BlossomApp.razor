@@ -59,6 +59,9 @@
 </Router>
 
 @inject AuthenticationStateProvider Auth
+@inject System.TimeProvider TimeProvider
+@inject Microsoft.JSInterop.IJSRuntime Js
+
 @code {
     [Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
     [Parameter] public RenderFragment Authorizing { get; set; } = null!;
@@ -69,6 +72,12 @@
     protected override async Task OnInitializedAsync()
     {
         User = (await Auth.GetAuthenticationStateAsync()).User;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && TimeProvider is Sparc.Blossom.BrowserTimeProvider browserTimeProvider)
+            await browserTimeProvider.InitializeAsync();
     }
 
     public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName

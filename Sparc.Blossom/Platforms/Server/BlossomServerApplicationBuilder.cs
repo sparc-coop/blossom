@@ -41,6 +41,8 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
 
         AddBlossomRepository();
 
+        Services.AddScoped<TimeProvider, BrowserTimeProvider>();
+
         Services.AddServerSideBlazor();
         Services.AddHttpContextAccessor();
         Services.AddOutputCache();
