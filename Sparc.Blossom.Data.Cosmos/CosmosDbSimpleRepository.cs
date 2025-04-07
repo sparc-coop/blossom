@@ -3,6 +3,7 @@ using Ardalis.Specification.EntityFrameworkCore;
 using MediatR;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Sparc.Blossom.Data;
 
@@ -13,19 +14,19 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     public CosmosClient Client { get; }
     public Container Container { get; }
     public IMediator Mediator { get; }
+    public IEntityType? EntityType { get; }
 
     public CosmosDbSimpleRepository(DbContext context, IMediator mediator) : base(context)
     {
         var databaseName = context.Database.GetCosmosDatabaseId();
-        var containerName = context.Model.FindEntityType(typeof(T))?.GetContainer();
-
-        if (containerName == null)
-            throw new Exception($"Container name not found for entity type {typeof(T)}");
-
+        EntityType = context.Model.FindEntityType(typeof(T));
         Client = context.Database.GetCosmosClient();
         Client.ClientOptions.Serializer = new CosmosDbSimpleSerializer();
 
+        var containerName = (EntityType?.GetContainer())
+            ?? throw new Exception($"Container name not found for entity type {typeof(T)}");
         Container = Client.GetContainer(databaseName, containerName);
+
         Query = Container.GetItemLinqQueryable<T>();
         Mediator = mediator;
     }
@@ -133,9 +134,26 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         foreach (var item in items)
         {
-            await Container.DeleteItemAsync<T>(item.Id, PartitionKey.None);
+            var partitionKey = GetPartitionKey(item);
+            await Container.DeleteItemAsync<T>(item.Id, partitionKey);
             await Publish(item);
         }
+    }
+
+    private PartitionKey GetPartitionKey(T item)
+    {
+        var partitionKeyProperty = EntityType?.GetPartitionKeyProperties();
+        if (partitionKeyProperty == null || partitionKeyProperty.Count == 0)
+            return PartitionKey.None;
+
+        var partitionKey = new PartitionKeyBuilder();
+        foreach (var property in partitionKeyProperty)
+        {
+            var value = item.GetType().GetProperty(property.Name)?.GetValue(item)?.ToString();
+            partitionKey.Add(value);
+        }
+
+        return partitionKey.Build();
     }
 
     public IQueryable<T> FromSqlRaw(string sql, params object[] parameters)
