@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>b81bcdcf-a5a1-44e0-b471-c575c3c40478</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sparc.Blossom.Payment.Stripe\Sparc.Blossom.Payment.Stripe.csproj" />
+  </ItemGroup>
+
+</Project>

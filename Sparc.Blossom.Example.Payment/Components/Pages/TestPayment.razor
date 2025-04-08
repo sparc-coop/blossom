@@ -1,0 +1,62 @@
+﻿@page "/test-payment"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IConfiguration Configuration
+@inject Sparc.Blossom.Payment.Stripe.StripePaymentService PaymentService
+@inject IJSRuntime JS
+
+<h3>Test Payment</h3>
+
+<p>Amount (in cents): <input @bind="_amount" type="number" /></p>
+<button @onclick="CreatePaymentIntent">Create Payment Intent</button>
+
+@if (_paymentIntentId != null)
+{
+    <p>PaymentIntent created: @_paymentIntentId</p>
+    <p>ClientSecret: @_clientSecret</p>
+
+    <form id="payment-form">
+        <div id="payment-element"></div>
+        <button id="submit-button" type="submit">Pay Now</button>
+    </form>
+    <div id="error-message" style="color:red;"></div>
+}
+
+@code {
+    private long _amount = 1000;
+    private string? _paymentIntentId;
+    private string? _clientSecret;
+
+    // We'll fetch your publishable key from appsettings
+    private string? _publishableKey;
+
+    protected override void OnInitialized()
+    {
+        _publishableKey = Configuration["Stripe:PublishableKey"];
+    }
+
+    private async Task CreatePaymentIntent()
+    {
+        // 1) Create PaymentIntent (server side)
+        var intent = await PaymentService.CreatePaymentIntentAsync(
+            amount: _amount,
+            currency: "usd"
+        );
+
+        // 2) Store PaymentIntent details
+        _paymentIntentId = intent.Id;
+        _clientSecret = intent.ClientSecret;
+
+        // 3) Because the UI is re-rendering, call StateHasChanged() so the form elements appear
+        StateHasChanged();
+
+        // 4) Initialize the Stripe Payment form with JS interop
+        if (!string.IsNullOrEmpty(_clientSecret) && !string.IsNullOrEmpty(_publishableKey))
+        {
+            await JS.InvokeVoidAsync(
+                "stripeIntegration.initPaymentForm",
+                _clientSecret,
+                _publishableKey
+            );
+        }
+    }
+}
