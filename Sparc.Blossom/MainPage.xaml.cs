@@ -11,12 +11,12 @@ namespace Sparc.Blossom
             blazorWebView.RootComponents.Add(new RootComponent
             {
                 Selector = "#app",
-                ComponentType = typeof(BlossomApp),
-                Parameters = new Dictionary<string, object>
-                    {
-                        { nameof(BlossomApp.ProgramType), typeof(MauiProgram) },
-                        { nameof(BlossomApp.LayoutType), MauiProgram.LayoutType }
-                    }
+                //ComponentType = typeof(BlossomApp),
+                //Parameters = new Dictionary<string, object>
+                //    {
+                //        { nameof(BlossomApp.ProgramType), typeof(MauiProgram) },
+                //        { nameof(BlossomApp.LayoutType), MauiProgram.LayoutType }
+                //    }
             });
         }
     }

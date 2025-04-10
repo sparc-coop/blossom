@@ -3,16 +3,16 @@
 @using System.Security.Claims
 @using System.Reflection
 
-@* @typeparam Program
-@typeparam DefaultLayout *@
+@typeparam Program
+@typeparam DefaultLayout
 
-<Router AppAssembly="@ProgramType.Assembly" AdditionalAssemblies="@GetAdditionalAssemblies()">
+<Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@GetAdditionalAssemblies()">
     <Found Context="routeData">
         <CascadingValue Value="User">
-            <RouteView RouteData="@routeData" DefaultLayout="@LayoutType" />
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)" />
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-@*             <Sparc.Blossom.Realtime.BlossomRealtimeHub>
-                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@LayoutType">
+            <Sparc.Blossom.Realtime.BlossomRealtimeHub>
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
                     <NotAuthorized>
                         @if (!context.User.Identity?.IsAuthenticated == true)
                         {
@@ -43,11 +43,11 @@
                     </Authorizing>
                 </AuthorizeRouteView>
                 <FocusOnNavigate RouteData="routeData" Selector="h1" />
-            </Sparc.Blossom.Realtime.BlossomRealtimeHub> *@
+            </Sparc.Blossom.Realtime.BlossomRealtimeHub>
         </CascadingValue>
     </Found>
     <NotFound>
-            <LayoutView Layout="@LayoutType">
+        <LayoutView Layout="@typeof(DefaultLayout)">
             @if (NotFound is not null)
             {
                 @NotFound
@@ -68,8 +68,8 @@
     [Parameter] public RenderFragment Loading { get; set; } = null!;
     ClaimsPrincipal User = new(new ClaimsIdentity());
 
-    [Parameter] public Type ProgramType { get; set; } = default!;
-    [Parameter] public Type LayoutType { get; set; } = default!;
+    // [Parameter] public Type ProgramType { get; set; } = default!;
+    // [Parameter] public Type LayoutType { get; set; } = default!;
     [Parameter] public IEnumerable<Assembly>? ExtraAssemblies { get; set; }
 
     protected override async Task OnInitializedAsync()
@@ -81,14 +81,14 @@
     {
         var assemblies = new List<Assembly>();
 
-        if (LayoutType.Assembly.FullName == ProgramType.Assembly.FullName)
+        if (typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName)
         {
             assemblies.Add(this.GetType().Assembly);
         }
         else
         {
             assemblies.Add(this.GetType().Assembly);
-            assemblies.Add(LayoutType.Assembly);
+            assemblies.Add(typeof(DefaultLayout).Assembly);
         }
 
         if (ExtraAssemblies is not null)
