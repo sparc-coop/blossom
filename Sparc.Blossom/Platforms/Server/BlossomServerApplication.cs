@@ -46,6 +46,11 @@ public class BlossomServerApplication : IBlossomApplication
         await Host.RunAsync();
     }
 
+    public void Run()
+    {
+        Host.Run();
+    }
+
     public async Task RunAsync<TApp>()
     {
         var razor = Host.MapRazorComponents<TApp>();

@@ -179,4 +179,9 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
 
         return new([]);
     }
+
+    public Task<int> CountAsync()
+    {
+        return Task.FromResult(_items.Count());
+    }
 }
