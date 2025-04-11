@@ -2,9 +2,9 @@
 
 namespace Sparc.Blossom
 {
-    public partial class MainPage : ContentPage
+    public partial class BlossomMainPage : ContentPage
     {
-        public MainPage()
+        public BlossomMainPage()
         {
             InitializeComponent();
 

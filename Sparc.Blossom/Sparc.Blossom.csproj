@@ -130,10 +130,10 @@
 	  </Compile>
 	</ItemGroup>
 	<ItemGroup>
-	  <None Update="App.xaml">
+	  <None Update="BlossomApp.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
-	  <None Update="MainPage.xaml">
+	  <None Update="BlossomMainPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
 	</ItemGroup>

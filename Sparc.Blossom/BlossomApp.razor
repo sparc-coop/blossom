@@ -71,8 +71,6 @@
     [Parameter] public RenderFragment Loading { get; set; } = null!;
     ClaimsPrincipal User = new(new ClaimsIdentity());
 
-    // [Parameter] public Type ProgramType { get; set; } = default!;
-    // [Parameter] public Type LayoutType { get; set; } = default!;
     [Parameter] public IEnumerable<Assembly>? ExtraAssemblies { get; set; }
 
     protected override async Task OnInitializedAsync()

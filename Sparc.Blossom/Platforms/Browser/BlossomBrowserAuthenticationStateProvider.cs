@@ -4,7 +4,7 @@ using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom.Platforms.Browser;
 
-public class BlossomClientAuthenticationStateProvider<T>(IRepository<T> users) : AuthenticationStateProvider where T : BlossomUser
+public class BlossomBrowserAuthenticationStateProvider<T>(IRepository<T> users) : AuthenticationStateProvider where T : BlossomUser
 {
     public IRepository<T> Users { get; } = users;
 

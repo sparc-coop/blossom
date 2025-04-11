@@ -2,16 +2,16 @@
 
 namespace Sparc.Blossom
 {
-    public partial class App : Application
+    public partial class BlossomApp : Application
     {
-        public App()
+        public BlossomApp()
         {
             InitializeComponent();
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new MainPage()) { Title = "Sparc.Blossom" };
+            return new Window(new BlossomMainPage()) { Title = "Sparc.Blossom" };
         }
     }
 }

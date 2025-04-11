@@ -29,7 +29,7 @@ public class BlossomiOSApplicationBuilder : IBlossomApplicationBuilder
         }
 
         MauiBuilder
-            .UseMauiApp<App>()
+            .UseMauiApp<BlossomApp>()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
