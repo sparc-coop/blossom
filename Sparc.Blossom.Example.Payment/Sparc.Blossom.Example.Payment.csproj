@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Sparc.Blossom.Payment.Stripe\Sparc.Blossom.Payment.Stripe.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\js\" />
+  </ItemGroup>
+
 </Project>

@@ -15,7 +15,6 @@ namespace Sparc.Blossom.Payment.Stripe
         public StripePaymentService(IOptions<StripeClientOptions> options)
         {
             _options = options.Value;
-
             StripeConfiguration.ApiKey = _options.ApiKey;
         }
 
@@ -24,7 +23,8 @@ namespace Sparc.Blossom.Payment.Stripe
             string currency,
             string? customerId = null,
             string? receiptEmail = null,
-            Dictionary<string, string>? metadata = null)
+            Dictionary<string, string>? metadata = null,
+            string? setupFutureUsage = null)
         {
             var service = new PaymentIntentService();
             var createOptions = new PaymentIntentCreateOptions
@@ -33,8 +33,12 @@ namespace Sparc.Blossom.Payment.Stripe
                 Currency = currency,
                 Customer = customerId,
                 ReceiptEmail = receiptEmail,
-                PaymentMethodTypes = new List<string> { "card" },
                 Metadata = metadata,
+                SetupFutureUsage = setupFutureUsage,
+                AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
+                {
+                    Enabled = true,
+                },
             };
 
             return await service.CreateAsync(createOptions);

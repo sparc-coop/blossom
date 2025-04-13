@@ -23,10 +23,8 @@ namespace Sparc.Blossom.Payment.StripeIntegration
 
         public async Task HandleAsync(HttpRequest request, HttpResponse response)
         {
-            // Read the body from the request
             var json = await new StreamReader(request.Body).ReadToEndAsync();
 
-            // Verify the signature using Stripe’s utility
             Event stripeEvent;
             try
             {
