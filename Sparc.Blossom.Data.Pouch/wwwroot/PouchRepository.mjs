@@ -20,6 +20,17 @@ async function find(dbName, id) {
 async function add(dbName, doc) {
     doc._id = doc.id;
     await getDb(dbName).put(doc);
+    console.log(`dbName`, dbName);
+    console.log('doc', doc);
+    await syncToApi(dbName, doc);
+}
+
+async function syncToApi(partitionKey, doc) {
+    await fetch(`https://localhost:7033/api/db/sync/${partitionKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(doc),
+    });
 }
 
 async function bulkAdd(dbName, docs) {
