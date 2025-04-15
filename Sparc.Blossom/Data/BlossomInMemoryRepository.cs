@@ -184,4 +184,9 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
     {
         return Task.FromResult(_items.Count());
     }
+
+    public Task<List<T>> SyncAsync()
+    {
+        throw new NotImplementedException();
+    }
 }

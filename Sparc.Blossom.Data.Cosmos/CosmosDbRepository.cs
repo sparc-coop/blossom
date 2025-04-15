@@ -172,4 +172,14 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         return Query.WithPartitionKey(partitionKey);
     }
+
+    public Task<int> CountAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<List<T>> SyncAsync()
+    {
+        throw new NotImplementedException();
+    }
 }

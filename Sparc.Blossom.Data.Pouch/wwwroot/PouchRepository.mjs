@@ -22,7 +22,7 @@ async function add(dbName, doc) {
     await getDb(dbName).put(doc);
     console.log(`dbName`, dbName);
     console.log('doc', doc);
-    await syncToApi(dbName, doc);
+    //await syncToApi(dbName, doc);
 }
 
 async function syncToApi(partitionKey, doc) {
