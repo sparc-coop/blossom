@@ -33,6 +33,74 @@ async function syncToApi(partitionKey, doc) {
     });
 }
 
+async function syncAll(datasetId) {
+    console.log("begin sync");
+
+    // Get the local PouchDB instance
+    var _db = getDb(datasetId);
+
+    console.log("local db", _db);
+
+    // Define the remote CosmosDB URL
+    var cosmosDbUrl = `https://localhost:7033/db/${datasetId}`;
+
+    console.log("cosmosDbUrl", cosmosDbUrl);
+
+    var cosmosDb = new PouchDB(cosmosDbUrl, {
+        fetch: async function (url, opts) {
+            // Customize the fetch request if needed (e.g., add headers)
+            opts.headers.set("x-functions-key", "abc123");
+            return PouchDB.fetch(url, opts);
+        }
+    });
+
+    // Sync options
+    var opts = {
+        live: true, // Enable live syncing
+        retry: true // Retry on failure
+    };
+
+    // Array to store changes
+    var changes = [];
+
+    // Return a promise to handle the sync process
+    return new Promise((resolve, reject) => {
+        _db.sync(cosmosDb, opts)
+            .on('change', function (info) {
+                // Handle change events
+                if (info.change && info.change.docs) {
+                    changes = changes.concat(info.change.docs);
+                }
+            })
+            .on('paused', function (err) {
+                // Replication paused (e.g., offline or up-to-date)
+                if (err) {
+                    console.warn("Sync paused due to an error:", err);
+                } else {
+                    console.log("Sync paused (up-to-date or offline).");
+                }
+            })
+            .on('active', function () {
+                // Replication resumed
+                console.log("Sync resumed.");
+            })
+            .on('denied', function (err) {
+                // Document write denied
+                console.error("Sync denied:", err);
+            })
+            .on('complete', function (info) {
+                // Sync completed
+                console.log("Sync complete:", info);
+                resolve(changes);
+            })
+            .on('error', function (err) {
+                // Unhandled error
+                console.error("Sync error:", err);
+                reject(err);
+            });
+    });
+}
+
 async function bulkAdd(dbName, docs) {
     await getDb(dbName).bulkDocs(docs);
 }
@@ -77,4 +145,4 @@ async function query(dbName, spec) {
     return result.docs;
 }
 
-export { find, add, bulkAdd, update, remove, bulkRemove, getAll, index, query, count };
+export { find, add, bulkAdd, update, remove, bulkRemove, getAll, index, query, count, syncAll };

@@ -11,3 +11,12 @@ public record GetChangesResult(List<GetChangesRev> rev, string id, string seq);
 public record GetChangesRev(string rev);
 public record GetCheckpointRequest(string PartitionKey, string Id);
 public record SaveCheckpointRequest(string DatasetId, string DocumentId, [FromBody] ReplicationLog Log);
+
+public record BulkPostDataRequest(string PartitionKey, List<dynamic> Docs);
+
+public record GetDatumRequest(string PartitionKey, string Id);
+
+public record SaveDatumRevisionRequest(string PartitionKey, string Id, [FromBody] dynamic Datum);
+
+public record ServerMetadataVendor(string name, string version);
+public record GetServerMetadataResponse(string couchdb, string uuid, ServerMetadataVendor vendor, string version);
