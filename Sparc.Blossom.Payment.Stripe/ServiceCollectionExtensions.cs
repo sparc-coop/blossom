@@ -13,5 +13,14 @@ namespace Sparc.Blossom.Payment.Stripe
             services.AddSingleton<StripePaymentService>();
             return services;
         }
+
+        public static IServiceCollection AddExchangeRates(
+            this IServiceCollection services,
+            Action<ExchangeRatesOptions> configure)
+        {
+            services.Configure(configure);
+            services.AddSingleton<ExchangeRates>();
+            return services;
+        }
     }
 }

@@ -11,10 +11,12 @@ namespace Sparc.Blossom.Payment.Stripe
     public class StripePaymentService
     {
         private readonly StripeClientOptions _options;
+        private readonly ExchangeRates _rates;
 
-        public StripePaymentService(IOptions<StripeClientOptions> options)
+        public StripePaymentService(IOptions<StripeClientOptions> options, ExchangeRates rates)
         {
             _options = options.Value;
+            _rates = rates;
             StripeConfiguration.ApiKey = _options.ApiKey;
         }
 
@@ -27,6 +29,9 @@ namespace Sparc.Blossom.Payment.Stripe
             string? setupFutureUsage = null)
         {
             var service = new PaymentIntentService();
+
+            var amountTest = await _rates.ConvertAsync(amount, "USD", "BRL");
+
             var createOptions = new PaymentIntentCreateOptions
             {
                 Amount = amount,
