@@ -45,13 +45,6 @@ app.UseHttpsRedirection();
 app.UseCors();
 
 
-app.MapPost("/api/db/sync/{partitionKey}", async (string partitionKey, Document doc, [FromServices]Container container) =>
-{
-    doc.LastModified = DateTime.UtcNow;
-    await container.UpsertItemAsync(doc, new PartitionKey(doc.id));
-    return Results.Ok(doc);
-});
-
 app.MapGet("/db/{partitionKey}", async (string partitionKey, [FromServices] Container container) =>
 {
     try
@@ -143,7 +136,7 @@ app.MapGet("/db/{partitionKey}/_local/{id}", async (string partitionKey, string 
     try
     {
         // Attempt to read the item from Cosmos DB
-        var item = await container.ReadItemAsync<ReplicationLog>(id, new PartitionKey(partitionKey));
+        var item = await container.ReadItemAsync<ReplicationLog>(id, new PartitionKey(id));
         return Results.Ok(item.Resource);
     }
     catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -212,60 +205,6 @@ app.MapPost("/db/{partitionKey}/_bulk_docs", async (string partitionKey, [FromBo
 
     return Results.Ok(results);
 });
-
-static async Task<BulkPostDataResponse> PostRevision(string partitionKey, dynamic doc, Container container)
-{
-    var result = new BulkPostDataResponse(doc);
-
-    try
-    {
-        var mutableDoc = JsonElementToDictionary(doc);
-
-        mutableDoc["_db"] = partitionKey;
-        //mutableDoc["id"] = $"{mutableDoc["_id"]}-{mutableDoc["_rev"]}"; //but this will be different from _id?
-        
-        //var jsonString = JsonSerializer.Serialize(mutableDoc);
-        //var jsonElement = JsonSerializer.Deserialize<JsonElement>(jsonString);
-
-        await container.CreateItemAsync(mutableDoc, new PartitionKey(mutableDoc["id"].ToString()));
-
-        result.Ok = true;
-    }
-    catch (Exception e)
-    {
-        // Handle errors and set error details in the response
-        result.SetError(e);
-    }
-
-    return result;
-}
-
-static Dictionary<string, object> JsonElementToDictionary(JsonElement element)
-{
-    var dict = new Dictionary<string, object>();
-
-    foreach (var property in element.EnumerateObject())
-    {
-        dict[property.Name] = ConvertJsonValue(property.Value);
-    }
-
-    return dict;
-}
-
-static object ConvertJsonValue(JsonElement value)
-{
-    return value.ValueKind switch
-    {
-        JsonValueKind.String => value.GetString(),
-        JsonValueKind.Number => value.TryGetInt64(out var l) ? l : value.GetDouble(),
-        JsonValueKind.True => true,
-        JsonValueKind.False => false,
-        JsonValueKind.Null => null!,
-        JsonValueKind.Object => JsonElementToDictionary(value),
-        JsonValueKind.Array => value.EnumerateArray().Select(ConvertJsonValue).ToList(),
-        _ => value.GetRawText()
-    };
-}
 
 app.MapGet("/db/{partitionKey}/{id}", async (string partitionKey, string id, [FromServices] Container container) =>
 {
@@ -372,20 +311,60 @@ app.MapMethods("/db", new[] { "GET", "POST" }, () =>
     return Results.Ok(response);
 });
 
+static async Task<BulkPostDataResponse> PostRevision(string partitionKey, dynamic doc, Container container)
+{
+    var result = new BulkPostDataResponse(doc);
 
+    try
+    {
+        var mutableDoc = JsonElementToDictionary(doc);
+
+        mutableDoc["_db"] = partitionKey;
+        mutableDoc["PartitionKey"] = mutableDoc["id"].ToString();
+        //mutableDoc["id"] = $"{mutableDoc["_id"]}-{mutableDoc["_rev"]}";
+        //mutableDoc["id"] = $"{mutableDoc["_id"]}-{mutableDoc["_rev"]}"; //but this will be different from _id?
+
+        //var jsonString = JsonSerializer.Serialize(mutableDoc);
+        //var jsonElement = JsonSerializer.Deserialize<JsonElement>(jsonString);
+
+        await container.CreateItemAsync(mutableDoc, new PartitionKey(mutableDoc["id"].ToString()));
+
+        result.Ok = true;
+    }
+    catch (Exception e)
+    {
+        // Handle errors and set error details in the response
+        result.SetError(e);
+    }
+
+    return result;
+}
+
+static Dictionary<string, object> JsonElementToDictionary(JsonElement element)
+{
+    var dict = new Dictionary<string, object>();
+
+    foreach (var property in element.EnumerateObject())
+    {
+        dict[property.Name] = ConvertJsonValue(property.Value);
+    }
+
+    return dict;
+}
+
+static object ConvertJsonValue(JsonElement value)
+{
+    return value.ValueKind switch
+    {
+        JsonValueKind.String => value.GetString(),
+        JsonValueKind.Number => value.TryGetInt64(out var l) ? l : value.GetDouble(),
+        JsonValueKind.True => true,
+        JsonValueKind.False => false,
+        JsonValueKind.Null => null!,
+        JsonValueKind.Object => JsonElementToDictionary(value),
+        JsonValueKind.Array => value.EnumerateArray().Select(ConvertJsonValue).ToList(),
+        _ => value.GetRawText()
+    };
+}
 
 app.Run();
-
-public class Document
-{
-    public string id { get; set; }
-    public string UserId { get; set; }
-    public string Type { get; set; }
-    public dynamic Data { get; set; }
-    public DateTime LastModified { get; set; }
-    public string Title { get; set; }
-    public string Author { get; set; }
-    public string Description { get; set; }
-    public DateTime DateCreated { get; set; }
-    public List<string> FileUrls { get; set; } = new();
-}

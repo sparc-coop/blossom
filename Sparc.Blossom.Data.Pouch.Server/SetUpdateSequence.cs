@@ -30,7 +30,7 @@ namespace Sparc.Blossom.Data.Pouch.Server
             // Ensure the source container exists
             var containerResponse = await database.CreateContainerIfNotExistsAsync(
                 id: Settings.SourceContainerName,
-                partitionKeyPath: "/id", // Adjust the partition key path as needed
+                partitionKeyPath: "/DatasetId", 
                 throughput: 400
             );
             Container = containerResponse.Container;
@@ -38,10 +38,12 @@ namespace Sparc.Blossom.Data.Pouch.Server
             // Ensure the lease container exists
             var leaseContainerResponse = await database.CreateContainerIfNotExistsAsync(
                 id: Settings.LeaseContainerName,
-                partitionKeyPath: "/id", // Adjust the partition key path as needed
+                partitionKeyPath: "/id", 
                 throughput: 400
             );
             var leaseContainer = leaseContainerResponse.Container;
+
+
 
             // Build the Change Feed Processor
             ChangeFeedProcessor = Container.GetChangeFeedProcessorBuilder<dynamic>("RevisionProcessor", SetUpdateSequenceAsync)

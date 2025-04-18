@@ -20,35 +20,21 @@ async function find(dbName, id) {
 async function add(dbName, doc) {
     doc._id = doc.id;
     await getDb(dbName).put(doc);
-    console.log(`dbName`, dbName);
-    console.log('doc', doc);
-    //await syncToApi(dbName, doc);
-}
-
-async function syncToApi(partitionKey, doc) {
-    await fetch(`https://localhost:7033/api/db/sync/${partitionKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(doc),
-    });
 }
 
 async function syncAll(datasetId) {
     console.log("begin sync");
 
-    // Get the local PouchDB instance
     var _db = getDb(datasetId);
 
     console.log("local db", _db);
 
-    // Define the remote CosmosDB URL
     var cosmosDbUrl = `https://localhost:7033/db/${datasetId}`;
 
     console.log("cosmosDbUrl", cosmosDbUrl);
 
     var cosmosDb = new PouchDB(cosmosDbUrl, {
         fetch: async function (url, opts) {
-            // Customize the fetch request if needed (e.g., add headers)
             opts.headers.set("x-functions-key", "abc123");
             return PouchDB.fetch(url, opts);
         }
@@ -56,18 +42,15 @@ async function syncAll(datasetId) {
 
     // Sync options
     var opts = {
-        live: true, // Enable live syncing
+        live: true,
         retry: true // Retry on failure
     };
 
-    // Array to store changes
     var changes = [];
 
-    // Return a promise to handle the sync process
     return new Promise((resolve, reject) => {
         _db.sync(cosmosDb, opts)
             .on('change', function (info) {
-                // Handle change events
                 if (info.change && info.change.docs) {
                     changes = changes.concat(info.change.docs);
                 }
