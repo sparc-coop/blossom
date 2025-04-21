@@ -20,6 +20,7 @@ public interface IRepository<T>
     Task<T?> FindAsync(ISpecification<T> spec);
     Task<List<T>> GetAllAsync(ISpecification<T> spec);
     Task<int> CountAsync(ISpecification<T> spec);
+    Task<int> CountAsync();
     Task<bool> AnyAsync(ISpecification<T> spec);
     IQueryable<T> FromSqlRaw(string sql, params object[] parameters);
 }

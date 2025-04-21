@@ -49,6 +49,11 @@ async function getAll(dbName) {
     return result.rows.map(row => row.doc);
 }
 
+async function count(dbName) {
+    const result = await getDb(dbName).allDocs({ limit: 0 });
+    return result.total_rows;
+}
+
 async function index(dbName, spec) {
     const { fields = [] } = spec;
     const db = getDb(dbName);
@@ -61,4 +66,4 @@ async function query(dbName, spec) {
     return result.docs;
 }
 
-export { find, add, bulkAdd, update, remove, bulkRemove, getAll, index, query };
+export { find, add, bulkAdd, update, remove, bulkRemove, getAll, index, query, count };

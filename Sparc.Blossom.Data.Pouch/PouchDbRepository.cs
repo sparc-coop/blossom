@@ -80,4 +80,9 @@ public class PouchDbRepository<T>(IJSRuntime js) : IRepository<T>
         var pouch = await _pouch.Value;
         return pouch;
     }
+
+    public async Task<int> CountAsync()
+    {
+        return await ExecuteAsync<int>("count", DbName);
+    }
 }
