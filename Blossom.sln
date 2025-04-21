@@ -37,8 +37,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.ApiGenerator"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Authentication.Passwordless", "Sparc.Blossom.Authentication.Passwordless\Sparc.Blossom.Authentication.Passwordless.csproj", "{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blossom", "Blossom\Blossom.csproj", "{D31CC347-A958-47AF-88E0-13A633660DEC}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{31506F1F-B84B-4DB3-AF7E-1507152575B4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sparc.Blossom.Template", "Sparc.Blossom.Template\Sparc.Blossom.Template.csproj", "{A82CBF80-D7A1-4240-901D-469302F29371}"
@@ -249,22 +247,6 @@ Global
 		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x64.Build.0 = Release|Any CPU
 		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x86.ActiveCfg = Release|Any CPU
 		{2C1B3E13-FFC3-46FC-82AF-E2E9BF046123}.Release|x86.Build.0 = Release|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Debug|arm64.ActiveCfg = Debug|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Debug|arm64.Build.0 = Debug|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Debug|x64.Build.0 = Debug|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Debug|x86.Build.0 = Debug|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Release|arm64.ActiveCfg = Release|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Release|arm64.Build.0 = Release|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Release|x64.ActiveCfg = Release|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Release|x64.Build.0 = Release|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Release|x86.ActiveCfg = Release|Any CPU
-		{D31CC347-A958-47AF-88E0-13A633660DEC}.Release|x86.Build.0 = Release|Any CPU
 		{A82CBF80-D7A1-4240-901D-469302F29371}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A82CBF80-D7A1-4240-901D-469302F29371}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A82CBF80-D7A1-4240-901D-469302F29371}.Debug|arm64.ActiveCfg = Debug|Any CPU

@@ -4,10 +4,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 using Passwordless;
-using Sparc.Blossom.Data;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Net.Http.Json;
+using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom.Authentication.Passwordless;
 
@@ -23,12 +23,9 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         IPasswordlessClient _passwordlessClient,
         IOptions<PasswordlessOptions> options,
         IRepository<T> users,
-        ILoggerFactory loggerFactory,
-        IServiceScopeFactory scopeFactory,
-        PersistentComponentState state,
         NavigationManager nav,
         IJSRuntime js)
-        : base(users, loggerFactory, scopeFactory, state)
+        : base(users)
     {
         PasswordlessClient = _passwordlessClient;
         Js = new(() => js.InvokeAsync<IJSObjectReference>("import", "./_content/Sparc.Blossom.Authentication.Passwordless/BlossomPasswordlessAuthenticator.js").AsTask());
@@ -40,22 +37,6 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         Nav = nav;
 
         publicKey = options.Value.ApiKey!;
-    }
-
-    public override async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
-    {
-        if (principal?.Identity?.IsAuthenticated == true)
-        {
-            User = await Users.FindAsync(principal.Id());
-        }
-
-        if (User == null)
-        {
-            User = new T();
-            await Users.AddAsync((T)User);
-        }
-
-        return User!;
     }
 
     public override async IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal principal, string? emailOrToken = null)
