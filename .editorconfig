@@ -1,5 +1,0 @@
-﻿[*.cs]
-
-# Default severity for browser trimmer diagnostics
-dotnet_analyzer_diagnostic.IL2072.severity = suggestion
-
