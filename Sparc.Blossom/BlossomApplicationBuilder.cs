@@ -3,15 +3,13 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using MediatR.NotificationPublishers;
-using Microsoft.AspNetCore.SignalR;
-using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom;
 
 public abstract class BlossomApplicationBuilder : IBlossomApplicationBuilder
 {
-    public virtual IServiceCollection Services { get; protected set; }
-    public virtual IConfiguration Configuration { get; protected set; }
+    public virtual IServiceCollection Services { get; protected set; } = null!;
+    public virtual IConfiguration Configuration { get; protected set; } = null!;
     protected bool _isAuthenticationAdded;
 
     public abstract void AddAuthentication<TUser>() where TUser : BlossomUser, new();

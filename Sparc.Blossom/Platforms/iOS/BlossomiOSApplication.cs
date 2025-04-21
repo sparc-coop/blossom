@@ -2,7 +2,7 @@
 
 public class BlossomiOSApplication : IBlossomApplication
 {
-    public static MauiApp? MauiApp;
+    public static MauiApp MauiApp = null!;
 
     public BlossomiOSApplication(MauiApp mauiApp)
     {

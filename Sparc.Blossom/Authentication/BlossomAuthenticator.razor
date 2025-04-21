@@ -52,7 +52,7 @@
     [SupplyParameterFromQuery]
     public string? Token { get; set; }
 
-    [CascadingParameter] public ClaimsPrincipal? User { get; set; }
+    [CascadingParameter] public required ClaimsPrincipal User { get; set; }
 
     public string? Email;
 

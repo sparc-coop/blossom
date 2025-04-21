@@ -120,7 +120,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         throw new NotImplementedException();
     }
 
-    public async Task<T?> Undo(object id, long? revision)
+    public Task<T?> Undo(object id, long? revision)
     {
         throw new NotImplementedException();
         
@@ -131,7 +131,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         //    : await Events.ReplaceAsync(strId, revision.Value);
     }
 
-    public async Task<T?> Redo(object id, long? revision)
+    public Task<T?> Redo(object id, long? revision)
     {
         throw new NotImplementedException();
         //var strId = id.ToString()!;

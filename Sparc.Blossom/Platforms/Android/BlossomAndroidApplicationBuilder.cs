@@ -39,7 +39,8 @@ public class BlossomAndroidApplicationBuilder : IBlossomApplicationBuilder
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             });
 
-        MauiBuilder.Services.AddMauiBlazorWebView();
+        if (OperatingSystem.IsAndroidVersionAtLeast(23))
+            MauiBuilder.Services.AddMauiBlazorWebView();
 
 #if DEBUG
         MauiBuilder.Services.AddBlazorWebViewDeveloperTools();

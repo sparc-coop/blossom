@@ -2,7 +2,7 @@
 
 public class BlossomAndroidApplication : IBlossomApplication
 {
-    public static MauiApp? MauiApp;
+    public static MauiApp MauiApp = null!;
 
     public BlossomAndroidApplication(MauiApp mauiApp)
     {

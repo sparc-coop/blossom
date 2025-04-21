@@ -75,11 +75,6 @@
     // [Parameter] public Type LayoutType { get; set; } = default!;
     [Parameter] public IEnumerable<Assembly>? ExtraAssemblies { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        // User = (await Auth.GetAuthenticationStateAsync()).User;
-    }
-
     private Assembly[] GetAdditionalAssemblies()
     {
         var assemblies = new List<Assembly>();
