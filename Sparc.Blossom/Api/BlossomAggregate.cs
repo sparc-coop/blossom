@@ -9,7 +9,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
     : IRunner<T> where T : BlossomEntity
 {
     public IRepository<T> Repository => options.Repository;
-    public IRealtimeRepository<T> Events => options.Events;
+    //public IRealtimeRepository<T> Events => options.Events;
 
     public virtual async Task<T?> Get(object id) => await Repository.FindAsync(id);
 
@@ -87,7 +87,7 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
             return;
 
         changes.ApplyTo(entity);
-        await Events.BroadcastAsync(new BlossomEntityPatched<T>(entity, changes));
+        //await Events.BroadcastAsync(new BlossomEntityPatched<T>(entity, changes));
         await Repository.UpdateAsync(entity);
     }
 
@@ -122,20 +122,23 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
 
     public async Task<T?> Undo(object id, long? revision)
     {
-        var strId = id.ToString()!;
+        throw new NotImplementedException();
+        
+        //var strId = id.ToString()!;
 
-        return !revision.HasValue
-            ? await Events.UndoAsync(strId)
-            : await Events.ReplaceAsync(strId, revision.Value);
+        //return !revision.HasValue
+        //    ? await Events.UndoAsync(strId)
+        //    : await Events.ReplaceAsync(strId, revision.Value);
     }
 
     public async Task<T?> Redo(object id, long? revision)
     {
-        var strId = id.ToString()!;
+        throw new NotImplementedException();
+        //var strId = id.ToString()!;
 
-        return !revision.HasValue
-            ? await Events.RedoAsync(strId)
-            : await Events.ReplaceAsync(strId, revision.Value);
+        //return !revision.HasValue
+        //    ? await Events.RedoAsync(strId)
+        //    : await Events.ReplaceAsync(strId, revision.Value);
     }
 
     public Type? DtoType => AppDomain.CurrentDomain.FindType($"Sparc.Blossom.Api.{typeof(T).Name}");
@@ -148,10 +151,9 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
     }
 }
 
-public class BlossomAggregateOptions<T>(IRepository<T> repository, IRealtimeRepository<T> events, ClaimsPrincipal principal)
+public class BlossomAggregateOptions<T>(IRepository<T> repository, ClaimsPrincipal principal)
     where T : BlossomEntity
 {
     public IRepository<T> Repository { get; } = repository;
-    public IRealtimeRepository<T> Events { get; } = events;
     public ClaimsPrincipal User { get; } = principal;
 }

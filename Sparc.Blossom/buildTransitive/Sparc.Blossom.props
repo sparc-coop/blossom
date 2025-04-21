@@ -1,0 +1,9 @@
+<Project>
+	<PropertyGroup>
+		<BlossomPropsImported>Sparc.Blossom.props has been imported!</BlossomPropsImported>
+	</PropertyGroup>
+
+	<Target Name="PrintBlossomProps" AfterTargets="Build">
+		<Message Text="$(BlossomPropsImported)" Importance="High" />
+	</Target>
+</Project>

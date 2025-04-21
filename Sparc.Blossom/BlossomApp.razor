@@ -1,20 +1,22 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Routing
 @using System.Security.Claims
+@using System.Reflection
 
 @typeparam Program
 @typeparam DefaultLayout
 
-<Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@AdditionalAssemblies">
+<Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@GetAdditionalAssemblies()">
     <Found Context="routeData">
         <CascadingValue Value="User">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)" />
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
             <Sparc.Blossom.Realtime.BlossomRealtimeHub>
                 <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
                     <NotAuthorized>
                         @if (!context.User.Identity?.IsAuthenticated == true)
                         {
-                            @*                     <RedirectToLogin />
-                    *@      }
+                          }
                         else if (NotAuthorized is not null)
                         {
                             @NotAuthorized
@@ -59,6 +61,9 @@
 </Router>
 
 @inject AuthenticationStateProvider Auth
+@inject System.TimeProvider TimeProvider
+@inject Microsoft.JSInterop.IJSRuntime Js
+
 @code {
     [Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
     [Parameter] public RenderFragment Authorizing { get; set; } = null!;
@@ -66,9 +71,41 @@
     [Parameter] public RenderFragment Loading { get; set; } = null!;
     ClaimsPrincipal User = new(new ClaimsIdentity());
 
+    // [Parameter] public Type ProgramType { get; set; } = default!;
+    // [Parameter] public Type LayoutType { get; set; } = default!;
+    [Parameter] public IEnumerable<Assembly>? ExtraAssemblies { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        User = (await Auth.GetAuthenticationStateAsync()).User;
+        // User = (await Auth.GetAuthenticationStateAsync()).User;
+    }
+
+    private Assembly[] GetAdditionalAssemblies()
+    {
+        var assemblies = new List<Assembly>();
+
+        if (typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName)
+        {
+            assemblies.Add(this.GetType().Assembly);
+        }
+        else
+        {
+            assemblies.Add(this.GetType().Assembly);
+            assemblies.Add(typeof(DefaultLayout).Assembly);
+        }
+
+        if (ExtraAssemblies is not null)
+        {
+            assemblies.AddRange(ExtraAssemblies);
+        }
+
+        return assemblies.Distinct().ToArray();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && TimeProvider is Sparc.Blossom.BrowserTimeProvider browserTimeProvider)
+            await browserTimeProvider.InitializeAsync();
     }
 
     public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName

@@ -2,6 +2,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Sparc.Blossom.Data;
 
@@ -76,15 +77,19 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
 
     public virtual async Task UpdateAsync(IEnumerable<T> items)
     {
-        var detachedItems = items.Where(x => !IsTracked(x));
-        
-        foreach (var item in detachedItems)
+        foreach (var item in items)
         {
-            var entry = await FindAsync(item.Id);
-            if (entry == null)
+            var existing = await FindAsync(item.Id);
+            if (existing != null)
+            {
+                Context.Entry(existing).State = EntityState.Detached;
                 Context.Add(item);
+                Context.Update(item);
+            }
             else
-                Context.Entry(entry).CurrentValues.SetValues(item);
+            {
+                Context.Add(item);
+            }
         }
 
         await Context.SaveChangesAsync();
@@ -166,8 +171,24 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         return list;
     }
 
+    public async Task IncludeAsync<TProperty>(T entity, Expression<Func<T, IEnumerable<TProperty>>> navigationPropertyPath)
+        where TProperty : class
+    {
+        await Context.Entry(entity).Collection(navigationPropertyPath).LoadAsync();
+    }
+
     public IQueryable<T> PartitionQuery(string partitionKey)
     {
         return Query.WithPartitionKey(partitionKey);
+    }
+
+    public Task<int> CountAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<List<T>> SyncAsync()
+    {
+        throw new NotImplementedException();
     }
 }

@@ -3,13 +3,13 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom;
 
-public class BlossomEvent : MediatR.INotification
+public record BlossomEvent : MediatR.INotification
 {
     public BlossomEvent()
-    { 
+    {
         // for JSON deserialization
     }
-    
+
     private BlossomEvent(string name)
     {
         Name = name;
@@ -20,7 +20,7 @@ public class BlossomEvent : MediatR.INotification
         EntityId = entity.GenericId.ToString();
         EntityType = entity.GetType().Name;
     }
-    
+
     public BlossomEvent(string name, BlossomEntity entity) : this(entity)
     {
         Name = name;
@@ -52,12 +52,13 @@ public class BlossomEvent : MediatR.INotification
     }
 }
 
-public class BlossomEvent<T>(T entity) : BlossomEvent(entity) where T : BlossomEntity
+public record BlossomEvent<T>(T entity) : BlossomEvent(entity) where T : BlossomEntity
 {
     public T Entity { get; private set; } = entity;
 
-    public BlossomEvent(BlossomEvent<T> previous) : this(previous.Entity, previous)
+    public BlossomEvent(BlossomEvent<T> previous) : base(previous)
     {
+        Entity = previous.Entity;
     }
 
     public BlossomEvent(string name, T entity) : this(entity)
@@ -74,6 +75,5 @@ public class BlossomEvent<T>(T entity) : BlossomEvent(entity) where T : BlossomE
     {
         PreviousId = previous.Id;
         Changes = new(previous.Entity, entity);
-
     }
 }

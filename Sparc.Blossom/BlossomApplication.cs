@@ -20,6 +20,7 @@ public interface IBlossomApplication
 
     Task RunAsync<TApp>();
     Task RunAsync();
+    void Run();
 }
 
 public class BlossomApplication
@@ -34,4 +35,18 @@ public class BlossomApplication
 #endif
         throw new NotImplementedException();
     }
+
+    public static IBlossomApplicationBuilder CreateBuilder(string[]? args = null)
+    {
+#if ANDROID
+        return new Platforms.Android.BlossomAndroidApplicationBuilder(args ?? Array.Empty<string>());
+#elif IOS
+        return new Platforms.iOS.BlossomiOSApplicationBuilder(args ?? Array.Empty<string>());
+#elif WINDOWS
+        return new Platforms.Windows.BlossomWindowsApplicationBuilder(args ?? Array.Empty<string>());
+#endif
+        throw new NotImplementedException();
+    }
 }
+
+

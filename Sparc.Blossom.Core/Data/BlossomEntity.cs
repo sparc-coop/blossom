@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Newtonsoft.Json;
+using System.Reflection;
 
 namespace Sparc.Blossom;
 
@@ -86,5 +87,6 @@ public class BlossomEntity<T> : BlossomEntity where T : notnull
     public BlossomEntity(T id) => Id = id;
     public override object GenericId => Id;
 
+    [JsonProperty("id")]
     public virtual T Id { get; set; }
 }

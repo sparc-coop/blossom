@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\kori\Sparc.Kori\Sparc.Kori.csproj" />
     <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
     <ProjectReference Include="..\Sparc.Blossom.ApiGenerator\Sparc.Blossom.ApiGenerator.csproj" OutputItemType="Analyzer" />
     <ProjectReference Include="..\Sparc.Blossom.Data.Pouch\Sparc.Blossom.Data.Pouch.csproj" />

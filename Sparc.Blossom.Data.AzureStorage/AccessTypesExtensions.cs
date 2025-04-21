@@ -1,13 +1,7 @@
-﻿using Azure.Storage.Blobs.Models;
+﻿
+using Azure.Storage.Blobs.Models;
 
-namespace Sparc.Blossom.Data;
-
-public enum AccessTypes
-{
-    Public,
-    PublicAndDiscoverable,
-    Private
-}
+namespace Sparc.Blossom.Data.AzureStorage;
 
 public static class AccessTypesExtensions
 {

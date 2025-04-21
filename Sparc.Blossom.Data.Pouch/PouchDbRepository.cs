@@ -85,4 +85,10 @@ public class PouchDbRepository<T>(IJSRuntime js) : IRepository<T>
     {
         return await ExecuteAsync<int>("count", DbName);
     }
+
+    public async Task<List<T>> SyncAsync()
+    {
+        return await ExecuteAsync<List<T>>("syncAll", DbName);
+    }
+
 }
