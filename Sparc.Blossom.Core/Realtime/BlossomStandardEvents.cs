@@ -1,11 +1,11 @@
 ﻿namespace Sparc.Blossom;
 
-public class BlossomEntityAdded<T>(T Entity) : BlossomEvent<T>(Entity) where T : BlossomEntity;
-public class BlossomEntityUpdated<T>(string commandName, T Entity) : BlossomEvent<T>(commandName, Entity) where T : BlossomEntity;
-public class BlossomEntityPatched<T>(T Entity, BlossomPatch changes) : BlossomEvent<T>(Entity, changes) where T : BlossomEntity;
-public class BlossomEntityDeleted<T>(T Entity) : BlossomEvent<T>(Entity) where T : BlossomEntity;
+public record BlossomEntityAdded<T>(T Entity) : BlossomEvent<T>(Entity) where T : BlossomEntity;
+public record BlossomEntityUpdated<T>(string commandName, T Entity) : BlossomEvent<T>(commandName, Entity) where T : BlossomEntity;
+public record BlossomEntityPatched<T>(T Entity, BlossomPatch changes) : BlossomEvent<T>(Entity, changes) where T : BlossomEntity;
+public record BlossomEntityDeleted<T>(T Entity) : BlossomEvent<T>(Entity) where T : BlossomEntity;
 
-public class BlossomEntityUndone<T> : BlossomEvent<T> where T : BlossomEntity
+public record BlossomEntityUndone<T> : BlossomEvent<T> where T : BlossomEntity
 {
     public BlossomEntityUndone(BlossomEvent<T> current, BlossomEvent<T> previous) : base(previous.Entity, current)
     {
@@ -14,7 +14,7 @@ public class BlossomEntityUndone<T> : BlossomEvent<T> where T : BlossomEntity
     }
 }
 
-public class BlossomEntityRedone<T> : BlossomEvent<T> where T : BlossomEntity
+public record BlossomEntityRedone<T> : BlossomEvent<T> where T : BlossomEntity
 {
     public BlossomEntityRedone(BlossomEvent<T> current, BlossomEvent<T> replaceWith) : base(replaceWith.Entity, current)
     {

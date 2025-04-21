@@ -2,6 +2,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Sparc.Blossom.Data;
 
@@ -19,11 +20,11 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         Context = context;
         DbProvider = dbProvider;
 
-        if (!IsCreated)
-        {
-            Context.Database.EnsureCreatedAsync().Wait();
-            IsCreated = true;
-        }
+        //if (!IsCreated)
+        //{
+        //    Context.Database.EnsureCreatedAsync().Wait();
+        //    IsCreated = true;
+        //}
         //Mediator = mediator;
         Query = context.Set<T>();
     }
@@ -94,6 +95,8 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         await Context.SaveChangesAsync();
     }
 
+    private bool IsTracked(T entity) => Context.ChangeTracker.Entries<T>().Any(x => x.Entity.Id == entity.Id);
+
     public async Task ExecuteAsync(object id, Action<T> action)
     {
         var entity = await FindAsync(id);
@@ -132,9 +135,14 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         return CosmosQueryableExtensions.FromSqlRaw(Context.Set<T>(), sql, parameters);
     }
 
-    public async Task<List<U>> FromSqlAsync<U>(string sql, string? partitionKey, params object[] parameters)
+    public IQueryable<T> FromSql(FormattableString sql)
     {
-        var container = DbProvider.Database.GetContainer(Context.GetType().Name);
+        return CosmosQueryableExtensions.FromSql(Context.Set<T>(), sql);
+    }
+
+    public async Task<List<U>> FromSqlAsync<U>(string sql, string? partitionKey, string? containerName = null, params object[] parameters)
+    {
+        var container = DbProvider.Database.GetContainer(containerName ?? Context.GetType().Name);
         var requestOptions = partitionKey == null
             ? null
             : new QueryRequestOptions { PartitionKey = new PartitionKey(partitionKey) };
@@ -163,8 +171,24 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         return list;
     }
 
+    public async Task IncludeAsync<TProperty>(T entity, Expression<Func<T, IEnumerable<TProperty>>> navigationPropertyPath)
+        where TProperty : class
+    {
+        await Context.Entry(entity).Collection(navigationPropertyPath).LoadAsync();
+    }
+
     public IQueryable<T> PartitionQuery(string partitionKey)
     {
         return Query.WithPartitionKey(partitionKey);
+    }
+
+    public Task<int> CountAsync()
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<List<T>> SyncAsync()
+    {
+        throw new NotImplementedException();
     }
 }

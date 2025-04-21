@@ -41,13 +41,13 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
     }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public virtual async IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal? principal, string? emailOrToken = null)
+    public virtual async IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal principal, string? emailOrToken = null)
     {
         LoginState = LoginStates.LoggedIn;
         yield return LoginState;
     }
 
-    public virtual async IAsyncEnumerable<LoginStates> Logout(ClaimsPrincipal? principal)
+    public virtual async IAsyncEnumerable<LoginStates> Logout(ClaimsPrincipal principal)
     {
         LoginState = LoginStates.LoggedOut;
         yield return LoginState;

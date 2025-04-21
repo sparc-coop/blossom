@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
 
 namespace Sparc.Blossom;
 
@@ -12,5 +13,10 @@ public static partial class ServiceCollectionExtensions
         services.AddScoped<IRepository<T>>(_ => results);
 
         return services;
+    }
+
+    public static Lazy<Task<IJSObjectReference>> Import(this IJSRuntime js, string module)
+    {
+        return new(() => js.InvokeAsync<IJSObjectReference>("import", module).AsTask());
     }
 }
