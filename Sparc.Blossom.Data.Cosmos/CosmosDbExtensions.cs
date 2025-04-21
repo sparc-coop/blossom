@@ -23,6 +23,27 @@ public static class CosmosDbExtensions
         }
     }
 
+    public static async Task<List<T>> ToCosmosAsync<T>(this IQueryable<T> query)
+    {
+        var iterator = query.ToFeedIterator();
+
+        var results = new List<T>();
+        while (iterator.HasMoreResults)
+        {
+            foreach (var item in await iterator.ReadNextAsync())
+            {
+                results.Add(item);
+            }
+        }
+        return results;
+    }
+
+    public static async Task<T?> CosmosFirstOrDefaultAsync<T>(this IQueryable<T> query)
+    {
+        var results = await query.ToCosmosAsync();
+        return results.FirstOrDefault();
+    }
+
     public static IQueryable<T> Query<T>(this IRepository<T> repository, string? partitionKey) where T : BlossomEntity<string>
     {
         if (repository is CosmosDbRepository<T> cosmosRepository && partitionKey != null)

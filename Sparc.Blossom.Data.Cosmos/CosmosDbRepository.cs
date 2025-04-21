@@ -2,6 +2,7 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Sparc.Blossom.Data;
 
@@ -94,6 +95,8 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         await Context.SaveChangesAsync();
     }
 
+    private bool IsTracked(T entity) => Context.ChangeTracker.Entries<T>().Any(x => x.Entity.Id == entity.Id);
+
     public async Task ExecuteAsync(object id, Action<T> action)
     {
         var entity = await FindAsync(id);
@@ -166,6 +169,12 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
             list.AddRange(await results.ReadNextAsync());
 
         return list;
+    }
+
+    public async Task IncludeAsync<TProperty>(T entity, Expression<Func<T, IEnumerable<TProperty>>> navigationPropertyPath)
+        where TProperty : class
+    {
+        await Context.Entry(entity).Collection(navigationPropertyPath).LoadAsync();
     }
 
     public IQueryable<T> PartitionQuery(string partitionKey)

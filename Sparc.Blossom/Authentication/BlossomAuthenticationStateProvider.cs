@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
-using Sparc.Blossom.Authentication;
 
-namespace Sparc.Blossom.Platforms.Browser;
+namespace Sparc.Blossom.Authentication;
 
-public class BlossomClientAuthenticationStateProvider<T>(IRepository<T> users) : AuthenticationStateProvider where T : BlossomUser
+public class BlossomAuthenticationStateProvider<T>(IRepository<T> users) : AuthenticationStateProvider where T : BlossomUser
 {
     public IRepository<T> Users { get; } = users;
 

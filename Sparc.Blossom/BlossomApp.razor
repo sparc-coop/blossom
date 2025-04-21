@@ -60,7 +60,10 @@
     </NotFound>
 </Router>
 
-@* @inject AuthenticationStateProvider Auth *@
+@inject AuthenticationStateProvider Auth
+@inject System.TimeProvider TimeProvider
+@inject Microsoft.JSInterop.IJSRuntime Js
+
 @code {
     [Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
     [Parameter] public RenderFragment Authorizing { get; set; } = null!;
@@ -99,7 +102,13 @@
         return assemblies.Distinct().ToArray();
     }
 
-    // public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
-    // ? new[] { this.GetType().Assembly }
-    //     : new[] { this.GetType().Assembly, typeof(DefaultLayout).Assembly };
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && TimeProvider is Sparc.Blossom.BrowserTimeProvider browserTimeProvider)
+            await browserTimeProvider.InitializeAsync();
+    }
+
+    public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
+    ? new[] { this.GetType().Assembly }
+        : new[] { this.GetType().Assembly, typeof(DefaultLayout).Assembly };
 } 

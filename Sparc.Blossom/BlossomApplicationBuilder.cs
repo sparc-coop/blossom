@@ -67,7 +67,7 @@ public abstract class BlossomApplicationBuilder : IBlossomApplicationBuilder
         if (!Services.Any(x => x.ServiceType == typeof(IRepository<>)))
             Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
 
-        Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
+        //Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
         Services.AddScoped<BlossomHubProxy>();
     }
 
