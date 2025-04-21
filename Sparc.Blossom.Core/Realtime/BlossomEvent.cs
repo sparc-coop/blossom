@@ -8,6 +8,7 @@ public record BlossomEvent : MediatR.INotification
     public BlossomEvent()
     {
         // for JSON deserialization
+        Name = "BlossomEvent";
     }
 
     private BlossomEvent(string name)
@@ -52,9 +53,14 @@ public record BlossomEvent : MediatR.INotification
     }
 }
 
-public record BlossomEvent<T>(T entity) : BlossomEvent(entity) where T : BlossomEntity
+public record BlossomEvent<T> : BlossomEvent where T : BlossomEntity
 {
-    public T Entity { get; private set; } = entity;
+    public T Entity { get; private set; }
+
+    public BlossomEvent(T entity) : base(entity)
+    {
+        Entity = entity;
+    }
 
     public BlossomEvent(BlossomEvent<T> previous) : base(previous)
     {

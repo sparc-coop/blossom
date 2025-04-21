@@ -7,7 +7,7 @@ public sealed class CosmosDbSimpleSerializer : CosmosSerializer
 {
     private static readonly Encoding DefaultEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
-    private readonly JsonSerializerSettings SerializerSettings;
+    private readonly JsonSerializerSettings? SerializerSettings;
 
     //
     // Summary:
@@ -42,10 +42,10 @@ public sealed class CosmosDbSimpleSerializer : CosmosSerializer
             return;
         }
 
-        JsonSerializerSettings serializerSettings = new JsonSerializerSettings
+        JsonSerializerSettings serializerSettings = new()
         {
-            NullValueHandling = (cosmosSerializerOptions.IgnoreNullValues ? NullValueHandling.Ignore : NullValueHandling.Include),
-            Formatting = (cosmosSerializerOptions.Indented ? Formatting.Indented : Formatting.None),
+            NullValueHandling = cosmosSerializerOptions.IgnoreNullValues ? NullValueHandling.Ignore : NullValueHandling.Include,
+            Formatting = cosmosSerializerOptions.Indented ? Formatting.Indented : Formatting.None,
             ContractResolver = new CamelCaseIdContractResolver(),
             MaxDepth = 64
         };
@@ -89,7 +89,7 @@ public sealed class CosmosDbSimpleSerializer : CosmosSerializer
 
             using StreamReader reader = new StreamReader(stream);
             using JsonTextReader reader2 = new JsonTextReader(reader);
-            return GetSerializer().Deserialize<T>(reader2);
+            return GetSerializer().Deserialize<T>(reader2) ?? default!;
         }
     }
 

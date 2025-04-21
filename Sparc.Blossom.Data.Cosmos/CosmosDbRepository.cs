@@ -13,7 +13,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
     public DbContext Context { get; }
     protected CosmosDbDatabaseProvider DbProvider { get; }
 
-    private static bool IsCreated;
+    //private static bool IsCreated;
 
     public CosmosDbRepository(DbContext context, CosmosDbDatabaseProvider dbProvider) : base(context)
     {

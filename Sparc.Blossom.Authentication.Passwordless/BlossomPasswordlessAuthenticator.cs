@@ -199,7 +199,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
 
         user.Logout();
 
-        await Users.UpdateAsync((T)User);
+        await Users.UpdateAsync((T)User!);
 
         yield return LoginStates.LoggedOut;
     }

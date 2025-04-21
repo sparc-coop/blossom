@@ -158,7 +158,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
 
     public IQueryable<T> FromSqlRaw(string sql, params object[] parameters)
     {
-        var results = FromSqlAsync<T>(sql, null, null, parameters).Result;
+        var results = FromSqlAsync<T>(sql, null, parameters).Result;
         return results.AsQueryable();
     }
 
