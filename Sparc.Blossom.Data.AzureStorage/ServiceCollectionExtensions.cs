@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped(_ => new BlobServiceClient(connectionString));
         services.AddScoped<IRepository<BlossomFile>, AzureBlobRepository>();
+        services.AddScoped<AzureBlobRepository>();
         return services;
     }
 
@@ -17,6 +18,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped(_ => new BlobServiceClient(configuration.GetConnectionString("Storage")));
         services.AddScoped<IRepository<BlossomFile>, AzureBlobRepository>();
+        services.AddScoped<AzureBlobRepository>();
         return services;
     }
 }

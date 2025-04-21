@@ -18,6 +18,44 @@ public class AzureBlobRepository(BlobServiceClient client) : IRepository<Blossom
         if (!await blob.ExistsAsync())
             await blob.UploadAsync(item.Stream);
 
+
+
+        item.Url = blob.Uri.AbsoluteUri;
+    }
+
+    public async Task AddAsync(BlossomFile item, IProgress<int> progress)
+    {
+        if (item.Stream == null)
+            throw new Exception("Stream is not attached to the BlossomFile");
+
+        var container = await GetContainer(item);
+        var blob = container.GetBlobClient(item.FileName);
+
+        var blockSize = 81920; // 80 KB
+        var totalBytes = item.Stream.Length;
+        var uploadedBytes = 0L;
+        var buffer = new byte[blockSize];
+
+        using var uploadStream = new MemoryStream();
+        int read;
+        while ((read = await item.Stream.ReadAsync(buffer)) > 0)
+        {
+            await uploadStream.WriteAsync(buffer.AsMemory(0, read));
+            uploadedBytes += read;
+
+            var percent = (int)(uploadedBytes * 100 / totalBytes);
+            progress.Report(percent);
+        }
+
+        uploadStream.Position = 0;
+
+        var blobHttpHeaders = new BlobHttpHeaders
+        {
+            ContentType = item.ContentType
+        };
+
+        await blob.UploadAsync(uploadStream, blobHttpHeaders);
+
         item.Url = blob.Uri.AbsoluteUri;
     }
 
