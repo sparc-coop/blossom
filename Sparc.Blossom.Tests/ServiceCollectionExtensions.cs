@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
         return faker;
     }
 
-    public static Faker<T> AddFakeRepository<T>(this IServiceCollection services, int? count = null) where T : class, IEntity<string>
+    public static Faker<T> AddFakeRepository<T>(this IServiceCollection services, int? count = null) where T : BlossomEntity<string>
     {
         var faker = services.AddFakeData<T>();
 
