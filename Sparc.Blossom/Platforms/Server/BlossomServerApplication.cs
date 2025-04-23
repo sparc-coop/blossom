@@ -1,5 +1,4 @@
-﻿using Scalar.AspNetCore;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Reflection;
 
 namespace Sparc.Blossom.Platforms.Server;
@@ -30,15 +29,7 @@ public class BlossomServerApplication : IBlossomApplication
         Host.UseAntiforgery();
 
         UseBlossomAuthentication();
-
-        if (IsDevelopment)
-        {
-            Host.MapOpenApi();
-            Host.MapScalarApiReference();
-        }
-
-        if (Builder.Services.Any(x => x.ServiceType.Name.Contains("Kori")))
-            UseAllCultures();
+        UseAllCultures();
     }
 
     public async Task RunAsync()

@@ -1,0 +1,6 @@
+@Sparc.Blossom.Cloud_HostAddress = http://localhost:5081
+
+GET {{Sparc.Blossom.Cloud_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

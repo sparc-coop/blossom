@@ -107,8 +107,6 @@
 	</PropertyGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
-		<PackageReference Include="Scalar.AspNetCore" Version="1.2.36" />
 		<Compile Remove="**\*.xaml.cs" />
 		<None Include="**\*.xaml.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 		<Compile Remove="**\*.xaml" />
