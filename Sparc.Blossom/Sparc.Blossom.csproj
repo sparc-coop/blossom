@@ -27,10 +27,19 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="BlossomApp.refitter" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.4.0" />
+		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
+		<PackageReference Include="Refitter.SourceGenerator" Version="1.5.3">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.0.2" />
 		<PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
 		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />

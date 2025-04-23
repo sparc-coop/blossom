@@ -1,0 +1,34 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Sparc.Blossom.Cloud | v1",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/tools/friendlyid": {
+      "get": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": { },
+  "tags": [
+    {
+      "name": "Sparc.Blossom.Cloud"
+    }
+  ]
+}
