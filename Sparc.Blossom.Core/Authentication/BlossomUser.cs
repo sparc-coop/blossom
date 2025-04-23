@@ -9,12 +9,18 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         Id = Guid.NewGuid().ToString();
         AuthenticationType = "Blossom";
         Username = Id;
+        Avatar = new(Id, Username);
     }
     
     public string Username { get; set; }
     public string AuthenticationType { get; set; }
     public string? ExternalId { get; set; }
     public string? ParentUserId { get; set; }
+    public DateTime DateCreated { get; private set; }
+    public DateTime DateModified { get; private set; }
+    public UserAvatar Avatar { get; private set; } = new();
+    public List<Language> LanguagesSpoken { get; private set; } = [];
+
 
     internal Dictionary<string, string> Claims { get; set; } = [];
     Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
@@ -131,5 +137,44 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
             orderedClaims.Zip(orderedPriorClaims, (a, b) => a.Key != b.Key || a.Value != b.Value).Any(x => x);
 
         return !hasDifferentClaims;
+    }
+    
+    public void ChangeVoice(Language language, Voice? voice = null)
+    {
+        var hasLanguageChanged = Avatar.Language != language;
+
+        if (!LanguagesSpoken.Any(x => x.Id == language.Id))
+            LanguagesSpoken.Add(language);
+
+        Avatar.Language = language with { DialectId = voice?.Locale, VoiceId = voice?.ShortName };
+        Avatar.Gender = voice?.Gender;
+    }
+
+    internal Language? PrimaryLanguage => LanguagesSpoken.FirstOrDefault(x => x == Avatar.Language);
+
+    public static BlossomUser System => new() { Username = "system" };
+
+    internal void UpdateAvatar(UserAvatar avatar)
+    {
+        Avatar.Id = Id;
+        Avatar.Language = avatar.Language;
+        Avatar.BackgroundColor = avatar.BackgroundColor;
+        Avatar.Pronouns = avatar.Pronouns;
+        Avatar.Name = avatar.Name;
+        Avatar.Description = avatar.Description;
+        Avatar.SkinTone = avatar.SkinTone;
+        Avatar.Emoji = avatar.Emoji;
+        Avatar.HearOthers = avatar.HearOthers;
+        Avatar.MuteMe = avatar.MuteMe;
+    }
+
+    internal void GoOnline(string connectionId)
+    {
+        Avatar.IsOnline = true;
+    }
+
+    internal void GoOffline()
+    {
+        Avatar.IsOnline = false;
     }
 }
