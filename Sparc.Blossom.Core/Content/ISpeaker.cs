@@ -1,4 +1,4 @@
-﻿namespace Kori;
+﻿namespace Sparc.Blossom.Content;
 
 internal interface ISpeaker
 {

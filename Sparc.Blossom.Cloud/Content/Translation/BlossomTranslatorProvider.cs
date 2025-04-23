@@ -1,8 +1,8 @@
 ﻿using System.Security.Claims;
 
-namespace Kori;
+namespace Sparc.Blossom.Content;
 
-public class KoriTranslatorProvider(IEnumerable<ITranslator> translators, IRepository<Content> content)
+public class BlossomTranslatorProvider(IEnumerable<ITranslator> translators, IRepository<Content> content)
 {
     internal static List<Language>? Languages;
 
@@ -110,6 +110,6 @@ public static class LanguageExtensions
 {
     public static Language? Language(this ClaimsPrincipal user, string? fallbackLanguageId = null)
     {
-        return KoriTranslatorProvider.GetLanguage(user, fallbackLanguageId);
+        return BlossomTranslatorProvider.GetLanguage(user, fallbackLanguageId);
     }
 }

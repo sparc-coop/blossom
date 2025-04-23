@@ -1,8 +1,6 @@
-﻿using DeepL.Model;
-using Markdig;
-using Markdig.Renderers;
+﻿using Sparc.Blossom.Authentication;
 
-namespace Kori;
+namespace Sparc.Blossom.Content;
 
 public record EditHistory(DateTime Timestamp, string Text);
 public record AudioContent(string? Url, long Duration, string Voice)
@@ -15,7 +13,7 @@ public record ContentTranslation(string Id, Language Language, string? SourceCon
     public ContentTranslation(string id) : this(id, new()) { }
 }
 
-    public class Content : BlossomEntity<string>
+public class Content : BlossomEntity<string>
 {
     public string Domain { get; private set; }
     public string Path { get; private set; }
@@ -42,7 +40,7 @@ public record ContentTranslation(string Id, Language Language, string? SourceCon
         PageId = pageId;
         Domain = new Uri(pageId).Host;
         Path = new Uri(pageId).AbsolutePath;
-        User = new KoriUser().Avatar;
+        User = new BlossomUser().Avatar;
         Language = new();
         Translations = [];
         EditHistory = [];
@@ -51,7 +49,7 @@ public record ContentTranslation(string Id, Language Language, string? SourceCon
         ContentType = "Text";
     }
 
-    public Content(string pageId, Language language, string text, KoriUser? user = null, string? originalText = null, string contentType = "Text") 
+    public Content(string pageId, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
         : this(pageId)
     {
         User = user?.Avatar;
@@ -67,7 +65,7 @@ public record ContentTranslation(string Id, Language Language, string? SourceCon
     {
         SourceContentId = sourceContent.Id;
         User = sourceContent.User;
-        Audio = sourceContent.Audio?.Voice == null ? null : new(null, 0, new(sourceContent.Audio.Voice));
+        Audio = sourceContent.Audio?.Voice == null ? null : new(null, 0, sourceContent.Audio.Voice);
         Language = toLanguage;
         Timestamp = sourceContent.Timestamp;
         OriginalText = sourceContent.OriginalText;

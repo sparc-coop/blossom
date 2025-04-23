@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom;
+﻿namespace Sparc.Blossom.Content;
 
 public record Language
 {
@@ -12,7 +12,7 @@ public record Language
 
     public Language() {}
 
-    internal Language(string id)
+    public Language(string id)
     {
         Id = id.Split('-').First();
         if (id.Contains('-'))

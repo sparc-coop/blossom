@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom.Cloud;
+﻿namespace Sparc.Blossom.Content;
 
 public interface ITranslator
 {

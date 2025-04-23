@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Content;
 
 public class Dialect
 {
