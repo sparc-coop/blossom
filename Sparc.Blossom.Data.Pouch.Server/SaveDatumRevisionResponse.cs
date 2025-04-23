@@ -1,18 +1,9 @@
 ﻿namespace Sparc.Blossom.Data.Pouch.Server
 {
-    public class SaveDatumRevisionResponse
+    public record SaveDatumRevisionResponse(bool Ok, string Error, string Reason)
     {
-        public SaveDatumRevisionResponse(dynamic data)
-        {
-            Id = data._id;
-            Rev = data._rev;
-        }
-
-        public string Id { get; set; }
-        public string Rev { get; set; }
-        public bool Ok { get; set; }
-        public string Error { get; set; }
-        public string Reason { get; set; }
+        public string Id { get; set; } = data._id;
+        public string Rev { get; set; } = data._rev;
 
         public void SetError(Exception e)
         {
