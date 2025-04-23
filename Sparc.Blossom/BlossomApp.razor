@@ -11,7 +11,7 @@
         <CascadingValue Value="User">
             <RouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)" />
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-            <Sparc.Blossom.Realtime.BlossomRealtimeHub>
+            @* <Sparc.Blossom.Realtime.BlossomRealtimeHub>
                 <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
                     <NotAuthorized>
                         @if (!context.User.Identity?.IsAuthenticated == true)
@@ -43,7 +43,7 @@
                     </Authorizing>
                 </AuthorizeRouteView>
                 <FocusOnNavigate RouteData="routeData" Selector="h1" />
-            </Sparc.Blossom.Realtime.BlossomRealtimeHub>
+            </Sparc.Blossom.Realtime.BlossomRealtimeHub> *@
         </CascadingValue>
     </Found>
     <NotFound>
