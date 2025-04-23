@@ -1,4 +1,4 @@
-﻿namespace Kori;
+﻿namespace Sparc.Blossom.Content;
 
 public class Pages(BlossomAggregateOptions<Page> options) : BlossomAggregate<Page>(options)
 {

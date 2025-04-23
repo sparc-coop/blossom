@@ -1,7 +1,7 @@
 ﻿using DeepL;
 using DeepL.Model;
 
-namespace Kori;
+namespace Sparc.Blossom.Content;
 
 internal class DeepLTranslator(IConfiguration configuration) : ITranslator
 {

@@ -30,7 +30,7 @@ public record Language
         }
     }
 
-    internal Language(string id, string displayName, string nativeName, bool? isRightToLeft) : this(id)
+    public Language(string id, string displayName, string nativeName, bool? isRightToLeft) : this(id)
     {
         DisplayName = displayName;
         NativeName = nativeName;

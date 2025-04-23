@@ -100,15 +100,15 @@ public class Page : BlossomEntity<string>
         EndDate = DateTime.UtcNow;
     }
     
-    internal void UpdateName(string name) => Name = name;
+    public void UpdateName(string name) => Name = name;
 
-    internal Task<ICollection<Content>> LoadOriginalContentAsync(IRepository<Content> repository)
+    public Task<ICollection<Content>> LoadOriginalContentAsync(IRepository<Content> repository)
     {
         Contents = repository.Query.Where(x => x.PageId == Id && x.SourceContentId == null).ToList();
         return Task.FromResult(Contents);
     }
 
-    internal async Task<IEnumerable<Content>> LoadContentAsync(Language language, IRepository<Content> repository, BlossomTranslator translator)
+    public async Task<IEnumerable<Content>> LoadContentAsync(Language language, IRepository<Content> repository, BlossomTranslator translator)
     {
         await LoadOriginalContentAsync(repository);
         var translatedContent = await TranslateAsync(language, translator);

@@ -9,7 +9,7 @@ public class BlossomTranslator(IEnumerable<ITranslator> translators, IRepository
     internal IEnumerable<ITranslator> Translators { get; } = translators;
     public IRepository<Content> Content { get; } = content;
 
-    internal async Task<List<Language>> GetLanguagesAsync()
+    public async Task<List<Language>> GetLanguagesAsync()
     {
         if (Languages == null)
         {

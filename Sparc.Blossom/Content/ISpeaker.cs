@@ -1,6 +1,6 @@
 ﻿namespace Sparc.Blossom.Content;
 
-internal interface ISpeaker
+public interface ISpeaker
 {
     Task<AudioContent?> SpeakAsync(Content message, string? voiceId = null);
     Task<List<Voice>> GetVoicesAsync(Language? language = null, string? dialect = null, string? gender = null);

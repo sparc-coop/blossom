@@ -14,6 +14,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     }
     
     public string Username { get; set; }
+    public string UserId { get { return Id; } set { Id = value; } }
     public string AuthenticationType { get; set; }
     public string? ExternalId { get; set; }
     public string? ParentUserId { get; set; }

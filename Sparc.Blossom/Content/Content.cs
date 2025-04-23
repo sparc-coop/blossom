@@ -34,7 +34,7 @@ public class Content : BlossomEntity<string>
     public string Html { get; set; }
     public string PageId { get; internal set; }
 
-    protected Content(string pageId)
+    public Content(string pageId)
     {
         Id = Guid.NewGuid().ToString();
         PageId = pageId;
@@ -61,7 +61,7 @@ public class Content : BlossomEntity<string>
         SetText(text);
     }
 
-    internal Content(Content sourceContent, Language toLanguage, string text) : this(sourceContent.PageId)
+    public Content(Content sourceContent, Language toLanguage, string text) : this(sourceContent.PageId)
     {
         SourceContentId = sourceContent.Id;
         User = sourceContent.User;
@@ -132,7 +132,7 @@ public class Content : BlossomEntity<string>
         }
     }
 
-    internal void AddCharge(long ticks, decimal cost, string description)
+    public void AddCharge(long ticks, decimal cost, string description)
     {
         Charge += ticks;
         Cost -= cost;

@@ -1,7 +1,7 @@
 ﻿using Azure;
 using Azure.AI.Translation.Text;
 
-namespace Kori;
+namespace Sparc.Blossom.Content;
 
 internal class AzureTranslator(IConfiguration configuration) : ITranslator
 {
