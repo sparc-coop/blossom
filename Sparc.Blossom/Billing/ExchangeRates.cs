@@ -1,20 +1,14 @@
 ﻿using System.Text.Json;
 
-namespace Kori;
+namespace Sparc.Blossom.Billing;
 
-public class ExchangeRates
+public class ExchangeRates(string apiKey, IFileRepository<BlossomFile> files)
 {
-    readonly string ApiKey;
+    readonly string ApiKey = apiKey;
     static Dictionary<string, decimal> Rates = [];
     public DateTime? LastUpdated { get; private set; }
     public DateTime? AsOfDate { get; private set; }
-    public IFileRepository<Sparc.Blossom.Data.BlossomFile> Files { get; }
-
-    public ExchangeRates(IConfiguration configuration, IFileRepository<Sparc.Blossom.Data.BlossomFile> files)
-    {
-        ApiKey = configuration["ExchangeRatesApi"]!;
-        Files = files;
-    }
+    public IFileRepository<BlossomFile> Files { get; } = files;
 
     public async Task<decimal> ConvertAsync(decimal amount, string from, string to)
     {
@@ -64,7 +58,8 @@ public class ExchangeRates
 
             client.DefaultRequestHeaders.Add("apikey", ApiKey);
 
-            var response = await client.GetFromJsonAsync<ExchangeRatesResponse>("?base=USD");
+            var result = await client.GetStringAsync("?base=USD");
+            var response = JsonSerializer.Deserialize<ExchangeRatesResponse>(result);
             if (response?.Success == true)
             {
                 Rates = response.Rates;
@@ -73,7 +68,7 @@ public class ExchangeRates
                 using MemoryStream stream = new();
                 await JsonSerializer.SerializeAsync(stream, response);
                 stream.Position = 0;
-                await Files.AddAsync(new Sparc.Blossom.Data.BlossomFile("exchangerates", $"{today}.json", AccessTypes.Public, stream));
+                await Files.AddAsync(new BlossomFile("exchangerates", $"{today}.json", AccessTypes.Public, stream));
             }
         }
     }

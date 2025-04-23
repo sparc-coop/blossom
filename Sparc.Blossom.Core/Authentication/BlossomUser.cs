@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using Sparc.Blossom.Content;
+using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 

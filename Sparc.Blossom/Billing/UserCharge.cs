@@ -1,6 +1,4 @@
-﻿using Stripe;
-
-namespace Kori;
+﻿namespace Sparc.Blossom.Billing;
 
 public class UserCharge : BlossomEntity<string>
 {
@@ -21,20 +19,20 @@ public class UserCharge : BlossomEntity<string>
         Description = "";
     }
 
-    internal UserCharge(string userId, PaymentIntent paymentIntent)
-    {
-        Id = paymentIntent.Id;
-        UserId = userId;
-        Description = "Funds Added";
-        Timestamp = DateTime.UtcNow;
-        Currency = paymentIntent.Currency.ToUpper();
-        //Amount = paymentIntent.LocalAmount();
-        PaymentIntent = paymentIntent.ToJson();
+    //internal UserCharge(string userId, PaymentIntent paymentIntent)
+    //{
+    //    Id = paymentIntent.Id;
+    //    UserId = userId;
+    //    Description = "Funds Added";
+    //    Timestamp = DateTime.UtcNow;
+    //    Currency = paymentIntent.Currency.ToUpper();
+    //    //Amount = paymentIntent.LocalAmount();
+    //    PaymentIntent = paymentIntent.ToJson();
 
-        Ticks = paymentIntent.Metadata.TryGetValue("Ticks", out var ticksStr) && long.TryParse(ticksStr, out var ticksVal)
-            ? ticksVal
-            : 0;
-    }
+    //    Ticks = paymentIntent.Metadata.TryGetValue("Ticks", out var ticksStr) && long.TryParse(ticksStr, out var ticksVal)
+    //        ? ticksVal
+    //        : 0;
+    //}
 
     //internal UserCharge(Room room, CostIncurred cost, User user)
     //{

@@ -2,7 +2,7 @@
 
 namespace Sparc.Blossom.Content;
 
-public class BlossomTranslatorProvider(IEnumerable<ITranslator> translators, IRepository<Content> content)
+public class BlossomTranslator(IEnumerable<ITranslator> translators, IRepository<Content> content)
 {
     internal static List<Language>? Languages;
 
@@ -90,7 +90,7 @@ public class BlossomTranslatorProvider(IEnumerable<ITranslator> translators, IRe
         if (Languages == null)
             return null;
 
-        var languageClaim = user.FindFirstValue(ClaimTypes.Locality);
+        var languageClaim = user.FindFirst(x => x.Type == ClaimTypes.Locality)?.Value;
         if (string.IsNullOrEmpty(languageClaim))
             return null;
 
@@ -110,6 +110,6 @@ public static class LanguageExtensions
 {
     public static Language? Language(this ClaimsPrincipal user, string? fallbackLanguageId = null)
     {
-        return BlossomTranslatorProvider.GetLanguage(user, fallbackLanguageId);
+        return BlossomTranslator.GetLanguage(user, fallbackLanguageId);
     }
 }

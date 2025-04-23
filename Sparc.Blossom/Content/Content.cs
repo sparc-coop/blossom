@@ -58,7 +58,7 @@ public class Content : BlossomEntity<string>
         Timestamp = DateTime.UtcNow;
         OriginalText = originalText ?? "";
         ContentType = contentType;
-        SetTextAndHtml(text);
+        SetText(text);
     }
 
     internal Content(Content sourceContent, Language toLanguage, string text) : this(sourceContent.PageId)
@@ -69,10 +69,10 @@ public class Content : BlossomEntity<string>
         Language = toLanguage;
         Timestamp = sourceContent.Timestamp;
         OriginalText = sourceContent.OriginalText;
-        SetTextAndHtml(text);
+        SetText(text);
     }
 
-    internal async Task<Content?> TranslateAsync(Language language, IRepository<Content> contents, KoriTranslatorProvider provider)
+    internal async Task<Content?> TranslateAsync(Language language, IRepository<Content> contents, BlossomTranslator provider)
     {
         if (Language == language)
             return this;
@@ -145,26 +145,8 @@ public class Content : BlossomEntity<string>
         DeletedDate = DateTime.UtcNow;
     }
 
-    public void SetHtmlFromMarkdown()
-    {
-        var pipeline = new MarkdownPipelineBuilder()
-            .UseEmphasisExtras()
-            .Build();
 
-        var writer = new StringWriter();
-        var renderer = new HtmlRenderer(writer)
-        {
-            ImplicitParagraph = true //This is needed to render a single line of text without a paragraph tag
-        };
-        pipeline.Setup(renderer);
-
-        renderer.Render(Markdown.Parse(Text ?? string.Empty, pipeline));
-        writer.Flush();
-
-        Html = writer.ToString();
-    }
-
-    public Content SetTextAndHtml(string text)
+    public Content SetText(string text)
     {
         if (Text == text)
             return this;
@@ -177,8 +159,6 @@ public class Content : BlossomEntity<string>
 
         Text = text;
         LastModified = DateTime.UtcNow;
-
-        SetHtmlFromMarkdown();
 
         return this;
     }
