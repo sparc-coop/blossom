@@ -14,9 +14,15 @@ public static class ServiceCollectionExtensions
         builder.Services.Configure<PasswordlessOptions>(passwordlessSettings);
         builder.Services.AddPasswordlessSdk(passwordlessSettings.Bind);
 
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddBlossomPasswordlessAuthenticationClient<TUser>(this WebApplicationBuilder builder)
+        where TUser : BlossomUser, new()
+    { 
         builder.Services.AddScoped<AuthenticationStateProvider, BlossomAuthenticationStateProvider<TUser>>()
             .AddScoped<BlossomPasswordlessAuthenticator<TUser>>()
-            .AddScoped(typeof(IBlossomAuthenticator), typeof(BlossomPasswordlessAuthenticator<TUser>));
+            .AddScoped<IBlossomAuthenticator, BlossomPasswordlessAuthenticator<TUser>>();
 
         return builder;
     }
