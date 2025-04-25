@@ -1,13 +1,10 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 using Passwordless;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Net.Http.Json;
-using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom.Authentication.Passwordless;
 

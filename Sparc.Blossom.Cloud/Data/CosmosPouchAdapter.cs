@@ -66,7 +66,7 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data) : IBlossom
         var last_seq = (results.LastOrDefault()?.Seq ?? request.since) ?? "0";
 
         var output = results
-            .Select(x => new GetChangesResult([new(x.Rev)], x.Id, x.Seq))
+            .Select(x => new GetChangesResult([new(x.Rev)], x.Id, x.Seq!))
             .ToList();
 
         // Return the response

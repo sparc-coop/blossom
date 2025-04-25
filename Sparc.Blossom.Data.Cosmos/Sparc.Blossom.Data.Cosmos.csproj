@@ -19,8 +19,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="8.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.0" />
+		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.1.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.4" />
 	</ItemGroup>
 
 	<ItemGroup>
