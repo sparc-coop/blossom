@@ -33,9 +33,4 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapGet("/tools/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
-
-var endpoints = app.Services.GetServices<IBlossomCloudApi>();
-foreach (var endpoint in endpoints)
-    endpoint.Map(app);
-
 app.Run();

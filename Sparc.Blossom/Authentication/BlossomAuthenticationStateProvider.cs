@@ -3,20 +3,21 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomAuthenticationStateProvider<T>(IRepository<T> users) : AuthenticationStateProvider where T : BlossomUser
+public class BlossomAuthenticationStateProvider<T>(IBlossomCloud cloud) : AuthenticationStateProvider where T : BlossomUser
 {
-    public IRepository<T> Users { get; } = users;
+    BlossomUser? User;
+    
+    public IBlossomCloud Cloud { get; } = cloud;
 
-    public virtual async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
+    public virtual Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
     {
-        return await Users.FindAsync(principal.Id()) ?? BlossomUser.FromPrincipal(principal);
-
+        return Task.FromResult(BlossomUser.FromPrincipal(principal));
     }
 
-    public override Task<AuthenticationState> GetAuthenticationStateAsync()
+    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var identity = new ClaimsIdentity();
-        var user = new ClaimsPrincipal(identity);
-        return Task.FromResult(new AuthenticationState(user));
+        User ??= await Cloud.UserInfo();
+        var principal = User.Login();
+        return new AuthenticationState(principal);
     }
 }

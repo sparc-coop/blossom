@@ -94,7 +94,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         return credentials.Any();
     }
 
-    public async Task<bool> SendMagicLinkAsync(BlossomUser user, string urlTemplate, int timeToLive = 3600)
+    private async Task<bool> SendMagicLinkAsync(BlossomUser user, string urlTemplate, int timeToLive = 3600)
         => await PostAsync("magic-links/send", new
         {
             emailAddress = user.Username,
@@ -154,5 +154,6 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
     {
         var auth = endpoints.MapGroup("/auth");
         auth.MapPost("login", LoginWithPasswordless);
+        auth.MapGet("userinfo", GetAsync);
     }
 }
