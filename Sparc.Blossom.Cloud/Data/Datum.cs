@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom.Cloud.Data;
+﻿namespace Sparc.Blossom.Data;
 
 public class Datum : BlossomEntity<string>
 {

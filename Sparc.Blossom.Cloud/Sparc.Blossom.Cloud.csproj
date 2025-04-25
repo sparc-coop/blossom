@@ -23,6 +23,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Passwordless" Version="2.0.0" />
 		<PackageReference Include="Scalar.AspNetCore" Version="2.2.1" />
 		<PackageReference Include="Markdig" Version="0.41.0" />
 		<PackageReference Include="Azure.AI.Translation.Text" Version="1.0.0" />
@@ -33,12 +34,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Authentication\" />
 		<Folder Include="Communication\" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Sparc.Blossom.Authentication.Passwordless\Sparc.Blossom.Authentication.Passwordless.csproj" />
 		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 		<ProjectReference Include="..\Sparc.Blossom.Data.Cosmos\Sparc.Blossom.Data.Cosmos.csproj" />
 		<ProjectReference Include="..\Sparc.Blossom\Sparc.Blossom.csproj" />

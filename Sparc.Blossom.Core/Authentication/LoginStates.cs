@@ -7,6 +7,7 @@ public enum LoginStates
     ReadyForLogin,
     VerifyingEmail,
     AwaitingMagicLink,
+    AwaitingPasskey,
     VerifyingToken,
     LoggedIn,
     LoggingOut,

@@ -5,6 +5,35 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "BlossomPasswordlessAuthenticator`1"
+        ],
+        "parameters": [
+          {
+            "name": "emailOrToken",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginStates"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/friendlyid": {
       "get": {
         "tags": [
@@ -25,8 +54,17 @@
       }
     }
   },
-  "components": { },
+  "components": {
+    "schemas": {
+      "LoginStates": {
+        "type": "integer"
+      }
+    }
+  },
   "tags": [
+    {
+      "name": "BlossomPasswordlessAuthenticator`1"
+    },
     {
       "name": "Sparc.Blossom.Cloud"
     }

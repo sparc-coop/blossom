@@ -28,7 +28,6 @@ public class BlossomServerApplication : IBlossomApplication
         Host.MapStaticAssets();
         Host.UseAntiforgery();
 
-        UseBlossomAuthentication();
         UseAllCultures();
     }
 
@@ -65,14 +64,6 @@ public class BlossomServerApplication : IBlossomApplication
         });
 
         await RunAsync();
-    }
-
-    void UseBlossomAuthentication()
-    {
-        Host.UseCookiePolicy(new() { MinimumSameSitePolicy = SameSiteMode.Strict });
-        Host.UseAuthentication();
-        Host.UseAuthorization();
-        Host.UseMiddleware<BlossomAuthenticatorMiddleware>();
     }
 
     void UseCultures(string[] supportedCultures)

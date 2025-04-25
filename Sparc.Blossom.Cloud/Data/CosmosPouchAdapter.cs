@@ -1,12 +1,10 @@
-﻿using Mapster;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Cosmos;
-using Sparc.Blossom.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+
 using System.Data;
 
-namespace Sparc.Blossom.Cloud.Data;
+namespace Sparc.Blossom.Data;
 
-public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data) : IBlossomApi
+public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data) : IBlossomCloudApi
 {
     public CosmosDbSimpleRepository<Datum> Data { get; } = data;
 
