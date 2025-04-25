@@ -8,18 +8,8 @@ public class BlossomBrowserApplication<TLayout>(WebAssemblyHost host) : IBlossom
     public IServiceProvider Services => Host.Services;
     public bool IsDevelopment => false;
 
-    public void Run()
-    {
-
-    }
-
-    public async Task RunAsync()
-    {
-        await Host.RunAsync();
-    }
-
     public async Task RunAsync<TApp>()
     {
-        await RunAsync();
+        await Host.RunAsync();
     }
 }

@@ -8,8 +8,6 @@ public interface IBlossomApplication
     bool IsDevelopment { get; }
 
     Task RunAsync<TApp>();
-    Task RunAsync();
-    void Run();
 }
 
 public class BlossomApplication

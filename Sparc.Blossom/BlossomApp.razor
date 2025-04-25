@@ -76,6 +76,7 @@
     protected override async Task OnInitializedAsync()
     {
         User = (await Auth.GetAuthenticationStateAsync()).User;
+        Console.WriteLine("Hello " + User.Identity.Name);
     }
 
     private Assembly[] GetAdditionalAssemblies()

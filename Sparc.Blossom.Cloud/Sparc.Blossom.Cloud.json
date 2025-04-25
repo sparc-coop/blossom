@@ -8,7 +8,7 @@
     "/auth/login": {
       "post": {
         "tags": [
-          "BlossomPasswordlessAuthenticator`1"
+          "Sparc.Blossom.Cloud"
         ],
         "parameters": [
           {
@@ -37,7 +37,7 @@
     "/auth/userinfo": {
       "get": {
         "tags": [
-          "BlossomDefaultAuthenticator`1"
+          "Sparc.Blossom.Cloud"
         ],
         "responses": {
           "200": {
@@ -303,12 +303,6 @@
     }
   },
   "tags": [
-    {
-      "name": "BlossomPasswordlessAuthenticator`1"
-    },
-    {
-      "name": "BlossomDefaultAuthenticator`1"
-    },
     {
       "name": "Sparc.Blossom.Cloud"
     }
