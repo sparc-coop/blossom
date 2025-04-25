@@ -3,16 +3,24 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using MediatR.NotificationPublishers;
+using Refit;
 
 namespace Sparc.Blossom;
 
-public abstract class BlossomApplicationBuilder : IBlossomApplicationBuilder
+public abstract class BlossomApplicationBuilder
 {
     public virtual IServiceCollection Services { get; protected set; } = null!;
     public virtual IConfiguration Configuration { get; protected set; } = null!;
     protected bool _isAuthenticationAdded;
 
     public abstract void AddAuthentication<TUser>() where TUser : BlossomUser, new();
+
+    public void AddBlossomCloud()
+    {
+        Services.AddRefitClient<IBlossomCloud>()
+            .ConfigureHttpClient(x => x.BaseAddress = new Uri("https://localhost:7185"));
+    }
+
     public abstract IBlossomApplication Build();
 
     protected void RegisterBlossomEntities(Assembly assembly)

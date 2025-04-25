@@ -7,15 +7,11 @@ using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom.Platforms.Windows;
 
-public class BlossomWindowsApplicationBuilder : IBlossomApplicationBuilder
+public class BlossomWindowsApplicationBuilder : BlossomApplicationBuilder
 {
     private readonly MauiAppBuilder MauiBuilder;
 
-    public IServiceCollection Services => MauiBuilder.Services;
-
-    public IConfiguration Configuration { get; }
-
-    private bool _isAuthenticationAdded;
+    public override IServiceCollection Services => MauiBuilder.Services;
 
     public BlossomWindowsApplicationBuilder(string[] args)
     {
@@ -46,7 +42,7 @@ public class BlossomWindowsApplicationBuilder : IBlossomApplicationBuilder
             .Build();
     }
 
-    public void AddAuthentication<TUser>() where TUser : BlossomUser, new()
+    public override void AddAuthentication<TUser>()
     {
 
         Services.AddScoped<BlossomDefaultAuthenticator<TUser>>()
@@ -55,7 +51,7 @@ public class BlossomWindowsApplicationBuilder : IBlossomApplicationBuilder
         _isAuthenticationAdded = true;
     }
 
-    public IBlossomApplication Build()
+    public override IBlossomApplication Build()
     {
 
         if (!_isAuthenticationAdded)

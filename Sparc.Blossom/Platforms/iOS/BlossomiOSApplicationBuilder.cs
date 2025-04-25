@@ -1,21 +1,14 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui;
-using Microsoft.Maui.Hosting;
 using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom.Platforms.iOS;
 
-public class BlossomiOSApplicationBuilder : IBlossomApplicationBuilder
+public class BlossomiOSApplicationBuilder : BlossomApplicationBuilder
 {
     private readonly MauiAppBuilder MauiBuilder;
 
-    public IServiceCollection Services => MauiBuilder.Services;
-
-    public IConfiguration Configuration { get; }
-
-    private bool _isAuthenticationAdded;
+    public override IServiceCollection Services => MauiBuilder.Services;
 
     public BlossomiOSApplicationBuilder(string[] args)
     {
@@ -46,7 +39,7 @@ public class BlossomiOSApplicationBuilder : IBlossomApplicationBuilder
             .Build();
     }
 
-    public void AddAuthentication<TUser>() where TUser : BlossomUser, new()
+    public override void AddAuthentication<TUser>() 
     {
 
         Services.AddScoped<BlossomDefaultAuthenticator<TUser>>()
@@ -55,7 +48,7 @@ public class BlossomiOSApplicationBuilder : IBlossomApplicationBuilder
         _isAuthenticationAdded = true;
     }
 
-    public IBlossomApplication Build()
+    public override IBlossomApplication Build()
     {
 
         if (!_isAuthenticationAdded)

@@ -1,17 +1,6 @@
-﻿using Sparc.Blossom.Authentication;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 
 namespace Sparc.Blossom;
-
-public interface IBlossomApplicationBuilder
-{
-    public IServiceCollection Services { get; }
-    public IConfiguration Configuration { get; }
-    void AddAuthentication<TUser>() where TUser : BlossomUser, new();
-    public IBlossomApplication Build();
-}
 
 public interface IBlossomApplication
 {
@@ -25,7 +14,7 @@ public interface IBlossomApplication
 
 public class BlossomApplication
 {
-    public static IBlossomApplicationBuilder CreateBuilder<TApp>(string[]? args = null)
+    public static BlossomApplicationBuilder CreateBuilder<TApp>(string[]? args = null)
         where TApp : IComponent
     {
 #if BROWSER
