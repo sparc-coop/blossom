@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using MediatR.NotificationPublishers;
 using Refit;
+using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom;
 
@@ -18,7 +19,8 @@ public abstract class BlossomApplicationBuilder
     public void AddBlossomCloud()
     {
         Services.AddRefitClient<IBlossomCloud>()
-            .ConfigureHttpClient(x => x.BaseAddress = new Uri("https://localhost:7185"));
+            .ConfigureHttpClient(x => x.BaseAddress = new Uri("https://localhost:7185"))
+            .AddStandardResilienceHandler();
     }
 
     public abstract IBlossomApplication Build();
@@ -71,7 +73,7 @@ public abstract class BlossomApplicationBuilder
     protected void AddBlossomRepository()
     {
         if (!Services.Any(x => x.ServiceType == typeof(IRepository<>)))
-            Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
+            Services.AddScoped(typeof(IRepository<>), typeof(PouchDbRepository<>));
 
         //Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
         Services.AddScoped<BlossomHubProxy>();

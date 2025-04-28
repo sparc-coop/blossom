@@ -49,7 +49,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
     {
         Services.AddAuthorizationCore();
         
-        Services.AddScoped<AuthenticationStateProvider, BlossomAuthenticationStateProvider<TUser>>()
+        Services.AddScoped<AuthenticationStateProvider, BlossomCloudAuthenticationStateProvider<TUser>>()
             .AddScoped<BlossomDefaultAuthenticator<TUser>>()
             .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<TUser>>();
 

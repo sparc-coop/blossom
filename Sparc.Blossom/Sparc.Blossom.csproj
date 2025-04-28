@@ -35,11 +35,12 @@
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.2" />
 		<PackageReference Include="System.Net.Http.Json" Version="9.0.4" />
 		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+		<ProjectReference Include="..\Sparc.Blossom.Data.Pouch\Sparc.Blossom.Data.Pouch.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\Sparc.Blossom.ApiGenerator\bin\$(Configuration)\netstandard2.0\Sparc.Blossom.ApiGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-		<None Include="Authentication\BlossomAuthenticationStateProvider.cs" />
+		<None Include="Authentication\BlossomCloudAuthenticationStateProvider.cs" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -10,7 +10,7 @@ public partial class PouchDbSpecification<T>(ISpecification<T> spec)
             PouchDbSpecification<T>.GenerateSelector(spec.WhereExpressions),
             null,
             PouchDbSpecification<T>.GenerateSort(spec.OrderExpressions),
-            spec.Take ?? 25,
+            spec.Take,
             spec.Skip);
 
     private static Dictionary<string, Dictionary<string, object?>> GenerateSelector(IEnumerable<WhereExpressionInfo<T>> criteria)
