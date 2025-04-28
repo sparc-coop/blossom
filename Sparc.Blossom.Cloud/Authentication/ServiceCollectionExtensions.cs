@@ -8,7 +8,7 @@ namespace Sparc.Blossom.Authentication;
 
 public static class ServiceCollectionExtensions
 {
-    public static WebApplicationBuilder AddBlossomPasswordlessAuthentication<TUser>(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddBlossomCloudAuthentication<TUser>(this WebApplicationBuilder builder)
         where TUser : BlossomUser, new()
     {
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -34,10 +34,14 @@ public static class ServiceCollectionExtensions
         return builder;
     }
 
-    public static WebApplication UseBlossomPasswordlessAuthentication<TUser>(this WebApplication app)
+    public static WebApplication UseBlossomCloudAuthentication<TUser>(this WebApplication app)
         where TUser : BlossomUser, new()
     { 
-        app.UseCookiePolicy(new() { MinimumSameSitePolicy = SameSiteMode.Strict });
+        app.UseCookiePolicy(new() { 
+            MinimumSameSitePolicy = SameSiteMode.Strict,
+            HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
+            Secure = CookieSecurePolicy.Always
+        });
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseMiddleware<BlossomAuthenticatorMiddleware>();
