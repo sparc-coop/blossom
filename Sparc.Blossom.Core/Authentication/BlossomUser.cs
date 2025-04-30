@@ -152,7 +152,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         Avatar.Gender = voice?.Gender;
     }
 
-    internal Language? PrimaryLanguage => LanguagesSpoken.FirstOrDefault(x => x == Avatar.Language);
+    public Language? PrimaryLanguage => LanguagesSpoken.FirstOrDefault(x => x == Avatar.Language);
 
     public static BlossomUser System => new() { Username = "system" };
 

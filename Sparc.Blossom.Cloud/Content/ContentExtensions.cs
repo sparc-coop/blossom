@@ -6,7 +6,7 @@ namespace Sparc.Kori;
 
 internal static class ContentExtensions
 {
-    public static void SetHtmlFromMarkdown(this Content content)
+    public static void SetHtmlFromMarkdown(this TextContent content)
     {
         var pipeline = new MarkdownPipelineBuilder()
             .UseEmphasisExtras()

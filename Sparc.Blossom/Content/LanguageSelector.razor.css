@@ -1,0 +1,157 @@
+﻿.kori-login__language .kori-login__language-btn {
+  width: 100%;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 8px 0 !important;
+  background: none !important;
+  border: none !important;
+  font-family: "Encode Sans Expanded" !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 140% !important;
+  text-align: left !important;
+  color: white !important;
+  cursor: pointer;
+}
+.kori-login__language .kori-login__language-btn-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  font-family: "Encode Sans Expanded" !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 140% !important;
+  color: white !important;
+  opacity: 0.7 !important;
+}
+.kori-login__language .kori-login__language-btn .kori-login__expand-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 1000ms ease-in-out;
+  opacity: 0.7;
+}
+.kori-login__language .kori-login__language-btn .kori-login__expand-icon.rotate {
+  transform: rotate(-180deg);
+}
+.kori-login__language .kori-login__language-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  list-style: none;
+  width: 100%;
+  margin-right: -16px;
+  padding-right: 16px;
+  max-height: 0px;
+  opacity: 0;
+  transition: all 1s ease-in-out;
+}
+.kori-login__language .kori-login__language-list.show {
+  max-height: 400px;
+  opacity: 1;
+}
+.kori-login__language .kori-login__language-list li {
+  list-style: none;
+}
+.kori-login__language .kori-login__language-list button {
+  padding: 4px 8px;
+  background: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  text-align: left !important;
+}
+.kori-login__language .kori-login__language-list button aside {
+  font-family: "Encode Sans Expanded" !important;
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  line-height: 140% !important;
+  color: var(--grey-300) !important;
+}
+.kori-login__language .kori-login__language-mobile {
+  display: none;
+}
+.kori-login__language .kori-login__language-mobile .kori-login__language-selected {
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid var(--Gray-100, #E5E5E5);
+  border-radius: 8px;
+  color: white;
+}
+.kori-login__language .kori-login__language-mobile .kori-login__language-list {
+  height: 100%;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+.kori-login__language .kori-login__language-mobile .kori-login__language-list button {
+  width: 100%;
+  padding: 16px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border: 1px solid var(--Gray-800, #1E1E1E) !important;
+  border-radius: 8px !important;
+  font-style: normal;
+  transition: 0.3s ease-in-out;
+}
+.kori-login__language .kori-login__language-mobile .kori-login__language-list button aside {
+  font-style: normal;
+}
+.kori-login__language .kori-login__language-mobile .kori-login__language-list button:hover {
+  filter: brightness(105%);
+  border: 1px solid white;
+}
+.kori-login__language .kori-login__language-mobile .kori-login__language-list button:active {
+  filter: brightness(100%);
+  border: 1px solid white;
+}
+@media only screen and (max-width: 1024px) {
+  .kori-login__language .kori-login__language-desktop {
+    display: none;
+  }
+  .kori-login__language .kori-login__language-mobile {
+    display: block;
+  }
+  .kori-login__language .kori-login__language-mobile .kori-login__language-selected {
+    display: flex;
+  }
+}
+
+.kori-login__text-primary, .kori-login__language .kori-login__language-mobile .kori-login__language-selected {
+  font-family: "Encode Sans Semi Expanded" !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 160% !important;
+  color: var(--grey-50) !important;
+}
+
+.kori-login__text-secondary, .kori-login__language .kori-login__language-mobile aside {
+  font-family: "Encode Sans Expanded" !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 140% !important;
+  color: var(--grey-300) !important;
+}
+
+.kori-login__text-btn, .kori-login__language .kori-login__language-btn, .kori-login__language .kori-login__language-list button {
+  font-family: "Encode Sans Expanded" !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 140% !important;
+  color: white !important;
+  cursor: pointer !important;
+  transition: 300ms ease-in-out !important;
+  opacity: 0.7 !important;
+}
+.kori-login__text-btn:hover, .kori-login__language .kori-login__language-btn:hover, .kori-login__language .kori-login__language-list button:hover {
+  opacity: 1 !important;
+}
+.kori-login__text-btn:active, .kori-login__language .kori-login__language-btn:active, .kori-login__language .kori-login__language-list button:active {
+  opacity: 0.7 !important;
+}

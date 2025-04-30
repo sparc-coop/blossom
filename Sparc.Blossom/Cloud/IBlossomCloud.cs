@@ -1,5 +1,6 @@
 ﻿using Refit;
 using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Content;
 
 namespace Sparc.Blossom;
 
@@ -16,4 +17,7 @@ public interface IBlossomCloud
 
     [Get("/auth/userinfo")]
     Task<BlossomUser> UserInfo();
+
+    [Get("/translate/languages")]
+    Task<IEnumerable<Language>> GetLanguages();
 }

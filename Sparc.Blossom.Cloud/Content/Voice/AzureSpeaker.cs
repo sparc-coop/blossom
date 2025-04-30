@@ -26,7 +26,7 @@ internal class AzureSpeaker : ISpeaker
         Files = files;
     }
 
-    public async Task<AudioContent?> SpeakAsync(Content message, string? voiceId = null)
+    public async Task<AudioContent?> SpeakAsync(TextContent message, string? voiceId = null)
     {
         if (voiceId == null && message.Audio?.Voice == null)
             return null;
@@ -53,7 +53,7 @@ internal class AzureSpeaker : ISpeaker
         return new(file.Url!, (long)result.AudioDuration.TotalMilliseconds, message.Audio!.Voice) { Words = words };
     }
 
-    public async Task<AudioContent> SpeakAsync(List<Content> messages)
+    public async Task<AudioContent> SpeakAsync(List<TextContent> messages)
     {
         byte[] buffer = new byte[1024];
         WaveFileWriter? waveFileWriter = null;

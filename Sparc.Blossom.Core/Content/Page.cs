@@ -2,7 +2,7 @@
 
 public record SourceContent(string PageId, string ContentId);
 public record TranslateContentRequest(Dictionary<string, string> ContentDictionary, bool AsHtml, string LanguageId);
-public record TranslateContentResponse(string Domain, string Path, string Id, string Language, Dictionary<string, Content> Content);
+public record TranslateContentResponse(string Domain, string Path, string Id, string Language, Dictionary<string, TextContent> Content);
 
 public class Page : BlossomEntity<string>
 {
@@ -15,7 +15,7 @@ public class Page : BlossomEntity<string>
     public DateTime? LastActiveDate { get; private set; }
     public DateTime? EndDate { get; private set; }
     public AudioContent? Audio { get; private set; }
-    private ICollection<Content> Contents { get; set; } = [];
+    private ICollection<TextContent> Contents { get; set; } = [];
 
     internal Page(string pageId)
     {
@@ -48,7 +48,7 @@ public class Page : BlossomEntity<string>
     {
     }
 
-    internal Page(Page page, Content content) : this(page.Domain, page.Path, page.Name)
+    internal Page(Page page, TextContent content) : this(page.Domain, page.Path, page.Name)
     {
         // Create a subpage from a message
 
@@ -66,31 +66,31 @@ public class Page : BlossomEntity<string>
         Languages.Add(language);
     }
 
-    internal async Task<ICollection<Content>> TranslateAsync(Language toLanguage, BlossomTranslator provider)
-    {
-        var needsTranslation = Contents.Where(x => !x.HasTranslation(toLanguage)).ToList();
-        if (needsTranslation.Count == 0)
-            return Contents;
+    //internal async Task<ICollection<TextContent>> TranslateAsync(Language toLanguage, BlossomTranslator provider)
+    //{
+    //    var needsTranslation = Contents.Where(x => !x.HasTranslation(toLanguage)).ToList();
+    //    if (needsTranslation.Count == 0)
+    //        return Contents;
 
-        var languages = needsTranslation.GroupBy(x => x.Language);
-        foreach (var language in languages)
-        {
-            var translator = await provider.For(language.Key, toLanguage);
-            if (translator == null)
-                continue;
+    //    var languages = needsTranslation.GroupBy(x => x.Language);
+    //    foreach (var language in languages)
+    //    {
+    //        var translator = await provider.For(language.Key, toLanguage);
+    //        if (translator == null)
+    //            continue;
 
-            var translatedContents = await translator.TranslateAsync(language, toLanguage);
-            foreach (var translatedContent in translatedContents)
-            {
-                var existing = needsTranslation.FirstOrDefault(x => x.Id == translatedContent.SourceContentId);
-                existing?.AddTranslation(translatedContent);
-            }
-        }
+    //        var translatedContents = await translator.TranslateAsync(language, toLanguage);
+    //        foreach (var translatedContent in translatedContents)
+    //        {
+    //            var existing = needsTranslation.FirstOrDefault(x => x.Id == translatedContent.SourceContentId);
+    //            existing?.AddTranslation(translatedContent);
+    //        }
+    //    }
 
-        return Contents;
-    }
+    //    return Contents;
+    //}
 
-    internal async Task SpeakAsync(ISpeaker speaker, List<Content> contents)
+    internal async Task SpeakAsync(ISpeaker speaker, List<TextContent> contents)
     {
         Audio = await speaker.SpeakAsync(contents);
     }
@@ -102,18 +102,18 @@ public class Page : BlossomEntity<string>
     
     public void UpdateName(string name) => Name = name;
 
-    public Task<ICollection<Content>> LoadOriginalContentAsync(IRepository<Content> repository)
+    public Task<ICollection<TextContent>> LoadOriginalContentAsync(IRepository<TextContent> repository)
     {
         Contents = repository.Query.Where(x => x.PageId == Id && x.SourceContentId == null).ToList();
         return Task.FromResult(Contents);
     }
 
-    public async Task<IEnumerable<Content>> LoadContentAsync(Language language, IRepository<Content> repository, BlossomTranslator translator)
-    {
-        await LoadOriginalContentAsync(repository);
-        var translatedContent = await TranslateAsync(language, translator);
-        Contents = Contents.Union(translatedContent).ToList();
-        return Contents;
-    }
+    //public async Task<IEnumerable<TextContent>> LoadContentAsync(Language language, IRepository<TextContent> repository, BlossomTranslator translator)
+    //{
+    //    await LoadOriginalContentAsync(repository);
+    //    var translatedContent = await TranslateAsync(language, translator);
+    //    Contents = Contents.Union(translatedContent).ToList();
+    //    return Contents;
+    //}
 }
 

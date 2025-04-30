@@ -3,17 +3,13 @@
 namespace Sparc.Blossom.Content;
 
 public record EditHistory(DateTime Timestamp, string Text);
-public record AudioContent(string? Url, long Duration, string Voice)
-{
-    public List<Word> Words { get; set; } = [];
-}
 
 public record ContentTranslation(string Id, Language Language, string? SourceContentId = null)
 {
     public ContentTranslation(string id) : this(id, new()) { }
 }
 
-public class Content : BlossomEntity<string>
+public class TextContent : BlossomEntity<string>
 {
     public string Domain { get; private set; }
     public string Path { get; private set; }
@@ -34,7 +30,7 @@ public class Content : BlossomEntity<string>
     public string Html { get; set; }
     public string PageId { get; internal set; }
 
-    public Content(string pageId)
+    public TextContent(string pageId)
     {
         Id = Guid.NewGuid().ToString();
         PageId = pageId;
@@ -49,7 +45,7 @@ public class Content : BlossomEntity<string>
         ContentType = "Text";
     }
 
-    public Content(string pageId, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
+    public TextContent(string pageId, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
         : this(pageId)
     {
         User = user?.Avatar;
@@ -61,7 +57,7 @@ public class Content : BlossomEntity<string>
         SetText(text);
     }
 
-    public Content(Content sourceContent, Language toLanguage, string text) : this(sourceContent.PageId)
+    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.PageId)
     {
         SourceContentId = sourceContent.Id;
         User = sourceContent.User;
@@ -72,27 +68,27 @@ public class Content : BlossomEntity<string>
         SetText(text);
     }
 
-    internal async Task<Content?> TranslateAsync(Language language, IRepository<Content> contents, BlossomTranslator provider)
-    {
-        if (Language == language)
-            return this;
+    //internal async Task<TextContent?> TranslateAsync(Language language, IRepository<TextContent> contents, BlossomTranslator provider)
+    //{
+    //    if (Language == language)
+    //        return this;
 
-        var translation = Translations.FirstOrDefault(x => x.Language == language);
+    //    var translation = Translations.FirstOrDefault(x => x.Language == language);
 
-        if (translation != null)
-            return await contents.FindAsync(translation.Id);
+    //    if (translation != null)
+    //        return await contents.FindAsync(translation.Id);
 
-        var translator = await provider.For(Language, language);
-        if (translator == null)
-            return null;
+    //    var translator = await provider.For(Language, language);
+    //    if (translator == null)
+    //        return null;
 
-        var translatedContent = await translator.TranslateAsync(this, language);
+    //    var translatedContent = await translator.TranslateAsync(this, language);
 
-        if (translatedContent != null)
-            AddTranslation(translatedContent);
+    //    if (translatedContent != null)
+    //        AddTranslation(translatedContent);
 
-        return translatedContent;
-    }
+    //    return translatedContent;
+    //}
 
     internal async Task<AudioContent?> SpeakAsync(ISpeaker engine, string? voiceId = null)
     {
@@ -117,7 +113,7 @@ public class Content : BlossomEntity<string>
             || Translations != null && Translations.Any(x => x.Language.Equals(language));
     }
 
-    internal void AddTranslation(Content translatedContent)
+    internal void AddTranslation(TextContent translatedContent)
     {
         if (HasTranslation(translatedContent.Language))
         {
@@ -146,7 +142,7 @@ public class Content : BlossomEntity<string>
     }
 
 
-    public Content SetText(string text)
+    public TextContent SetText(string text)
     {
         if (Text == text)
             return this;

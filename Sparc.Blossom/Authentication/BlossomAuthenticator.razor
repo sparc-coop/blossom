@@ -3,54 +3,77 @@
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 @using Sparc.Blossom.Authentication
+@using Sparc.Blossom.Content
 
-<div class="blossom-authenticator">
-    <AuthorizeView>
-        <Authorized>
-            <figure class="@(context.User.IsAnonymous() ? "loggedout" : "loggedin")">
-                <div class="icon">
-                    <UserIcon LoggedIn="!context.User.IsAnonymous()" />
-                </div>
-            </figure>
-        </Authorized>
-        <NotAuthorized>
-            @switch (Auth.LoginState)
+<AuthorizeView>
+    <Authorized>
+        <div class="blossom-authenticator @(context.User.IsAnonymous() ? "loggedout" : "loggedin")">
+            @if (!IsOpen)
             {
-                case LoginStates.LoggedOut:
-                    <button class="loggedout" @onclick="BeginLogin">
-                        <div class="icon">
-                            <UserIcon />
-                        </div>
-                    </button>
-                    break;
-                default:
-                    <label @onclick="LoginAsync" class="@Auth.LoginState">
-                        <div class="icon">
-                            <UserIcon />
-                        </div>
-                        @if (Auth.LoginState == LoginStates.ReadyForLogin)
-                        {
-                            <input @ref=LoginInput type="text" @bind="Email" name="username" placeholder="Enter your email" autocomplete="username webauthn" @onclick:stopPropagation="true" />
-                            <div class="icon submit">
-                                OK
-                            </div>
-                        }
-                        else if (Auth.LoginState == LoginStates.AwaitingMagicLink)
-                        {
-                            <span>Click the link in your email!</span>
-                        }
-                    </label>
-                    break;
+                <button aria-label="Login" @onclick="ToggleLoginMenu">
+                    <UserIcon LoggedIn="!context.User.IsAnonymous()" />
+                </button>
             }
-        </NotAuthorized>
-    </AuthorizeView>
-</div>
+            else
+            {
+                <button class="close" @onclick=Close aria-label="Close">
+                    <img src="_content/Sparc.Kori/icons/Close X.svg" />
+                </button>
+            }
+        </div>
+
+        @if (IsOpen)
+        {
+            <section>
+                @switch (Auth.LoginState)
+                {
+                    case LoginStates.NotInitialized:
+                    case LoginStates.LoggedOut:
+                        <header>
+                            <h3>Welcome!</h3>
+                            <p>Lorem ipsum dolor sit amet, consectetur</p>
+                        </header>
+
+                        <nav>
+                            <ul>
+                                <li onclick="@(() => ChangeTab("login"))">Login</li>
+                                <li onclick="@(() => ChangeTab("language"))">Language</li>
+                            </ul>
+                        </nav>
+
+                        @if (Tab == "login")
+                        {
+                            <article>
+                                <button @onclick=LoginWithPasskey>
+                                    <img src="_content/Sparc.Kori/icons/Passkey.svg" />
+                                    <div class="btn-wrapper">
+                                        <figcaption>Passkey Login</figcaption>
+                                        <aside>Set up your passkey</aside>
+                                    </div>
+                                </button>
+                            </article>
+                        }
+                        else
+                        {
+                            <article>
+                                <LanguageSelector SelectedLanguage="Auth.User.PrimaryLanguage" LanguageChanged="UpdateLanguage" />
+                            </article>
+                        }
+                        break;
+                }
+            </section>
+        }
+    </Authorized>
+
+</AuthorizeView>
 
 @inject IBlossomAuthenticator Auth
 @code {
     [Parameter]
     [SupplyParameterFromQuery]
     public string? Token { get; set; }
+    bool IsOpen;
+    string Tab = "login";
 
     [CascadingParameter] public required ClaimsPrincipal User { get; set; }
 
@@ -67,6 +90,8 @@
         }
     }
 
+    void ChangeTab(string tab) => Tab = tab;
+
     async Task BeginLogin()
     {
         // Attempt autofill signin
@@ -75,7 +100,7 @@
 
         if (Auth.LoginState == LoginStates.LoggedIn)
             return;
-        
+
         Auth.LoginState = LoginStates.ReadyForLogin;
         StateHasChanged();
         await Task.Delay(1);

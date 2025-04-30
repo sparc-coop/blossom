@@ -11,7 +11,7 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
 
     public int Priority => 1;
 
-    public async Task<List<Content>> TranslateAsync(IEnumerable<Content> messages, IEnumerable<Language> toLanguages, string? additionalContext = null)
+    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, IEnumerable<Language> toLanguages, string? additionalContext = null)
     {
         var options = new TextTranslateOptions
         {
@@ -20,14 +20,14 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
         };
 
         var fromLanguages = messages.GroupBy(x => x.Language);
-        var translatedMessages = new List<Content>();
+        var translatedMessages = new List<TextContent>();
         foreach (var sourceLanguage in fromLanguages)
         {
             foreach (var targetLanguage in toLanguages)
             {
                 var texts = messages.Select(x => x.Text).Where(x => x != null);
                 var result = await Client.TranslateTextAsync(texts!, sourceLanguage.Key.Id, targetLanguage.Id, options);
-                var newContent = messages.Zip(result, (message, translation) => new Content(message, targetLanguage, translation.Text));
+                var newContent = messages.Zip(result, (message, translation) => new TextContent(message, targetLanguage, translation.Text));
                 translatedMessages.AddRange(newContent);
             }
         }

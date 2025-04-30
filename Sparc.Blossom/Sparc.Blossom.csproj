@@ -27,6 +27,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="compilerconfig.json" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.4" />
@@ -41,6 +45,7 @@
 	<ItemGroup>
 		<None Include="..\Sparc.Blossom.ApiGenerator\bin\$(Configuration)\netstandard2.0\Sparc.Blossom.ApiGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 		<None Include="Authentication\BlossomCloudAuthenticationStateProvider.cs" />
+		<None Include="compilerconfig.json" />
 	</ItemGroup>
 
 	<ItemGroup>
