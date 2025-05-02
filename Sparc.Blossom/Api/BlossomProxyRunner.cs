@@ -57,6 +57,17 @@ public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomH
         return result;
     }
 
+    public async Task<T> Update(T entity)
+    {
+        var existing = await Aggregate.Get(entity.GenericId) 
+            ?? throw new Exception($"Entity with id {entity.GenericId} not found.");
+        
+        var changes = new BlossomPatch(existing, entity);
+        await Aggregate.Patch(entity.GenericId, changes);
+
+        return await Get(entity.GenericId)!;
+    }
+
     public async Task Delete(object id) => await Aggregate.Delete(id);
 
     public Task On(object id, string name, params object?[] parameters)

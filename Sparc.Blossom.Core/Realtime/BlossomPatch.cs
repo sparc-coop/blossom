@@ -26,7 +26,13 @@ public record BlossomPatch
             properties = properties.Where(x => propertiesToSelect.Any(y => y == x.Name)).ToArray();
 
         foreach (var property in properties)
-            From(property.Name, property.GetValue(previousEntity), property.GetValue(currentEntity), ignoreNulls);
+        {
+            var currentEntityProperty = currentEntity.GetType().GetProperty(property.Name);
+            if (currentEntityProperty == null)
+                continue;
+
+            From(property.Name, property.GetValue(previousEntity), currentEntityProperty.GetValue(currentEntity), ignoreNulls);
+        }
     }
 
     public void ApplyTo<T>(T target)

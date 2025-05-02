@@ -105,7 +105,18 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var action = new Action<T>(x => typeof(T).GetMethod(name)?.Invoke(x, parameters));
         return await Execute(id, action);
     }
-   
+
+    public async Task<T> Update(T entity)
+    {
+        var existing = await Get(entity.GenericId) 
+            ?? throw new Exception($"Entity with id {entity.GenericId} not found.");
+        
+        var changes = new BlossomPatch(existing, entity);
+        await Patch(entity.GenericId, changes);
+
+        return await Get(entity.GenericId)!;
+    }
+
     public async Task Delete(object id)
     {
         var entity = await Repository.FindAsync(id)
