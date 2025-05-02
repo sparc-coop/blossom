@@ -9,7 +9,6 @@
 <Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@GetAdditionalAssemblies()">
     <Found Context="routeData">
         <CascadingValue Value="User">
-            <RouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)" />
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
                 <NotAuthorized>
@@ -76,7 +75,6 @@
     protected override async Task OnInitializedAsync()
     {
         User = (await Auth.GetAuthenticationStateAsync()).User;
-        Console.WriteLine("Hello " + User.Identity.Name);
     }
 
     private Assembly[] GetAdditionalAssemblies()

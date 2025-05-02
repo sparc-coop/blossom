@@ -12,6 +12,12 @@ public abstract class BlossomApplicationBuilder
     protected bool _isAuthenticationAdded;
 
     public abstract void AddAuthentication<TUser>() where TUser : BlossomUser, new();
+    public virtual void AddAuthentication<TAuthenticator, TUser>()
+        where TAuthenticator : class, IBlossomAuthenticator
+        where TUser : BlossomUser, new()
+    { 
+        AddAuthentication<TUser>();
+    }
 
     public void AddBlossomCloud()
     {

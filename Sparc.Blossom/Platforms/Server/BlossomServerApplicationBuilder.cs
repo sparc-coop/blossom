@@ -69,6 +69,23 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
         _isAuthenticationAdded = true;
     }
 
+    public override void AddAuthentication<TAuthenticator, TUser>()
+    {
+        Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options => options.ExpireTimeSpan = TimeSpan.FromDays(30));
+
+        Services.AddCascadingAuthenticationState();
+        Services.AddScoped<AuthenticationStateProvider, BlossomServerAuthenticationStateProvider<TUser>>()
+            .AddScoped<TAuthenticator>()
+            .AddScoped<IBlossomAuthenticator, TAuthenticator>();
+
+        Services.AddTransient(s =>
+            s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User
+            ?? new ClaimsPrincipal(new ClaimsIdentity()));
+
+        _isAuthenticationAdded = true;
+    }
+
     void AddBlossomServer(IComponentRenderMode? renderMode = null)
     {
         var razor = Services.AddRazorComponents();

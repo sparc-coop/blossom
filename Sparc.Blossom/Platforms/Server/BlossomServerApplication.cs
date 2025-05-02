@@ -28,6 +28,8 @@ public class BlossomServerApplication : IBlossomApplication
         Host.MapStaticAssets();
         Host.UseAntiforgery();
 
+        UseBlossomAuthentication();
+
         UseAllCultures();
     }
 
@@ -80,6 +82,14 @@ public class BlossomServerApplication : IBlossomApplication
             .ToArray();
 
         UseCultures(allCultures);
+    }
+
+    void UseBlossomAuthentication()
+    {
+        Host.UseCookiePolicy(new() { MinimumSameSitePolicy = SameSiteMode.Strict });
+        Host.UseAuthentication();
+        Host.UseAuthorization();
+        Host.UseMiddleware<BlossomAuthenticatorMiddleware>();
     }
 
     void MapBlossomContexts(Assembly assembly)
