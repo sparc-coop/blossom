@@ -9,7 +9,6 @@
 <Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@GetAdditionalAssemblies()">
     <Found Context="routeData">
         <CascadingValue Value="User">
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
                 <NotAuthorized>
                     @if (!context.User.Identity?.IsAuthenticated == true)
@@ -40,7 +39,6 @@
                     }
                 </Authorizing>
             </AuthorizeRouteView>
-            <FocusOnNavigate RouteData="routeData" Selector="h1" />
         </CascadingValue>
     </Found>
     <NotFound>
