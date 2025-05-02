@@ -2,5 +2,13 @@
   {
     "outputFile": "Authentication/BlossomAuthenticator.razor.css",
     "inputFile": "Authentication/BlossomAuthenticator.razor.scss"
+  },
+  {
+    "outputFile": "Data/BlossomGrid.razor.css",
+    "inputFile": "Data/BlossomGrid.razor.scss"
+  },
+  {
+    "outputFile": "Data/BlossomSearch.razor.css",
+    "inputFile": "Data/BlossomSearch.razor.scss"
   }
 ]

@@ -39,6 +39,7 @@
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.2" />
 		<PackageReference Include="System.Net.Http.Json" Version="9.0.4" />
 		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
