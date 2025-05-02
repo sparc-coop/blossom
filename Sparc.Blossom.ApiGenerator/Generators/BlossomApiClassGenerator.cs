@@ -21,7 +21,7 @@ internal class BlossomApiClassGenerator() : BlossomGenerator<ClassDeclarationSyn
             }
             else
             {
-                properties.AppendLine($@"{property.Modifiers} {property.Type} {property.Name} {{ get; set; }}{property.PostModifiers(false)}");
+                properties.AppendLine($@"{property.Modifiers} {property.Type} {property.Name} {{ get; {property.SetModifiers} set; }}{property.PostModifiers(false)}");
             }
         }
 
