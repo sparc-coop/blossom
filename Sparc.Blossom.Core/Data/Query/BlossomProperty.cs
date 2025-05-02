@@ -14,7 +14,7 @@ public class BlossomProperty
         Type = !property.PropertyType.IsPrimitive && property.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType) ? (property.PropertyType.GenericTypeArguments?.First().Name ?? property.PropertyType.Name) : property.PropertyType.Name;
         IsPrimitive = property.PropertyType.IsPrimitive || property.PropertyType == typeof(string) || property.PropertyType == typeof(DateTime) || property.PropertyType == typeof(decimal);
         IsEnumerable = !property.PropertyType.IsPrimitive && property.PropertyType != typeof(string) && typeof(IEnumerable).IsAssignableFrom(property.PropertyType);
-        CanRead = property.Name != "SubscriptionId" && property.Name != "Runner" && property.Name != "GenericId";
+        CanRead = property.Name != "SubscriptionId" && property.Name != "Runner" && property.Name != "GenericId" && property.Name != "GenericRunner";
         CanEdit = property.DeclaringType == property.ReflectedType && property.SetMethod?.IsPublic == true;
     }
 
