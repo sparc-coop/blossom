@@ -1,10 +1,7 @@
 ﻿using Sparc.Blossom.Authentication;
 using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using MediatR.NotificationPublishers;
 using Refit;
-using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom;
 
@@ -23,7 +20,7 @@ public abstract class BlossomApplicationBuilder
             .AddStandardResilienceHandler();
     }
 
-    public abstract IBlossomApplication Build();
+    public abstract IBlossomApplication Build(Assembly? entityAssembly = null);
 
     protected void RegisterBlossomEntities(Assembly assembly)
     {
@@ -73,7 +70,7 @@ public abstract class BlossomApplicationBuilder
     protected void AddBlossomRepository()
     {
         if (!Services.Any(x => x.ServiceType == typeof(IRepository<>)))
-            Services.AddScoped(typeof(IRepository<>), typeof(PouchDbRepository<>));
+            Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
 
         //Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
         Services.AddScoped<BlossomHubProxy>();

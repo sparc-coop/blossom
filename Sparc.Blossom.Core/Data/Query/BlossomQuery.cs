@@ -58,6 +58,12 @@ public class BlossomQuery<T> : Specification<T> where T : class
         return this;
     }
 
+    public new BlossomQuery<T> Take(int take)
+    {
+        Query.Take(take);
+        return this;
+    }
+
     public BlossomQuery<T> WithOptions(BlossomQueryOptions options)
     {
         Query.WithOptions(options);

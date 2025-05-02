@@ -22,9 +22,9 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
         Configuration = Builder.Configuration;
     }
 
-    public override IBlossomApplication Build()
+    public override IBlossomApplication Build(Assembly? entityAssembly = null)
     {
-        var callingAssembly = Assembly.GetCallingAssembly();
+        var callingAssembly = entityAssembly ?? Assembly.GetCallingAssembly();
 
         if (!_isAuthenticationAdded)
         {

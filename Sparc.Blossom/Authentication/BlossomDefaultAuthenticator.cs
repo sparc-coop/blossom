@@ -54,7 +54,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
     }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
-    private async Task<BlossomUser> GetUserAsync(ClaimsPrincipal principal)
+    protected virtual async Task<BlossomUser> GetUserAsync(ClaimsPrincipal principal)
     {
         if (principal.Identity?.IsAuthenticated == true)
         {

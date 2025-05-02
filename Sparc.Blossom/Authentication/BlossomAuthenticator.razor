@@ -122,4 +122,9 @@
         await foreach (var state in Auth.Logout(User))
             StateHasChanged();
     }
+
+    async Task UpdateLanguage(Language language)
+    {
+        // Auth.User.PrimaryLanguage = language;
+    }
 }

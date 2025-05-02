@@ -15,6 +15,9 @@ public static class AssemblyExtensions
     public static IEnumerable<Type> GetEntities(this Assembly assembly)
         => assembly.GetDerivedTypes(typeof(BlossomEntity<>));
 
+    public static IEnumerable<Type> GetEntities(this AppDomain domain)
+        => domain.GetAssemblies().Where(x => !x.IsDynamic).SelectMany(x => x.GetDerivedTypes(typeof(BlossomEntity<>)));
+
     public static Type? FindType(this AppDomain domain, string typeName)
     {
         foreach (var assembly in domain.GetAssemblies())
