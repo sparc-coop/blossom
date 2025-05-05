@@ -72,8 +72,14 @@ public class BlossomProperty
     {
         if (Property == null)
             _value = value;
-        else if (CanEdit) 
-            Property.SetValue(entity, value);
+        else if (CanEdit)
+        {
+            // if Property is a number type, convert value to that type
+            if (Property.PropertyType == typeof(decimal?) && value is string decimalString && decimal.TryParse(decimalString, out var decimalValue))
+                Property.SetValue(entity, decimalValue);
+            else
+                Property.SetValue(entity, value);
+        }
     }
 
 
