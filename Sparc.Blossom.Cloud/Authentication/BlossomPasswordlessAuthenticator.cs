@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using Passwordless;
-using System.ComponentModel.DataAnnotations;
+using Sparc.Blossom.Cloud.Tools;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
@@ -9,14 +9,17 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
     where T : BlossomUser, new()
 {
     IPasswordlessClient PasswordlessClient { get; }
+    public FriendlyId FriendlyId { get; }
     public HttpClient Client { get; }
     public BlossomPasswordlessAuthenticator(
         IPasswordlessClient _passwordlessClient,
         IOptions<PasswordlessOptions> options,
-        IRepository<T> users)
+        IRepository<T> users,
+        FriendlyId friendlyId)
         : base(users)
     {
         PasswordlessClient = _passwordlessClient;
+        FriendlyId = friendlyId;
         Client = new HttpClient
         {
             BaseAddress = new Uri("https://v4.passwordless.dev/")
@@ -24,55 +27,33 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         Client.DefaultRequestHeaders.Add("ApiSecret", options.Value.ApiSecret);
     }
 
-    public async Task<LoginStates> LoginWithPasswordless(ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null)
+    public async Task<BlossomUser> Login(ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null)
     {
         Message = null;
 
         // 1. Convert the ClaimsPrincipal from the cookie into a BlossomUser
         // If the BlossomUser is already attached to Passwordless, they're logged in because their cookie is valid
-        var user = await GetAsync(principal);
+        User = await GetAsync(principal);
 
-        if (user.ExternalId != null)
-            return LoginStates.LoggedIn;
-        else if (LoginState == LoginStates.NotInitialized && string.IsNullOrEmpty(emailOrToken))
-            return LoginStates.LoggedOut;
+        if (User.ExternalId != null)
+            return User;
 
-        // 3. No discoverable passkeys. We need an email address from the user to identify them.
-        if (string.IsNullOrEmpty(emailOrToken))
-            return LoginStates.ReadyForLogin;
-
-        // 4. An email address has been supplied. Make this the username, and look it up in Passwordless.
-        if (new EmailAddressAttribute().IsValid(emailOrToken))
+        if (emailOrToken != null && await HasPasskeys(User.Id))
         {
-            user.ChangeUsername(emailOrToken);
-            await Users.UpdateAsync((T)user);
-
-            // 5. If the user has no passkeys, send them a magic link to log in.
-            var hasPasskeys = await HasPasskeys(user.ExternalId);
-            if (!hasPasskeys)
+            // User has just signed up
+            User.AuthenticationType.ExternalId = User.Id;
+            var parentUser = Users.Query.FirstOrDefault(x => x.ExternalId == uUserser.UserId && x.ParentUserId == null);
+            if (parentUser != null)
             {
-                await SendMagicLinkAsync(user, $"{context.Request.Headers.Referer}?token=$TOKEN");
-                return LoginStates.AwaitingMagicLink;
-            }
-            else
-            {
-                return LoginStates.AwaitingPasskey;
-            }
+                User.SetParentUser(parentUser);
+
+                await Save();
+            return User;
         }
 
-        // 7. The user has signed in with a passkey. Verify the token and log them in.
-        try
-        {
-            await LoginWithTokenAsync(emailOrToken);
-            LoginState = LoginStates.LoggedIn;
-        }
-        catch (Exception e)
-        {
-            LoginState = LoginStates.Error;
-            Message = e.Message;
-        }
-
-        return LoginState;
+        var passwordlessToken = await SignUpWithPasswordlessAsync(user);
+        user.SetToken(passwordlessToken);
+        return user;
     }
 
     private async Task<string> SignUpWithPasswordlessAsync(BlossomUser user)
@@ -128,7 +109,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         if (parentUser != null)
         {
             User.SetParentUser(parentUser);
-            await Users.UpdateAsync((T)User);
+            await Save();
             User = parentUser;
         }
         else
@@ -136,7 +117,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
             User.Login("Passwordless", passwordlessUser.UserId);
         }
 
-        await Users.UpdateAsync((T)User);
+        await Save();
     }
 
     public override async IAsyncEnumerable<LoginStates> Logout(ClaimsPrincipal principal)
@@ -144,10 +125,27 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         var user = await GetAsync(principal);
 
         user.Logout();
-
-        await Users.UpdateAsync((T)User!);
+        await Save();
 
         yield return LoginStates.LoggedOut;
+    }
+
+    protected override async Task<BlossomUser> GetUserAsync(ClaimsPrincipal principal)
+    {
+        await base.GetUserAsync(principal);
+        
+        if (User!.Username == null)
+        {
+            User.ChangeUsername(FriendlyId.Create(1, 2));
+            await Save();
+        }
+
+        return User;
+    }
+
+    private async Task Save()
+    {
+        await Users.UpdateAsync((T)User!);
     }
 
     public void Map(IEndpointRouteBuilder endpoints)

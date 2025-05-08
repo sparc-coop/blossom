@@ -47,7 +47,7 @@ public static class ServiceCollectionExtensions
         app.UseMiddleware<BlossomAuthenticatorMiddleware>();
 
         var auth = app.MapGroup("/auth");
-        auth.MapPost("login", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.LoginWithPasswordless(principal, context, emailOrToken));
+        auth.MapPost("login", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.Login(principal, context, emailOrToken));
         auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
 
         return app;

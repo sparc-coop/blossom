@@ -17,6 +17,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public string UserId { get { return Id; } set { Id = value; } }
     public string AuthenticationType { get; set; }
     public string? ExternalId { get; set; }
+    public string? Token { get; set; }
     public string? ParentUserId { get; set; }
     public DateTime DateCreated { get; private set; }
     public DateTime DateModified { get; private set; }
@@ -143,20 +144,25 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     
     public void ChangeVoice(Language language, Voice? voice = null)
     {
-        var hasLanguageChanged = Avatar.Language != language;
+        ChangeLanguage(language);
+        
+        Avatar.Language = language with { DialectId = voice?.Locale, VoiceId = voice?.ShortName };
+        Avatar.Gender = voice?.Gender;
+    }
 
+    public void ChangeLanguage(Language language)
+    {
         if (!LanguagesSpoken.Any(x => x.Id == language.Id))
             LanguagesSpoken.Add(language);
 
-        Avatar.Language = language with { DialectId = voice?.Locale, VoiceId = voice?.ShortName };
-        Avatar.Gender = voice?.Gender;
+        Avatar.Language = language;
     }
 
     public Language? PrimaryLanguage => LanguagesSpoken.FirstOrDefault(x => x == Avatar.Language);
 
     public static BlossomUser System => new() { Username = "system" };
 
-    internal void UpdateAvatar(UserAvatar avatar)
+    public void UpdateAvatar(UserAvatar avatar)
     {
         Avatar.Id = Id;
         Avatar.Language = avatar.Language;
@@ -178,5 +184,10 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     internal void GoOffline()
     {
         Avatar.IsOnline = false;
+    }
+
+    public void SetToken(string token)
+    {
+        AddClaim("token", token);
     }
 }

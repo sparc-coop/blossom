@@ -6,9 +6,13 @@ public class FriendlyId(IWebHostEnvironment env)
     public string WordsPath { get; } = Path.Combine(env.ContentRootPath, "Tools/FriendlyId/words_alpha.txt");
     public IEnumerable<string> UnsafeWords { get; } = File.ReadLines(Path.Combine(env.ContentRootPath, "Tools/FriendlyId/words_officesafe.txt"));
 
-    public string Create()
+    public string Create(int wordCount = 2, int numberCount = 0)
     {
-        return $"{GetRandomWord()}-{GetRandomWord()}";
+        var words = Enumerable.Range(0, wordCount).Select(_ => GetRandomWord()).ToList();
+        var numbers = Enumerable.Range(0, numberCount).Select(_ => new Random().Next(10)).Select(n => n.ToString()).ToList();
+        
+        var all = words.Concat(numbers).ToList();
+        return string.Join("-", words) + string.Join("", numbers);
     }
 
     string GetRandomWord()
