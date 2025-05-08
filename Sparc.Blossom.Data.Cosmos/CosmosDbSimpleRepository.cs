@@ -191,4 +191,21 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
 
         return list;
     }
+
+    public async Task UpsertAsync(T item, string? partitionKey = null)
+    {
+        var pk = partitionKey != null ? new PartitionKey(partitionKey) : GetPartitionKey(item);
+
+        await Container.UpsertItemAsync(item, pk);
+
+        await Publish(item);
+    }
+
+    public async Task UpsertAsync(IEnumerable<T> items, string? partitionKey = null)
+    {
+        foreach (var item in items)
+        {
+            await UpsertAsync(item, partitionKey);
+        }
+    }
 }

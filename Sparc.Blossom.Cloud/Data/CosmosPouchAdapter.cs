@@ -23,6 +23,35 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data) : IBlossom
         return new(db, count, 0, lastUpdateSequence ?? "0");
     }
 
+    public async Task<IResult> GetDocument(string db, string docid)
+    {
+        var doc = await Data.Query(db).Where(x => x.Id == docid).CosmosFirstOrDefaultAsync();
+        if (doc == null)
+            return Results.NotFound(new { error = "not_found", reason = "missing" });
+
+        return Results.Ok(doc);
+    }
+
+    public async Task<IResult> CreateOrUpdateDocument(string db, string docid, [FromBody] Datum body)
+    {
+        body.Id = docid;
+        await Data.UpsertAsync(body, db);
+        return Results.Ok(new { ok = true, id = docid, rev = body.Rev });
+    }
+
+    public async Task<IResult> DeleteDocument(string db, string docid, string rev)
+    {
+        var doc = await Data.Query(db).Where(x => x.Id == docid).CosmosFirstOrDefaultAsync();
+        if (doc == null)
+            return Results.NotFound();
+
+        doc.Deleted = true;
+        doc.Rev = IncrementRev(rev);
+
+        await Data.UpsertAsync(doc, db);
+        return Results.Ok(new { ok = true, id = docid, rev = doc.Rev });
+    }
+
     public record MissingItems(List<string> Missing);
     public async Task<Dictionary<string, MissingItems>> GetRevsDiff(string db, [FromBody] Dictionary<string, List<string>> revisions)
     {
@@ -93,8 +122,25 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data) : IBlossom
         var group = endpoints.MapGroup(baseUrl);
 
         group.MapGet("{db}", GetDb);
+        //group.MapPut("/{db}", CreateDatabase);
+        //group.MapPost("/{db}", CreateDocument);
+        group.MapPut("/{db}/{docid}", CreateOrUpdateDocument);
+        group.MapGet("/{db}/{docid}", GetDocument);
+        group.MapDelete("/{db}/{docid}", DeleteDocument);
+        //group.MapPost("/{db}/_bulk_docs", BulkDocs);
+        //group.MapGet("/{db}/_all_docs", GetAllDocs);
+        //group.MapPost("/{db}/_changes", GetChanges);
+        //group.MapGet("/{db}/_changes", GetChanges);
         group.MapPost("{db}/_revs_diff", GetRevsDiff);
-        group.MapPost("{db}/_changes", GetChanges);
         //group.MapGet("{db}/_local/{id}", GetCheckpoint);
+    }
+
+    private static string IncrementRev(string rev)
+    {
+        var parts = rev.Split('-');
+        if (parts.Length != 2 || !int.TryParse(parts[0], out var number))
+            return $"1-{Guid.NewGuid():N}";
+
+        return $"{number + 1}-{Guid.NewGuid():N}";
     }
 }
