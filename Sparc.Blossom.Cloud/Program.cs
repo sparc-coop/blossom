@@ -22,6 +22,18 @@ builder.Services.AddMediatR(options =>
     options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .SetIsOriginAllowed((string x) => true)
+              .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 app.UseBlossomCloudAuthentication<BlossomUser>();
 
@@ -33,6 +45,16 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors();
 
 app.MapGet("/tools/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
+
+using (var scope = app.Services.CreateScope())
+{
+    var repo = scope.ServiceProvider.GetRequiredService<CosmosDbSimpleRepository<Datum>>();
+    var adapter = new CosmosPouchAdapter(repo);
+    adapter.Map(app);
+}
+
+
 app.Run();

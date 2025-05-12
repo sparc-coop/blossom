@@ -71,6 +71,317 @@
           }
         }
       }
+    },
+    "/data/{db}": {
+      "get": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDatasetMetadataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/{db}/{docid}": {
+      "put": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "docid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Datum"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "docid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "docid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rev",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/data/{db}/_bulk_docs": {
+      "post": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkDocsPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/data/{db}/_all_docs": {
+      "get": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/data/{db}/_changes": {
+      "post": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetChangesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetChangesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetChangesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetChangesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/{db}/_revs_diff": {
+      "post": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/MissingItems"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -112,6 +423,54 @@
               "$ref": "#/components/schemas/Language2"
             }
           },
+          "primaryLanguage": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "genericId": { },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "BulkDocsPayload": {
+        "required": [
+          "docs"
+        ],
+        "type": "object",
+        "properties": {
+          "docs": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "Datum": {
+        "required": [
+          "rev"
+        ],
+        "type": "object",
+        "properties": {
+          "seq": {
+            "type": "string",
+            "nullable": true
+          },
+          "rev": {
+            "type": "string"
+          },
+          "deleted": {
+            "type": "boolean"
+          },
+          "tenantId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "datasetId": {
+            "type": "string"
+          },
           "genericId": { },
           "id": {
             "type": "string"
@@ -138,6 +497,106 @@
             "items": {
               "$ref": "#/components/schemas/Voice"
             }
+          }
+        }
+      },
+      "GetChangesRequest": {
+        "required": [
+          "doc_ids",
+          "since",
+          "limit"
+        ],
+        "type": "object",
+        "properties": {
+          "doc_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "since": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "GetChangesResponse": {
+        "required": [
+          "last_seq",
+          "results"
+        ],
+        "type": "object",
+        "properties": {
+          "last_seq": {
+            "type": "string"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetChangesResult"
+            }
+          }
+        }
+      },
+      "GetChangesResult": {
+        "required": [
+          "rev",
+          "id",
+          "seq"
+        ],
+        "type": "object",
+        "properties": {
+          "rev": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetChangesRev"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "seq": {
+            "type": "string"
+          }
+        }
+      },
+      "GetChangesRev": {
+        "required": [
+          "rev"
+        ],
+        "type": "object",
+        "properties": {
+          "rev": {
+            "type": "string"
+          }
+        }
+      },
+      "GetDatasetMetadataResponse": {
+        "required": [
+          "db_name",
+          "doc_count",
+          "instance_start_time",
+          "update_seq"
+        ],
+        "type": "object",
+        "properties": {
+          "db_name": {
+            "type": "string"
+          },
+          "doc_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "instance_start_time": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "update_seq": {
+            "type": "string"
           }
         }
       },
@@ -208,6 +667,20 @@
       },
       "LoginStates": {
         "type": "integer"
+      },
+      "MissingItems": {
+        "required": [
+          "missing"
+        ],
+        "type": "object",
+        "properties": {
+          "missing": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       },
       "UserAvatar": {
         "type": "object",
@@ -305,6 +778,9 @@
   "tags": [
     {
       "name": "Sparc.Blossom.Cloud"
+    },
+    {
+      "name": "CosmosPouchAdapter"
     }
   ]
 }

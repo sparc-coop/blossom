@@ -29,7 +29,7 @@ async function syncAll(datasetId) {
 
     console.log("local db", _db);
 
-    var cosmosDbUrl = `https://localhost:7033/db/${datasetId}`;
+    var cosmosDbUrl = `https://localhost:7185/data/${datasetId}`;
 
     console.log("cosmosDbUrl", cosmosDbUrl);
 

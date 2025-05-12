@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 
 namespace Sparc.Blossom.Data;
@@ -116,24 +116,73 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data) : IBlossom
     //    return Results.Ok(item);
     //}
 
+    public record BulkDocsPayload(List<Dictionary<string, object>> Docs);
+
+    public async Task<IResult> BulkDocs(string db, [FromBody] BulkDocsPayload payload)
+    {
+        foreach (var doc in payload.Docs)
+        {
+            var datum = new Datum
+            {
+                Id = doc["_id"].ToString()!,
+                Rev = doc["_rev"].ToString()!,
+                Deleted = doc.ContainsKey("_deleted") && (bool)doc["_deleted"],
+                // other fields
+            };
+            await Data.UpsertAsync(datum, db);
+        }
+
+        return Results.Ok(payload.Docs.Select(d => new { ok = true, id = d["_id"], rev = d["_rev"] }));
+    }
+
+    public async Task<IResult> GetAllDocs(string db)
+    {
+        var docs = await Data.Query(db).Where(x => !x.Deleted).ToListAsync();
+        var rows = docs.Select(d => new
+        {
+            id = d.Id,
+            key = d.Id,
+            value = new { rev = d.Rev }
+        });
+
+        return Results.Ok(new { total_rows = rows.Count(), rows });
+    }
+
+    public record ServerMetadataVendor(string name, string version);
+    public record GetServerMetadataResponse(string couchdb, string uuid, ServerMetadataVendor vendor, string version);
+    public async Task<GetServerMetadataResponse> GetInfo(HttpContext context)
+    {
+        var response = new GetServerMetadataResponse(
+            "Welcome to the Cosmos API",
+            "85fb71bf700c17267fef77535820e371",
+            new ServerMetadataVendor("Sparc Cooperative", "2.0.1"),
+            "2.0.1"
+        );
+
+        return response;
+    }
+
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var baseUrl = $"/data";
         var group = endpoints.MapGroup(baseUrl);
 
+        group.MapGet("/", GetInfo);
         group.MapGet("{db}", GetDb);
         //group.MapPut("/{db}", CreateDatabase);
         //group.MapPost("/{db}", CreateDocument);
         group.MapPut("/{db}/{docid}", CreateOrUpdateDocument);
         group.MapGet("/{db}/{docid}", GetDocument);
         group.MapDelete("/{db}/{docid}", DeleteDocument);
-        //group.MapPost("/{db}/_bulk_docs", BulkDocs);
-        //group.MapGet("/{db}/_all_docs", GetAllDocs);
-        //group.MapPost("/{db}/_changes", GetChanges);
-        //group.MapGet("/{db}/_changes", GetChanges);
+        group.MapPost("/{db}/_bulk_docs", BulkDocs);
+        group.MapGet("/{db}/_all_docs", GetAllDocs);
+        group.MapPost("/{db}/_changes", GetChanges);
+        group.MapGet("/{db}/_changes", GetChanges);
         group.MapPost("{db}/_revs_diff", GetRevsDiff);
         //group.MapGet("{db}/_local/{id}", GetCheckpoint);
     }
+
+    
 
     private static string IncrementRev(string rev)
     {
