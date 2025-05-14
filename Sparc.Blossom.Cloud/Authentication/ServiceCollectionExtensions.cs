@@ -17,8 +17,8 @@ public static class ServiceCollectionExtensions
         builder.Services.AddAuthorization();
 
         builder.Services.AddScoped<AuthenticationStateProvider, BlossomServerAuthenticationStateProvider<TUser>>()
-            .AddScoped<BlossomDefaultAuthenticator<TUser>>()
-            .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<TUser>>();
+            .AddScoped<BlossomPasswordlessAuthenticator<TUser>>()
+            .AddScoped<IBlossomAuthenticator, BlossomPasswordlessAuthenticator<TUser>>();
 
         builder.Services.AddTransient(s =>
             s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User

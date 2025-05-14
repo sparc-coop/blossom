@@ -5,6 +5,54 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "parameters": [
+          {
+            "name": "emailOrToken",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlossomUser"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/userinfo": {
+      "get": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlossomUser"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/friendlyid": {
       "get": {
         "tags": [
@@ -25,7 +73,239 @@
       }
     }
   },
-  "components": { },
+  "components": {
+    "schemas": {
+      "BlossomUser": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "authenticationType": {
+            "type": "string"
+          },
+          "externalId": {
+            "type": "string",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          },
+          "parentUserId": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateCreated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dateModified": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/UserAvatar"
+          },
+          "languagesSpoken": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Language2"
+            }
+          },
+          "primaryLanguage": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "genericId": { },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "Dialect": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "nativeName": {
+            "type": "string"
+          },
+          "voices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Voice"
+            }
+          }
+        }
+      },
+      "Language": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "dialectId": {
+            "type": "string",
+            "nullable": true
+          },
+          "voiceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "nativeName": {
+            "type": "string"
+          },
+          "isRightToLeft": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "dialects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Dialect"
+            }
+          }
+        },
+        "nullable": true
+      },
+      "Language2": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "dialectId": {
+            "type": "string",
+            "nullable": true
+          },
+          "voiceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "nativeName": {
+            "type": "string"
+          },
+          "isRightToLeft": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "dialects": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Dialect"
+            }
+          }
+        }
+      },
+      "UserAvatar": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "initials": {
+            "type": "string",
+            "nullable": true
+          },
+          "isOnline": {
+            "type": "boolean"
+          },
+          "backgroundColor": {
+            "type": "string"
+          },
+          "foregroundColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "emoji": {
+            "type": "string",
+            "nullable": true
+          },
+          "skinTone": {
+            "type": "string",
+            "nullable": true
+          },
+          "pronouns": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "hearOthers": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "muteMe": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "Voice": {
+        "required": [
+          "locale",
+          "name",
+          "displayName",
+          "localeName",
+          "shortName",
+          "gender",
+          "voiceType"
+        ],
+        "type": "object",
+        "properties": {
+          "locale": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "localeName": {
+            "type": "string"
+          },
+          "shortName": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "voiceType": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
   "tags": [
     {
       "name": "Sparc.Blossom.Cloud"
