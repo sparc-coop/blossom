@@ -35,7 +35,6 @@
 
 	<ItemGroup>
 		<Folder Include="Communication\" />
-		<Folder Include="Data\Pouch\" />
 	</ItemGroup>
 
 	<ItemGroup>

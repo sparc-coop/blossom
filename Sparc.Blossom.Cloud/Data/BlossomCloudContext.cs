@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
+using Sparc.Blossom.Data.Pouch;
 
 internal class BlossomCloudContext(DbContextOptions<BlossomCloudContext> options) : DbContext(options)
 {
@@ -11,6 +12,10 @@ internal class BlossomCloudContext(DbContextOptions<BlossomCloudContext> options
 
         
         model.Entity<Datum>().ToContainer("Datum")
+            .HasPartitionKey(x => new { x.TenantId, x.UserId, x.DatasetId })
+            .HasKey(x => x.Id);
+
+        model.Entity<ReplicationLog>().ToContainer("ReplicationLog")
             .HasPartitionKey(x => new { x.TenantId, x.UserId, x.DatasetId })
             .HasKey(x => x.Id);
     }

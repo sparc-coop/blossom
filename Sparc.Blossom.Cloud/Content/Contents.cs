@@ -17,8 +17,8 @@ public class Contents(BlossomAggregateOptions<TextContent> options, IRepository<
         if (language == null || page == null)
             return [];
 
-        var content = await page.LoadContentAsync(language, Repository, translator);
-        return content;
+        //var content = await page.LoadContentAsync(language, Repository, translator);
+        return [];// content;
     }
 
     public BlossomQuery<TextContent> All(string pageId) => Query().Where(content => content.PageId == pageId && content.SourceContentId == null);
