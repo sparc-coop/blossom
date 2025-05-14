@@ -41,19 +41,20 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         if (emailOrToken != null && await HasPasskeys(User.Id))
         {
             // User has just signed up
-            User.AuthenticationType.ExternalId = User.Id;
-            var parentUser = Users.Query.FirstOrDefault(x => x.ExternalId == uUserser.UserId && x.ParentUserId == null);
+            User.AuthenticationType = User.Id;
+            var parentUser = Users.Query.FirstOrDefault(x => x.ExternalId == User.UserId && x.ParentUserId == null);
             if (parentUser != null)
             {
                 User.SetParentUser(parentUser);
 
                 await Save();
-            return User;
+                return User;
+            }
         }
 
-        var passwordlessToken = await SignUpWithPasswordlessAsync(user);
-        user.SetToken(passwordlessToken);
-        return user;
+        var passwordlessToken = await SignUpWithPasswordlessAsync(User);
+        User.SetToken(passwordlessToken);
+        return User;
     }
 
     private async Task<string> SignUpWithPasswordlessAsync(BlossomUser user)
@@ -153,5 +154,10 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         var auth = endpoints.MapGroup("/auth");
         auth.MapPost("login", LoginWithPasswordless);
         auth.MapGet("userinfo", GetAsync);
+    }
+
+    private async Task LoginWithPasswordless(HttpContext context)
+    {
+        throw new NotImplementedException();
     }
 }

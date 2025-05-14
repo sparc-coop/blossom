@@ -11,7 +11,7 @@ builder.Services.AddScoped<FriendlyId>();
 
 builder.Services.AddCosmos<BlossomCloudContext>(builder.Configuration.GetConnectionString("Cosmos")!, "BlossomCloud", ServiceLifetime.Scoped);
 
-builder.AddBlossomCloudAuthentication<BlossomUser>();
+//builder.AddBlossomCloudAuthentication<BlossomUser>();
 builder.AddBlossomCloudTranslation();
 
 builder.Services.AddMediatR(options =>
@@ -23,7 +23,7 @@ builder.Services.AddMediatR(options =>
 });
 
 var app = builder.Build();
-app.UseBlossomCloudAuthentication<BlossomUser>();
+//app.UseBlossomCloudAuthentication<BlossomUser>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -36,6 +36,7 @@ public class BlossomCloudAuthenticator<T>(
             
         }
 
+        return new BlossomUser();
     }
 
     public async Task<AuthenticationState> PollAsync(int everyXSeconds)
@@ -94,5 +95,7 @@ public class BlossomCloudAuthenticator<T>(
         {
             await cloud.Login(result);
         }
+
+        return "abc";
     }
 }

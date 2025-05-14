@@ -32,6 +32,18 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
         return state;
     }
 
+    public virtual async IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal principal, string? emailOrToken = null)
+    {
+        LoginState = LoginStates.LoggedIn;
+        yield return LoginState;
+    }
+
+    public virtual async IAsyncEnumerable<LoginStates> Logout(ClaimsPrincipal principal)
+    {
+        LoginState = LoginStates.LoggedOut;
+        yield return LoginState;
+    }
+
     public virtual async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
     {
         var user = await GetAsync(principal);
@@ -78,5 +90,10 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
         user.UpdateAvatar(avatar);
         await Users.UpdateAsync((T)user);
         return user;
+    }
+
+    public virtual async Task<BlossomUser> LoginAsync(ClaimsPrincipal principal, string? emailOrToken = null)
+    {
+        throw new NotImplementedException();
     }
 }

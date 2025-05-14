@@ -17,7 +17,7 @@
             @foreach (var language in Languages)
             {
                 <li>
-                    <button @onclick=@(() => ChangeLanguage(language))>
+@*                     <button @onclick=@(() => ChangeLanguage(language))>
                         @language.DisplayName
 
                         @if (language.DisplayName != language.NativeName)
@@ -31,7 +31,7 @@
                                 <Check />
                             </div>
                         }
-                    </button>
+                    </button> *@
                 </li>
             }
         </ul>
@@ -59,9 +59,9 @@
         ShowLanguageSettings = !ShowLanguageSettings;
     }
 
-    async Task ChangeLanguage(Language language)
-    {
-        await LanguageChanged.InvokeAsync(language);
-        ToggleLanguageSettings();
-    }
+    // async Task ChangeLanguage(Language language)
+    // {
+    //     await LanguageChanged.InvokeAsync(language);
+    //     ToggleLanguageSettings();
+    // }
 }
