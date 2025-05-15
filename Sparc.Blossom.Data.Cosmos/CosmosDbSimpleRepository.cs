@@ -166,7 +166,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         var requestOptions = partitionKey == null
             ? null
-            : new QueryRequestOptions { PartitionKey = new PartitionKey(partitionKey) };
+            : new QueryRequestOptions { PartitionKey = new PartitionKeyBuilder().Add("sparc").Add("sparc-admin").Add(partitionKey).Build() };
 
         sql = sql.Replace("{", "@").Replace("}", "");
 
@@ -207,5 +207,10 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         {
             await UpsertAsync(item, partitionKey);
         }
+    }
+
+    public IQueryable<T> PartitionQuery(string partitionKey)
+    {
+        return Query.WithPartitionKey(partitionKey);
     }
 }

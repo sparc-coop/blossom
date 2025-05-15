@@ -50,6 +50,9 @@ public static class CosmosDbExtensions
         if (repository is CosmosDbRepository<T> cosmosRepository && partitionKey != null)
             return cosmosRepository.PartitionQuery(partitionKey);
 
+        if (repository is CosmosDbSimpleRepository<T> cosmosSimpleRepository && partitionKey != null)
+            return cosmosSimpleRepository.PartitionQuery(partitionKey);
+
         return repository.Query;
     }
 

@@ -10,7 +10,7 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
     public CosmosDbSimpleRepository<Datum> Data { get; } = data;
     public CosmosDbSimpleRepository<ReplicationLog> Checkpoints { get; } = checkpoints;
     public record GetDatasetMetadataResponse(string db_name, int doc_count, int instance_start_time, string update_seq);
-    public async Task<GetDatasetMetadataResponse> GetDb(string db)
+    public async Task<GetDatasetMetadataResponse>  GetDb(string db)
     {
         var count = Data.Query(db).Count();
 
@@ -76,38 +76,56 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
     public record GetChangesRequest(List<string> doc_ids, string since, int? limit);
     public record GetChangesResult(List<GetChangesRev> rev, string id, string seq);
     public record GetChangesRev(string rev);
-    public record GetChangesResponse(string last_seq, List<GetChangesResult> results);
-
-    public async Task<GetChangesResponse> GetChanges(string db, [FromQuery] string? since, [FromQuery] int? limit)
+    public record GetChangesResponse(string last_seq, List<GetChangesResult> results);  
+    public record BulkDocsPayload(List<Dictionary<string, object>> Docs);
+    public async Task<IResult> BulkDocs(string db, [FromBody] BulkDocsPayload payload)
     {
-        var request = new GetChangesRequest(new List<string>(), since ?? "0", limit);
-        return await PostChanges(db, request);
+        foreach (var doc in payload.Docs)
+        {
+            var datum = new Datum
+            {
+                Id = doc["_id"].ToString()!,
+                Rev = doc["_rev"].ToString()!,
+                Deleted = doc.ContainsKey("_deleted") && (bool)doc["_deleted"],
+                TenantId = "sparc",
+                UserId = "sparc-admin",
+                DatabaseId = db,
+                Doc = doc
+            };
+
+            await Data.UpsertAsync(datum, db);
+        }
+
+        return Results.Ok(payload.Docs.Select(d => new { ok = true, id = d["_id"], rev = d["_rev"] }));
+    }
+    public async Task<IResult> GetAllDocs(string db)
+    {
+        var docs = await Data.Query(db).Where(x => !x.Deleted).ToListAsync();
+        var rows = docs.Select(d => new
+        {
+            id = d.Id,
+            key = d.Id,
+            value = new { rev = d.Rev }
+        });
+
+        return Results.Ok(new { total_rows = rows.Count(), rows });
+    }
+    public record ServerMetadataVendor(string name, string version);
+    public record GetServerMetadataResponse(string couchdb, string uuid, ServerMetadataVendor vendor, string version);
+
+
+    public async Task<GetServerMetadataResponse> GetInfo(HttpContext context)
+    {
+        var response = new GetServerMetadataResponse(
+            "Welcome to the Cosmos API",
+            "85fb71bf700c17267fef77535820e371",
+            new ServerMetadataVendor("Sparc Cooperative", "2.0.1"),
+            "2.0.1"
+        );
+
+        return response;
     }
 
-
-    public async Task<GetChangesResponse> PostChanges(string db, [FromBody] GetChangesRequest request)
-    {
-        // Build the SQL query
-        var query = Data.Query(db).Where(x => x.Seq != null);
-        if (!string.IsNullOrEmpty(request.since) && request.since != "0")
-            query = query.Where(x => string.Compare(x.Seq, request.since) > 0);
-
-        query = query.OrderBy(x => x.Seq);
-
-        if (request.limit.HasValue)
-            query = query.Take(request.limit.Value);
-
-        var results = await query.ToCosmosAsync();
-        var last_seq = (results.LastOrDefault()?.Seq ?? request.since) ?? "0";
-
-        var output = results
-            .Select(x => new GetChangesResult([new(x.Rev)], x.Id, x.Seq!))
-            .ToList();
-
-        // Return the response
-        return new GetChangesResponse(last_seq, output);
-    }
-  
     public async Task<IResult> GetCheckpoint(string db, string id)
     {
         var log = await Checkpoints.Query(db).Where(x => x.PouchId == id).CosmosFirstOrDefaultAsync();
@@ -133,51 +151,32 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
         await Checkpoints.UpsertAsync(log, db);
         return Results.Ok(log);
     }
-
-    public record BulkDocsPayload(List<Dictionary<string, object>> Docs);
-
-    public async Task<IResult> BulkDocs(string db, [FromBody] BulkDocsPayload payload)
+    public async Task<GetChangesResponse> GetChanges(string db, [FromQuery] string? since, [FromQuery] int? limit)
     {
-        foreach (var doc in payload.Docs)
-        {
-            var datum = new Datum
-            {
-                Id = doc["_id"].ToString()!,
-                Rev = doc["_rev"].ToString()!,
-                Deleted = doc.ContainsKey("_deleted") && (bool)doc["_deleted"],
-                // other fields
-            };
-            await Data.UpsertAsync(datum, db);
-        }
-
-        return Results.Ok(payload.Docs.Select(d => new { ok = true, id = d["_id"], rev = d["_rev"] }));
+        var request = new GetChangesRequest(new List<string>(), since ?? "0", limit);
+        return await PostChanges(db, request);
     }
-
-    public async Task<IResult> GetAllDocs(string db)
+    public async Task<GetChangesResponse> PostChanges(string db, [FromBody] GetChangesRequest request)
     {
-        var docs = await Data.Query(db).Where(x => !x.Deleted).ToListAsync();
-        var rows = docs.Select(d => new
-        {
-            id = d.Id,
-            key = d.Id,
-            value = new { rev = d.Rev }
-        });
+        // Build the SQL query
+        var query = Data.Query(db).Where(x => x.Seq != null);
+        if (!string.IsNullOrEmpty(request.since) && request.since != "0")
+            query = query.Where(x => string.Compare(x.Seq, request.since) > 0);
 
-        return Results.Ok(new { total_rows = rows.Count(), rows });
-    }
+        query = query.OrderBy(x => x.Seq);
 
-    public record ServerMetadataVendor(string name, string version);
-    public record GetServerMetadataResponse(string couchdb, string uuid, ServerMetadataVendor vendor, string version);
-    public async Task<GetServerMetadataResponse> GetInfo(HttpContext context)
-    {
-        var response = new GetServerMetadataResponse(
-            "Welcome to the Cosmos API",
-            "85fb71bf700c17267fef77535820e371",
-            new ServerMetadataVendor("Sparc Cooperative", "2.0.1"),
-            "2.0.1"
-        );
+        if (request.limit.HasValue)
+            query = query.Take(request.limit.Value);
 
-        return response;
+        var results = await query.ToCosmosAsync();
+        var last_seq = (results.LastOrDefault()?.Seq ?? request.since) ?? "0";
+
+        var output = results
+            .Select(x => new GetChangesResult([new(x.Rev)], x.Id, x.Seq!))
+            .ToList();
+
+        // Return the response
+        return new GetChangesResponse(last_seq, output);
     }
 
     public void Map(IEndpointRouteBuilder endpoints)
@@ -187,6 +186,10 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
 
         group.MapGet("/", GetInfo);
         group.MapGet("{db}", GetDb);
+        group.MapGet("{db}/_local/{id}", GetCheckpoint);
+        group.MapPut("{db}/_local/{id}", PutCheckpoint);
+        group.MapPost("/{db}/_changes", PostChanges);
+        group.MapGet("/{db}/_changes", GetChanges);
         //group.MapPut("/{db}", CreateDatabase);
         //group.MapPost("/{db}", CreateDocument);
         group.MapPut("/{db}/{docid}", CreateOrUpdateDocument);
@@ -194,11 +197,9 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
         group.MapDelete("/{db}/{docid}", DeleteDocument);
         group.MapPost("/{db}/_bulk_docs", BulkDocs);
         group.MapGet("/{db}/_all_docs", GetAllDocs);
-        group.MapPost("/{db}/_changes", PostChanges);
-        group.MapGet("/{db}/_changes", GetChanges);
+       
         group.MapPost("{db}/_revs_diff", GetRevsDiff);
-        group.MapGet("{db}/_local/{id}", GetCheckpoint);
-        group.MapPut("{db}/_local/{id}", PutCheckpoint);
+        
     }
 
     

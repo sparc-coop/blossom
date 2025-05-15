@@ -12,7 +12,7 @@ internal class BlossomCloudContext(DbContextOptions<BlossomCloudContext> options
 
         
         model.Entity<Datum>().ToContainer("Datum")
-            .HasPartitionKey(x => new { x.TenantId, x.UserId, x.DatasetId })
+            .HasPartitionKey(x => new { x.TenantId, x.UserId, x.DatabaseId })
             .HasKey(x => x.Id);
 
         model.Entity<ReplicationLog>().ToContainer("ReplicationLog")

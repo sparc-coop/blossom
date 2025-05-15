@@ -101,6 +101,155 @@
         }
       }
     },
+    "/data/{db}/_local/{id}": {
+      "get": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplicationLog"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/data/{db}/_changes": {
+      "post": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetChangesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetChangesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "since",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetChangesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/data/{db}/{docid}": {
       "put": {
         "tags": [
@@ -259,87 +408,6 @@
         }
       }
     },
-    "/data/{db}/_changes": {
-      "post": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetChangesRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetChangesResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "since",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetChangesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/data/{db}/_revs_diff": {
       "post": {
         "tags": [
@@ -384,74 +452,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/data/{db}/_local/{id}": {
-      "get": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReplicationLog"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
           }
         }
       }
@@ -541,8 +541,15 @@
           "userId": {
             "type": "string"
           },
-          "datasetId": {
+          "databaseId": {
             "type": "string"
+          },
+          "docJson": {
+            "type": "string",
+            "nullable": true
+          },
+          "doc": {
+            "type": "object"
           },
           "genericId": { },
           "id": {
