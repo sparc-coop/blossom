@@ -107,23 +107,7 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
         // Return the response
         return new GetChangesResponse(last_seq, output);
     }
-    //public async Task<Results<ReplicationLog>> GetCheckpoint(string db, string id)
-    //{
-    //    // Attempt to read the item from Cosmos DB
-    //    var item = await Data.Query(db).Where(x => x.Id == id).CosmosFirstOrDefaultAsync();
-    //    if (item == null)
-    //    {
-    //        var dictionary = new Dictionary<string, string>
-    //    {
-    //        { "error", "not_found" },
-    //        { "reason", "missing" }
-    //    };
-
-    //        return Results.NotFound(dictionary);
-    //    }
-    //    return Results.Ok(item);
-    //}
-
+  
     public async Task<IResult> GetCheckpoint(string db, string id)
     {
         var log = await Checkpoints.Query(db).Where(x => x.PouchId == id).CosmosFirstOrDefaultAsync();
@@ -142,7 +126,10 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
     public async Task<IResult> PutCheckpoint(string db, string id, [FromBody] ReplicationLog log)
     {
         log.PouchId = id;
-        log.DatasetId = db;
+        log.Id = id;
+        log.TenantId = "sparc";
+        log.UserId = "sparc-admin";
+        log.DatabaseId = db;
         await Checkpoints.UpsertAsync(log, db);
         return Results.Ok(log);
     }

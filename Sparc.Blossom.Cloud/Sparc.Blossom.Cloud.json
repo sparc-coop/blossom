@@ -782,7 +782,7 @@
           "userId": {
             "type": "string"
           },
-          "datasetId": {
+          "databaseId": {
             "type": "string"
           },
           "history": {

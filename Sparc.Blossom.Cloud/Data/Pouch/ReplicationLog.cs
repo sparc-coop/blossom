@@ -11,7 +11,7 @@ namespace Sparc.Blossom.Data.Pouch
         public string Id { get; set; }
         public string TenantId { get; set; }
         public string UserId { get; set; }
-        public string DatasetId { get; set; }
+        public string DatabaseId { get; set; }
 
         [JsonProperty("history")]
         public List<ReplicationHistory> History { get; set; }
@@ -22,9 +22,9 @@ namespace Sparc.Blossom.Data.Pouch
         public long last_seq { get; set; }
         public int version { get; set; }
 
-        public void SetFromPouch(string datasetId, string documentId)
+        public void SetFromPouch(string databaseId, string documentId)
         {
-            DatasetId = datasetId;
+            DatabaseId = databaseId;
             Id = documentId;
         }
 

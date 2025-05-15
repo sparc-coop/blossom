@@ -194,7 +194,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
 
     public async Task UpsertAsync(T item, string? partitionKey = null)
     {
-        var pk = partitionKey != null ? new PartitionKey(partitionKey) : GetPartitionKey(item);
+        var pk = partitionKey != null ? new PartitionKeyBuilder().Add("sparc").Add("sparc-admin").Add(partitionKey).Build() : GetPartitionKey(item);
 
         await Container.UpsertItemAsync(item, pk);
 

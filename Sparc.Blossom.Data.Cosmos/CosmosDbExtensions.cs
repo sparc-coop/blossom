@@ -7,7 +7,8 @@ public static class CosmosDbExtensions
 {
     public static IQueryable<T> WithPartitionKey<T>(this IQueryable<T> query, string partitionKey) where T : class
     {
-        return CosmosQueryableExtensions.WithPartitionKey(query, partitionKey);
+        var hierarchicalPartitionKey = new { TenantId = "Sparc2", UserId = "sparc-admin", DatabaseId = partitionKey };
+        return CosmosQueryableExtensions.WithPartitionKey(query, hierarchicalPartitionKey);
     }
 
     public static async IAsyncEnumerable<T> ToAsyncEnumerable<T>(this IQueryable<T> query)
