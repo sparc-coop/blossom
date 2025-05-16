@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Sparc.Blossom.Data.Pouch;
 using System.Data;
+using System.Text.Json;
 
 namespace Sparc.Blossom.Data;
 
@@ -10,7 +11,7 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
     public CosmosDbSimpleRepository<Datum> Data { get; } = data;
     public CosmosDbSimpleRepository<ReplicationLog> Checkpoints { get; } = checkpoints;
     public record GetDatasetMetadataResponse(string db_name, int doc_count, int instance_start_time, string update_seq);
-    public async Task<GetDatasetMetadataResponse>  GetDb(string db)
+    public async Task<GetDatasetMetadataResponse>  GetDbAsync(string db)
     {
         var count = Data.Query(db).Count();
 
@@ -53,51 +54,12 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
         return Results.Ok(new { ok = true, id = docid, rev = doc.Rev });
     }
 
-    public record MissingItems(List<string> Missing);
-    public async Task<Dictionary<string, MissingItems>> GetRevsDiff(string db, [FromBody] Dictionary<string, List<string>> revisions)
-    {
-        var result = new Dictionary<string, MissingItems>();
-
-        foreach (var id in revisions.Keys)
-        {
-            var revisionsList = string.Join(", ", revisions[id].Select(x => $"'{x}'"));
-            var sql = $"SELECT VALUE r._rev FROM r WHERE r._rev IN ({revisionsList})";
-
-            var existingRevisions = await Data.FromSqlAsync<string>(sql, db);
-            var missingRevisions = revisions[id].Except(existingRevisions).ToList();
-
-            if (missingRevisions.Count != 0)
-                result.Add(id, new MissingItems(missingRevisions));
-        }
-
-        return result;
-    }
+    
 
     public record GetChangesRequest(List<string> doc_ids, string since, int? limit);
     public record GetChangesResult(List<GetChangesRev> rev, string id, string seq);
     public record GetChangesRev(string rev);
     public record GetChangesResponse(string last_seq, List<GetChangesResult> results);  
-    public record BulkDocsPayload(List<Dictionary<string, object>> Docs);
-    public async Task<IResult> BulkDocs(string db, [FromBody] BulkDocsPayload payload)
-    {
-        foreach (var doc in payload.Docs)
-        {
-            var datum = new Datum
-            {
-                Id = doc["_id"].ToString()!,
-                Rev = doc["_rev"].ToString()!,
-                Deleted = doc.ContainsKey("_deleted") && (bool)doc["_deleted"],
-                TenantId = "sparc",
-                UserId = "sparc-admin",
-                DatabaseId = db,
-                Doc = doc
-            };
-
-            await Data.UpsertAsync(datum, db);
-        }
-
-        return Results.Ok(payload.Docs.Select(d => new { ok = true, id = d["_id"], rev = d["_rev"] }));
-    }
     public async Task<IResult> GetAllDocs(string db)
     {
         var docs = await Data.Query(db).Where(x => !x.Deleted).ToListAsync();
@@ -114,7 +76,7 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
     public record GetServerMetadataResponse(string couchdb, string uuid, ServerMetadataVendor vendor, string version);
 
 
-    public async Task<GetServerMetadataResponse> GetInfo(HttpContext context)
+    public GetServerMetadataResponse GetInfo(HttpContext context)
     {
         var response = new GetServerMetadataResponse(
             "Welcome to the Cosmos API",
@@ -125,8 +87,7 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
 
         return response;
     }
-
-    public async Task<IResult> GetCheckpoint(string db, string id)
+    public async Task<IResult> GetCheckpointAsync(string db, string id)
     {
         var log = await Checkpoints.Query(db).Where(x => x.PouchId == id).CosmosFirstOrDefaultAsync();
         if (log == null)
@@ -140,8 +101,7 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
         }
         return Results.Ok(log);
     }
-
-    public async Task<IResult> PutCheckpoint(string db, string id, [FromBody] ReplicationLog log)
+    public async Task<IResult> PutCheckpointAsync(string db, string id, [FromBody] ReplicationLog log)
     {
         log.PouchId = id;
         log.Id = id;
@@ -151,12 +111,12 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
         await Checkpoints.UpsertAsync(log, db);
         return Results.Ok(log);
     }
-    public async Task<GetChangesResponse> GetChanges(string db, [FromQuery] string? since, [FromQuery] int? limit)
+    public async Task<GetChangesResponse> GetChangesAsync(string db, [FromQuery] string? since, [FromQuery] int? limit)
     {
         var request = new GetChangesRequest(new List<string>(), since ?? "0", limit);
-        return await PostChanges(db, request);
+        return await PostChangesAsync(db, request);
     }
-    public async Task<GetChangesResponse> PostChanges(string db, [FromBody] GetChangesRequest request)
+    public async Task<GetChangesResponse> PostChangesAsync(string db, [FromBody] GetChangesRequest request)
     {
         // Build the SQL query
         var query = Data.Query(db).Where(x => x.Seq != null);
@@ -178,27 +138,81 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
         // Return the response
         return new GetChangesResponse(last_seq, output);
     }
+    public record MissingItems(List<string> Missing);
+    public async Task<Dictionary<string, MissingItems>> GetRevsDiff(string db, [FromBody] Dictionary<string, List<string>> revisions)
+    {
+        var result = new Dictionary<string, MissingItems>();
 
+        foreach (var id in revisions.Keys)
+        {
+            var revisionsList = string.Join(", ", revisions[id].Select(x => $"'{x}'"));
+            var sql = $"SELECT VALUE r._rev FROM r WHERE r._rev IN ({revisionsList})";
+
+            var existingRevisions = await Data.FromSqlAsync<string>(sql, db);
+            var missingRevisions = revisions[id].Except(existingRevisions).ToList();
+
+            if (missingRevisions.Count != 0)
+                result.Add(id, new MissingItems(missingRevisions));
+        }
+
+        return result;
+    }
+    public record BulkDocsPayload(List<Dictionary<string, object>> Docs);
+    public async Task<IResult> BulkDocs(string db, [FromBody] BulkDocsPayload payload)
+    {
+        foreach (var doc in payload.Docs)
+        {
+            bool deleted = false;
+            if (doc.ContainsKey("_deleted") && doc["_deleted"] is JsonElement je)
+            {
+                if (je.ValueKind == JsonValueKind.True)
+                    deleted = true;
+                else if (je.ValueKind == JsonValueKind.False)
+                    deleted = false;
+                else if (je.ValueKind == JsonValueKind.Number && je.TryGetInt32(out var n))
+                    deleted = n != 0;
+            }
+
+            var datum = new Datum
+            {
+                Id = doc["_id"].ToString()!,
+                Rev = doc["_rev"].ToString()!,
+                Deleted = deleted,
+                TenantId = "sparc",
+                UserId = "sparc-admin",
+                DatabaseId = db,
+                Doc = doc
+            };
+
+            await Data.UpsertAsync(datum, db);
+        }
+
+        return Results.Ok(payload.Docs.Select(d => new { ok = true, id = d["_id"], rev = d["_rev"] }));
+    }
+    
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var baseUrl = $"/data";
         var group = endpoints.MapGroup(baseUrl);
 
         group.MapGet("/", GetInfo);
-        group.MapGet("{db}", GetDb);
-        group.MapGet("{db}/_local/{id}", GetCheckpoint);
-        group.MapPut("{db}/_local/{id}", PutCheckpoint);
-        group.MapPost("/{db}/_changes", PostChanges);
-        group.MapGet("/{db}/_changes", GetChanges);
+        group.MapGet("{db}", GetDbAsync);
+        group.MapGet("{db}/_local/{id}", GetCheckpointAsync);
+        group.MapPut("{db}/_local/{id}", PutCheckpointAsync);
+        group.MapPost("/{db}/_changes", PostChangesAsync);
+        group.MapGet("/{db}/_changes", GetChangesAsync);
+        group.MapPost("{db}/_revs_diff", GetRevsDiff);
+
+        group.MapPost("/{db}/_bulk_docs", BulkDocs);
         //group.MapPut("/{db}", CreateDatabase);
         //group.MapPost("/{db}", CreateDocument);
         group.MapPut("/{db}/{docid}", CreateOrUpdateDocument);
         group.MapGet("/{db}/{docid}", GetDocument);
         group.MapDelete("/{db}/{docid}", DeleteDocument);
-        group.MapPost("/{db}/_bulk_docs", BulkDocs);
+        
         group.MapGet("/{db}/_all_docs", GetAllDocs);
        
-        group.MapPost("{db}/_revs_diff", GetRevsDiff);
+        
         
     }
 

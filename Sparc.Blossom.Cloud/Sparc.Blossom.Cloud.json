@@ -72,6 +72,25 @@
         }
       }
     },
+    "/data": {
+      "get": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetServerMetadataResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/data/{db}": {
       "get": {
         "tags": [
@@ -250,6 +269,86 @@
         }
       }
     },
+    "/data/{db}/_revs_diff": {
+      "post": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/MissingItems"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data/{db}/_bulk_docs": {
+      "post": {
+        "tags": [
+          "CosmosPouchAdapter"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkDocsPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/data/{db}/{docid}": {
       "put": {
         "tags": [
@@ -354,38 +453,6 @@
         }
       }
     },
-    "/data/{db}/_bulk_docs": {
-      "post": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkDocsPayload"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/data/{db}/_all_docs": {
       "get": {
         "tags": [
@@ -404,54 +471,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          }
-        }
-      }
-    },
-    "/data/{db}/_revs_diff": {
-      "post": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "$ref": "#/components/schemas/MissingItems"
-                  }
-                }
-              }
-            }
           }
         }
       }
@@ -680,6 +699,29 @@
           }
         }
       },
+      "GetServerMetadataResponse": {
+        "required": [
+          "couchdb",
+          "uuid",
+          "vendor",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "couchdb": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "vendor": {
+            "$ref": "#/components/schemas/ServerMetadataVendor"
+          },
+          "version": {
+            "type": "string"
+          }
+        }
+      },
       "Language": {
         "type": "object",
         "properties": {
@@ -813,6 +855,21 @@
             "format": "int32"
           },
           "genericId": { }
+        }
+      },
+      "ServerMetadataVendor": {
+        "required": [
+          "name",
+          "version"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
         }
       },
       "UserAvatar": {
