@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Passwordless;
 using Sparc.Blossom.Cloud.Tools;
 using System.Security.Claims;
@@ -27,6 +28,14 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         Client.DefaultRequestHeaders.Add("ApiSecret", options.Value.ApiSecret);
     }
 
+    public override async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
+    {
+        var user = await GetAsync(principal);
+        principal = user.Login();
+        await Users.UpdateAsync((T)user);
+        return principal;
+    }
+
     public async Task<BlossomUser> Login(ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null)
     {
         Message = null;
@@ -38,20 +47,32 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         if (User.ExternalId != null)
             return User;
 
-        if (emailOrToken != null && await HasPasskeys(User.Id))
+        // Verify Authentication Token or Register
+        if (emailOrToken != null && emailOrToken.StartsWith("verify"))
         {
-            // User has just signed up
-            User.AuthenticationType = User.Id;
-            var parentUser = Users.Query.FirstOrDefault(x => x.ExternalId == User.UserId && x.ParentUserId == null);
-            if (parentUser != null)
-            {
-                User.SetParentUser(parentUser);
+            var passwordlessUser = await PasswordlessClient.VerifyAuthenticationTokenAsync(emailOrToken);
 
-                await Save();
-                return User;
+            if (passwordlessUser?.Success == true)
+            {
+                //var parentUser = Users.Query.Where(x => x.ExternalId == User.UserId && x.ParentUserId == null).FirstOrDefault();
+                var parentUser = Users.Query.Where(x => x.ExternalId == passwordlessUser.UserId && x.ParentUserId == null).FirstOrDefault();
+                if (parentUser == null)
+                {
+                    User.ExternalId = passwordlessUser.UserId;
+
+                    await Save();
+                    return User;
+                }
+                else
+                {
+                    User.SetParentUser(parentUser);
+
+                    await Save();
+                    return User;
+                }
             }
         }
-
+            
         var passwordlessToken = await SignUpWithPasswordlessAsync(User);
         User.SetToken(passwordlessToken);
         return User;

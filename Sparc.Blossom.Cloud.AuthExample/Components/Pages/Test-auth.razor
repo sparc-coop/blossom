@@ -1,0 +1,160 @@
+﻿@page "/test-auth"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using System.Net.Http.Json
+@using System.Text.Json
+@using Sparc.Blossom.Authentication
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<h3>🔐 Authentication Service + Passkey Tester</h3>
+
+<div class="mb-3">
+    <label>Alias (optional for discoverable)</label>
+    <input class="form-control" @bind="Alias" placeholder="username or leave blank" />
+</div>
+
+<div class="mb-3">
+    <button class="btn btn-success me-2" @onclick="SignupWithPasskey">
+        Sign Up with Passkey
+    </button>
+    <button class="btn btn-primary me-2" @onclick="LoginWithPasskey">
+        Login with Passkey
+    </button>
+    <button class="btn btn-secondary" @onclick="GetUserInfo">
+        Get User Info
+    </button>
+</div>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="alert alert-info">@Message</div>
+}
+
+@if (CurrentUser is not null)
+{
+    <h5>Current User Object</h5>
+    <pre>@JsonSerializer.Serialize(CurrentUser, new JsonSerializerOptions { WriteIndented = true })</pre>
+}
+
+@code {
+    string Alias { get; set; }
+    BlossomUser? CurrentUser { get; set; }
+    string Message { get; set; }
+
+    const string ApiKey = "blossomcloud:public:3a16c78de07641e5b82f270d278ace2b";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUserInfo();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("init", ApiKey);
+        }
+    }
+
+    async Task SignupWithPasskey()
+    {
+        Message = null;
+        CurrentUser = null;
+
+        // 1) Hit your /auth/login (no token) to get back the registration challenge token
+        var startResp = await Http.PostAsync("auth/login", content: null);
+        if (!startResp.IsSuccessStatusCode)
+        {
+            Message = $"❌ Could not start sign-up: {startResp.StatusCode}";
+            return;
+        }
+
+        // 2) Pull the "token" property out of the JSON
+        using var doc = await startResp.Content.ReadFromJsonAsync<JsonDocument>();
+        string? registrationToken = null;
+        if (doc.RootElement.TryGetProperty("token", out var lower))
+            registrationToken = lower.GetString();
+        else if (doc.RootElement.TryGetProperty("Token", out var upper))
+            registrationToken = upper.GetString();
+
+        if (string.IsNullOrEmpty(registrationToken))
+        {
+            Message = "❌ No registration token in response";
+            return;
+        }
+
+        // 3) Launch the browser WebAuthn register flow
+        var passkeyToken = await JS.InvokeAsync<string>("signUpWithPasskey", registrationToken);
+        if (string.IsNullOrEmpty(passkeyToken))
+        {
+            Message = "❌ Browser registration failed (no token returned)";
+            return;
+        }
+
+        // 4) Finalize on the server—POST the new passkey token back to /auth/login
+        var finishResp = await Http.PostAsync(
+            $"auth/login?emailOrToken={Uri.EscapeDataString(passkeyToken)}",
+            content: null
+        );
+        if (finishResp.IsSuccessStatusCode)
+        {
+            CurrentUser = await finishResp.Content.ReadFromJsonAsync<BlossomUser>();
+            Message = "✅ Sign-up + login successful!";
+        }
+        else
+        {
+            var body = await finishResp.Content.ReadAsStringAsync();
+            Message = $"❌ Final login failed: {finishResp.StatusCode} – {body}";
+        }
+    }
+
+    async Task LoginWithPasskey()
+    {
+        Message = null;
+        CurrentUser = null;
+
+        var token = await JS.InvokeAsync<string>(
+            "signInWithPasskey",
+            string.IsNullOrWhiteSpace(Alias) ? null : Alias
+        );
+
+        if (string.IsNullOrEmpty(token))
+        {
+            Message = "❌ No token returned from passkey flow.";
+            return;
+        }
+
+        var resp = await Http.PostAsync(
+            $"auth/login?emailOrToken={Uri.EscapeDataString(token)}",
+            content: null
+        );
+
+        if (resp.IsSuccessStatusCode)
+        {
+            CurrentUser = await resp.Content.ReadFromJsonAsync<BlossomUser>();
+            Message = "✅ Login successful (cookie set)";
+        }
+        else
+        {
+            Message = $"❌ Login failed: {resp.StatusCode}";
+        }
+    }
+
+    async Task GetUserInfo()
+    {
+        Message = null;
+        CurrentUser = null;
+
+        var resp = await Http.GetAsync("auth/userinfo");
+        if (resp.IsSuccessStatusCode)
+        {
+            CurrentUser = await resp.Content.ReadFromJsonAsync<BlossomUser>();
+            Message = "ℹ️ User info retrieved";
+        }
+        else
+        {
+            Message = $"❌ Could not fetch userinfo: {resp.StatusCode}";
+        }
+    }
+
+}

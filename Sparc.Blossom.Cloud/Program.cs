@@ -1,4 +1,5 @@
 using MediatR.NotificationPublishers;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Scalar.AspNetCore;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Cloud.Tools;

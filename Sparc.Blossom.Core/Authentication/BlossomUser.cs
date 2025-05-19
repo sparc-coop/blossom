@@ -188,6 +188,10 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
     public void SetToken(string token)
     {
-        AddClaim("token", token);
+        Token = token;
+        if (Claims.ContainsKey("token"))
+            Claims["token"] = token;
+        else
+            Claims.Add("token", token);
     }
 }
