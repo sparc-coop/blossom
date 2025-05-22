@@ -78,6 +78,16 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         return User;
     }
 
+    public async Task<BlossomUser> Logout(ClaimsPrincipal principal, string? emailOrToken = null)
+    {
+        var user = await GetAsync(principal);
+
+        user.Logout();
+        await Save();
+
+        return user;
+    }
+
     private async Task<string> SignUpWithPasswordlessAsync(BlossomUser user)
     {
         var registerToken = await PasswordlessClient.CreateRegisterTokenAsync(new RegisterOptions(user.Id, user.Username)
