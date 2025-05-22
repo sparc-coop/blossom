@@ -3,6 +3,8 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
+public record ProductKey(string ProductName, string SerialNumber, DateTime PurchaseDate);
+
 public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 {
     public BlossomUser()
@@ -23,6 +25,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public DateTime DateModified { get; private set; }
     public UserAvatar Avatar { get; private set; } = new();
     public List<Language> LanguagesSpoken { get; private set; } = [];
+    public List<ProductKey> Products { get; set; } = [];
 
 
     internal Dictionary<string, string> Claims { get; set; } = [];
@@ -193,5 +196,19 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
             Claims["token"] = token;
         else
             Claims.Add("token", token);
+    }
+
+    public bool HasProduct(string productName)
+    {
+        return Products.Any(x => x.ProductName.Equals(productName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public void AddProduct(string productName)
+    {
+        if (HasProduct(productName))
+            return;
+
+        var serial = Guid.NewGuid().ToString(); 
+        Products.Add(new ProductKey(productName, serial, DateTime.UtcNow));
     }
 }

@@ -9,7 +9,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient("AuthService", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:44300/");
+    client.BaseAddress = new Uri("https://localhost:7185/");
 }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
 {
     UseCookies = true,

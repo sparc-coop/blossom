@@ -60,19 +60,19 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
                 {
                     User.ExternalId = passwordlessUser.UserId;
 
-                    await Save();
+                    await SaveAsync();
                     return User;
                 }
                 else
                 {
                     User.SetParentUser(parentUser);
 
-                    await Save();
+                    await SaveAsync();
                     return User;
                 }
             }
         }
-            
+
         var passwordlessToken = await SignUpWithPasswordlessAsync(User);
         User.SetToken(passwordlessToken);
         return User;
@@ -131,7 +131,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         if (parentUser != null)
         {
             User.SetParentUser(parentUser);
-            await Save();
+            await SaveAsync();
             User = parentUser;
         }
         else
@@ -139,7 +139,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
             User.Login("Passwordless", passwordlessUser.UserId);
         }
 
-        await Save();
+        await SaveAsync();
     }
 
     public override async IAsyncEnumerable<LoginStates> Logout(ClaimsPrincipal principal)
@@ -147,7 +147,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         var user = await GetAsync(principal);
 
         user.Logout();
-        await Save();
+        await SaveAsync();
 
         yield return LoginStates.LoggedOut;
     }
@@ -155,19 +155,35 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
     protected override async Task<BlossomUser> GetUserAsync(ClaimsPrincipal principal)
     {
         await base.GetUserAsync(principal);
-        
+
         if (User!.Username == null)
         {
             User.ChangeUsername(FriendlyId.Create(1, 2));
-            await Save();
+            await SaveAsync();
         }
 
         return User;
     }
 
-    private async Task Save()
+    private async Task SaveAsync()
     {
         await Users.UpdateAsync((T)User!);
+    }
+
+    public async Task<BlossomUser> AddProductAsync(ClaimsPrincipal principal, string productName)
+    {
+        await base.GetUserAsync(principal);
+
+        if (User == null)
+            throw new Exception("User not initialized");
+
+        if (!User.Products.Any(product => product.ProductName == productName))
+        {
+            User.AddProduct(productName);
+            await SaveAsync();
+        }
+
+        return User;
     }
 
     public void Map(IEndpointRouteBuilder endpoints)
@@ -175,6 +191,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         var auth = endpoints.MapGroup("/auth");
         auth.MapPost("login", LoginWithPasswordless);
         auth.MapGet("userinfo", GetAsync);
+        auth.MapPost("user-products", AddProductAsync);
     }
 
     private async Task LoginWithPasswordless(HttpContext context)

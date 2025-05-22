@@ -20,8 +20,11 @@
     <button class="btn btn-primary me-2" @onclick="LoginWithPasskey">
         Login with Passkey
     </button>
-    <button class="btn btn-secondary" @onclick="GetUserInfo">
+    <button class="btn btn-secondary me-2" @onclick="GetUserInfo">
         Get User Info
+    </button>
+    <button class="btn btn-outline-primary" @onclick="AddKoriProduct">
+        Add Kori
     </button>
 </div>
 
@@ -157,4 +160,24 @@
         }
     }
 
+    async Task AddKoriProduct()
+    {
+        Message = null;
+
+        await GetUserInfo();
+
+        var content = JsonContent.Create("Kori"); 
+
+        var resp = await Http.PostAsync("auth/user-products", content);
+
+        if (resp.IsSuccessStatusCode)
+        {
+            Message = "✅ Kori product added to user!";
+        }
+        else
+        {
+            var body = await resp.Content.ReadAsStringAsync();
+            Message = $"❌ Failed to add Kori product: {resp.StatusCode} – {body}";
+        }
+    }
 }

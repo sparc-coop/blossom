@@ -116,6 +116,12 @@
               "$ref": "#/components/schemas/Language2"
             }
           },
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductKey"
+            }
+          },
           "primaryLanguage": {
             "$ref": "#/components/schemas/Language"
           },
@@ -210,6 +216,26 @@
             "items": {
               "$ref": "#/components/schemas/Dialect"
             }
+          }
+        }
+      },
+      "ProductKey": {
+        "required": [
+          "productName",
+          "serialNumber",
+          "purchaseDate"
+        ],
+        "type": "object",
+        "properties": {
+          "productName": {
+            "type": "string"
+          },
+          "serialNumber": {
+            "type": "string"
+          },
+          "purchaseDate": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
