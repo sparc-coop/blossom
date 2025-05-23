@@ -185,12 +185,14 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
     {
         await base.GetUserAsync(principal);
 
-        if (User == null)
-            throw new Exception("User not initialized");
+        if (User is null)
+            throw new InvalidOperationException("User not initialized");
 
-        if (!User.Products.Any(product => product.ProductName == productName))
+        bool alreadyHasProduct = User.Products.Any(p => p.ProductName.Equals(productName, StringComparison.OrdinalIgnoreCase));
+
+        if (!alreadyHasProduct)
         {
-            User.AddProduct(productName);
+            User.AddProduct(productName); 
             await SaveAsync();
         }
 
@@ -203,7 +205,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         auth.MapPost("login", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.Login(principal, context, emailOrToken));
         auth.MapPost("logout", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.Logout(principal, emailOrToken));
         auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
-        auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] string productName) => await auth.AddProductAsync(principal, productName));
+        auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddProductRequest request) => await auth.AddProductAsync(principal, request.ProductName));
     }
 
     private async Task LoginWithPasswordless(HttpContext context)

@@ -91,7 +91,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "string"
+                "$ref": "#/components/schemas/AddProductRequest"
               }
             }
           },
@@ -133,6 +133,17 @@
   },
   "components": {
     "schemas": {
+      "AddProductRequest": {
+        "required": [
+          "productName"
+        ],
+        "type": "object",
+        "properties": {
+          "productName": {
+            "type": "string"
+          }
+        }
+      },
       "BlossomUser": {
         "type": "object",
         "properties": {

@@ -4,6 +4,7 @@ using System.Security.Claims;
 namespace Sparc.Blossom.Authentication;
 
 public record ProductKey(string ProductName, string SerialNumber, DateTime PurchaseDate);
+public record AddProductRequest(string ProductName);
 
 public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 {
