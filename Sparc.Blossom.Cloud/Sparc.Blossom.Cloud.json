@@ -82,6 +82,35 @@
         }
       }
     },
+    "/auth/user-products": {
+      "post": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlossomUser"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/friendlyid": {
       "get": {
         "tags": [

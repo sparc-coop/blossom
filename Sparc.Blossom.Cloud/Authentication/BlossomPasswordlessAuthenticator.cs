@@ -84,7 +84,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         var user = await GetAsync(principal);
 
         user.Logout();
-        await Save();
+        await SaveAsync();
 
         return user;
     }
@@ -203,7 +203,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         auth.MapPost("login", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.Login(principal, context, emailOrToken));
         auth.MapPost("logout", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.Logout(principal, emailOrToken));
         auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
-        auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal, [FromBody] string productName) => await auth.AddProductAsync(principal, productName));
+        auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] string productName) => await auth.AddProductAsync(principal, productName));
     }
 
     private async Task LoginWithPasswordless(HttpContext context)
