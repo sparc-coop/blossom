@@ -23,4 +23,7 @@ public interface IBlossomCloud
 
     [Post("/auth/userinfo")]
     Task<BlossomUser> UpdateUserInfo([Body] UserAvatar userInfo);
+
+    [Post("/auth/user-products")]
+    Task AddUserProduct([Body] string productName);
 }
