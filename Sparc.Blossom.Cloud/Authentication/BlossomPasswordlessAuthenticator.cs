@@ -78,6 +78,16 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         return User;
     }
 
+    public async Task<BlossomUser> Logout(ClaimsPrincipal principal, string? emailOrToken = null)
+    {
+        var user = await GetAsync(principal);
+
+        user.Logout();
+        await Save();
+
+        return user;
+    }
+
     private async Task<string> SignUpWithPasswordlessAsync(BlossomUser user)
     {
         var registerToken = await PasswordlessClient.CreateRegisterTokenAsync(new RegisterOptions(user.Id, user.Username)
@@ -189,9 +199,9 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var auth = endpoints.MapGroup("/auth");
-        auth.MapPost("login", LoginWithPasswordless);
-        auth.MapGet("userinfo", GetAsync);
-        auth.MapPost("user-products", AddProductAsync);
+        auth.MapPost("login", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.Login(principal, context, emailOrToken));
+        auth.MapPost("logout", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.Logout(principal, emailOrToken));
+        auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
     }
 
     private async Task LoginWithPasswordless(HttpContext context)

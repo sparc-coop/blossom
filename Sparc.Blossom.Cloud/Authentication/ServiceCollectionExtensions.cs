@@ -47,10 +47,16 @@ public static class ServiceCollectionExtensions
         app.UseAuthorization();
         app.UseMiddleware<BlossomAuthenticatorMiddleware>();
 
-        var auth = app.MapGroup("/auth");
-        auth.MapPost("login", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.Login(principal, context, emailOrToken));
-        auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
-        auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal, [FromBody] string productName) => await auth.AddProductAsync(principal, productName));
+        using var scope = app.Services.CreateScope();
+        var passwordlessAuthenticator =
+            scope.ServiceProvider.GetRequiredService<BlossomPasswordlessAuthenticator<TUser>>();
+
+        passwordlessAuthenticator.Map(app);
+
+        //var auth = app.MapGroup("/auth");
+        //auth.MapPost("login", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.Login(principal, context, emailOrToken));
+        //auth.MapPost("logout", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.Logout(principal, emailOrToken));
+        //auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
 
         return app;
     }
