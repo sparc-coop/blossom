@@ -1,6 +1,6 @@
 ﻿let client = {};
-function init(apiKey) {
-    console.log("initializing client...");
+function initBlossomCloudAuthenticator(apiKey) {
+    console.log("initializing passwordless client...");
     client = new Passwordless.Client({
         apiKey: apiKey
     });
@@ -51,7 +51,7 @@ async function signUpWithPasskey(registerToken) {
 
 //export { init, signInWithPasskey, signUpWithPasskey };
 
-window.init = init;
+window.initBlossomCloudAuthenticator = initBlossomCloudAuthenticator;
 window.signInWithPasskey = signInWithPasskey;
 window.signUpWithPasskey = signUpWithPasskey;
 
