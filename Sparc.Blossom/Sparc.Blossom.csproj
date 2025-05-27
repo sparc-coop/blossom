@@ -125,7 +125,4 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </None>
 	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="buildTransitive\" />
-	</ItemGroup>
 </Project>
