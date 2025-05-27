@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Passwordless;
-using System.ComponentModel.DataAnnotations;
+using Sparc.Blossom.Cloud.Tools;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
@@ -9,14 +11,17 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
     where T : BlossomUser, new()
 {
     IPasswordlessClient PasswordlessClient { get; }
+    public FriendlyId FriendlyId { get; }
     public HttpClient Client { get; }
     public BlossomPasswordlessAuthenticator(
         IPasswordlessClient _passwordlessClient,
         IOptions<PasswordlessOptions> options,
-        IRepository<T> users)
+        IRepository<T> users,
+        FriendlyId friendlyId)
         : base(users)
     {
         PasswordlessClient = _passwordlessClient;
+        FriendlyId = friendlyId;
         Client = new HttpClient
         {
             BaseAddress = new Uri("https://v4.passwordless.dev/")
@@ -24,55 +29,64 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         Client.DefaultRequestHeaders.Add("ApiSecret", options.Value.ApiSecret);
     }
 
-    public async Task<LoginStates> LoginWithPasswordless(ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null)
+    public override async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
+    {
+        var user = await GetAsync(principal);
+        principal = user.Login();
+        await Users.UpdateAsync((T)user);
+        return principal;
+    }
+
+    public async Task<BlossomUser> Login(ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null)
     {
         Message = null;
 
         // 1. Convert the ClaimsPrincipal from the cookie into a BlossomUser
         // If the BlossomUser is already attached to Passwordless, they're logged in because their cookie is valid
+        User = await GetAsync(principal);
+
+        if (User.ExternalId != null)
+            return User;
+
+        // Verify Authentication Token or Register
+        if (emailOrToken != null && emailOrToken.StartsWith("verify"))
+        {
+            var passwordlessUser = await PasswordlessClient.VerifyAuthenticationTokenAsync(emailOrToken);
+
+            if (passwordlessUser?.Success == true)
+            {
+                //var parentUser = Users.Query.Where(x => x.ExternalId == User.UserId && x.ParentUserId == null).FirstOrDefault();
+                var parentUser = Users.Query.Where(x => x.ExternalId == passwordlessUser.UserId && x.ParentUserId == null).FirstOrDefault();
+                if (parentUser == null)
+                {
+                    User.ExternalId = passwordlessUser.UserId;
+
+                    await SaveAsync();
+                    return User;
+                }
+                else
+                {
+                    User.SetParentUser(parentUser);
+
+                    await SaveAsync();
+                    return User;
+                }
+            }
+        }
+
+        var passwordlessToken = await SignUpWithPasswordlessAsync(User);
+        User.SetToken(passwordlessToken);
+        return User;
+    }
+
+    public async Task<BlossomUser> Logout(ClaimsPrincipal principal, string? emailOrToken = null)
+    {
         var user = await GetAsync(principal);
 
-        if (user.ExternalId != null)
-            return LoginStates.LoggedIn;
-        else if (LoginState == LoginStates.NotInitialized && string.IsNullOrEmpty(emailOrToken))
-            return LoginStates.LoggedOut;
+        user.Logout();
+        await SaveAsync();
 
-        // 3. No discoverable passkeys. We need an email address from the user to identify them.
-        if (string.IsNullOrEmpty(emailOrToken))
-            return LoginStates.ReadyForLogin;
-
-        // 4. An email address has been supplied. Make this the username, and look it up in Passwordless.
-        if (new EmailAddressAttribute().IsValid(emailOrToken))
-        {
-            user.ChangeUsername(emailOrToken);
-            await Users.UpdateAsync((T)user);
-
-            // 5. If the user has no passkeys, send them a magic link to log in.
-            var hasPasskeys = await HasPasskeys(user.ExternalId);
-            if (!hasPasskeys)
-            {
-                await SendMagicLinkAsync(user, $"{context.Request.Headers.Referer}?token=$TOKEN");
-                return LoginStates.AwaitingMagicLink;
-            }
-            else
-            {
-                return LoginStates.AwaitingPasskey;
-            }
-        }
-
-        // 7. The user has signed in with a passkey. Verify the token and log them in.
-        try
-        {
-            await LoginWithTokenAsync(emailOrToken);
-            LoginState = LoginStates.LoggedIn;
-        }
-        catch (Exception e)
-        {
-            LoginState = LoginStates.Error;
-            Message = e.Message;
-        }
-
-        return LoginState;
+        return user;
     }
 
     private async Task<string> SignUpWithPasswordlessAsync(BlossomUser user)
@@ -128,7 +142,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         if (parentUser != null)
         {
             User.SetParentUser(parentUser);
-            await Users.UpdateAsync((T)User);
+            await SaveAsync();
             User = parentUser;
         }
         else
@@ -136,7 +150,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
             User.Login("Passwordless", passwordlessUser.UserId);
         }
 
-        await Users.UpdateAsync((T)User);
+        await SaveAsync();
     }
 
     public override async IAsyncEnumerable<LoginStates> Logout(ClaimsPrincipal principal)
@@ -144,16 +158,58 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         var user = await GetAsync(principal);
 
         user.Logout();
-
-        await Users.UpdateAsync((T)User!);
+        await SaveAsync();
 
         yield return LoginStates.LoggedOut;
+    }
+
+    protected override async Task<BlossomUser> GetUserAsync(ClaimsPrincipal principal)
+    {
+        await base.GetUserAsync(principal);
+
+        if (User!.Username == null)
+        {
+            User.ChangeUsername(FriendlyId.Create(1, 2));
+            await SaveAsync();
+        }
+
+        return User;
+    }
+
+    private async Task SaveAsync()
+    {
+        await Users.UpdateAsync((T)User!);
+    }
+
+    public async Task<BlossomUser> AddProductAsync(ClaimsPrincipal principal, string productName)
+    {
+        await base.GetUserAsync(principal);
+
+        if (User is null)
+            throw new InvalidOperationException("User not initialized");
+
+        bool alreadyHasProduct = User.Products.Any(p => p.ProductName.Equals(productName, StringComparison.OrdinalIgnoreCase));
+
+        if (!alreadyHasProduct)
+        {
+            User.AddProduct(productName); 
+            await SaveAsync();
+        }
+
+        return User;
     }
 
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var auth = endpoints.MapGroup("/auth");
-        auth.MapPost("login", LoginWithPasswordless);
-        auth.MapGet("userinfo", GetAsync);
+        auth.MapPost("login", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.Login(principal, context, emailOrToken));
+        auth.MapPost("logout", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.Logout(principal, emailOrToken));
+        auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
+        auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddProductRequest request) => await auth.AddProductAsync(principal, request.ProductName));
+    }
+
+    private async Task LoginWithPasswordless(HttpContext context)
+    {
+        throw new NotImplementedException();
     }
 }

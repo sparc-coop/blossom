@@ -26,7 +26,36 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LoginStates"
+                  "$ref": "#/components/schemas/BlossomUser"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "parameters": [
+          {
+            "name": "emailOrToken",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "default": null
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlossomUser"
                 }
               }
             }
@@ -39,6 +68,35 @@
         "tags": [
           "Sparc.Blossom.Cloud"
         ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlossomUser"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/user-products": {
+      "post": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddProductRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -71,413 +129,21 @@
           }
         }
       }
-    },
-    "/data": {
-      "get": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetServerMetadataResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/data/{db}": {
-      "get": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetDatasetMetadataResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/data/{db}/_local/{id}": {
-      "get": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReplicationLog"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/data/{db}/_changes": {
-      "post": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetChangesRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetChangesResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "since",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetChangesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/data/{db}/_revs_diff": {
-      "post": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "$ref": "#/components/schemas/MissingItems"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/data/{db}/_bulk_docs": {
-      "post": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkDocsPayload"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/data/{db}/{docid}": {
-      "put": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "docid",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Datum"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "docid",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "docid",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "rev",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/data/{db}/_all_docs": {
-      "get": {
-        "tags": [
-          "CosmosPouchAdapter"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
     }
   },
   "components": {
     "schemas": {
+      "AddProductRequest": {
+        "required": [
+          "productName"
+        ],
+        "type": "object",
+        "properties": {
+          "productName": {
+            "type": "string"
+          }
+        }
+      },
       "BlossomUser": {
         "type": "object",
         "properties": {
@@ -491,6 +157,10 @@
             "type": "string"
           },
           "externalId": {
+            "type": "string",
+            "nullable": true
+          },
+          "token": {
             "type": "string",
             "nullable": true
           },
@@ -515,60 +185,14 @@
               "$ref": "#/components/schemas/Language2"
             }
           },
-          "primaryLanguage": {
-            "$ref": "#/components/schemas/Language"
-          },
-          "genericId": { },
-          "id": {
-            "type": "string"
-          }
-        }
-      },
-      "BulkDocsPayload": {
-        "required": [
-          "docs"
-        ],
-        "type": "object",
-        "properties": {
-          "docs": {
+          "products": {
             "type": "array",
             "items": {
-              "type": "object"
+              "$ref": "#/components/schemas/ProductKey"
             }
-          }
-        }
-      },
-      "Datum": {
-        "required": [
-          "rev"
-        ],
-        "type": "object",
-        "properties": {
-          "seq": {
-            "type": "string",
-            "nullable": true
           },
-          "rev": {
-            "type": "string"
-          },
-          "deleted": {
-            "type": "boolean"
-          },
-          "tenantId": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "databaseId": {
-            "type": "string"
-          },
-          "docJson": {
-            "type": "string",
-            "nullable": true
-          },
-          "doc": {
-            "type": "object"
+          "primaryLanguage": {
+            "$ref": "#/components/schemas/Language"
           },
           "genericId": { },
           "id": {
@@ -596,129 +220,6 @@
             "items": {
               "$ref": "#/components/schemas/Voice"
             }
-          }
-        }
-      },
-      "GetChangesRequest": {
-        "required": [
-          "doc_ids",
-          "since",
-          "limit"
-        ],
-        "type": "object",
-        "properties": {
-          "doc_ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "since": {
-            "type": "string"
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          }
-        }
-      },
-      "GetChangesResponse": {
-        "required": [
-          "last_seq",
-          "results"
-        ],
-        "type": "object",
-        "properties": {
-          "last_seq": {
-            "type": "string"
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GetChangesResult"
-            }
-          }
-        }
-      },
-      "GetChangesResult": {
-        "required": [
-          "rev",
-          "id",
-          "seq"
-        ],
-        "type": "object",
-        "properties": {
-          "rev": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GetChangesRev"
-            }
-          },
-          "id": {
-            "type": "string"
-          },
-          "seq": {
-            "type": "string"
-          }
-        }
-      },
-      "GetChangesRev": {
-        "required": [
-          "rev"
-        ],
-        "type": "object",
-        "properties": {
-          "rev": {
-            "type": "string"
-          }
-        }
-      },
-      "GetDatasetMetadataResponse": {
-        "required": [
-          "db_name",
-          "doc_count",
-          "instance_start_time",
-          "update_seq"
-        ],
-        "type": "object",
-        "properties": {
-          "db_name": {
-            "type": "string"
-          },
-          "doc_count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "instance_start_time": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "update_seq": {
-            "type": "string"
-          }
-        }
-      },
-      "GetServerMetadataResponse": {
-        "required": [
-          "couchdb",
-          "uuid",
-          "vendor",
-          "version"
-        ],
-        "type": "object",
-        "properties": {
-          "couchdb": {
-            "type": "string"
-          },
-          "uuid": {
-            "type": "string"
-          },
-          "vendor": {
-            "$ref": "#/components/schemas/ServerMetadataVendor"
-          },
-          "version": {
-            "type": "string"
           }
         }
       },
@@ -787,88 +288,23 @@
           }
         }
       },
-      "LoginStates": {
-        "type": "integer"
-      },
-      "MissingItems": {
+      "ProductKey": {
         "required": [
-          "missing"
+          "productName",
+          "serialNumber",
+          "purchaseDate"
         ],
         "type": "object",
         "properties": {
-          "missing": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "ReplicationHistory": {
-        "type": "object",
-        "properties": {
-          "last_seq": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "session_id": {
-            "type": "string"
-          }
-        }
-      },
-      "ReplicationLog": {
-        "type": "object",
-        "properties": {
-          "pouchId": {
+          "productName": {
             "type": "string"
           },
-          "id": {
+          "serialNumber": {
             "type": "string"
           },
-          "tenantId": {
-            "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "databaseId": {
-            "type": "string"
-          },
-          "history": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReplicationHistory"
-            }
-          },
-          "replicator": {
-            "type": "string"
-          },
-          "session_id": {
-            "type": "string"
-          },
-          "last_seq": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "genericId": { }
-        }
-      },
-      "ServerMetadataVendor": {
-        "required": [
-          "name",
-          "version"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "version": {
-            "type": "string"
+          "purchaseDate": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -968,9 +404,6 @@
   "tags": [
     {
       "name": "Sparc.Blossom.Cloud"
-    },
-    {
-      "name": "CosmosPouchAdapter"
     }
   ]
 }

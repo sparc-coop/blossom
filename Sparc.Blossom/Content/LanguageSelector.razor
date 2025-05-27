@@ -1,54 +1,23 @@
 @using System.Net.Http.Json
 @using System.Globalization
+@using Sparc.Blossom.Authentication
 @using Sparc.Blossom.Content
+@using Sparc.Blossom.Content.Icons
 
-<div class="kori-login__language-desktop">
-    <button class="kori-login__language-btn" @onclick=ToggleLanguageSettings>
-        <div class="kori-login__language-btn-content kori-login__text-btn">
-            <img src="_content/Sparc.Kori/icons/Language.svg" /> @SelectedLanguage?.DisplayName
-        </div>
-        <img class="kori-login__expand-icon @(ShowLanguageSettings ? "rotate": "")" src="_content/Sparc.Kori/icons/Expand.svg" />
-    </button>
-    <ul class="kori-login__language-list @(ShowLanguageSettings? "show" : "")">
-        @if (Languages != null)
-        {
-            @foreach (var language in Languages)
-            {
-                <li>
-                    <button class="kori-login__change-language-btn kori-login__text-btn" @onclick=@(() => ChangeLanguage(language))>
-                        @language.DisplayName
-
-                        @if (language.DisplayName != language.NativeName)
-                        {
-                            <aside>@language.NativeName</aside>
-                        }
-
-                        @* @if (User.Language == language.Id)
-            {
-            <div class="right">
-            <img src="icons/Check.svg" />
-            </div>
-            }
-            *@
-                    </button>
-                </li>
-            }
-        }
-    </ul>
-</div>
-
-<div class="kori-login__language-mobile">
-    <div class="kori-login__language-selected">
+<div class="language-selector">
+    <button @onclick=ToggleLanguageList>
+        <Language />
         @SelectedLanguage?.DisplayName
-        <aside>@SelectedLanguage?.NativeName</aside>
-    </div>
-    <ul class="kori-login__language-list show">
-        @if (Languages != null)
-        {
+        <Expand IsExpanded="ShowLanguageSettings" />
+    </button>
+
+    @if (ShowLanguageSettings && Languages != null)
+    {
+        <ul>
             @foreach (var language in Languages)
             {
                 <li>
-                    <button class="kori-login__change-language-btn kori-login__text-btn" @onclick=@(() => ChangeLanguage(language))>
+@*                     <button @onclick=@(() => ChangeLanguage(language))>
                         @language.DisplayName
 
                         @if (language.DisplayName != language.NativeName)
@@ -56,44 +25,43 @@
                             <aside>@language.NativeName</aside>
                         }
 
-                        @* @if (User.Language == language.Id)
-            {
-            <div class="right">
-            <img src="icons/Check.svg" />
-            </div>
-            }
-            *@
-                    </button>
+                        @if (SelectedLanguage?.Id == language.Id)
+                        {
+                            <div class="right">
+                                <Check />
+                            </div>
+                        }
+                    </button> *@
                 </li>
             }
-        }
-    </ul>
+        </ul>
+    }
 </div>
 
 @inject IBlossomCloud Cloud
+@inject IBlossomAuthenticator Auth
 
 @code {
-    [Parameter] public Language? SelectedLanguage { get; set; }
-    [Parameter] public EventCallback<Language> LanguageChanged { get; set; }
+    Language? SelectedLanguage;
     IEnumerable<Language>? Languages { get; set; }
 
     bool ShowLanguageSettings = false;
 
     protected override async Task OnInitializedAsync()
     {
-        //SelectedLanguageId = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
         Languages = await Cloud.GetLanguages();
-        //SelectedLanguage = Languages.First(x => x.Id == SelectedLanguageId);
+        SelectedLanguage = Auth.User?.PrimaryLanguage
+            ?? Languages.FirstOrDefault(x => x.Id == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
     }
 
-    void ToggleLanguageSettings()
+    void ToggleLanguageList()
     {
         ShowLanguageSettings = !ShowLanguageSettings;
     }
 
-    async Task ChangeLanguage(Language language)
-    {
-        await LanguageChanged.InvokeAsync(language);
-        ToggleLanguageSettings();
-    }
+    // async Task ChangeLanguage(Language language)
+    // {
+    //     await LanguageChanged.InvokeAsync(language);
+    //     ToggleLanguageSettings();
+    // }
 }

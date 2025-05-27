@@ -1,8 +1,9 @@
-﻿using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator 
+public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : AuthenticationStateProvider, IBlossomAuthenticator 
     where T : BlossomUser, new()
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
@@ -14,6 +15,33 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
     public async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
     {
         return await GetUserAsync(principal);
+    }
+
+    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+    {
+        User = Users.Query.FirstOrDefault();
+        if (User == null)
+        {
+            User = new BlossomUser();
+            await Users.AddAsync((T)User);
+        }
+
+        var principal = User.Login();
+        var state = new AuthenticationState(principal);
+
+        return state;
+    }
+
+    public virtual async IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal principal, string? emailOrToken = null)
+    {
+        LoginState = LoginStates.LoggedIn;
+        yield return LoginState;
+    }
+
+    public virtual async IAsyncEnumerable<LoginStates> Logout(ClaimsPrincipal principal)
+    {
+        LoginState = LoginStates.LoggedOut;
+        yield return LoginState;
     }
 
     public virtual async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
@@ -40,20 +68,6 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
         return principal;
     }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public virtual async IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal principal, string? emailOrToken = null)
-    {
-        LoginState = LoginStates.LoggedIn;
-        yield return LoginState;
-    }
-
-    public virtual async IAsyncEnumerable<LoginStates> Logout(ClaimsPrincipal principal)
-    {
-        LoginState = LoginStates.LoggedOut;
-        yield return LoginState;
-    }
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-
     protected virtual async Task<BlossomUser> GetUserAsync(ClaimsPrincipal principal)
     {
         if (principal.Identity?.IsAuthenticated == true)
@@ -70,4 +84,16 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
         return User!;
     }
 
+    public async Task<BlossomUser> UpdateAsync(ClaimsPrincipal principal, UserAvatar avatar)
+    {
+        var user = await GetUserAsync(principal);
+        user.UpdateAvatar(avatar);
+        await Users.UpdateAsync((T)user);
+        return user;
+    }
+
+    public virtual async Task<BlossomUser> LoginAsync(ClaimsPrincipal principal, string? emailOrToken = null)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -3,6 +3,9 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
+public record ProductKey(string ProductName, string SerialNumber, DateTime PurchaseDate);
+public record AddProductRequest(string ProductName);
+
 public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 {
     public BlossomUser()
@@ -17,11 +20,13 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public string UserId { get { return Id; } set { Id = value; } }
     public string AuthenticationType { get; set; }
     public string? ExternalId { get; set; }
+    public string? Token { get; set; }
     public string? ParentUserId { get; set; }
     public DateTime DateCreated { get; private set; }
     public DateTime DateModified { get; private set; }
     public UserAvatar Avatar { get; private set; } = new();
     public List<Language> LanguagesSpoken { get; private set; } = [];
+    public List<ProductKey> Products { get; set; } = [];
 
 
     internal Dictionary<string, string> Claims { get; set; } = [];
@@ -143,20 +148,25 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     
     public void ChangeVoice(Language language, Voice? voice = null)
     {
-        var hasLanguageChanged = Avatar.Language != language;
+        ChangeLanguage(language);
+        
+        Avatar.Language = language with { DialectId = voice?.Locale, VoiceId = voice?.ShortName };
+        Avatar.Gender = voice?.Gender;
+    }
 
+    public void ChangeLanguage(Language language)
+    {
         if (!LanguagesSpoken.Any(x => x.Id == language.Id))
             LanguagesSpoken.Add(language);
 
-        Avatar.Language = language with { DialectId = voice?.Locale, VoiceId = voice?.ShortName };
-        Avatar.Gender = voice?.Gender;
+        Avatar.Language = language;
     }
 
     public Language? PrimaryLanguage => LanguagesSpoken.FirstOrDefault(x => x == Avatar.Language);
 
     public static BlossomUser System => new() { Username = "system" };
 
-    internal void UpdateAvatar(UserAvatar avatar)
+    public void UpdateAvatar(UserAvatar avatar)
     {
         Avatar.Id = Id;
         Avatar.Language = avatar.Language;
@@ -178,5 +188,28 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     internal void GoOffline()
     {
         Avatar.IsOnline = false;
+    }
+
+    public void SetToken(string token)
+    {
+        Token = token;
+        if (Claims.ContainsKey("token"))
+            Claims["token"] = token;
+        else
+            Claims.Add("token", token);
+    }
+
+    public bool HasProduct(string productName)
+    {
+        return Products.Any(x => x.ProductName.Equals(productName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public void AddProduct(string productName)
+    {
+        if (HasProduct(productName))
+            return;
+
+        var serial = Guid.NewGuid().ToString(); 
+        Products.Add(new ProductKey(productName, serial, DateTime.UtcNow));
     }
 }

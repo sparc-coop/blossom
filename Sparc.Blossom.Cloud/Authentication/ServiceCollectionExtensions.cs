@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Passwordless;
 using Sparc.Blossom.Platforms.Server;
 using System.Security.Claims;
@@ -17,8 +18,8 @@ public static class ServiceCollectionExtensions
         builder.Services.AddAuthorization();
 
         builder.Services.AddScoped<AuthenticationStateProvider, BlossomServerAuthenticationStateProvider<TUser>>()
-            .AddScoped<BlossomDefaultAuthenticator<TUser>>()
-            .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<TUser>>();
+            .AddScoped<BlossomPasswordlessAuthenticator<TUser>>()
+            .AddScoped<IBlossomAuthenticator, BlossomPasswordlessAuthenticator<TUser>>();
 
         builder.Services.AddTransient(s =>
             s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User
@@ -28,8 +29,8 @@ public static class ServiceCollectionExtensions
         builder.Services.Configure<PasswordlessOptions>(passwordlessSettings);
         builder.Services.AddPasswordlessSdk(passwordlessSettings.Bind);
 
-        builder.Services.AddScoped<BlossomPasswordlessAuthenticator<TUser>>()
-            .AddScoped<IBlossomAuthenticator, BlossomPasswordlessAuthenticator<TUser>>();
+        //builder.Services.AddScoped<BlossomPasswordlessAuthenticator<TUser>>()
+        //    .AddScoped<IBlossomAuthenticator, BlossomPasswordlessAuthenticator<TUser>>();
 
         return builder;
     }
@@ -46,9 +47,16 @@ public static class ServiceCollectionExtensions
         app.UseAuthorization();
         app.UseMiddleware<BlossomAuthenticatorMiddleware>();
 
-        var auth = app.MapGroup("/auth");
-        auth.MapPost("login", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.LoginWithPasswordless(principal, context, emailOrToken));
-        auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
+        using var scope = app.Services.CreateScope();
+        var passwordlessAuthenticator =
+            scope.ServiceProvider.GetRequiredService<BlossomPasswordlessAuthenticator<TUser>>();
+
+        passwordlessAuthenticator.Map(app);
+
+        //var auth = app.MapGroup("/auth");
+        //auth.MapPost("login", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.Login(principal, context, emailOrToken));
+        //auth.MapPost("logout", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.Logout(principal, emailOrToken));
+        //auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<TUser> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
 
         return app;
     }
