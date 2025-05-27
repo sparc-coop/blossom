@@ -24,7 +24,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
         Configuration = Builder.Configuration;
     }
 
-    public override IBlossomApplication Build()
+    public override IBlossomApplication Build(Assembly? entityAssembly = null)
     {
         Builder.RootComponents.Add<TApp>("#app");
         Builder.RootComponents.Add<HeadOutlet>("head::after");
@@ -36,7 +36,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
             Services.AddSingleton<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
         }
 
-        var assembly = Assembly.GetCallingAssembly();
+        var assembly = entityAssembly ?? Assembly.GetCallingAssembly();
         RegisterBlossomEntities(assembly);
         AddBlossomRepository();
         AddBlossomRealtime(assembly);
@@ -49,7 +49,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
     {
         Services.AddAuthorizationCore();
         
-        Services.AddScoped<AuthenticationStateProvider, BlossomCloudAuthenticationStateProvider<TUser>>()
+        Services.AddScoped<AuthenticationStateProvider, BlossomDefaultAuthenticator<TUser>>()
             .AddScoped<BlossomDefaultAuthenticator<TUser>>()
             .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<TUser>>();
 

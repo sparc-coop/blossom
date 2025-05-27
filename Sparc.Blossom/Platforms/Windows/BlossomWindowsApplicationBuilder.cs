@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui;
 using Microsoft.Maui.Hosting;
 using Sparc.Blossom.Authentication;
+using System.Reflection;
 
 namespace Sparc.Blossom.Platforms.Windows;
 
@@ -51,14 +52,10 @@ public class BlossomWindowsApplicationBuilder : BlossomApplicationBuilder
         _isAuthenticationAdded = true;
     }
 
-    public override IBlossomApplication Build()
+    public override IBlossomApplication Build(Assembly? entityAssembly = null)
     {
-
         if (!_isAuthenticationAdded)
-        {
             AddAuthentication<BlossomUser>();
-        }
-
 
         var mauiApp = MauiBuilder.Build();
 

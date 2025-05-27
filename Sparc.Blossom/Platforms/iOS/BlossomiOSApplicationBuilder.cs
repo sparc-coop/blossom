@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Sparc.Blossom.Authentication;
+using System.Reflection;
 
 namespace Sparc.Blossom.Platforms.iOS;
 
@@ -48,17 +49,12 @@ public class BlossomiOSApplicationBuilder : BlossomApplicationBuilder
         _isAuthenticationAdded = true;
     }
 
-    public override IBlossomApplication Build()
+    public override IBlossomApplication Build(Assembly? entityAssembly = null)
     {
-
         if (!_isAuthenticationAdded)
-        {
             AddAuthentication<BlossomUser>();
-        }
-
 
         var mauiApp = MauiBuilder.Build();
-
         return new BlossomiOSApplication(mauiApp);
     }
 }

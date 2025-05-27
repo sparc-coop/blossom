@@ -53,9 +53,9 @@ public class BlossomAndroidApplicationBuilder : BlossomApplicationBuilder
         _isAuthenticationAdded = true;
     }
 
-    public override IBlossomApplication Build()
+    public override IBlossomApplication Build(Assembly? entityAssembly = null)
     {
-        var callingAssembly = Assembly.GetCallingAssembly();
+        var callingAssembly = entityAssembly ?? Assembly.GetCallingAssembly();
 
         if (!_isAuthenticationAdded)
         {
