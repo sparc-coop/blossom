@@ -1,4 +1,7 @@
 ﻿
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
 namespace Sparc.Blossom;
 
 public class BlossomTimedBackgroundService<T>(IServiceScopeFactory scopes, TimeSpan timespan) 

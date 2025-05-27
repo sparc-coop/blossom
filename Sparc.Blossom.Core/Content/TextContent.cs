@@ -148,7 +148,7 @@ public class TextContent : BlossomEntity<string>
             return this;
 
         if (!string.IsNullOrWhiteSpace(Text))
-            EditHistory.Add(new(LastModified ?? Timestamp, Text));
+            EditHistory.Add(new(LastModified ?? Timestamp, Text!));
 
         if (string.IsNullOrWhiteSpace(OriginalText))
             OriginalText = text;

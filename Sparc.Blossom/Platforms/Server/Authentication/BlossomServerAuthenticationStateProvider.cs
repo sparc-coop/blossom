@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Components.Server;
 using System.Security.Claims;
 using Sparc.Blossom.Authentication;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Sparc.Blossom.Platforms.Server;
 
