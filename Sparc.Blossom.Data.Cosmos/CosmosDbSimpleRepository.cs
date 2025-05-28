@@ -166,7 +166,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         var requestOptions = partitionKey == null
             ? null
-            : new QueryRequestOptions { PartitionKey = new PartitionKeyBuilder().Add("sparc").Add("sparc-admin").Add(partitionKey).Build() };
+            : new QueryRequestOptions { PartitionKey = NewSparcHierarchicalPartitionKey(partitionKey) };
 
         sql = sql.Replace("{", "@").Replace("}", "");
 
@@ -194,7 +194,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
 
     public async Task UpsertAsync(T item, string? partitionKey = null)
     {
-        var pk = partitionKey != null ? new PartitionKeyBuilder().Add("sparc").Add("sparc-admin").Add(partitionKey).Build() : GetPartitionKey(item);
+        var pk = partitionKey != null ? NewSparcHierarchicalPartitionKey(partitionKey) : GetPartitionKey(item);
 
         await Container.UpsertItemAsync(item, pk);
 
@@ -212,5 +212,10 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     public IQueryable<T> PartitionQuery(string partitionKey)
     {
         return Query.WithPartitionKey(partitionKey);
+    }
+
+    private static PartitionKey NewSparcHierarchicalPartitionKey(string partitionKey)
+    {
+        return new PartitionKeyBuilder().Add("sparc").Add("sparc-admin").Add(partitionKey).Build();
     }
 }

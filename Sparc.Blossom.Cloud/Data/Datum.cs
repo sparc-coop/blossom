@@ -1,36 +1,53 @@
-﻿using Sparc.Blossom.Cloud.Data;
+﻿using Newtonsoft.Json;
+using Sparc.Blossom.Cloud.Data;
+using Stripe;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
+
 
 namespace Sparc.Blossom.Data;
 
 public class Datum : BlossomEntity<string>
 {
+    [JsonProperty("_seq")]
     public string? Seq { get; set; }
-    public required string _rev { get; set; }
+    
+    [JsonProperty("_rev")]
+    public required string Rev { get; set; }
 
-    public bool _deleted { get; set; }
-    public DatumRevisions _revisions { get; set; }
+    [JsonProperty("_deleted")]
+    public bool Deleted { get; set; }
 
+    [JsonProperty("_revisions")]
+    public DatumRevisions Revisions { get; set; }
+
+    [JsonProperty("_tenantId")]
     public string TenantId { get; set; }
+
+    [JsonProperty("_userId")]
     public string UserId { get; set; }
+
+    [JsonProperty("_databaseId")]
     public string DatabaseId { get; set; }
+
+    [JsonProperty("_doc")]
+    public Dictionary<string, object> Doc { get; set; }
 
     public Datum()
     {
-        Data = new Dictionary<string, object>();
+        Doc = new Dictionary<string, object>();
     }
 
     public T Get<T>(string key)
     {
-        if (Data.TryGetValue(key, out object val))
+        if (Doc.TryGetValue(key, out object val))
         {
             if (val is JsonElement el)
             {
                 try
                 {
                     var json = el.GetRawText();
-                    return System.Text.Json.JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    return JsonConvert.DeserializeObject<T>(json);
                 }
                 catch
                 {
@@ -45,22 +62,61 @@ public class Datum : BlossomEntity<string>
         return default;
     }
 
-    public void Set<U>(string key, U item) where U : class
+    public void Set<U>(string key, U item)
     {
-        if (Data.ContainsKey(key))
-            Data[key] = item;
+        // If U is a JsonElement.ValueKind, store the value as its underlying type
+        if (item is JsonElement el)
+        {
+            object value;
+            switch (el.ValueKind)
+            {
+                case JsonValueKind.String:
+                    value = el.GetString();
+                    break;
+                case JsonValueKind.Number:
+                    if (el.TryGetInt64(out long l))
+                        value = l;
+                    else if (el.TryGetDouble(out double d))
+                        value = d;
+                    else
+                        value = el.GetRawText();
+                    break;
+                case JsonValueKind.True:
+                case JsonValueKind.False:
+                    value = el.GetBoolean();
+                    break;
+                case JsonValueKind.Object:
+                case JsonValueKind.Array:
+                    value = el.GetRawText();
+                    break;
+                case JsonValueKind.Null:
+                case JsonValueKind.Undefined:
+                default:
+                    value = null;
+                    break;
+            }
+            if (Doc.ContainsKey(key))
+                Doc[key] = value;
+            else
+                Doc.TryAdd(key, value);
+        }
         else
-            Data.TryAdd(key, item);
+        {
+            if (Doc.ContainsKey(key))
+                Doc[key] = item;
+            else
+                Doc.TryAdd(key, item);
+        }
     }
 
-    public Dictionary<string, object> Data { get; set; }
+    
 
-    public string? DocJson { get; set; }
+    //public string? DocJson { get; set; }
 
-    [NotMapped]
-    public IDictionary<string, object> Doc
-    {
-        get => DocJson == null ? null : JsonSerializer.Deserialize<Dictionary<string, object>>(DocJson);
-        set => DocJson = JsonSerializer.Serialize(value);
-    }
+    //[NotMapped]
+    //public IDictionary<string, object> Doc
+    //{
+    //    get => DocJson == null ? null : JsonConvert.DeserializeObject<Dictionary<string, object>>(DocJson);
+    //    set => DocJson = JsonConvert.SerializeObject(value);
+    //}
 }

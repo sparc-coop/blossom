@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Sparc.Blossom.Cloud.Data;
 using Sparc.Blossom.Data.Pouch;
 using System.Data;
 using System.Text.Json;
@@ -181,8 +183,20 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
                 TenantId = "sparc",
                 UserId = "sparc-admin",
                 DatabaseId = db,
-                Doc = doc
+                Doc = new Dictionary<string, object>(),
+                Revisions = doc.ContainsKey("_revisions")
+                    ? JsonConvert.DeserializeObject<DatumRevisions>(doc["_revisions"].ToString()!)
+                    : new DatumRevisions { Start = 1, Ids = new List<string> { doc["_revisions"].ToString()! } }
             };
+
+            // Save all remaining doc properties into Data using Set
+            foreach (var kvp in doc)
+            {
+                var key = kvp.Key;
+                if (key == "_id" || key == "_rev" || key == "_deleted" || key == "_tenantId" || key == "_userId" || key == "_databaseId" || key == "_revisions")
+                    continue;
+                datum.Set(key, kvp.Value);
+            }
 
             await Data.UpsertAsync(datum, db);
         }

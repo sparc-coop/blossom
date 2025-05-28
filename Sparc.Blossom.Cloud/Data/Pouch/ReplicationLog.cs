@@ -9,17 +9,29 @@ namespace Sparc.Blossom.Data.Pouch
 
         [JsonProperty("id")]
         public string Id { get; set; }
+
+        [JsonProperty("_tenantId")]
         public string TenantId { get; set; }
+
+        [JsonProperty("_userId")]
         public string UserId { get; set; }
+
+        [JsonProperty("_databaseId")]
         public string DatabaseId { get; set; }
 
-        [JsonProperty("history")]
+        [JsonProperty("_history")]
         public List<ReplicationHistory> History { get; set; }
 
-        public string replicator { get; set; }
-        public string session_id { get; set; }
+        [JsonProperty("_replicator")]
+        public string Replicator { get; set; }
 
-        public long last_seq { get; set; }
+        [JsonProperty("_session_id")]
+        public string SessionId { get; set; }
+
+        [JsonProperty("_last_seq")]
+        public long LastSeq { get; set; }
+
+        [JsonProperty("_version")]
         public int version { get; set; }
 
         public void SetFromPouch(string databaseId, string documentId)
