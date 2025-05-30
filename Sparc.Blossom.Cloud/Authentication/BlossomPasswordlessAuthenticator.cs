@@ -206,10 +206,26 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         auth.MapPost("logout", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.Logout(principal, emailOrToken));
         auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
         auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddProductRequest request) => await auth.AddProductAsync(principal, request.ProductName));
+        auth.MapPost("user-email", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddUserEmailRequest request) => await auth.AddEmailAsync(principal, request.UserEmail));
     }
 
     private async Task LoginWithPasswordless(HttpContext context)
     {
         throw new NotImplementedException();
+    }
+    public async Task<BlossomUser> AddEmailAsync(ClaimsPrincipal principal, string email)
+    {
+        await base.GetUserAsync(principal);
+
+        if (User is null)
+            throw new InvalidOperationException("User not initialized");
+
+        if (!string.Equals(User.UserEmail, email, StringComparison.OrdinalIgnoreCase))
+        {
+            User.UserEmail = email;
+            await SaveAsync();
+        }
+
+        return User;
     }
 }

@@ -27,4 +27,6 @@ public interface IBlossomCloud
     [Post("/auth/user-products")]
     Task<BlossomUser> AddUserProduct([Body] AddProductRequest request);
 
+    [Post("/auth/user-email")]
+    Task<BlossomUser> AddUserEmail([Body] AddUserEmailRequest request);
 }

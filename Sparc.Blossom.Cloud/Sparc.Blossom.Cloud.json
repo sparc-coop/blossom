@@ -111,6 +111,35 @@
         }
       }
     },
+    "/auth/user-email": {
+      "post": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddUserEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlossomUser"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/friendlyid": {
       "get": {
         "tags": [
@@ -144,10 +173,24 @@
           }
         }
       },
+      "AddUserEmailRequest": {
+        "required": [
+          "userEmail"
+        ],
+        "type": "object",
+        "properties": {
+          "userEmail": {
+            "type": "string"
+          }
+        }
+      },
       "BlossomUser": {
         "type": "object",
         "properties": {
           "username": {
+            "type": "string"
+          },
+          "userEmail": {
             "type": "string"
           },
           "userId": {

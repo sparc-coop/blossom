@@ -5,6 +5,7 @@ namespace Sparc.Blossom.Authentication;
 
 public record ProductKey(string ProductName, string SerialNumber, DateTime PurchaseDate);
 public record AddProductRequest(string ProductName);
+public record AddUserEmailRequest(string UserEmail);
 
 public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 {
@@ -17,6 +18,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     }
     
     public string Username { get; set; }
+    public string UserEmail { get; set; } = string.Empty;
     public string UserId { get { return Id; } set { Id = value; } }
     public string AuthenticationType { get; set; }
     public string? ExternalId { get; set; }
