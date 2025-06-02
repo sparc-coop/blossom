@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Sparc.Blossom.Cloud.Data;
 using Sparc.Blossom.Data.Pouch;
+using Stripe;
 using System.Data;
 using System.Text.Json;
 
@@ -164,64 +165,14 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
     {
         foreach (var doc in payload.Docs)
         {
-            bool deleted = false;
-            if (doc.ContainsKey("_deleted") && doc["_deleted"] is JsonElement je)
-            {
-                if (je.ValueKind == JsonValueKind.True)
-                    deleted = true;
-                else if (je.ValueKind == JsonValueKind.False)
-                    deleted = false;
-                else if (je.ValueKind == JsonValueKind.Number && je.TryGetInt32(out var n))
-                    deleted = n != 0;
-            }
-
-            var test = ConvertDocToDictionary(doc);
-
-
-            // Ensure _tenantId is present
-            if (!test.ContainsKey("_tenantId"))
-            {
-                test["_tenantId"] = "sparc";
-            }
-
-            // Ensure _userId is present
-            if (!test.ContainsKey("_userId"))
-            {
-                test["_userId"] = "sparc-admin";
-            }
-
-            // Ensure _databaseId is present
-            if (!doc.ContainsKey("_databaseId"))
-            {
-                test["_databaseId"] = db;
-            }
-
-            //var datum = new Datum
-            //{
-            //    Id = doc["_id"].ToString()!,
-            //    Rev = doc["_rev"].ToString()!,
-            //    Deleted = deleted,
-            //    TenantId = "sparc",
-            //    UserId = "sparc-admin",
-            //    DatabaseId = db,
-            //    Doc = new Dictionary<string, object>(),
-            //    Revisions = doc.ContainsKey("_revisions")
-            //        ? JsonConvert.DeserializeObject<DatumRevisions>(doc["_revisions"].ToString()!)
-            //        : new DatumRevisions { Start = 1, Ids = new List<string> { doc["_revisions"].ToString()! } }
-            //};
-
-            //// Save all remaining doc properties into Data using Set
-            //foreach (var kvp in doc)
-            //{
-            //    var key = kvp.Key;
-            //    if (key == "_id" || key == "_rev" || key == "_deleted" || key == "_tenantId" || key == "_userId" || key == "_databaseId" || key == "_revisions")
-            //        continue;
-            //    datum.Set(key, kvp.Value);
-            //}
+            var objectDictionary = ConvertDocToDictionary(doc);
+            objectDictionary["id"] = objectDictionary["_id"];
+            
+            EnsurePartitionKey(objectDictionary, db);
 
             dynamic dynamicDoc = new System.Dynamic.ExpandoObject();
             var dynamicDict = (IDictionary<string, object?>)dynamicDoc;
-            foreach (var kvp in test)
+            foreach (var kvp in objectDictionary)
             {
                 dynamicDict[kvp.Key] = kvp.Value;
             }
@@ -231,7 +182,25 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
 
         return Results.Ok(payload.Docs.Select(d => new { ok = true, id = d["_id"], rev = d["_rev"] }));
     }
-    
+
+    private void EnsurePartitionKey(Dictionary<string, object?> dic, string db)
+    {
+        if (!dic.ContainsKey("_tenantId"))
+        {
+            dic["_tenantId"] = "sparc";
+        }
+
+        if (!dic.ContainsKey("_userId"))
+        {
+            dic["_userId"] = "sparc-admin";
+        }
+
+        if (!dic.ContainsKey("_databaseId"))
+        {
+            dic["_databaseId"] = db;
+        }
+    }
+
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var baseUrl = $"/data";
