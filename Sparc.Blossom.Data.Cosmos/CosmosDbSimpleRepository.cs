@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Newtonsoft.Json;
 
 namespace Sparc.Blossom.Data;
 
@@ -192,7 +193,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         return list;
     }
 
-    public async Task UpsertAsync(T item, string? partitionKey = null)
+    public async Task UpsertAsync(dynamic item, string? partitionKey = null)
     {
         var pk = partitionKey != null ? NewSparcHierarchicalPartitionKey(partitionKey) : GetPartitionKey(item);
 

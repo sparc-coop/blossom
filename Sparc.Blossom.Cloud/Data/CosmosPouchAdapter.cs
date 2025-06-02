@@ -159,7 +159,7 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
 
         return result;
     }
-    public record BulkDocsPayload(List<Dictionary<string, object>> Docs);
+    public record BulkDocsPayload(List<Dictionary<string, JsonElement>> Docs);
     public async Task<IResult> BulkDocs(string db, [FromBody] BulkDocsPayload payload)
     {
         foreach (var doc in payload.Docs)
@@ -175,30 +175,58 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
                     deleted = n != 0;
             }
 
-            var datum = new Datum
-            {
-                Id = doc["_id"].ToString()!,
-                Rev = doc["_rev"].ToString()!,
-                Deleted = deleted,
-                TenantId = "sparc",
-                UserId = "sparc-admin",
-                DatabaseId = db,
-                Doc = new Dictionary<string, object>(),
-                Revisions = doc.ContainsKey("_revisions")
-                    ? JsonConvert.DeserializeObject<DatumRevisions>(doc["_revisions"].ToString()!)
-                    : new DatumRevisions { Start = 1, Ids = new List<string> { doc["_revisions"].ToString()! } }
-            };
+            var test = ConvertDocToDictionary(doc);
 
-            // Save all remaining doc properties into Data using Set
-            foreach (var kvp in doc)
+
+            // Ensure _tenantId is present
+            if (!test.ContainsKey("_tenantId"))
             {
-                var key = kvp.Key;
-                if (key == "_id" || key == "_rev" || key == "_deleted" || key == "_tenantId" || key == "_userId" || key == "_databaseId" || key == "_revisions")
-                    continue;
-                datum.Set(key, kvp.Value);
+                test["_tenantId"] = "sparc";
             }
 
-            await Data.UpsertAsync(datum, db);
+            // Ensure _userId is present
+            if (!test.ContainsKey("_userId"))
+            {
+                test["_userId"] = "sparc-admin";
+            }
+
+            // Ensure _databaseId is present
+            if (!doc.ContainsKey("_databaseId"))
+            {
+                test["_databaseId"] = db;
+            }
+
+            //var datum = new Datum
+            //{
+            //    Id = doc["_id"].ToString()!,
+            //    Rev = doc["_rev"].ToString()!,
+            //    Deleted = deleted,
+            //    TenantId = "sparc",
+            //    UserId = "sparc-admin",
+            //    DatabaseId = db,
+            //    Doc = new Dictionary<string, object>(),
+            //    Revisions = doc.ContainsKey("_revisions")
+            //        ? JsonConvert.DeserializeObject<DatumRevisions>(doc["_revisions"].ToString()!)
+            //        : new DatumRevisions { Start = 1, Ids = new List<string> { doc["_revisions"].ToString()! } }
+            //};
+
+            //// Save all remaining doc properties into Data using Set
+            //foreach (var kvp in doc)
+            //{
+            //    var key = kvp.Key;
+            //    if (key == "_id" || key == "_rev" || key == "_deleted" || key == "_tenantId" || key == "_userId" || key == "_databaseId" || key == "_revisions")
+            //        continue;
+            //    datum.Set(key, kvp.Value);
+            //}
+
+            dynamic dynamicDoc = new System.Dynamic.ExpandoObject();
+            var dynamicDict = (IDictionary<string, object?>)dynamicDoc;
+            foreach (var kvp in test)
+            {
+                dynamicDict[kvp.Key] = kvp.Value;
+            }
+
+            await Data.UpsertAsync(dynamicDoc, db);
         }
 
         return Results.Ok(payload.Docs.Select(d => new { ok = true, id = d["_id"], rev = d["_rev"] }));
@@ -239,5 +267,64 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSi
             return $"1-{Guid.NewGuid():N}";
 
         return $"{number + 1}-{Guid.NewGuid():N}";
+    }
+    private static Dictionary<string, object?> ConvertDocToDictionary(Dictionary<string, JsonElement> doc)
+    {
+        var result = new Dictionary<string, object?>();
+        foreach (var kvp in doc)
+        {
+            var key = kvp.Key;
+            var value = kvp.Value;
+            switch (value.ValueKind)
+            {
+                case JsonValueKind.String:
+                    result[key] = value.GetString();
+                    break;
+                case JsonValueKind.Number:
+                    if (value.TryGetInt64(out var l))
+                        result[key] = l;
+                    else if (value.TryGetDouble(out var d))
+                        result[key] = d;
+                    else
+                        result[key] = value.GetRawText();
+                    break;
+                case JsonValueKind.True:
+                case JsonValueKind.False:
+                    result[key] = value.GetBoolean();
+                    break;
+                case JsonValueKind.Object:
+                    result[key] = ConvertDocToDictionary(System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(value.GetRawText())!);
+                    break;
+                case JsonValueKind.Array:
+                    var arr = new List<object?>();
+                    foreach (var item in value.EnumerateArray())
+                    {
+                        if (item.ValueKind == JsonValueKind.Object)
+                            arr.Add(ConvertDocToDictionary(System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(item.GetRawText())!));
+                        else if (item.ValueKind == JsonValueKind.Array)
+                            arr.Add(System.Text.Json.JsonSerializer.Deserialize<List<object?>>(item.GetRawText()));
+                        else if (item.ValueKind == JsonValueKind.String)
+                            arr.Add(item.GetString());
+                        else if (item.ValueKind == JsonValueKind.Number && item.TryGetInt64(out var arrL))
+                            arr.Add(arrL);
+                        else if (item.ValueKind == JsonValueKind.Number && item.TryGetDouble(out var arrD))
+                            arr.Add(arrD);
+                        else if (item.ValueKind == JsonValueKind.True || item.ValueKind == JsonValueKind.False)
+                            arr.Add(item.GetBoolean());
+                        else
+                            arr.Add(item.GetRawText());
+                    }
+                    result[key] = arr;
+                    break;
+                case JsonValueKind.Null:
+                case JsonValueKind.Undefined:
+                    result[key] = null;
+                    break;
+                default:
+                    result[key] = value.GetRawText();
+                    break;
+            }
+        }
+        return result;
     }
 }
