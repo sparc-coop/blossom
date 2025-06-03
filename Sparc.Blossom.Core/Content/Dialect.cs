@@ -4,13 +4,13 @@ namespace Sparc.Blossom.Content;
 
 public class Dialect
 {
-    public string Language { get; private set; }
-    public string Locale { get; private set; }
-    public string DisplayName { get; private set; }
-    public string NativeName { get; private set; }
-    public List<Voice> Voices { get; private set; }
+    public string Language { get; set; }
+    public string Locale { get; set; }
+    public string DisplayName { get; set; }
+    public string NativeName { get; set; }
+    public List<Voice> Voices { get; set; }
 
-    internal Dialect()
+    public Dialect()
     {
         Language = string.Empty;
         Locale = string.Empty;
@@ -19,7 +19,7 @@ public class Dialect
         Voices = [];
     }
 
-    internal Dialect(string localeName)
+    public Dialect(string localeName)
     {
         var info = CultureInfo.GetCultureInfo(localeName);
 
@@ -30,7 +30,7 @@ public class Dialect
         Voices = [];
     }
 
-    internal void AddVoice(Voice voice)
+    public void AddVoice(Voice voice)
     {
         var existing = Voices.FindIndex(x => x.ShortName == voice.ShortName);
 

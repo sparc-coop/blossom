@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Passwordless;
 using Sparc.Blossom.Cloud.Tools;
 using System.Security.Claims;
+using Sparc.Blossom.Content;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -199,6 +200,19 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         return User;
     }
 
+    public async Task<BlossomUser> AddLanguageAsync(ClaimsPrincipal principal, Language language)
+    {
+        await base.GetUserAsync(principal);
+
+        if (User is null)
+            throw new InvalidOperationException("User not initialized");
+
+        User.ChangeLanguage(language);
+        await SaveAsync();
+
+        return User;
+    }
+
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var auth = endpoints.MapGroup("/auth");
@@ -207,6 +221,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
         auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddProductRequest request) => await auth.AddProductAsync(principal, request.ProductName));
         auth.MapPost("user-email", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddUserEmailRequest request) => await auth.AddEmailAsync(principal, request.UserEmail));
+        auth.MapPost("user-languages", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] Language language) => await auth.AddLanguageAsync(principal, language));
     }
 
     private async Task LoginWithPasswordless(HttpContext context)

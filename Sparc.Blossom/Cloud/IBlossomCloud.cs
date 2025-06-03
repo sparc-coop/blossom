@@ -29,4 +29,7 @@ public interface IBlossomCloud
 
     [Post("/auth/user-email")]
     Task<BlossomUser> AddUserEmail([Body] AddUserEmailRequest request);
+
+    [Post("/auth/user-languages")]
+    Task<BlossomUser> AddUserLanguage([Body] Language language);
 }

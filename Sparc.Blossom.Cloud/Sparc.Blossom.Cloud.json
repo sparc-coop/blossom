@@ -140,6 +140,57 @@
         }
       }
     },
+    "/auth/user-languages": {
+      "post": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Language2"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlossomUser"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/translate/languages": {
+      "get": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Language2"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/tools/friendlyid": {
       "get": {
         "tags": [

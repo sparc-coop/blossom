@@ -25,6 +25,7 @@ builder.Services.AddMediatR(options =>
 
 var app = builder.Build();
 app.UseBlossomCloudAuthentication<BlossomUser>();
+app.UseBlossomCloudTranslation();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

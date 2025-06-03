@@ -6,7 +6,7 @@ public static class ServiceCollectionExtensions
     {
         builder.Services
             .AddScoped<ITranslator, AzureTranslator>()
-            .AddScoped<ITranslator, DeepLTranslator>()
+            //.AddScoped<ITranslator, DeepLTranslator>()
             .AddScoped<BlossomTranslator>();
         
         return builder;

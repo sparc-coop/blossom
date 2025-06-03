@@ -2,13 +2,13 @@
 
 public record Language
 {
-    public string Id { get; private set; } = "";
+    public string Id { get; set; } = "";
     public string? DialectId { get; set; }
     public string? VoiceId { get; set; }
-    public string DisplayName { get; private set; } = "";
-    public string NativeName { get; private set; } = "";
-    public bool? IsRightToLeft { get; private set; }
-    public List<Dialect> Dialects { get; private set; } = [];
+    public string DisplayName { get; set; } = "";
+    public string NativeName { get; set; } = "";
+    public bool? IsRightToLeft { get; set; }
+    public List<Dialect> Dialects { get; set; } = [];
 
     public Language() {}
 
