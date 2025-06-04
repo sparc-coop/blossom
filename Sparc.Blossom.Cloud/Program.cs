@@ -53,7 +53,7 @@ app.MapGet("/tools/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 
 using (var scope = app.Services.CreateScope())
 {
-    var dataRepo = scope.ServiceProvider.GetRequiredService<CosmosDbSimpleRepository<Datum>>();
+    var dataRepo = scope.ServiceProvider.GetRequiredService<CosmosDbDynamicRepository<Datum>>();
     var repRepo = scope.ServiceProvider.GetRequiredService<CosmosDbSimpleRepository<ReplicationLog>>();
     var adapter = new CosmosPouchAdapter(dataRepo, repRepo);
     adapter.Map(app);
