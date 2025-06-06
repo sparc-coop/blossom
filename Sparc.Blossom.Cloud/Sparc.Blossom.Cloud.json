@@ -111,7 +111,7 @@
         }
       }
     },
-    "/auth/user-email": {
+    "/auth/update-user": {
       "post": {
         "tags": [
           "Sparc.Blossom.Cloud"
@@ -120,7 +120,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AddUserEmailRequest"
+                "$ref": "#/components/schemas/UpdateUserRequest"
               }
             }
           },
@@ -209,6 +209,25 @@
           }
         }
       }
+    },
+    "/tools/friendlyusername": {
+      "get": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -224,24 +243,16 @@
           }
         }
       },
-      "AddUserEmailRequest": {
-        "required": [
-          "userEmail"
-        ],
-        "type": "object",
-        "properties": {
-          "userEmail": {
-            "type": "string"
-          }
-        }
-      },
       "BlossomUser": {
         "type": "object",
         "properties": {
           "username": {
             "type": "string"
           },
-          "userEmail": {
+          "email": {
+            "type": "string"
+          },
+          "phoneNumber": {
             "type": "string"
           },
           "userId": {
@@ -399,6 +410,26 @@
           "purchaseDate": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "default": null,
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "default": null,
+            "nullable": true
+          },
+          "phoneNumber": {
+            "type": "string",
+            "default": null,
+            "nullable": true
           }
         }
       },

@@ -12,6 +12,10 @@ public interface IBlossomCloud
     [Get("/tools/friendlyid")]
     Task<string> FriendlyId();
 
+    [Headers("Accept: text/plain")]
+    [Get("/tools/friendlyusername")]
+    Task<string> FriendlyUsername();
+
     [Get("/auth/login")]
     Task<BlossomUser> Login(string? emailOrToken = null);
 
@@ -27,8 +31,8 @@ public interface IBlossomCloud
     [Post("/auth/user-products")]
     Task<BlossomUser> AddUserProduct([Body] AddProductRequest request);
 
-    [Post("/auth/user-email")]
-    Task<BlossomUser> AddUserEmail([Body] AddUserEmailRequest request);
+    [Post("/auth/update-user")]
+    Task<BlossomUser> UpdateUser([Body] UpdateUserRequest request);
 
     [Post("/auth/user-languages")]
     Task<BlossomUser> AddUserLanguage([Body] Language language);

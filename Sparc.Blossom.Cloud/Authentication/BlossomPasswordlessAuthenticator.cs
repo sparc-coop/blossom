@@ -13,16 +13,19 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
 {
     IPasswordlessClient PasswordlessClient { get; }
     public FriendlyId FriendlyId { get; }
+    public FriendlyUsername FriendlyUsername { get; }
     public HttpClient Client { get; }
     public BlossomPasswordlessAuthenticator(
         IPasswordlessClient _passwordlessClient,
         IOptions<PasswordlessOptions> options,
         IRepository<T> users,
-        FriendlyId friendlyId)
+        FriendlyId friendlyId,
+        FriendlyUsername friendlyUsername)
         : base(users)
     {
         PasswordlessClient = _passwordlessClient;
         FriendlyId = friendlyId;
+        FriendlyUsername = friendlyUsername;
         Client = new HttpClient
         {
             BaseAddress = new Uri("https://v4.passwordless.dev/")
@@ -168,9 +171,9 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
     {
         await base.GetUserAsync(principal);
 
-        if (User!.Username == null)
+        if (User!.Username == null || User!.Username == "User")
         {
-            User.ChangeUsername(FriendlyId.Create(1, 2));
+            User.ChangeUsername(FriendlyUsername.GetRandomName());
             await SaveAsync();
         }
 
@@ -220,7 +223,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         auth.MapPost("logout", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.Logout(principal, emailOrToken));
         auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
         auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddProductRequest request) => await auth.AddProductAsync(principal, request.ProductName));
-        auth.MapPost("user-email", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddUserEmailRequest request) => await auth.AddEmailAsync(principal, request.UserEmail));
+        auth.MapPost("update-user", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] UpdateUserRequest request) => await auth.UpdateUserAsync(principal, request));
         auth.MapPost("user-languages", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] Language language) => await auth.AddLanguageAsync(principal, language));
     }
 
@@ -228,18 +231,36 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
     {
         throw new NotImplementedException();
     }
-    public async Task<BlossomUser> AddEmailAsync(ClaimsPrincipal principal, string email)
+
+    public async Task<BlossomUser> UpdateUserAsync(ClaimsPrincipal principal, UpdateUserRequest request)
     {
         await base.GetUserAsync(principal);
 
         if (User is null)
             throw new InvalidOperationException("User not initialized");
 
-        if (!string.Equals(User.UserEmail, email, StringComparison.OrdinalIgnoreCase))
+        var shouldSave = false;
+
+        if (!string.IsNullOrWhiteSpace(request.Username) && User.Username != request.Username)
         {
-            User.UserEmail = email;
-            await SaveAsync();
+            User.Username = request.Username;
+            shouldSave = true;
         }
+
+        if (!string.IsNullOrWhiteSpace(request.Email) && User.Email != request.Email)
+        {
+            User.Email = request.Email;
+            shouldSave = true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.PhoneNumber) && User.PhoneNumber != request.PhoneNumber)
+        {
+            User.PhoneNumber = request.PhoneNumber;
+            shouldSave = true;
+        }
+
+        if (shouldSave)
+            await SaveAsync();
 
         return User;
     }

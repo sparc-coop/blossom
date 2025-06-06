@@ -9,6 +9,7 @@ using Sparc.Blossom.Data;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<FriendlyId>();
+builder.Services.AddScoped<FriendlyUsername>();
 
 builder.Services.AddCosmos<BlossomCloudContext>(builder.Configuration.GetConnectionString("Cosmos")!, "BlossomCloud", ServiceLifetime.Scoped);
 
@@ -37,4 +38,5 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapGet("/tools/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
+app.MapGet("/tools/friendlyusername", (FriendlyUsername friendlyUsername) => friendlyUsername.GetRandomName());
 app.Run();

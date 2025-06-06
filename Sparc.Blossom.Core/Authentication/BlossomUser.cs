@@ -5,7 +5,7 @@ namespace Sparc.Blossom.Authentication;
 
 public record ProductKey(string ProductName, string SerialNumber, DateTime PurchaseDate);
 public record AddProductRequest(string ProductName);
-public record AddUserEmailRequest(string UserEmail);
+public record UpdateUserRequest(string? Username = null, string? Email = null, string? PhoneNumber = null);
 
 public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 {
@@ -13,12 +13,13 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         Id = Guid.NewGuid().ToString();
         AuthenticationType = "Blossom";
-        Username = Id;
+        Username = "User";
         Avatar = new(Id, Username);
     }
     
     public string Username { get; set; }
-    public string UserEmail { get; set; } = string.Empty;
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
     public string UserId { get { return Id; } set { Id = value; } }
     public string AuthenticationType { get; set; }
     public string? ExternalId { get; set; }
@@ -213,5 +214,17 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
         var serial = Guid.NewGuid().ToString(); 
         Products.Add(new ProductKey(productName, serial, DateTime.UtcNow));
+    }
+
+    public void Update(UpdateUserRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(request.Username))
+            Username = request.Username;
+
+        if (!string.IsNullOrWhiteSpace(request.Email))
+            Email = request.Email;
+
+        if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+            PhoneNumber = request.PhoneNumber;
     }
 }
