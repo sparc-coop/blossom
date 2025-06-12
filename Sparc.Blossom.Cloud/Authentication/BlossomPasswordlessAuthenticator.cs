@@ -5,6 +5,7 @@ using Passwordless;
 using Sparc.Blossom.Cloud.Tools;
 using System.Security.Claims;
 using Sparc.Blossom.Content;
+using Sparc.Notifications.Twilio;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -15,15 +16,19 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
     public FriendlyId FriendlyId { get; }
     public FriendlyUsername FriendlyUsername { get; }
     public HttpClient Client { get; }
+    public TwilioService Twilio { get; }
+
     public BlossomPasswordlessAuthenticator(
         IPasswordlessClient _passwordlessClient,
         IOptions<PasswordlessOptions> options,
         IRepository<T> users,
+        TwilioService twilio,
         FriendlyId friendlyId,
         FriendlyUsername friendlyUsername)
         : base(users)
     {
         PasswordlessClient = _passwordlessClient;
+        Twilio = twilio;
         FriendlyId = friendlyId;
         FriendlyUsername = friendlyUsername;
         Client = new HttpClient
@@ -216,22 +221,6 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         return User;
     }
 
-    public void Map(IEndpointRouteBuilder endpoints)
-    {
-        var auth = endpoints.MapGroup("/auth");
-        auth.MapPost("login", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.Login(principal, context, emailOrToken));
-        auth.MapPost("logout", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.Logout(principal, emailOrToken));
-        auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
-        auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddProductRequest request) => await auth.AddProductAsync(principal, request.ProductName));
-        auth.MapPost("update-user", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] UpdateUserRequest request) => await auth.UpdateUserAsync(principal, request));
-        auth.MapPost("user-languages", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] Language language) => await auth.AddLanguageAsync(principal, language));
-    }
-
-    private async Task LoginWithPasswordless(HttpContext context)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<BlossomUser> UpdateUserAsync(ClaimsPrincipal principal, UpdateUserRequest request)
     {
         await base.GetUserAsync(principal);
@@ -247,15 +236,33 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
             shouldSave = true;
         }
 
+        //if (!string.IsNullOrWhiteSpace(request.Email) && User.Email != request.Email)
+        //{
+        //    User.Email = request.Email;
+        //    shouldSave = true;
+        //}
+
+        //if (!string.IsNullOrWhiteSpace(request.PhoneNumber) && User.PhoneNumber != request.PhoneNumber)
+        //{
+        //    User.PhoneNumber = request.PhoneNumber;
+        //    shouldSave = true;
+        //}
+
         if (!string.IsNullOrWhiteSpace(request.Email) && User.Email != request.Email)
         {
             User.Email = request.Email;
+            User.RevokeEmail();  
+            var code = User.GenerateVerificationCode(User.Email);
+            await Twilio.SendAsync(User.Email, $"Your verification code is: {code}");
             shouldSave = true;
         }
-
+        
         if (!string.IsNullOrWhiteSpace(request.PhoneNumber) && User.PhoneNumber != request.PhoneNumber)
         {
             User.PhoneNumber = request.PhoneNumber;
+            User.RevokePhone();  
+            var code = User.GenerateVerificationCode(User.PhoneNumber);
+            await Twilio.SendAsync(User.PhoneNumber, $"Your verification code is: {code}");
             shouldSave = true;
         }
 
@@ -264,4 +271,48 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
 
         return User;
     }
+
+    //public async Task SendVerificationCodeAsync(ClaimsPrincipal principal, string id)
+    //{
+    //    await base.GetUserAsync(principal);
+
+    //    if (User is null)
+    //        throw new InvalidOperationException("User not initialized");
+
+    //    var code = User.GenerateVerificationCode(id);
+    //    var message = $"Your verification code is: {code}";
+
+    //    await Twilio.SendAsync(id, message);
+    //    await SaveAsync();
+    //}
+
+    //public async Task<bool> VerifyCodeAsync(ClaimsPrincipal principal, string id, string code)
+    //{
+    //    await base.GetUserAsync(principal);
+
+    //    if (User is null)
+    //        throw new InvalidOperationException("User not initialized");
+
+    //    var success = User.VerifyCode(id, code);
+    //    if (success)
+    //        await SaveAsync();
+
+    //    return success;
+    //}
+
+    public void Map(IEndpointRouteBuilder endpoints)
+    {
+        var auth = endpoints.MapGroup("/auth");
+        auth.MapPost("login", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.Login(principal, context, emailOrToken));
+        auth.MapPost("logout", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.Logout(principal, emailOrToken));
+        auth.MapGet("userinfo", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
+        auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddProductRequest request) => await auth.AddProductAsync(principal, request.ProductName));
+        auth.MapPost("update-user", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] UpdateUserRequest request) => await auth.UpdateUserAsync(principal, request));
+        auth.MapPost("user-languages", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] Language language) => await auth.AddLanguageAsync(principal, language));
+    }
+
+    private async Task LoginWithPasswordless(HttpContext context)
+    {
+        throw new NotImplementedException();
+    }    
 }

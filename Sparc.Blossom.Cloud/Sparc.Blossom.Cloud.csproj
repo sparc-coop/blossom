@@ -33,6 +33,7 @@
 		<PackageReference Include="DeepL.net" Version="1.14.0" />
 		<PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.43.0" />
 		<PackageReference Include="NAudio.Lame" Version="2.0.1" />
+		<PackageReference Include="Sparc.Notifications.Twilio" Version="7.0.2" />
 		<PackageReference Include="Stripe.net" Version="48.0.2" />
 	</ItemGroup>
 

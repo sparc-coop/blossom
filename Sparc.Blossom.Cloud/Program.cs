@@ -5,6 +5,7 @@ using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Cloud.Tools;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
+using Sparc.Notifications.Twilio;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -23,6 +24,8 @@ builder.Services.AddMediatR(options =>
     options.NotificationPublisher = new TaskWhenAllPublisher();
     options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
 });
+
+builder.Services.AddTwilio(builder.Configuration.GetSection("Twilio"));
 
 var app = builder.Build();
 app.UseBlossomCloudAuthentication<BlossomUser>();

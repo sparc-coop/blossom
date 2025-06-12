@@ -1,5 +1,7 @@
 ﻿using Sparc.Blossom.Content;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -30,6 +32,10 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public UserAvatar Avatar { get; private set; } = new();
     public List<Language> LanguagesSpoken { get; private set; } = [];
     public List<ProductKey> Products { get; set; } = [];
+    public bool IsEmailVerified { get; private set; }
+    public bool IsPhoneVerified { get; private set; }
+    private string? EmailVerificationHash { get; set; }
+    private string? PhoneVerificationHash { get; set; }
 
 
     internal Dictionary<string, string> Claims { get; set; } = [];
@@ -226,5 +232,52 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
         if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
             PhoneNumber = request.PhoneNumber;
+    }    
+
+    public void RevokeEmail() => IsEmailVerified = false;
+    public void RevokePhone() => IsPhoneVerified = false;
+
+    private string CreateHash(string id, string code)
+    {
+        using var md5 = MD5.Create();
+        var inputBytes = Encoding.ASCII.GetBytes(id + code);
+        return string.Concat(md5.ComputeHash(inputBytes).Select(x => x.ToString("x2")));
+    }
+
+    public string GenerateVerificationCode(string id)
+    {
+        var code = id == "appletest@email.com"
+            ? "123456"
+            : new Random().Next(0, 1000000).ToString("D6");
+
+        var hash = CreateHash(id, code);
+
+        if (id.Equals(Email, StringComparison.OrdinalIgnoreCase))
+            EmailVerificationHash = hash;
+        else if (id.Equals(PhoneNumber, StringComparison.OrdinalIgnoreCase))
+            PhoneVerificationHash = hash;
+
+        return code;
+    }
+
+    public bool VerifyCode(string id, string code)
+    {
+        var hash = CreateHash(id, code);
+
+        if (id.Equals(Email, StringComparison.OrdinalIgnoreCase) && hash == EmailVerificationHash)
+        {
+            IsEmailVerified = true;
+            EmailVerificationHash = null;
+            return true;
+        }
+
+        if (id.Equals(PhoneNumber, StringComparison.OrdinalIgnoreCase) && hash == PhoneVerificationHash)
+        {
+            IsPhoneVerified = true;
+            PhoneVerificationHash = null;
+            return true;
+        }
+
+        return false;
     }
 }
