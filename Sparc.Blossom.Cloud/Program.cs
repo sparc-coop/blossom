@@ -25,7 +25,7 @@ builder.Services.AddMediatR(options =>
     options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
 });
 
-builder.Services.AddTwilio(builder.Configuration.GetSection("Twilio"));
+builder.Services.AddTwilio(builder.Configuration);
 
 var app = builder.Build();
 app.UseBlossomCloudAuthentication<BlossomUser>();
