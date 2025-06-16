@@ -169,6 +169,35 @@
         }
       }
     },
+    "/auth/verify-code": {
+      "post": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerificationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/translate/languages": {
       "get": {
         "tags": [
@@ -295,6 +324,20 @@
             "items": {
               "$ref": "#/components/schemas/ProductKey"
             }
+          },
+          "isEmailVerified": {
+            "type": "boolean"
+          },
+          "isPhoneVerified": {
+            "type": "boolean"
+          },
+          "emailVerificationHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "phoneVerificationHash": {
+            "type": "string",
+            "nullable": true
           },
           "primaryLanguage": {
             "$ref": "#/components/schemas/Language"
@@ -486,6 +529,21 @@
           "muteMe": {
             "type": "boolean",
             "nullable": true
+          }
+        }
+      },
+      "VerificationRequest": {
+        "required": [
+          "destination",
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
           }
         }
       },
