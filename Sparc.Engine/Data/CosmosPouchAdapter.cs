@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosPouchAdapter(CosmosDbDynamicRepository<Datum> data, CosmosDbSimpleRepository<ReplicationLog> checkpoints) : IBlossomCloudApi
+public class CosmosPouchAdapter(CosmosDbDynamicRepository<Datum> data, CosmosDbSimpleRepository<ReplicationLog> checkpoints) : IBlossomEndpoints
 {
     public CosmosDbDynamicRepository<Datum> Data { get; } = data;
     public CosmosDbSimpleRepository<ReplicationLog> Checkpoints { get; } = checkpoints;
