@@ -33,7 +33,10 @@ public class CosmosDbSimpleClient<T>
             }
         };
 
-        Client = new CosmosClient(config.GetConnectionString("CosmosDB"), options);
+        var connectionString = config.GetConnectionString("Cosmos")
+            ?? throw new Exception("Cosmos connection string not found in configuration.");
+
+        Client = new CosmosClient(connectionString, options);
         Container = Client.GetContainer(DatabaseName, containerName);
         Context = context;
     }

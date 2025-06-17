@@ -434,7 +434,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Datum"
+                "$ref": "#/components/schemas/PouchDatum"
               }
             }
           },
@@ -614,50 +614,6 @@
             "items": {
               "type": "object"
             }
-          }
-        }
-      },
-      "Datum": {
-        "required": [
-          "_rev",
-          "_realmId"
-        ],
-        "type": "object",
-        "properties": {
-          "_seq": {
-            "type": "string",
-            "nullable": true
-          },
-          "_rev": {
-            "type": "string"
-          },
-          "_deleted": {
-            "type": "boolean"
-          },
-          "_revisions": {
-            "$ref": "#/components/schemas/DatumRevisions"
-          },
-          "_realmId": {
-            "type": "string"
-          },
-          "genericId": { },
-          "id": {
-            "type": "string"
-          }
-        }
-      },
-      "DatumRevisions": {
-        "type": "object",
-        "properties": {
-          "ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "start": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       },
@@ -883,6 +839,50 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "PouchDatum": {
+        "required": [
+          "_realmId",
+          "_rev"
+        ],
+        "type": "object",
+        "properties": {
+          "_realmId": {
+            "type": "string"
+          },
+          "_seq": {
+            "type": "string",
+            "nullable": true
+          },
+          "_rev": {
+            "type": "string"
+          },
+          "_deleted": {
+            "type": "boolean"
+          },
+          "_revisions": {
+            "$ref": "#/components/schemas/PouchRevisions"
+          },
+          "genericId": { },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "PouchRevisions": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "start": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

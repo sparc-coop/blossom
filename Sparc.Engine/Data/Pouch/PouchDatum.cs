@@ -2,8 +2,11 @@
 
 namespace Sparc.Blossom.Data;
 
-public class Datum : BlossomEntity<string>
+public class PouchDatum : BlossomEntity<string>
 {
+    [JsonPropertyName("_realmId")]
+    public required string RealmId { get; set; }
+
     [JsonPropertyName("_seq")]
     public string? Seq { get; set; }
     
@@ -14,8 +17,5 @@ public class Datum : BlossomEntity<string>
     public bool Deleted { get; set; }
 
     [JsonPropertyName("_revisions")]
-    public DatumRevisions Revisions { get; set; }
-
-    [JsonPropertyName("_realmId")]
-    public required string RealmId { get; set; }
+    public PouchRevisions Revisions { get; set; }
 }

@@ -6,19 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
+public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, IMediator mediator) 
+    : RepositoryBase<T>(simpleClient.Context), IRepository<T>
     where T : BlossomEntity<string>
 {
-    public IQueryable<T> Query { get; }
-    public CosmosDbSimpleClient<T> Client { get; }
-    public IMediator Mediator { get; }
-
-    public CosmosDbSimpleRepository(CosmosDbSimpleClient<T> simpleClient, IMediator mediator) : base(simpleClient.Context)
-    {
-        Client = simpleClient;
-        Query = simpleClient.Container.GetItemLinqQueryable<T>();
-        Mediator = mediator;
-    }
+    public IQueryable<T> Query { get; } = simpleClient.Container.GetItemLinqQueryable<T>();
+    public CosmosDbSimpleClient<T> Client { get; } = simpleClient;
+    public IMediator Mediator { get; } = mediator;
 
     public async Task<T?> FindAsync(object id)
     {
@@ -185,7 +179,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         var pk = partitionKey != null ? NewSparcHierarchicalPartitionKey(partitionKey) : GetPartitionKey(item);
 
-        await Container.UpsertItemAsync(item, pk);
+        await Client.Container.UpsertItemAsync(item, pk);
 
         await Publish(item);
     }

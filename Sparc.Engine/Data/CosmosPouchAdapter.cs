@@ -6,9 +6,9 @@ using System.Text.Json;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosPouchAdapter(CosmosDbDynamicRepository<Datum> data, CosmosDbSimpleRepository<ReplicationLog> checkpoints) : IBlossomEndpoints
+public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, CosmosDbSimpleRepository<ReplicationLog> checkpoints) : IBlossomEndpoints
 {
-    public CosmosDbDynamicRepository<Datum> Data { get; } = data;
+    public CosmosDbDynamicRepository<PouchDatum> Data { get; } = data;
     public CosmosDbSimpleRepository<ReplicationLog> Checkpoints { get; } = checkpoints;
     public record GetDatasetMetadataResponse(string db_name, int doc_count, int instance_start_time, string update_seq);
     public async Task<GetDatasetMetadataResponse>  GetDbAsync(string db)
@@ -34,7 +34,7 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<Datum> data, CosmosDbS
         return Results.Ok(doc);
     }
 
-    public async Task<IResult> CreateOrUpdateDocument(string db, string docid, [FromBody] Datum body)
+    public async Task<IResult> CreateOrUpdateDocument(string db, string docid, [FromBody] PouchDatum body)
     {
         body.Id = docid;
         await Data.UpsertAsync(body, db);

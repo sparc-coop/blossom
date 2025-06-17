@@ -2,7 +2,7 @@
 
 namespace Sparc.Blossom.Data;
 
-public class DatumRevisions
+public class PouchRevisions
 {
     [JsonProperty("ids")]
     public List<string> Ids { get; set; }
