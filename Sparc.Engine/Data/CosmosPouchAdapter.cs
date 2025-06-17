@@ -6,9 +6,9 @@ using System.Text.Json;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosPouchAdapter(CosmosDbSimpleRepository<Datum> data, CosmosDbSimpleRepository<ReplicationLog> checkpoints) : IBlossomEndpoints
+public class CosmosPouchAdapter(CosmosDbDynamicRepository<Datum> data, CosmosDbSimpleRepository<ReplicationLog> checkpoints) : IBlossomCloudApi
 {
-    public CosmosDbSimpleRepository<Datum> Data { get; } = data;
+    public CosmosDbDynamicRepository<Datum> Data { get; } = data;
     public CosmosDbSimpleRepository<ReplicationLog> Checkpoints { get; } = checkpoints;
     public record GetDatasetMetadataResponse(string db_name, int doc_count, int instance_start_time, string update_seq);
     public async Task<GetDatasetMetadataResponse>  GetDbAsync(string db)

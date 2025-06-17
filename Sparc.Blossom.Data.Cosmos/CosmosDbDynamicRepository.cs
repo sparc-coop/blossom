@@ -7,64 +7,64 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
-    where T : BlossomEntity<string>
+public class CosmosDbDynamicRepository<DT> : RepositoryBase<DT>, IRepository<DT>
+    where DT : BlossomEntity<string>
 {
-    public IQueryable<T> Query { get; }
+    public IQueryable<DT> Query { get; }
     public CosmosClient Client { get; }
     public Container Container { get; }
     public IMediator Mediator { get; }
     public IEntityType? EntityType { get; }
 
-    public CosmosDbSimpleRepository(DbContext context, IMediator mediator) : base(context)
+    public CosmosDbDynamicRepository(DbContext context, IMediator mediator) : base(context)
     {
         var databaseName = context.Database.GetCosmosDatabaseId();
-        EntityType = context.Model.FindEntityType(typeof(T));
+        EntityType = context.Model.FindEntityType(typeof(DT));
         Client = context.Database.GetCosmosClient();
         Client.ClientOptions.Serializer = new CosmosDbSimpleSerializer();
 
         var containerName = (EntityType?.GetContainer())
-            ?? throw new Exception($"Container name not found for entity type {typeof(T)}");
+            ?? throw new Exception($"Container name not found for entity type {typeof(DT)}");
         Container = Client.GetContainer(databaseName, containerName);
 
-        Query = Container.GetItemLinqQueryable<T>();
+        Query = Container.GetItemLinqQueryable<DT>();
         Mediator = mediator;
     }
 
-    public async Task<T?> FindAsync(object id)
+    public async Task<DT?> FindAsync(object id)
     {
         var strId = id.ToString();
         var result = await Query.Where(x => x.Id == strId).ToCosmosAsync();
         return result.FirstOrDefault();
     }
 
-    public async Task<T?> FindAsync(ISpecification<T> spec)
+    public async Task<DT?> FindAsync(ISpecification<DT> spec)
     {
         var result = await ApplySpecification(spec).ToCosmosAsync();
         return result.FirstOrDefault();
     }
 
-    public async Task<int> CountAsync(ISpecification<T> spec)
+    public async Task<int> CountAsync(ISpecification<DT> spec)
     {
         return await CountAsync(spec, default);
     }
 
-    public async Task<bool> AnyAsync(ISpecification<T> spec)
+    public async Task<bool> AnyAsync(ISpecification<DT> spec)
     {
         return await AnyAsync(spec, default);
     }
 
-    public async Task<List<T>> GetAllAsync(ISpecification<T> spec)
+    public async Task<List<DT>> GetAllAsync(ISpecification<DT> spec)
     {
         return await ListAsync(spec);
     }
 
-    public async Task AddAsync(T item)
+    public async Task AddAsync(DT item)
     {
         await AddAsync([item]);
     }
 
-    public virtual async Task AddAsync(IEnumerable<T> items)
+    public virtual async Task AddAsync(IEnumerable<DT> items)
     {
         foreach (var item in items)
         {
@@ -89,12 +89,12 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         }
     }
 
-    public async Task UpdateAsync(T item)
+    public async Task UpdateAsync(DT item)
     {
         await UpdateAsync([item]);
     }
 
-    public virtual async Task UpdateAsync(IEnumerable<T> items)
+    public virtual async Task UpdateAsync(IEnumerable<DT> items)
     {
         foreach (var item in items)
         {
@@ -110,7 +110,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         }
     }
 
-    public async Task ExecuteAsync(object id, Action<T> action)
+    public async Task ExecuteAsync(object id, Action<DT> action)
     {
         var entity = await FindAsync(id);
         if (entity == null)
@@ -119,28 +119,28 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         await ExecuteAsync(entity, action);
     }
 
-    public async Task ExecuteAsync(T entity, Action<T> action)
+    public async Task ExecuteAsync(DT entity, Action<DT> action)
     {
         action(entity);
         await UpdateAsync(entity);
     }
 
-    public async Task DeleteAsync(T item)
+    public async Task DeleteAsync(DT item)
     {
         await DeleteAsync([item]);
     }
 
-    public async Task DeleteAsync(IEnumerable<T> items)
+    public async Task DeleteAsync(IEnumerable<DT> items)
     {
         foreach (var item in items)
         {
             var partitionKey = GetPartitionKey(item);
-            await Container.DeleteItemAsync<T>(item.Id, partitionKey);
+            await Container.DeleteItemAsync<DT>(item.Id, partitionKey);
             await Publish(item);
         }
     }
 
-    private PartitionKey GetPartitionKey(T item)
+    private PartitionKey GetPartitionKey(DT item)
     {
         var partitionKeyProperty = EntityType?.GetPartitionKeyProperties();
         if (partitionKeyProperty == null || partitionKeyProperty.Count == 0)
@@ -156,9 +156,9 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         return partitionKey.Build();
     }
 
-    public IQueryable<T> FromSqlRaw(string sql, params object[] parameters)
+    public IQueryable<DT> FromSqlRaw(string sql, params object[] parameters)
     {
-        var results = FromSqlAsync<T>(sql, null, parameters).Result;
+        var results = FromSqlAsync<DT>(sql, null, parameters).Result;
         return results.AsQueryable();
     }
 
@@ -192,16 +192,14 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         return list;
     }
 
-    public async Task UpsertAsync(T item, string? partitionKey = null)
+    public async Task UpsertAsync(dynamic item, string? partitionKey = null)
     {
         var pk = partitionKey != null ? NewSparcHierarchicalPartitionKey(partitionKey) : GetPartitionKey(item);
 
         await Container.UpsertItemAsync(item, pk);
-
-        await Publish(item);
     }
 
-    public async Task UpsertAsync(IEnumerable<T> items, string? partitionKey = null)
+    public async Task UpsertAsync(IEnumerable<dynamic> items, string? partitionKey = null)
     {
         foreach (var item in items)
         {
@@ -209,7 +207,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         }
     }
 
-    public IQueryable<T> PartitionQuery(string partitionKey)
+    public IQueryable<DT> PartitionQuery(string partitionKey)
     {
         return Query.WithPartitionKey(partitionKey);
     }
