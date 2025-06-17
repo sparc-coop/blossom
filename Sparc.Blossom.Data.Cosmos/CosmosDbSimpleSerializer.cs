@@ -1,13 +1,15 @@
-﻿using Microsoft.Azure.Cosmos;
-using Newtonsoft.Json;
+﻿using Azure.Core.Serialization;
+using Microsoft.Azure.Cosmos;
+using System.Reflection;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Data;
-public sealed class CosmosDbSimpleSerializer : CosmosSerializer
+public sealed class CosmosDbSimpleSerializer : CosmosLinqSerializer
 {
-    private static readonly Encoding DefaultEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
-
-    private readonly JsonSerializerSettings? SerializerSettings;
+    private readonly JsonObjectSerializer systemTextJsonSerializer;
+    private readonly JsonSerializerOptions jsonSerializerOptions;
 
     //
     // Summary:
@@ -18,38 +20,13 @@ public sealed class CosmosDbSimpleSerializer : CosmosSerializer
     //     to System.Text.Json
     public CosmosDbSimpleSerializer()
     {
-        SerializerSettings = new JsonSerializerSettings
+        jsonSerializerOptions = new JsonSerializerOptions
         {
-            NullValueHandling = NullValueHandling.Ignore,
-            Formatting = Formatting.Indented,
-            ContractResolver = new CamelCaseIdContractResolver(),
-            MaxDepth = 64
-        }; ;
-    }
-
-    //
-    // Summary:
-    //     Create a serializer that uses the JSON.net serializer
-    //
-    // Remarks:
-    //     This is internal to reduce exposure of JSON.net types so it is easier to convert
-    //     to System.Text.Json
-    public CosmosDbSimpleSerializer(CosmosSerializationOptions cosmosSerializerOptions)
-    {
-        if (cosmosSerializerOptions == null)
-        {
-            SerializerSettings = null;
-            return;
-        }
-
-        JsonSerializerSettings serializerSettings = new()
-        {
-            NullValueHandling = cosmosSerializerOptions.IgnoreNullValues ? NullValueHandling.Ignore : NullValueHandling.Include,
-            Formatting = cosmosSerializerOptions.Indented ? Formatting.Indented : Formatting.None,
-            ContractResolver = new CamelCaseIdContractResolver(),
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            PropertyNamingPolicy = new CamelCaseIdNamingPolicy(),
             MaxDepth = 64
         };
-        SerializerSettings = serializerSettings;
+        systemTextJsonSerializer = new JsonObjectSerializer(jsonSerializerOptions);
     }
 
     //
@@ -59,10 +36,33 @@ public sealed class CosmosDbSimpleSerializer : CosmosSerializer
     // Remarks:
     //     This is internal to reduce exposure of JSON.net types so it is easier to convert
     //     to System.Text.Json
-    public CosmosDbSimpleSerializer(JsonSerializerSettings jsonSerializerSettings)
+    public CosmosDbSimpleSerializer(CosmosSerializationOptions cosmosSerializerOptions) : this()
     {
-        SerializerSettings = jsonSerializerSettings ?? throw new ArgumentNullException("jsonSerializerSettings");
+        if (cosmosSerializerOptions != null)
+        {
+            jsonSerializerOptions = new()
+            {
+                DefaultIgnoreCondition = cosmosSerializerOptions.IgnoreNullValues ? JsonIgnoreCondition.WhenWritingNull : JsonIgnoreCondition.Never,
+                PropertyNamingPolicy = new CamelCaseIdNamingPolicy(),
+                MaxDepth = 64
+            };
+            systemTextJsonSerializer = new JsonObjectSerializer(jsonSerializerOptions);
+        }
     }
+
+    //
+    // Summary:
+    //     Create a serializer that uses the JSON.net serializer
+    //
+    // Remarks:
+    //     This is internal to reduce exposure of JSON.net types so it is easier to convert
+    //     to System.Text.Json
+    public CosmosDbSimpleSerializer(JsonSerializerOptions jsonSerializerSettings)
+    {
+        jsonSerializerOptions = jsonSerializerSettings;
+        systemTextJsonSerializer = new JsonObjectSerializer(jsonSerializerOptions);
+    }
+    
 
     //
     // Summary:
@@ -82,14 +82,18 @@ public sealed class CosmosDbSimpleSerializer : CosmosSerializer
     {
         using (stream)
         {
+            if (stream.CanSeek
+                   && stream.Length == 0)
+            {
+                return default;
+            }
+
             if (typeof(Stream).IsAssignableFrom(typeof(T)))
             {
                 return (T)(object)stream;
             }
 
-            using StreamReader reader = new StreamReader(stream);
-            using JsonTextReader reader2 = new JsonTextReader(reader);
-            return GetSerializer().Deserialize<T>(reader2) ?? default!;
+            return (T)this.systemTextJsonSerializer.Deserialize(stream, typeof(T), default);
         }
     }
 
@@ -109,27 +113,33 @@ public sealed class CosmosDbSimpleSerializer : CosmosSerializer
     //     An open readable stream containing the JSON of the serialized object
     public override Stream ToStream<T>(T input)
     {
-        MemoryStream memoryStream = new MemoryStream();
-        using (StreamWriter streamWriter = new StreamWriter(memoryStream, DefaultEncoding, 1024, leaveOpen: true))
-        {
-            using JsonWriter jsonWriter = new JsonTextWriter(streamWriter);
-            jsonWriter.Formatting = Formatting.None;
-            GetSerializer().Serialize(jsonWriter, input);
-            jsonWriter.Flush();
-            streamWriter.Flush();
-        }
-
-        memoryStream.Position = 0L;
-        return memoryStream;
+        MemoryStream streamPayload = new MemoryStream();
+        this.systemTextJsonSerializer.Serialize(streamPayload, input, input.GetType(), default);
+        streamPayload.Position = 0;
+        return streamPayload;
     }
 
-    //
-    // Summary:
-    //     JsonSerializer has hit a race conditions with custom settings that cause null
-    //     reference exception. To avoid the race condition a new JsonSerializer is created
-    //     for each call
-    private JsonSerializer GetSerializer()
+    public override string SerializeMemberName(MemberInfo memberInfo)
     {
-        return JsonSerializer.Create(SerializerSettings);
+        JsonExtensionDataAttribute jsonExtensionDataAttribute = memberInfo.GetCustomAttribute<JsonExtensionDataAttribute>(true);
+        if (jsonExtensionDataAttribute != null)
+        {
+            return null;
+        }
+
+        JsonPropertyNameAttribute jsonPropertyNameAttribute = memberInfo.GetCustomAttribute<JsonPropertyNameAttribute>(true);
+        if (!string.IsNullOrEmpty(jsonPropertyNameAttribute?.Name))
+        {
+            return jsonPropertyNameAttribute.Name;
+        }
+
+        if (this.jsonSerializerOptions.PropertyNamingPolicy != null)
+        {
+            return this.jsonSerializerOptions.PropertyNamingPolicy.ConvertName(memberInfo.Name);
+        }
+
+        // Do any additional handling of JsonSerializerOptions here.
+
+        return memberInfo.Name;
     }
 }

@@ -3,7 +3,6 @@ using Ardalis.Specification.EntityFrameworkCore;
 using MediatR;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Sparc.Blossom.Data;
 
@@ -11,23 +10,13 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     where T : BlossomEntity<string>
 {
     public IQueryable<T> Query { get; }
-    public CosmosClient Client { get; }
-    public Container Container { get; }
+    public CosmosDbSimpleClient<T> Client { get; }
     public IMediator Mediator { get; }
-    public IEntityType? EntityType { get; }
 
-    public CosmosDbSimpleRepository(DbContext context, IMediator mediator) : base(context)
+    public CosmosDbSimpleRepository(CosmosDbSimpleClient<T> simpleClient, IMediator mediator) : base(simpleClient.Context)
     {
-        var databaseName = context.Database.GetCosmosDatabaseId();
-        EntityType = context.Model.FindEntityType(typeof(T));
-        Client = context.Database.GetCosmosClient();
-        Client.ClientOptions.Serializer = new CosmosDbSimpleSerializer();
-
-        var containerName = (EntityType?.GetContainer())
-            ?? throw new Exception($"Container name not found for entity type {typeof(T)}");
-        Container = Client.GetContainer(databaseName, containerName);
-
-        Query = Container.GetItemLinqQueryable<T>();
+        Client = simpleClient;
+        Query = simpleClient.Container.GetItemLinqQueryable<T>();
         Mediator = mediator;
     }
 
@@ -68,7 +57,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
     {
         foreach (var item in items)
         {
-            await Container.CreateItemAsync(item);
+            await Client.Container.CreateItemAsync(item);
             await Publish(item);
         }
 
@@ -100,7 +89,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         {
             try
             {
-                await Container.UpsertItemAsync(item);
+                await Client.Container.UpsertItemAsync(item);
                 await Publish(item);
             }
             catch (Exception e)
@@ -135,14 +124,14 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
         foreach (var item in items)
         {
             var partitionKey = GetPartitionKey(item);
-            await Container.DeleteItemAsync<T>(item.Id, partitionKey);
+            await Client.Container.DeleteItemAsync<T>(item.Id, partitionKey);
             await Publish(item);
         }
     }
 
     private PartitionKey GetPartitionKey(T item)
     {
-        var partitionKeyProperty = EntityType?.GetPartitionKeyProperties();
+        var partitionKeyProperty = Client.EntityType?.GetPartitionKeyProperties();
         if (partitionKeyProperty == null || partitionKeyProperty.Count == 0)
             return PartitionKey.None;
 
@@ -181,7 +170,7 @@ public class CosmosDbSimpleRepository<T> : RepositoryBase<T>, IRepository<T>
             }
         }
 
-        var results = Container.GetItemQueryIterator<U>(query,
+        var results = Client.Container.GetItemQueryIterator<U>(query,
             requestOptions: requestOptions);
 
         var list = new List<U>();
