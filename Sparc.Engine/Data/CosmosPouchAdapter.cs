@@ -101,21 +101,22 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<Datum> data, CosmosDbS
         }
         return Results.Ok(log);
     }
+
     public async Task<IResult> PutCheckpointAsync(string db, string id, [FromBody] ReplicationLog log)
     {
         log.PouchId = id;
         log.Id = id;
-        log.TenantId = "sparc";
-        log.UserId = "sparc-admin";
-        log.DatabaseId = db;
+        log.RealmId = "sparc";
         await Checkpoints.UpsertAsync(log, db);
         return Results.Ok(log);
     }
+
     public async Task<GetChangesResponse> GetChangesAsync(string db, [FromQuery] string? since, [FromQuery] int? limit)
     {
         var request = new GetChangesRequest(new List<string>(), since ?? "0", limit);
         return await PostChangesAsync(db, request);
     }
+
     public async Task<GetChangesResponse> PostChangesAsync(string db, [FromBody] GetChangesRequest request)
     {
         // Build the SQL query
@@ -219,12 +220,7 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<Datum> data, CosmosDbS
         group.MapDelete("/{db}/{docid}", DeleteDocument);
         
         group.MapGet("/{db}/_all_docs", GetAllDocs);
-       
-        
-        
     }
-
-    
 
     private static string IncrementRev(string rev)
     {

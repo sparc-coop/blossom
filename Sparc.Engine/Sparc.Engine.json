@@ -619,34 +619,26 @@
       },
       "Datum": {
         "required": [
-          "rev"
+          "_rev",
+          "_realmId"
         ],
         "type": "object",
         "properties": {
-          "seq": {
+          "_seq": {
             "type": "string",
             "nullable": true
           },
-          "rev": {
+          "_rev": {
             "type": "string"
           },
-          "deleted": {
+          "_deleted": {
             "type": "boolean"
           },
-          "revisions": {
+          "_revisions": {
             "$ref": "#/components/schemas/DatumRevisions"
           },
-          "tenantId": {
+          "_realmId": {
             "type": "string"
-          },
-          "userId": {
-            "type": "string"
-          },
-          "databaseId": {
-            "type": "string"
-          },
-          "doc": {
-            "type": "object"
           },
           "genericId": { },
           "id": {
@@ -929,38 +921,32 @@
       "ReplicationLog": {
         "type": "object",
         "properties": {
-          "pouchId": {
+          "_id": {
             "type": "string"
           },
           "id": {
             "type": "string"
           },
-          "tenantId": {
+          "_realmId": {
             "type": "string"
           },
-          "userId": {
-            "type": "string"
-          },
-          "databaseId": {
-            "type": "string"
-          },
-          "history": {
+          "_history": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ReplicationHistory"
             }
           },
-          "replicator": {
+          "_replicator": {
             "type": "string"
           },
-          "sessionId": {
+          "_session_id": {
             "type": "string"
           },
-          "lastSeq": {
+          "_last_seq": {
             "type": "integer",
             "format": "int64"
           },
-          "version": {
+          "_version": {
             "type": "integer",
             "format": "int32"
           },
