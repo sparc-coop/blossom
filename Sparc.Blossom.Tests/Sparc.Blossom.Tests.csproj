@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
-		<Version>10.0.0-preview.1</Version>
+		<Version>10.0.0-preview.4</Version>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -20,12 +20,12 @@
 	
 
 	<ItemGroup>
-		<PackageReference Include="Bogus" Version="35.6.1" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
+		<PackageReference Include="Bogus" Version="35.6.3" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.6" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

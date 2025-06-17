@@ -12,11 +12,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+    <ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
   </ItemGroup>
 
 </Project>

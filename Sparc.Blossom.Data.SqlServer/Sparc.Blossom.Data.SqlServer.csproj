@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net9.0</TargetFrameworks>
 		<Nullable>enable</Nullable>
-		<Version>10.0.0-preview.1</Version>
+		<Version>10.0.0-preview.4</Version>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
@@ -18,13 +18,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.1.0" />
+		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.2.0" />
 		<PackageReference Include="Dapper" Version="2.1.66" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.6" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+	  <ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

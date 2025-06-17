@@ -12,7 +12,7 @@
 		<Nullable>enable</Nullable>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
-		<Version>10.0.0-preview.1</Version>
+		<Version>10.0.0-preview.4</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Sparc Cooperative</Authors>
@@ -33,14 +33,14 @@
 
 	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.4" />
-		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.4.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.6" />
+		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.6.0" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
-		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.2" />
-		<PackageReference Include="System.Net.Http.Json" Version="9.0.4" />
+		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.6" />
+		<PackageReference Include="System.Net.Http.Json" Version="9.0.6" />
 		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.6" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -114,7 +114,7 @@
 		<DefineConstants>SERVER</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.6" />
 		<Compile Remove="**\*.xaml.cs" />
 		<None Include="**\*.xaml.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 		<Compile Remove="**\*.xaml" />
