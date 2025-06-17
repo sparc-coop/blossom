@@ -4,7 +4,6 @@ using MediatR;
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Newtonsoft.Json;
 
 namespace Sparc.Blossom.Data;
 

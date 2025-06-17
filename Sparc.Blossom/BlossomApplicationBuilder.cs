@@ -2,6 +2,7 @@
 using System.Reflection;
 using MediatR.NotificationPublishers;
 using Refit;
+using Sparc.Engine;
 
 namespace Sparc.Blossom;
 
@@ -19,9 +20,9 @@ public abstract class BlossomApplicationBuilder
         AddAuthentication<TUser>();
     }
 
-    public void AddBlossomCloud()
+    public void AddSparcEngine()
     {
-        Services.AddRefitClient<IBlossomCloud>()
+        Services.AddRefitClient<ISparcEngine>()
             .ConfigureHttpClient(x => x.BaseAddress = new Uri("https://localhost:7185"))
             .AddStandardResilienceHandler();
     }

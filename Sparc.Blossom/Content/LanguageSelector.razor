@@ -1,14 +1,13 @@
 @using System.Net.Http.Json
 @using System.Globalization
 @using Sparc.Blossom.Authentication
-@using Sparc.Blossom.Content
-@using Sparc.Blossom.Content.Icons
+@using Sparc.Engine
 
 <div class="language-selector">
     <button @onclick=ToggleLanguageList>
-        <Language />
+        <Sparc.Blossom.Content.Icons.Language />
         @SelectedLanguage?.DisplayName
-        <Expand IsExpanded="ShowLanguageSettings" />
+        <Sparc.Blossom.Content.Icons.Expand IsExpanded="ShowLanguageSettings" />
     </button>
 
     @if (ShowLanguageSettings && Languages != null)
@@ -38,7 +37,7 @@
     }
 </div>
 
-@inject IBlossomCloud Cloud
+@inject ISparcEngine Engine
 @inject IBlossomAuthenticator Auth
 
 @code {
@@ -49,7 +48,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Languages = await Cloud.GetLanguages();
+        Languages = await Engine.GetLanguages();
         SelectedLanguage = Auth.User?.PrimaryLanguage
             ?? Languages.FirstOrDefault(x => x.Id == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
     }

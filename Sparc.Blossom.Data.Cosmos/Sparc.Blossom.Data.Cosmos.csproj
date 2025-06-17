@@ -25,7 +25,7 @@
 
 	<ItemGroup>
 	  <None Include="readme.md" Pack="true" PackagePath="\" />
-	  <ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
+	  <ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
 	  <None Update="icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
