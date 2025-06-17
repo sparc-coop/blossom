@@ -105,15 +105,4 @@ public class Datum : BlossomEntity<string>
                 Doc.TryAdd(key, item);
         }
     }
-
-    
-
-    //public string? DocJson { get; set; }
-
-    //[NotMapped]
-    //public IDictionary<string, object> Doc
-    //{
-    //    get => DocJson == null ? null : JsonConvert.DeserializeObject<Dictionary<string, object>>(DocJson);
-    //    set => DocJson = JsonConvert.SerializeObject(value);
-    //}
 }
