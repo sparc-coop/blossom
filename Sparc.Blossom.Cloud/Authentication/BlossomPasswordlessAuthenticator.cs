@@ -224,7 +224,6 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
     public async Task<BlossomUser> UpdateUserAsync(ClaimsPrincipal principal, UpdateUserRequest request)
     {
         await base.GetUserAsync(principal);
-
         if (User is null)
             throw new InvalidOperationException("User not initialized");
 
@@ -238,16 +237,28 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
 
         if (!string.IsNullOrWhiteSpace(request.Email) && User.Email != request.Email)
         {
-            User.Email = request.Email;
-            await SendVerificationCodeAsync(principal, User.Email);
-            shouldSave = true;
+            if (request.RequireEmailVerification)
+            {                
+                await SendVerificationCodeAsync(principal, request.Email);
+            }
+            else
+            {
+                User.Email = request.Email;
+                shouldSave = true;
+            }
         }
 
         if (!string.IsNullOrWhiteSpace(request.PhoneNumber) && User.PhoneNumber != request.PhoneNumber)
         {
-            User.PhoneNumber = request.PhoneNumber;
-            await SendVerificationCodeAsync(principal, User.PhoneNumber);
-            shouldSave = true;
+            if (request.RequirePhoneVerification)
+            {
+                await SendVerificationCodeAsync(principal, request.PhoneNumber);
+            }
+            else
+            {
+                User.PhoneNumber = request.PhoneNumber;
+                shouldSave = true;
+            }
         }
 
         if (shouldSave)
@@ -263,18 +274,11 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         if (User is null)
             throw new InvalidOperationException("User not initialized");
 
-        if (destination == User.Email)
-        {
-            User.RevokeEmail();
-        }
-        else if (destination == User.PhoneNumber)
-        {
-            User.RevokePhone();
-        }
+        User.Revoke();
+        User.EmailOrPhone = destination;
 
-        var code = User.GenerateVerificationCode(destination);
-        var message = $"Your verification code is: {code}";
-
+        var code = User.GenerateVerificationCode();
+        var message = $"Your Sparc verification code is: {code}";
         var subject = "Sparc Verification Code";
 
         await Twilio.SendAsync(destination, message, subject);
@@ -288,13 +292,21 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         if (User is null)
             throw new InvalidOperationException("User not initialized");
 
-        var success = User.VerifyCode(destination, code);
+        var success = User.VerifyCode(code);
 
         if (success)
+        {
+            if (destination.Contains("@"))
+                User.Email = destination;
+            else
+                User.PhoneNumber = destination;
+
             await SaveAsync();
+        }
 
         return success;
     }
+
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var auth = endpoints.MapGroup("/auth");
@@ -304,7 +316,7 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         auth.MapPost("user-products", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddProductRequest request) => await auth.AddProductAsync(principal, request.ProductName));
         auth.MapPost("update-user", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] UpdateUserRequest request) => await auth.UpdateUserAsync(principal, request));
         auth.MapPost("user-languages", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] Language language) => await auth.AddLanguageAsync(principal, language));
-        auth.MapPost("verify-code", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] VerificationRequest request) => await auth.VerifyCodeAsync(principal, request.Destination, request.Code));
+        auth.MapPost("verify-code", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] VerificationRequest request) => await auth.VerifyCodeAsync(principal, request.EmailOrPhone, request.Code));
     }
 
     private async Task LoginWithPasswordless(HttpContext context)

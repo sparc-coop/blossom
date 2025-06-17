@@ -38,5 +38,5 @@ public interface IBlossomCloud
     Task<BlossomUser> AddUserLanguage([Body] Language language);
 
     [Post("/auth/verify-code")]
-    Task<bool> VerifyEmailOrPhoneCode([Body] VerificationRequest request);
+    Task<bool> VerifyCode([Body] VerificationRequest request);
 }
