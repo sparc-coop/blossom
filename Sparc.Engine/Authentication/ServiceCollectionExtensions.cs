@@ -25,9 +25,11 @@ public static class ServiceCollectionExtensions
             s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User
             ?? new ClaimsPrincipal(new ClaimsIdentity()));
 
-        var passwordlessSettings = builder.Configuration.GetRequiredSection("Passwordless");
-        builder.Services.Configure<PasswordlessOptions>(passwordlessSettings);
-        builder.Services.AddPasswordlessSdk(passwordlessSettings.Bind);
+        builder.Services.AddPasswordlessSdk(x =>
+        {
+            x.ApiKey = SparcEngineAuthenticator<TUser>.PublicKey;
+            x.ApiSecret = builder.Configuration.GetConnectionString("Passwordless") ?? throw new InvalidOperationException("Passwordless API Secret is not configured.");
+        });
 
         //builder.Services.AddScoped<BlossomPasswordlessAuthenticator<TUser>>()
         //    .AddScoped<IBlossomAuthenticator, BlossomPasswordlessAuthenticator<TUser>>();

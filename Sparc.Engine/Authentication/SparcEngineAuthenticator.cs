@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Passwordless;
 using Sparc.Blossom.Authentication;
 using System.Security.Claims;
@@ -12,9 +11,11 @@ public class SparcEngineAuthenticator<T> : BlossomDefaultAuthenticator<T>, IBlos
     IPasswordlessClient PasswordlessClient { get; }
     public FriendlyId FriendlyId { get; }
     public HttpClient Client { get; }
+    public const string PublicKey = "sparcengine:public:63cc565eb9544940ad6f2c387b228677";
+
     public SparcEngineAuthenticator(
         IPasswordlessClient _passwordlessClient,
-        IOptions<PasswordlessOptions> options,
+        IConfiguration config,
         IRepository<T> users,
         FriendlyId friendlyId)
         : base(users)
@@ -25,7 +26,7 @@ public class SparcEngineAuthenticator<T> : BlossomDefaultAuthenticator<T>, IBlos
         {
             BaseAddress = new Uri("https://v4.passwordless.dev/")
         };
-        Client.DefaultRequestHeaders.Add("ApiSecret", options.Value.ApiSecret);
+        Client.DefaultRequestHeaders.Add("ApiSecret", config.GetConnectionString("Passwordless"));
     }
 
     public override async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
