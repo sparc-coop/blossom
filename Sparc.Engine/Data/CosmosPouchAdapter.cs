@@ -205,7 +205,7 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, Cosm
         var group = endpoints.MapGroup(baseUrl);
 
         group.MapGet("/", GetInfo);
-        group.MapGet("{db}", GetDbAsync);
+        group.MapGet("{app}/{db}", GetDbAsync);
         group.MapGet("{db}/_local/{id}", GetCheckpointAsync);
         group.MapPut("{db}/_local/{id}", PutCheckpointAsync);
         group.MapPost("/{db}/_changes", PostChangesAsync);

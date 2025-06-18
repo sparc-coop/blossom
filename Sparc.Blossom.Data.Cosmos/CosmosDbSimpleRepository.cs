@@ -123,7 +123,7 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         }
     }
 
-    private PartitionKey GetPartitionKey(T item)
+    protected PartitionKey GetPartitionKey(T item)
     {
         var partitionKeyProperty = Client.EntityType?.GetPartitionKeyProperties();
         if (partitionKeyProperty == null || partitionKeyProperty.Count == 0)

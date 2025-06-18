@@ -11,8 +11,8 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
             .HasPartitionKey(x => x.UserId);
 
         
-        model.Entity<PouchDatum>().ToContainer("Datum")
-            .HasPartitionKey(x => new { x.RealmId, x.Id })
+        model.Entity<PouchDatum>().ToContainer("Data")
+            .HasPartitionKey(x => new { x.RealmId, x.Type, x.Id })
             .HasKey(x => x.Id);
 
         model.Entity<ReplicationLog>().ToContainer("ReplicationLog")
