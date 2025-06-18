@@ -2,6 +2,7 @@
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Linq;
 
 namespace Sparc.Blossom.Data;
 
@@ -33,6 +34,9 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
 
     public async Task<IResult> UpsertAsync(string db, string docid, [FromBody] Dictionary<string, object?> body)
     {
+        if (!body.ContainsKey("_rev"))
+            return Results.Ok(new { ok = true, id = docid });
+
         var doc = await data.Query(db).Where(x => x.PouchId == docid).CosmosFirstOrDefaultAsync();
         if (doc == null)
            doc = new PouchDatum(db, body);
@@ -120,14 +124,22 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
     public async Task<Dictionary<string, MissingItems>> GetMissingItemsAsync(string db, [FromBody] Dictionary<string, List<string>> revisions)
     {
         var result = new Dictionary<string, MissingItems>();
+        var ids = new List<string>();
+        foreach (var id in revisions.Keys)
+            ids.AddRange(revisions[id].Select(rev => $"{id}:{rev}"));
+
+        var existingRevisions = await data.Query(db)
+               .Where(x => ids.Contains(x.Id))
+               .Select(x => new { x.PouchId, x.Rev })
+               .ToCosmosAsync();
 
         foreach (var id in revisions.Keys)
         {
-            var revisionsList = string.Join(", ", revisions[id].Select(x => $"'{x}'"));
-            var sql = $"SELECT VALUE r._rev FROM r WHERE r._rev IN ({revisionsList})";
-
-            var existingRevisions = await data.FromSqlAsync<string>(sql, db);
-            var missingRevisions = revisions[id].Except(existingRevisions).ToList();
+            var existingRevisionsForId = existingRevisions
+                .Where(x => x.PouchId == id)
+                .Select(x => x.Rev)
+                .ToList();
+            var missingRevisions = revisions[id].Except(existingRevisionsForId).ToList();
 
             if (missingRevisions.Count != 0)
                 result.Add(id, new MissingItems(missingRevisions));

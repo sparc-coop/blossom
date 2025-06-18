@@ -15,7 +15,7 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
             .HasPartitionKey(x => new { x.Db, x.PouchId })
             .HasKey(x => x.Id);
 
-        model.Entity<ReplicationLog>().ToContainer("ReplicationLog")
+        model.Entity<ReplicationLog>().ToContainer("ReplicationLogs")
             .HasPartitionKey(x => new { x.Db, x.PouchId })
             .HasKey(x => x.Id);
     }
