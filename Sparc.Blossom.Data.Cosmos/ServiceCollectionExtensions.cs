@@ -22,9 +22,6 @@ public static class ServiceCollectionExtensions
         services.Add(new ServiceDescriptor(typeof(CosmosDbSimpleClient<>), typeof(CosmosDbSimpleClient<>), serviceLifetime));
         services.Add(new ServiceDescriptor(typeof(CosmosDbSimpleRepository<>), typeof(CosmosDbSimpleRepository<>), serviceLifetime));
 
-        services.Add(new ServiceDescriptor(typeof(IRepository<>), typeof(CosmosDbDynamicRepository<>), serviceLifetime));
-        services.Add(new ServiceDescriptor(typeof(CosmosDbDynamicRepository<>), typeof(CosmosDbDynamicRepository<>), serviceLifetime));
-
         return services;
     }
 

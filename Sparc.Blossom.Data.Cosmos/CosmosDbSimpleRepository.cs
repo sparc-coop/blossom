@@ -58,7 +58,7 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         await SaveChangesAsync();
     }
 
-    private async Task Publish(IBlossomEntity<string> item)
+    private async Task Publish(T item)
     {
         var events = item.Publish();
         try

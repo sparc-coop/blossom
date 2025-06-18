@@ -40,7 +40,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
 
     public async Task<IResult> DeleteAsync(string db, string docid, string rev)
     {
-        var doc = await data.Query(db).Where(x => x.Id == docid).CosmosFirstOrDefaultAsync();
+        var doc = await data.Query(db).Where(x => x.PouchId == docid && x.Rev == rev).CosmosFirstOrDefaultAsync();
         if (doc == null)
             return Results.NotFound();
 
@@ -190,24 +190,15 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
         group.MapGet("/{db}/_all_docs", GetAllAsync);
     }
 
-    public async Task UpsertDynamicAsync(dynamic item, string? partitionKey = null)
+    public async Task UpsertDynamicAsync(string db, dynamic item)
     {
-        var pk = partitionKey != null ? NewSparcHierarchicalPartitionKey(partitionKey) : data.GetPartitionKey(item);
+        var pk = new PartitionKeyBuilder().Add(db).Add(item._id).Build();
         await data.Client.Container.UpsertItemAsync(item, pk);
     }
 
-    public async Task UpsertDynamicAsync(IEnumerable<dynamic> items, string? partitionKey = null)
+    public async Task UpsertDynamicAsync(string db, IEnumerable<dynamic> items)
     {
         foreach (var item in items)
-        {
-            await UpsertDynamicAsync(item, partitionKey);
-        }
-    }
-
-    
-
-    private static PartitionKey NewSparcHierarchicalPartitionKey(string partitionKey)
-    {
-        return new PartitionKeyBuilder().Add("sparc").Add("sparc-admin").Add(partitionKey).Build();
+            await UpsertDynamicAsync(db, item);
     }
 }

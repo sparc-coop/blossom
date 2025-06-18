@@ -1,17 +1,17 @@
-﻿using System.Dynamic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Data;
 
 public class PouchDatum(string db, string pouchId, string rev) 
-    : BlossomEntity<string>
+    : BlossomEntity<string>($"{pouchId}:{rev}")
 {
-    public PouchDatum(string db, Dictionary<string, object?> doc) 
-        : this(db, doc["_id"]!.ToString()!, doc["_rev"]!.ToString()!)
+    public PouchDatum(string db, Dictionary<string, object?> data) 
+        : this(db, data["_id"]!.ToString()!, data["_rev"]!.ToString()!)
     {
+        Data = data;
+        Seq = data.TryGetValue("_seq", out object? seq) ? seq?.ToString() : null;
+        Deleted = data.TryGetValue("_deleted", out object? deleted) && deleted != null && (bool)deleted;
     }
-
-    public string Id { get; set; } = $"{pouchId}:{rev}";
 
     [JsonPropertyName("_db")]
     public string Db { get; set; } = db;
@@ -28,8 +28,11 @@ public class PouchDatum(string db, string pouchId, string rev)
     [JsonPropertyName("_deleted")]
     public bool Deleted { get; set; }
 
-    [JsonPropertyName("_revisions")]
-    public PouchRevisions Revisions { get; set; } = new();
+    public Dictionary<string, object?> Data { get; set; } = new()
+    {
+        { "_id", pouchId },
+        { "_rev", rev }
+    };
 
     internal void Update()
     {
@@ -52,10 +55,5 @@ public class PouchDatum(string db, string pouchId, string rev)
     {
         PouchId = pouchId;
         Id = $"{PouchId}:{Rev}";
-    }
-
-    public List<BlossomEvent> Publish()
-    {
-        return [];
     }
 }
