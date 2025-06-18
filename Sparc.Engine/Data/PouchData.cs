@@ -139,7 +139,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
     public async Task<IResult> BulkDocs(string db, [FromBody] BulkDocsPayload payload)
     {
         var newData = payload.Docs.Select(x => new PouchDatum(db, x)).ToList();
-        await data.UpdateRangeAsync(newData);
+        await data.UpdateAsync(newData);
 
         return Results.Ok(newData.Select(d => new { ok = true, id = d.PouchId, rev = d.Rev }));
     }
@@ -162,17 +162,5 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
         group.MapDelete("/{db}/{docid}", DeleteAsync);
         
         group.MapGet("/{db}/_all_docs", GetAllAsync);
-    }
-
-    public async Task UpsertDynamicAsync(string db, dynamic item)
-    {
-        var pk = new PartitionKeyBuilder().Add(db).Add(item._id).Build();
-        await data.Client.Container.UpsertItemAsync(item, pk);
-    }
-
-    public async Task UpsertDynamicAsync(string db, IEnumerable<dynamic> items)
-    {
-        foreach (var item in items)
-            await UpsertDynamicAsync(db, item);
     }
 }
