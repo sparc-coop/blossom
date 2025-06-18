@@ -394,7 +394,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PouchDatum"
+                "type": "object"
               }
             }
           },
@@ -458,6 +458,74 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/data/{db}/_local/{id}": {
+      "get": {
+        "tags": [
+          "ReplicationLogs"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "ReplicationLogs"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplicationLog"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -774,34 +842,6 @@
           }
         }
       },
-      "PouchDatum": {
-        "type": "object",
-        "properties": {
-          "_db": {
-            "type": "string"
-          },
-          "_id": {
-            "type": "string"
-          },
-          "_rev": {
-            "type": "string"
-          },
-          "_seq": {
-            "type": "string",
-            "nullable": true
-          },
-          "_deleted": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "object"
-          },
-          "genericId": { },
-          "id": {
-            "type": "string"
-          }
-        }
-      },
       "ProductKey": {
         "required": [
           "productName",
@@ -819,6 +859,53 @@
           "purchaseDate": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ReplicationHistory": {
+        "type": "object",
+        "properties": {
+          "last_seq": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "session_id": {
+            "type": "string"
+          }
+        }
+      },
+      "ReplicationLog": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "_db": {
+            "type": "string"
+          },
+          "_history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReplicationHistory"
+            }
+          },
+          "_replicator": {
+            "type": "string"
+          },
+          "_session_id": {
+            "type": "string"
+          },
+          "_last_seq": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "_version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "genericId": { },
+          "id": {
+            "type": "string"
           }
         }
       },
@@ -936,6 +1023,9 @@
     },
     {
       "name": "PouchData"
+    },
+    {
+      "name": "ReplicationLogs"
     }
   ]
 }

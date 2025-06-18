@@ -4,11 +4,11 @@ using Sparc.Blossom.Data.Pouch;
 
 namespace Sparc.Engine;
 
-public class Checkpoints(CosmosDbSimpleRepository<ReplicationLog> checkpoints) : IBlossomEndpoints
+public class ReplicationLogs(CosmosDbSimpleRepository<ReplicationLog> logs) : IBlossomEndpoints
 {
     public async Task<IResult> GetAsync(string db, string id)
     {
-        var log = await checkpoints.Query(db).Where(x => x.PouchId == id).CosmosFirstOrDefaultAsync();
+        var log = await logs.Query(db).Where(x => x.PouchId == id).CosmosFirstOrDefaultAsync();
         if (log == null)
         {
             var dictionary = new Dictionary<string, string>
@@ -24,7 +24,8 @@ public class Checkpoints(CosmosDbSimpleRepository<ReplicationLog> checkpoints) :
     public async Task<IResult> PutAsync(string db, string id, [FromBody] ReplicationLog log)
     {
         log.SetId(id);
-        await checkpoints.UpsertAsync(log, db);
+        log.Db = db;
+        await logs.UpdateAsync(log);
         return Results.Ok(log);
     }
 

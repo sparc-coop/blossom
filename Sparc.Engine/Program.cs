@@ -55,7 +55,7 @@ app.UseCors();
 app.MapGet("/tools/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 
 using var scope = app.Services.CreateScope();
-var dataRepo = scope.ServiceProvider.GetRequiredService<PouchData>();
-dataRepo.Map(app);
+scope.ServiceProvider.GetRequiredService<PouchData>().Map(app);
+scope.ServiceProvider.GetRequiredService<ReplicationLogs>().Map(app);
 
 app.Run();

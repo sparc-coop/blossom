@@ -24,18 +24,24 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
 
     public async Task<IResult> FindAsync(string db, string docid)
     {
-        var doc = await data.Query(db).Where(x => x.Id == docid).CosmosFirstOrDefaultAsync();
+        var doc = await data.Query(db).Where(x => x.PouchId == docid).CosmosFirstOrDefaultAsync();
         if (doc == null)
             return Results.NotFound(new { error = "not_found", reason = "missing" });
 
-        return Results.Ok(doc);
+        return Results.Ok(doc.Data);
     }
 
-    public async Task<IResult> UpsertAsync(string db, string docid, [FromBody] PouchDatum body)
+    public async Task<IResult> UpsertAsync(string db, string docid, [FromBody] Dictionary<string, object?> body)
     {
-        body.SetId(docid);
-        await data.UpsertAsync(body, db);
-        return Results.Ok(new { ok = true, id = docid, rev = body.Rev });
+        var doc = await data.Query(db).Where(x => x.PouchId == docid).CosmosFirstOrDefaultAsync();
+        if (doc == null)
+           doc = new PouchDatum(db, body);
+        else
+            doc.Data = body;
+
+        doc.SetId(docid);
+        await data.UpdateAsync(doc);
+        return Results.Ok(new { ok = true, id = docid, rev = doc.Rev });
     }
 
     public async Task<IResult> DeleteAsync(string db, string docid, string rev)
@@ -45,7 +51,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
             return Results.NotFound();
 
         doc.Delete();
-        await data.UpsertAsync(doc, db);
+        await data.UpdateAsync(doc);
         return Results.Ok(new { ok = true, id = docid, rev = doc.Rev });
     }
 
@@ -82,7 +88,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
     
     public async Task<GetChangesResponse> GetChangesAsync(string db, [FromQuery] string? since, [FromQuery] int? limit)
     {
-        var request = new GetChangesRequest(new List<string>(), since ?? "0", limit);
+        var request = new GetChangesRequest([], since ?? "0", limit);
         return await PostChangesAsync(db, request);
     }
 
@@ -90,6 +96,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
     {
         // Build the SQL query
         var query = data.Query(db).Where(x => x.Seq != null);
+
         if (!string.IsNullOrEmpty(request.since) && request.since != "0")
             query = query.Where(x => string.Compare(x.Seq, request.since) > 0);
 
@@ -131,43 +138,10 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
     public record BulkDocsPayload(List<Dictionary<string, object?>> Docs);
     public async Task<IResult> BulkDocs(string db, [FromBody] BulkDocsPayload payload)
     {
-        foreach (var doc in payload.Docs)
-        {
-            var datum = new PouchDatum(db, doc);
-            
-            EnsurePartitionKey(doc, db);
+        var newData = payload.Docs.Select(x => new PouchDatum(db, x)).ToList();
+        await data.UpdateRangeAsync(newData);
 
-            dynamic dynamicDoc = new System.Dynamic.ExpandoObject();
-            var dynamicDict = (IDictionary<string, object?>)dynamicDoc;
-            foreach (var kvp in doc)
-            {
-                dynamicDict[kvp.Key] = kvp.Value;
-            }
-
-            await data.UpsertAsync(dynamicDoc, db);
-        }
-
-        return Results.Ok(payload.Docs.Select(d => new { ok = true, id = d["_id"], rev = d["_rev"] }));
-    }
-
-    private void EnsurePartitionKey(Dictionary<string, object?> dic, string db)
-    {
-        dic["id"] = dic["_id"];
-
-        if (!dic.ContainsKey("_tenantId"))
-        {
-            dic["_tenantId"] = "sparc";
-        }
-
-        if (!dic.ContainsKey("_userId"))
-        {
-            dic["_userId"] = "sparc-admin";
-        }
-
-        if (!dic.ContainsKey("_databaseId"))
-        {
-            dic["_databaseId"] = db;
-        }
+        return Results.Ok(newData.Select(d => new { ok = true, id = d.PouchId, rev = d.Rev }));
     }
 
     public void Map(IEndpointRouteBuilder endpoints)

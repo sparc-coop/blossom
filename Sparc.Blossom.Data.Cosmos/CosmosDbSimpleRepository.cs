@@ -175,21 +175,6 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         return list;
     }
 
-    public async Task UpsertAsync(T item, string? partitionKey = null)
-    {
-        var pk = partitionKey != null ? new PartitionKey(partitionKey) : GetPartitionKey(item);
-        await Client.Container.UpsertItemAsync(item, pk);
-        await Publish(item);
-    }
-
-    public async Task UpsertAsync(IEnumerable<T> items, string? partitionKey = null)
-    {
-        foreach (var item in items)
-        {
-            await UpsertAsync(item, partitionKey);
-        }
-    }
-
     public IQueryable<T> PartitionQuery(string partitionKey)
     {
         return Query.WithPartitionKey(partitionKey);

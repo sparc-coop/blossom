@@ -10,7 +10,8 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<ITranslator, AzureTranslator>()
             .AddScoped<ITranslator, DeepLTranslator>()
             .AddScoped<KoriTranslator>()
-            .AddScoped<PouchData>();
+            .AddScoped<PouchData>()
+            .AddScoped<ReplicationLogs>();
         
         return builder;
     }
