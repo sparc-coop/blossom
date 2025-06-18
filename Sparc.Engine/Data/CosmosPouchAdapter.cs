@@ -1,21 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
-using Sparc.Blossom.Data.Pouch;
 using System.Data;
 using System.Text.Json;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, CosmosDbSimpleRepository<ReplicationLog> checkpoints) : IBlossomEndpoints
+public class CosmosPouchAdapter(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndpoints
 {
-    public CosmosDbDynamicRepository<PouchDatum> Data { get; } = data;
-    public CosmosDbSimpleRepository<ReplicationLog> Checkpoints { get; } = checkpoints;
     public record GetDatasetMetadataResponse(string db_name, int doc_count, int instance_start_time, string update_seq);
     public async Task<GetDatasetMetadataResponse>  GetDbAsync(string db)
     {
-        var count = Data.Query(db).Count();
+        var count = data.Query(db).Count();
 
-        var lastUpdateSequence = await Data.Query
+        var lastUpdateSequence = await data.Query
             .Where(x => x.Seq != null)
             .OrderByDescending(x => x.Seq)
             .Select(x => x.Seq)
@@ -27,7 +25,7 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, Cosm
 
     public async Task<IResult> GetDocument(string db, string docid)
     {
-        var doc = await Data.Query(db).Where(x => x.Id == docid).CosmosFirstOrDefaultAsync();
+        var doc = await data.Query(db).Where(x => x.Id == docid).CosmosFirstOrDefaultAsync();
         if (doc == null)
             return Results.NotFound(new { error = "not_found", reason = "missing" });
 
@@ -36,25 +34,21 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, Cosm
 
     public async Task<IResult> CreateOrUpdateDocument(string db, string docid, [FromBody] PouchDatum body)
     {
-        body.Id = docid;
-        await Data.UpsertAsync(body, db);
+        body.SetId(docid);
+        await data.UpsertAsync(body, db);
         return Results.Ok(new { ok = true, id = docid, rev = body.Rev });
     }
 
     public async Task<IResult> DeleteDocument(string db, string docid, string rev)
     {
-        var doc = await Data.Query(db).Where(x => x.Id == docid).CosmosFirstOrDefaultAsync();
+        var doc = await data.Query(db).Where(x => x.Id == docid).CosmosFirstOrDefaultAsync();
         if (doc == null)
             return Results.NotFound();
 
-        doc.Deleted = true;
-        doc.Rev = IncrementRev(rev);
-
-        await Data.UpsertAsync(doc, db);
+        doc.Delete();
+        await data.UpsertAsync(doc, db);
         return Results.Ok(new { ok = true, id = docid, rev = doc.Rev });
     }
-
-    
 
     public record GetChangesRequest(List<string> doc_ids, string since, int? limit);
     public record GetChangesResult(List<GetChangesRev> rev, string id, string seq);
@@ -62,7 +56,7 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, Cosm
     public record GetChangesResponse(string last_seq, List<GetChangesResult> results);  
     public async Task<IResult> GetAllDocs(string db)
     {
-        var docs = await Data.Query(db).Where(x => !x.Deleted).ToListAsync();
+        var docs = await data.Query(db).Where(x => !x.Deleted).ToListAsync();
         var rows = docs.Select(d => new
         {
             id = d.Id,
@@ -87,30 +81,7 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, Cosm
 
         return response;
     }
-    public async Task<IResult> GetCheckpointAsync(string db, string id)
-    {
-        var log = await Checkpoints.Query(db).Where(x => x.PouchId == id).CosmosFirstOrDefaultAsync();
-        if (log == null)
-        {
-            var dictionary = new Dictionary<string, string>
-            {
-                { "error", "not_found" },
-                { "reason", "missing" }
-            };
-            return Results.NotFound(dictionary);
-        }
-        return Results.Ok(log);
-    }
-
-    public async Task<IResult> PutCheckpointAsync(string db, string id, [FromBody] ReplicationLog log)
-    {
-        log.PouchId = id;
-        log.Id = id;
-        log.RealmId = "sparc";
-        await Checkpoints.UpsertAsync(log, db);
-        return Results.Ok(log);
-    }
-
+    
     public async Task<GetChangesResponse> GetChangesAsync(string db, [FromQuery] string? since, [FromQuery] int? limit)
     {
         var request = new GetChangesRequest(new List<string>(), since ?? "0", limit);
@@ -120,7 +91,7 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, Cosm
     public async Task<GetChangesResponse> PostChangesAsync(string db, [FromBody] GetChangesRequest request)
     {
         // Build the SQL query
-        var query = Data.Query(db).Where(x => x.Seq != null);
+        var query = data.Query(db).Where(x => x.Seq != null);
         if (!string.IsNullOrEmpty(request.since) && request.since != "0")
             query = query.Where(x => string.Compare(x.Seq, request.since) > 0);
 
@@ -149,7 +120,7 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, Cosm
             var revisionsList = string.Join(", ", revisions[id].Select(x => $"'{x}'"));
             var sql = $"SELECT VALUE r._rev FROM r WHERE r._rev IN ({revisionsList})";
 
-            var existingRevisions = await Data.FromSqlAsync<string>(sql, db);
+            var existingRevisions = await data.FromSqlAsync<string>(sql, db);
             var missingRevisions = revisions[id].Except(existingRevisions).ToList();
 
             if (missingRevisions.Count != 0)
@@ -175,7 +146,7 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, Cosm
                 dynamicDict[kvp.Key] = kvp.Value;
             }
 
-            await Data.UpsertAsync(dynamicDoc, db);
+            await data.UpsertAsync(dynamicDoc, db);
         }
 
         return Results.Ok(payload.Docs.Select(d => new { ok = true, id = d["_id"], rev = d["_rev"] }));
@@ -205,31 +176,34 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, Cosm
         var group = endpoints.MapGroup(baseUrl);
 
         group.MapGet("/", GetInfo);
-        group.MapGet("{app}/{db}", GetDbAsync);
-        group.MapGet("{db}/_local/{id}", GetCheckpointAsync);
-        group.MapPut("{db}/_local/{id}", PutCheckpointAsync);
-        group.MapPost("/{db}/_changes", PostChangesAsync);
+        group.MapGet("/{db}", GetDbAsync);
         group.MapGet("/{db}/_changes", GetChangesAsync);
-        group.MapPost("{db}/_revs_diff", GetRevsDiff);
 
+        group.MapPost("/{db}/_changes", PostChangesAsync);
+        group.MapPost("{db}/_revs_diff", GetRevsDiff);
         group.MapPost("/{db}/_bulk_docs", BulkDocs);
-        //group.MapPut("/{db}", CreateDatabase);
-        //group.MapPost("/{db}", CreateDocument);
-        group.MapPut("/{db}/{docid}", CreateOrUpdateDocument);
+
         group.MapGet("/{db}/{docid}", GetDocument);
+        group.MapPut("/{db}/{docid}", CreateOrUpdateDocument);
         group.MapDelete("/{db}/{docid}", DeleteDocument);
         
         group.MapGet("/{db}/_all_docs", GetAllDocs);
     }
 
-    private static string IncrementRev(string rev)
+    public async Task UpsertAsync(dynamic item, string? partitionKey = null)
     {
-        var parts = rev.Split('-');
-        if (parts.Length != 2 || !int.TryParse(parts[0], out var number))
-            return $"1-{Guid.NewGuid():N}";
-
-        return $"{number + 1}-{Guid.NewGuid():N}";
+        var pk = partitionKey != null ? NewSparcHierarchicalPartitionKey(partitionKey) : data.GetPartitionKey(item);
+        await data.Client.Container.UpsertItemAsync(item, pk);
     }
+
+    public async Task UpsertAsync(IEnumerable<dynamic> items, string? partitionKey = null)
+    {
+        foreach (var item in items)
+        {
+            await UpsertAsync(item, partitionKey);
+        }
+    }
+
     private static Dictionary<string, object?> ConvertDocToDictionary(Dictionary<string, JsonElement> doc)
     {
         var result = new Dictionary<string, object?>();
@@ -288,5 +262,10 @@ public class CosmosPouchAdapter(CosmosDbDynamicRepository<PouchDatum> data, Cosm
             }
         }
         return result;
+    }
+
+    private static PartitionKey NewSparcHierarchicalPartitionKey(string partitionKey)
+    {
+        return new PartitionKeyBuilder().Add("sparc").Add("sparc-admin").Add(partitionKey).Build();
     }
 }

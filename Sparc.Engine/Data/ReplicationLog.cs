@@ -10,8 +10,8 @@ public class ReplicationLog : BlossomEntity<string>
     [JsonPropertyName("id")]
     public string Id { get; set; }
 
-    [JsonPropertyName("_realmId")]
-    public string RealmId { get; set; }
+    [JsonPropertyName("_db")]
+    public string Db { get; set; }
 
     [JsonPropertyName("_history")]
     public List<ReplicationHistory> History { get; set; }
@@ -27,4 +27,11 @@ public class ReplicationLog : BlossomEntity<string>
 
     [JsonPropertyName("_version")]
     public int version { get; set; }
+
+    internal void SetId(string id)
+    {
+        PouchId = id;
+        Id = id;
+        Db ??= "sparc";
+    }
 }

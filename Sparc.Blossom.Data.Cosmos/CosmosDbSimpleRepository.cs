@@ -123,7 +123,7 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         }
     }
 
-    protected PartitionKey GetPartitionKey(T item)
+    public PartitionKey GetPartitionKey(T item)
     {
         var partitionKeyProperty = Client.EntityType?.GetPartitionKeyProperties();
         if (partitionKeyProperty == null || partitionKeyProperty.Count == 0)
@@ -195,10 +195,5 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
     public IQueryable<T> PartitionQuery(string partitionKey)
     {
         return Query.WithPartitionKey(partitionKey);
-    }
-
-    private static PartitionKey NewSparcHierarchicalPartitionKey(string partitionKey)
-    {
-        return new PartitionKeyBuilder().Add("sparc").Add("sparc-admin").Add(partitionKey).Build();
     }
 }
