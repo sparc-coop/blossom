@@ -11,7 +11,7 @@ public class CosmosDbSimpleClient<T>
     public CosmosClient Client { get; }
     public IEntityType? EntityType { get; }
     public Container Container { get; }
-    public DbContext? Context { get; }
+    public DbContext Context { get; }
 
     public CosmosDbSimpleClient(DbContext context, IConfiguration config)
     {
@@ -37,24 +37,5 @@ public class CosmosDbSimpleClient<T>
         Client = new CosmosClient(connectionString, options);
         Container = Client.GetContainer(db, containerName);
         Context = context;
-    }
-
-    public CosmosDbSimpleClient(string appName, string containerName, IConfiguration config)
-    {
-        var options = new CosmosClientOptions
-        {
-            UseSystemTextJsonSerializerWithOptions = new()
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                PropertyNamingPolicy = new CamelCaseIdNamingPolicy(),
-                MaxDepth = 64
-            }
-        };
-
-        var connectionString = config.GetConnectionString("Cosmos")
-            ?? throw new Exception("Cosmos connection string not found in configuration.");
-
-        Client = new CosmosClient(connectionString, options);
-        Container = Client.GetContainer(appName, containerName);
     }
 }

@@ -12,11 +12,11 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
 
         
         model.Entity<PouchDatum>().ToContainer("Data")
-            .HasPartitionKey(x => new { x.Db, x.Type })
+            .HasPartitionKey(x => new { x.Db, x.PouchId })
             .HasKey(x => x.Id);
 
         model.Entity<ReplicationLog>().ToContainer("ReplicationLog")
-            .HasPartitionKey(x => new { x.Db, x.Id })
+            .HasPartitionKey(x => new { x.Db, x.PouchId })
             .HasKey(x => x.Id);
     }
 }

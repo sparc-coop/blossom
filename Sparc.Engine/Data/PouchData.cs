@@ -2,11 +2,10 @@
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using System.Text.Json;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosPouchAdapter(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndpoints
+public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndpoints
 {
     public record GetDatasetMetadataResponse(string db_name, int doc_count, int instance_start_time, string update_seq);
     public async Task<GetDatasetMetadataResponse>  GetDbAsync(string db)
@@ -23,7 +22,7 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<PouchDatum> data) : IBl
         return new(db, count, 0, lastUpdateSequence ?? "0");
     }
 
-    public async Task<IResult> GetDocument(string db, string docid)
+    public async Task<IResult> FindAsync(string db, string docid)
     {
         var doc = await data.Query(db).Where(x => x.Id == docid).CosmosFirstOrDefaultAsync();
         if (doc == null)
@@ -32,14 +31,14 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<PouchDatum> data) : IBl
         return Results.Ok(doc);
     }
 
-    public async Task<IResult> CreateOrUpdateDocument(string db, string docid, [FromBody] PouchDatum body)
+    public async Task<IResult> UpsertAsync(string db, string docid, [FromBody] PouchDatum body)
     {
         body.SetId(docid);
         await data.UpsertAsync(body, db);
         return Results.Ok(new { ok = true, id = docid, rev = body.Rev });
     }
 
-    public async Task<IResult> DeleteDocument(string db, string docid, string rev)
+    public async Task<IResult> DeleteAsync(string db, string docid, string rev)
     {
         var doc = await data.Query(db).Where(x => x.Id == docid).CosmosFirstOrDefaultAsync();
         if (doc == null)
@@ -54,7 +53,7 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<PouchDatum> data) : IBl
     public record GetChangesResult(List<GetChangesRev> rev, string id, string seq);
     public record GetChangesRev(string rev);
     public record GetChangesResponse(string last_seq, List<GetChangesResult> results);  
-    public async Task<IResult> GetAllDocs(string db)
+    public async Task<IResult> GetAllAsync(string db)
     {
         var docs = await data.Query(db).Where(x => !x.Deleted).ToListAsync();
         var rows = docs.Select(d => new
@@ -66,10 +65,9 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<PouchDatum> data) : IBl
 
         return Results.Ok(new { total_rows = rows.Count(), rows });
     }
+
     public record ServerMetadataVendor(string name, string version);
     public record GetServerMetadataResponse(string couchdb, string uuid, ServerMetadataVendor vendor, string version);
-
-
     public GetServerMetadataResponse GetInfo(HttpContext context)
     {
         var response = new GetServerMetadataResponse(
@@ -110,8 +108,9 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<PouchDatum> data) : IBl
         // Return the response
         return new GetChangesResponse(last_seq, output);
     }
+
     public record MissingItems(List<string> Missing);
-    public async Task<Dictionary<string, MissingItems>> GetRevsDiff(string db, [FromBody] Dictionary<string, List<string>> revisions)
+    public async Task<Dictionary<string, MissingItems>> GetMissingItemsAsync(string db, [FromBody] Dictionary<string, List<string>> revisions)
     {
         var result = new Dictionary<string, MissingItems>();
 
@@ -129,19 +128,18 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<PouchDatum> data) : IBl
 
         return result;
     }
-    public record BulkDocsPayload(List<Dictionary<string, JsonElement>> Docs);
+    public record BulkDocsPayload(List<Dictionary<string, object?>> Docs);
     public async Task<IResult> BulkDocs(string db, [FromBody] BulkDocsPayload payload)
     {
         foreach (var doc in payload.Docs)
         {
-            var objectDictionary = ConvertDocToDictionary(doc);
-            objectDictionary["id"] = objectDictionary["_id"];
+            var datum = new PouchDatum(db, doc);
             
-            EnsurePartitionKey(objectDictionary, db);
+            EnsurePartitionKey(doc, db);
 
             dynamic dynamicDoc = new System.Dynamic.ExpandoObject();
             var dynamicDict = (IDictionary<string, object?>)dynamicDoc;
-            foreach (var kvp in objectDictionary)
+            foreach (var kvp in doc)
             {
                 dynamicDict[kvp.Key] = kvp.Value;
             }
@@ -154,6 +152,8 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<PouchDatum> data) : IBl
 
     private void EnsurePartitionKey(Dictionary<string, object?> dic, string db)
     {
+        dic["id"] = dic["_id"];
+
         if (!dic.ContainsKey("_tenantId"))
         {
             dic["_tenantId"] = "sparc";
@@ -180,89 +180,31 @@ public class CosmosPouchAdapter(CosmosDbSimpleRepository<PouchDatum> data) : IBl
         group.MapGet("/{db}/_changes", GetChangesAsync);
 
         group.MapPost("/{db}/_changes", PostChangesAsync);
-        group.MapPost("{db}/_revs_diff", GetRevsDiff);
+        group.MapPost("{db}/_revs_diff", GetMissingItemsAsync);
         group.MapPost("/{db}/_bulk_docs", BulkDocs);
 
-        group.MapGet("/{db}/{docid}", GetDocument);
-        group.MapPut("/{db}/{docid}", CreateOrUpdateDocument);
-        group.MapDelete("/{db}/{docid}", DeleteDocument);
+        group.MapGet("/{db}/{docid}", FindAsync);
+        group.MapPut("/{db}/{docid}", UpsertAsync);
+        group.MapDelete("/{db}/{docid}", DeleteAsync);
         
-        group.MapGet("/{db}/_all_docs", GetAllDocs);
+        group.MapGet("/{db}/_all_docs", GetAllAsync);
     }
 
-    public async Task UpsertAsync(dynamic item, string? partitionKey = null)
+    public async Task UpsertDynamicAsync(dynamic item, string? partitionKey = null)
     {
         var pk = partitionKey != null ? NewSparcHierarchicalPartitionKey(partitionKey) : data.GetPartitionKey(item);
         await data.Client.Container.UpsertItemAsync(item, pk);
     }
 
-    public async Task UpsertAsync(IEnumerable<dynamic> items, string? partitionKey = null)
+    public async Task UpsertDynamicAsync(IEnumerable<dynamic> items, string? partitionKey = null)
     {
         foreach (var item in items)
         {
-            await UpsertAsync(item, partitionKey);
+            await UpsertDynamicAsync(item, partitionKey);
         }
     }
 
-    private static Dictionary<string, object?> ConvertDocToDictionary(Dictionary<string, JsonElement> doc)
-    {
-        var result = new Dictionary<string, object?>();
-        foreach (var kvp in doc)
-        {
-            var key = kvp.Key;
-            var value = kvp.Value;
-            switch (value.ValueKind)
-            {
-                case JsonValueKind.String:
-                    result[key] = value.GetString();
-                    break;
-                case JsonValueKind.Number:
-                    if (value.TryGetInt64(out var l))
-                        result[key] = l;
-                    else if (value.TryGetDouble(out var d))
-                        result[key] = d;
-                    else
-                        result[key] = value.GetRawText();
-                    break;
-                case JsonValueKind.True:
-                case JsonValueKind.False:
-                    result[key] = value.GetBoolean();
-                    break;
-                case JsonValueKind.Object:
-                    result[key] = ConvertDocToDictionary(System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(value.GetRawText())!);
-                    break;
-                case JsonValueKind.Array:
-                    var arr = new List<object?>();
-                    foreach (var item in value.EnumerateArray())
-                    {
-                        if (item.ValueKind == JsonValueKind.Object)
-                            arr.Add(ConvertDocToDictionary(System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(item.GetRawText())!));
-                        else if (item.ValueKind == JsonValueKind.Array)
-                            arr.Add(System.Text.Json.JsonSerializer.Deserialize<List<object?>>(item.GetRawText()));
-                        else if (item.ValueKind == JsonValueKind.String)
-                            arr.Add(item.GetString());
-                        else if (item.ValueKind == JsonValueKind.Number && item.TryGetInt64(out var arrL))
-                            arr.Add(arrL);
-                        else if (item.ValueKind == JsonValueKind.Number && item.TryGetDouble(out var arrD))
-                            arr.Add(arrD);
-                        else if (item.ValueKind == JsonValueKind.True || item.ValueKind == JsonValueKind.False)
-                            arr.Add(item.GetBoolean());
-                        else
-                            arr.Add(item.GetRawText());
-                    }
-                    result[key] = arr;
-                    break;
-                case JsonValueKind.Null:
-                case JsonValueKind.Undefined:
-                    result[key] = null;
-                    break;
-                default:
-                    result[key] = value.GetRawText();
-                    break;
-            }
-        }
-        return result;
-    }
+    
 
     private static PartitionKey NewSparcHierarchicalPartitionKey(string partitionKey)
     {

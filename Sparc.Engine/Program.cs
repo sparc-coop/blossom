@@ -1,8 +1,8 @@
 using MediatR.NotificationPublishers;
+using Microsoft.AspNetCore.Http.Json;
 using Scalar.AspNetCore;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
-using Sparc.Blossom.Data.Pouch;
 using Sparc.Engine;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +34,11 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.Converters.Add(new ObjectToInferredTypesConverter());
+});
+
 var app = builder.Build();
 app.UseSparcEngineAuthentication<BlossomUser>();
 
@@ -49,13 +54,8 @@ app.UseCors();
 
 app.MapGet("/tools/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 
-using (var scope = app.Services.CreateScope())
-{
-    var dataRepo = scope.ServiceProvider.GetRequiredService<CosmosDbDynamicRepository<PouchDatum>>();
-    var repRepo = scope.ServiceProvider.GetRequiredService<CosmosDbSimpleRepository<ReplicationLog>>();
-    var adapter = new CosmosPouchAdapter(dataRepo, repRepo);
-    adapter.Map(app);
-}
-
+using var scope = app.Services.CreateScope();
+var dataRepo = scope.ServiceProvider.GetRequiredService<PouchData>();
+dataRepo.Map(app);
 
 app.Run();

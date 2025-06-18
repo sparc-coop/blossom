@@ -58,7 +58,7 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         await SaveChangesAsync();
     }
 
-    private async Task Publish(BlossomEntity item)
+    private async Task Publish(IBlossomEntity<string> item)
     {
         var events = item.Publish();
         try
@@ -149,7 +149,7 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
     {
         var requestOptions = partitionKey == null
             ? null
-            : new QueryRequestOptions { PartitionKey = NewSparcHierarchicalPartitionKey(partitionKey) };
+            : new QueryRequestOptions { PartitionKey = new PartitionKey(partitionKey) };
 
         sql = sql.Replace("{", "@").Replace("}", "");
 
@@ -177,10 +177,8 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
 
     public async Task UpsertAsync(T item, string? partitionKey = null)
     {
-        var pk = partitionKey != null ? NewSparcHierarchicalPartitionKey(partitionKey) : GetPartitionKey(item);
-
+        var pk = partitionKey != null ? new PartitionKey(partitionKey) : GetPartitionKey(item);
         await Client.Container.UpsertItemAsync(item, pk);
-
         await Publish(item);
     }
 

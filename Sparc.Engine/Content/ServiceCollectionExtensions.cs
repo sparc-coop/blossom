@@ -1,4 +1,6 @@
-﻿namespace Sparc.Engine;
+﻿using Sparc.Blossom.Data;
+
+namespace Sparc.Engine;
 
 public static class ContentServiceCollectionExtensions
 {
@@ -7,7 +9,8 @@ public static class ContentServiceCollectionExtensions
         builder.Services
             .AddScoped<ITranslator, AzureTranslator>()
             .AddScoped<ITranslator, DeepLTranslator>()
-            .AddScoped<KoriTranslator>();
+            .AddScoped<KoriTranslator>()
+            .AddScoped<PouchData>();
         
         return builder;
     }

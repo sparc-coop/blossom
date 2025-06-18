@@ -1,21 +1,26 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Dynamic;
+using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Data;
 
-public class PouchDatum(string db, string type, string pouchId, string rev) 
-    : BlossomEntity<string>($"{pouchId}:{rev}")
+public class PouchDatum(string db, string pouchId, string rev) 
+    : BlossomEntity<string>
 {
-    [JsonPropertyName("_db")]
-    public required string Db { get; set; } = db;
+    public PouchDatum(string db, Dictionary<string, object?> doc) 
+        : this(db, doc["_id"]!.ToString()!, doc["_rev"]!.ToString()!)
+    {
+    }
 
-    [JsonPropertyName("_type")]
-    public required string Type { get; set; } = type;
+    public string Id { get; set; } = $"{pouchId}:{rev}";
+
+    [JsonPropertyName("_db")]
+    public string Db { get; set; } = db;
 
     [JsonPropertyName("_id")]
-    public required string PouchId { get; set; } = pouchId;
+    public string PouchId { get; set; } = pouchId;
 
     [JsonPropertyName("_rev")]
-    public required string Rev { get; set; } = rev;
+    public string Rev { get; set; } = rev;
 
     [JsonPropertyName("_seq")]
     public string? Seq { get; set; }
@@ -47,5 +52,10 @@ public class PouchDatum(string db, string type, string pouchId, string rev)
     {
         PouchId = pouchId;
         Id = $"{PouchId}:{Rev}";
+    }
+
+    public List<BlossomEvent> Publish()
+    {
+        return [];
     }
 }
