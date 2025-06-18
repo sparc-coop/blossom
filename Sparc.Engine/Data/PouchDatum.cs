@@ -2,9 +2,25 @@
 
 namespace Sparc.Blossom.Data;
 
-public class PouchDatum(string db, string pouchId, string rev) 
-    : BlossomEntity<string>($"{pouchId}:{rev}")
+public class PouchDatum : BlossomEntity<string>
 {
+    [JsonConstructor]
+    private PouchDatum() : this("", "", "")
+    { 
+    }
+    
+    public PouchDatum(string db, string pouchId, string rev) : base($"{pouchId}:{rev}")
+    {
+        Db = db;
+        PouchId = pouchId;
+        Rev = rev;
+        Data = new()
+    {
+        { "_id", pouchId },
+        { "_rev", rev }
+    };
+    }
+
     public PouchDatum(string db, Dictionary<string, object?> data) 
         : this(db, data["_id"]!.ToString()!, data["_rev"]!.ToString()!)
     {
@@ -14,13 +30,13 @@ public class PouchDatum(string db, string pouchId, string rev)
     }
 
     [JsonPropertyName("_db")]
-    public string Db { get; set; } = db;
+    public string Db { get; set; }
 
     [JsonPropertyName("_id")]
-    public string PouchId { get; set; } = pouchId;
+    public string PouchId { get; set; }
 
     [JsonPropertyName("_rev")]
-    public string Rev { get; set; } = rev;
+    public string Rev { get; set; }
 
     [JsonPropertyName("_seq")]
     public string? Seq { get; set; }
@@ -28,11 +44,7 @@ public class PouchDatum(string db, string pouchId, string rev)
     [JsonPropertyName("_deleted")]
     public bool Deleted { get; set; }
 
-    public Dictionary<string, object?> Data { get; set; } = new()
-    {
-        { "_id", pouchId },
-        { "_rev", rev }
-    };
+    public Dictionary<string, object?> Data { get; set; }
 
     internal void Update()
     {
