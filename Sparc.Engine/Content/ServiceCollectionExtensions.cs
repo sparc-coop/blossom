@@ -14,7 +14,8 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<PouchData>()
             .AddScoped<ReplicationLogs>();
 
-        builder.Services.AddTransient<IClaimsTransformation, LanguageClaimsTransformation>();
+        builder.Services.AddTransient<IClaimsTransformation, LanguageClaimsTransformation>()
+            .AddTransient<LanguageClaimsTransformation>();
 
         return builder;
     }

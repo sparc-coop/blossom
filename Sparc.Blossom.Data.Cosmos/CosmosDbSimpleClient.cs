@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Data;
@@ -25,9 +26,7 @@ public class CosmosDbSimpleClient<T>
         {
             UseSystemTextJsonSerializerWithOptions = new()
             {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                PropertyNamingPolicy = new CamelCaseIdNamingPolicy(),
-                MaxDepth = 64
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             }
         };
 

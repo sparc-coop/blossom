@@ -1,10 +1,13 @@
 ﻿using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using System.Reflection;
 
 namespace Sparc.Blossom;
 
 public abstract class BlossomEntity
 {
+    [Newtonsoft.Json.JsonIgnore]
+    [System.Text.Json.Serialization.JsonIgnore]
     public virtual object GenericId { get; } = null!;
     protected List<BlossomEvent>? _events;
 
@@ -88,5 +91,6 @@ public class BlossomEntity<T> : BlossomEntity where T : notnull
     public override object GenericId => Id;
 
     [JsonProperty("id")]
+    [JsonPropertyName("id")]
     public virtual T Id { get; set; }
 }
