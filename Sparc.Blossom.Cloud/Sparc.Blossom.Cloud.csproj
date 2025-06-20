@@ -44,6 +44,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Sparc.Blossom.Core\Sparc.Blossom.Core.csproj" />
 		<ProjectReference Include="..\Sparc.Blossom.Data.Cosmos\Sparc.Blossom.Data.Cosmos.csproj" />
+		<ProjectReference Include="..\Sparc.Blossom.Payment.Stripe\Sparc.Blossom.Payment.Stripe.csproj" />
 		<ProjectReference Include="..\Sparc.Blossom\Sparc.Blossom.csproj" />
 	</ItemGroup>
 
