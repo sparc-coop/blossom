@@ -23,7 +23,11 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
             }
         }
 
-        return Languages.OrderBy(x => x.DisplayName).ToList();
+        Languages = Languages.OrderBy(x => x.Id)
+            .ThenBy(x => x.DialectId == null ? 1 : 0)
+            .ToList();
+
+        return Languages;
     }
 
     async Task<Language?> GetLanguageAsync(string language)
@@ -70,8 +74,7 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
     {
         foreach (var translator in Translators)
         {
-            var languages = await translator.GetLanguagesAsync();
-            if (languages.Any(x => x.Id == fromLanguage.Id) && languages.Any(x => x.Id == toLanguage.Id))
+            if (translator.CanTranslate(fromLanguage, toLanguage))
                 return translator;
         }
 

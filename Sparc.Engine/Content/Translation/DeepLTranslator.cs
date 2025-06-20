@@ -7,7 +7,8 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
 {
     readonly DeepL.Translator Client = new(configuration.GetConnectionString("DeepL")!);
 
-    internal static SourceLanguage[]? Languages;
+    internal static SourceLanguage[]? SourceLanguages;
+    internal static TargetLanguage[]? TargetLanguages;
 
     public int Priority => 1;
 
@@ -34,12 +35,24 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
 
         return translatedMessages;
     }
-   
+
+    public bool CanTranslate(Language fromLanguage, Language toLanguage)
+    {
+        return SourceLanguages?.Any(x => fromLanguage.Matches(x.Code)) == true &&
+               TargetLanguages?.Any(x => toLanguage.Matches(x.Code)) == true;
+    }
+
     public async Task<List<Language>> GetLanguagesAsync()
     {
-        Languages ??= await Client.GetSourceLanguagesAsync();
-        return Languages
-            .Select(x => new Language(x.Code, x.Name, x.Name, x.CultureInfo.TextInfo.IsRightToLeft))
+        SourceLanguages ??= await Client.GetSourceLanguagesAsync();
+        TargetLanguages ??= await Client.GetTargetLanguagesAsync();
+
+        var allLanguages =  
+            SourceLanguages.Select(x => new Language(x.Code, x.Name, x.Name, x.CultureInfo.TextInfo.IsRightToLeft))
+            .Union(
+                TargetLanguages.Select(x => new Language(x.Code, x.Name, x.Name, x.CultureInfo.TextInfo.IsRightToLeft)))
             .ToList();
+
+        return allLanguages;
     }
 }

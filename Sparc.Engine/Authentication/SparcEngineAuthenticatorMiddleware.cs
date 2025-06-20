@@ -19,8 +19,6 @@ public class SparcEngineAuthenticatorMiddleware(RequestDelegate next)
         var priorUser = BlossomUser.FromPrincipal(context.User);
         var user = await auth.GetAsync(context.User);
         
-        translator.SetLanguage(user, context.Request.Headers.AcceptLanguage);
-
         if (user != null && (context.User.Identity?.IsAuthenticated != true || !priorUser.Equals(user)))
         {
             context.User = await auth.LoginAsync(context.User);

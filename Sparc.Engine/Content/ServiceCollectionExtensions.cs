@@ -1,4 +1,5 @@
-﻿using Sparc.Blossom.Data;
+﻿using Microsoft.AspNetCore.Authentication;
+using Sparc.Blossom.Data;
 
 namespace Sparc.Engine;
 
@@ -12,7 +13,9 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<KoriTranslator>()
             .AddScoped<PouchData>()
             .AddScoped<ReplicationLogs>();
-        
+
+        builder.Services.AddTransient<IClaimsTransformation, LanguageClaimsTransformation>();
+
         return builder;
     }
 

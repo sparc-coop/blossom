@@ -38,6 +38,11 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
         return translatedMessages;
     }
 
+    public bool CanTranslate(Language fromLanguage, Language toLanguage)
+    {
+        return Languages?.Any(x => x.Matches(fromLanguage) || x.Matches(toLanguage)) == true;
+    }
+
     public async Task<List<Language>> GetLanguagesAsync()
     {
         if (Languages != null)

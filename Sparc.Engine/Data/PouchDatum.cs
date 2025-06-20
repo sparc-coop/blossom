@@ -61,7 +61,7 @@ public class PouchDatum(string db, string pouchId, string rev)
 
     internal T? Cast<T>()
     {
-        if (!Data.TryGetValue("$type", out var type) || type is not string typeString || typeString == typeof(T).Name)
+        if (!Data.TryGetValue("$type", out var type) || type is not string typeString || typeString != typeof(T).Name)
             return default;
 
         return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(Data));

@@ -617,29 +617,6 @@
           }
         }
       },
-      "Dialect": {
-        "type": "object",
-        "properties": {
-          "language": {
-            "type": "string"
-          },
-          "locale": {
-            "type": "string"
-          },
-          "displayName": {
-            "type": "string"
-          },
-          "nativeName": {
-            "type": "string"
-          },
-          "voices": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Voice"
-            }
-          }
-        }
-      },
       "GetChangesRequest": {
         "required": [
           "doc_ids",
@@ -786,12 +763,6 @@
           "isRightToLeft": {
             "type": "boolean",
             "nullable": true
-          },
-          "dialects": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Dialect"
-            }
           }
         },
         "nullable": true
@@ -819,12 +790,6 @@
           "isRightToLeft": {
             "type": "boolean",
             "nullable": true
-          },
-          "dialects": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Dialect"
-            }
           }
         }
       },
@@ -977,41 +942,6 @@
           "muteMe": {
             "type": "boolean",
             "nullable": true
-          }
-        }
-      },
-      "Voice": {
-        "required": [
-          "locale",
-          "name",
-          "displayName",
-          "localeName",
-          "shortName",
-          "gender",
-          "voiceType"
-        ],
-        "type": "object",
-        "properties": {
-          "locale": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "displayName": {
-            "type": "string"
-          },
-          "localeName": {
-            "type": "string"
-          },
-          "shortName": {
-            "type": "string"
-          },
-          "gender": {
-            "type": "string"
-          },
-          "voiceType": {
-            "type": "string"
           }
         }
       }

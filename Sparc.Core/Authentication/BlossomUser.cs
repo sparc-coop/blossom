@@ -24,8 +24,8 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public string? ParentUserId { get; set; }
     public DateTime DateCreated { get; private set; }
     public DateTime DateModified { get; private set; }
-    public UserAvatar Avatar { get; private set; } = new();
-    public List<Language> LanguagesSpoken { get; private set; } = [];
+    public UserAvatar Avatar { get; set; } = new();
+    public List<Language> LanguagesSpoken { get; set; } = [];
     public List<ProductKey> Products { get; set; } = [];
     internal Dictionary<string, string> Claims { get; set; } = [];
     Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
@@ -138,6 +138,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         if (Username != other.Username) return false;
         if (AuthenticationType != other.AuthenticationType) return false;
         if (ExternalId != other.ExternalId) return false;
+        if (Avatar.Language != other.Avatar.Language) return false;
 
         var orderedPriorClaims = Claims.OrderBy(x => x.Key).ThenBy(x => x.Value);
         var orderedClaims = other.Claims.OrderBy(x => x.Key).ThenBy(x => x.Value);

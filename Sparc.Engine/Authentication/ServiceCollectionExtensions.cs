@@ -16,6 +16,7 @@ public static class ServiceCollectionExtensions
             .AddCookie(options => options.ExpireTimeSpan = TimeSpan.FromDays(30));
 
         builder.Services.AddAuthorization();
+        builder.Services.AddHttpContextAccessor();
 
         builder.Services.AddScoped<AuthenticationStateProvider, BlossomServerAuthenticationStateProvider<TUser>>()
             .AddScoped<SparcEngineAuthenticator<TUser>>()
