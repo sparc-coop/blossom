@@ -6,7 +6,7 @@ namespace Sparc.Blossom.Payment.Stripe
     public class ExchangeRates
     {
         private readonly string _apiKey;
-        static Dictionary<string, decimal> Rates = new();
+        public Dictionary<string, decimal> Rates = new();
         public DateTime? LastUpdated { get; private set; }
         public DateTime? AsOfDate { get; private set; }
 
@@ -44,18 +44,20 @@ namespace Sparc.Blossom.Payment.Stripe
             return usdAmounts.Select(x => baseAmount * x).ToList();
         }
 
-        async Task RefreshAsync()
+        public async Task RefreshAsync()
         {
             var today = DateTime.Today.ToString("yyyy-MM-dd");
 
 
             using var client = new HttpClient()
             {
+                //BaseAddress = new Uri("https://api.exchangeratesapi.io/v1/latest")
                 BaseAddress = new Uri("https://api.apilayer.com/exchangerates_data/latest")
             };
 
             client.DefaultRequestHeaders.Add("apikey", _apiKey);
 
+            //var response = await client.GetFromJsonAsync<ExchangeRatesResponse>("?access_key=<key>");
             var response = await client.GetFromJsonAsync<ExchangeRatesResponse>("?base=USD");
             if (response?.Success == true)
             {
@@ -69,7 +71,7 @@ namespace Sparc.Blossom.Payment.Stripe
             
         }
 
-        static int NiceRound(decimal value)
+        public static int NiceRound(decimal value)
         {
             int roundedValue = (int)Math.Round(value, 0);
             var strVal = roundedValue.ToString();

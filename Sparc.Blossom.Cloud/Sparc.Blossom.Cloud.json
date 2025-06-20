@@ -191,6 +191,72 @@
         }
       }
     },
+    "/billing/create-order-payment": {
+      "post": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOrderPaymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/billing/confirm-order-payment": {
+      "post": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmOrderPaymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/billing/get-product/{productId}": {
+      "get": {
+        "tags": [
+          "Sparc.Blossom.Cloud"
+        ],
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/tools/friendlyid": {
       "get": {
         "tags": [
@@ -291,6 +357,60 @@
           "genericId": { },
           "id": {
             "type": "string"
+          }
+        }
+      },
+      "ConfirmOrderPaymentRequest": {
+        "required": [
+          "paymentIntentId",
+          "paymentMethodId"
+        ],
+        "type": "object",
+        "properties": {
+          "paymentIntentId": {
+            "type": "string"
+          },
+          "paymentMethodId": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateOrderPaymentRequest": {
+        "required": [
+          "amount",
+          "currency",
+          "customerId",
+          "receiptEmail",
+          "metadata",
+          "setupFutureUsage"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "customerId": {
+            "type": "string",
+            "nullable": true
+          },
+          "receiptEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "setupFutureUsage": {
+            "type": "string",
+            "nullable": true
           }
         }
       },

@@ -2,9 +2,11 @@ using MediatR.NotificationPublishers;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Scalar.AspNetCore;
 using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Cloud.Billing;
 using Sparc.Blossom.Cloud.Tools;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
+using Sparc.Blossom.Payment.Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -14,6 +16,7 @@ builder.Services.AddCosmos<BlossomCloudContext>(builder.Configuration.GetConnect
 
 builder.AddBlossomCloudAuthentication<BlossomUser>();
 builder.AddBlossomCloudTranslation();
+builder.AddBlossomCloudBilling();
 
 builder.Services.AddMediatR(options =>
 {
@@ -26,6 +29,7 @@ builder.Services.AddMediatR(options =>
 var app = builder.Build();
 app.UseBlossomCloudAuthentication<BlossomUser>();
 app.UseBlossomCloudTranslation();
+app.UseBlossomCloudBilling();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
