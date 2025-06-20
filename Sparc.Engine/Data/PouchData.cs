@@ -9,7 +9,7 @@ namespace Sparc.Blossom.Data;
 public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndpoints
 {
     public record GetDatasetMetadataResponse(string db_name, int doc_count, int instance_start_time, string update_seq);
-    public async Task<GetDatasetMetadataResponse>  GetDbAsync(string db)
+    public async Task<GetDatasetMetadataResponse> GetDbAsync(string db)
     {
         var count = data.Query(db).Count();
 
@@ -54,7 +54,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
 
         var doc = await data.Query(db).Where(x => x.PouchId == docid).CosmosFirstOrDefaultAsync();
         if (doc == null)
-           doc = new PouchDatum(db, body);
+            doc = new PouchDatum(db, body);
         else
             doc.Update(body);
 
@@ -77,7 +77,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
     public record GetChangesRequest(List<string> doc_ids, string since, int? limit);
     public record GetChangesResult(List<GetChangesRev> rev, string id, string seq);
     public record GetChangesRev(string rev);
-    public record GetChangesResponse(string last_seq, List<GetChangesResult> results);  
+    public record GetChangesResponse(string last_seq, List<GetChangesResult> results);
     public async Task<IResult> GetAllAsync(string db)
     {
         var docs = await data.Query(db).Where(x => !x.Deleted).ToListAsync();
@@ -104,7 +104,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
 
         return response;
     }
-    
+
     public async Task<GetChangesResponse> GetChangesAsync(string db, [FromQuery] string? since, [FromQuery] int? limit)
     {
         var request = new GetChangesRequest([], since ?? "0", limit);
@@ -187,7 +187,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
         group.MapGet("/{db}/{docid}", FindAsync);
         group.MapPut("/{db}/{docid}", UpsertAsync);
         group.MapDelete("/{db}/{docid}", DeleteAsync);
-        
+
         group.MapGet("/{db}/_all_docs", GetAllAsync);
     }
 }
