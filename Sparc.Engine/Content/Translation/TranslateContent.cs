@@ -14,10 +14,18 @@ public class TranslateContent(
     public async Task Handle(PouchRevisionAdded notification, CancellationToken cancellationToken)
     {
         var content = notification.Datum.Cast<TextContent>();
-
         var toLanguage = principal.Language();
         if (content == null || toLanguage == null)
             return;
+
+        var existing = await contents.Query
+            .Where(x => x.Domain == content.Domain && x.Id == content.Id)
+            .CosmosFirstOrDefaultAsync();
+
+        if (existing != null)
+            content = existing;
+        else
+            await contents.AddAsync(content);
 
         var translation = await TranslateAsync(content, toLanguage);
         if (translation != null)

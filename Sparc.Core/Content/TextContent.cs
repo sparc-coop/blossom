@@ -1,5 +1,6 @@
 ﻿using Sparc.Blossom;
 using Sparc.Blossom.Authentication;
+using Sparc.Core;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Engine;
@@ -34,6 +35,9 @@ public class TextContent : BlossomEntity<string>
     public string? PageId { get; internal set; }
 
     [JsonConstructor]
+    private TextContent()
+    { }
+
     public TextContent(string domain, string languageId)
     {
         Id = Guid.NewGuid().ToString();
@@ -51,7 +55,7 @@ public class TextContent : BlossomEntity<string>
     public TextContent(string domain, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
         : this(domain, language.Id)
     {
-        Id = text;
+        Id = BlossomHash.MD5($"{originalText}:{language}");
         User = user?.Avatar;
         Language = user?.Avatar.Language ?? language;
         Audio = user?.Avatar.Language?.VoiceId == null ? null : new(null, 0, user.Avatar.Language.VoiceId);
@@ -63,7 +67,7 @@ public class TextContent : BlossomEntity<string>
 
     public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, sourceContent.Language.Id)
     {
-        Id = text;
+        Id = BlossomHash.MD5($"{sourceContent.OriginalText}:{toLanguage}");
         SourceContentId = sourceContent.Id;
         User = sourceContent.User;
         Audio = sourceContent.Audio?.Voice == null ? null : new(null, 0, sourceContent.Audio.Voice);

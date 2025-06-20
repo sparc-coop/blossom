@@ -13,7 +13,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
     {
         var count = data.Query(db).Count();
 
-        var lastUpdateSequence = await data.Query
+        var lastUpdateSequence = await data.Query(db)
             .Where(x => x.Seq != null)
             .OrderByDescending(x => x.Seq)
             .Select(x => x.Seq)

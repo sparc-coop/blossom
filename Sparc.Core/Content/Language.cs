@@ -1,4 +1,6 @@
 ﻿
+using System.Text.Json.Serialization;
+
 namespace Sparc.Engine;
 
 public record Language
@@ -13,6 +15,7 @@ public record Language
 
     public Language() {}
 
+    [JsonConstructor]
     public Language(string id)
     {
         Id = id;

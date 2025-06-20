@@ -72,13 +72,8 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
 
     async Task<ITranslator> GetBestTranslatorAsync(Language fromLanguage, Language toLanguage)
     {
-        foreach (var translator in Translators)
-        {
-            if (translator.CanTranslate(fromLanguage, toLanguage))
-                return translator;
-        }
-
-        throw new Exception($"No translator found for {fromLanguage.Id} to {toLanguage.Id}");
+        return Translators.FirstOrDefault(x => x.CanTranslate(fromLanguage, toLanguage))
+            ?? throw new Exception($"No translator found for {fromLanguage.Id} to {toLanguage.Id}");
     }
 
     public void SetLanguage(BlossomUser user, string? acceptLanguageHeaders)

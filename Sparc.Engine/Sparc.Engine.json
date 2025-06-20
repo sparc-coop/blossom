@@ -741,6 +741,9 @@
         }
       },
       "Language": {
+        "required": [
+          "id"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -771,6 +774,9 @@
         "nullable": true
       },
       "Language2": {
+        "required": [
+          "id"
+        ],
         "type": "object",
         "properties": {
           "id": {

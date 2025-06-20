@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using Sparc.Core;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Data;
@@ -59,12 +60,15 @@ public class PouchDatum(string db, string pouchId, string rev)
         Broadcast(new PouchRevisionAdded(this));
     }
 
-    internal T? Cast<T>()
+    internal T? Cast<T>() where T : BlossomEntity<string>
     {
         if (!Data.TryGetValue("$type", out var type) || type is not string typeString || typeString != typeof(T).Name)
             return default;
 
-        return JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(Data));
+        var result = JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(Data));
+        if (result != null)
+            result.Id = PouchId;
+        return result;
     }
 
     internal void Update(Dictionary<string, object?> data)
@@ -137,6 +141,7 @@ public class PouchDatum(string db, string pouchId, string rev)
         return dict;
     }
 
+   
     private string Hash()
     {
         // use deterministic MD5 hashing to match Pouch revision algorithm
@@ -151,8 +156,7 @@ public class PouchDatum(string db, string pouchId, string rev)
             sb.Append(kv.Value?.ToString() ?? "null");
             sb.Append(';');
         }
-        var bytes = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
-        var hash = System.Security.Cryptography.MD5.HashData(bytes);
-        return Convert.ToHexString(hash).ToLowerInvariant();
+
+        return BlossomHash.MD5(sb.ToString());
     }
 }
