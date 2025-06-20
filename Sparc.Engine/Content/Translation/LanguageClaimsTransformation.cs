@@ -9,7 +9,7 @@ public class LanguageClaimsTransformation(KoriTranslator translator, IBlossomAut
 {
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
-        var user = await auth.GetAsync(principal);
+        var user = BlossomUser.FromPrincipal(principal);
         var accept = http.HttpContext?.Request.Headers.AcceptLanguage;
 
         if (principal.HasClaim(x => x.Type == "language") || !accept.HasValue)

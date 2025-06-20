@@ -27,7 +27,7 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
             foreach (var targetLanguage in toLanguages)
             {
                 var texts = messages.Select(x => x.Text).Where(x => x != null);
-                var result = await Client.TranslateTextAsync(texts!, sourceLanguage.Key.LanguageId, targetLanguage.LanguageId, options);
+                var result = await Client.TranslateTextAsync(texts!, sourceLanguage.Key.Id, targetLanguage.Id, options);
                 var newContent = messages.Zip(result, (message, translation) => new TextContent(message, targetLanguage, translation.Text));
                 translatedMessages.AddRange(newContent);
             }

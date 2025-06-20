@@ -743,7 +743,7 @@
       "Language": {
         "type": "object",
         "properties": {
-          "languageId": {
+          "id": {
             "type": "string"
           },
           "dialectId": {
@@ -770,7 +770,7 @@
       "Language2": {
         "type": "object",
         "properties": {
-          "languageId": {
+          "id": {
             "type": "string"
           },
           "dialectId": {
