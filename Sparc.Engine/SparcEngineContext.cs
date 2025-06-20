@@ -2,6 +2,7 @@
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 using Sparc.Blossom.Data.Pouch;
+using Sparc.Engine;
 
 internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) : DbContext(options)
 {
@@ -17,6 +18,10 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
 
         model.Entity<ReplicationLog>().ToContainer("ReplicationLogs")
             .HasPartitionKey(x => new { x.Db, x.PouchId })
+            .HasKey(x => x.Id);
+
+        model.Entity<TextContent>().ToContainer("TextContent")
+            .HasPartitionKey(x => new { x.Domain, x.LanguageId })
             .HasKey(x => x.Id);
     }
 }

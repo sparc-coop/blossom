@@ -4,18 +4,20 @@ using System.Security.Claims;
 
 namespace Sparc.Engine;
 
-public class TranslateContent(KoriTranslator translator, ClaimsPrincipal principal) 
+public class TranslateContent(Contents contents, ClaimsPrincipal principal, PouchData data)
     : INotificationHandler<PouchRevisionAdded>
 {
     public async Task Handle(PouchRevisionAdded notification, CancellationToken cancellationToken)
     {
         var content = notification.Datum.Cast<TextContent>();
-        if (content == null)
+        var toLanguage = principal.Language();
+        if (content == null || toLanguage == null)
             return;
 
-        var newContent = await translator.TranslateAsync(content, principal.Language());
-
+        var translation = await contents.TranslateAsync(content, toLanguage);
         notification.Datum.Update(content);
+
+        await data.UpsertAsync(content.Domain, translation);
     }
 }
 

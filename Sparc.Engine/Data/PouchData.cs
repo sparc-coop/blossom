@@ -32,6 +32,21 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
         return Results.Ok(doc.ToDictionary());
     }
 
+    public async Task UpsertAsync<T>(string db, T item) where T : BlossomEntity<string>
+    {
+        var doc = await data.Query(db).Where(x => x.PouchId == item.Id).CosmosFirstOrDefaultAsync();
+        if (doc == null)
+        {
+            doc = PouchDatum.Create(db, item);
+            await data.AddAsync(doc);
+        }
+        else
+        {
+            doc.Update(item);
+            await data.UpdateAsync(doc);
+        }
+    }
+
     public async Task<IResult> UpsertAsync(string db, string docid, [FromBody] Dictionary<string, object?> body)
     {
         if (!body.ContainsKey("_rev"))

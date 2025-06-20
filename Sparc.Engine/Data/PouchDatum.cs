@@ -84,6 +84,13 @@ public class PouchDatum(string db, string pouchId, string rev)
         Data = FromDictionary(data);
     }
 
+    internal static PouchDatum Create<T>(string db, T data) where T : BlossomEntity<string>
+    {
+        var datum = new PouchDatum(db, data.Id, "");
+        datum.Update(data);
+        return datum;
+    }
+
     internal void Update<T>(T data)
     {
         Data = JsonSerializer.Deserialize<Dictionary<string, object?>>(JsonSerializer.Serialize(data))
