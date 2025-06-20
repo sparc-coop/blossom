@@ -6,22 +6,22 @@ public class PouchDatum : BlossomEntity<string>
 {
     [JsonConstructor]
     private PouchDatum() : this("", "", "")
-    { 
+    {
     }
-    
+
     public PouchDatum(string db, string pouchId, string rev) : base($"{pouchId}:{rev}")
     {
         Db = db;
         PouchId = pouchId;
         Rev = rev;
         Data = new()
-    {
-        { "_id", pouchId },
-        { "_rev", rev }
-    };
+        {
+            { "_id", pouchId },
+            { "_rev", rev }
+        };
     }
 
-    public PouchDatum(string db, Dictionary<string, object?> data) 
+    public PouchDatum(string db, Dictionary<string, object?> data)
         : this(db, data["_id"]!.ToString()!, data["_rev"]!.ToString()!)
     {
         Data = data;
@@ -40,7 +40,7 @@ public class PouchDatum : BlossomEntity<string>
 
     [JsonPropertyName("_seq")]
     public string? Seq { get; set; }
-    
+
     [JsonPropertyName("_deleted")]
     public bool Deleted { get; set; }
 
@@ -49,10 +49,11 @@ public class PouchDatum : BlossomEntity<string>
     internal void Update()
     {
         var parts = Rev.Split('-');
+        var hash = Hash();
         if (parts.Length != 2 || !int.TryParse(parts[0], out var number))
-            Rev = $"1-{Guid.NewGuid():N}";
+            Rev = $"1-{hash}";
         else
-            Rev = $"{number + 1}-{Guid.NewGuid():N}";
+            Rev = $"{number + 1}-{hash}";
 
         SetId(PouchId);
     }
@@ -67,5 +68,24 @@ public class PouchDatum : BlossomEntity<string>
     {
         PouchId = pouchId;
         Id = $"{PouchId}:{Rev}";
+    }
+
+    private string Hash()
+    {
+        // use deterministic MD5 hashing to match Pouch revision algorithm
+        
+        var sorted = Data.OrderBy(kv => kv.Key, StringComparer.Ordinal);
+        
+        var sb = new System.Text.StringBuilder();
+        foreach (var kv in sorted)
+        {
+            sb.Append(kv.Key);
+            sb.Append('=');
+            sb.Append(kv.Value?.ToString() ?? "null");
+            sb.Append(';');
+        }
+        var bytes = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+        var hash = System.Security.Cryptography.MD5.HashData(bytes);
+        return Convert.ToHexString(hash).ToLowerInvariant();
     }
 }
