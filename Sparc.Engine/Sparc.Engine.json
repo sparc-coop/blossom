@@ -746,6 +746,9 @@
           "id": {
             "type": "string"
           },
+          "languageId": {
+            "type": "string"
+          },
           "dialectId": {
             "type": "string",
             "nullable": true
@@ -771,6 +774,9 @@
         "type": "object",
         "properties": {
           "id": {
+            "type": "string"
+          },
+          "languageId": {
             "type": "string"
           },
           "dialectId": {

@@ -9,6 +9,7 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
 
     internal static SourceLanguage[]? SourceLanguages;
     internal static TargetLanguage[]? TargetLanguages;
+    internal static List<Language>? Languages;
 
     public int Priority => 1;
 
@@ -20,14 +21,16 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
             Context = additionalContext
         };
 
-        var fromLanguages = messages.GroupBy(x => x.Language);
+        var fromLanguages = messages.GroupBy(x => DeepLLanguage(x.Language));
+        var toDeepLLanguages = toLanguages.Select(DeepLLanguage).Where(x => x != null).ToList();
+
         var translatedMessages = new List<TextContent>();
         foreach (var sourceLanguage in fromLanguages)
         {
-            foreach (var targetLanguage in toLanguages)
+            foreach (var targetLanguage in toDeepLLanguages)
             {
                 var texts = messages.Select(x => x.Text).Where(x => x != null);
-                var result = await Client.TranslateTextAsync(texts!, sourceLanguage.Key.Id, targetLanguage.Id, options);
+                var result = await Client.TranslateTextAsync(texts!, sourceLanguage.Key.ToString(), targetLanguage.ToString(), options);
                 var newContent = messages.Zip(result, (message, translation) => new TextContent(message, targetLanguage, translation.Text));
                 translatedMessages.AddRange(newContent);
             }
@@ -42,17 +45,25 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
                TargetLanguages?.Any(x => toLanguage.Matches(x.Code)) == true;
     }
 
+    Language DeepLLanguage(Language language)
+    {
+        return Languages!.First(x => x.Matches(language.Id));
+    }
+
     public async Task<List<Language>> GetLanguagesAsync()
     {
+        if (Languages != null)
+            return Languages;
+
         SourceLanguages ??= await Client.GetSourceLanguagesAsync();
         TargetLanguages ??= await Client.GetTargetLanguagesAsync();
 
-        var allLanguages =  
+        Languages =  
             SourceLanguages.Select(x => new Language(x.Code, x.Name, x.Name, x.CultureInfo.TextInfo.IsRightToLeft))
             .Union(
                 TargetLanguages.Select(x => new Language(x.Code, x.Name, x.Name, x.CultureInfo.TextInfo.IsRightToLeft)))
             .ToList();
 
-        return allLanguages;
+        return Languages;
     }
 }

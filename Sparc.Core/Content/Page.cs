@@ -62,7 +62,7 @@ public class Page : BlossomEntity<string>
 
     public void AddLanguage(Language language)
     {
-        if (Languages.Any(x => x.Id == language.Id))
+        if (Languages.Any(x => x.Matches(language)))
             return;
 
         Languages.Add(language);

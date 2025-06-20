@@ -159,7 +159,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
     public void ChangeLanguage(Language language)
     {
-        if (!LanguagesSpoken.Any(x => x.Id == language.Id))
+        if (!LanguagesSpoken.Any(x => x.Matches(language)))
             LanguagesSpoken.Add(language);
 
         Avatar.Language = language;

@@ -39,8 +39,8 @@ public class TextContent : BlossomEntity<string>
         Id = Guid.NewGuid().ToString();
         Domain = domain;
         User = new BlossomUser().Avatar;
-        LanguageId = languageId;
         Language = new(languageId);
+        LanguageId = Language.Id;
         Translations = [];
         EditHistory = [];
         Html = string.Empty;
@@ -97,7 +97,7 @@ public class TextContent : BlossomEntity<string>
 
     internal async Task<AudioContent?> SpeakAsync(ISpeaker engine, string? voiceId = null)
     {
-        if (voiceId == null && (Audio?.Voice == null || !Audio.Voice.StartsWith(Language.Id)))
+        if (voiceId == null && (Audio?.Voice == null || !Audio.Voice.StartsWith(Language.LanguageId)))
         {
             voiceId = await engine.GetClosestVoiceAsync(Language, User?.Gender, User?.Id ?? Guid.NewGuid().ToString());
         }

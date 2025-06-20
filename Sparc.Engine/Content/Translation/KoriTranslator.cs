@@ -87,14 +87,24 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
             return;
 
         // Split the header by comma, then by semicolon to get language codes
-        var languages = acceptLanguageHeaders!
+        var match = GetLanguage(acceptLanguageHeaders);
+        if (match != null)
+            user.ChangeLanguage(match);
+    }
+
+    internal static Language? GetLanguage(string languageClaim)
+    {
+        if (Languages == null)
+            return null;
+
+        var languages = languageClaim
             .Split(',')
             .Select(l => l.Split(';')[0].Trim())
             .Where(l => !string.IsNullOrWhiteSpace(l))
             .ToList();
 
         if (languages.Count == 0)
-            return;
+            return null;
 
         // Try to find a matching language in LanguagesSpoken or create a new one
         foreach (var langCode in languages)
@@ -103,11 +113,10 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
             var match = Languages.FirstOrDefault(l => l.Matches(langCode));
 
             if (match != null)
-            {
-                user.ChangeLanguage(match);
-                return;
-            }
+                return match;
         }
+
+        return null;
     }
 
     internal static Language? GetLanguage(ClaimsPrincipal user, string? fallbackLanguageId = null)
@@ -119,15 +128,7 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
         if (string.IsNullOrEmpty(languageClaim))
             return null;
 
-        var language = languageClaim.Split(",")
-            .Select(x => x.Split(";").First().Trim())
-            .Select(id => new Language(id))
-            .Select(lang => Languages.FirstOrDefault(y => y.Id.Equals(lang.Id, StringComparison.CurrentCultureIgnoreCase)))
-            .FirstOrDefault(x => x != null);
-
-        language ??= Languages.FirstOrDefault(x => x.Id.Equals(fallbackLanguageId, StringComparison.CurrentCultureIgnoreCase));
-
-        return language;
+        return GetLanguage(languageClaim);
     }
 }
 
