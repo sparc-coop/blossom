@@ -16,6 +16,7 @@ public class PouchDatum(string db, string pouchId, string rev)
     public PouchDatum(string db, Dictionary<string, object?> data)
         : this(db, data["_id"]!.ToString()!, data["_rev"]!.ToString()!)
     {
+        CreatedDate = DateTime.Now;
         Update(data);
         Broadcast(new PouchRevisionAdded(this));
     }
@@ -37,6 +38,9 @@ public class PouchDatum(string db, string pouchId, string rev)
 
     [JsonPropertyName("_revisions")]
     public PouchRevisions? Revisions { get; set; }
+
+    [JsonPropertyName("_createdDate")]
+    public DateTime CreatedDate { get; set; }
 
     public Dictionary<string, object?> Data { get; set; } = [];
 
