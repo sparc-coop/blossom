@@ -148,7 +148,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
         return result;
     }
     public record BulkDocsPayload(List<Dictionary<string, object?>> Docs);
-    public async Task<IResult> BulkDocs(string db, [FromBody] BulkDocsPayload payload)
+    public async Task<IResult> UpsertBulkAsync(string db, [FromBody] BulkDocsPayload payload)
     {
         var newData = payload.Docs.Select(x => new PouchDatum(db, x)).ToList();
         await data.UpdateAsync(newData);
@@ -167,7 +167,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
 
         group.MapPost("/{db}/_changes", PostChangesAsync);
         group.MapPost("{db}/_revs_diff", GetMissingItemsAsync);
-        group.MapPost("/{db}/_bulk_docs", BulkDocs);
+        group.MapPost("/{db}/_bulk_docs", UpsertBulkAsync);
 
         group.MapGet("/{db}/{docid}", FindAsync);
         group.MapPut("/{db}/{docid}", UpsertAsync);

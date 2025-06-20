@@ -13,8 +13,9 @@ public record ContentTranslation(string Id, Language Language, string? SourceCon
 public class TextContent : BlossomEntity<string>
 {
     public string Domain { get; private set; }
-    public string Path { get; private set; }
+    public string? Path { get; private set; }
     public string? SourceContentId { get; private set; }
+    public string LanguageId { get; private set; }
     public Language Language { get; protected set; }
     public string ContentType { get; private set; }
     public DateTime Timestamp { get; private set; }
@@ -29,14 +30,13 @@ public class TextContent : BlossomEntity<string>
     public string OriginalText { get; set; }
     internal List<EditHistory> EditHistory { get; private set; }
     public string Html { get; set; }
-    public string PageId { get; internal set; }
+    public string? PageId { get; internal set; }
 
-    public TextContent(string pageId)
+    public TextContent(string domain, string languageId)
     {
         Id = Guid.NewGuid().ToString();
-        PageId = pageId;
-        Domain = new Uri(pageId).Host;
-        Path = new Uri(pageId).AbsolutePath;
+        LanguageId = languageId;
+        Domain = domain;
         User = new BlossomUser().Avatar;
         Language = new();
         Translations = [];
@@ -46,8 +46,8 @@ public class TextContent : BlossomEntity<string>
         ContentType = "Text";
     }
 
-    public TextContent(string pageId, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
-        : this(pageId)
+    public TextContent(string domain, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
+        : this(domain, language.Id)
     {
         User = user?.Avatar;
         Language = user?.Avatar.Language ?? language;
@@ -58,7 +58,7 @@ public class TextContent : BlossomEntity<string>
         SetText(text);
     }
 
-    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.PageId)
+    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, sourceContent.LanguageId)
     {
         SourceContentId = sourceContent.Id;
         User = sourceContent.User;

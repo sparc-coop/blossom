@@ -1,24 +1,15 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Data;
 
-public class PouchDatum : BlossomEntity<string>
+public record PouchRevisionAdded(PouchDatum Datum) : BlossomEvent<PouchDatum>(Datum);
+public class PouchDatum(string db, string pouchId, string rev) 
+    : BlossomEntity<string>($"{pouchId}:{rev}")
 {
     [JsonConstructor]
     private PouchDatum() : this("", "", "")
     {
-    }
-
-    public PouchDatum(string db, string pouchId, string rev) : base($"{pouchId}:{rev}")
-    {
-        Db = db;
-        PouchId = pouchId;
-        Rev = rev;
-        Data = new()
-        {
-            { "_id", pouchId },
-            { "_rev", rev }
-        };
     }
 
     public PouchDatum(string db, Dictionary<string, object?> data)
@@ -27,16 +18,21 @@ public class PouchDatum : BlossomEntity<string>
         Data = data;
         Seq = data.TryGetValue("_seq", out object? seq) ? seq?.ToString() : null;
         Deleted = data.TryGetValue("_deleted", out object? deleted) && deleted != null && (bool)deleted;
+
+        if (data.TryGetValue("_revisions", out object? revisions))
+            Revisions = JsonSerializer.Deserialize<PouchRevisions>(revisions!.ToString()!);
+
+        Broadcast(new PouchRevisionAdded(this));
     }
 
     [JsonPropertyName("_db")]
-    public string Db { get; set; }
+    public string Db { get; set; } = db;
 
     [JsonPropertyName("_id")]
-    public string PouchId { get; set; }
+    public string PouchId { get; set; } = pouchId;
 
     [JsonPropertyName("_rev")]
-    public string Rev { get; set; }
+    public string Rev { get; set; } = rev;
 
     [JsonPropertyName("_seq")]
     public string? Seq { get; set; }
@@ -44,7 +40,10 @@ public class PouchDatum : BlossomEntity<string>
     [JsonPropertyName("_deleted")]
     public bool Deleted { get; set; }
 
-    public Dictionary<string, object?> Data { get; set; }
+    [JsonPropertyName("_revisions")]
+    public PouchRevisions? Revisions { get; set; }
+
+    public Dictionary<string, object?> Data { get; set; } = [];
 
     internal void Update()
     {
@@ -56,6 +55,7 @@ public class PouchDatum : BlossomEntity<string>
             Rev = $"{number + 1}-{hash}";
 
         SetId(PouchId);
+        Broadcast(new PouchRevisionAdded(this));
     }
 
     internal void Delete()
