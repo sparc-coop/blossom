@@ -16,12 +16,18 @@ public class SparcEngineAuthenticatorMiddleware(RequestDelegate next)
             return;
         }
 
+        if (context.User.Identity?.IsAuthenticated == true)
+        {   // If the user is already authenticated, we can skip the authentication process.
+            await _next(context);
+            return;
+        }
+
         var priorUser = BlossomUser.FromPrincipal(context.User);
         var user = await auth.GetAsync(context.User);
 
         context.User = await language.TransformAsync(context.User);
 
-        if (user != null && (context.User.Identity?.IsAuthenticated != true || !priorUser.Equals(user)))
+        if (!priorUser.Equals(user))
         {
             context.User = await auth.LoginAsync(context.User);
             await context.SignOutAsync();

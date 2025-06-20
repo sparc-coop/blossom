@@ -95,7 +95,7 @@ internal class AzureSpeaker : ISpeaker
         Voices ??= await Client.GetFromJsonAsync<List<Voice>>("/cognitiveservices/voices/list");
 
         return Voices!
-            .Where(x => language == null || x.Locale.StartsWith(language.LanguageId))
+            .Where(x => language == null || x.Locale.StartsWith(language.Id))
             .Where(x => dialect == null || x.Locale.Split("-").Last() == dialect)
             .Where(x => gender == null || x.Gender == gender)
             .ToList();

@@ -23,7 +23,7 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
             }
         }
 
-        Languages = Languages.OrderBy(x => x.LanguageId)
+        Languages = Languages.OrderBy(x => x.Id)
             .ThenBy(x => x.DialectId == null ? 1 : 0)
             .ToList();
 
@@ -33,7 +33,7 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
     async Task<Language?> GetLanguageAsync(string language)
     {
         var languages = await GetLanguagesAsync();
-        return languages.FirstOrDefault(x => x.LanguageId == language);
+        return languages.FirstOrDefault(x => x.Id == language);
     }
 
     public async Task<TextContent?> TranslateAsync(TextContent message, Language toLanguage, string? additionalContext = null)
@@ -78,7 +78,7 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
                 return translator;
         }
 
-        throw new Exception($"No translator found for {fromLanguage.LanguageId} to {toLanguage.LanguageId}");
+        throw new Exception($"No translator found for {fromLanguage.Id} to {toLanguage.Id}");
     }
 
     public void SetLanguage(BlossomUser user, string? acceptLanguageHeaders)
@@ -87,14 +87,24 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
             return;
 
         // Split the header by comma, then by semicolon to get language codes
-        var languages = acceptLanguageHeaders!
+        var match = GetLanguage(acceptLanguageHeaders);
+        if (match != null)
+            user.ChangeLanguage(match);
+    }
+
+    internal static Language? GetLanguage(string languageClaim)
+    {
+        if (Languages == null)
+            return null;
+
+        var languages = languageClaim
             .Split(',')
             .Select(l => l.Split(';')[0].Trim())
             .Where(l => !string.IsNullOrWhiteSpace(l))
             .ToList();
 
         if (languages.Count == 0)
-            return;
+            return null;
 
         // Try to find a matching language in LanguagesSpoken or create a new one
         foreach (var langCode in languages)
@@ -103,11 +113,10 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
             var match = Languages.FirstOrDefault(l => l.Matches(langCode));
 
             if (match != null)
-            {
-                user.ChangeLanguage(match);
-                return;
-            }
+                return match;
         }
+
+        return null;
     }
 
     internal static Language? GetLanguage(ClaimsPrincipal user, string? fallbackLanguageId = null)
@@ -119,15 +128,7 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
         if (string.IsNullOrEmpty(languageClaim))
             return null;
 
-        var language = languageClaim.Split(",")
-            .Select(x => x.Split(";").First().Trim())
-            .Select(id => new Language(id))
-            .Select(lang => Languages.FirstOrDefault(y => y.LanguageId.Equals(lang.LanguageId, StringComparison.CurrentCultureIgnoreCase)))
-            .FirstOrDefault(x => x != null);
-
-        language ??= Languages.FirstOrDefault(x => x.LanguageId.Equals(fallbackLanguageId, StringComparison.CurrentCultureIgnoreCase));
-
-        return language;
+        return GetLanguage(languageClaim);
     }
 }
 

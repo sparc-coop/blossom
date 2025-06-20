@@ -16,12 +16,14 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, IEnumerable<Language> toLanguages, string? additionalContext = null)
     {
         var translatedMessages = new List<TextContent>();
-        var batches = Batch(toLanguages, 10);
+        var azureLanguages = toLanguages.Select(AzureLanguage).Where(x => x != null).ToList();
+
+        var batches = Batch(azureLanguages, 10);
         
         foreach (var batch in batches)
         {
             var options = new TextTranslationTranslateOptions(
-                targetLanguages: batch.Select(x => x.LanguageId),
+                targetLanguages: batch.Select(x => x.Id),
                 content: messages.Select(x => x.Text));
 
             var response = await Client.TranslateAsync(options);
@@ -30,7 +32,7 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
             foreach (var (sourceContent, result) in translations)
             {
                 var newContent = result.Translations.Select(translation =>
-                    new TextContent(sourceContent, toLanguages.First(x => x.LanguageId == translation.TargetLanguage), translation.Text));
+                    new TextContent(sourceContent, toLanguages.First(x => x.Matches(translation.TargetLanguage)), translation.Text));
                 translatedMessages.AddRange(newContent);
             }
         }
@@ -41,6 +43,11 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
     public bool CanTranslate(Language fromLanguage, Language toLanguage)
     {
         return Languages?.Any(x => x.Matches(fromLanguage) || x.Matches(toLanguage)) == true;
+    }
+
+    public Language? AzureLanguage(Language language)
+    {
+        return Languages?.FirstOrDefault(x => x.Matches(language.Id));
     }
 
     public async Task<List<Language>> GetLanguagesAsync()

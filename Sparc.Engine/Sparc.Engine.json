@@ -743,6 +743,9 @@
       "Language": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "languageId": {
             "type": "string"
           },
@@ -770,6 +773,9 @@
       "Language2": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string"
+          },
           "languageId": {
             "type": "string"
           },

@@ -13,23 +13,23 @@ public record ContentTranslation(string Id, Language Language, string? SourceCon
 
 public class TextContent : BlossomEntity<string>
 {
-    public string Domain { get; private set; }
-    public string? Path { get; private set; }
-    public string? SourceContentId { get; private set; }
-    public string LanguageId { get; private set; }
-    public Language Language { get; protected set; }
-    public string ContentType { get; private set; }
-    public DateTime Timestamp { get; private set; }
-    public DateTime? LastModified { get; private set; }
-    public DateTime? DeletedDate { get; private set; }
-    public UserAvatar? User { get; private set; }
-    public AudioContent? Audio { get; private set; }
-    public string? Text { get; private set; }
-    public List<ContentTranslation> Translations { get; private set; }
-    internal long Charge { get; private set; }
-    internal decimal Cost { get; private set; }
+    public string Domain { get; set; }
+    public string? Path { get; set; }
+    public string? SourceContentId { get; set; }
+    public string LanguageId { get; set; }
+    public Language Language { get; set; }
+    public string ContentType { get; set; }
+    public DateTime Timestamp { get; set; }
+    public DateTime? LastModified { get; set; }
+    public DateTime? DeletedDate { get; set; }
+    public UserAvatar? User { get; set; }
+    public AudioContent? Audio { get; set; }
+    public string? Text { get; set; }
+    public List<ContentTranslation> Translations { get; set; }
+    internal long Charge { get; set; }
+    internal decimal Cost { get; set; }
     public string OriginalText { get; set; }
-    internal List<EditHistory> EditHistory { get; private set; }
+    internal List<EditHistory> EditHistory { get; set; }
     public string Html { get; set; }
     public string? PageId { get; internal set; }
 
@@ -37,10 +37,10 @@ public class TextContent : BlossomEntity<string>
     public TextContent(string domain, string languageId)
     {
         Id = Guid.NewGuid().ToString();
-        LanguageId = languageId;
         Domain = domain;
         User = new BlossomUser().Avatar;
-        Language = new();
+        Language = new(languageId);
+        LanguageId = Language.Id;
         Translations = [];
         EditHistory = [];
         Html = string.Empty;
@@ -49,7 +49,7 @@ public class TextContent : BlossomEntity<string>
     }
 
     public TextContent(string domain, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
-        : this(domain, language.LanguageId)
+        : this(domain, language.Id)
     {
         Id = text;
         User = user?.Avatar;
@@ -61,7 +61,7 @@ public class TextContent : BlossomEntity<string>
         SetText(text);
     }
 
-    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, sourceContent.LanguageId)
+    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, sourceContent.Language.Id)
     {
         Id = text;
         SourceContentId = sourceContent.Id;

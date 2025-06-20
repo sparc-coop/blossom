@@ -3,6 +3,7 @@ namespace Sparc.Engine;
 
 public record Language
 {
+    public string Id { get; set; } = "";
     public string LanguageId { get; set; } = "";
     public string? DialectId { get; set; }
     public string? VoiceId { get; set; }
@@ -14,6 +15,7 @@ public record Language
 
     public Language(string id)
     {
+        Id = id;
         LanguageId = id.Split('-').First();
         DisplayName = "";
         NativeName = "";

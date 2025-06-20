@@ -50,7 +50,7 @@
     {
         Languages = await Engine.GetLanguages();
         SelectedLanguage = Auth.User?.PrimaryLanguage
-            ?? Languages.FirstOrDefault(x => x.LanguageId == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
+            ?? Languages.FirstOrDefault(x => x.Matches(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName));
     }
 
     void ToggleLanguageList()
