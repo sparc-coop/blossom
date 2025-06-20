@@ -1,4 +1,5 @@
-﻿namespace Sparc.Engine;
+﻿
+namespace Sparc.Engine;
 
 public record Language
 {
@@ -55,6 +56,31 @@ public record Language
     public override string ToString()
     {
         return Id + (DialectId != null ? "-" + DialectId : "");
+    }
+
+    public bool Matches(Language language)
+    {
+        if (!Id.Equals(language.Id, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (language.DialectId == null)
+            return DialectId == null;
+
+        return DialectId?.Equals(language.DialectId, StringComparison.OrdinalIgnoreCase) == true;
+    }
+
+    public bool Matches(string langCode)
+    {
+        var elements = langCode.Split('-');
+
+        if (elements.Length == 1)
+            return Id.Equals(langCode, StringComparison.OrdinalIgnoreCase);
+
+        if (elements.Length == 2)
+            return Id.Equals(elements[0], StringComparison.OrdinalIgnoreCase) &&
+                   DialectId?.Equals(elements[1], StringComparison.OrdinalIgnoreCase) == true;
+
+        return false;
     }
 }
 

@@ -1,10 +1,16 @@
-﻿using MediatR;
+﻿using DeepL;
+using MediatR;
+using Sparc.Blossom;
 using Sparc.Blossom.Data;
 using System.Security.Claims;
 
 namespace Sparc.Engine;
 
-public class TranslateContent(Contents contents, ClaimsPrincipal principal, PouchData data)
+public class TranslateContent(
+    IRepository<TextContent> contents, 
+    KoriTranslator translator,
+    ClaimsPrincipal principal, 
+    PouchData data)
     : INotificationHandler<PouchRevisionAdded>
 {
     public async Task Handle(PouchRevisionAdded notification, CancellationToken cancellationToken)
@@ -14,10 +20,28 @@ public class TranslateContent(Contents contents, ClaimsPrincipal principal, Pouc
         if (content == null || toLanguage == null)
             return;
 
-        var translation = await contents.TranslateAsync(content, toLanguage);
-        notification.Datum.Update(content);
+        var translation = await TranslateAsync(content, toLanguage);
+        if (translation != null)
+        {
+            notification.Datum.Update(content);
+            await data.UpsertAsync(content.Domain, translation);
+        }
+    }
 
-        await data.UpsertAsync(content.Domain, translation);
+    internal async Task<TextContent?> TranslateAsync(TextContent content, Language toLanguage)
+    {
+        var translation = await contents.Query
+            .Where(x => x.Domain == content.Domain && x.SourceContentId == content.Id && x.Language.Id == toLanguage.Id)
+            .CosmosFirstOrDefaultAsync();
+
+        if (translation != null)
+            return translation;
+
+        translation = await translator.TranslateAsync(content, toLanguage);
+        if (translation != null)
+            await contents.AddAsync(translation);
+
+        return translation;
     }
 }
 

@@ -30,20 +30,4 @@ public class Contents(BlossomAggregateOptions<TextContent> options, IRepository<
 
     public async Task<IEnumerable<Language>> Languages()
         => await translator.GetLanguagesAsync();
-
-    internal async Task<TextContent?> TranslateAsync(TextContent content, Language toLanguage)
-    {
-        var translation = await Repository.Query
-            .Where(x => x.Domain == content.Domain && x.SourceContentId == content.Id && x.Language.Id == toLanguage.Id)
-            .CosmosFirstOrDefaultAsync();
-
-        if (translation != null)
-            return translation;
-
-        translation = await translator.TranslateAsync(content, toLanguage);
-        if (translation != null)
-            await Repository.AddAsync(translation);
-        
-        return translation;
-    }
 }

@@ -8,7 +8,7 @@ public class SparcEngineAuthenticatorMiddleware(RequestDelegate next)
 {
     private readonly RequestDelegate _next = next;
 
-    public async Task InvokeAsync(HttpContext context, IBlossomAuthenticator auth)
+    public async Task InvokeAsync(HttpContext context, IBlossomAuthenticator auth, KoriTranslator translator)
     {
         if (context.Request.Path.StartsWithSegments("/_blazor") || context.Request.Path.StartsWithSegments("/_framework"))
         {
@@ -18,10 +18,11 @@ public class SparcEngineAuthenticatorMiddleware(RequestDelegate next)
 
         var priorUser = BlossomUser.FromPrincipal(context.User);
         var user = await auth.GetAsync(context.User);
+        
+        translator.SetLanguage(user, context.Request.Headers.AcceptLanguage);
 
         if (user != null && (context.User.Identity?.IsAuthenticated != true || !priorUser.Equals(user)))
         {
-            user.SetLanguage(context.Request.Headers.AcceptLanguage);
             context.User = await auth.LoginAsync(context.User);
             await context.SignOutAsync();
             await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User, new() { IsPersistent = true });

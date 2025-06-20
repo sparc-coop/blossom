@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Sparc.Blossom.Authentication;
+using System.Collections.Concurrent;
 using System.Security.Claims;
 
 namespace Sparc.Engine;
@@ -18,7 +19,7 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
             foreach (var translator in Translators.OrderBy(x => x.Priority))
             {
                 var languages = await translator.GetLanguagesAsync();
-                Languages.AddRange(languages.Where(x => !Languages.Any(y => y.Id.Equals(x.Id, StringComparison.CurrentCultureIgnoreCase))));
+                Languages.AddRange(languages.Where(x => !Languages.Any(y => y.Matches(x))));
             }
         }
 
@@ -75,6 +76,35 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
         }
 
         throw new Exception($"No translator found for {fromLanguage.Id} to {toLanguage.Id}");
+    }
+
+    public void SetLanguage(BlossomUser user, string? acceptLanguageHeaders)
+    {
+        if (Languages == null || user.Avatar.Language != null || string.IsNullOrWhiteSpace(acceptLanguageHeaders))
+            return;
+
+        // Split the header by comma, then by semicolon to get language codes
+        var languages = acceptLanguageHeaders!
+            .Split(',')
+            .Select(l => l.Split(';')[0].Trim())
+            .Where(l => !string.IsNullOrWhiteSpace(l))
+            .ToList();
+
+        if (languages.Count == 0)
+            return;
+
+        // Try to find a matching language in LanguagesSpoken or create a new one
+        foreach (var langCode in languages)
+        {
+            // Try to match by Id or DialectId
+            var match = Languages.FirstOrDefault(l => l.Matches(langCode));
+
+            if (match != null)
+            {
+                user.ChangeLanguage(match);
+                return;
+            }
+        }
     }
 
     internal static Language? GetLanguage(ClaimsPrincipal user, string? fallbackLanguageId = null)

@@ -58,4 +58,9 @@ using var scope = app.Services.CreateScope();
 scope.ServiceProvider.GetRequiredService<PouchData>().Map(app);
 scope.ServiceProvider.GetRequiredService<ReplicationLogs>().Map(app);
 
+if (!string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("Cognitive")))
+{
+    var translator = scope.ServiceProvider.GetRequiredService<KoriTranslator>();
+    await translator.GetLanguagesAsync();
+}
 app.Run();

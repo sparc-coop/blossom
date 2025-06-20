@@ -214,40 +214,4 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         var serial = Guid.NewGuid().ToString(); 
         Products.Add(new ProductKey(productName, serial, DateTime.UtcNow));
     }
-
-    public void SetLanguage(string? acceptLanguageHeaders)
-    {
-        if (Avatar.Language != null || string.IsNullOrWhiteSpace(acceptLanguageHeaders))
-            return;
-
-        // Split the header by comma, then by semicolon to get language codes
-        var languages = acceptLanguageHeaders!
-            .Split(',')
-            .Select(l => l.Split(';')[0].Trim())
-            .Where(l => !string.IsNullOrWhiteSpace(l))
-            .ToList();
-
-        if (!languages.Any())
-            return;
-
-        // Try to find a matching language in LanguagesSpoken or create a new one
-        foreach (var langCode in languages)
-        {
-            // Try to match by Id or DialectId
-            var match = LanguagesSpoken.FirstOrDefault(l =>
-                l.Id.Equals(langCode, StringComparison.OrdinalIgnoreCase) ||
-                (l.DialectId != null && l.DialectId.Equals(langCode, StringComparison.OrdinalIgnoreCase)));
-
-            if (match != null)
-            {
-                ChangeLanguage(match);
-                return;
-            }
-        }
-
-        // If no match, add the first language as a new Language
-        var primaryLang = languages.First();
-        var newLang = new Language(primaryLang);
-        ChangeLanguage(newLang);
-    }
 }
