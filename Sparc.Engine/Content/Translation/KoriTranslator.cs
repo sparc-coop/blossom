@@ -31,28 +31,8 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
         return languages.FirstOrDefault(x => x.Id == language);
     }
 
-    async Task<Language?> GetLanguageAsync(Language language) => await GetLanguageAsync(language.Id);
-
-    async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, Language toLanguage, string? additionalContext = null)
-    {
-        var language = await GetLanguageAsync(toLanguage)
-            ?? throw new ArgumentException($"Language {toLanguage} not found");
-        
-        return await TranslateAsync(messages, [language], additionalContext);
-    }
-
     public async Task<TextContent?> TranslateAsync(TextContent message, Language toLanguage, string? additionalContext = null)
         => (await TranslateAsync([message], [toLanguage], additionalContext)).FirstOrDefault();
-
-    async Task<string?> TranslateAsync(string text, Language fromLanguage, Language toLanguage, string? additionalContext = null)
-    {
-        var language = await GetLanguageAsync(toLanguage)
-            ?? throw new ArgumentException($"Language {toLanguage} not found");
-
-        var message = new TextContent("", fromLanguage, text);
-        var result = await TranslateAsync([message], [language], additionalContext);
-        return result?.FirstOrDefault()?.Text;
-    }
 
     internal async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, List<Language> toLanguages, string? additionalContext = null)
     {
@@ -97,13 +77,12 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
         throw new Exception($"No translator found for {fromLanguage.Id} to {toLanguage.Id}");
     }
 
-
     internal static Language? GetLanguage(ClaimsPrincipal user, string? fallbackLanguageId = null)
     {
         if (Languages == null)
             return null;
 
-        var languageClaim = user.FindFirst(x => x.Type == ClaimTypes.Locality)?.Value;
+        var languageClaim = user.FindFirst(x => x.Type == "language")?.Value;
         if (string.IsNullOrEmpty(languageClaim))
             return null;
 

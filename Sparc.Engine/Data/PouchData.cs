@@ -29,7 +29,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
         if (doc == null)
             return Results.NotFound(new { error = "not_found", reason = "missing" });
 
-        return Results.Ok(doc.Data);
+        return Results.Ok(doc.ToDictionary());
     }
 
     public async Task<IResult> UpsertAsync(string db, string docid, [FromBody] Dictionary<string, object?> body)
@@ -41,7 +41,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
         if (doc == null)
            doc = new PouchDatum(db, body);
         else
-            doc.Data = body;
+            doc.Update(body);
 
         doc.SetId(docid);
         await data.UpdateAsync(doc);

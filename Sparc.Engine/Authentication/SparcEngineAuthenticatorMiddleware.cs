@@ -21,6 +21,7 @@ public class SparcEngineAuthenticatorMiddleware(RequestDelegate next)
 
         if (user != null && (context.User.Identity?.IsAuthenticated != true || !priorUser.Equals(user)))
         {
+            user.SetLanguage(context.Request.Headers.AcceptLanguage);
             context.User = await auth.LoginAsync(context.User);
             await context.SignOutAsync();
             await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User, new() { IsPersistent = true });

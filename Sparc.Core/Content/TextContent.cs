@@ -1,5 +1,6 @@
 ﻿using Sparc.Blossom;
 using Sparc.Blossom.Authentication;
+using System.Text.Json.Serialization;
 
 namespace Sparc.Engine;
 
@@ -32,6 +33,7 @@ public class TextContent : BlossomEntity<string>
     public string Html { get; set; }
     public string? PageId { get; internal set; }
 
+    [JsonConstructor]
     public TextContent(string domain, string languageId)
     {
         Id = Guid.NewGuid().ToString();
