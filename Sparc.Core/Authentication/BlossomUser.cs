@@ -72,7 +72,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         AddClaim(ClaimTypes.Name, Username);
 
         if (Avatar.Language != null)
-            AddClaim("language", Avatar.Language.Id);
+            AddClaim("language", Avatar.Language.LanguageId);
 
         RegisterClaims();
 
@@ -159,7 +159,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
     public void ChangeLanguage(Language language)
     {
-        if (!LanguagesSpoken.Any(x => x.Id == language.Id))
+        if (!LanguagesSpoken.Any(x => x.LanguageId == language.LanguageId))
             LanguagesSpoken.Add(language);
 
         Avatar.Language = language;

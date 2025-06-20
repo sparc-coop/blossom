@@ -49,7 +49,7 @@ public class TextContent : BlossomEntity<string>
     }
 
     public TextContent(string domain, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
-        : this(domain, language.Id)
+        : this(domain, language.LanguageId)
     {
         Id = text;
         User = user?.Avatar;
@@ -97,7 +97,7 @@ public class TextContent : BlossomEntity<string>
 
     internal async Task<AudioContent?> SpeakAsync(ISpeaker engine, string? voiceId = null)
     {
-        if (voiceId == null && (Audio?.Voice == null || !Audio.Voice.StartsWith(Language.Id)))
+        if (voiceId == null && (Audio?.Voice == null || !Audio.Voice.StartsWith(Language.LanguageId)))
         {
             voiceId = await engine.GetClosestVoiceAsync(Language, User?.Gender, User?.Id ?? Guid.NewGuid().ToString());
         }

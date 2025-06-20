@@ -21,7 +21,7 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
         foreach (var batch in batches)
         {
             var options = new TextTranslationTranslateOptions(
-                targetLanguages: batch.Select(x => x.Id),
+                targetLanguages: batch.Select(x => x.LanguageId),
                 content: messages.Select(x => x.Text));
 
             var response = await Client.TranslateAsync(options);
@@ -30,7 +30,7 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
             foreach (var (sourceContent, result) in translations)
             {
                 var newContent = result.Translations.Select(translation =>
-                    new TextContent(sourceContent, toLanguages.First(x => x.Id == translation.TargetLanguage), translation.Text));
+                    new TextContent(sourceContent, toLanguages.First(x => x.LanguageId == translation.TargetLanguage), translation.Text));
                 translatedMessages.AddRange(newContent);
             }
         }

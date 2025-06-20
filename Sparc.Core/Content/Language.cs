@@ -3,18 +3,18 @@ namespace Sparc.Engine;
 
 public record Language
 {
-    public string Id { get; private set; } = "";
+    public string LanguageId { get; set; } = "";
     public string? DialectId { get; set; }
     public string? VoiceId { get; set; }
-    public string DisplayName { get; private set; } = "";
-    public string NativeName { get; private set; } = "";
-    public bool? IsRightToLeft { get; private set; }
+    public string DisplayName { get; set; } = "";
+    public string NativeName { get; set; } = "";
+    public bool? IsRightToLeft { get; set; }
 
     public Language() {}
 
     public Language(string id)
     {
-        Id = id.Split('-').First();
+        LanguageId = id.Split('-').First();
         DisplayName = "";
         NativeName = "";
 
@@ -35,12 +35,12 @@ public record Language
 
     public override string ToString()
     {
-        return Id + (DialectId != null ? "-" + DialectId : "");
+        return LanguageId + (DialectId != null ? "-" + DialectId : "");
     }
 
     public bool Matches(Language language)
     {
-        if (!Id.Equals(language.Id, StringComparison.OrdinalIgnoreCase))
+        if (!LanguageId.Equals(language.LanguageId, StringComparison.OrdinalIgnoreCase))
             return false;
 
         if (language.DialectId == null)
@@ -54,10 +54,10 @@ public record Language
         var elements = langCode.Split('-');
 
         if (elements.Length == 1)
-            return Id.Equals(langCode, StringComparison.OrdinalIgnoreCase);
+            return LanguageId.Equals(langCode, StringComparison.OrdinalIgnoreCase);
 
         if (elements.Length == 2)
-            return Id.Equals(elements[0], StringComparison.OrdinalIgnoreCase) &&
+            return LanguageId.Equals(elements[0], StringComparison.OrdinalIgnoreCase) &&
                    DialectId?.Equals(elements[1], StringComparison.OrdinalIgnoreCase) == true;
 
         return false;

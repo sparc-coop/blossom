@@ -23,7 +23,7 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
             }
         }
 
-        Languages = Languages.OrderBy(x => x.Id)
+        Languages = Languages.OrderBy(x => x.LanguageId)
             .ThenBy(x => x.DialectId == null ? 1 : 0)
             .ToList();
 
@@ -33,7 +33,7 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
     async Task<Language?> GetLanguageAsync(string language)
     {
         var languages = await GetLanguagesAsync();
-        return languages.FirstOrDefault(x => x.Id == language);
+        return languages.FirstOrDefault(x => x.LanguageId == language);
     }
 
     public async Task<TextContent?> TranslateAsync(TextContent message, Language toLanguage, string? additionalContext = null)
@@ -78,7 +78,7 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
                 return translator;
         }
 
-        throw new Exception($"No translator found for {fromLanguage.Id} to {toLanguage.Id}");
+        throw new Exception($"No translator found for {fromLanguage.LanguageId} to {toLanguage.LanguageId}");
     }
 
     public void SetLanguage(BlossomUser user, string? acceptLanguageHeaders)
@@ -122,10 +122,10 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
         var language = languageClaim.Split(",")
             .Select(x => x.Split(";").First().Trim())
             .Select(id => new Language(id))
-            .Select(lang => Languages.FirstOrDefault(y => y.Id.Equals(lang.Id, StringComparison.CurrentCultureIgnoreCase)))
+            .Select(lang => Languages.FirstOrDefault(y => y.LanguageId.Equals(lang.LanguageId, StringComparison.CurrentCultureIgnoreCase)))
             .FirstOrDefault(x => x != null);
 
-        language ??= Languages.FirstOrDefault(x => x.Id.Equals(fallbackLanguageId, StringComparison.CurrentCultureIgnoreCase));
+        language ??= Languages.FirstOrDefault(x => x.LanguageId.Equals(fallbackLanguageId, StringComparison.CurrentCultureIgnoreCase));
 
         return language;
     }

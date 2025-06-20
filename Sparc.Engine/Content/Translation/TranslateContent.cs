@@ -29,7 +29,7 @@ public class TranslateContent(
     internal async Task<TextContent?> TranslateAsync(TextContent content, Language toLanguage)
     {
         var translation = await contents.Query
-            .Where(x => x.Domain == content.Domain && x.SourceContentId == content.Id && x.Language.Id == toLanguage.Id)
+            .Where(x => x.Domain == content.Domain && x.SourceContentId == content.Id && x.Language.LanguageId == toLanguage.LanguageId)
             .CosmosFirstOrDefaultAsync();
 
         if (translation != null)
