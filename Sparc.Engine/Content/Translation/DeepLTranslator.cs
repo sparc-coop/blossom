@@ -5,7 +5,7 @@ namespace Sparc.Engine;
 
 internal class DeepLTranslator(IConfiguration configuration) : ITranslator
 {
-    readonly DeepL.Translator Client = new(configuration.GetConnectionString("DeepL")!);
+    Translator? Client;
 
     internal static SourceLanguage[]? SourceLanguages;
     internal static TargetLanguage[]? TargetLanguages;
@@ -15,6 +15,8 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
 
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, IEnumerable<Language> toLanguages, string? additionalContext = null)
     {
+        Client ??= new(configuration.GetConnectionString("DeepL")!);
+
         var options = new TextTranslateOptions
         {
             SentenceSplittingMode = SentenceSplittingMode.Off,
@@ -55,6 +57,8 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
         if (Languages != null)
             return Languages;
 
+        Client ??= new(configuration.GetConnectionString("DeepL")!);
+        
         SourceLanguages ??= await Client.GetSourceLanguagesAsync();
         TargetLanguages ??= await Client.GetTargetLanguagesAsync();
 

@@ -3,8 +3,8 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Engine;
 
-public class Contents(BlossomAggregateOptions<TextContent> options, IRepository<Page> pages, KoriTranslator translator) 
-    : BlossomAggregate<TextContent>(options)
+public class Contents(BlossomAggregateOptions<TextContent> options, KoriTranslator translator) 
+    : BlossomAggregate<TextContent>(options), IBlossomEndpoints
 {
     public BlossomQuery<TextContent> Search(string searchTerm) => Query().Where(content =>
          ((content.Text != null && content.Text.ToLower().Contains(searchTerm) == true) ||
@@ -12,22 +12,51 @@ public class Contents(BlossomAggregateOptions<TextContent> options, IRepository<
          (content.Domain != null && content.Domain.ToLower().Contains(searchTerm) == true) ||
          (content.Path != null && content.Path.ToLower().Contains(searchTerm) == true)));
 
-    public async Task<IEnumerable<TextContent>> GetAll(string pageId, string? fallbackLanguageId = null)
-    {
-        var language = User.Language(fallbackLanguageId);
-        var page = await pages.FindAsync(pageId);
+    //public async Task<IEnumerable<TextContent>> GetAll(string pageId, string? fallbackLanguageId = null)
+    //{
+    //    var language = User.Language(fallbackLanguageId);
+    //    var page = await Repository.Query.FindAsync(pageId);
 
-        if (language == null || page == null)
-            return [];
+    //    if (language == null || page == null)
+    //        return [];
 
-        //var content = await page.LoadContentAsync(language, Repository, translator);
+    //    //var content = await page.LoadContentAsync(language, Repository, translator);
  
 
-        return [];
+    //    return [];
+    //}
+
+    public async Task<TextContent> Get(string domain, string language, TextContent content)
+    {
+        content.Domain = domain;
+        
+        var toLanguage = User.Language(language) 
+            ?? throw new ArgumentException("Invalid language specified.", nameof(language));
+
+        var newId = TextContent.IdHash(content.Text, toLanguage);
+        var existing = await Repository.Query
+            .Where(x => x.Domain == domain && x.Id == newId)
+            .CosmosFirstOrDefaultAsync();
+
+        if (existing != null)
+            return existing;
+        
+        var translation = await translator.TranslateAsync(content, toLanguage);
+        if (translation == null)
+            throw new InvalidOperationException("Translation failed.");
+
+        await Repository.AddAsync(translation);
+        return translation;
     }
 
     public BlossomQuery<TextContent> All(string pageId) => Query().Where(content => content.PageId == pageId && content.SourceContentId == null);
 
     public async Task<IEnumerable<Language>> Languages()
         => await translator.GetLanguagesAsync();
+
+    public void Map(IEndpointRouteBuilder endpoints)
+    {
+        var group = endpoints.MapGroup("translate");
+        group.MapPost("", async (HttpRequest request, TextContent content) => await Get(new Uri(request.Headers.Referer).Host, request.Headers.AcceptLanguage, content));
+    }
 }

@@ -40,6 +40,7 @@ builder.Services.Configure<JsonOptions>(options =>
 });
 
 var app = builder.Build();
+app.MapStaticAssets();
 app.UseSparcEngineAuthentication<BlossomUser>();
 
 // Configure the HTTP request pipeline.
@@ -55,8 +56,7 @@ app.UseCors();
 app.MapGet("/tools/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 
 using var scope = app.Services.CreateScope();
-scope.ServiceProvider.GetRequiredService<PouchData>().Map(app);
-scope.ServiceProvider.GetRequiredService<ReplicationLogs>().Map(app);
+scope.ServiceProvider.GetRequiredService<Contents>().Map(app);
 
 if (!string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("Cognitive")))
 {

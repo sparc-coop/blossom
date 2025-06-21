@@ -11,8 +11,9 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<ITranslator, AzureTranslator>()
             .AddScoped<ITranslator, DeepLTranslator>()
             .AddScoped<KoriTranslator>()
-            .AddScoped<PouchData>()
-            .AddScoped<ReplicationLogs>();
+            .AddScoped<BlossomAggregateOptions<TextContent>>()
+            .AddScoped<BlossomAggregate<TextContent>>()
+            .AddScoped<Contents>();
 
         builder.Services.AddTransient<IClaimsTransformation, LanguageClaimsTransformation>()
             .AddTransient<LanguageClaimsTransformation>();

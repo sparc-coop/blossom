@@ -5,9 +5,7 @@ namespace Sparc.Engine;
 
 internal class AzureTranslator(IConfiguration configuration) : ITranslator
 {
-    readonly TextTranslationClient Client = new(new AzureKeyCredential(configuration.GetConnectionString("Cognitive")!),
-            new Uri("https://api.cognitive.microsofttranslator.com"),
-            "southcentralus");
+    TextTranslationClient? Client;
 
     internal static List<Language>? Languages;
 
@@ -19,14 +17,15 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
         var azureLanguages = toLanguages.Select(AzureLanguage).Where(x => x != null).ToList();
 
         var batches = Batch(azureLanguages, 10);
-        
+
+        await ConnectAsync();
         foreach (var batch in batches)
         {
             var options = new TextTranslationTranslateOptions(
                 targetLanguages: batch.Select(x => x.Id),
                 content: messages.Select(x => x.Text));
 
-            var response = await Client.TranslateAsync(options);
+            var response = await Client!.TranslateAsync(options);
             var translations = messages.Zip(response.Value);
 
             foreach (var (sourceContent, result) in translations)
@@ -55,7 +54,8 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
         if (Languages != null)
             return Languages;
 
-        var languages = await Client.GetSupportedLanguagesAsync();
+        await ConnectAsync();
+        var languages = await Client!.GetSupportedLanguagesAsync();
 
         Languages = languages.Value.Translation
             .Select(x => new Language(x.Key, x.Value.Name, x.Value.NativeName, x.Value.Directionality == LanguageDirectionality.RightToLeft))
@@ -71,5 +71,14 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
         return items.Select((item, inx) => new { item, inx })
                     .GroupBy(x => x.inx / maxItems)
                     .Select(g => g.Select(x => x.item));
+    }
+
+    private Task ConnectAsync()
+    {
+         Client ??= new(new AzureKeyCredential(configuration.GetConnectionString("Cognitive")!),
+            new Uri("https://api.cognitive.microsofttranslator.com"),
+            "southcentralus");
+
+        return Task.CompletedTask;
     }
 }

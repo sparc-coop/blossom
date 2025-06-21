@@ -5,6 +5,25 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/tools/friendlyid": {
+      "get": {
+        "tags": [
+          "Sparc.Engine"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/login": {
       "post": {
         "tags": [
@@ -111,135 +130,16 @@
         }
       }
     },
-    "/tools/friendlyid": {
-      "get": {
-        "tags": [
-          "Sparc.Engine"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/data": {
-      "get": {
-        "tags": [
-          "PouchData"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetServerMetadataResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/data/{db}": {
-      "get": {
-        "tags": [
-          "PouchData"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetDatasetMetadataResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/data/{db}/_changes": {
-      "get": {
-        "tags": [
-          "PouchData"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "since",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetChangesResponse"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/translate": {
       "post": {
         "tags": [
-          "PouchData"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
+          "Contents"
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/GetChangesRequest"
+                "$ref": "#/components/schemas/TextContent"
               }
             }
           },
@@ -251,316 +151,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetChangesResponse"
+                  "$ref": "#/components/schemas/TextContent"
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/data/{db}/_revs_diff": {
-      "post": {
-        "tags": [
-          "PouchData"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "$ref": "#/components/schemas/MissingItems"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/data/{db}/_bulk_get": {
-      "post": {
-        "tags": [
-          "PouchData"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkGetPayload"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/data/{db}/_bulk_docs": {
-      "post": {
-        "tags": [
-          "PouchData"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkDocsPayload"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/data/{db}/{docid}": {
-      "get": {
-        "tags": [
-          "PouchData"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "docid",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "PouchData"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "docid",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "PouchData"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "docid",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "rev",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/data/{db}/_all_docs": {
-      "get": {
-        "tags": [
-          "PouchData"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/data/{db}/_local/{id}": {
-      "get": {
-        "tags": [
-          "ReplicationLogs"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "ReplicationLogs"
-        ],
-        "parameters": [
-          {
-            "name": "db",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReplicationLog"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
           }
         }
       }
@@ -578,6 +172,34 @@
             "type": "string"
           }
         }
+      },
+      "AudioContent": {
+        "required": [
+          "url",
+          "duration",
+          "voice"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "voice": {
+            "type": "string"
+          },
+          "words": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Word"
+            }
+          }
+        },
+        "nullable": true
       },
       "BlossomUser": {
         "type": "object",
@@ -635,170 +257,18 @@
           }
         }
       },
-      "BulkDocsPayload": {
-        "required": [
-          "docs"
-        ],
-        "type": "object",
-        "properties": {
-          "docs": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          }
-        }
-      },
-      "BulkGetPayload": {
-        "required": [
-          "docs"
-        ],
-        "type": "object",
-        "properties": {
-          "docs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DocRef"
-            }
-          }
-        }
-      },
-      "DocRef": {
-        "required": [
-          "id",
-          "rev"
-        ],
+      "ContentTranslation": {
         "type": "object",
         "properties": {
           "id": {
             "type": "string"
           },
-          "rev": {
+          "language": {
+            "$ref": "#/components/schemas/Language2"
+          },
+          "sourceContentId": {
             "type": "string",
             "nullable": true
-          }
-        }
-      },
-      "GetChangesRequest": {
-        "required": [
-          "doc_ids",
-          "since",
-          "limit"
-        ],
-        "type": "object",
-        "properties": {
-          "doc_ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "since": {
-            "type": "string"
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          }
-        }
-      },
-      "GetChangesResponse": {
-        "required": [
-          "last_seq",
-          "results"
-        ],
-        "type": "object",
-        "properties": {
-          "last_seq": {
-            "type": "string"
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GetChangesResult"
-            }
-          }
-        }
-      },
-      "GetChangesResult": {
-        "required": [
-          "changes",
-          "id",
-          "seq"
-        ],
-        "type": "object",
-        "properties": {
-          "changes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GetChangesRev"
-            }
-          },
-          "id": {
-            "type": "string"
-          },
-          "seq": {
-            "type": "string"
-          }
-        }
-      },
-      "GetChangesRev": {
-        "required": [
-          "rev"
-        ],
-        "type": "object",
-        "properties": {
-          "rev": {
-            "type": "string"
-          }
-        }
-      },
-      "GetDatasetMetadataResponse": {
-        "required": [
-          "db_name",
-          "doc_count",
-          "instance_start_time",
-          "update_seq"
-        ],
-        "type": "object",
-        "properties": {
-          "db_name": {
-            "type": "string"
-          },
-          "doc_count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "instance_start_time": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "update_seq": {
-            "type": "string"
-          }
-        }
-      },
-      "GetServerMetadataResponse": {
-        "required": [
-          "couchdb",
-          "uuid",
-          "vendor",
-          "version"
-        ],
-        "type": "object",
-        "properties": {
-          "couchdb": {
-            "type": "string"
-          },
-          "uuid": {
-            "type": "string"
-          },
-          "vendor": {
-            "$ref": "#/components/schemas/ServerMetadataVendor"
-          },
-          "version": {
-            "type": "string"
           }
         }
       },
@@ -867,20 +337,6 @@
           }
         }
       },
-      "MissingItems": {
-        "required": [
-          "missing"
-        ],
-        "type": "object",
-        "properties": {
-          "missing": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
       "ProductKey": {
         "required": [
           "productName",
@@ -901,64 +357,71 @@
           }
         }
       },
-      "ReplicationHistory": {
+      "TextContent": {
         "type": "object",
         "properties": {
-          "last_seq": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "session_id": {
-            "type": "string"
-          }
-        }
-      },
-      "ReplicationLog": {
-        "type": "object",
-        "properties": {
-          "_id": {
+          "domain": {
             "type": "string"
           },
-          "_db": {
+          "path": {
+            "type": "string",
+            "nullable": true
+          },
+          "sourceContentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "languageId": {
             "type": "string"
           },
-          "_history": {
+          "language": {
+            "$ref": "#/components/schemas/Language2"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModified": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deletedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserAvatar2"
+          },
+          "audio": {
+            "$ref": "#/components/schemas/AudioContent"
+          },
+          "text": {
+            "type": "string",
+            "nullable": true
+          },
+          "translations": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ReplicationHistory"
+              "$ref": "#/components/schemas/ContentTranslation"
             }
           },
-          "_replicator": {
+          "originalText": {
             "type": "string"
           },
-          "_session_id": {
+          "html": {
             "type": "string"
           },
-          "_last_seq": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "_version": {
-            "type": "integer",
-            "format": "int32"
+          "pageId": {
+            "type": "string",
+            "nullable": true
           },
           "genericId": { },
           "id": {
-            "type": "string"
-          }
-        }
-      },
-      "ServerMetadataVendor": {
-        "required": [
-          "name",
-          "version"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "version": {
             "type": "string"
           }
         }
@@ -1018,6 +481,84 @@
             "nullable": true
           }
         }
+      },
+      "UserAvatar2": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "initials": {
+            "type": "string",
+            "nullable": true
+          },
+          "isOnline": {
+            "type": "boolean"
+          },
+          "backgroundColor": {
+            "type": "string"
+          },
+          "foregroundColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "language": {
+            "$ref": "#/components/schemas/Language"
+          },
+          "emoji": {
+            "type": "string",
+            "nullable": true
+          },
+          "skinTone": {
+            "type": "string",
+            "nullable": true
+          },
+          "pronouns": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "gender": {
+            "type": "string",
+            "nullable": true
+          },
+          "hearOthers": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "muteMe": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "nullable": true
+      },
+      "Word": {
+        "required": [
+          "offset",
+          "duration",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
       }
     }
   },
@@ -1026,10 +567,7 @@
       "name": "Sparc.Engine"
     },
     {
-      "name": "PouchData"
-    },
-    {
-      "name": "ReplicationLogs"
+      "name": "Contents"
     }
   ]
 }

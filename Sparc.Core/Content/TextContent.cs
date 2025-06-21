@@ -55,7 +55,7 @@ public class TextContent : BlossomEntity<string>
     public TextContent(string domain, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
         : this(domain, language.Id)
     {
-        Id = BlossomHash.MD5($"{text}:{language}");
+        Id = IdHash(text, language);
         User = user?.Avatar;
         Language = user?.Avatar.Language ?? language;
         Audio = user?.Avatar.Language?.VoiceId == null ? null : new(null, 0, user.Avatar.Language.VoiceId);
@@ -67,7 +67,7 @@ public class TextContent : BlossomEntity<string>
 
     public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, toLanguage.Id)
     {
-        Id = BlossomHash.MD5($"{sourceContent.Text}:{toLanguage}");
+        Id = IdHash(sourceContent.Text, toLanguage);
         SourceContentId = sourceContent.Id;
         User = sourceContent.User;
         Audio = sourceContent.Audio?.Voice == null ? null : new(null, 0, sourceContent.Audio.Voice);
@@ -76,6 +76,8 @@ public class TextContent : BlossomEntity<string>
         OriginalText = sourceContent.Text;
         SetText(text);
     }
+
+    public static string IdHash(string? text, Language language) => BlossomHash.MD5($"{text}:{language}");
 
     //internal async Task<TextContent?> TranslateAsync(Language language, IRepository<TextContent> contents, BlossomTranslator provider)
     //{
