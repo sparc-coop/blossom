@@ -1,6 +1,6 @@
 ﻿import db from './db.js';
 import MD5 from './md5.js';
-
+import KoriEngine from './koriengine.js';
 class KoriTranslateElement extends HTMLElement {
     #original;
     #originalLang;
@@ -80,3 +80,4 @@ class KoriTranslateElement extends HTMLElement {
 }
 
 customElements.define('kori-translate', KoriTranslateElement);
+document.addEventListener('DOMContentLoaded', () => new KoriEngine().init());

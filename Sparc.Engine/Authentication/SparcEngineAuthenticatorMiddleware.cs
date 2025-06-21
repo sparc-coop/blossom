@@ -10,7 +10,10 @@ public class SparcEngineAuthenticatorMiddleware(RequestDelegate next)
 
     public async Task InvokeAsync(HttpContext context, IBlossomAuthenticator auth, KoriTranslator translator, LanguageClaimsTransformation language)
     {
-        if (context.Request.Path.StartsWithSegments("/_blazor") || context.Request.Path.StartsWithSegments("/_framework") || context.Request.Method == "OPTIONS")
+        if (context.Request.Path.StartsWithSegments("/_blazor") 
+            || context.Request.Path.StartsWithSegments("/_framework") 
+            || context.Request.Method == "OPTIONS"
+            || context.Request.Path.Value?.EndsWith("js") == true)
         {
             await _next(context);
             return;
