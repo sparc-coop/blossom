@@ -661,13 +661,13 @@
       },
       "GetChangesResult": {
         "required": [
-          "rev",
+          "changes",
           "id",
           "seq"
         ],
         "type": "object",
         "properties": {
-          "rev": {
+          "changes": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/GetChangesRev"

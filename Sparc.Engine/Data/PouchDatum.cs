@@ -31,7 +31,7 @@ public class PouchDatum(string db, string pouchId, string rev)
     public string Rev { get; set; } = rev;
 
     [JsonPropertyName("_seq")]
-    public string? Seq { get; set; }
+    public string? Seq { get; set; } = DateTime.UtcNow.Ticks.ToString();
 
     [JsonPropertyName("_deleted")]
     public bool Deleted { get; set; }
@@ -88,7 +88,9 @@ public class PouchDatum(string db, string pouchId, string rev)
         if (data.TryGetValue("_id", out var id) && id is string pouchId)
             PouchId = pouchId;
         
-        Seq = data.TryGetValue("_seq", out var seq) ? seq?.ToString() : null;
+        if (data.TryGetValue("_seq", out var seq)) 
+            Seq = seq?.ToString();
+
         Deleted = data.TryGetValue("_deleted", out var deleted) && deleted != null && (bool)deleted;
 
         if (data.TryGetValue("_revisions", out var revisions))

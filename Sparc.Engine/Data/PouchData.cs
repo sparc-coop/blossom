@@ -75,7 +75,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
     }
 
     public record GetChangesRequest(List<string> doc_ids, string since, int? limit);
-    public record GetChangesResult(List<GetChangesRev> rev, string id, string seq);
+    public record GetChangesResult(List<GetChangesRev> changes, string id, string seq);
     public record GetChangesRev(string rev);
     public record GetChangesResponse(string last_seq, List<GetChangesResult> results);
     public async Task<IResult> GetAllAsync(string db)
@@ -128,11 +128,12 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
         var last_seq = (results.LastOrDefault()?.Seq ?? request.since) ?? "0";
 
         var output = results
-            .Select(x => new GetChangesResult([new(x.Rev)], x.Id, x.Seq!))
+            .Select(x => new GetChangesResult([new(x.Rev)], x.PouchId, x.Seq!))
             .ToList();
 
         // Return the response
-        return new GetChangesResponse(last_seq, output);
+        var response = new GetChangesResponse(last_seq, output);
+        return response;
     }
 
     public record MissingItems(List<string> Missing);
@@ -154,7 +155,6 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
                 .Where(x => x.PouchId == id)
                 .Select(x => x.Rev)
                 .ToList();
-
             var missingRevisions = revisions[id].Except(existingRevisionsForId).ToList();
 
             if (missingRevisions.Count != 0)
