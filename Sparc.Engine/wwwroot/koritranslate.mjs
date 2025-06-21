@@ -40,8 +40,8 @@ class KoriTranslateElement extends HTMLElement {
                 const request = {
                     id: this.originalHash,
                     Domain: window.location.host,
-                    LanguageId: this.#lang,
-                    Language: { Id: this.#lang },
+                    LanguageId: this.#originalLang,
+                    Language: { Id: this.#originalLang },
                     Text: this.#original
                 };
 
@@ -55,11 +55,12 @@ class KoriTranslateElement extends HTMLElement {
                         'Content-Type': 'application/json'
                     }
                 }).then(response => {
-                    console.log('OH LAWD!!!!!', response);
                     if (response.ok) {
-                        const newTranslation = response.json();
-                        this.render(newTranslation);
-                        db.put(newTranslation);
+                        response.json().then(newTranslation => {
+                            console.log('OH LAWD!!!!!', newTranslation);
+                            this.render(newTranslation);
+                            db.translations.put(newTranslation);
+                        });
                     }
                 });
             }
@@ -67,7 +68,7 @@ class KoriTranslateElement extends HTMLElement {
     }
 
     render(translation) {
-        this.#translated = translation.Text;
+        this.#translated = translation.text;
 
         if (this.#translated) {
             this.textContent = this.#translated;

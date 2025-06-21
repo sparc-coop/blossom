@@ -26,16 +26,14 @@ public class Contents(BlossomAggregateOptions<TextContent> options, KoriTranslat
     //    return [];
     //}
 
-    public async Task<TextContent> Get(string domain, string language, TextContent content)
+    public async Task<TextContent> Get(TextContent content, string language)
     {
-        content.Domain = domain;
-        
         var toLanguage = User.Language(language) 
             ?? throw new ArgumentException("Invalid language specified.", nameof(language));
 
         var newId = TextContent.IdHash(content.Text, toLanguage);
         var existing = await Repository.Query
-            .Where(x => x.Domain == domain && x.Id == newId)
+            .Where(x => x.Domain == content.Domain && x.Id == newId)
             .CosmosFirstOrDefaultAsync();
 
         if (existing != null)
@@ -57,6 +55,6 @@ public class Contents(BlossomAggregateOptions<TextContent> options, KoriTranslat
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("translate");
-        group.MapPost("", async (HttpRequest request, TextContent content) => await Get(new Uri(request.Headers.Referer).Host, request.Headers.AcceptLanguage, content));
+        group.MapPost("", async (HttpRequest request, TextContent content) => await Get(content, request.Headers.AcceptLanguage));
     }
 }

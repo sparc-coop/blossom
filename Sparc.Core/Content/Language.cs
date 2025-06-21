@@ -63,7 +63,7 @@ public record Language
 
         if (elements.Length == 2)
             return LanguageId.Equals(elements[0], StringComparison.OrdinalIgnoreCase) &&
-                   DialectId?.Equals(elements[1], StringComparison.OrdinalIgnoreCase) == true;
+                    (DialectId == null || DialectId.Equals(elements[1], StringComparison.OrdinalIgnoreCase));
 
         return false;
     }
