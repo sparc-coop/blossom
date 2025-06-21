@@ -307,6 +307,38 @@
         }
       }
     },
+    "/data/{db}/_bulk_get": {
+      "post": {
+        "tags": [
+          "PouchData"
+        ],
+        "parameters": [
+          {
+            "name": "db",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkGetPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/data/{db}/_bulk_docs": {
       "post": {
         "tags": [
@@ -614,6 +646,36 @@
             "items": {
               "type": "object"
             }
+          }
+        }
+      },
+      "BulkGetPayload": {
+        "required": [
+          "docs"
+        ],
+        "type": "object",
+        "properties": {
+          "docs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocRef"
+            }
+          }
+        }
+      },
+      "DocRef": {
+        "required": [
+          "id",
+          "rev"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "rev": {
+            "type": "string",
+            "nullable": true
           }
         }
       },

@@ -5,8 +5,7 @@ using System.Text.Json.Serialization;
 namespace Sparc.Blossom.Data;
 
 public record PouchRevisionAdded(PouchDatum Datum) : BlossomEvent<PouchDatum>(Datum);
-public class PouchDatum(string db, string pouchId, string rev) 
-    : BlossomEntity<string>($"{pouchId}:{rev}")
+public class PouchDatum(string db, string pouchId, string rev) : BlossomEntity<string>($"{pouchId}:{rev}")
 {
     [JsonConstructor]
     private PouchDatum() : this("", "", "")
@@ -20,7 +19,7 @@ public class PouchDatum(string db, string pouchId, string rev)
         Update(data);
         Broadcast(new PouchRevisionAdded(this));
     }
-    
+
     [JsonPropertyName("_db")]
     public string Db { get; set; } = db;
 
@@ -50,23 +49,33 @@ public class PouchDatum(string db, string pouchId, string rev)
         if (parts.Length != 2)
         {
             Rev = $"1-{Hash()}";
-            SetId(PouchId);
-            Broadcast(new PouchRevisionAdded(this));
-            return;
         }
-
-        var oldHash = parts[1];
-        var hash = Hash();
-        if (oldHash == hash)
-            return; // no change in data, no need to update revision
-
-        if (!int.TryParse(parts[0], out var number))
-            Rev = $"1-{hash}";
         else
-            Rev = $"{number + 1}-{hash}";
+        {
+            var oldHash = parts[1];
+            var hash = Hash();
+            if (oldHash == hash)
+                return; // no change in data, no need to update revision
+
+            if (!int.TryParse(parts[0], out var number))
+                Rev = $"1-{hash}";
+            else
+                Rev = $"{number + 1}-{hash}";
+        }
 
         SetId(PouchId);
         Broadcast(new PouchRevisionAdded(this));
+    }
+
+    private void SetRevisions()
+    {
+        var start = Rev.Split('-')[0];
+        var id = Rev.Split('-')[1];
+
+        Revisions ??= new PouchRevisions();
+        Revisions.Start = int.Parse(start);
+        if (!Revisions.Ids.Contains(id))
+            Revisions.Ids.Insert(0, Rev.Split('-')[1]);
     }
 
     internal T? Cast<T>() where T : BlossomEntity<string>
@@ -84,17 +93,19 @@ public class PouchDatum(string db, string pouchId, string rev)
     {
         if (data.TryGetValue("_rev", out var rev) && rev is string revString)
             Rev = revString;
-        
+
         if (data.TryGetValue("_id", out var id) && id is string pouchId)
             PouchId = pouchId;
-        
-        if (data.TryGetValue("_seq", out var seq)) 
+
+        if (data.TryGetValue("_seq", out var seq))
             Seq = seq?.ToString();
 
         Deleted = data.TryGetValue("_deleted", out var deleted) && deleted != null && (bool)deleted;
 
-        if (data.TryGetValue("_revisions", out var revisions))
-            Revisions = JsonSerializer.Deserialize<PouchRevisions>(revisions!.ToString()!);
+        if (data.TryGetValue("_revisions", out var revisions) && revisions is JsonElement el)
+            Revisions = el.Deserialize<PouchRevisions>();
+        else
+            SetRevisions();
 
         Data = FromDictionary(data);
     }
@@ -124,6 +135,7 @@ public class PouchDatum(string db, string pouchId, string rev)
     {
         PouchId = pouchId;
         Id = $"{PouchId}:{Rev}";
+        SetRevisions();
     }
 
     internal Dictionary<string, object?> ToDictionary()
@@ -132,12 +144,11 @@ public class PouchDatum(string db, string pouchId, string rev)
         {
             ["_id"] = PouchId,
             ["_rev"] = Rev,
-            ["_seq"] = Seq,
             ["_deleted"] = Deleted
         };
 
         if (Revisions != null)
-            dict["_revisions"] = JsonSerializer.Serialize(Revisions);
+            dict["_revisions"] = Revisions;
 
         return dict;
     }
@@ -152,13 +163,13 @@ public class PouchDatum(string db, string pouchId, string rev)
         return dict;
     }
 
-   
+
     private string Hash()
     {
         // use deterministic MD5 hashing to match Pouch revision algorithm
-        
+
         var sorted = Data.OrderBy(kv => kv.Key, StringComparer.Ordinal);
-        
+
         var sb = new System.Text.StringBuilder();
         foreach (var kv in sorted)
         {

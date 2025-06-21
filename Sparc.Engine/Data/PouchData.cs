@@ -163,6 +163,31 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
 
         return result;
     }
+
+    public record BulkGetPayload(List<DocRef> Docs);
+    public record DocRef(string Id, string? Rev);
+    public async Task<IResult> GetBulkAsync(string db, [FromBody] BulkGetPayload payload)
+    {
+        var ids = payload.Docs.Select(x => $"{x.Id}:{x.Rev}").ToList();
+        var docs = await data.Query(db)
+            .Where(x => ids.Contains(x.Id))
+            .ToCosmosAsync();
+
+        var results = docs.Select(d => new
+        {
+            id = d.PouchId,
+            docs = new[]
+            {
+                new
+                {
+                    ok = d.ToDictionary()
+                }
+            }
+        });
+
+        return Results.Ok(new { results });
+    }
+
     public record BulkDocsPayload(List<Dictionary<string, object?>> Docs);
     public async Task<IResult> UpsertBulkAsync(string db, [FromBody] BulkDocsPayload payload)
     {
@@ -183,6 +208,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
 
         group.MapPost("/{db}/_changes", PostChangesAsync);
         group.MapPost("{db}/_revs_diff", GetMissingItemsAsync);
+        group.MapPost("/{db}/_bulk_get", GetBulkAsync);
         group.MapPost("/{db}/_bulk_docs", UpsertBulkAsync);
 
         group.MapGet("/{db}/{docid}", FindAsync);
