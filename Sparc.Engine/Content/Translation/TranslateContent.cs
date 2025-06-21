@@ -31,7 +31,7 @@ public class TranslateContent(
         if (translation != null)
         {
             notification.Datum.Update(content);
-            await data.UpsertAsync(content.Domain, translation);
+            await data.UpsertAsync(notification.Datum.Db, translation);
         }
     }
 

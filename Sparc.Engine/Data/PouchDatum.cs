@@ -48,7 +48,12 @@ public class PouchDatum(string db, string pouchId, string rev)
     {
         var parts = Rev.Split('-');
         if (parts.Length != 2)
-            throw new InvalidOperationException("Invalid revision format");
+        {
+            Rev = $"1-{Hash()}";
+            SetId(PouchId);
+            Broadcast(new PouchRevisionAdded(this));
+            return;
+        }
 
         var oldHash = parts[1];
         var hash = Hash();

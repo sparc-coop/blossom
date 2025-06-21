@@ -55,7 +55,7 @@ public class TextContent : BlossomEntity<string>
     public TextContent(string domain, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
         : this(domain, language.Id)
     {
-        Id = BlossomHash.MD5($"{originalText}:{language}");
+        Id = BlossomHash.MD5($"{text}:{language}");
         User = user?.Avatar;
         Language = user?.Avatar.Language ?? language;
         Audio = user?.Avatar.Language?.VoiceId == null ? null : new(null, 0, user.Avatar.Language.VoiceId);
@@ -65,15 +65,15 @@ public class TextContent : BlossomEntity<string>
         SetText(text);
     }
 
-    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, sourceContent.Language.Id)
+    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, toLanguage.Id)
     {
-        Id = BlossomHash.MD5($"{sourceContent.OriginalText}:{toLanguage}");
+        Id = BlossomHash.MD5($"{sourceContent.Text}:{toLanguage}");
         SourceContentId = sourceContent.Id;
         User = sourceContent.User;
         Audio = sourceContent.Audio?.Voice == null ? null : new(null, 0, sourceContent.Audio.Voice);
         Language = toLanguage;
         Timestamp = sourceContent.Timestamp;
-        OriginalText = sourceContent.OriginalText;
+        OriginalText = sourceContent.Text;
         SetText(text);
     }
 

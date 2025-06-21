@@ -154,6 +154,7 @@ public class PouchData(CosmosDbSimpleRepository<PouchDatum> data) : IBlossomEndp
                 .Where(x => x.PouchId == id)
                 .Select(x => x.Rev)
                 .ToList();
+
             var missingRevisions = revisions[id].Except(existingRevisionsForId).ToList();
 
             if (missingRevisions.Count != 0)

@@ -49,13 +49,14 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
 
     public virtual async Task AddAsync(IEnumerable<T> items)
     {
-        foreach (var item in items)
+        if (!items.Any())
+            return;
+        
+        await Parallel.ForEachAsync(items, async (item, token) =>
         {
-            await Client.Container.CreateItemAsync(item);
+            await Client.Container.CreateItemAsync(item, cancellationToken: token);
             await Publish(item);
-        }
-
-        await SaveChangesAsync();
+        });
     }
 
     private async Task Publish(T item)
@@ -79,18 +80,18 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
 
     public virtual async Task UpdateAsync(IEnumerable<T> items)
     {
-        foreach (var item in items)
+        await Parallel.ForEachAsync(items, async (item, token) =>
         {
             try
             {
-                await Client.Container.UpsertItemAsync(item);
+                await Client.Container.UpsertItemAsync(item, cancellationToken: token);
                 await Publish(item);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
-        }
+        });
     }
 
     public async Task ExecuteAsync(object id, Action<T> action)
