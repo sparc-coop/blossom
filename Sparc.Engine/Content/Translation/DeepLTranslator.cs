@@ -7,9 +7,8 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
 {
     Translator? Client;
 
-    internal static SourceLanguage[]? SourceLanguages;
-    internal static TargetLanguage[]? TargetLanguages;
-    internal static List<Language>? Languages;
+    internal static List<Language> SourceLanguages = [];
+    internal static List<Language> TargetLanguages = [];
 
     public int Priority => 1;
 
@@ -23,8 +22,8 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
             Context = additionalContext
         };
 
-        var fromLanguages = messages.GroupBy(x => DeepLLanguage(x.Language));
-        var toDeepLLanguages = toLanguages.Select(DeepLLanguage).Where(x => x != null).ToList();
+        var fromLanguages = messages.GroupBy(x => SourceLanguage(x.Language));
+        var toDeepLLanguages = toLanguages.Select(TargetLanguage).Where(x => x != null).ToList();
 
         var translatedMessages = new List<TextContent>();
         foreach (var sourceLanguage in fromLanguages)
@@ -43,31 +42,42 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
 
     public bool CanTranslate(Language fromLanguage, Language toLanguage)
     {
-        return SourceLanguages?.Any(x => fromLanguage.Matches(x.Code)) == true &&
-               TargetLanguages?.Any(x => toLanguage.Matches(x.Code)) == true;
+        return SourceLanguages.Any(x => fromLanguage.Matches(x.Id)) == true &&
+               TargetLanguages.Any(x => toLanguage.Matches(x.Id)) == true;
     }
 
-    Language DeepLLanguage(Language language)
+    Language SourceLanguage(Language language)
     {
-        return Languages!.First(x => x.Matches(language.Id));
+        return SourceLanguages!
+            .OrderBy(x => x.DialectId == null ? 1 : 0)
+            .First(x => x.Matches(language.Id));
+    }
+
+    Language TargetLanguage(Language language)
+    {
+        return TargetLanguages!
+            .OrderBy(x => x.DialectId == null ? 1 : 0)
+            .First(x => x.Matches(language.Id));
     }
 
     public async Task<List<Language>> GetLanguagesAsync()
     {
-        if (Languages != null)
-            return Languages;
+        if (SourceLanguages.Count > 0 && TargetLanguages.Count > 0)
+            return SourceLanguages.Union(TargetLanguages).ToList();
 
         Client ??= new(configuration.GetConnectionString("DeepL")!);
         
-        SourceLanguages ??= await Client.GetSourceLanguagesAsync();
-        TargetLanguages ??= await Client.GetTargetLanguagesAsync();
+        var sources = await Client.GetSourceLanguagesAsync();
+        var targets = await Client.GetTargetLanguagesAsync();
 
-        Languages =  
-            SourceLanguages.Select(x => new Language(x.Code, x.Name, x.Name, x.CultureInfo.TextInfo.IsRightToLeft))
-            .Union(
-                TargetLanguages.Select(x => new Language(x.Code, x.Name, x.Name, x.CultureInfo.TextInfo.IsRightToLeft)))
+        SourceLanguages = sources
+            .Select(x => new Language(x.Code, x.Name, x.Name, x.CultureInfo.TextInfo.IsRightToLeft))
             .ToList();
 
-        return Languages;
+        TargetLanguages = targets
+            .Select(x => new Language(x.Code, x.Name, x.Name, x.CultureInfo.TextInfo.IsRightToLeft))
+            .ToList();
+
+        return SourceLanguages.Union(TargetLanguages).ToList();
     }
 }

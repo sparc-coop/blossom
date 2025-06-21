@@ -72,7 +72,9 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
 
     async Task<ITranslator> GetBestTranslatorAsync(Language fromLanguage, Language toLanguage)
     {
-        return Translators.FirstOrDefault(x => x.CanTranslate(fromLanguage, toLanguage))
+        return Translators
+            .OrderBy(x => x.Priority)
+            .FirstOrDefault(x => x.CanTranslate(fromLanguage, toLanguage))
             ?? throw new Exception($"No translator found for {fromLanguage.Id} to {toLanguage.Id}");
     }
 
@@ -105,7 +107,9 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
         foreach (var langCode in languages)
         {
             // Try to match by Id or DialectId
-            var match = Languages.FirstOrDefault(l => l.Matches(langCode));
+            var match = Languages
+                .OrderBy(x => x.DialectId != null ? 0 : 1)
+                .FirstOrDefault(l => l.Matches(langCode));
 
             if (match != null)
                 return match;
