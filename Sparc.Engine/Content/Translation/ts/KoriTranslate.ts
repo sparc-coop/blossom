@@ -15,7 +15,13 @@ export default class KoriTranslateElement extends HTMLElement {
         this.#original = this.textContent.trim();
         this.#lang = this.lang || navigator.language;
         this.#originalLang = this.lang || document.documentElement.lang;
+
+        document.addEventListener('kori-language-changed', this.#languageChangedCallback);
         this.askForTranslation();
+    }
+
+    disconnectedCallback() {
+        document.removeEventListener('kori-language-changed', this.#languageChangedCallback);
     }
 
     get originalHash() { return MD5(this.#original + ':' + this.#originalLang); }
@@ -29,6 +35,13 @@ export default class KoriTranslateElement extends HTMLElement {
             this.#lang = newValue || document.documentElement.lang || navigator.language;
             this.askForTranslation();
         }
+    }
+
+    #languageChangedCallback = (event: any) => {
+        console.log('Language changed to:', event.detail);
+        if (event.detail === this.#lang) return; // No change in language
+        this.#lang = event.detail;
+        this.askForTranslation();
     }
 
     askForTranslation() {

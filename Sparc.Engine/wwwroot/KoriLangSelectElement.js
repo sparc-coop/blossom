@@ -41,7 +41,7 @@ export default class KoriLangSelectElement extends HTMLElement {
         select.addEventListener('change', () => {
             this.#lang = select.value;
             document.documentElement.lang = this.#lang;
-            this.dispatchEvent(new CustomEvent('kori-language-changed', { detail: { lang: this.#lang } }));
+            document.dispatchEvent(new CustomEvent('kori-language-changed', { detail: this.#lang }));
         });
         this.appendChild(select);
     }
