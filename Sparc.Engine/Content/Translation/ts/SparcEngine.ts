@@ -1,7 +1,7 @@
 import MD5 from "./MD5.js";
 
-const baseUrl = 'https://localhost:7185';
-//const baseUrl = 'https://engine.sparc.coop';
+//const baseUrl = 'https://localhost:7185';
+const baseUrl = 'https://engine.sparc.coop';
 
 export default class SparcEngine {
     static userLang;
