@@ -1,54 +1,45 @@
 import db from './KoriDb.js';
 import MD5 from './MD5.js';
-
-export default class KoriTranslateElement extends HTMLElement {
+export default class KoriTranslateNode extends HTMLElement {
     #original;
     #originalLang;
     #translated;
     #lang;
-
     constructor() {
         super();
     }
-
     connectedCallback() {
         this.#original = this.textContent.trim();
         this.#lang = this.lang || navigator.language;
         this.#originalLang = this.lang || document.documentElement.lang;
-
         document.addEventListener('kori-language-changed', this.#languageChangedCallback);
         this.askForTranslation();
     }
-
     disconnectedCallback() {
         document.removeEventListener('kori-language-changed', this.#languageChangedCallback);
     }
-
     get originalHash() { return MD5(this.#original + ':' + this.#originalLang); }
-
     get hash() { return MD5(this.#original + ':' + this.#lang); }
-
     static observedAttributes = ['lang'];
-
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'lang' && oldValue != newValue) {
             this.#lang = newValue || document.documentElement.lang || navigator.language;
             this.askForTranslation();
         }
     }
-
-    #languageChangedCallback = (event: any) => {
+    #languageChangedCallback = (event) => {
         console.log('Language changed to:', event.detail);
-        if (event.detail === this.#lang) return; // No change in language
+        if (event.detail === this.#lang)
+            return; // No change in language
         this.#lang = event.detail;
         this.askForTranslation();
-    }
-
+    };
     askForTranslation() {
         db.translations.get(this.hash).then(translation => {
             if (translation) {
                 this.render(translation);
-            } else {
+            }
+            else {
                 const request = {
                     id: this.originalHash,
                     Domain: window.location.host,
@@ -56,7 +47,7 @@ export default class KoriTranslateElement extends HTMLElement {
                     Language: { Id: this.#originalLang },
                     Text: this.#original
                 };
-
+                this.classList.add('kori-translating');
                 fetch('https://localhost:7185/translate', {
                     method: 'POST',
                     body: JSON.stringify(request),
@@ -71,18 +62,19 @@ export default class KoriTranslateElement extends HTMLElement {
                             db.translations.put(newTranslation);
                         });
                     }
+                    this.classList.remove('kori-translating');
                 });
             }
-        })
+        });
     }
-
     render(translation) {
         this.#translated = translation.text;
-
         if (this.#translated) {
             this.textContent = this.#translated;
-        } else {
+        }
+        else {
             this.textContent = this.#original;
         }
     }
 }
+//# sourceMappingURL=KoriTranslateNode.js.map

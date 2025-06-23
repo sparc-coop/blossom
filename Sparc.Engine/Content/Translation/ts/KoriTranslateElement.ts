@@ -1,24 +1,41 @@
-﻿export default class KoriTranslator {
+﻿export default class KoriTranslateElement extends HTMLElement {
     observer;
+    #observedElement;
     
     constructor() {
-        this.observer = new MutationObserver(this.#observer);
+        super();
     }
 
-    init(element) {
-        this.wrapTextNodes(element || document.body);
-        this.observer.observe(element || document.body, { childList: true, characterData: true, subtree: true });
+    connectedCallback() {
+        this.#observedElement = this;
+        
+        // if the attribute 'for' is set, observe the element with that selector
+        if (this.hasAttribute('for')) {
+            const selector = this.getAttribute('for');
+            this.#observedElement = document.querySelector(selector);
+        }
+
+        this.wrapTextNodes();
+
+        // Observe changes in the DOM if the attribute 'live' is set
+        if (this.hasAttribute('live')) {
+            this.observer = new MutationObserver(this.#observer);
+            this.observer.observe(this.#observedElement, { childList: true, characterData: true, subtree: true });
+        }
     }
 
-    wrapTextNodes(element) {
-        console.log('wrapping text nodes');
+    disconnectedCallback() {
+        if (this.observer)
+            this.observer.disconnect();
+    }
+
+    wrapTextNodes() {
         var nodes = [];
-        var treeWalker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, this.#koriIgnoreFilter);
+        var treeWalker = document.createTreeWalker(this.#observedElement, NodeFilter.SHOW_TEXT, this.#koriIgnoreFilter);
         while (treeWalker.nextNode()) {
             const node = treeWalker.currentNode;
             if (this.isValid(node)) {
                 nodes.push(node);
-                console.log('oop', node);
             }
         }
 
@@ -28,7 +45,7 @@
     wrapTextNode(node) {
         if (this.isValid(node)) {
             // wrap the text node in a KoriTranslateElement
-            const wrapper = document.createElement('kori-translate');
+            const wrapper = document.createElement('kori-t');
             wrapper.textContent = node.textContent;
             node.parentElement.replaceChild(wrapper, node);
         }
@@ -38,7 +55,7 @@
         return node
             && node.textContent
             && node.textContent.trim()
-            && !(node.parentElement && node.parentElement.tagName === 'KORI-TRANSLATE');
+            && !(node.parentElement && node.parentElement.tagName === 'KORI-T');
     }
 
     #observer = mutations => {
