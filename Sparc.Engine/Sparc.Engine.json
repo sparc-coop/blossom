@@ -24,6 +24,25 @@
         }
       }
     },
+    "/hi": {
+      "get": {
+        "tags": [
+          "Sparc.Engine"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/auth/login": {
       "post": {
         "tags": [
