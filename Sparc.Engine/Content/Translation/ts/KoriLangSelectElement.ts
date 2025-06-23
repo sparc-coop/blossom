@@ -1,4 +1,5 @@
 ﻿import db from './KoriDb.js';
+import SparcEngine from './SparcEngine.js';
 
 export default class KoriLangSelectElement extends HTMLElement {
     #lang;
@@ -17,15 +18,9 @@ export default class KoriLangSelectElement extends HTMLElement {
             if (languages.length > 0) {
                 this.renderLanguages(languages);
             } else {
-                fetch('https://engine.sparc.coop/translate/languages', {
-                    credentials: 'include'
-                }).then(response => {
-                    if (response.ok) {
-                        response.json().then(languages => {
-                            this.renderLanguages(languages);
-                            db.languages.bulkPut(languages);
-                        });
-                    }
+                SparcEngine.getLanguages().then(languages => {
+                    this.renderLanguages(languages);
+                    db.languages.bulkPut(languages);
                 });
             }
         });

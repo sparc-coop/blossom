@@ -1,5 +1,5 @@
 import db from './KoriDb.js';
-import MD5 from './MD5.js';
+import SparcEngine from './SparcEngine.js';
 
 export default class KoriTranslateNode extends HTMLElement {
     #original;
@@ -24,10 +24,6 @@ export default class KoriTranslateNode extends HTMLElement {
         document.removeEventListener('kori-language-changed', this.#languageChangedCallback);
     }
 
-    get originalHash() { return MD5(this.#original + ':' + this.#originalLang); }
-
-    get hash() { return MD5(this.#original + ':' + this.#lang); }
-
     static observedAttributes = ['lang'];
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -45,38 +41,20 @@ export default class KoriTranslateNode extends HTMLElement {
     }
 
     askForTranslation() {
-        db.translations.get(this.hash).then(translation => {
+        const hash = SparcEngine.idHash(this.#original, this.#lang);
+        db.translations.get(hash).then(translation => {
             if (translation) {
                 this.render(translation);
             } else {
-                const request = {
-                    id: this.originalHash,
-                    Domain: window.location.host,
-                    LanguageId: this.#originalLang,
-                    Language: { Id: this.#originalLang },
-                    Text: this.#original
-                };
-
                 this.classList.add('kori-translating');
-                fetch('https://engine.sparc.coop/translate', {
-                    credentials: 'include',
-                    method: 'POST',
-                    body: JSON.stringify(request),
-                    headers: {
-                        'Accept-Language': this.#lang,
-                        'Content-Type': 'application/json'
-                    }
-                }).then(response => {
-                    if (response.ok) {
-                        response.json().then(newTranslation => {
-                            this.render(newTranslation);
-                            db.translations.put(newTranslation);
-                        });
-                    }
-                    this.classList.remove('kori-translating');
-                });
+                SparcEngine.translate(this.#original, this.#originalLang, this.#lang)
+                    .then(newTranslation => {
+                        this.render(newTranslation);
+                        db.translations.put(newTranslation);
+                    });
+                this.classList.remove('kori-translating');
             }
-        })
+        });
     }
 
     render(translation) {

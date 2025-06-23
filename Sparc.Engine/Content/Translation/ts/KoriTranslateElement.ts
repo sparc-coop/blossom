@@ -1,5 +1,6 @@
 ﻿import db from './KoriDb.js';
-import MD5 from './MD5.js';
+import SparcEngine from './SparcEngine.js';
+
 export default class KoriTranslateElement extends HTMLElement {
     observer;
     #observedElement;
@@ -60,7 +61,7 @@ export default class KoriTranslateElement extends HTMLElement {
             if (this.#mode === 'live') {
                 if (!node.hash) {
                     var text = node.textContent.trim();
-                    node.hash = MD5(text + ':' + this.#originalLang);
+                    node.hash = SparcEngine.idHash(text, this.#originalLang);
                     this.#originalText[node.hash] = text;
                     document.addEventListener('kori-language-changed', (event: any) => {
                         this.#lang = event.detail;
@@ -117,40 +118,17 @@ export default class KoriTranslateElement extends HTMLElement {
     }
 
     askForTranslation(textNode) {
-        const hash = MD5(textNode.textContent.trim() + ':' + this.#lang);
+        const hash = SparcEngine.idHash(textNode.textContent, this.#lang);
 
         db.translations.get(hash).then(translation => {
             if (translation) {
-                console.log('translation found!', hash, textNode, this.#lang);
                 textNode.textContent = translation.text;
             } else {
-                const request = {
-                    id: textNode.hash,
-                    Domain: window.location.host,
-                    LanguageId: this.#originalLang,
-                    Language: { Id: this.#originalLang },
-                    Text: this.#originalText[textNode.hash]
-                };
-
-                console.log('translation not found???', hash, textNode, this.#lang);
-
-                fetch('https://engine.sparc.coop/translate', {
-                    method: 'POST',
-                    credentials: 'include',
-                    body: JSON.stringify(request),
-                    headers: {
-                        'Accept-Language': this.#lang,
-                        'Content-Type': 'application/json'
-                    }
-                }).then(response => {
-                    if (response.ok) {
-                        response.json().then(newTranslation => {
-                            textNode.textContent = newTranslation.text;
-                            db.translations.put(newTranslation);
-                            console.log('translation loaded', hash, newTranslation);
-                        });
-                    }
-                });
+                SparcEngine.translate(this.#originalText[textNode.hash], this.#originalLang, this.#lang)
+                    .then(newTranslation => {
+                        textNode.textContent = newTranslation.text;
+                        db.translations.put(newTranslation);
+                    });
             }
         });
     }
