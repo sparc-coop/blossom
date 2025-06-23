@@ -54,7 +54,15 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         
         await Parallel.ForEachAsync(items, async (item, token) =>
         {
-            await Client.Container.CreateItemAsync(item, cancellationToken: token);
+            try
+            {
+                await Client.Container.CreateItemAsync(item, cancellationToken: token);
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                // Handle 409 Conflict (item already exists)
+                Console.WriteLine($"Conflict: Item with id {item.Id} already exists.");
+            }
             await Publish(item);
         });
     }
