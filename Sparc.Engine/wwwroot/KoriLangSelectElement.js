@@ -1,14 +1,11 @@
 import db from './KoriDb.js';
-class KoriLangSelectElement extends HTMLElement {
-    #select;
-    #languages;
+export default class KoriLangSelectElement extends HTMLElement {
     #lang;
     constructor() {
         super();
     }
     connectedCallback() {
-        this.#lang = this.lang || document.documentElement.lang;
-        this.#select = document.createElement('select');
+        this.#lang = this.lang || navigator.language;
         this.getLanguages();
     }
     getLanguages() {
@@ -29,8 +26,24 @@ class KoriLangSelectElement extends HTMLElement {
         });
     }
     renderLanguages(languages) {
-        this.#languages = languages;
+        this.innerHTML = '';
+        let select = document.createElement('select');
+        select.className = 'kori-ignore';
+        languages.forEach(lang => {
+            const option = document.createElement('option');
+            option.value = lang.id;
+            option.textContent = lang.nativeName;
+            if (lang.id === this.#lang) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+        select.addEventListener('change', () => {
+            this.#lang = select.value;
+            document.documentElement.lang = this.#lang;
+            this.dispatchEvent(new CustomEvent('kori-language-changed', { detail: { lang: this.#lang } }));
+        });
+        this.appendChild(select);
     }
 }
-customElements.define('kori-langselect', KoriLangSelectElement);
 //# sourceMappingURL=KoriLangSelectElement.js.map

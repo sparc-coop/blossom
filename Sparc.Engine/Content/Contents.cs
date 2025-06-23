@@ -26,10 +26,10 @@ public class Contents(BlossomAggregateOptions<TextContent> options, KoriTranslat
     //    return [];
     //}
 
-    public async Task<TextContent> Get(TextContent content, string language)
+    public async Task<TextContent> Get(TextContent content, string? fallbackLanguage)
     {
-        var toLanguage = User.Language(language) 
-            ?? throw new ArgumentException("Invalid language specified.", nameof(language));
+        var toLanguage = User.Language(fallbackLanguage) 
+            ?? throw new ArgumentException("Invalid language specified.", nameof(fallbackLanguage));
 
         var newId = TextContent.IdHash(content.Text, toLanguage);
         var existing = await Repository.Query
@@ -56,5 +56,6 @@ public class Contents(BlossomAggregateOptions<TextContent> options, KoriTranslat
     {
         var group = endpoints.MapGroup("translate");
         group.MapPost("", async (HttpRequest request, TextContent content) => await Get(content, request.Headers.AcceptLanguage));
+        group.MapGet("languages", Languages).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
     }
 }

@@ -158,6 +158,28 @@
           }
         }
       }
+    },
+    "/translate/languages": {
+      "get": {
+        "tags": [
+          "Contents"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Language2"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
