@@ -20,7 +20,10 @@ public class LanguageClaimsTransformation(KoriTranslator translator, IBlossomAut
             translator.SetLanguage(user, accept);
             await auth.UpdateAsync(principal, user.Avatar);
         }
-        
+
+        if (user.Avatar.Language == null && string.IsNullOrWhiteSpace(accept))
+            return principal;
+
         principal.Identities.First().AddClaim(new Claim("language", user.Avatar.Language?.ToString() ?? accept!));
 
         return principal;

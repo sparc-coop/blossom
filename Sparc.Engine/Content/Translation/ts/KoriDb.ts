@@ -2,6 +2,9 @@
 
 const db = new Dexie.Dexie('KoriTranslate');
 
-db.version(1).stores({ translations: 'id' });
+db.version(2).stores({
+    translations: 'id',
+    languages: 'id'
+});
 
 export default db;

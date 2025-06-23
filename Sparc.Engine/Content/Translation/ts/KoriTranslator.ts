@@ -1,4 +1,6 @@
-﻿export default class KoriEngine {
+﻿export default class KoriTranslator {
+    observer;
+    
     constructor() {
         this.observer = new MutationObserver(this.#observer);
     }

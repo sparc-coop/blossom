@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "es2023",
+    "outDir": "wwwroot"
+  },
+  "include": [
+    "Content/Translation/**/*"
+  ]
+}

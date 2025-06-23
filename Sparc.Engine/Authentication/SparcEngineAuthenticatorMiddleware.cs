@@ -13,7 +13,8 @@ public class SparcEngineAuthenticatorMiddleware(RequestDelegate next)
         if (context.Request.Path.StartsWithSegments("/_blazor") 
             || context.Request.Path.StartsWithSegments("/_framework") 
             || context.Request.Method == "OPTIONS"
-            || context.Request.Path.Value?.EndsWith("js") == true)
+            || context.Request.Path.Value?.EndsWith("js") == true
+            || context.Request.Path.Value?.EndsWith("js.map") == true)
         {
             await _next(context);
             return;
