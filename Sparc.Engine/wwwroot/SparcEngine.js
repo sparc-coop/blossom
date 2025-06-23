@@ -2,13 +2,34 @@ import MD5 from "./MD5.js";
 const baseUrl = 'https://localhost:7185';
 //const baseUrl = 'https://engine.sparc.coop';
 export default class SparcEngine {
+    static userLang;
+    static async hi() {
+        return await this.getLanguage();
+    }
     static async getLanguages() {
         return await this.fetch('translate/languages');
     }
-    static idHash(text, lang) {
+    static async getLanguage() {
+        const response = await this.fetch('user/language');
+        if (response && response.id) {
+            this.userLang = response.id;
+        }
+        else {
+            return null;
+        }
+    }
+    static async setLanguage(language) {
+        await this.fetch('user/language', { Id: language });
+        document.documentElement.lang = language;
+        this.userLang = language;
+        document.dispatchEvent(new CustomEvent('kori-language-changed', { detail: language }));
+    }
+    static idHash(text, lang = null) {
+        if (!lang)
+            lang = this.userLang;
         return MD5(text.trim() + ':' + lang);
     }
-    static async translate(text, fromLang, toLang) {
+    static async translate(text, fromLang) {
         const request = {
             id: this.idHash(text, fromLang),
             Domain: window.location.host,
@@ -16,10 +37,7 @@ export default class SparcEngine {
             Language: { Id: fromLang },
             Text: text
         };
-        return await this.fetch('translate', request, toLang);
-    }
-    static async hi() {
-        return await fetch(`${baseUrl}/hi`);
+        return await this.fetch('translate', request, this.userLang);
     }
     static async fetch(url, body = null, language = null) {
         const options = {

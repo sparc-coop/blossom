@@ -80,7 +80,7 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
 
     public void SetLanguage(BlossomUser user, string? acceptLanguageHeaders)
     {
-        if (Languages == null || user.Avatar.Language != null || string.IsNullOrWhiteSpace(acceptLanguageHeaders))
+        if (Languages == null || string.IsNullOrWhiteSpace(acceptLanguageHeaders))
             return;
 
         // Split the header by comma, then by semicolon to get language codes
@@ -116,25 +116,5 @@ public class KoriTranslator(IEnumerable<ITranslator> translators, IRepository<Te
         }
 
         return null;
-    }
-
-    internal static Language? GetLanguage(ClaimsPrincipal user, string? fallbackLanguageId = null)
-    {
-        if (Languages == null)
-            return null;
-
-        var languageClaim = user.FindFirst(x => x.Type == "language")?.Value;
-        if (string.IsNullOrEmpty(languageClaim))
-            return null;
-
-        return GetLanguage(languageClaim);
-    }
-}
-
-public static class LanguageExtensions
-{
-    public static Language? Language(this ClaimsPrincipal user, string? fallbackLanguageId = null)
-    {
-        return KoriTranslator.GetLanguage(user, fallbackLanguageId);
     }
 }

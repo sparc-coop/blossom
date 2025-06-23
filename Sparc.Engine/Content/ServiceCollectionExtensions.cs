@@ -15,9 +15,6 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<BlossomAggregate<TextContent>>()
             .AddScoped<Contents>();
 
-        builder.Services.AddTransient<IClaimsTransformation, LanguageClaimsTransformation>()
-            .AddTransient<LanguageClaimsTransformation>();
-
         return builder;
     }
 

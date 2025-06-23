@@ -70,10 +70,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         AddClaim(ClaimTypes.NameIdentifier, Id);
         AddClaim(ClaimTypes.Name, Username);
-
-        if (Avatar.Language != null)
-            AddClaim("language", Avatar.Language.ToString());
-
         RegisterClaims();
 
         var claims = Claims.Select(x => new Claim(x.Key, x.Value)).ToList();

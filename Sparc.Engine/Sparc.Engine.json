@@ -149,6 +149,52 @@
         }
       }
     },
+    "/user/language": {
+      "get": {
+        "tags": [
+          "SparcEngineAuthenticator`1"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Language2"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sparc.Engine"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Language2"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlossomUser"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/translate": {
       "post": {
         "tags": [
@@ -606,6 +652,9 @@
   "tags": [
     {
       "name": "Sparc.Engine"
+    },
+    {
+      "name": "SparcEngineAuthenticator`1"
     },
     {
       "name": "Contents"

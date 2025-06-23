@@ -1,9 +1,10 @@
 ﻿
+using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 
 namespace Sparc.Engine;
 
-public class Contents(BlossomAggregateOptions<TextContent> options, KoriTranslator translator) 
+public class Contents(BlossomAggregateOptions<TextContent> options, KoriTranslator translator, SparcEngineAuthenticator<BlossomUser> auth) 
     : BlossomAggregate<TextContent>(options), IBlossomEndpoints
 {
     public BlossomQuery<TextContent> Search(string searchTerm) => Query().Where(content =>
@@ -26,10 +27,10 @@ public class Contents(BlossomAggregateOptions<TextContent> options, KoriTranslat
     //    return [];
     //}
 
-    public async Task<TextContent> Get(TextContent content, string? fallbackLanguage)
+    public async Task<TextContent> Get(TextContent content)
     {
-        var toLanguage = User.Language(fallbackLanguage) 
-            ?? throw new ArgumentException("Invalid language specified.", nameof(fallbackLanguage));
+        var user = await auth.GetAsync(User);
+        var toLanguage = user?.Avatar.Language;
 
         var newId = TextContent.IdHash(content.Text, toLanguage);
         var existing = await Repository.Query
@@ -55,7 +56,7 @@ public class Contents(BlossomAggregateOptions<TextContent> options, KoriTranslat
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("translate");
-        group.MapPost("", async (HttpRequest request, TextContent content) => await Get(content, request.Headers.AcceptLanguage));
+        group.MapPost("", async (HttpRequest request, TextContent content) => await Get(content));
         group.MapGet("languages", Languages).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
     }
 }

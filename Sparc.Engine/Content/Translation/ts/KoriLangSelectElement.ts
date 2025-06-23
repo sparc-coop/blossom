@@ -2,14 +2,11 @@
 import SparcEngine from './SparcEngine.js';
 
 export default class KoriLangSelectElement extends HTMLElement {
-    #lang;
-
     constructor() {
         super();
     }
 
     connectedCallback() {
-        this.#lang = this.lang || navigator.language;
         this.getLanguages();
     }
 
@@ -35,16 +32,14 @@ export default class KoriLangSelectElement extends HTMLElement {
             const option = document.createElement('option');
             option.value = lang.id;
             option.textContent = lang.nativeName;
-            if (lang.id === this.#lang) {
+            if (lang.id === SparcEngine.userLang) {
                 option.selected = true;
             }
             select.appendChild(option);
         });
 
         select.addEventListener('change', () => {
-            this.#lang = select.value;
-            document.documentElement.lang = this.#lang;
-            document.dispatchEvent(new CustomEvent('kori-language-changed', { detail: this.#lang }));
+            SparcEngine.setLanguage(select.value);
         });
 
         this.appendChild(select);

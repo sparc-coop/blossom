@@ -10,6 +10,7 @@ public class SparcEngineAuthenticator<T> : BlossomDefaultAuthenticator<T>, IBlos
 {
     IPasswordlessClient PasswordlessClient { get; }
     public FriendlyId FriendlyId { get; }
+    public KoriTranslator Translator { get; }
     public HttpClient Client { get; }
     public const string PublicKey = "sparcengine:public:63cc565eb9544940ad6f2c387b228677";
 
@@ -17,11 +18,13 @@ public class SparcEngineAuthenticator<T> : BlossomDefaultAuthenticator<T>, IBlos
         IPasswordlessClient _passwordlessClient,
         IConfiguration config,
         IRepository<T> users,
-        FriendlyId friendlyId)
+        FriendlyId friendlyId,
+        KoriTranslator translator)
         : base(users)
     {
         PasswordlessClient = _passwordlessClient;
         FriendlyId = friendlyId;
+        Translator = translator;
         Client = new HttpClient
         {
             BaseAddress = new Uri("https://v4.passwordless.dev/")
@@ -192,7 +195,7 @@ public class SparcEngineAuthenticator<T> : BlossomDefaultAuthenticator<T>, IBlos
 
         if (!alreadyHasProduct)
         {
-            User.AddProduct(productName); 
+            User.AddProduct(productName);
             await SaveAsync();
         }
 
@@ -205,6 +208,33 @@ public class SparcEngineAuthenticator<T> : BlossomDefaultAuthenticator<T>, IBlos
         auth.MapPost("login", async (SparcEngineAuthenticator<T> auth, ClaimsPrincipal principal, HttpContext context, string? emailOrToken = null) => await auth.Login(principal, context, emailOrToken));
         auth.MapPost("logout", async (SparcEngineAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.Logout(principal, emailOrToken));
         auth.MapGet("userinfo", async (SparcEngineAuthenticator<T> auth, ClaimsPrincipal principal) => await auth.GetAsync(principal));
+
+        var user = endpoints.MapGroup("/user");
+        user.MapGet("language", async (SparcEngineAuthenticator<T> auth, ClaimsPrincipal principal, HttpRequest request) =>
+        {
+            await auth.GetUserAsync(principal);
+            var language = auth.User?.Avatar?.Language;
+            if (language == null && !string.IsNullOrWhiteSpace(request.Headers.AcceptLanguage))
+            {
+                Translator.SetLanguage(auth.User!, request.Headers.AcceptLanguage);
+                await auth.SaveAsync();
+            }
+            return auth.User?.Avatar?.Language;
+        });
+        user.MapPost("language", async (SparcEngineAuthenticator<T> auth, ClaimsPrincipal principal, Language language) => await auth.SetLanguageAsync(principal, language));
         auth.MapPost("user-products", async (SparcEngineAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] AddProductRequest request) => await auth.AddProductAsync(principal, request.ProductName));
+    }
+
+    private async Task<BlossomUser> SetLanguageAsync(ClaimsPrincipal principal, Language language)
+    {
+        await base.GetUserAsync(principal);
+
+        if (User is null)
+            throw new InvalidOperationException("User not initialized");
+
+        Translator.SetLanguage(User, language.Id);
+        await SaveAsync();
+
+        return User;
     }
 }

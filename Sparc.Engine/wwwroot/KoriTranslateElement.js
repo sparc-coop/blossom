@@ -6,7 +6,6 @@ export default class KoriTranslateElement extends HTMLElement {
     #mode;
     #originalLang;
     #originalText = {};
-    #lang;
     constructor() {
         super();
     }
@@ -14,7 +13,6 @@ export default class KoriTranslateElement extends HTMLElement {
         this.#observedElement = this;
         this.#mode = 'static';
         this.#originalLang = this.lang || document.documentElement.lang;
-        this.#lang = navigator.language;
         // if the attribute 'for' is set, observe the element with that selector
         if (this.hasAttribute('for')) {
             const selector = this.getAttribute('for');
@@ -53,7 +51,6 @@ export default class KoriTranslateElement extends HTMLElement {
                     node.hash = SparcEngine.idHash(text, this.#originalLang);
                     this.#originalText[node.hash] = text;
                     document.addEventListener('kori-language-changed', (event) => {
-                        this.#lang = event.detail;
                         this.askForTranslation(node);
                     });
                     console.log('live node registered', node.textContent);
@@ -100,13 +97,13 @@ export default class KoriTranslateElement extends HTMLElement {
         return NodeFilter.FILTER_ACCEPT;
     };
     askForTranslation(textNode) {
-        const hash = SparcEngine.idHash(textNode.textContent, this.#lang);
+        const hash = SparcEngine.idHash(textNode.textContent);
         db.translations.get(hash).then(translation => {
             if (translation) {
                 textNode.textContent = translation.text;
             }
             else {
-                SparcEngine.translate(this.#originalText[textNode.hash], this.#originalLang, this.#lang)
+                SparcEngine.translate(this.#originalText[textNode.hash], this.#originalLang)
                     .then(newTranslation => {
                     textNode.textContent = newTranslation.text;
                     db.translations.put(newTranslation);
