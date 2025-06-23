@@ -1,5 +1,6 @@
 ﻿using Refit;
 using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Billing;
 using Sparc.Blossom.Content;
 
 namespace Sparc.Blossom;
@@ -37,6 +38,16 @@ public interface IBlossomCloud
     [Post("/auth/user-languages")]
     Task<BlossomUser> AddUserLanguage([Body] Language language);
 
+    [Post("/billing/create-order-payment")]
+    Task<CreateOrderPaymentResponse> CreateOrderPaymentAsync([Body] CreateOrderPaymentRequest request);
+
+    [Get("/billing/get-product/{productId}")]
+    Task<GetProductResponse> GetProductAsync(string productId);
+
+
+    //[Post("/billing/confirm-order-payment")]
+    //Task<PaymentIntent> ConfirmOrderPaymentAsync([Body] ConfirmOrderPaymentRequest request);
+
     [Post("/auth/verify-code")]
-    Task<bool> VerifyEmailOrPhoneCode([Body] VerificationRequest request);
+    Task<bool> VerifyCode([Body] VerificationRequest request);
 }

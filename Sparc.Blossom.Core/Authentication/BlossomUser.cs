@@ -7,8 +7,9 @@ namespace Sparc.Blossom.Authentication;
 
 public record ProductKey(string ProductName, string SerialNumber, DateTime PurchaseDate);
 public record AddProductRequest(string ProductName);
-public record UpdateUserRequest(string? Username = null, string? Email = null, string? PhoneNumber = null);
-public record VerificationRequest(string Destination, string Code);
+public record UpdateUserRequest(string? Username = null, string? Email = null, string? PhoneNumber = null, bool RequireEmailVerification = false,
+    bool RequirePhoneVerification = false);
+public record VerificationRequest(string EmailOrPhone, string Code);
 
 public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 {
@@ -33,11 +34,9 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public UserAvatar Avatar { get; private set; } = new();
     public List<Language> LanguagesSpoken { get; private set; } = [];
     public List<ProductKey> Products { get; set; } = [];
-    public bool IsEmailVerified { get; set; }
-    public bool IsPhoneVerified { get; set; }
-    public string? EmailVerificationHash { get; set; }
-    public string? PhoneVerificationHash { get; set; }
-
+    public string? EmailOrPhone { get; set; }
+    public bool IsVerified { get; set; }
+    public string? VerificationHash { get; set; }
 
     internal Dictionary<string, string> Claims { get; set; } = [];
     Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
@@ -235,55 +234,29 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
             PhoneNumber = request.PhoneNumber;
     }    
 
-    public void RevokeEmail() => IsEmailVerified = false;
-    public void RevokePhone() => IsPhoneVerified = false;
+    public void Revoke() => IsVerified = false;
 
-    public string CreateHash(string destination, string code)
+    public string CreateHash(string code)
     {
         using var md5 = MD5.Create();
-        var inputBytes = Encoding.ASCII.GetBytes(destination + code);
+        var inputBytes = Encoding.ASCII.GetBytes(EmailOrPhone + code);
         return string.Concat(md5.ComputeHash(inputBytes).Select(x => x.ToString("x2")));
     }
 
-    public string GenerateVerificationCode(string destination)
+    public string GenerateVerificationCode()
     {
-        var code = destination == "appletest@email.com"
+        var code = EmailOrPhone == "appletest@email.com"
             ? "123456"
             : new Random().Next(0, 1000000).ToString("D6");
-
-        var hash = CreateHash(destination, code);
-
-       
-        if (!string.IsNullOrWhiteSpace(Email) && destination.Equals(Email, StringComparison.OrdinalIgnoreCase))
-            EmailVerificationHash = hash;
-        else if (!string.IsNullOrWhiteSpace(PhoneNumber) && destination.Equals(PhoneNumber, StringComparison.OrdinalIgnoreCase))
-            PhoneVerificationHash = hash;
-        else if (destination.Contains("@"))
-            EmailVerificationHash = hash;
-        else
-            PhoneVerificationHash = hash;
-
+        VerificationHash = CreateHash(code);
         return code;
     }
 
-    public bool VerifyCode(string destination, string code)
+    public bool VerifyCode(string code)
     {
-        var hash = CreateHash(destination, code);
+        var hash = CreateHash(code);
+        IsVerified = hash == VerificationHash;
 
-        if (hash == EmailVerificationHash)
-        {
-            IsEmailVerified = true;
-            EmailVerificationHash = null;
-            return true;
-        }
-
-        if (hash == PhoneVerificationHash)
-        {
-            IsPhoneVerified = true;
-            PhoneVerificationHash = null;
-            return true;
-        }
-
-        return false;
+        return IsVerified;
     }
 }
