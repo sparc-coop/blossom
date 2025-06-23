@@ -55,7 +55,10 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
     public override void AddAuthentication<TUser>()
     {
         Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(options => options.ExpireTimeSpan = TimeSpan.FromDays(30));
+            .AddCookie(options => {
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+            });
 
         Services.AddCascadingAuthenticationState();
         Services.AddScoped<AuthenticationStateProvider, BlossomServerAuthenticationStateProvider<TUser>>()
@@ -72,7 +75,10 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
     public override void AddAuthentication<TAuthenticator, TUser>()
     {
         Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(options => options.ExpireTimeSpan = TimeSpan.FromDays(30));
+            .AddCookie(options => {
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+            });
 
         Services.AddCascadingAuthenticationState();
         Services.AddScoped<AuthenticationStateProvider, BlossomServerAuthenticationStateProvider<TUser>>()

@@ -134,8 +134,9 @@ export default class KoriTranslateElement extends HTMLElement {
 
                 console.log('translation not found???', hash, textNode, this.#lang);
 
-                fetch('https://localhost:7185/translate', {
+                fetch('https://engine.sparc.coop/translate', {
                     method: 'POST',
+                    credentials: 'include',
                     body: JSON.stringify(request),
                     headers: {
                         'Accept-Language': this.#lang,

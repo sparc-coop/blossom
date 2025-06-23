@@ -13,7 +13,10 @@ public static class ServiceCollectionExtensions
         where TUser : BlossomUser, new()
     {
         builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(options => options.ExpireTimeSpan = TimeSpan.FromDays(30));
+            .AddCookie(options => {
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+                });
 
         builder.Services.AddAuthorization();
         builder.Services.AddHttpContextAccessor();
@@ -42,7 +45,7 @@ public static class ServiceCollectionExtensions
         where TUser : BlossomUser, new()
     { 
         app.UseCookiePolicy(new() { 
-            MinimumSameSitePolicy = SameSiteMode.Strict,
+            MinimumSameSitePolicy = SameSiteMode.None,
             HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always,
             Secure = CookieSecurePolicy.Always
         });

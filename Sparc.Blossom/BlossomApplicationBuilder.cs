@@ -23,7 +23,7 @@ public abstract class BlossomApplicationBuilder
     public void AddSparcEngine()
     {
         Services.AddRefitClient<ISparcEngine>()
-            .ConfigureHttpClient(x => x.BaseAddress = new Uri("https://localhost:7185"))
+            .ConfigureHttpClient(x => x.BaseAddress = new Uri("https://engine.sparc.coop"))
             .AddStandardResilienceHandler();
     }
 

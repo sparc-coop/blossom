@@ -14,7 +14,9 @@ export default class KoriLangSelectElement extends HTMLElement {
                 this.renderLanguages(languages);
             }
             else {
-                fetch('https://localhost:7185/translate/languages').then(response => {
+                fetch('https://engine.sparc.coop/translate/languages', {
+                    credentials: 'include'
+                }).then(response => {
                     if (response.ok) {
                         response.json().then(languages => {
                             this.renderLanguages(languages);

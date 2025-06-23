@@ -48,7 +48,8 @@ export default class KoriTranslateNode extends HTMLElement {
                     Text: this.#original
                 };
                 this.classList.add('kori-translating');
-                fetch('https://localhost:7185/translate', {
+                fetch('https://engine.sparc.coop/translate', {
+                    credentials: 'include',
                     method: 'POST',
                     body: JSON.stringify(request),
                     headers: {
