@@ -50,4 +50,7 @@ public interface IBlossomCloud
 
     [Post("/auth/verify-code")]
     Task<bool> VerifyCode([Body] VerificationRequest request);
+
+    [Post("/auth/update-avatar")]
+    Task<BlossomUser> UpdateAvatar([Body] UpdateAvatarRequest request);
 }

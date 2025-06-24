@@ -267,6 +267,30 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         return User;
     }
 
+    public async Task<BlossomUser> UpdateAvatarAsync(ClaimsPrincipal principal, UpdateAvatarRequest request)
+    {
+        await base.GetUserAsync(principal);
+        if (User is null)
+            throw new InvalidOperationException("User not initialized");
+
+        var avatar = new UserAvatar(User.Avatar)
+        {
+            Id = User.Id,
+            Name = request.Name ?? User.Avatar.Name,
+            BackgroundColor = request.BackgroundColor ?? User.Avatar.BackgroundColor,
+            Pronouns = request.Pronouns ?? User.Avatar.Pronouns,
+            Description = request.Description ?? User.Avatar.Description,
+            SkinTone = request.SkinTone ?? User.Avatar.SkinTone,
+            Emoji = request.Emoji ?? User.Avatar.Emoji,
+            Gender = request.Gender ?? User.Avatar.Gender
+        };
+
+        User.UpdateAvatar(avatar);
+        await SaveAsync();
+        return User;
+    }
+
+
     public async Task SendVerificationCodeAsync(ClaimsPrincipal principal, string destination)
     {
         await base.GetUserAsync(principal);
@@ -317,6 +341,8 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         auth.MapPost("update-user", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] UpdateUserRequest request) => await auth.UpdateUserAsync(principal, request));
         auth.MapPost("user-languages", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] Language language) => await auth.AddLanguageAsync(principal, language));
         auth.MapPost("verify-code", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] VerificationRequest request) => await auth.VerifyCodeAsync(principal, request.EmailOrPhone, request.Code));
+        auth.MapPost("update-avatar", async (BlossomPasswordlessAuthenticator<T> auth, ClaimsPrincipal principal, [FromBody] UpdateAvatarRequest request) => await auth.UpdateAvatarAsync(principal, request));
+
     }
 
     private async Task LoginWithPasswordless(HttpContext context)

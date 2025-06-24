@@ -10,6 +10,7 @@ public record AddProductRequest(string ProductName);
 public record UpdateUserRequest(string? Username = null, string? Email = null, string? PhoneNumber = null, bool RequireEmailVerification = false,
     bool RequirePhoneVerification = false);
 public record VerificationRequest(string EmailOrPhone, string Code);
+public record UpdateAvatarRequest(string? Name, string? BackgroundColor, string? Pronouns, string? Description, string? SkinTone, string? Emoji, string? Gender);
 
 public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 {
@@ -17,10 +18,10 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         Id = Guid.NewGuid().ToString();
         AuthenticationType = "Blossom";
-        Username = "User";
-        Avatar = new(Id, Username);
+        //Username = "User";
+        Avatar = new(Id, "");
     }
-    
+
     public string Username { get; set; }
     public string Email { get; set; }
     public string PhoneNumber { get; set; }
@@ -45,7 +46,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         if (value == null)
             return;
-        
+
         if (Claims.ContainsKey(type))
             Claims[type] = value;
         else
@@ -103,7 +104,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         Username = username;
     }
-   
+
     public void SetParentUser(BlossomUser parentUser)
     {
         Username = parentUser.Username;
@@ -154,11 +155,11 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
         return !hasDifferentClaims;
     }
-    
+
     public void ChangeVoice(Language language, Voice? voice = null)
     {
         ChangeLanguage(language);
-        
+
         Avatar.Language = language with { DialectId = voice?.Locale, VoiceId = voice?.ShortName };
         Avatar.Gender = voice?.Gender;
     }
@@ -218,7 +219,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         if (HasProduct(productName))
             return;
 
-        var serial = Guid.NewGuid().ToString(); 
+        var serial = Guid.NewGuid().ToString();
         Products.Add(new ProductKey(productName, serial, DateTime.UtcNow));
     }
 
@@ -232,7 +233,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
         if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
             PhoneNumber = request.PhoneNumber;
-    }    
+    }
 
     public void Revoke() => IsVerified = false;
 
