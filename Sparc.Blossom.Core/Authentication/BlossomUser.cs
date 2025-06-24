@@ -10,7 +10,7 @@ public record AddProductRequest(string ProductName);
 public record UpdateUserRequest(string? Username = null, string? Email = null, string? PhoneNumber = null, bool RequireEmailVerification = false,
     bool RequirePhoneVerification = false);
 public record VerificationRequest(string EmailOrPhone, string Code);
-public record UpdateAvatarRequest(string? Name, string? BackgroundColor, string? Pronouns, string? Description, string? SkinTone, string? Emoji, string? Gender);
+public record UpdateAvatarRequest(string? Name = null, string? BackgroundColor = null, string? Pronouns = null, string? Description = null, string? Emoji = null, string? Gender = null);
 
 public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 {

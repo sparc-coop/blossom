@@ -280,7 +280,6 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
             BackgroundColor = request.BackgroundColor ?? User.Avatar.BackgroundColor,
             Pronouns = request.Pronouns ?? User.Avatar.Pronouns,
             Description = request.Description ?? User.Avatar.Description,
-            SkinTone = request.SkinTone ?? User.Avatar.SkinTone,
             Emoji = request.Emoji ?? User.Avatar.Emoji,
             Gender = request.Gender ?? User.Avatar.Gender
         };
@@ -289,7 +288,6 @@ public class BlossomPasswordlessAuthenticator<T> : BlossomDefaultAuthenticator<T
         await SaveAsync();
         return User;
     }
-
 
     public async Task SendVerificationCodeAsync(ClaimsPrincipal principal, string destination)
     {
