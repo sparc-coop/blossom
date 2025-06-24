@@ -24,6 +24,7 @@
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<StaticWebAssetBasePath>Blossom</StaticWebAssetBasePath>
 		<NoWarn>NU5100</NoWarn>
+		<UserSecretsId>1545b1f6-fd33-456d-9853-8b96b235cfd6</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
