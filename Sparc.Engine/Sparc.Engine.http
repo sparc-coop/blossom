@@ -1,6 +1,0 @@
-@Sparc.Engine_HostAddress = http://localhost:5081
-
-GET {{Sparc.Engine_HostAddress}}/weatherforecast/
-Accept: application/json
-
-### 
