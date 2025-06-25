@@ -147,6 +147,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="buildTransitive\" />
+	  <Folder Include="wwwroot\" />
 	</ItemGroup>
 
 	<!-- Android -->
