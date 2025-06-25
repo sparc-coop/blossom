@@ -1,10 +1,16 @@
 ﻿using Sparc.Engine;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Sparc.Blossom.Authentication;
 
 public record ProductKey(string ProductName, string SerialNumber, DateTime PurchaseDate);
 public record AddProductRequest(string ProductName);
+public record UpdateUserRequest(string? Username = null, string? Email = null, string? PhoneNumber = null, bool RequireEmailVerification = false,
+    bool RequirePhoneVerification = false);
+public record VerificationRequest(string EmailOrPhone, string Code);
+public record UpdateAvatarRequest(string? Name = null, string? BackgroundColor = null, string? Pronouns = null, string? Description = null, string? Emoji = null, string? Gender = null);
 
 public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 {
@@ -12,11 +18,13 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         Id = Guid.NewGuid().ToString();
         AuthenticationType = "Blossom";
-        Username = Id;
-        Avatar = new(Id, Username);
+        //Username = "User";
+        Avatar = new(Id, "");
     }
-    
+
     public string Username { get; set; }
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
     public string UserId { get { return Id; } set { Id = value; } }
     public string AuthenticationType { get; set; }
     public string? ExternalId { get; set; }
@@ -27,6 +35,10 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public UserAvatar Avatar { get; set; } = new();
     public List<Language> LanguagesSpoken { get; set; } = [];
     public List<ProductKey> Products { get; set; } = [];
+    public string? EmailOrPhone { get; set; }
+    public bool IsVerified { get; set; }
+    public string? VerificationHash { get; set; }
+
     internal Dictionary<string, string> Claims { get; set; } = [];
     Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
 
@@ -34,7 +46,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         if (value == null)
             return;
-        
+
         if (Claims.ContainsKey(type))
             Claims[type] = value;
         else
@@ -92,7 +104,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         Username = username;
     }
-   
+
     public void SetParentUser(BlossomUser parentUser)
     {
         Username = parentUser.Username;
@@ -144,11 +156,11 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
         return !hasDifferentClaims;
     }
-    
+
     public void ChangeVoice(Language language, Voice? voice = null)
     {
         ChangeLanguage(language);
-        
+
         Avatar.Language = language with { DialectId = voice?.Locale, VoiceId = voice?.ShortName };
         Avatar.Gender = voice?.Gender;
     }
@@ -208,7 +220,45 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         if (HasProduct(productName))
             return;
 
-        var serial = Guid.NewGuid().ToString(); 
+        var serial = Guid.NewGuid().ToString();
         Products.Add(new ProductKey(productName, serial, DateTime.UtcNow));
+    }
+
+    public void Update(UpdateUserRequest request)
+    {
+        if (!string.IsNullOrWhiteSpace(request.Username))
+            Username = request.Username;
+
+        if (!string.IsNullOrWhiteSpace(request.Email))
+            Email = request.Email;
+
+        if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
+            PhoneNumber = request.PhoneNumber;
+    }
+
+    public void Revoke() => IsVerified = false;
+
+    public string CreateHash(string code)
+    {
+        using var md5 = MD5.Create();
+        var inputBytes = Encoding.ASCII.GetBytes(EmailOrPhone + code);
+        return string.Concat(md5.ComputeHash(inputBytes).Select(x => x.ToString("x2")));
+    }
+
+    public string GenerateVerificationCode()
+    {
+        var code = EmailOrPhone == "appletest@email.com"
+            ? "123456"
+            : new Random().Next(0, 1000000).ToString("D6");
+        VerificationHash = CreateHash(code);
+        return code;
+    }
+
+    public bool VerifyCode(string code)
+    {
+        var hash = CreateHash(code);
+        IsVerified = hash == VerificationHash;
+
+        return IsVerified;
     }
 }

@@ -1,5 +1,7 @@
 ﻿using Refit;
 using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Billing;
+using Sparc.Blossom.Content;
 
 namespace Sparc.Engine;
 
@@ -10,6 +12,10 @@ public interface ISparcEngine
     [Headers("Accept: text/plain")]
     [Get("/tools/friendlyid")]
     Task<string> FriendlyId();
+
+    [Headers("Accept: text/plain")]
+    [Get("/tools/friendlyusername")]
+    Task<string> FriendlyUsername();
 
     [Get("/auth/login")]
     Task<BlossomUser> Login(string? emailOrToken = null);
@@ -26,4 +32,25 @@ public interface ISparcEngine
     [Post("/auth/user-products")]
     Task<BlossomUser> AddUserProduct([Body] AddProductRequest request);
 
+    [Post("/auth/update-user")]
+    Task<BlossomUser> UpdateUser([Body] UpdateUserRequest request);
+
+    [Post("/auth/user-languages")]
+    Task<BlossomUser> AddUserLanguage([Body] Language language);
+
+    [Post("/billing/create-order-payment")]
+    Task<CreateOrderPaymentResponse> CreateOrderPaymentAsync([Body] CreateOrderPaymentRequest request);
+
+    [Get("/billing/get-product/{productId}")]
+    Task<GetProductResponse> GetProductAsync(string productId);
+
+
+    //[Post("/billing/confirm-order-payment")]
+    //Task<PaymentIntent> ConfirmOrderPaymentAsync([Body] ConfirmOrderPaymentRequest request);
+
+    [Post("/auth/verify-code")]
+    Task<bool> VerifyCode([Body] VerificationRequest request);
+
+    [Post("/auth/update-avatar")]
+    Task<BlossomUser> UpdateAvatar([Body] UpdateAvatarRequest request);
 }
