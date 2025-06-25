@@ -65,7 +65,10 @@ public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomH
         var changes = new BlossomPatch(existing, entity);
         await Aggregate.Patch(entity.GenericId, changes);
 
-        return await Get(entity.GenericId)!;
+        var updated = await Get(entity.GenericId) 
+            ?? throw new Exception($"Failed to retrieve updated entity with id {entity.GenericId}.");
+        
+        return updated;
     }
 
     public async Task Delete(object id) => await Aggregate.Delete(id);

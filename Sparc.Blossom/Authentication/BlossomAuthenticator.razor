@@ -149,7 +149,7 @@
     [SupplyParameterFromQuery]
     public string? Token { get; set; }
     bool IsOpen;
-    bool HasError;
+    bool HasError = false;
 
     [CascadingParameter] public required ClaimsPrincipal User { get; set; }
 
@@ -194,9 +194,9 @@
             StateHasChanged();
     }
 
-    async Task VerifyToken() { }
-    async Task EditProfile() { }
-    async Task AddBackupEmail() { }
+    void VerifyToken() { }
+    void EditProfile() { }
+    void AddBackupEmail() { }
 
     async Task SignOut()
     {

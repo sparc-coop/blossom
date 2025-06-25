@@ -32,6 +32,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
         return state;
     }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
     public virtual async IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal principal, string? emailOrToken = null)
     {
         LoginState = LoginStates.LoggedIn;
@@ -43,6 +44,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
         LoginState = LoginStates.LoggedOut;
         yield return LoginState;
     }
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 
     public virtual async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
     {
@@ -92,7 +94,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
         return user;
     }
 
-    public virtual async Task<BlossomUser> LoginAsync(ClaimsPrincipal principal, string? emailOrToken = null)
+    public virtual Task<BlossomUser> LoginAsync(ClaimsPrincipal principal, string? emailOrToken = null)
     {
         throw new NotImplementedException();
     }

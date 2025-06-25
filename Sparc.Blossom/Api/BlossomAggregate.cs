@@ -114,7 +114,10 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
         var changes = new BlossomPatch(existing, entity);
         await Patch(entity.GenericId, changes);
 
-        return await Get(entity.GenericId)!;
+        var updated = await Get(entity.GenericId)
+            ?? throw new Exception($"Failed to retrieve updated entity with id {entity.GenericId}.");
+
+        return updated;
     }
 
     public async Task Delete(object id)

@@ -14,24 +14,24 @@ public record ContentTranslation(string Id, Language Language, string? SourceCon
 
 public class TextContent : BlossomEntity<string>
 {
-    public string Domain { get; set; }
+    public string Domain { get; set; } = null!;
     public string? Path { get; set; }
     public string? SourceContentId { get; set; }
-    public string LanguageId { get; set; }
-    public Language Language { get; set; }
-    public string ContentType { get; set; }
-    public DateTime Timestamp { get; set; }
+    public string LanguageId { get; set; } = null!;
+    public Language Language { get; set; } = null!;
+    public string ContentType { get; set; } = "Text";
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public DateTime? LastModified { get; set; }
     public DateTime? DeletedDate { get; set; }
     public UserAvatar? User { get; set; }
     public AudioContent? Audio { get; set; }
     public string? Text { get; set; }
-    public List<ContentTranslation> Translations { get; set; }
+    public List<ContentTranslation> Translations { get; set; } = [];
     internal long Charge { get; set; }
     internal decimal Cost { get; set; }
-    public string OriginalText { get; set; }
-    internal List<EditHistory> EditHistory { get; set; }
-    public string Html { get; set; }
+    public string OriginalText { get; set; } = "";
+    internal List<EditHistory> EditHistory { get; set; } = [];
+    public string Html { get; set; } = "";
     public string? PageId { get; internal set; }
 
     [JsonConstructor]
@@ -45,11 +45,6 @@ public class TextContent : BlossomEntity<string>
         User = new BlossomUser().Avatar;
         Language = new(languageId);
         LanguageId = Language.Id;
-        Translations = [];
-        EditHistory = [];
-        Html = string.Empty;
-        OriginalText = string.Empty;
-        ContentType = "Text";
     }
 
     public TextContent(string domain, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
@@ -59,7 +54,6 @@ public class TextContent : BlossomEntity<string>
         User = user?.Avatar;
         Language = user?.Avatar.Language ?? language;
         Audio = user?.Avatar.Language?.VoiceId == null ? null : new(null, 0, user.Avatar.Language.VoiceId);
-        Timestamp = DateTime.UtcNow;
         OriginalText = originalText ?? "";
         ContentType = contentType;
         SetText(text);
@@ -73,7 +67,7 @@ public class TextContent : BlossomEntity<string>
         Audio = sourceContent.Audio?.Voice == null ? null : new(null, 0, sourceContent.Audio.Voice);
         Language = toLanguage;
         Timestamp = sourceContent.Timestamp;
-        OriginalText = sourceContent.Text;
+        OriginalText = sourceContent.Text ?? "";
         SetText(text);
     }
 
@@ -159,7 +153,7 @@ public class TextContent : BlossomEntity<string>
             return this;
 
         if (!string.IsNullOrWhiteSpace(Text))
-            EditHistory.Add(new(LastModified ?? Timestamp, Text));
+            EditHistory.Add(new(LastModified ?? Timestamp, Text!));
 
         if (string.IsNullOrWhiteSpace(OriginalText))
             OriginalText = text;

@@ -18,13 +18,12 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         Id = Guid.NewGuid().ToString();
         AuthenticationType = "Blossom";
-        //Username = "User";
         Avatar = new(Id, "");
     }
 
-    public string Username { get; set; }
-    public string Email { get; set; }
-    public string PhoneNumber { get; set; }
+    public string Username { get; set; } = "AnonymousUser";
+    public string? Email { get; set; }
+    public string? PhoneNumber { get; set; }
     public string UserId { get { return Id; } set { Id = value; } }
     public string AuthenticationType { get; set; }
     public string? ExternalId { get; set; }
@@ -227,7 +226,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public void Update(UpdateUserRequest request)
     {
         if (!string.IsNullOrWhiteSpace(request.Username))
-            Username = request.Username;
+            Username = request.Username!;
 
         if (!string.IsNullOrWhiteSpace(request.Email))
             Email = request.Email;
