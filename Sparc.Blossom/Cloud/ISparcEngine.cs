@@ -28,10 +28,10 @@ public interface ISparcEngine
     [Post("/auth/userinfo")]
     Task<BlossomUser> UpdateUserInfo([Body] UserAvatar userInfo);
 
-    [Post("/auth/user-products")]
+    [Post("/user/user-products")]
     Task<BlossomUser> AddUserProduct([Body] AddProductRequest request);
 
-    [Post("/auth/update-user")]
+    [Post("/user/update-user")]
     Task<BlossomUser> UpdateUser([Body] UpdateUserRequest request);
 
     [Post("/auth/user-languages")]
@@ -47,9 +47,9 @@ public interface ISparcEngine
     //[Post("/billing/confirm-order-payment")]
     //Task<PaymentIntent> ConfirmOrderPaymentAsync([Body] ConfirmOrderPaymentRequest request);
 
-    [Post("/auth/verify-code")]
+    [Post("/user/verify-code")]
     Task<bool> VerifyCode([Body] VerificationRequest request);
 
-    [Post("/auth/update-avatar")]
+    [Post("/user/update-avatar")]
     Task<BlossomUser> UpdateAvatar([Body] UpdateAvatarRequest request);
 }
