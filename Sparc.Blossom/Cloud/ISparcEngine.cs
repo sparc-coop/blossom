@@ -43,10 +43,6 @@ public interface ISparcEngine
     [Get("/billing/get-product/{productId}")]
     Task<GetProductResponse> GetProductAsync(string productId);
 
-
-    //[Post("/billing/confirm-order-payment")]
-    //Task<PaymentIntent> ConfirmOrderPaymentAsync([Body] ConfirmOrderPaymentRequest request);
-
     [Post("/auth/verify-code")]
     Task<bool> VerifyCode([Body] VerificationRequest request);
 
