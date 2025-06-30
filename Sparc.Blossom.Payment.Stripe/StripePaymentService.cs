@@ -23,13 +23,7 @@ namespace Sparc.Blossom.Payment.Stripe
             StripeConfiguration.ApiKey = _options.ApiKey;
         }
 
-        public async Task<PaymentIntent> CreatePaymentIntentAsync(
-            long amount,
-            string currency,
-            string? customerId = null,
-            string? receiptEmail = null,
-            Dictionary<string, string>? metadata = null,
-            string? setupFutureUsage = null)
+        public async Task<PaymentIntent> CreatePaymentIntentAsync(long amount, string currency, string? customerId = null, string? receiptEmail = null, Dictionary<string, string>? metadata = null, string? setupFutureUsage = null)
         {
             var customerService = new CustomerService();
             string? stripeCustomerId = null;
