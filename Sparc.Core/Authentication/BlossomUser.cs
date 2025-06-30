@@ -4,8 +4,6 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace Sparc.Blossom.Authentication;
-
-public record ProductKey(string ProductName, string SerialNumber, DateTime PurchaseDate);
 public record AddProductRequest(string ProductName);
 public record UpdateUserRequest(string? Username = null, string? Email = null, string? PhoneNumber = null, bool RequireEmailVerification = false,
     bool RequirePhoneVerification = false);
@@ -81,6 +79,8 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         AddClaim(ClaimTypes.NameIdentifier, Id);
         AddClaim(ClaimTypes.Name, Username);
+        if (Avatar.Language != null)
+            AddClaim("language", Avatar.Language.Id);
         RegisterClaims();
 
         var claims = Claims.Select(x => new Claim(x.Key, x.Value)).ToList();
@@ -211,7 +211,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
     public bool HasProduct(string productName)
     {
-        return Products.Any(x => x.ProductName.Equals(productName, StringComparison.OrdinalIgnoreCase));
+        return Products.Any(x => x.ProductId.Equals(productName, StringComparison.OrdinalIgnoreCase));
     }
 
     public void AddProduct(string productName)
@@ -220,7 +220,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
             return;
 
         var serial = Guid.NewGuid().ToString();
-        Products.Add(new ProductKey(productName, serial, DateTime.UtcNow));
+        Products.Add(new ProductKey(productName, serial, DateTime.UtcNow, Id));
     }
 
     public void Update(UpdateUserRequest request)
