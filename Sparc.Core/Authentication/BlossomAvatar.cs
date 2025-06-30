@@ -4,7 +4,7 @@ using System.Globalization;
 
 namespace Sparc.Blossom.Authentication;
 
-public class UserAvatar
+public class BlossomAvatar
 {
     public string Id { get; set; }
     public string Name { get; set; }
@@ -13,6 +13,8 @@ public class UserAvatar
     public string BackgroundColor { get; set; }
     public string ForegroundColor => CalculateForegroundColor(BackgroundColor);
     public Language? Language { get; set; }
+    public List<Language> LanguagesSpoken { get; set; } = [];
+
     public string? Emoji { get; set; }
     public string? SkinTone { get; set; }
     public string? Pronouns { get; set; }
@@ -21,11 +23,11 @@ public class UserAvatar
     public bool? HearOthers { get; set; }
     public bool? MuteMe { get; set; }
 
-    public UserAvatar() : this("", "")
+    public BlossomAvatar() : this("", "")
     {
     }
 
-    public UserAvatar(UserAvatar sourceAvatar)
+    public BlossomAvatar(BlossomAvatar sourceAvatar)
     {
         Id = sourceAvatar.Id;
         Name = sourceAvatar.Name;
@@ -39,7 +41,7 @@ public class UserAvatar
         Gender = sourceAvatar.Gender;
     }
 
-    public UserAvatar(string id, string name)
+    public BlossomAvatar(string id, string name)
     {
         Id = id;
         Name = name;

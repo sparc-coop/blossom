@@ -12,27 +12,17 @@ public interface ISparcEngine
     [Get("/tools/friendlyid")]
     Task<string> FriendlyId();
 
-    [Headers("Accept: text/plain")]
-    [Get("/tools/friendlyusername")]
-    Task<string> FriendlyUsername();
-
     [Get("/auth/login")]
     Task<BlossomUser> Login(string? emailOrToken = null);
 
     [Get("/auth/userinfo")]
     Task<BlossomUser> UserInfo();
 
-    [Get("/translate/languages")]
-    Task<IEnumerable<Language>> GetLanguages();
-
     [Post("/auth/userinfo")]
-    Task<BlossomUser> UpdateUserInfo([Body] UserAvatar userInfo);
+    Task<BlossomUser> UpdateUserInfo([Body] BlossomUser userInfo);
 
-    [Post("/user/user-products")]
-    Task<BlossomUser> AddUserProduct([Body] AddProductRequest request);
-
-    [Post("/user/update-user")]
-    Task<BlossomUser> UpdateUser([Body] UpdateUserRequest request);
+    [Get("/tovik/languages")]
+    Task<IEnumerable<Language>> GetLanguages();
 
     [Post("/auth/user-languages")]
     Task<BlossomUser> AddUserLanguage([Body] Language language);

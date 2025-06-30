@@ -1,40 +1,25 @@
 ﻿using Sparc.Engine;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Sparc.Blossom.Authentication;
-public record AddProductRequest(string ProductName);
-public record UpdateUserRequest(string? Username = null, string? Email = null, string? PhoneNumber = null, bool RequireEmailVerification = false,
-    bool RequirePhoneVerification = false);
-public record VerificationRequest(string EmailOrPhone, string Code);
-public record UpdateAvatarRequest(string? Name = null, string? BackgroundColor = null, string? Pronouns = null, string? Description = null, string? Emoji = null, string? Gender = null);
 
 public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 {
     public BlossomUser()
     {
         Id = Guid.NewGuid().ToString();
-        AuthenticationType = "Blossom";
         Avatar = new(Id, "");
+        DateCreated = DateTime.UtcNow;
     }
 
     public string Username { get; set; } = "AnonymousUser";
-    public string? Email { get; set; }
-    public string? PhoneNumber { get; set; }
     public string UserId { get { return Id; } set { Id = value; } }
-    public string AuthenticationType { get; set; }
-    public string? ExternalId { get; set; }
-    public string? Token { get; set; }
     public string? ParentUserId { get; set; }
     public DateTime DateCreated { get; private set; }
     public DateTime DateModified { get; private set; }
-    public UserAvatar Avatar { get; set; } = new();
-    public List<Language> LanguagesSpoken { get; set; } = [];
-    public string? EmailOrPhone { get; set; }
-    public bool IsVerified { get; set; }
-    public string? VerificationHash { get; set; }
+    public BlossomAvatar Avatar { get; set; } = new();
 
+    public List<BlossomIdentity> Identities { get; set; } = [];
     internal Dictionary<string, string> Claims { get; set; } = [];
     Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
 
@@ -85,17 +70,29 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         var claims = Claims.Select(x => new Claim(x.Key, x.Value)).ToList();
         claims.AddRange(MultiClaims.SelectMany(x => x.Value.Select(v => new Claim(x.Key, v))));
 
-        return new ClaimsPrincipal(new ClaimsIdentity(claims, AuthenticationType ?? "Blossom"));
+        return new ClaimsPrincipal(new ClaimsIdentity(claims, "Blossom"));
     }
 
     public ClaimsPrincipal ToPrincipal(string authenticationType, string externalId)
     {
-        AuthenticationType = authenticationType;
-        ExternalId = externalId;
+        var identity = GetOrCreateIdentity(authenticationType, externalId);
         AddClaim(ClaimTypes.AuthenticationMethod, authenticationType);
         AddClaim("externalId", externalId);
 
         return ToPrincipal();
+    }
+
+    private BlossomIdentity GetOrCreateIdentity(string authenticationType, string externalId)
+    {
+        var identity = Identities.FirstOrDefault(x => x.Type == authenticationType && x.Id == externalId);
+        
+        if (identity == null)
+        {
+            identity = new BlossomIdentity(externalId, authenticationType);
+            Identities.Add(identity);
+        }
+
+        return identity;
     }
 
     public void ChangeUsername(string username)
@@ -107,16 +104,12 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         Username = parentUser.Username;
         ParentUserId = parentUser.Id;
-        ExternalId = parentUser.ExternalId;
     }
 
     public ClaimsPrincipal Logout()
     {
         ParentUserId = null;
-        ExternalId = null;
-        AuthenticationType = "Blossom";
-        RemoveClaim(ClaimTypes.AuthenticationMethod);
-        RemoveClaim("externalId");
+        Identities.ForEach(x => x.Logout());
         return ToPrincipal();
     }
 
@@ -127,9 +120,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         if (!string.IsNullOrWhiteSpace(id))
         {
             user.Id = id;
-            user.ChangeUsername(principal.Get(ClaimTypes.Name) ?? id);
-            user.AuthenticationType = principal.Get(ClaimTypes.AuthenticationMethod) ?? "Blossom";
-            user.ExternalId = principal.Get("externalId");
+            user.Username = principal.Get(ClaimTypes.Name) ?? id;
         }
 
         foreach (var claim in principal.Claims)
@@ -142,8 +133,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         if (Id != other.Id) return false;
         if (Username != other.Username) return false;
-        if (AuthenticationType != other.AuthenticationType) return false;
-        if (ExternalId != other.ExternalId) return false;
         if (Avatar.Language != other.Avatar.Language) return false;
 
         var orderedPriorClaims = Claims.OrderBy(x => x.Key).ThenBy(x => x.Value);
@@ -165,17 +154,15 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
     public void ChangeLanguage(Language language)
     {
-        if (!LanguagesSpoken.Any(x => x.Matches(language)))
-            LanguagesSpoken.Add(language);
+        if (!Avatar.LanguagesSpoken.Any(x => x.Matches(language)))
+            Avatar.LanguagesSpoken.Add(language);
 
         Avatar.Language = language;
     }
 
-    public Language? PrimaryLanguage => LanguagesSpoken.FirstOrDefault(x => x == Avatar.Language);
-
     public static BlossomUser System => new() { Username = "system" };
 
-    public void UpdateAvatar(UserAvatar avatar)
+    public void UpdateAvatar(BlossomAvatar avatar)
     {
         Avatar.Id = Id;
         Avatar.Language = avatar.Language;
@@ -197,52 +184,5 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     internal void GoOffline()
     {
         Avatar.IsOnline = false;
-    }
-
-    public void SetToken(string token)
-    {
-        Token = token;
-        if (Claims.ContainsKey("token"))
-            Claims["token"] = token;
-        else
-            Claims.Add("token", token);
-    }
-    
-    public void Update(BlossomUser request)
-    {
-        if (!string.IsNullOrWhiteSpace(request.Username))
-            Username = request.Username!;
-
-        if (!string.IsNullOrWhiteSpace(request.Email))
-            Email = request.Email;
-
-        if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
-            PhoneNumber = request.PhoneNumber;
-    }
-
-    public void Revoke() => IsVerified = false;
-
-    public string CreateHash(string code)
-    {
-        using var md5 = MD5.Create();
-        var inputBytes = Encoding.ASCII.GetBytes(EmailOrPhone + code);
-        return string.Concat(md5.ComputeHash(inputBytes).Select(x => x.ToString("x2")));
-    }
-
-    public string GenerateVerificationCode()
-    {
-        var code = EmailOrPhone == "appletest@email.com"
-            ? "123456"
-            : new Random().Next(0, 1000000).ToString("D6");
-        VerificationHash = CreateHash(code);
-        return code;
-    }
-
-    public bool VerifyCode(string code)
-    {
-        var hash = CreateHash(code);
-        IsVerified = hash == VerificationHash;
-
-        return IsVerified;
     }
 }

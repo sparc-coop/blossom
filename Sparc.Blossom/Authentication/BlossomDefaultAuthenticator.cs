@@ -86,7 +86,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
         return User!;
     }
 
-    public async Task<BlossomUser> UpdateAsync(ClaimsPrincipal principal, UserAvatar avatar)
+    public async Task<BlossomUser> UpdateAsync(ClaimsPrincipal principal, BlossomAvatar avatar)
     {
         var user = await GetUserAsync(principal);
         user.UpdateAvatar(avatar);

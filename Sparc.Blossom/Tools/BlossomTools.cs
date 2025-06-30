@@ -13,17 +13,4 @@ public class BlossomTools
         using var reader = new StreamReader(response.Content.ReadAsStream());
         return reader.ReadToEnd();
     }
-
-    public static string FriendlyUsername()
-    {
-        var client = new HttpClient();
-        //var webRequest = new HttpRequestMessage(HttpMethod.Get, "https://blossom-cloud.azurewebsites.net/tools/friendlyusername");
-        var webRequest = new HttpRequestMessage(HttpMethod.Get, "https://localhost:7185/tools/friendlyusername");
-        var response = client.Send(webRequest);
-        if (!response.IsSuccessStatusCode)
-            return "User";
-
-        using var reader = new StreamReader(response.Content.ReadAsStream());
-        return reader.ReadToEnd().Trim();
-    }
 }
