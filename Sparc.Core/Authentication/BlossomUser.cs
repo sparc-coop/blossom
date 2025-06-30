@@ -1,5 +1,6 @@
 ﻿using Sparc.Engine;
 using System.Security.Claims;
+using System.Security.Principal;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -14,7 +15,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
     public string Username { get; set; } = "AnonymousUser";
     public string UserId { get { return Id; } set { Id = value; } }
-    public string? ParentUserId { get; set; }
     public DateTime DateCreated { get; private set; }
     public DateTime DateModified { get; private set; }
     public BlossomAvatar Avatar { get; set; } = new();
@@ -82,33 +82,13 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         return ToPrincipal();
     }
 
-    private BlossomIdentity GetOrCreateIdentity(string authenticationType, string externalId)
-    {
-        var identity = Identities.FirstOrDefault(x => x.Type == authenticationType && x.Id == externalId);
-        
-        if (identity == null)
-        {
-            identity = new BlossomIdentity(externalId, authenticationType);
-            Identities.Add(identity);
-        }
-
-        return identity;
-    }
-
     public void ChangeUsername(string username)
     {
         Username = username;
     }
 
-    public void SetParentUser(BlossomUser parentUser)
-    {
-        Username = parentUser.Username;
-        ParentUserId = parentUser.Id;
-    }
-
     public ClaimsPrincipal Logout()
     {
-        ParentUserId = null;
         Identities.ForEach(x => x.Logout());
         return ToPrincipal();
     }
@@ -184,5 +164,25 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     internal void GoOffline()
     {
         Avatar.IsOnline = false;
+    }
+
+    public bool HasIdentity(string authenticationType)
+    {
+        return Identities.Any(x => x.Type == authenticationType);
+    }
+
+    public BlossomIdentity GetOrCreateIdentity(string authenticationType, string externalId)
+    {
+        var identity = Identities.FirstOrDefault(x => x.Type == authenticationType && x.Id == externalId)
+            ?? AddIdentity(authenticationType, externalId);
+
+        return identity;
+    }
+
+    public BlossomIdentity AddIdentity(string authenticationType, string externalId)
+    {
+        var identity = new BlossomIdentity(externalId, authenticationType);
+        Identities.Add(identity);
+        return identity;
     }
 }

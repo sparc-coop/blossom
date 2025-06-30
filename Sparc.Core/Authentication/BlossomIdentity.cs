@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using PhoneNumbers;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Sparc.Blossom.Authentication;
@@ -8,6 +9,7 @@ public class BlossomIdentity(string id, string type)
     public string Id { get; private set; } = id;
     public string Type { get; private set; } = type;
     public string? VerificationHash { get; private set; }
+    public bool IsVerified { get; set; }
     public bool IsLoggedIn { get; private set; } = false;
     public DateTime? LastLoginDate { get; private set; }
     public DateTime? LastVerifiedDate { get; private set; }
@@ -31,13 +33,15 @@ public class BlossomIdentity(string id, string type)
     public bool VerifyCode(string code)
     {
         var hash = CreateHash(code);
-        return hash == VerificationHash;
+        IsVerified = hash == VerificationHash;
+        return IsVerified;
     }
 
     public void Revoke()
     {
         VerificationHash = null;
         IsLoggedIn = false;
+        IsVerified = false;
     }
 
     internal void Login()

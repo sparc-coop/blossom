@@ -49,7 +49,7 @@
     protected override async Task OnInitializedAsync()
     {
         Languages = await Engine.GetLanguages();
-        SelectedLanguage = Auth.User?.PrimaryLanguage
+        SelectedLanguage = Auth.User?.Avatar.Language
             ?? Languages.FirstOrDefault(x => x.Matches(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName));
     }
 

@@ -19,7 +19,7 @@ public interface ISparcEngine
     Task<BlossomUser> UserInfo();
 
     [Post("/auth/userinfo")]
-    Task<BlossomUser> UpdateUserInfo([Body] BlossomUser userInfo);
+    Task<BlossomUser> UpdateUserInfo([Body] BlossomAvatar avatar);
 
     [Get("/tovik/languages")]
     Task<IEnumerable<Language>> GetLanguages();
@@ -33,13 +33,4 @@ public interface ISparcEngine
     [Get("/billing/get-product/{productId}")]
     Task<GetProductResponse> GetProductAsync(string productId);
 
-
-    //[Post("/billing/confirm-order-payment")]
-    //Task<PaymentIntent> ConfirmOrderPaymentAsync([Body] ConfirmOrderPaymentRequest request);
-
-    [Post("/user/verify-code")]
-    Task<bool> VerifyCode([Body] VerificationRequest request);
-
-    [Post("/user/update-avatar")]
-    Task<BlossomUser> UpdateAvatar([Body] UpdateAvatarRequest request);
 }
