@@ -31,7 +31,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public DateTime DateModified { get; private set; }
     public UserAvatar Avatar { get; set; } = new();
     public List<Language> LanguagesSpoken { get; set; } = [];
-    public List<ProductKey> Products { get; set; } = [];
     public string? EmailOrPhone { get; set; }
     public bool IsVerified { get; set; }
     public string? VerificationHash { get; set; }
@@ -75,7 +74,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         // create the claims from the persisted user.
     }
 
-    public virtual ClaimsPrincipal Login()
+    public virtual ClaimsPrincipal ToPrincipal()
     {
         AddClaim(ClaimTypes.NameIdentifier, Id);
         AddClaim(ClaimTypes.Name, Username);
@@ -89,14 +88,14 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         return new ClaimsPrincipal(new ClaimsIdentity(claims, AuthenticationType ?? "Blossom"));
     }
 
-    public ClaimsPrincipal Login(string authenticationType, string externalId)
+    public ClaimsPrincipal ToPrincipal(string authenticationType, string externalId)
     {
         AuthenticationType = authenticationType;
         ExternalId = externalId;
         AddClaim(ClaimTypes.AuthenticationMethod, authenticationType);
         AddClaim("externalId", externalId);
 
-        return Login();
+        return ToPrincipal();
     }
 
     public void ChangeUsername(string username)
@@ -118,7 +117,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         AuthenticationType = "Blossom";
         RemoveClaim(ClaimTypes.AuthenticationMethod);
         RemoveClaim("externalId");
-        return Login();
+        return ToPrincipal();
     }
 
     public static BlossomUser FromPrincipal(ClaimsPrincipal principal)
@@ -208,22 +207,8 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         else
             Claims.Add("token", token);
     }
-
-    public bool HasProduct(string productName)
-    {
-        return Products.Any(x => x.ProductId.Equals(productName, StringComparison.OrdinalIgnoreCase));
-    }
-
-    public void AddProduct(string productName)
-    {
-        if (HasProduct(productName))
-            return;
-
-        var serial = Guid.NewGuid().ToString();
-        Products.Add(new ProductKey(productName, serial, DateTime.UtcNow, Id));
-    }
-
-    public void Update(UpdateUserRequest request)
+    
+    public void Update(BlossomUser request)
     {
         if (!string.IsNullOrWhiteSpace(request.Username))
             Username = request.Username!;

@@ -26,14 +26,14 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
             await Users.AddAsync((T)User);
         }
 
-        var principal = User.Login();
+        var principal = User.ToPrincipal();
         var state = new AuthenticationState(principal);
 
         return state;
     }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-    public virtual async IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal principal, string? emailOrToken = null)
+    public virtual async IAsyncEnumerable<LoginStates> Login(ClaimsPrincipal principal, string authenticationType, string externalId)
     {
         LoginState = LoginStates.LoggedIn;
         yield return LoginState;
@@ -49,7 +49,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
     public virtual async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
     {
         var user = await GetAsync(principal);
-        principal = user.Login();
+        principal = user.ToPrincipal();
         await Users.UpdateAsync((T)user);
         return principal;
     }
@@ -57,7 +57,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
     public virtual async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId)
     {
         var user = await GetUserAsync(principal);
-        principal = user.Login(authenticationType, externalId);
+        principal = user.ToPrincipal(authenticationType, externalId);
         await Users.UpdateAsync((T)user);
         return principal;
     }
