@@ -214,13 +214,13 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         return Products.Any(x => x.ProductId.Equals(productName, StringComparison.OrdinalIgnoreCase));
     }
 
-    public void AddProduct(string productName)
+    public void AddProduct(string productId)
     {
-        if (HasProduct(productName))
+        if (HasProduct(productId))
             return;
 
-        var serial = Guid.NewGuid().ToString();
-        Products.Add(new ProductKey(productName, serial, DateTime.UtcNow, Id));
+        var serialNumber = Guid.NewGuid().ToString();
+        Products.Add(new ProductKey(productId, serialNumber, DateTime.UtcNow, Id));
     }
 
     public void Update(UpdateUserRequest request)
