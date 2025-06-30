@@ -1,5 +1,5 @@
-.kori-login__language {
-    .kori-login__language-btn {
+.tovik-login__language {
+    .tovik-login__language-btn {
         width: 100%;
         display: flex !important;
         justify-content: space-between !important;
@@ -15,7 +15,7 @@
         color: white !important;
         cursor: pointer;
 
-        @extend .kori-login__text-btn;
+        @extend .tovik-login__text-btn;
 
         &-content {
             display: flex !important;
@@ -29,7 +29,7 @@
             opacity: 0.7 !important;
         }
 
-        .kori-login__expand-icon {
+        .tovik-login__expand-icon {
             width: 16px;
             height: 16px;
             transition: transform 1000ms ease-in-out;
@@ -41,7 +41,7 @@
         }
     }
 
-    .kori-login__language-list {
+    .tovik-login__language-list {
         display: flex;
         flex-direction: column;
         gap: 8px;
@@ -70,7 +70,7 @@
             border: none !important;
             border-radius: 0 !important;
             text-align: left !important;
-            @extend .kori-login__text-btn;
+            @extend .tovik-login__text-btn;
 
             aside {
                 font-family: 'Encode Sans Expanded' !important;
@@ -82,10 +82,10 @@
         }
     }
 
-    .kori-login__language-mobile {
+    .tovik-login__language-mobile {
         display: none;
 
-        .kori-login__language-selected {
+        .tovik-login__language-selected {
             width: 100%;
             padding: 16px;
             margin-bottom: 32px;
@@ -94,14 +94,14 @@
             border: 1px solid var(--Gray-100, #E5E5E5);
             border-radius: 8px;
             color: white;
-            @extend .kori-login__text-primary;
+            @extend .tovik-login__text-primary;
         }
 
         aside {
-            @extend .kori-login__text-secondary;
+            @extend .tovik-login__text-secondary;
         }
 
-        .kori-login__language-list {
+        .tovik-login__language-list {
             height: 100%;
             max-height: none;
             display: flex;
@@ -138,14 +138,14 @@
     }
 
     @media only screen and (max-width: 1024px) {
-        .kori-login__language-desktop {
+        .tovik-login__language-desktop {
             display: none;
         }
 
-        .kori-login__language-mobile {
+        .tovik-login__language-mobile {
             display: block;
 
-            .kori-login__language-selected {
+            .tovik-login__language-selected {
                 display: flex;
             }
         }
@@ -154,7 +154,7 @@
 
 // buttons
 
-.kori-login__text-primary {
+.tovik-login__text-primary {
     font-family: 'Encode Sans Semi Expanded' !important;
     font-size: 16px !important;
     font-weight: 400 !important;
@@ -162,7 +162,7 @@
     color: var(--grey-50) !important;
 }
 
-.kori-login__text-secondary {
+.tovik-login__text-secondary {
     font-family: 'Encode Sans Expanded' !important;
     font-size: 14px !important;
     font-weight: 400 !important;
@@ -170,7 +170,7 @@
     color: var(--grey-300) !important;
 }
 
-.kori-login__text-btn {
+.tovik-login__text-btn {
     font-family: 'Encode Sans Expanded' !important;
     font-size: 14px !important;
     font-weight: 400 !important;
