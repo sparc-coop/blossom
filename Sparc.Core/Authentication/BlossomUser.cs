@@ -71,8 +71,11 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public virtual ClaimsPrincipal ToPrincipal()
     {
         RegisterBaseClaims();
-        var anonymousIdentity = new BlossomIdentity(Id, "Anonymous");
-        return new ClaimsPrincipal(anonymousIdentity.ToIdentity(this));
+
+        var defaultIdentity = Identities.FirstOrDefault()
+            ?? new BlossomIdentity(Id, "Anonymous");
+
+        return new ClaimsPrincipal(defaultIdentity.ToIdentity(this));
     }
 
     public ClaimsPrincipal ToPrincipal(string authenticationType, string externalId)
