@@ -85,7 +85,7 @@ public sealed class CosmosDbSimpleSerializer : CosmosLinqSerializer
             if (stream.CanSeek
                    && stream.Length == 0)
             {
-                return default;
+                return default!;
             }
 
             if (typeof(Stream).IsAssignableFrom(typeof(T)))
@@ -93,7 +93,7 @@ public sealed class CosmosDbSimpleSerializer : CosmosLinqSerializer
                 return (T)(object)stream;
             }
 
-            return (T)this.systemTextJsonSerializer.Deserialize(stream, typeof(T), default);
+            return (T)systemTextJsonSerializer.Deserialize(stream, typeof(T), default)!;
         }
     }
 
@@ -121,13 +121,13 @@ public sealed class CosmosDbSimpleSerializer : CosmosLinqSerializer
 
     public override string SerializeMemberName(MemberInfo memberInfo)
     {
-        JsonExtensionDataAttribute jsonExtensionDataAttribute = memberInfo.GetCustomAttribute<JsonExtensionDataAttribute>(true);
+        JsonExtensionDataAttribute jsonExtensionDataAttribute = memberInfo.GetCustomAttribute<JsonExtensionDataAttribute>(true)!;
         if (jsonExtensionDataAttribute != null)
         {
-            return null;
+            return null!;
         }
 
-        JsonPropertyNameAttribute jsonPropertyNameAttribute = memberInfo.GetCustomAttribute<JsonPropertyNameAttribute>(true);
+        JsonPropertyNameAttribute jsonPropertyNameAttribute = memberInfo.GetCustomAttribute<JsonPropertyNameAttribute>(true)!;
         if (!string.IsNullOrEmpty(jsonPropertyNameAttribute?.Name))
         {
             return jsonPropertyNameAttribute.Name;

@@ -186,6 +186,6 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
 
     public IQueryable<T> PartitionQuery(string partitionKey)
     {
-        return simpleClient.Container.GetItemLinqQueryable<T>(requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(partitionKey) });
+        return Client.Container.GetItemLinqQueryable<T>(requestOptions: new QueryRequestOptions { PartitionKey = new PartitionKey(partitionKey) });
     }
 }
