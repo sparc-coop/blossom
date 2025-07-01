@@ -15,6 +15,13 @@ public class PhoneNumberRegion
         CountryName = new System.Globalization.RegionInfo(CountryCode).NativeName;
     }
 
+    public PhoneNumberRegion(string countryCode)
+    {
+        CountryCode = countryCode;
+        CallingCode = PhoneNumberUtil.GetInstance().GetCountryCodeForRegion(countryCode);
+        CountryName = new System.Globalization.RegionInfo(countryCode).NativeName;
+    }
+
     public override string ToString()
     {
         return $"+{CountryCode} ({CountryName})";
