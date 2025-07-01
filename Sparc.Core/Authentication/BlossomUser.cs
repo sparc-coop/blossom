@@ -123,6 +123,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         if (Id != other.Id) return false;
         if (Username != other.Username) return false;
         if (Avatar.Language != other.Avatar.Language) return false;
+        if (Avatar.Locale?.TwoLetterISORegionName != other.Avatar.Locale?.TwoLetterISORegionName) return false;
 
         var orderedPriorClaims = Claims.OrderBy(x => x.Key).ThenBy(x => x.Value);
         var orderedClaims = other.Claims.OrderBy(x => x.Key).ThenBy(x => x.Value);
