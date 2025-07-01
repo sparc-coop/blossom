@@ -6,13 +6,13 @@ namespace Sparc.Blossom.Authentication;
 
 public class BlossomIdentity(string id, string type)
 {
-    public string Id { get; private set; } = id;
-    public string Type { get; private set; } = type;
-    public string? VerificationHash { get; private set; }
+    public string Id { get; set; } = id;
+    public string Type { get; set; } = type;
+    internal string? VerificationHash { get; set; }
     public bool IsVerified { get; set; }
-    public bool IsLoggedIn { get; private set; } = false;
-    public DateTime? LastLoginDate { get; private set; }
-    public DateTime? LastVerifiedDate { get; private set; }
+    public bool IsLoggedIn { get; set; } = false;
+    public DateTime? LastLoginDate { get; set; }
+    public DateTime? LastVerifiedDate { get; set; }
 
     public string CreateHash(string code)
     {

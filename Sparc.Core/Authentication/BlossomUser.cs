@@ -17,6 +17,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public string UserId { get { return Id; } set { Id = value; } }
     public DateTime DateCreated { get; private set; }
     public DateTime DateModified { get; private set; }
+    public DateTime? LastLogin { get; private set; }
     public BlossomAvatar Avatar { get; set; } = new();
 
     public List<BlossomIdentity> Identities { get; set; } = [];
@@ -88,6 +89,11 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public void ChangeUsername(string username)
     {
         Username = username;
+    }
+
+    public void Login()
+    {
+        LastLogin = DateTime.UtcNow;
     }
 
     public ClaimsPrincipal Logout()
