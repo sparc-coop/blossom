@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using PhoneNumbers;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 using System.Globalization;
@@ -36,17 +37,17 @@ public class TwilioService
         return PhoneNumberRegion.GetAll();
     }
 
-    public async Task<PhoneNumberResource> LookupPhoneNumberAsync(string phoneNumber, string? countryCode = null)
+    public static async Task<PhoneNumberResource> LookupPhoneNumberAsync(string phoneNumber, PhoneNumberRegion region)
     {
-        return await PhoneNumberResource.FetchAsync(phoneNumber, countryCode);
+        return await PhoneNumberResource.FetchAsync(phoneNumber, region.CountryCode);
     }
 
     public async Task<bool> SendSmsAsync(string phoneNumber, string body)
     {
         var message = await MessageResource.CreateAsync(
             body: body,
-            from: new global::Twilio.Types.PhoneNumber(Config.FromPhoneNumber),
-            to: new global::Twilio.Types.PhoneNumber(phoneNumber)
+            from: new Twilio.Types.PhoneNumber(Config.FromPhoneNumber),
+            to: new Twilio.Types.PhoneNumber(phoneNumber)
         );
 
         if (message.ErrorMessage != null)
@@ -118,7 +119,23 @@ public class TwilioService
             throw new Exception($"Unable to add contact: Error {response.StatusCode}");
     }
 
-    private static bool IsValidEmail(string email)
+    public static bool IsValidPhoneNumber(string phoneNumber, PhoneNumberRegion region)
+    {
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+            return false;
+        try
+        {
+            var phoneNumberUtil = PhoneNumberUtil.GetInstance();
+            var number = phoneNumberUtil.Parse(phoneNumber, region.CountryCode);
+            return phoneNumberUtil.IsValidNumber(number);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    public static bool IsValidEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
             return false;
