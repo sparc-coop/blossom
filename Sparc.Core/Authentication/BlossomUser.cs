@@ -21,7 +21,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
     public List<BlossomIdentity> Identities { get; set; } = [];
     internal Dictionary<string, string> Claims { get; set; } = [];
-    Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
+    internal Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
 
     public void AddClaim(string type, string? value)
     {
@@ -53,33 +53,33 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
             MultiClaims.Remove(type);
     }
 
-    protected virtual void RegisterClaims()
+    internal virtual void RegisterClaims()
     {
         // Do nothing in base class. This should be overridden in derived classes to
         // create the claims from the persisted user.
     }
 
-    public virtual ClaimsPrincipal ToPrincipal()
+    void RegisterBaseClaims()
     {
         AddClaim(ClaimTypes.NameIdentifier, Id);
         AddClaim(ClaimTypes.Name, Username);
         if (Avatar.Language != null)
             AddClaim("language", Avatar.Language.Id);
         RegisterClaims();
+    }
 
-        var claims = Claims.Select(x => new Claim(x.Key, x.Value)).ToList();
-        claims.AddRange(MultiClaims.SelectMany(x => x.Value.Select(v => new Claim(x.Key, v))));
-
-        return new ClaimsPrincipal(new ClaimsIdentity(claims, "Blossom"));
+    public virtual ClaimsPrincipal ToPrincipal()
+    {
+        RegisterBaseClaims();
+        var anonymousIdentity = new BlossomIdentity(Id, "Anonymous");
+        return new ClaimsPrincipal(anonymousIdentity.ToIdentity(this));
     }
 
     public ClaimsPrincipal ToPrincipal(string authenticationType, string externalId)
     {
+        RegisterBaseClaims();
         var identity = GetOrCreateIdentity(authenticationType, externalId);
-        AddClaim(ClaimTypes.AuthenticationMethod, authenticationType);
-        AddClaim("externalId", externalId);
-
-        return ToPrincipal();
+        return new ClaimsPrincipal(identity.ToIdentity(this));
     }
 
     public void ChangeUsername(string username)

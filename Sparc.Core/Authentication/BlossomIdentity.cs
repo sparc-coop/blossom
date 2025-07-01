@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Sparc.Blossom.Authentication;
@@ -18,6 +19,16 @@ public class BlossomIdentity(string id, string type)
         using var md5 = MD5.Create();
         var inputBytes = Encoding.ASCII.GetBytes(Id + code);
         return string.Concat(md5.ComputeHash(inputBytes).Select(x => x.ToString("x2")));
+    }
+
+    public ClaimsIdentity ToIdentity(BlossomUser user)
+    {
+        var claims = user.Claims.Select(x => new Claim(x.Key, x.Value)).ToList();
+        claims.AddRange(user.MultiClaims.SelectMany(x => x.Value.Select(v => new Claim(x.Key, v))));
+        claims.Add(new Claim(ClaimTypes.AuthenticationMethod, Type));
+        claims.Add(new Claim("externalId", Id));
+
+        return new ClaimsIdentity(claims, Type);
     }
 
     public string GenerateVerificationCode()
