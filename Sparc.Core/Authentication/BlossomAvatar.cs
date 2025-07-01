@@ -12,7 +12,7 @@ public class BlossomAvatar
     public bool IsOnline { get; set; }
     public string BackgroundColor { get; set; }
     public string ForegroundColor => CalculateForegroundColor(BackgroundColor);
-    public RegionInfo? Locale { get; set; }
+    public BlossomRegion? Locale { get; set; }
     public Language? Language { get; set; }
     public List<Language> LanguagesSpoken { get; set; } = [];
 
