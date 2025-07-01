@@ -31,6 +31,11 @@ public class TwilioService
         return await SendSmsAsync(phoneOrEmail, body);
     }
 
+    public static List<PhoneNumberRegion> GetCountryCodes()
+    {
+        return PhoneNumberRegion.GetAll();
+    }
+
     public async Task<PhoneNumberResource> LookupPhoneNumberAsync(string phoneNumber, string? countryCode = null)
     {
         return await PhoneNumberResource.FetchAsync(phoneNumber, countryCode);
