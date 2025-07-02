@@ -1,6 +1,5 @@
 ﻿using Sparc.Engine;
 using System.Security.Claims;
-using System.Security.Principal;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -13,7 +12,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         DateCreated = DateTime.UtcNow;
     }
 
-    public string Username { get; set; } = "AnonymousUser";
     public string UserId { get { return Id; } set { Id = value; } }
     public DateTime DateCreated { get; private set; }
     public DateTime DateModified { get; private set; }
@@ -63,7 +61,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     void RegisterBaseClaims()
     {
         AddClaim(ClaimTypes.NameIdentifier, Id);
-        AddClaim(ClaimTypes.Name, Username);
+        AddClaim(ClaimTypes.Name, Avatar.Username);
         if (Avatar.Language != null)
             AddClaim("language", Avatar.Language.Id);
         RegisterClaims();
@@ -88,7 +86,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
     public void ChangeUsername(string username)
     {
-        Username = username;
+        Avatar.Username = username;
     }
 
     public void Login()
@@ -109,7 +107,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         if (!string.IsNullOrWhiteSpace(id))
         {
             user.Id = id;
-            user.Username = principal.Get(ClaimTypes.Name) ?? id;
+            user.Avatar.Username = principal.Get(ClaimTypes.Name) ?? id;
         }
 
         foreach (var claim in principal.Claims)
@@ -121,7 +119,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public bool Equals(BlossomUser other)
     {
         if (Id != other.Id) return false;
-        if (Username != other.Username) return false;
+        if (Avatar.Username != other.Avatar.Username) return false;
         if (Avatar.Language != other.Avatar.Language) return false;
         if (Avatar.Locale?.Id != other.Avatar.Locale?.Id) return false;
 
@@ -149,8 +147,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
 
         Avatar.Language = language;
     }
-
-    public static BlossomUser System => new() { Username = "system" };
 
     public void UpdateAvatar(BlossomAvatar avatar)
     {

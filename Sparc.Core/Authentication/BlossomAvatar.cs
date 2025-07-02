@@ -7,6 +7,7 @@ namespace Sparc.Blossom.Authentication;
 public class BlossomAvatar
 {
     public string Id { get; set; }
+    public string Username { get; set; } = "AnonymousUser";
     public string Name { get; set; }
     public string Initials => string.IsNullOrWhiteSpace(Name) ? "" : string.Join(string.Empty, Name.Split(' ').Select(x => x[0]));
     public bool IsOnline { get; set; }
