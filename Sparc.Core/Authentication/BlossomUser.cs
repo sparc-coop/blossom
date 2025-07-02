@@ -52,7 +52,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
             MultiClaims.Remove(type);
     }
 
-    internal virtual void RegisterClaims()
+    public virtual void RegisterClaims()
     {
         // Do nothing in base class. This should be overridden in derived classes to
         // create the claims from the persisted user.
