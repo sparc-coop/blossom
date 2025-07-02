@@ -23,7 +23,7 @@ public static class CosmosDbExtensions
         }
     }
 
-    public static async Task<List<T>> ToCosmosAsync<T>(this IQueryable<T> query)
+    public static async Task<List<T>> ToListAsync<T>(this IQueryable<T> query)
     {
         var iterator = query.ToFeedIterator();
 
@@ -38,9 +38,9 @@ public static class CosmosDbExtensions
         return results;
     }
 
-    public static async Task<T?> CosmosFirstOrDefaultAsync<T>(this IQueryable<T> query)
+    public static async Task<T?> FirstOrDefaultAsync<T>(this IQueryable<T> query)
     {
-        var results = await query.ToCosmosAsync();
+        var results = await query.ToListAsync();
         return results.FirstOrDefault();
     }
 

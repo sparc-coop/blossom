@@ -17,13 +17,13 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
     public async Task<T?> FindAsync(object id)
     {
         var strId = id.ToString();
-        var result = await Query.Where(x => x.Id == strId).ToCosmosAsync();
+        var result = await Query.Where(x => x.Id == strId).ToListAsync();
         return result.FirstOrDefault();
     }
 
     public async Task<T?> FindAsync(ISpecification<T> spec)
     {
-        var result = await ApplySpecification(spec).ToCosmosAsync();
+        var result = await ApplySpecification(spec).ToListAsync();
         return result.FirstOrDefault();
     }
 

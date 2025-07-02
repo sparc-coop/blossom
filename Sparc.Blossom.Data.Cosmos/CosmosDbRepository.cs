@@ -39,7 +39,7 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
 
     public async Task<T?> FindAsync(ISpecification<T> spec)
     {
-        return await ApplySpecification(spec).FirstOrDefaultAsync();
+        return await EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(base.ApplySpecification(spec));
     }
 
     public async Task<int> CountAsync(ISpecification<T> spec)
