@@ -1,0 +1,203 @@
+﻿@using System.Threading.Tasks
+@using System.Web
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using Sparc.Blossom.Authentication
+@using Sparc.Blossom.Content
+@using Sparc.Blossom.Authentication.Icons
+
+<AuthorizeView>
+    <Authorized>
+        <div class="blossom-authenticator @(context.User.IsAnonymous() ? "loggedout" : "loggedin")">
+            <button aria-label="Login" @onclick="ToggleLoginMenu">
+                <UserIcon LoggedIn="!context.User.IsAnonymous()" />
+            </button>
+
+            @if (IsOpen)
+            {
+                <section>
+                    <button @onclick="ToggleLoginMenu">
+                        <Close />
+                    </button>
+
+                    @if (context.User.IsAnonymous())
+                    {
+                        <header>
+                            <h3>Welcome!</h3>
+                            <p>We're glad you're here.</p>
+                        </header>
+                    }
+                    else
+                    {
+                        <header>
+                            <figure>
+                                <UserIcon LoggedIn="true" />
+                                <figcaption>
+                                    @context.User.Identity?.Name
+                                    <aside>@context.User.Identity?.Name</aside>
+                                </figcaption>
+                            </figure>
+                        </header>
+                    }
+
+                    @switch (Auth.LoginState)
+                    {
+                        case LoginStates.NotInitialized:
+                            <article>
+                                <p>You are currently <strong>offline.</strong> You may continue to use this app on this device, and all
+                                    of your data is being securely stored locally. However, you will not be able to sync your data 
+                                    across devices until you are back online.
+                                </p>
+                            </article>
+                            break;
+
+                        case LoginStates.LoggedOut:
+                        case LoginStates.ReadyForLogin:
+                            <article>
+                                <button @onclick=BeginLogin>
+                                    <Passkey />
+                                    <span>
+                                        Sign In With Passkey
+                                        <aside>Secure, anonymous, & password-free</aside>
+                                    </span>
+                                </button>
+                                <p>
+                                    Your app uses <strong>passkeys</strong> to sign you in. Passkeys are a modern replacement for passwords that
+                                    are stored securely on your device. They are never shared with this app or sent over the internet.
+                                </p>
+                                <p>
+                                    Signing in is always optional, and you may freely use this app on this device. We recommend
+                                    that you sign in only if you wish to sync your data across devices, or if you would like to
+                                    recover your data in case your device is lost.
+                                </p>
+
+                            </article>
+                            break;
+
+                        case LoginStates.VerifyingEmail:
+                            <form @onsubmit=VerifyEmail>
+                                <input @ref=LoginInput type="email" @bind="Email" placeholder="Enter your email address" @onclick:stopPropagation="true" />
+                                <button type="submit">
+                                    Send Me A Verification Code
+                                </button>
+                                @if (HasError)
+                                {
+                                    <p role="alert">
+                                        Email cannot be blank
+                                    </p>
+                                }
+                            </form>
+                            break;
+
+                        case LoginStates.VerifyingToken:
+                            <form @onsubmit=VerifyToken>
+                                <input type="text" @bind="Token" placeholder="Enter the verification code" @onclick:stopPropagation="true" />
+                                <button type="submit">
+                                    Verify Code
+                                </button>
+                                @if (HasError)
+                                {
+                                    <p role="alert">
+                                        Invalid verification code
+                                    </p>
+                                }
+                            </form>
+                            break;
+
+                        case LoginStates.LoggedIn:
+                            <article>
+                                <nav>
+                                    <ul>
+                                        <li>
+                                            <button @onclick="EditProfile">
+                                                <Profile />
+                                                Change Username
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button @onclick="AddBackupEmail">
+                                                <Shield />
+                                                Add a Backup Email or Phone Number
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button onclick="SignOut">
+                                                <SignOut />
+                                                Sign Out
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </article>
+                            break;
+                    }
+
+                    <hr />
+
+                    <footer>
+                        <LanguageSelector />
+                    </footer>
+                </section>
+            }
+        </div>
+    </Authorized>
+</AuthorizeView>
+
+@inject ClaimsPrincipal Principal
+@inject IBlossomAuthenticator Auth
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Token { get; set; }
+    bool IsOpen;
+    bool HasError = false;
+
+    public string? Email;
+
+    ElementReference? LoginInput;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Token))
+            await Auth.LoginAsync(Principal, "Passwordless", Token);
+    }
+
+    void ToggleLoginMenu() => IsOpen = !IsOpen;
+
+    async Task BeginLogin()
+    {
+        // Attempt autofill signin
+        await Auth.LoginAsync(Principal);
+        if (Auth.LoginState == LoginStates.LoggedIn)
+            return;
+
+        Auth.LoginState = LoginStates.ReadyForLogin;
+        StateHasChanged();
+        await Task.Delay(1);
+
+        if (LoginInput.HasValue)
+            await LoginInput.Value.FocusAsync();
+    }
+
+    async Task VerifyEmail()
+    {
+        if (string.IsNullOrWhiteSpace(Email))
+            return;
+
+        await Auth.LoginAsync(Principal, "Email", Email);
+    }
+
+    void VerifyToken() { }
+    void EditProfile() { }
+    void AddBackupEmail() { }
+
+    async Task SignOut()
+    {
+        await Auth.LogoutAsync(Principal);
+    }
+
+    // async Task UpdateLanguage(Language language)
+    // {
+    //     await Auth.UpdateLanguageAsync(language);
+    // }
+}

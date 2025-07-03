@@ -20,14 +20,6 @@ public abstract class BlossomApplicationBuilder
         AddAuthentication<TUser>();
     }
 
-    public void AddSparcEngine()
-    {
-        Services.AddRefitClient<ISparcEngine>()
-            //.ConfigureHttpClient(x => x.BaseAddress = new Uri("https://engine.sparc.coop"))
-            .ConfigureHttpClient(x => x.BaseAddress = new Uri("https://localhost:7185"))
-            .AddStandardResilienceHandler();
-    }
-
     public abstract IBlossomApplication Build(Assembly? entityAssembly = null);
 
     protected void RegisterBlossomEntities(Assembly assembly)
