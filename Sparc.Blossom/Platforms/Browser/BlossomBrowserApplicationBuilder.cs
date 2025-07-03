@@ -54,6 +54,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
             .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<TUser>>();
 
         Services.AddScoped(_ => new ClaimsPrincipal(new ClaimsIdentity()));
+        Services.AddScoped<BlossomUser>(s => BlossomUser.FromPrincipal(s.GetRequiredService<ClaimsPrincipal>()));    
 
         _isAuthenticationAdded = true;
     }

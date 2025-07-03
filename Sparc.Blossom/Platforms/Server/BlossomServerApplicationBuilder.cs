@@ -69,6 +69,8 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
             s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User 
             ?? new ClaimsPrincipal(new ClaimsIdentity()));
 
+        Services.AddTransient(s => BlossomUser.FromPrincipal(s.GetRequiredService<ClaimsPrincipal>()));
+
         _isAuthenticationAdded = true;
     }
 

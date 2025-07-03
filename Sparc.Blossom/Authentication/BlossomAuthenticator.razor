@@ -143,6 +143,7 @@
     </Authorized>
 </AuthorizeView>
 
+@inject ClaimsPrincipal Principal
 @inject IBlossomAuthenticator Auth
 @code {
     [Parameter]
@@ -151,17 +152,12 @@
     bool IsOpen;
     bool HasError = false;
 
-    [CascadingParameter] public required ClaimsPrincipal Principal { get; set; }
-
-    BlossomUser User = null!;
     public string? Email;
 
     ElementReference? LoginInput;
 
     protected override async Task OnInitializedAsync()
     {
-        await Auth.GetAsync(Principal);
-
         if (!string.IsNullOrEmpty(Token))
             await Auth.LoginAsync(Principal, "Passwordless", Token);
     }
