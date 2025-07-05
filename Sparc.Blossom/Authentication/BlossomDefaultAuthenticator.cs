@@ -3,13 +3,12 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : AuthenticationStateProvider, IBlossomAuthenticator 
+public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuthenticator 
     where T : BlossomUser, new()
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
 
     public BlossomUser? User { get; set; }
-    public IRepository<T> Users { get; } = users;
     public string? Message { get; set; }
 
     public async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
@@ -17,26 +16,11 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
         return await GetUserAsync(principal);
     }
 
-    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
-    {
-        if (User == null)
-        {
-            var user = new T();
-            await Users.AddAsync(user);
-            User = user;
-        }
-
-        var principal = User.ToPrincipal();
-        var state = new AuthenticationState(principal);
-
-        return state;
-    }
-
     public virtual async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
     {
         var user = await GetUserAsync(principal);
         principal = user.ToPrincipal();
-        await Users.UpdateAsync(user);
+        await users.UpdateAsync(user);
         return principal;
     }
     
@@ -44,7 +28,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
     {
         var user = await GetUserAsync(principal);
         principal = user.ToPrincipal(authenticationType, externalId);
-        await Users.UpdateAsync(user);
+        await users.UpdateAsync(user);
         return principal;
     }
 
@@ -52,7 +36,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
     {
         var user = await GetUserAsync(principal);
         principal = user.Logout();
-        await Users.UpdateAsync(user);
+        await users.UpdateAsync(user);
         return principal;
     }
 
@@ -61,13 +45,13 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
         T? user = null;
         if (principal.Identity?.IsAuthenticated == true)
         {
-            user = await Users.FindAsync(principal.Id());
+            user = await users.FindAsync(principal.Id());
         }
 
         if (user == null)
         {
             user = BlossomUser.FromPrincipal<T>(principal);
-            await Users.AddAsync(user);
+            await users.AddAsync(user);
         }
 
         User = user;
@@ -78,7 +62,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
     {
         var user = await GetUserAsync(principal);
         user.UpdateAvatar(avatar);
-        await Users.UpdateAsync(user);
+        await users.UpdateAsync(user);
         return user;
     }
 

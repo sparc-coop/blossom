@@ -10,7 +10,7 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
 
     public async Task InvokeAsync(HttpContext context, IBlossomAuthenticator auth)
     {
-        if (context.Request.Path.StartsWithSegments("/_blazor") || context.Request.Path.StartsWithSegments("/_framework"))
+        if (context.IsStaticFileRequest())
         {
             await _next(context);
             return;

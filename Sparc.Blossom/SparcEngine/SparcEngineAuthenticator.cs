@@ -3,32 +3,23 @@ using Sparc.Blossom.Authentication;
 
 namespace Sparc.Engine;
 
-public class SparcEngineAuthenticator : IBlossomAuthenticator
+public class SparcEngineAuthenticator(ISparcEngine engine) : IBlossomAuthenticator
 {
-    private readonly ISparcEngine _engine;
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
     public BlossomUser? User { get; private set; }
     public string? Message { get; set; }
 
-    public SparcEngineAuthenticator(ISparcEngine engine)
-    {
-        _engine = engine;
-    }
-
     public async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
     {
-        if (User != null)
-            return User;
+        if (User == null)
+            await LoginAsync(principal);
 
-        // Try to get user info from the engine
-        var user = await _engine.UserInfo();
-        User = user;
-        return user;
+        return User!;
     }
 
     public async Task<BlossomUser> UpdateAsync(ClaimsPrincipal principal, BlossomAvatar avatar)
     {
-        var user = await _engine.UpdateUserInfo(avatar);
+        var user = await engine.UpdateUserInfo(avatar);
         User = user;
         return user;
     }
@@ -37,7 +28,7 @@ public class SparcEngineAuthenticator : IBlossomAuthenticator
     {
         if (User == null)
         {
-            var user = await _engine.Login();
+            var user = await engine.Login();
             User = user;
         }
 
@@ -47,7 +38,7 @@ public class SparcEngineAuthenticator : IBlossomAuthenticator
 
     public async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId)
     {
-        var user = await _engine.Login(externalId);
+        var user = await engine.Login(externalId);
         User = user;
         LoginState = LoginStates.LoggedIn;
         return user.ToPrincipal(authenticationType, externalId);
