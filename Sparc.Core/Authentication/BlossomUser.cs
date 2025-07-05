@@ -16,6 +16,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public DateTime DateCreated { get; private set; }
     public DateTime DateModified { get; private set; }
     public DateTime? LastLogin { get; private set; }
+    public string? LastPageVisited { get; set; }
     public BlossomAvatar Avatar { get; set; } = new();
 
     public List<BlossomIdentity> Identities { get; set; } = [];

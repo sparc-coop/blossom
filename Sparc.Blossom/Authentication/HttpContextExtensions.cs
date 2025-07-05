@@ -4,10 +4,10 @@ public static class HttpContextExtensions
 {
     private static readonly HashSet<string> StaticFileExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        ".js", ".js.map", ".css", ".css.map", ".png", ".jpg", ".jpeg", ".gif", ".svg",
+        ".js", ".js.map", ".mjs", ".mjs.map", ".css", ".css.map", ".png", ".jpg", ".jpeg", ".gif", ".svg",
         ".woff", ".woff2", ".ttf", ".ico", ".webp", ".avif", ".mp4", ".webm", ".ogg",
         ".mp3", ".wav", ".flac", ".aac", ".m4a", ".zip", ".pdf", ".txt", ".html", ".htm",
-        ".xml", ".json", ".csv", ".md", ".yaml", ".yml", ".webmanifest", ".wasm"
+        ".xml", ".json", ".csv", ".md", ".yaml", ".yml", ".webmanifest", ".wasm", ".ts", ".ts.map"
     };
 
     public static bool IsStaticFileRequest(this HttpContext context)
