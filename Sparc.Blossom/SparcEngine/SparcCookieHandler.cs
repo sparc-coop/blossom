@@ -4,6 +4,7 @@ public class SparcCookieHandler(IHttpContextAccessor httpContextAccessor) : Dele
 {
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     private const string CookieName = ".Sparc.Cookie";
+    private const string AspNetCoreCookieName = ".AspNetCore.Cookies";
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
@@ -18,9 +19,9 @@ public class SparcCookieHandler(IHttpContextAccessor httpContextAccessor) : Dele
         var response = await base.SendAsync(request, cancellationToken);
 
         // Capture Set-Cookie from Login response and set it in the browser
-        if (request.RequestUri?.AbsolutePath.Contains("/auth/login") == true && response.Headers.TryGetValues("Set-Cookie", out var setCookies))
+        if (response.Headers.TryGetValues("Set-Cookie", out var setCookies))
         {
-            foreach (var setCookie in setCookies.Where(x => x.StartsWith(CookieName)))
+            foreach (var setCookie in setCookies.Where(x => x.StartsWith(AspNetCoreCookieName)))
             {
                 // Set the cookie in the response
                 var cookieValue = setCookie.Split(';')[0].Split('=')[1];

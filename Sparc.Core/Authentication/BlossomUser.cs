@@ -64,6 +64,9 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         AddClaim(ClaimTypes.Name, Avatar.Username);
         if (Avatar.Language != null)
             AddClaim("language", Avatar.Language.Id);
+        if (Avatar.Locale != null)
+            AddClaim(ClaimTypes.Locality, Avatar.Locale.Id);
+        
         RegisterClaims();
     }
 

@@ -17,17 +17,13 @@ public class SparcEngineAuthenticator : IBlossomAuthenticator
 
     public async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
     {
+        if (User != null)
+            return User;
+
         // Try to get user info from the engine
-        try
-        {
-            var user = await _engine.UserInfo();
-            User = user;
-            return user;
-        }
-        catch
-        {
-            return new BlossomUser();
-        }
+        var user = await _engine.UserInfo();
+        User = user;
+        return user;
     }
 
     public async Task<BlossomUser> UpdateAsync(ClaimsPrincipal principal, BlossomAvatar avatar)
