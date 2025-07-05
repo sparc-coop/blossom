@@ -1,8 +1,6 @@
 ﻿using Sparc.Blossom.Authentication;
 using System.Reflection;
 using MediatR.NotificationPublishers;
-using Refit;
-using Sparc.Engine;
 
 namespace Sparc.Blossom;
 
@@ -10,7 +8,7 @@ public abstract class BlossomApplicationBuilder
 {
     public virtual IServiceCollection Services { get; protected set; } = null!;
     public virtual IConfiguration Configuration { get; protected set; } = null!;
-    protected bool _isAuthenticationAdded;
+    protected bool isAuthenticationAdded => Services.Any(x => x.ServiceType == typeof(IBlossomAuthenticator));
 
     public abstract void AddAuthentication<TUser>() where TUser : BlossomUser, new();
     public virtual void AddAuthentication<TAuthenticator, TUser>()

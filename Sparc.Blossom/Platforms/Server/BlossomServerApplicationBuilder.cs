@@ -26,7 +26,7 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
     {
         var callingAssembly = entityAssembly ?? Assembly.GetCallingAssembly();
 
-        if (!_isAuthenticationAdded)
+        if (!isAuthenticationAdded)
         {
             // No-config Blossom User setup
             AddAuthentication<BlossomUser>();
@@ -70,8 +70,6 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
             ?? new ClaimsPrincipal(new ClaimsIdentity()));
 
         Services.AddTransient(s => BlossomUser.FromPrincipal(s.GetRequiredService<ClaimsPrincipal>()));
-
-        _isAuthenticationAdded = true;
     }
 
     public override void AddAuthentication<TAuthenticator, TUser>()
@@ -90,8 +88,6 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
         Services.AddTransient(s =>
             s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User
             ?? new ClaimsPrincipal(new ClaimsIdentity()));
-
-        _isAuthenticationAdded = true;
     }
 
     void AddBlossomServer(IComponentRenderMode? renderMode = null)

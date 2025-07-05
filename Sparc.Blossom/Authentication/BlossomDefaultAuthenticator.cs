@@ -19,11 +19,11 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        User = Users.Query.FirstOrDefault();
         if (User == null)
         {
-            User = new BlossomUser();
-            await Users.AddAsync((T)User);
+            var user = new T();
+            await Users.AddAsync(user);
+            User = user;
         }
 
         var principal = User.ToPrincipal();
@@ -34,9 +34,9 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
 
     public virtual async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
     {
-        var user = await GetAsync(principal);
+        var user = await GetUserAsync(principal);
         principal = user.ToPrincipal();
-        await Users.UpdateAsync((T)user);
+        await Users.UpdateAsync(user);
         return principal;
     }
     
@@ -44,7 +44,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
     {
         var user = await GetUserAsync(principal);
         principal = user.ToPrincipal(authenticationType, externalId);
-        await Users.UpdateAsync((T)user);
+        await Users.UpdateAsync(user);
         return principal;
     }
 
@@ -52,31 +52,33 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : Authenticati
     {
         var user = await GetUserAsync(principal);
         principal = user.Logout();
-        await Users.UpdateAsync((T)user);
+        await Users.UpdateAsync(user);
         return principal;
     }
 
-    protected virtual async Task<BlossomUser> GetUserAsync(ClaimsPrincipal principal)
+    protected virtual async Task<T> GetUserAsync(ClaimsPrincipal principal)
     {
+        T? user = null;
         if (principal.Identity?.IsAuthenticated == true)
         {
-            User = await Users.FindAsync(principal.Id());
+            user = await Users.FindAsync(principal.Id());
         }
 
-        if (User == null)
+        if (user == null)
         {
-            User = BlossomUser.FromPrincipal(principal);
-            await Users.AddAsync((T)User);
+            user = BlossomUser.FromPrincipal<T>(principal);
+            await Users.AddAsync(user);
         }
 
-        return User!;
+        User = user;
+        return user!;
     }
 
     public async Task<BlossomUser> UpdateAsync(ClaimsPrincipal principal, BlossomAvatar avatar)
     {
         var user = await GetUserAsync(principal);
         user.UpdateAvatar(avatar);
-        await Users.UpdateAsync((T)user);
+        await Users.UpdateAsync(user);
         return user;
     }
 
