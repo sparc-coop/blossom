@@ -18,6 +18,8 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public DateTime? LastLogin { get; private set; }
     public string? LastPageVisited { get; set; }
     public BlossomAvatar Avatar { get; set; } = new();
+    public string? Identity(string authenticationType) => 
+        Identities.FirstOrDefault(x => x.Type == authenticationType)?.Id;
 
     public List<BlossomIdentity> Identities { get; set; } = [];
     internal Dictionary<string, string> Claims { get; set; } = [];
