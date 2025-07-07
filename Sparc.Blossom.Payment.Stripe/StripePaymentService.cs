@@ -88,7 +88,7 @@ namespace Sparc.Blossom.Payment.Stripe
             return await service.ConfirmAsync(paymentIntentId, confirmOptions);
         }
 
-        public async Task<Product> GetProductAsync(string productId)
+        public async Task<Product> GetStripeProductAsync(string productId)
         {
             var productService = new ProductService();
             var product = await productService.GetAsync(productId);
