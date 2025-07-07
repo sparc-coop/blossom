@@ -1,11 +1,11 @@
 ﻿
+using Sparc.Blossom;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Engine;
 
-public record Language
+public class Language : BlossomEntity<string>
 {
-    public string Id { get; set; } = "";
     public string LanguageId { get; set; } = "";
     public string? DialectId { get; set; }
     public string? VoiceId { get; set; }
