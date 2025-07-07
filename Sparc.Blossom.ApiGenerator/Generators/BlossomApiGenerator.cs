@@ -65,13 +65,13 @@ public class BlossomApi({{constructor}}) : BlossomApiProxy
 
     static string Code(IGrouping<string?, BlossomApiInfo> sources)
     {
-        var commands = new StringBuilder();
+        var comments = new StringBuilder();
         var constructors = new StringBuilder();
         var queries = new StringBuilder();
         var api = sources.OrderBy(x => x.IsAggregate ? 0 : 1).First();
 
         foreach (var comment in api.Comments)
-            commands.AppendLine("// " + comment);
+            comments.AppendLine("// " + comment);
 
         foreach (var source in sources.Where(x => x.IsEntity))
         {
@@ -101,10 +101,10 @@ namespace Sparc.Blossom.Api;
 #nullable enable
 public partial class {{api.PluralName}} : BlossomAggregateProxy<{{api.EntityName}}>
 {
+    {{comments}}
     public {{api.PluralName}}(IRunner<{{api.EntityName}}> runner) : base(runner) { }
 
     {{constructors}}
-    {{commands}}
     {{queries}}
 }
 """;
