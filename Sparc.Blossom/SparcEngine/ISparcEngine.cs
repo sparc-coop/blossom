@@ -29,6 +29,8 @@ public interface ISparcEngine
 
     [Post("/billing/create-order-payment")]
     Task<CreateOrderPaymentResponse> CreateOrderPaymentAsync([Body] CreateOrderPaymentRequest request);
+    [Post("/billing/create-order")]
+    Task<CreateOrderPaymentResponse> CreateOrderAsync([Body] CreateOrderRequest request);
 
     [Get("/billing/get-product/{productId}")]
     Task<GetProductResponse> GetProductAsync(string productId);
