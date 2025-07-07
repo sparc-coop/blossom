@@ -1,0 +1,27 @@
+﻿<div>
+    <InputText @bind-Value="PhoneNumber" @oninput="OnPhoneNumberChanged" />
+    <label>
+        <InputCheckbox Value="VerifyPhone" ValueChanged="OnVerifyPhoneNumberChanged" ValueExpression="@(() => VerifyPhone)" />
+        <span>Verify this phone number</span>
+    </label>
+</div>
+
+@code {
+    [Parameter] public string PhoneNumber { get; set; } = "";
+    [Parameter] public bool VerifyPhone { get; set; }
+    [Parameter] public EventCallback<string> PhoneNumberChanged { get; set; }
+    [Parameter] public EventCallback<bool> VerifyPhoneChanged { get; set; }
+
+    private async Task OnPhoneNumberChanged(ChangeEventArgs e)
+    {
+        PhoneNumber = e.Value?.ToString() ?? "";
+        await PhoneNumberChanged.InvokeAsync(PhoneNumber);
+    }
+
+    private async Task OnVerifyPhoneNumberChanged(bool value)
+    {
+        VerifyPhone = value;
+        await VerifyPhoneChanged.InvokeAsync(value);
+    }
+}
+

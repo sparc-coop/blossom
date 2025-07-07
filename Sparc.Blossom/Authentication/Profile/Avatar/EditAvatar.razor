@@ -1,0 +1,59 @@
+﻿@using Sparc.Blossom.Authentication
+
+<div class="avatar-editor--container">
+    <div class="account-details">
+        <label>
+            Name
+            <input @bind="User.Name" @bind:event="oninput" placeholder="Jane Doe" />
+        </label>
+
+        <label>
+            Pronouns (Optional)
+            <input @bind="User.Pronouns" @bind:event="oninput" placeholder="She/her, He/him, They/them, etc." />
+        </label>
+
+        <label>
+            About You (Optional)
+            <textarea @bind="User.Description"
+                      @bind:event="oninput"
+                      maxlength="@descLimit"
+                      placeholder="Enter a little about yourself" />
+        </label>
+        @if (User.Description != null)
+        {
+            <aside>
+                @(descLimit - User.Description.Count()) characters left
+            </aside>
+        }
+    </div>
+        <div class="selector-wrapper">
+        <ColorSelector @bind-BackgroundColor="User.BackgroundColor" />
+        <EmojiSelector Emoji="@User.Emoji" EmojiChanged="HandleEmojiChanged" />
+
+        </div>
+        <div class="avatar-preview">
+            <h3>Preview</h3>
+            <figure class="avatar @(HasEmoji ? "emoji" : "")" style="background-color: @User.BackgroundColor">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <text x="50%" y="60%" font-size="80" text-anchor="middle" dominant-baseline="middle" style="fill: @User.ForegroundColor">
+                    @(!string.IsNullOrWhiteSpace(User?.Emoji) ? User.Emoji : User?.Initials)
+                    </text>
+                </svg>
+            </figure>
+        </div>
+    </div>
+
+@code {
+    [Parameter] public BlossomAvatar User { get; set; } = null!;
+    [Parameter] public bool SpillBackground { get; set; }
+    [Parameter] public EventCallback<string> OnEmojiChanged { get; set; }
+    public int descLimit = 275;
+
+    bool HasEmoji => !string.IsNullOrWhiteSpace(User?.Emoji);
+
+    private async Task HandleEmojiChanged(string emoji)
+    {
+        User.Emoji = emoji;
+        await OnEmojiChanged.InvokeAsync(emoji);
+    }
+}

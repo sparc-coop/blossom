@@ -1,0 +1,47 @@
+﻿.emoji-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    height: 100%;
+
+    h3 {
+        font-size: 1.2rem;
+        letter-spacing: 0.16px;
+        font-weight: normal;
+    }
+
+    .emoji-container {
+        flex: 1;
+        min-height: 200px;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid var(--gray-200);
+        border-radius: 8px;
+        padding: 16px 0;
+    }
+}
+
+.skintones, .emojis {
+    font-family: 'Noto Emoji', sans-serif;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 6px 0 18px;
+
+    li {
+        padding: 6px;
+        font-size: 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 300ms ease-in-out;
+
+        &:hover {
+            background: var(--gray-100);
+        }
+
+        &.selected {
+            background: var(--purple-900);
+            color: white;
+        }
+    }
+}

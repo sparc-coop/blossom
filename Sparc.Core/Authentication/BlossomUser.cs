@@ -146,7 +146,8 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         ChangeLanguage(language);
 
-        Avatar.Language = language with { DialectId = voice?.Locale, VoiceId = voice?.ShortName };
+        Avatar.Language!.VoiceId = voice?.ShortName;
+        Avatar.Language.DialectId = voice?.Locale; 
         Avatar.Gender = voice?.Gender;
     }
 

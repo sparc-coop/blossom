@@ -1,0 +1,32 @@
+﻿<div class="modal-overlay">
+    <div class="modal @CssClass" @onclick:stopPropagation>
+        <header>
+            <h3>@Title</h3>
+        </header>
+        <div>
+            @ChildContent
+        </div>
+        <footer>
+            @if (ShowDefaultButtons)
+            {
+                <button class="secondary-btn" @onclick="Close">Cancel</button>
+                @if (ShowSaveButton)
+                {
+                    <button class="primary-btn" @onclick="OnSave">Save</button>
+                }
+            }
+        </footer>
+    </div>
+</div>
+
+@code {
+    [Parameter] public required string Title { get; set; }
+    [Parameter] public required RenderFragment ChildContent { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    [Parameter] public bool ShowDefaultButtons { get; set; } = true;
+    [Parameter] public bool ShowSaveButton { get; set; } = true;
+    [Parameter] public string CssClass { get; set; } = "";
+
+    private async Task Close() => await OnClose.InvokeAsync();
+}

@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -10,6 +9,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
 
     public BlossomUser? User { get; set; }
     public string? Message { get; set; }
+    protected IRepository<T> Users { get; } = users;
 
     public async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
     {
@@ -20,7 +20,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
     {
         var user = await GetUserAsync(principal);
         principal = user.ToPrincipal();
-        await users.UpdateAsync(user);
+        await Users.UpdateAsync(user);
         return principal;
     }
     
@@ -28,7 +28,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
     {
         var user = await GetUserAsync(principal);
         principal = user.ToPrincipal(authenticationType, externalId);
-        await users.UpdateAsync(user);
+        await Users.UpdateAsync(user);
         return principal;
     }
 
@@ -36,7 +36,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
     {
         var user = await GetUserAsync(principal);
         principal = user.Logout();
-        await users.UpdateAsync(user);
+        await Users.UpdateAsync(user);
         return principal;
     }
 
@@ -45,13 +45,13 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
         T? user = null;
         if (principal.Identity?.IsAuthenticated == true)
         {
-            user = await users.FindAsync(principal.Id());
+            user = await Users.FindAsync(principal.Id());
         }
 
         if (user == null)
         {
             user = BlossomUser.FromPrincipal<T>(principal);
-            await users.AddAsync(user);
+            await Users.AddAsync(user);
         }
 
         User = user;
@@ -62,7 +62,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
     {
         var user = await GetUserAsync(principal);
         user.UpdateAvatar(avatar);
-        await users.UpdateAsync(user);
+        await Users.UpdateAsync(user);
         return user;
     }
 
