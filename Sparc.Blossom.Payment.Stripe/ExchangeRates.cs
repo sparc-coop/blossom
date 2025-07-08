@@ -1,21 +1,15 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Configuration;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace Sparc.Blossom.Payment.Stripe
 {
-    public class ExchangeRates
+    public class ExchangeRates()
     {
-        private readonly string _apiKey;
-        public Dictionary<string, decimal> Rates = new();
+        internal static string ApiKey { get; set; } = "";
+        public Dictionary<string, decimal> Rates = [];
         public DateTime? LastUpdated { get; private set; }
         public DateTime? AsOfDate { get; private set; }
-
-        public ExchangeRates(IOptions<ExchangeRatesOptions> opt)
-        {
-            _apiKey = opt.Value.ApiKey
-          ?? throw new InvalidOperationException(
-                 "ExchangeRates:ApiKey is missing in configuration.");
-        }
 
         public async Task<decimal> ConvertAsync(decimal amount, string from, string to)
         {
@@ -55,7 +49,7 @@ namespace Sparc.Blossom.Payment.Stripe
                 BaseAddress = new Uri("https://api.apilayer.com/exchangerates_data/latest")
             };
 
-            client.DefaultRequestHeaders.Add("apikey", _apiKey);
+            client.DefaultRequestHeaders.Add("apikey", ApiKey);
 
             //var response = await client.GetFromJsonAsync<ExchangeRatesResponse>("?access_key=<key>");
             var response = await client.GetFromJsonAsync<ExchangeRatesResponse>("?base=USD");

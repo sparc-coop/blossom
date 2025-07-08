@@ -1,27 +1,11 @@
-﻿using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
+﻿using Microsoft.Extensions.Configuration;
 using Stripe;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sparc.Blossom.Payment.Stripe
 {
-    public class StripePaymentService
+    public class StripePaymentService(ExchangeRates rates)
     {
-        public readonly StripeClientOptions _options;
-        public readonly ExchangeRates _rates;
-
-        public StripePaymentService(IOptions<StripeClientOptions> options, ExchangeRates rates)
-        {
-            _options = options.Value;
-            _rates = rates;
-            StripeConfiguration.ApiKey = _options.ApiKey;
-        }
+        public readonly ExchangeRates _rates = rates;
 
         public async Task<PaymentIntent> CreatePaymentIntentAsync(long amount, string currency, string? customerId = null, string? receiptEmail = null, Dictionary<string, string>? metadata = null, string? setupFutureUsage = null)
         {

@@ -1,26 +1,19 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Stripe;
 
-namespace Sparc.Blossom.Payment.Stripe
+namespace Sparc.Blossom.Payment.Stripe;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    public static IServiceCollection AddStripePayments(this IServiceCollection services, IConfiguration config)
     {
-        public static IServiceCollection AddStripePayments(
-            this IServiceCollection services,
-            Action<StripeClientOptions> configure)
-        {
-            services.Configure(configure);
-            services.AddSingleton<StripePaymentService>();
-            return services;
-        }
+        services.AddSingleton<StripePaymentService>();
+        services.AddSingleton<ExchangeRates>();
+        StripeConfiguration.ApiKey = config.GetConnectionString("Stripe");
+        ExchangeRates.ApiKey = config.GetConnectionString("ExchangeRates")
+            ?? throw new Exception("ExchangeRates connection string not configured");
 
-        public static IServiceCollection AddExchangeRates(
-            this IServiceCollection services,
-            Action<ExchangeRatesOptions> configure)
-        {
-            services.Configure(configure);
-            services.AddSingleton<ExchangeRates>();
-            return services;
-        }
+        return services;
     }
 }
