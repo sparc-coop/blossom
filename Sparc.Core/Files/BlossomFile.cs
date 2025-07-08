@@ -2,6 +2,12 @@
 
 public class BlossomFile
 {
+    public BlossomFile()
+    {
+        FolderName = string.Empty;
+        FileName = string.Empty;
+    }
+    
     public BlossomFile(string folderName, string fileName, AccessTypes? accessType = null, Stream? stream = null)
     {
         FolderName = folderName;
