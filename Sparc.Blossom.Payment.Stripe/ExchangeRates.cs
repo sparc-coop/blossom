@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace Sparc.Blossom.Payment.Stripe
@@ -7,16 +6,17 @@ namespace Sparc.Blossom.Payment.Stripe
     public class ExchangeRates()
     {
         internal static string ApiKey { get; set; } = "";
-        public Dictionary<string, decimal> Rates = [];
+        internal static Dictionary<string, decimal> Rates = [];
         public DateTime? LastUpdated { get; private set; }
         public DateTime? AsOfDate { get; private set; }
+        public bool IsOutOfDate => Rates.Count == 0 || LastUpdated == null || LastUpdated < DateTime.UtcNow.AddHours(-24);
 
         public async Task<decimal> ConvertAsync(decimal amount, string from, string to)
         {
             from = from.ToUpper();
             to = to.ToUpper();
 
-            if (Rates.Count == 0 || LastUpdated < DateTime.UtcNow.AddHours(-24))
+            if (IsOutOfDate)
                 await RefreshAsync();
 
             if (from == to)
@@ -31,6 +31,16 @@ namespace Sparc.Blossom.Payment.Stripe
             return amount * Rates[to] / Rates[from];
         }
 
+        public async Task<long> ConvertAsync(long amount, string from, string to, bool round = false)
+        {
+            var convertedAmount = await ConvertAsync((decimal)amount, from, to);
+            if (round)
+                // round to the nearest 100
+                convertedAmount = Math.Round(convertedAmount / 100, 0) * 100;
+            
+            return (long)convertedAmount;
+        }
+
         public async Task<List<decimal>> ConvertToNiceAmountsAsync(string toCurrency, params decimal[] usdAmounts)
         {
             var result = new List<decimal>();
@@ -38,20 +48,15 @@ namespace Sparc.Blossom.Payment.Stripe
             return usdAmounts.Select(x => baseAmount * x).ToList();
         }
 
-        public async Task RefreshAsync()
+        async Task RefreshAsync()
         {
-            var today = DateTime.Today.ToString("yyyy-MM-dd");
-
-
             using var client = new HttpClient()
             {
-                //BaseAddress = new Uri("https://api.exchangeratesapi.io/v1/latest")
                 BaseAddress = new Uri("https://api.apilayer.com/exchangerates_data/latest")
             };
 
             client.DefaultRequestHeaders.Add("apikey", ApiKey);
 
-            //var response = await client.GetFromJsonAsync<ExchangeRatesResponse>("?access_key=<key>");
             var response = await client.GetFromJsonAsync<ExchangeRatesResponse>("?base=USD");
             if (response?.Success == true)
             {

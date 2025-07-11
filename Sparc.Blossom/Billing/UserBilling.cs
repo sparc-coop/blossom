@@ -34,16 +34,6 @@ public class CreateOrderPaymentResponse
     public string ClientSecret { get; set; } = default!;
 }
 
-public record GetProductResponse
-(
-    string Id,
-    string Name,
-    long Price,
-    string Currency,
-    bool IsActive,
-    List<Dictionary<string, long>> Prices
-);
-
 public record ConfirmOrderPaymentRequest(string PaymentIntentId, string PaymentMethodId);
 
 

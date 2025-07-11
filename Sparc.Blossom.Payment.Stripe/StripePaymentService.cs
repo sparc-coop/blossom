@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Stripe;
+﻿using Stripe;
 
 namespace Sparc.Blossom.Payment.Stripe
 {
@@ -7,57 +6,25 @@ namespace Sparc.Blossom.Payment.Stripe
     {
         public readonly ExchangeRates _rates = rates;
 
-        public async Task<PaymentIntent> CreatePaymentIntentAsync(long amount, string currency, string? customerId = null, string? receiptEmail = null, Dictionary<string, string>? metadata = null, string? setupFutureUsage = null)
+        public async Task<PaymentIntent> CreatePaymentIntentAsync(string email, decimal amount, string currencyId, string? productId = null)
         {
-            var customerService = new CustomerService();
-            string? stripeCustomerId = null;
-
-            if (customerId != null)
-            {
-                var searchOptions = new CustomerSearchOptions
-                {
-                    
-                    Query = $"name:'{customerId}'"
-                };
-
-                var stripeCustomerList = await customerService.SearchAsync(searchOptions);
-                if (stripeCustomerList.Data.Count > 0)
-                {
-                    var stripeCustomer = stripeCustomerList.FirstOrDefault();
-                    if (stripeCustomer != null)
-                    {
-                        stripeCustomerId = stripeCustomer.Id;
-                    }
-
-                }
-                else
-                {
-                    var customerOptions = new CustomerCreateOptions
-                    {
-                        Name = customerId
-                    };
-                    var newCustomer = await customerService.CreateAsync(customerOptions);
-                    stripeCustomerId = newCustomer.Id;
-                }
-            }
-
-            var service = new PaymentIntentService();
+            var customerId = await GetOrCreateCustomerAsync(email);
+            currencyId = currencyId.ToLower();
 
             var createOptions = new PaymentIntentCreateOptions
             {
-                Amount = amount,
-                Currency = currency,
-                Customer = stripeCustomerId,
-                ReceiptEmail = receiptEmail,
-                Metadata = metadata,
-                SetupFutureUsage = setupFutureUsage,
+                Amount = ToStripePrice(amount, currencyId),
+                Currency = currencyId,
+                Customer = customerId,
+                SetupFutureUsage = "on_session",
+                StatementDescriptor = productId,
                 AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
                 {
                     Enabled = true,
                 },
             };
 
-            return await service.CreateAsync(createOptions);
+            return await new PaymentIntentService().CreateAsync(createOptions);
         }
 
         public async Task<PaymentIntent> ConfirmPaymentIntentAsync(
@@ -72,7 +39,7 @@ namespace Sparc.Blossom.Payment.Stripe
             return await service.ConfirmAsync(paymentIntentId, confirmOptions);
         }
 
-        public async Task<Product> GetStripeProductAsync(string productId)
+        public async Task<Product> GetProductAsync(string productId)
         {
             var productService = new ProductService();
             var product = await productService.GetAsync(productId);
@@ -82,107 +49,152 @@ namespace Sparc.Blossom.Payment.Stripe
             return product;
         }
 
-        public async Task<Price> GetPricesAsync(string priceId)
+        public async Task<decimal?> GetPriceAsync(string productId, string currencyId)
         {
+            currencyId = currencyId.ToLower();
+
             var priceService = new PriceService();
-            var getOptions = new PriceGetOptions
-            {
-                Expand = new List<string> { "currency_options" }
-            };
-
-            var price = await priceService.GetAsync(
-                id: priceId,
-                options: getOptions
-            );
-
-            return price;
-        }
-
-        public async Task<IList<Price>> GetAllPricesForProductAsync(string productId)
-        {
-            var priceService = new PriceService();
-
             var listOptions = new PriceListOptions
             {
                 Product = productId,
-                Expand = new List<string> { "data.currency_options" }
+                Expand = ["data.currency_options"]
             };
 
-            var prices = new List<Price>();
             var pricesResult = await priceService.ListAsync(listOptions);
-            prices.AddRange(pricesResult.Data);
+            var basePrice = pricesResult.Data.FirstOrDefault();
+            if (basePrice?.UnitAmount == null)
+                return null;
 
-            return prices.ToList();
+            var hasPrice = basePrice.CurrencyOptions.TryGetValue(currencyId, out var currentPrice);
+            if (hasPrice && currentPrice!.UnitAmount != null && _rates.IsOutOfDate)
+                // If the price is already set and the rates are up to date, return the price
+                return FromStripePrice(currentPrice.UnitAmount.Value, currencyId);
+
+            var newPrice = await _rates.ConvertAsync(basePrice.UnitAmount.Value, "USD", currencyId, true);
+            // if the difference is less than 20%, keep the old price
+            if (currentPrice?.UnitAmount != null && Math.Abs(newPrice - currentPrice.UnitAmount.Value) / currentPrice.UnitAmount.Value < 0.2M)
+                return FromStripePrice(currentPrice.UnitAmount.Value, currencyId);
+
+            var priceUpdateOptions = new PriceUpdateOptions
+            {
+                CurrencyOptions = new Dictionary<string, PriceCurrencyOptionsOptions>
+                {
+                    { currencyId, new PriceCurrencyOptionsOptions { UnitAmount = newPrice } }
+                }
+            };
+            await priceService.UpdateAsync(basePrice.Id, priceUpdateOptions);
+
+            return FromStripePrice(newPrice, currencyId);
         }
 
-        public async Task<Price> CreatePriceWithCurrencyOptionsAsync(string productId)
+        //public async Task<Price> CreatePriceWithCurrencyOptionsAsync(string productId)
+        //{
+        //    var priceService = new PriceService();
+        //    var defaultCurrency = "usd";
+        //    var defaultUnitAmount = 1000;
+        //    var currencyOptions = new Dictionary<string, PriceCurrencyOptionsOptions>();
+
+        //    var lowercasedSupportedRates = _rates.Rates
+        //        .Where(kvp => SupportedCurrencies.Contains(kvp.Key))
+        //        .ToDictionary(
+        //            kvp => kvp.Key.ToLowerInvariant(),
+        //            kvp => kvp.Value // / eurToUsdRate
+        //        ).Where(x => x.Value <= 10_000M)
+        //        .ToDictionary(
+        //            x => x.Key,
+        //            x => x.Value
+        //        );
+
+        //    lowercasedSupportedRates.Remove("usd");
+
+
+        //    foreach (var rate in lowercasedSupportedRates)
+        //    {
+        //        var convertedValue = Math.Round(rate.Value, 2) * defaultUnitAmount;
+        //        int roundedValue = (int)Math.Round(convertedValue, 0);
+        //        var strVal = roundedValue.ToString();
+        //        var niceStrVal = strVal[0] + new string(strVal.Skip(1).Select(x => '0').ToArray());
+
+        //        currencyOptions[rate.Key] = new PriceCurrencyOptionsOptions
+        //        {
+        //            UnitAmountDecimal = decimal.Parse(niceStrVal)
+        //        };
+        //    }
+
+        //    var createOptions = new PriceCreateOptions
+        //    {
+        //        Product = productId,
+        //        Currency = defaultCurrency,
+        //        UnitAmountDecimal = defaultUnitAmount,
+        //        CurrencyOptions = currencyOptions,
+        //    };
+
+        //    return await priceService.CreateAsync(createOptions);
+        //}
+
+        public async Task<string?> GetOrCreateCustomerAsync(string? email)
         {
-            var priceService = new PriceService();
-            var defaultCurrency = "usd";
-            var defaultUnitAmount = 1000;
-            var currencyOptions = new Dictionary<string, PriceCurrencyOptionsOptions>();
+            var customerService = new CustomerService();
 
-            await _rates.RefreshAsync();
-            var allRates = _rates.Rates;
-
-            //if (!allRates.TryGetValue("USD", out var eurToUsdRate)) // uncomment this line if you want to use EUR as base currency
-            //    throw new InvalidOperationException("Missing USD rate for re-basing.");
-
-            var supportedCurrencies = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            if (email != null)
             {
-                "sll","aed","afn","all","amd","ang","aoa","ars","aud","awg","azn",
-                "bam","bbd","bdt","bgn","bhd","bif","bmd","bnd","bob","brl","bsd",
-                "bwp","byn","bzd","cad","cdf","chf","clp","cny","cop","crc","cve",
-                "czk","djf","dkk","dop","dzd","egp","etb","eur","fjd","fkp","gbp",
-                "gel","gip","gmd","gnf","gtq","gyd","hkd","hnl","htg","huf","mro",
-                "idr","ils","inr","isk","jmd","jod","jpy","kes","kgs","khr","kmf",
-                "krw","kwd","kyd","kzt","lak","lbp","lkr","lrd","lsl","mad","mdl",
-                "mga","mkd","mmk","mnt","mop","mur","mvr","mwk","mxn","myr","mzn",
-                "nad","ngn","nio","nok","npr","nzd","omr","pab","pen","pgk","php",
-                "pkr","pln","pyg","qar","ron","rsd","rub","rwf","sar","sbd","scr",
-                "sek","sgd","shp","sle","sos","srd","std","szl","thb","tjs","tnd",
-                "top","try","ttd","twd","tzs","uah","ugx","uyu","uzs","vnd","vuv",
-                "wst","xaf","xcd","xcg","xof","xpf","yer","zar","zmw","btn",
-                "ghs","eek","lvl","svc","vef","ltl"
-            };
-
-            var lowercasedSupportedRates = _rates.Rates
-                .Where(kvp => supportedCurrencies.Contains(kvp.Key))
-                .ToDictionary(
-                    kvp => kvp.Key.ToLowerInvariant(),
-                    kvp => kvp.Value // / eurToUsdRate
-                ).Where(x => x.Value <= 10_000M)
-                .ToDictionary(
-                    x => x.Key,
-                    x => x.Value
-                );
-
-            lowercasedSupportedRates.Remove("usd");
-
-
-            foreach (var rate in lowercasedSupportedRates)
-            {
-                var convertedValue = Math.Round(rate.Value, 2) * (decimal)defaultUnitAmount;
-                int roundedValue = (int)Math.Round(convertedValue, 0);
-                var strVal = roundedValue.ToString();
-                var niceStrVal = strVal[0] + new string(strVal.Skip(1).Select(x => '0').ToArray());
-
-                currencyOptions[rate.Key] = new PriceCurrencyOptionsOptions
+                var searchOptions = new CustomerSearchOptions
                 {
-                    UnitAmountDecimal = Decimal.Parse(niceStrVal)
+                    Query = $"email:'{email}'"
                 };
-                
+
+                var stripeCustomerList = await customerService.SearchAsync(searchOptions);
+                if (stripeCustomerList.Data.Count > 0)
+                    return stripeCustomerList.Data.First().Id;
             }
 
-            var createOptions = new PriceCreateOptions
+            var customerOptions = new CustomerCreateOptions
             {
-                Product = productId,
-                Currency = defaultCurrency,
-                UnitAmountDecimal = (decimal?)defaultUnitAmount,
-                CurrencyOptions = currencyOptions,
+                Email = email
             };
 
-            return await priceService.CreateAsync(createOptions);
+            var newCustomer = await customerService.CreateAsync(customerOptions);
+            return newCustomer.Id;
         }
+
+        private long ToStripePrice(decimal amount, string currencyId)
+        {
+            if (ZeroDecimalCurrencies.Contains(currencyId))
+                return (long)amount;
+            // Convert to cents for currencies that require it
+            return (long)(amount * 100);
+        }
+
+        private decimal FromStripePrice(long amount, string currencyId)
+        {
+            if (ZeroDecimalCurrencies.Contains(currencyId))
+                return amount;
+            // Convert from cents for currencies that require it
+            return amount / 100M;
+        }
+
+        static readonly HashSet<string> ZeroDecimalCurrencies = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf",
+            "ugx", "vnd", "vuv", "xaf", "xof", "xpf"
+        };
+
+        static readonly HashSet<string> Currencies = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "sll","aed","afn","all","amd","ang","aoa","ars","aud","awg","azn",
+            "bam","bbd","bdt","bgn","bhd","bif","bmd","bnd","bob","brl","bsd",
+            "bwp","byn","bzd","cad","cdf","chf","clp","cny","cop","crc","cve",
+            "czk","djf","dkk","dop","dzd","egp","etb","eur","fjd","fkp","gbp",
+            "gel","gip","gmd","gnf","gtq","gyd","hkd","hnl","htg","huf","mro",
+            "idr","ils","inr","isk","jmd","jod","jpy","kes","kgs","khr","kmf",
+            "krw","kwd","kyd","kzt","lak","lbp","lkr","lrd","lsl","mad","mdl",
+            "mga","mkd","mmk","mnt","mop","mur","mvr","mwk","mxn","myr","mzn",
+            "nad","ngn","nio","nok","npr","nzd","omr","pab","pen","pgk","php",
+            "pkr","pln","pyg","qar","ron","rsd","rub","rwf","sar","sbd","scr",
+            "sek","sgd","shp","sle","sos","srd","std","szl","thb","tjs","tnd",
+            "top","try","ttd","twd","tzs","uah","ugx","uyu","uzs","vnd","vuv",
+            "wst","xaf","xcd","xcg","xof","xpf","yer","zar","zmw","btn",
+            "ghs","eek","lvl","svc","vef","ltl"
+        };
     }
 }
