@@ -1,6 +1,5 @@
 ﻿using Refit;
 using Sparc.Blossom.Authentication;
-using Sparc.Blossom.Billing;
 
 namespace Sparc.Engine;
 
@@ -27,10 +26,10 @@ public interface ISparcEngine
     [Post("/auth/user-languages")]
     Task<BlossomUser> AddUserLanguage([Body] Language language);
 
-    [Post("/billing/create-order-payment")]
-    Task<CreateOrderPaymentResponse> CreateOrderPaymentAsync([Body] CreateOrderPaymentRequest request);
+    //[Post("/billing/create-order-payment")]
+    //Task<CreateOrderPaymentResponse> CreateOrderPaymentAsync([Body] CreateOrderPaymentRequest request);
 
-    [Get("/billing/get-product/{productId}")]
-    Task<GetProductResponse> GetProductAsync(string productId);
+    //[Get("/billing/get-product/{productId}")]
+    //Task<GetProductResponse> GetProductAsync(string productId);
 
 }
