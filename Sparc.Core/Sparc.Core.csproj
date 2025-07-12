@@ -31,8 +31,4 @@
 		<None Include="readme.md" Pack="true" PackagePath="\" />
 		<None Include="icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Bogus" Version="35.6.3" />
-	</ItemGroup>
 </Project>
