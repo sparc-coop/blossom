@@ -12,19 +12,19 @@ public interface ISparcEngine
     Task<string> FriendlyId();
 
     [Get("/auth/login")]
-    Task<BlossomUser> Login(string? emailOrToken = null);
+    Task<SparcUser> Login(string? emailOrToken = null);
 
     [Get("/auth/userinfo")]
-    Task<BlossomUser> UserInfo();
+    Task<SparcUser> UserInfo();
 
     [Post("/auth/userinfo")]
-    Task<BlossomUser> UpdateUserInfo([Body] BlossomAvatar avatar);
+    Task<SparcUser> UpdateUserInfo([Body] SparcUser avatar);
 
     [Get("/tovik/languages")]
     Task<IEnumerable<Language>> GetLanguages();
 
     [Post("/auth/user-languages")]
-    Task<BlossomUser> AddUserLanguage([Body] Language language);
+    Task<SparcUser> AddUserLanguage([Body] Language language);
 
     //[Post("/billing/create-order-payment")]
     //Task<CreateOrderPaymentResponse> CreateOrderPaymentAsync([Body] CreateOrderPaymentRequest request);

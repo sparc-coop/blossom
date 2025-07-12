@@ -23,7 +23,7 @@ public class TextContent : BlossomEntity<string>
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public DateTime? LastModified { get; set; }
     public DateTime? DeletedDate { get; set; }
-    public BlossomAvatar? User { get; set; }
+    public SparcUser? User { get; set; }
     public AudioContent? Audio { get; set; }
     public string? Text { get; set; }
     public List<ContentTranslation> Translations { get; set; } = [];
@@ -42,18 +42,18 @@ public class TextContent : BlossomEntity<string>
     {
         Id = Guid.NewGuid().ToString();
         Domain = domain;
-        User = new BlossomUser().Avatar;
+        User = new();
         Language = new(languageId);
         LanguageId = Language.Id;
     }
 
-    public TextContent(string domain, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
+    public TextContent(string domain, Language language, string text, SparcUser? user = null, string? originalText = null, string contentType = "Text")
         : this(domain, language.Id)
     {
         Id = IdHash(text, language);
-        User = user?.Avatar;
-        Language = user?.Avatar.Language ?? language;
-        Audio = user?.Avatar.Language?.VoiceId == null ? null : new(null, 0, user.Avatar.Language.VoiceId);
+        User = user;
+        Language = user?.Language ?? language;
+        Audio = user?.Language?.VoiceId == null ? null : new(null, 0, user.Language.VoiceId);
         OriginalText = originalText ?? "";
         ContentType = contentType;
         SetText(text);

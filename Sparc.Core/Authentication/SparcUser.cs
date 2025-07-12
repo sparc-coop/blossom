@@ -1,10 +1,11 @@
 ﻿using Sparc.Engine;
 using System.Drawing;
 using System.Globalization;
+using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class BlossomAvatar
+public class SparcUser
 {
     public string Id { get; set; }
     public string Username { get; set; } = "";
@@ -25,11 +26,11 @@ public class BlossomAvatar
     public bool? HearOthers { get; set; }
     public bool? MuteMe { get; set; }
 
-    public BlossomAvatar() : this("", "")
+    public SparcUser() : this("", "")
     {
     }
 
-    public BlossomAvatar(BlossomAvatar sourceAvatar)
+    public SparcUser(SparcUser sourceAvatar)
     {
         Id = sourceAvatar.Id;
         Name = sourceAvatar.Name;
@@ -43,11 +44,65 @@ public class BlossomAvatar
         Gender = sourceAvatar.Gender;
     }
 
-    public BlossomAvatar(string id, string name)
+    public SparcUser(string id, string name)
     {
         Id = id;
         Name = name;
         BackgroundColor = BackgroundColors().OrderBy(x => Guid.NewGuid()).First();
+    }
+
+    public void ChangeVoice(Language language, Voice? voice = null)
+    {
+        ChangeLanguage(language);
+
+        Language!.VoiceId = voice?.ShortName;
+        Language.DialectId = voice?.Locale;
+        Gender = voice?.Gender;
+    }
+
+    public void ChangeLanguage(Language language)
+    {
+        if (!LanguagesSpoken.Any(x => x.Matches(language)))
+            LanguagesSpoken.Add(language);
+
+        Language = language;
+    }
+
+    public void UpdateAvatar(SparcUser avatar)
+    {
+        Id = Id;
+        Language = avatar.Language;
+        BackgroundColor = avatar.BackgroundColor;
+        Pronouns = avatar.Pronouns;
+        Name = avatar.Name;
+        Description = avatar.Description;
+        SkinTone = avatar.SkinTone;
+        Emoji = avatar.Emoji;
+        HearOthers = avatar.HearOthers;
+        MuteMe = avatar.MuteMe;
+    }
+
+    public ClaimsPrincipal ToPrincipal()
+    {
+        var identity = new ClaimsIdentity("Sparc");
+        identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, Id));
+        identity.AddClaim(new Claim(ClaimTypes.Name, Username));
+        if (Language != null)
+            identity.AddClaim(new Claim("language", Language.Id));
+        if (Locale != null)
+            identity.AddClaim(new Claim(ClaimTypes.Locality, Locale.Id));
+
+        return new ClaimsPrincipal(identity);
+    }
+
+    internal void GoOnline(string connectionId)
+    {
+        IsOnline = true;
+    }
+
+    internal void GoOffline()
+    {
+        IsOnline = false;
     }
 
     public static string CalculateForegroundColor(string backgroundColor)

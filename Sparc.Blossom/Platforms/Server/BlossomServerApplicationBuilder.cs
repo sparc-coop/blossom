@@ -61,9 +61,7 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
             });
 
         Services.AddCascadingAuthenticationState();
-        Services.AddScoped<AuthenticationStateProvider, BlossomServerAuthenticationStateProvider<TUser>>()
-            .AddScoped<BlossomDefaultAuthenticator<TUser>>()
-            .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<TUser>>();
+        Services.AddScoped<AuthenticationStateProvider, BlossomServerAuthenticationStateProvider<TUser>>();
 
         Services.AddTransient(s => 
             s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User 
