@@ -1,0 +1,101 @@
+﻿.avatar-editor--container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: scroll;
+  max-height: 800px;
+}
+.avatar-editor--container .account-details {
+  gap: 5px;
+  display: flex;
+  flex-direction: column;
+}
+.avatar-editor--container .account-details label {
+  gap: 5px;
+  margin-top: 10px;
+  font-size: 1.2rem;
+  letter-spacing: 0.16px;
+  display: flex;
+  flex-direction: column;
+}
+.avatar-editor--container .account-details input, .avatar-editor--container .account-details textarea {
+  resize: none;
+  border-radius: 16px;
+  border: 1px solid var(--gray-100);
+  background: var(--yellow-50);
+  padding: 8px 16px;
+  height: 22px;
+  width: -webkit-fill-available;
+}
+.avatar-editor--container .account-details input ::placeholder, .avatar-editor--container .account-details textarea ::placeholder {
+  color: var(--gray-600);
+}
+.avatar-editor--container .account-details textarea {
+  min-height: 128px;
+}
+.avatar-editor--container .account-details aside {
+  color: var(--gray-600);
+  font-size: 1rem;
+  letter-spacing: 0.6px;
+}
+.avatar-editor--container .selector-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.avatar-editor--container .emoji-selector {
+  height: 250px;
+  margin-top: 16px;
+}
+.avatar-editor--container .avatar-preview {
+  width: 100%;
+  max-width: 123px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.avatar-editor--container .avatar-preview h3 {
+  font-size: 1.2rem;
+  letter-spacing: 0.16px;
+  font-weight: normal;
+}
+.avatar-editor--container .avatar-preview .avatar {
+  aspect-ratio: 1/1;
+  width: 100%;
+  padding: 15%;
+  border-radius: 8px;
+}
+.avatar-editor--container .avatar-preview .upload-image {
+  width: 123px;
+  padding: 8px;
+  border: 1px solid var(--purple-900);
+  border-radius: 8px;
+  background-color: var(--white);
+  color: var(--purple-900);
+}
+.avatar-editor--container .avatar-preview .remove-image {
+  width: 123px;
+  padding: 8px;
+  border: 1px solid var(--gray-900);
+  border-radius: 8px;
+  background-color: var(--white);
+  color: var(--gray-900);
+}
+@media screen and (max-width: 480px) {
+  .avatar-editor--container {
+    display: block;
+  }
+  .avatar-editor--container .emoji-selector {
+    width: 100%;
+    min-width: 150px;
+  }
+  .avatar-editor--container .avatar-preview {
+    margin-top: 35px;
+  }
+}
+.avatar-editor h3 {
+  font-size: 13px;
+  line-height: 15px;
+  margin-bottom: 8px;
+}
