@@ -4,7 +4,7 @@ using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom.Platforms.Server;
 
-public class BlossomAuthenticatorMiddleware(RequestDelegate next)
+public class SparcAuthenticatorMiddleware(RequestDelegate next)
 {
     private readonly RequestDelegate _next = next;
 
@@ -15,6 +15,7 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
             await _next(context);
             return;
         }
+
 
         var priorUser = BlossomUser.FromPrincipal(context.User);
         var user = await auth.GetAsync(context.User);

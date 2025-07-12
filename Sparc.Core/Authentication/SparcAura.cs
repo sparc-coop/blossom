@@ -5,9 +5,9 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class SparcUser
+public class SparcAura : BlossomEntity<string>
 {
-    public string Id { get; set; }
+    public string UserId {  get { return Id; } set {  Id = value; } }
     public string Username { get; set; } = "";
     public string Name { get; set; }
     public string Initials => string.IsNullOrWhiteSpace(Name) ? "" : string.Join(string.Empty, Name.Split(' ').Select(x => x[0]));
@@ -26,11 +26,11 @@ public class SparcUser
     public bool? HearOthers { get; set; }
     public bool? MuteMe { get; set; }
 
-    public SparcUser() : this("", "")
+    public SparcAura() : this("", "")
     {
     }
 
-    public SparcUser(SparcUser sourceAvatar)
+    public SparcAura(SparcAura sourceAvatar)
     {
         Id = sourceAvatar.Id;
         Name = sourceAvatar.Name;
@@ -44,7 +44,7 @@ public class SparcUser
         Gender = sourceAvatar.Gender;
     }
 
-    public SparcUser(string id, string name)
+    public SparcAura(string id, string name)
     {
         Id = id;
         Name = name;
@@ -68,7 +68,7 @@ public class SparcUser
         Language = language;
     }
 
-    public void UpdateAvatar(SparcUser avatar)
+    public void UpdateAvatar(SparcAura avatar)
     {
         Id = Id;
         Language = avatar.Language;

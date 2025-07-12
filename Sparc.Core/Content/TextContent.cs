@@ -23,7 +23,7 @@ public class TextContent : BlossomEntity<string>
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public DateTime? LastModified { get; set; }
     public DateTime? DeletedDate { get; set; }
-    public SparcUser? User { get; set; }
+    public SparcAura? User { get; set; }
     public AudioContent? Audio { get; set; }
     public string? Text { get; set; }
     public List<ContentTranslation> Translations { get; set; } = [];
@@ -47,7 +47,7 @@ public class TextContent : BlossomEntity<string>
         LanguageId = Language.Id;
     }
 
-    public TextContent(string domain, Language language, string text, SparcUser? user = null, string? originalText = null, string contentType = "Text")
+    public TextContent(string domain, Language language, string text, SparcAura? user = null, string? originalText = null, string contentType = "Text")
         : this(domain, language.Id)
     {
         Id = IdHash(text, language);

@@ -3,7 +3,7 @@
 <div class="color-selector">
     <h3>Background Color</h3>
     <ul class="colors">
-        @foreach (var color in SparcUser.BackgroundColors())
+        @foreach (var color in SparcAura.BackgroundColors())
         {
             <li @onclick="() => SetColor(color)" class="@(BackgroundColor == color ? "selected" : "")">
                 <span style="background: @color">&nbsp;</span>

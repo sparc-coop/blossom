@@ -6,10 +6,10 @@ namespace Sparc.Engine;
 public class SparcEngineAuthenticator(ISparcEngine engine) : IBlossomAuthenticator
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
-    public SparcUser? User { get; private set; }
+    public SparcAura? User { get; private set; }
     public string? Message { get; set; }
 
-    public async Task<SparcUser> GetAsync(ClaimsPrincipal principal)
+    public async Task<SparcAura> GetAsync(ClaimsPrincipal principal)
     {
         if (User == null)
             await LoginAsync(principal);
@@ -17,7 +17,7 @@ public class SparcEngineAuthenticator(ISparcEngine engine) : IBlossomAuthenticat
         return User!;
     }
 
-    public async Task<SparcUser> UpdateAsync(ClaimsPrincipal principal, SparcUser avatar)
+    public async Task<SparcAura> UpdateAsync(ClaimsPrincipal principal, SparcAura avatar)
     {
         var user = await engine.UpdateUserInfo(avatar);
         User = user;

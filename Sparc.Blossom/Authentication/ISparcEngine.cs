@@ -3,23 +3,20 @@ using Sparc.Blossom.Authentication;
 
 namespace Sparc.Engine;
 
-public interface ISparcEngine
+public interface ISparcAura
 {
-    /// <returns>OK</returns>
-    /// <exception cref="ApiException">Thrown when the request returns a non-success status code.</exception>
-    [Headers("Accept: text/plain")]
-    [Get("/tools/friendlyid")]
-    Task<string> FriendlyId();
+    [Get("/hi")]
+    Task<SparcAura> Hi();
 
-    [Get("/auth/login")]
-    Task<SparcAura> Login(string? emailOrToken = null);
+    [Get("/me")]
+    Task<SparcAura> GetUserInfo();
 
-    [Get("/auth/userinfo")]
-    Task<SparcAura> UserInfo();
-
-    [Post("/auth/userinfo")]
+    [Patch("/me")]
     Task<SparcAura> UpdateUserInfo([Body] SparcAura avatar);
+}
 
+    public interface ITovik
+{
     [Get("/tovik/languages")]
     Task<IEnumerable<Language>> GetLanguages();
 
@@ -31,5 +28,4 @@ public interface ISparcEngine
 
     //[Get("/billing/get-product/{productId}")]
     //Task<GetProductResponse> GetProductAsync(string productId);
-
 }
