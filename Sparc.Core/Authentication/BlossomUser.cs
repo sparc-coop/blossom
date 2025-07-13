@@ -17,6 +17,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public DateTime DateModified { get; private set; }
     public DateTime? LastLogin { get; private set; }
     public string? LastPageVisited { get; set; }
+    public string? Token { get; set; }
     public BlossomAvatar Avatar { get; set; } = new();
 
     public List<BlossomIdentity> Identities { get; set; } = [];
@@ -200,5 +201,5 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         var identity = new BlossomIdentity(externalId, authenticationType);
         Identities.Add(identity);
         return identity;
-    }
+    }    
 }
