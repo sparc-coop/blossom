@@ -12,3 +12,13 @@ public class SparcProduct(string productId, string serialNumber, DateTime purcha
     public string? UserId { get; set;  } = userId;
     public int UsageMeter { get; set; } = 0;
 }
+
+public record GetProductResponse
+(
+    string Id,
+    string Name,
+    long Price,
+    string Currency,
+    bool IsActive,
+    List<Dictionary<string, long>> Prices
+);
