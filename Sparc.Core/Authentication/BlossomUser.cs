@@ -21,6 +21,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public BlossomAvatar Avatar { get; set; } = new();
 
     public List<BlossomIdentity> Identities { get; set; } = [];
+    public List<SparcProduct> Products { get; set; } = [];
     internal Dictionary<string, string> Claims { get; set; } = [];
     internal Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
     public string? Identity(string authenticationType) => 
@@ -94,6 +95,18 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public void ChangeUsername(string username)
     {
         Avatar.Username = username;
+    }
+
+    public SparcProduct AddProduct(string productId)
+    {
+        var existing = Products.FirstOrDefault(x => x.ProductId == productId);
+        if (existing != null)
+            return existing;
+
+        var product = new SparcProduct(productId);
+        Products.Add(product);
+
+        return product;
     }
 
     public void Login()
