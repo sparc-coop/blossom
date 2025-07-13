@@ -9,15 +9,13 @@ namespace Sparc.Engine;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddSparcEngine(this IServiceCollection services, Uri? uri = null)
+    public static void AddSparcAura(this IServiceCollection services, Uri? uri = null)
     {
         uri ??= new Uri("https://engine.sparc.coop");
 
         services.AddHttpContextAccessor();
-        services.AddTransient<SparcCookieHandler>();
-        services.AddRefitClient<ISparcEngine>()
+        services.AddRefitClient<ISparcAura>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
-            .AddHttpMessageHandler<SparcCookieHandler>()
             .AddStandardResilienceHandler();
 
         services.AddSparcEngineAuthentication();
