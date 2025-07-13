@@ -9,8 +9,8 @@ public class SparcAura : BlossomEntity<string>
 {
     public string UserId {  get { return Id; } set {  Id = value; } }
     public string Username { get; set; } = "";
-    public string Name { get; set; }
-    public string Initials => string.IsNullOrWhiteSpace(Name) ? "" : string.Join(string.Empty, Name.Split(' ').Select(x => x[0]));
+    public string? Name { get; set; }
+    public string Initials => string.IsNullOrWhiteSpace(Name) ? "" : string.Join(string.Empty, Name!.Split(' ').Select(x => x[0]));
     public bool IsOnline { get; set; }
     public string BackgroundColor { get; set; }
     public string ForegroundColor => CalculateForegroundColor(BackgroundColor);
@@ -47,7 +47,7 @@ public class SparcAura : BlossomEntity<string>
     public SparcAura(string id, string name)
     {
         Id = id;
-        Name = name;
+        Username = name;
         BackgroundColor = BackgroundColors().OrderBy(x => Guid.NewGuid()).First();
     }
 
