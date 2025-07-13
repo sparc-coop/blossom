@@ -109,6 +109,11 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         return product;
     }
 
+    public bool HasProduct(string productName)
+    {
+        return Products.Any(x => x.ProductId.Equals(productName, StringComparison.OrdinalIgnoreCase));
+    }
+
     public void Login()
     {
         LastLogin = DateTime.UtcNow;
