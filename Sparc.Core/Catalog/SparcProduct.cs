@@ -27,16 +27,12 @@ public class SparcProduct(string productId)
 
         return string.Join("-", sections);
     }
-
-
 }
 
 public record GetProductResponse
 (
     string Id,
     string Name,
-    long Price,
-    string Currency,
-    bool IsActive,
-    List<Dictionary<string, long>> Prices
+    decimal Price,
+    string Currency
 );
