@@ -29,15 +29,12 @@
 
 	<ItemGroup>
 	  <Content Remove="compilerconfig.json" />
-	  <Content Remove="Content\Language.razor" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.6" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.6" />
-		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.6.0" />
-		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.6" />
 		<PackageReference Include="System.Net.Http.Json" Version="9.0.6" />
 		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
@@ -47,7 +44,6 @@
 	<ItemGroup>
 		<!--<None Include="..\Sparc.Blossom.ApiGenerator\bin\$(Configuration)\netstandard2.0\Sparc.Blossom.ApiGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />-->
 		<None Include="compilerconfig.json" />
-		<None Include="Content\Icons\Language.razor" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -146,6 +142,7 @@
 	  </None>
 	</ItemGroup>
 	<ItemGroup>
+	  <Folder Include="Authentication\Icons\" />
 	  <Folder Include="buildTransitive\" />
 	  <Folder Include="wwwroot\" />
 	</ItemGroup>
