@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+using System.Globalization;
 using System.Reflection;
 
 namespace Sparc.Blossom.Platforms.Server;
@@ -27,6 +28,9 @@ public class BlossomServerApplication : IBlossomApplication
         Host.UseHttpsRedirection();
         Host.MapStaticAssets();
         Host.UseAntiforgery();
+
+        if (builder.Services.Any(x => x.ServiceType == typeof(ICorsPolicyProvider)))
+            Host.UseCors();
 
         UseBlossomAuthentication();
 
