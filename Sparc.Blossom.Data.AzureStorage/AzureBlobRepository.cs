@@ -15,11 +15,11 @@ public class AzureBlobRepository(BlobServiceClient client) : IRepository<Blossom
     {
         var container = await GetContainer(item);
         var blob = container.GetBlobClient(item.FileName);
-        if (!await blob.ExistsAsync())
+        if (!await blob.ExistsAsync() && item.Stream != null)
+        {
+            item.Stream.Position = 0;
             await blob.UploadAsync(item.Stream);
-
-
-
+        }
         item.Url = blob.Uri.AbsoluteUri;
     }
 
@@ -113,7 +113,9 @@ public class AzureBlobRepository(BlobServiceClient client) : IRepository<Blossom
             file.AccessType = (await container.GetAccessPolicyAsync()).Value.BlobPublicAccess.ToAccessType();
             file.Stream = new MemoryStream();
             await blob.DownloadToAsync(file.Stream);
+            file.Stream.Position = 0; // Reset stream position after download
             file.Url = blob.Uri.AbsoluteUri;
+            file.LastModified = blob.GetProperties().Value.LastModified.UtcDateTime;
             return file;
         }
 

@@ -70,7 +70,9 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         if (Avatar.Language != null)
             AddClaim("language", Avatar.Language.Id);
         if (Avatar.Locale != null)
-            AddClaim(ClaimTypes.Locality, Avatar.Locale.Id);
+            AddClaim("locale", Avatar.Locale.Id);
+        if (Avatar.Currency != null)
+            AddClaim("currency", Avatar.Currency.Id);
         
         RegisterClaims();
     }
@@ -181,6 +183,8 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         Avatar.Id = Id;
         Avatar.Language = avatar.Language;
+        Avatar.Locale = avatar.Locale;
+        Avatar.Currency = avatar.Currency;
         Avatar.BackgroundColor = avatar.BackgroundColor;
         Avatar.Pronouns = avatar.Pronouns;
         Avatar.Name = avatar.Name;

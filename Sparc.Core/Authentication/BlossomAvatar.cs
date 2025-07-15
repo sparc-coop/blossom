@@ -1,4 +1,5 @@
-﻿using Sparc.Engine;
+﻿using Sparc.Core.Billing;
+using Sparc.Engine;
 using System.Drawing;
 using System.Globalization;
 
@@ -15,6 +16,7 @@ public class BlossomAvatar
     public string ForegroundColor => CalculateForegroundColor(BackgroundColor);
     public BlossomRegion? Locale { get; set; }
     public Language? Language { get; set; }
+    public SparcCurrency? Currency { get; set; }
     public List<Language> LanguagesSpoken { get; set; } = [];
 
     public string? Emoji { get; set; }

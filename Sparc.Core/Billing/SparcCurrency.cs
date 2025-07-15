@@ -13,12 +13,18 @@ public class SparcCurrency(RegionInfo region)
     public string Symbol { get; set; } = region.CurrencySymbol;
     public string NativeName { get; set; } = region.CurrencyNativeName;
 
-    public static SparcCurrency From(string currency)
+    public static SparcCurrency From(string currencyOrCulture)
     {
-        var matchingRegion = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
-            .Select(culture => new RegionInfo(culture.Name))
-            .FirstOrDefault(region => region.ISOCurrencySymbol.Equals(currency, StringComparison.OrdinalIgnoreCase));
+        var allCultures = CultureInfo.GetCultures(CultureTypes.SpecificCultures);
 
+        var matchingRegion = allCultures
+            .Select(culture => new RegionInfo(culture.Name))
+            .FirstOrDefault(region => region.ISOCurrencySymbol.Equals(currencyOrCulture, StringComparison.OrdinalIgnoreCase))
+            
+            ?? (allCultures.Where(culture => culture.Name.Equals(currencyOrCulture, StringComparison.OrdinalIgnoreCase))
+                ?.Select(culture => new RegionInfo(culture.Name))
+                .FirstOrDefault());
+        
         return matchingRegion != null
             ? new SparcCurrency(matchingRegion)
             : new SparcCurrency();
