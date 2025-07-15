@@ -57,7 +57,7 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
         return user!;
     }
 
-    public async Task<BlossomUser> UpdateAsync(ClaimsPrincipal principal, BlossomAvatar avatar)
+    public virtual async Task<BlossomUser> UpdateAsync(ClaimsPrincipal principal, BlossomAvatar avatar)
     {
         var user = await GetUserAsync(principal);
         user.UpdateAvatar(avatar);
