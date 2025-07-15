@@ -13,8 +13,9 @@ public class SparcCurrency(RegionInfo region)
     public string Symbol { get; set; } = region.CurrencySymbol;
     public string NativeName { get; set; } = region.CurrencyNativeName;
 
-    public static SparcCurrency From(string currencyOrCulture)
+    public static SparcCurrency From(string? currencyOrCulture)
     {
+        currencyOrCulture ??= CultureInfo.CurrentUICulture.Name;
         var allCultures = CultureInfo.GetCultures(CultureTypes.SpecificCultures);
 
         var matchingRegion = allCultures

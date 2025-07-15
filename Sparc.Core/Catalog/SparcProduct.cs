@@ -34,5 +34,6 @@ public record GetProductResponse
     string Id,
     string Name,
     decimal Price,
-    string Currency
+    string Currency,
+    string FormattedPrice
 );
