@@ -11,7 +11,9 @@ public class SparcProduct(string productId)
     public string? UserId { get; set; }
 
     public DateTime PurchaseDate { get; set; } = DateTime.UtcNow;
-    public int UsageMeter { get; set; } = 0;
+    public int MaxUsage { get; set; } = 0;
+    public decimal TotalUsage { get; set; } = 0;
+    public bool HasExceededUsage => TotalUsage > MaxUsage;
 
     private static string RandomSerialNumber(int numSections, int charsPerSection)
     {

@@ -223,5 +223,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         var identity = new BlossomIdentity(externalId, authenticationType);
         Identities.Add(identity);
         return identity;
-    }    
+    }
+
+    public SparcProduct? Product(string productId) => Products.FirstOrDefault(x => x.ProductId == productId);
 }

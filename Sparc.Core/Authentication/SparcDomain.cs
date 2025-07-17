@@ -5,11 +5,9 @@ namespace Sparc.Engine;
 public class SparcDomain(string domain) : BlossomEntity<string>(Guid.NewGuid().ToString())
 {
     public string Domain { get; set; } = Normalize(domain) ?? throw new Exception($"Invalid domain name: {domain}");
-    public List<SparcProduct> Products { get; set; } = [];
-    public Dictionary<string, string?> Glossary { get; set; } = new();
+    public Dictionary<string, string?> Glossary { get; set; } = [];
     public int TovikUsage { get; set; }
-
-    public bool HasProduct(string policyName) => policyName == "Auth" || Products.Any(p => p.ProductId == policyName);
+    public string? TovikUserId { get; set; }
 
     public static string? Normalize(string domain)
     {
