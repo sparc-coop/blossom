@@ -8,7 +8,8 @@ public class SparcDomain(string domain) : BlossomEntity<string>(Guid.NewGuid().T
     public string Domain { get; set; } = domain;
     public List<SparcProduct> Products { get; set; } = [];
     public int TotalUsage = new Random().Next(1, 100000);
-    public Dictionary<string, string?> Glossary { get; set; } = new();
+    public List<string> Exemptions{ get; set; } = new();
+    public DateTime? DateConnected { get; set; }
     //public int TotalUsage => Products.Sum(p => p.UsageMeter);
 
     public bool HasProduct(string policyName) => policyName == "Auth" || Products.Any(p => p.ProductId == policyName);
