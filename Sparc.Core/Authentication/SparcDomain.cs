@@ -24,7 +24,7 @@ public class SparcDomain(string domain) : BlossomEntity<string>(Guid.NewGuid().T
         {
             var uri = new Uri(domain);
             domain = uri.Host + (!uri.IsDefaultPort ? $":{uri.Port}" : "");
-            return uri.Host;
+            return domain;
         }
         catch (Exception)
         {
