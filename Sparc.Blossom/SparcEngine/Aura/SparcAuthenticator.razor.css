@@ -1,8 +1,0 @@
-﻿.blossom-authenticator {
-  width: fit-content;
-  padding: 12px;
-  display: flex;
-  flex-direction: row-reverse;
-  gap: 16px;
-  z-index: 2000;
-}

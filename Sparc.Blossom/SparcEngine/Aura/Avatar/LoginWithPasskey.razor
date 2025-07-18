@@ -1,0 +1,72 @@
+﻿<section class="login">
+    <header>
+        <h4>Create a Passkey</h4>
+        <p>
+            This app uses <strong>passkeys</strong> to sign you in. Passkeys are a modern replacement for passwords that
+            are stored securely on your device. They are never shared with this app or sent over the internet.
+        </p>
+        <p>
+            Creating a passkey is always optional, and you may freely use this app on this device without doing so.
+            However, we recommend that you create a passkey to keep your data safe and secure, and to enable syncing
+            your data across devices.
+        </p>
+    </header>
+
+    @if (Message != null)
+    {
+        <div class="error-message">
+            @Message
+        </div>
+    }
+    <div>
+        <button type="button" class="primary-btn" @onclick="Register" disabled="@IsLoggingIn">
+            @(IsLoggingIn ? "Waiting for your passkey..." : "Create My Passkey")
+        </button>
+
+        <aside>
+            Already have a passkey for this app?
+            <button @onclick=Login disabled="@IsLoggingIn">
+                Use My Existing Passkey
+            </button>
+        </aside>
+    </div>
+</section>
+
+@inject PasskeyAuthenticator Auth
+@code
+{
+    [Parameter] public required BlossomAvatar UserAvatar { get; set; }
+    bool HasAtLeastOnePasskey => UserAvatar.VerificationLevel > 0;
+    bool IsLoggingIn;
+    string? Message;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await Auth.InitializeAsync();
+    }
+
+    async Task Register() => await StartLogin(true);
+    async Task Login() => await StartLogin();
+
+    async Task StartLogin(bool isNew = false)
+    {
+        IsLoggingIn = true;
+        Message = null;
+
+        StateHasChanged();
+
+        try
+        {
+            if (isNew)
+                await Auth.RegisterAsync();
+            else
+                await Auth.LoginAsync();
+        }
+        catch (Exception e)
+        {
+            IsLoggingIn = false;
+            Message = e.Message;
+        }
+    }
+}

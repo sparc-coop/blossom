@@ -11,8 +11,14 @@ public interface ISparcAura
     [Get("/aura/friendlyid")]
     Task<string> FriendlyId();
 
+    [Post("/aura/register")]
+    Task<SparcCode> Register();
+
     [Post("/aura/login")]
     Task<BlossomUser> Login(string? emailOrToken = null);
+
+    [Post("/aura/logout")]
+    Task<BlossomUser> Logout();
 
     [Get("/aura/code")]
     Task<SparcCode?> GetSparcCode();

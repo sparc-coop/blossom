@@ -222,6 +222,11 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         var identity = new BlossomIdentity(externalId, authenticationType);
         Identities.Add(identity);
+
+        Avatar.VerificationLevel = Identity("Email") != null ? 2
+            : Identity("Passkey") != null ? 1
+            : 0;
+
         return identity;
     }
 
