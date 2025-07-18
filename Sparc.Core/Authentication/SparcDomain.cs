@@ -4,8 +4,10 @@ namespace Sparc.Engine;
 
 public class SparcDomain(string domain) : BlossomEntity<string>(Guid.NewGuid().ToString())
 {
+    public int TotalUsage = new Random().Next(1, 100000);
+    public List<string> Exemptions{ get; set; } = new();
+    public DateTime? DateConnected { get; set; }
     public string Domain { get; set; } = Normalize(domain) ?? throw new Exception($"Invalid domain name: {domain}");
-    public Dictionary<string, string?> Glossary { get; set; } = [];
     public int TovikUsage { get; set; }
     public string? TovikUserId { get; set; }
 
