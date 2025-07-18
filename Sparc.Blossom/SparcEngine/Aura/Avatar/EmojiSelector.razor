@@ -1,0 +1,48 @@
+@using Microsoft.AspNetCore.Components.Web
+@using Sparc.Blossom.Authentication
+
+@if (Emojis != null)
+{
+    <div class="emoji-selector">
+        <h3 @ref="EmojiList">Emoji</h3>
+        <div class="emoji-container">
+            <ul @onkeypress="Leave" class="emojis" translate="no">
+                @{ int tabIndex = 0; }
+                @foreach (var emoji in Emojis)
+                {
+                    <li tabindex="@tabIndex++"
+                        @onclick="(() => SetEmoji(emoji))"                        
+                        class="@(Emoji == emoji ? "selected" : "")">
+                        @emoji
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Emoji { get; set; } = "";
+    [Parameter] public EventCallback<string> EmojiChanged { get; set; }
+
+    private List<string>? Emojis;
+    private ElementReference EmojiList;
+
+    protected override void OnInitialized()
+    {
+        Emojis = BlossomAvatar.Emojis();
+    }
+
+    async Task SetEmoji(string emoji)
+    {
+        await EmojiChanged.InvokeAsync(emoji);
+    }
+
+    async Task Leave(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await EmojiList.FocusAsync();
+        }
+    }
+}

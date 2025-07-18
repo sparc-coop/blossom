@@ -28,10 +28,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Remove="compilerconfig.json" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.7" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.7" />
@@ -39,11 +35,12 @@
 		<PackageReference Include="System.Net.Http.Json" Version="9.0.7" />
 		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.7" />
+		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.7.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<!--<None Include="..\Sparc.Blossom.ApiGenerator\bin\$(Configuration)\netstandard2.0\Sparc.Blossom.ApiGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />-->
-		<None Include="compilerconfig.json" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -144,7 +141,6 @@
 	<ItemGroup>
 	  <Folder Include="Authentication\Icons\" />
 	  <Folder Include="buildTransitive\" />
-	  <Folder Include="SparcEngine\" />
 	  <Folder Include="wwwroot\" />
 	</ItemGroup>
 

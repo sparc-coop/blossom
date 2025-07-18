@@ -1,0 +1,14 @@
+﻿[
+  {
+    "outputFile": "Aura/SparcAura.razor.css",
+    "inputFile": "Aura/SparcAura.razor.scss"
+  },
+  {
+    "outputFile": "Aura/Avatar/ColorSelector.razor.css",
+    "inputFile": "Aura/Avatar/ColorSelector.razor.scss"
+  },
+  {
+    "outputFile": "Aura/Avatar/EmojiSelector.razor.css",
+    "inputFile": "Aura/Avatar/EmojiSelector.razor.scss"
+  }
+]

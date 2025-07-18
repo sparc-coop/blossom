@@ -1,0 +1,343 @@
+﻿<div class="account-btn" @onclick="OpenUserProfile">
+    <ProfileIcon />
+</div>
+
+<dialog @ref=Dialog>
+    <header>
+        <div>
+            <ProfileIcon />
+            <h3>Profile</h3>
+        </div>
+        <button type="button" aria-label="Close" @onclick="@CloseUserProfile"><XIcon /></button>
+    </header>
+    <section>
+        <div class="column">
+            @if (ShowVerifyContact)
+            {
+                <section class="verify-contact">
+                    <header>
+                        <h4>Verify Contact</h4>
+                        <p>To keep your account secure, help with recovery, and support cross-device access, please verify your contact. This setting is optional.</p>
+                    </header>
+                    <div>
+                        <input type="text" placeholder="Phone number or Email" />
+                        <button type="button" class="primary-btn">Verify</button>
+                    </div>
+                    <ul>
+                        <li>
+                            <div>
+                                <span>xxx-xxx-5678</span>
+                                @if (IsVerified)
+                                {
+                                    <Check />
+                                }
+                            </div>
+                            <button>Unlink</button>
+                        </li>
+                        <li>
+                            <div>
+                                <span>xxxxx@Kuviocreative.com</span>
+                                @if (IsVerified)
+                                {
+                                    <Check />
+                                }
+                            </div>
+                            <button>Unlink</button>
+                        </li>
+                    </ul>
+                </section>
+            }
+            else if (ShowLoginWithPasskey)
+            {
+                <section class="login">
+                    <header>
+                        <h4>Login</h4>
+                        <p>Use your passkey to sign in. If it’s your first time, you can create one along the way.</p>
+                    </header>
+                    <div>
+                        <button type="button" class="primary-btn" @onclick="HandlePasskeyAction">
+                            Continue with Passkey
+                        </button>
+                    </div>
+                </section>
+            }
+            else if (ShowRegisteringPasskey)
+            {
+                <section class="registering">
+                    <header>
+                        <Key />
+                        <h4>Registering your passkey...</h4>
+                        <p>You may use your device’s fingerprint, face scan, or screen lock. Your passkey may be saved to your browser account so you can use it on other devices.</p>
+                    </header>
+                    <div>
+                        <button type="button" class="primary-btn" disabled>
+                            Continue with Passkey
+                        </button>
+                    </div>
+                </section>
+            }
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <div class="alert alert-info">@Message</div>
+            }
+
+
+            <section class="app-links">
+                <header>
+                    <h4>Your Apps</h4>
+                    <p>Select app images to go to app page or store page</p>
+                </header>
+                <div>
+                    <article>
+                        <a href="">
+                            <SparcApp />
+                        </a>
+                    </article>
+                    <article>
+                        <a href="">
+                            <TimbiiApp />
+                        </a>
+                    </article>
+                    <article>
+                        <a href="">
+                            <SparcApp />
+                        </a>
+                    </article>
+                    <article>
+                        <a href="">
+                            <TimbiiApp />
+                        </a>
+                    </article>
+                    <article>
+                        <a href="">
+                            <SparcApp />
+                        </a>
+                    </article>
+                    <article>
+                        <a href="">
+                            <TimbiiApp />
+                        </a>
+                    </article>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="column">
+            <section class="profile-customization">
+                <header>
+                    <h4>Profile</h4>
+                    <p>Customize your profile!</p>
+                </header>
+                <div>
+                    <figure class="avatar @(HasEmoji ? "emoji" : "")" style="background-color: @UserAvatar.BackgroundColor">
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <text x="50%" y="60%" font-size="80" text-anchor="middle" dominant-baseline="middle" style="fill: @UserAvatar.ForegroundColor">
+                                @(!string.IsNullOrWhiteSpace(UserAvatar.Emoji) ? UserAvatar.Emoji : (!string.IsNullOrWhiteSpace(UserAvatar.Initials) ? UserAvatar.Initials : ""))
+                            </text>
+                        </svg>
+                    </figure>
+                </div>
+                <div>
+                    <ColorSelector @bind-BackgroundColor="UserAvatar.BackgroundColor" />
+                    <EmojiSelector Emoji="@UserAvatar.Emoji" EmojiChanged="HandleEmojiChanged" />
+                </div>
+            </section>
+        </div>
+
+        <div class="column">
+            <section class="user-details">
+                <header>
+                    <h4>Tell us about you</h4>
+                </header>
+                <div class="account-details">
+                    <label>
+                        Name
+                        <input @bind="UserAvatar.Username" @bind:event="oninput" placeholder="Your Name" @onblur=Save />
+                    </label>
+                    <label>
+                        Pronouns (Optional)
+                        <input @bind="UserAvatar.Pronouns" @bind:event="oninput" placeholder="She/her, He/him, They/them" @onblur=Save />
+                    </label>
+
+                    <label>
+                        About You (Optional)
+                        <textarea @bind="UserAvatar.Description"
+                                  @bind:event="oninput"
+                                  @onblur=Save
+                                  placeholder="Enter a little about yourself" />
+                    </label>
+                </div>
+            </section>
+
+            <section class="language-selector">
+                <header>
+                    <h4>Language</h4>
+                </header>
+                <tovik-language></tovik-language>
+            </section>
+        </div>
+    </section>
+</dialog>
+
+
+@inject ISparcAura Aura
+@inject IJSRuntime Js
+@code {
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public bool SpillBackground { get; set; }
+    [Parameter] public EventCallback<string> OnEmojiChanged { get; set; }
+    ElementReference Dialog;
+
+    public BlossomAvatar UserAvatar { get; set; } = new BlossomAvatar();
+    BlossomUser? BlossomUser;
+
+    bool HasEmoji => !string.IsNullOrWhiteSpace(UserAvatar?.Emoji);
+
+    private string VerificationCode { get; set; } = "";
+    private bool IsVerified = false;
+    private bool ShowVerifyContact;
+    private bool ShowLoginWithPasskey;
+    private bool ShowRegisteringPasskey;
+    string? Message;
+    private bool IsProcessingPasskey;
+    private bool HasPasskey;
+    private bool IsAuthenticated;
+
+    const string ApiKey = "sparcengine:public:63cc565eb9544940ad6f2c387b228677";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await Aura.UserInfo();
+        if (user != null)
+            UserAvatar = user.Avatar;
+
+        HasPasskey = user?.HasIdentity("Passwordless") ?? false;
+        IsAuthenticated = user?.Identities.Any(i => i.Type == "Passwordless" && i.IsLoggedIn) ?? false;
+
+        UpdateUIFlags();
+        Console.WriteLine($"HasPasskey: {HasPasskey}, IsAuthenticated: {IsAuthenticated}");
+        Console.WriteLine($"VerifyContact: {ShowVerifyContact}, LoginWithPasskey: {ShowLoginWithPasskey}, RegisteringPasskey: {ShowRegisteringPasskey}");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Js.InvokeVoidAsync("initSparcAuthenticator", ApiKey);
+        }
+    }
+
+    private void UpdateUIFlags()
+    {
+        ShowVerifyContact = IsAuthenticated && HasPasskey;
+        ShowLoginWithPasskey = !IsAuthenticated;
+        ShowRegisteringPasskey = IsProcessingPasskey;
+    }
+
+    private async Task HandlePasskeyAction()
+    {
+        IsProcessingPasskey = true;
+        UpdateUIFlags();
+        StateHasChanged();
+
+        if (HasPasskey)
+        {
+            // LOGIN FLOW
+            var token = await Js.InvokeAsync<string>("signInWithPasskey", null);
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                var resp = await Http.PostAsync($"auth/login?emailOrToken={Uri.EscapeDataString(token)}", null);
+                if (resp.IsSuccessStatusCode)
+                {
+                    var user = await resp.Content.ReadFromJsonAsync<BlossomUser>();
+                    HasPasskey = user?.HasIdentity("Passwordless") ?? false;
+                    IsAuthenticated = user?.Identities.Any(i => i.Type == "Passwordless" && i.IsLoggedIn) ?? false;
+                }
+            }
+        }
+        else
+        {
+            // REGISTER FLOW
+            var registerResp = await Http.PostAsync("auth/register", null);
+            // var registerResp = await Http.PostAsync("auth/login", null);
+            if (!registerResp.IsSuccessStatusCode)
+            {
+                var errorText = await registerResp.Content.ReadAsStringAsync();
+                Message = $"⚠️ Signup start failed: {(int)registerResp.StatusCode} {registerResp.ReasonPhrase}\n{errorText}";
+                return;
+            }
+            Console.WriteLine($"Register response: {registerResp.StatusCode} {registerResp}");
+
+            var content = await registerResp.Content.ReadAsStringAsync();
+            Console.WriteLine($"Register content: {content}");
+
+            var doc = await registerResp.Content.ReadFromJsonAsync<JsonDocument>();
+            if (doc == null || !doc.RootElement.TryGetProperty("token", out var tok))
+            {
+                Message = "⚠️ No registration token.";
+                return;
+            }
+            var challenge = tok.GetString();
+
+            var passkey = await Js.InvokeAsync<string>("signUpWithPasskey", challenge);
+            if (string.IsNullOrWhiteSpace(passkey))
+            {
+                Message = "⚠️ Passkey signup aborted.";
+                return;
+            }
+
+            var finish = await Http.PostAsync($"auth/login?emailOrToken={Uri.EscapeDataString(passkey)}", null);
+            if (finish.IsSuccessStatusCode)
+            {
+                BlossomUser = await finish.Content.ReadFromJsonAsync<BlossomUser>();
+                Message = "✅ Signed up & logged in!";
+            }
+            else
+            {
+                var err = await finish.Content.ReadAsStringAsync();
+                Message = $"❌ Signup failed: {finish.StatusCode} – {err}";
+            }
+        }
+
+        IsProcessingPasskey = false;
+        UpdateUIFlags();
+        StateHasChanged();
+    }
+
+    async Task Save()
+    {
+        await Aura.UpdateUserInfo(UserAvatar);
+    }
+
+    private async Task HandleEmojiChanged(string emoji)
+    {
+        UserAvatar.Emoji = emoji;
+        await OnEmojiChanged.InvokeAsync(emoji);
+    }
+
+    private void VerifyCode(string code)
+    {
+        VerificationCode = code;
+        // var success = await SparcEngine.VerifyCode(new VerificationRequest(CurrentVerificationDestination, VerificationCode));
+        // if (success)
+        // {
+        //     await SparcEngine.UserInfo();
+        //     StateHasChanged();
+        // }
+        // else
+        // {
+        //     // VerificationError = "Invalid verification code. Please try again.";
+        // }
+    }
+
+    private async Task OpenUserProfile()
+    {
+        await Js.InvokeVoidAsync("toggleDialog", Dialog, true);
+    }
+
+    private async Task CloseUserProfile()
+    {
+        await Js.InvokeVoidAsync("toggleDialog", Dialog, false);
+    }
+}
