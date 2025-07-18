@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.JSInterop;
 
 namespace Sparc.Blossom;
 

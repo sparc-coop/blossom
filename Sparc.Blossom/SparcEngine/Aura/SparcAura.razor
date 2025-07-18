@@ -1,8 +1,9 @@
-﻿<div class="account-btn" @onclick="OpenUserProfile">
+﻿@using Sparc.Blossom.Shared
+<div class="account-btn" @onclick="OpenUserProfile">
     <ProfileIcon />
 </div>
 
-<dialog @ref=Dialog>
+<BlossomDialog @ref=Dialog>
     <header>
         <div>
             <ProfileIcon />
@@ -51,14 +52,14 @@
             </section>
         </div>
     </section>
-</dialog>
+</BlossomDialog>
 
 
 @inject ISparcAura Aura
 @inject IJSRuntime Js
 @inject NavigationManager Nav
 @code {
-    ElementReference Dialog;
+    BlossomDialog Dialog = null!;
 
     public BlossomAvatar UserAvatar { get; set; } = new BlossomAvatar();
 
@@ -80,13 +81,7 @@
         Nav.Refresh(true);
     }
 
-    private async Task OpenUserProfile()
-    {
-        await Js.InvokeVoidAsync("toggleDialog", Dialog, true);
-    }
+    private async Task OpenUserProfile() => await Dialog.OpenModalAsync();
 
-    private async Task CloseUserProfile()
-    {
-        await Js.InvokeVoidAsync("toggleDialog", Dialog, false);
-    }
+    private async Task CloseUserProfile() => await Dialog.CloseAsync();
 }

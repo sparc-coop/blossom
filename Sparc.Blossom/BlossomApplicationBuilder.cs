@@ -1,6 +1,8 @@
 ﻿using Sparc.Blossom.Authentication;
 using System.Reflection;
 using MediatR.NotificationPublishers;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 namespace Sparc.Blossom;
 

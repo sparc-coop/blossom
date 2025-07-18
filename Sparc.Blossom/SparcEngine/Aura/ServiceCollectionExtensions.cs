@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Sparc.Blossom.Authentication;
 using System.Security.Claims;
 
@@ -16,7 +18,8 @@ public static class ServiceCollectionExtensions
 
         services.AddCascadingAuthenticationState();
         services.AddScoped<SparcAuraAuthenticator>()
-            .AddScoped<IBlossomAuthenticator, SparcAuraAuthenticator>();
+            .AddScoped<IBlossomAuthenticator, SparcAuraAuthenticator>()
+            .AddScoped<PasskeyAuthenticator>();
 
         services.AddTransient(s =>
             s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User

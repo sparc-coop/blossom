@@ -1,4 +1,6 @@
-﻿namespace Sparc.Blossom;
+﻿using Microsoft.Extensions.DependencyInjection;
+
+namespace Sparc.Blossom;
 
 public static class QueueServiceCollectionExtensions
 {
