@@ -14,6 +14,9 @@ public interface ISparcAura
     [Post("/aura/login")]
     Task<BlossomUser> Login(string? emailOrToken = null);
 
+    [Get("/aura/code")]
+    Task<SparcCode?> GetSparcCode();
+
     [Get("/aura/userinfo")]
     Task<BlossomUser> UserInfo();
 
