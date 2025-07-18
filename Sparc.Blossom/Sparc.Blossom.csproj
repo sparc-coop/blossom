@@ -33,12 +33,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.6" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.7" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.6" />
-		<PackageReference Include="System.Net.Http.Json" Version="9.0.6" />
+		<PackageReference Include="System.Net.Http.Json" Version="9.0.7" />
 		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.7" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -111,7 +111,7 @@
 		<DefineConstants>SERVER</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.7" />
 		<Compile Remove="**\*.xaml.cs" />
 		<None Include="**\*.xaml.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 		<Compile Remove="**\*.xaml" />
@@ -144,6 +144,7 @@
 	<ItemGroup>
 	  <Folder Include="Authentication\Icons\" />
 	  <Folder Include="buildTransitive\" />
+	  <Folder Include="SparcEngine\" />
 	  <Folder Include="wwwroot\" />
 	</ItemGroup>
 
