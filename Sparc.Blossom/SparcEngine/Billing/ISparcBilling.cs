@@ -11,6 +11,9 @@ public interface ISparcBilling
     [Get("/billing/products/{productId}")]
     Task<GetProductResponse> GetProductAsync(string productId, string? currency = null);
 
+    [Get("/billing/orders/{id}")]
+    Task<SparcOrder> GetOrderAsync(string id);
+
     [Get("/billing/currencies")]
     Task<List<SparcCurrency>> GetCurrenciesAsync();
 

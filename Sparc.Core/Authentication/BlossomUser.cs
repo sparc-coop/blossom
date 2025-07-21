@@ -231,4 +231,16 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     }
 
     public SparcProduct? Product(string productId) => Products.FirstOrDefault(x => x.ProductId == productId);
+
+    public void Fulfill(SparcProduct product)
+    {
+        var existing = Product(product.ProductId);
+        if (existing != null)
+        {
+            existing.MaxUsage += product.MaxUsage;
+            existing.OrderIds.AddRange(product.OrderIds);
+        }
+        else
+            Products.Add(product);
+    }
 }

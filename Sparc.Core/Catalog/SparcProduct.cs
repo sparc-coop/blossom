@@ -7,29 +7,10 @@ public class SparcProduct(string productId)
     }
 
     public string ProductId { get; set; } = productId;
-    public string SerialNumber { get; set; } = RandomSerialNumber(2, 5);
-    public string? UserId { get; set; }
-
-    public DateTime PurchaseDate { get; set; } = DateTime.UtcNow;
+    public List<string> OrderIds { get; set; } = []; 
     public int MaxUsage { get; set; } = 0;
     public decimal TotalUsage { get; set; } = 0;
     public bool HasExceededUsage => TotalUsage > MaxUsage;
-
-    private static string RandomSerialNumber(int numSections, int charsPerSection)
-    {
-        var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        var random = new Random();
-
-        var sections = new List<string>();
-        for (int i = 0; i < numSections; i++)
-        {
-            var section = new string(Enumerable.Repeat(chars, charsPerSection)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-            sections.Add(section);
-        }
-
-        return string.Join("-", sections);
-    }
 }
 
 public record GetProductResponse
