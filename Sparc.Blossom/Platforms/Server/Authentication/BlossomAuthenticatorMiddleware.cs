@@ -33,11 +33,8 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
             return;
         }
 
-        var priorUser = BlossomUser.FromPrincipal(context.User);
-        var user = await auth.GetAsync(context.User);
-
-        if (user != null && (context.User.Identity?.IsAuthenticated != true || !priorUser.Equals(user)))
-            await auth.LoginAsync(context.User);
+        if (context.User.Identity?.IsAuthenticated != true)
+            await auth.RegisterAsync();
 
         await _next(context);
     }

@@ -27,6 +27,13 @@ public class SparcAuraAuthenticator(ISparcAura aura, IHttpContextAccessor http) 
         return user;
     }
 
+    public async Task<ClaimsPrincipal> RegisterAsync()
+    {
+        var user = await aura.Login();
+        User = user.ToUser();
+        return await LoginAsync(User.ToPrincipal());
+    }
+
     public async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
     {
         if (User == null)

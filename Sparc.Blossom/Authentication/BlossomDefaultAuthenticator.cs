@@ -15,6 +15,12 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
         return await GetUserAsync(principal);
     }
 
+    public virtual async Task<ClaimsPrincipal> RegisterAsync()
+    {
+        var user = new T();
+        return await LoginAsync(user.ToPrincipal());
+    }
+
     public virtual async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
     {
         var user = await GetUserAsync(principal);
