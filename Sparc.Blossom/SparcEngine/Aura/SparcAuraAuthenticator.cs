@@ -36,22 +36,16 @@ public class SparcAuraAuthenticator(ISparcAura aura, IHttpContextAccessor http) 
 
     public async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
     {
-        if (User == null)
-        {
-            var user = await aura.Login();
-            User = user.ToUser();
-        }
-
+        User = BlossomUser.FromPrincipal(principal);
         LoginState = LoginStates.LoggedIn;
 
-        var newPrincipal = User.ToPrincipal();
         if (http.HttpContext != null)
         {
-            http.HttpContext.User = newPrincipal;
+            http.HttpContext.User = principal;
             await http.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, http.HttpContext.User, new() { IsPersistent = true });
         }
 
-        return newPrincipal;
+        return principal;
     }
 
     public async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId)
