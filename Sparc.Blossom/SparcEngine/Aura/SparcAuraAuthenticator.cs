@@ -1,9 +1,12 @@
-using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Sparc.Blossom.Authentication;
+using System.Security.Claims;
 
 namespace Sparc.Engine.Aura;
 
-public class SparcAuraAuthenticator(ISparcAura aura) : IBlossomAuthenticator
+public class SparcAuraAuthenticator(ISparcAura aura, IHttpContextAccessor http) : IBlossomAuthenticator
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
     public BlossomUser? User { get; private set; }
@@ -33,7 +36,15 @@ public class SparcAuraAuthenticator(ISparcAura aura) : IBlossomAuthenticator
         }
 
         LoginState = LoginStates.LoggedIn;
-        return User.ToPrincipal();
+
+        var newPrincipal = User.ToPrincipal();
+        if (http.HttpContext != null)
+        {
+            http.HttpContext.User = newPrincipal;
+            await http.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, http.HttpContext.User, new() { IsPersistent = true });
+        }
+
+        return newPrincipal;
     }
 
     public async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId)
@@ -44,10 +55,14 @@ public class SparcAuraAuthenticator(ISparcAura aura) : IBlossomAuthenticator
         return User.ToPrincipal(authenticationType, externalId);
     }
 
-    public Task<ClaimsPrincipal> LogoutAsync(ClaimsPrincipal principal)
+    public async Task<ClaimsPrincipal> LogoutAsync(ClaimsPrincipal principal)
     {
         User = null;
         LoginState = LoginStates.LoggedOut;
-        return Task.FromResult(principal);
+
+        if (http.HttpContext != null)
+            await http.HttpContext.SignOutAsync();
+
+        return principal;
     }
 }

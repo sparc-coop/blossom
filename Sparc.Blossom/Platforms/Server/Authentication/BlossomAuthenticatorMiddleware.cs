@@ -25,8 +25,7 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
             var matchingUser = await aura.Login($"totp:{totpCode}");
             if (matchingUser != null)
             {
-                context.User = await auth.LoginAsync(matchingUser.ToUser().ToPrincipal());
-                await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User, new() { IsPersistent = true });
+                await auth.LoginAsync(matchingUser.ToUser().ToPrincipal());
                 context.Response.Redirect(context.Request.PathBase + context.Request.Path);
             }
 
@@ -38,10 +37,7 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
         var user = await auth.GetAsync(context.User);
 
         if (user != null && (context.User.Identity?.IsAuthenticated != true || !priorUser.Equals(user)))
-        {
-            context.User = await auth.LoginAsync(context.User);
-            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User, new() { IsPersistent = true });
-        }
+            await auth.LoginAsync(context.User);
 
         await _next(context);
     }

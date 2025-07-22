@@ -99,12 +99,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         return new ClaimsPrincipal(identity.ToIdentity(this));
     }
 
-    public BlossomLogin ToLogin()
-    {
-        var accessToken = Claims.ContainsKey("sparcaura-access") ? Claims["sparcaura-access"] : null;
-        return new BlossomLogin(this, accessToken);
-    }
-
     public void ChangeUsername(string username)
     {
         Avatar.Username = username;
