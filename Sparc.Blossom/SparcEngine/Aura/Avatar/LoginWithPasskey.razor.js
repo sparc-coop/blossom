@@ -32,7 +32,7 @@ async function signInWithPasskey(alias) {
 }
 
 async function signUpWithPasskey(registerToken) {
-    console.log("initializing handleRegisterClick...")
+    console.log("initializing handleRegisterClick...", registerToken)
 
     try {
         const { token, error } = await client.register(registerToken);

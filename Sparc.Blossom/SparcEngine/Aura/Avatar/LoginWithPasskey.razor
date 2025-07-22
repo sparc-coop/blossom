@@ -33,6 +33,7 @@
 </section>
 
 @inject PasskeyAuthenticator Auth
+@inject NavigationManager Nav
 @code
 {
     [Parameter] public required BlossomAvatar UserAvatar { get; set; }
@@ -62,6 +63,8 @@
                 await Auth.RegisterAsync();
             else
                 await Auth.LoginAsync();
+
+            Nav.Refresh(true);
         }
         catch (Exception e)
         {

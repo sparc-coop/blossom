@@ -5,7 +5,7 @@ namespace Sparc.Blossom.Authentication;
 
 public class PasskeyAuthenticator(IJSRuntime js, ISparcAura aura)
 {
-    const string ApiKey = "sparcengine:public:63cc565eb9544940ad6f2c387b228677";
+    const string ApiKey = "sparcaura:public:b227c6af0d244323aaab033cc9d392c8";
 
     readonly Lazy<Task<IJSObjectReference>> Auth = js.Import(
         "./Blossom/SparcEngine/Aura/Avatar/LoginWithPasskey.razor.js");
