@@ -5,6 +5,9 @@ namespace Sparc.Blossom.Authentication;
 
 public class SparcCode(string code, int? remainingSeconds = null)
 {
+    public SparcCode() : this("")
+    { }
+    
     public string Code { get; set; } = code.Replace("totp:", "");
     public int RemainingSeconds { get; set; } = remainingSeconds ?? 0;
 
