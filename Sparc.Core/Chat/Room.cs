@@ -1,9 +1,13 @@
-﻿namespace Sparc.Core.Chat;
+﻿using Sparc.Blossom;
 
-public class Room
+namespace Sparc.Core.Chat;
+
+public class Room(string roomName) : BlossomEntity<string>(Guid.NewGuid().ToString())
 {
-    public string RoomId { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
+    public string RoomId { get { return Id; } set { Id = value; } } // Partition key
+    public string RoomName { get; set; } = roomName;
+    public string CreatorUserId { get; set; } = string.Empty;
+    public bool IsPrivate { get; set; }
 }
 
 
