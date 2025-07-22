@@ -8,6 +8,7 @@ public class SparcOrder() : BlossomEntity<string>(RandomSerialNumber(4, 3))
     public string OrderId {  get { return Id; } set { Id = value;  } } // Partition key
     public string ProductId { get; set; } = "";
     public string UserId { get; set; } = "";
+    public string StripeProductId { get; set; } = "";
     public string PaymentIntentId { get; set; } = "";   
     public string? Currency { get; set; }
     public string? Email { get; set; }
