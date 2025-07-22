@@ -60,7 +60,7 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
     {
         Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options => {
-                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SameSite = SameSiteMode.Lax;
                 options.ExpireTimeSpan = TimeSpan.FromDays(30);
             });
 
@@ -80,7 +80,7 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
     {
         Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options => {
-                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SameSite = SameSiteMode.Lax;
                 options.ExpireTimeSpan = TimeSpan.FromDays(30);
             });
 

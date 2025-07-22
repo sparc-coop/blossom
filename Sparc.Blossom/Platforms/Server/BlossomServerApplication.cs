@@ -93,7 +93,7 @@ public class BlossomServerApplication : IBlossomApplication
 
     void UseBlossomAuthentication()
     {
-        Host.UseCookiePolicy(new() { MinimumSameSitePolicy = SameSiteMode.None });
+        Host.UseCookiePolicy(new() { MinimumSameSitePolicy = SameSiteMode.Lax });
         Host.UseAuthentication();
         Host.UseAuthorization();
         Host.UseMiddleware<BlossomAuthenticatorMiddleware>();
