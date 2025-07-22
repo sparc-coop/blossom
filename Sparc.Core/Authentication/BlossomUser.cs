@@ -17,7 +17,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public DateTime DateModified { get; private set; }
     public DateTime? LastLogin { get; private set; }
     public string? LastPageVisited { get; set; }
-    public string? Token { get; set; }
     public BlossomAvatar Avatar { get; set; } = new();
 
     public List<BlossomIdentity> Identities { get; set; } = [];
@@ -77,14 +76,20 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         RegisterClaims();
     }
 
-    public virtual ClaimsPrincipal ToPrincipal()
+    public virtual ClaimsIdentity ToIdentity()
     {
         RegisterBaseClaims();
-
+        
         var defaultIdentity = Identities.FirstOrDefault()
             ?? new BlossomIdentity(Id, "Anonymous");
 
-        return new ClaimsPrincipal(defaultIdentity.ToIdentity(this));
+        return defaultIdentity.ToIdentity(this);
+    }
+
+    public virtual ClaimsPrincipal ToPrincipal()
+    {
+        var identity = ToIdentity();
+        return new ClaimsPrincipal(identity);
     }
 
     public ClaimsPrincipal ToPrincipal(string authenticationType, string externalId)
@@ -92,6 +97,12 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         RegisterBaseClaims();
         var identity = GetOrCreateIdentity(authenticationType, externalId);
         return new ClaimsPrincipal(identity.ToIdentity(this));
+    }
+
+    public BlossomLogin ToLogin()
+    {
+        var accessToken = Claims.ContainsKey("sparcaura-access") ? Claims["sparcaura-access"] : null;
+        return new BlossomLogin(this, accessToken);
     }
 
     public void ChangeUsername(string username)
@@ -242,5 +253,11 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         }
         else
             Products.Add(product);
+    }
+
+    public BlossomIdentity UpsertIdentity(string authenticationType, string externalId)
+    {
+        Identities.RemoveAll(x => x.Type == authenticationType);
+        return AddIdentity(authenticationType, externalId);
     }
 }

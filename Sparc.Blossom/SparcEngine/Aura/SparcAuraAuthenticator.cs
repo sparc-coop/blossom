@@ -29,7 +29,7 @@ public class SparcAuraAuthenticator(ISparcAura aura) : IBlossomAuthenticator
         if (User == null)
         {
             var user = await aura.Login();
-            User = user;
+            User = user.ToUser();
         }
 
         LoginState = LoginStates.LoggedIn;
@@ -39,9 +39,9 @@ public class SparcAuraAuthenticator(ISparcAura aura) : IBlossomAuthenticator
     public async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId)
     {
         var user = await aura.Login(externalId);
-        User = user;
+        User = user.ToUser();
         LoginState = LoginStates.LoggedIn;
-        return user.ToPrincipal(authenticationType, externalId);
+        return User.ToPrincipal(authenticationType, externalId);
     }
 
     public Task<ClaimsPrincipal> LogoutAsync(ClaimsPrincipal principal)

@@ -15,7 +15,7 @@ public interface ISparcAura
     Task<SparcCode> Register();
 
     [Post("/aura/login")]
-    Task<BlossomUser> Login(string? emailOrToken = null);
+    Task<BlossomLogin> Login(string? emailOrToken = null);
 
     [Post("/aura/logout")]
     Task<BlossomUser> Logout();

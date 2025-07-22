@@ -14,21 +14,21 @@ public static class ServiceCollectionExtensions
         var uri = new Uri(url);
 
         services.AddHttpContextAccessor();
-        services.AddTransient<SparcAuraCookieHandler>();
+        services.AddTransient<SparcAuraTokenHandler>();
 
         services.AddRefitClient<ISparcAura>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
-            .AddHttpMessageHandler<SparcAuraCookieHandler>()
+            .AddHttpMessageHandler<SparcAuraTokenHandler>()
             .AddStandardResilienceHandler();
 
         services.AddRefitClient<ISparcBilling>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
-            .AddHttpMessageHandler<SparcAuraCookieHandler>()
+            .AddHttpMessageHandler<SparcAuraTokenHandler>()
             .AddStandardResilienceHandler();
 
         services.AddRefitClient<ITovik>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
-            .AddHttpMessageHandler<SparcAuraCookieHandler>()
+            .AddHttpMessageHandler<SparcAuraTokenHandler>()
             .AddStandardResilienceHandler();
 
         services.AddSparcAura();
