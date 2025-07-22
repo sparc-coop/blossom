@@ -7,7 +7,7 @@
 @inject IJSRuntime Js
 @code {
     [Parameter] public required RenderFragment ChildContent { get; set; }
-    string Id => $"dialog-{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+    string Id = $"dialog-{Guid.NewGuid().ToString("N").Substring(0, 8)}";
 
     public async Task OpenAsync()
     {

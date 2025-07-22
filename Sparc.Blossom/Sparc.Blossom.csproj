@@ -29,6 +29,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Content Remove="compilerconfig.json" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Remove="SparcEngine\Aura\Avatar\LoginWithPasskey.razor.js" />
 	</ItemGroup>
 
@@ -150,6 +154,7 @@
 	  <Folder Include="wwwroot\" />
 	</ItemGroup>
 	<ItemGroup>
+	  <None Include="compilerconfig.json" />
 	  <None Include="SparcEngine\Aura\Avatar\LoginWithPasskey.razor" />
 	</ItemGroup>
 

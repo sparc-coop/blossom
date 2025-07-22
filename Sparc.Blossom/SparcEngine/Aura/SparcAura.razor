@@ -3,57 +3,58 @@
     <ProfileIcon />
 </div>
 
-<BlossomDialog @ref=Dialog>
-    <header>
-        <div>
-            <ProfileIcon />
-            <h3>Profile</h3>
-        </div>
-        <button type="button" aria-label="Close" @onclick="@CloseUserProfile"><XIcon /></button>
-    </header>
-    <section>
-        <div class="column">
-            @if (UserAvatar.VerificationLevel == 0)
-            {
-                <LoginWithPasskey UserAvatar="UserAvatar" />
-            }
-            else if (UserAvatar.VerificationLevel == 1)
-            {
-                <LoginWithEmail UserAvatar="UserAvatar" />
-            }
-            else
-            {
-                <p>You are logged in and your data is protected.</p>
-                <button @onclick=Logout>
-                    Forget Me on this Device
-                </button>
-            }
-            <section class="app-links">
-                <Apps />
-            </section>
-        </div>
+<div>
+    <BlossomDialog @ref=Dialog>
+        <header>
+            <div>
+                <ProfileIcon />
+                <h3>Profile</h3>
+            </div>
+            <button type="button" aria-label="Close" @onclick="@CloseUserProfile"><XIcon /></button>
+        </header>
+        <section>
+            <div class="column">
+                @if (UserAvatar.VerificationLevel == 0)
+                {
+                    <LoginWithPasskey UserAvatar="UserAvatar" />
+                }
+                else if (UserAvatar.VerificationLevel == 1)
+                {
+                    <LoginWithEmail UserAvatar="UserAvatar" />
+                }
+                else
+                {
+                    <p>You are logged in and your data is protected.</p>
+                    <button @onclick=Logout>
+                        Forget Me on this Device
+                    </button>
+                }
+                <section class="app-links">
+                    <Apps />
+                </section>
+            </div>
 
-        <div class="column">
-            <section class="profile-customization">
-                <AvatarEditor UserAvatar="UserAvatar" />
-            </section>
-        </div>
+            <div class="column">
+                <section class="profile-customization">
+                    <AvatarEditor UserAvatar="UserAvatar" />
+                </section>
+            </div>
 
-        <div class="column">
-            <section class="user-details">
-                <ProfileEditor UserAvatar="UserAvatar" />
-            </section>
+            <div class="column">
+                <section class="user-details">
+                    <ProfileEditor UserAvatar="UserAvatar" />
+                </section>
 
-            <section class="language-selector">
-                <header>
-                    <h4>Language</h4>
-                </header>
-                <tovik-language></tovik-language>
-            </section>
-        </div>
-    </section>
-</BlossomDialog>
-
+                <section class="language-selector">
+                    <header>
+                        <h4>Language</h4>
+                    </header>
+                    <tovik-language></tovik-language>
+                </section>
+            </div>
+        </section>
+    </BlossomDialog>
+</div>
 
 @inject ISparcAura Aura
 @inject IJSRuntime Js
