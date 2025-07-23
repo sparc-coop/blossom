@@ -10,5 +10,9 @@
   {
     "outputFile": "SparcEngine/Aura/Avatar/EmojiSelector.razor.css",
     "inputFile": "SparcEngine/Aura/Avatar/EmojiSelector.razor.scss"
+  },
+  {
+    "outputFile": "SparcEngine/Tovik/LanguageSelector.razor.css",
+    "inputFile": "SparcEngine/Tovik/LanguageSelector.razor.scss"
   }
 ]

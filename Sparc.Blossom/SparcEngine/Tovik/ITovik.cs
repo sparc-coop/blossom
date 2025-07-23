@@ -5,7 +5,7 @@ namespace Sparc.Engine.Tovik;
 
 public interface ITovik
 {
-    [Get("/tovik/languages")]
+    [Get("/translate/languages")]
     Task<IEnumerable<Language>> GetLanguages();
 
     [Post("/auth/user-languages")]
