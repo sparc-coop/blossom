@@ -32,17 +32,21 @@
         Languages = await Tovik.GetLanguages();
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
         SelectedLanguageId = Avatar.Language?.Id
                 ?? Languages.FirstOrDefault(l => l.Id == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)?.Id
                 ?? string.Empty;
+        await NotifyTovik();
     }
 
     async Task ChangeLanguage()
     {
         Avatar.Language = Languages.FirstOrDefault(l => l.Id == SelectedLanguageId);
         await Aura.UpdateUserInfo(Avatar);
-        await Js.InvokeVoidAsync("eval", "document.dispatchEvent(new CustomEvent('tovik-user-language-changed', { detail: '" + SelectedLanguageId + "' }));");
+        await NotifyTovik();
     }
+
+    async Task NotifyTovik()
+        => await Js.InvokeVoidAsync("eval", "document.dispatchEvent(new CustomEvent('tovik-user-language-changed', { detail: '" + SelectedLanguageId + "' }));");
 }
