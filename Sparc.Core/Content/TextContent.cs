@@ -2,6 +2,7 @@
 using Sparc.Blossom.Authentication;
 using Sparc.Core;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Sparc.Engine;
 
@@ -136,11 +137,13 @@ public class TextContent : BlossomEntity<string>
 
     private int WordCount()
     {
-        if (string.IsNullOrWhiteSpace(Text))
+        var textToCount = string.IsNullOrWhiteSpace(OriginalText) ? Text : OriginalText;
+
+        if (string.IsNullOrWhiteSpace(textToCount))
             return 0;
 
-        var words = Text!.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
-        return words.Length;
+        var matches = Regex.Matches(textToCount, @"[\p{L}\p{N}]+", RegexOptions.Multiline);
+        return matches.Count;
     }
 
     public void AddCharge(decimal? costPerWord = null, string? description = null)
