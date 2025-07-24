@@ -2,7 +2,8 @@
     <header>
         <h4>Create a Passkey</h4>
         <p>
-            Passekys are a secure, modern alternative to passwords that stay safely stored on your device. Passkeys are never shared or sent online. Creating one is optional, but we recommend it to protect your data and enable cross-device sync.
+            Passkeys are a secure, modern alternative to passwords that stay safely stored on your device, and are never shared or sent online.</p>
+            <p>Creating a passkey is optional, but we recommend it to better protect your data and enable cross-device sync.
         </p>
     </header>
 
@@ -57,8 +58,6 @@
                 await Auth.RegisterAsync();
             else
                 await Auth.LoginAsync();
-
-            Nav.Refresh(true);
         }
         catch (Exception e)
         {

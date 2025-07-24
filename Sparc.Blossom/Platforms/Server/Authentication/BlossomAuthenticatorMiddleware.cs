@@ -18,11 +18,11 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
             return;
         }
 
-        if (context.Request.Query.ContainsKey("_totp"))
+        if (context.Request.Query.ContainsKey("_auth"))
         {
             // Handle TOTP requests separately
-            var totpCode = context.Request.Query["_totp"].ToString();
-            var matchingUser = await aura.Login($"totp:{totpCode}");
+            var authCode = context.Request.Query["_auth"].ToString();
+            var matchingUser = await aura.Login(authCode);
             if (matchingUser != null)
             {
                 await auth.LoginAsync(matchingUser.ToUser().ToPrincipal());

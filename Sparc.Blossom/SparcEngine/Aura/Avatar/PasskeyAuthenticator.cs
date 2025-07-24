@@ -1,9 +1,15 @@
-﻿using Microsoft.JSInterop;
+﻿using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
+using Sparc.Blossom.SparcEngine.Aura.Icons;
 using Sparc.Engine.Aura;
 
 namespace Sparc.Blossom.Authentication;
 
-public class PasskeyAuthenticator(IJSRuntime js, ISparcAura aura)
+public class PasskeyAuthenticator(
+    IJSRuntime js, 
+    ISparcAura aura, 
+    IBlossomAuthenticator auth,
+    NavigationManager nav)
 {
     const string ApiKey = "sparcaura:public:b227c6af0d244323aaab033cc9d392c8";
 
@@ -23,9 +29,7 @@ public class PasskeyAuthenticator(IJSRuntime js, ISparcAura aura)
         var js = await Auth.Value;
         var token = await js.InvokeAsync<string>("signInWithPasskey", null);
         if (!string.IsNullOrWhiteSpace(token))
-        {
-            var user = await aura.Login(token);
-        }
+            nav.NavigateTo(nav.GetUriWithQueryParameter("_auth", token), true);
     }
 
     public async Task RegisterAsync()
@@ -40,6 +44,6 @@ public class PasskeyAuthenticator(IJSRuntime js, ISparcAura aura)
             return;
         }
 
-        var user = await aura.Login(passkey);
+        nav.NavigateTo(nav.GetUriWithQueryParameter("_auth", passkey), true);
     }
 }
