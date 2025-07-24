@@ -1,10 +1,20 @@
-﻿namespace Sparc.Core.Chat;
+﻿using Newtonsoft.Json;
+using Sparc.Blossom;
+using Sparc.Blossom.Authentication;
 
-public class RoomMembership
+namespace Sparc.Core.Chat;
+
+public class RoomMembership() : BlossomEntity<string>(Guid.NewGuid().ToString())
 {
-    public string RoomId { get; set; } = string.Empty;
-    public string UserId { get; set; } = string.Empty;
     public string Membership { get; set; } = string.Empty; // join/invite/leave/ban
+
+    public string RoomId { get; set; } = string.Empty;
+    public Room? Room { get; set; }
+
+    public string UserId { get; set; } = string.Empty;
+    public BlossomUser? User { get; set; }
+
+    public DateTimeOffset AssignedAt { get; set; }
 }
 
 

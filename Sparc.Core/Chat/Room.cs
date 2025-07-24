@@ -8,6 +8,8 @@ public class Room(string roomName) : BlossomEntity<string>(Guid.NewGuid().ToStri
     public string RoomName { get; set; } = roomName;
     public string CreatorUserId { get; set; } = string.Empty;
     public bool IsPrivate { get; set; }
+
+    public ICollection<RoomMembership> Memberships { get; set; } = new List<RoomMembership>();
 }
 
 

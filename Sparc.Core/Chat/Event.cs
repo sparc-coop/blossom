@@ -1,12 +1,15 @@
-﻿namespace Sparc.Core.Chat;
+﻿using Sparc.Blossom;
 
-public class Event
+namespace Sparc.Core.Chat;
+
+public class Event() : BlossomEntity<string>(Guid.NewGuid().ToString())
 {
-    public string EventId { get; set; } = string.Empty;
     public string RoomId { get; set; } = string.Empty;
-    public string Sender { get; set; } = string.Empty; // UserId of the sender
+    public string Sender { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
+    public DateTimeOffset CreatedDate { get; set; } = DateTimeOffset.UtcNow;
+
 }
 
 

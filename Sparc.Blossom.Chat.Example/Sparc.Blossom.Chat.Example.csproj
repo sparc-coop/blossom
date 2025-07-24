@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\sparcengine\Sparc.Engine.Client\Sparc.Engine.Client.csproj" />
+    <ProjectReference Include="..\Sparc.Blossom.ApiGenerator\Sparc.Blossom.ApiGenerator.csproj" />
+    <ProjectReference Include="..\Sparc.Blossom\Sparc.Blossom.csproj" />
+  </ItemGroup>
+
+</Project>

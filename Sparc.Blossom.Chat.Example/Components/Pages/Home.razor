@@ -1,0 +1,28 @@
+﻿@page "/"
+@using Sparc.Core.Chat
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<ChatRoom RoomId="@RoomId"></ChatRoom>
+
+@code {
+    private int currentCount = 0;
+    private string RoomId { get; set; } = "12b26e88-f1c2-45c9-a61c-7ba6df88751f";
+
+    protected async override Task OnInitializedAsync()
+    {
+        var room = new Room("Test Room");
+        // var newRoom = await Chat.CreateRoomAsync(room);
+        var rooms = await Chat.GetRoomsAsync("userid");
+        var breakpoint = "";
+    }
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
