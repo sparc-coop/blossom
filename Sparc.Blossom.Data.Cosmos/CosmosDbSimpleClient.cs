@@ -27,7 +27,8 @@ public class CosmosDbSimpleClient<T>
             UseSystemTextJsonSerializerWithOptions = new()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            }
+            },
+            ConnectionMode = ConnectionMode.Direct
         };
 
         var connectionString = config.GetConnectionString("Cosmos")
