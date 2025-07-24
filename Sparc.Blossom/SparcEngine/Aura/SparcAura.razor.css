@@ -17,6 +17,7 @@
   border: none;
   z-index: 10000;
   max-height: 100%;
+  font-family: "elza-text";
 }
 ::deep dialog[open] header {
   display: flex;
@@ -87,6 +88,15 @@
   min-height: fit-content;
   height: auto;
 }
+::deep dialog[open] section .column > section aside {
+  font-size: 1.2rem;
+  text-align: center;
+}
+::deep dialog[open] section .column > section aside button {
+  background: transparent;
+  text-decoration: underline;
+  margin-top: 4px;
+}
 ::deep dialog[open] section .column > section > header {
   display: flex;
   flex-direction: column;
@@ -143,42 +153,6 @@
 }
 ::deep dialog[open] section .column > section > div figure svg {
   padding: 31px;
-}
-::deep dialog[open] section .column > section ul {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
-  width: 100%;
-  flex: 1;
-}
-::deep dialog[open] section .column > section ul li {
-  display: flex;
-  padding: 0 8px;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-::deep dialog[open] section .column > section ul li div {
-  display: flex;
-  align-items: center;
-  gap: 0.2rem;
-}
-::deep dialog[open] section .column > section ul li div span {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 140%;
-}
-::deep dialog[open] section .column > section ul li button {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 140%;
-  color: var(--purple-500);
-  background: none;
-  margin-right: 0.8rem;
-}
-::deep dialog[open] section .column > section ul li button:hover {
-  text-decoration: underline;
 }
 ::deep dialog[open] section .column > section.app-links {
   padding: 1.6rem;

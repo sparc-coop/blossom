@@ -1,17 +1,20 @@
 .language-select {
+    border-radius: 32px;
+    border: 1px solid var(--purple-100);
+    padding: 8px 16px;
+    box-sizing: border-box;
+    width: 100%;
+
     ::deep select {
-        height: 40px;
-        width: -webkit-fill-available;
-        border-radius: 8px;
-        border: 1px solid var(--gray-100);
-        background: var(--yellow-50);
-        padding: 8px 4px;
+        width: 100%;
+        background: transparent;
         cursor: pointer;
+        border: none;
+        background: var(--yellow-50);
 
         &:focus {
             outline: none;
-            border-color: var(--gray-300);
-            background-color: var(--yellow-100);
+            border-color: var(--purple-300);
         }
     }
 }
