@@ -1,31 +1,32 @@
-﻿<section class="login">
-    <header>
-        <h4>Create a Passkey</h4>
-        <p>
-            Passkeys are a secure, modern alternative to passwords that stay safely stored on your device, and are never shared or sent online.</p>
-            <p>Creating a passkey is optional, but we recommend it to better protect your data and enable cross-device sync.
-        </p>
-    </header>
+﻿<header>
+    <h4>Save Your Profile</h4>
+    <p>
+        Save your profile securely with a passkey —- a modern, password-free method that stores your profile safely on your device.
+    </p>
+    <p>
+        Your passkey stays private and is never shared with us or any third parties.
+    </p>
+</header>
 
-    @if (Message != null)
-    {
-        <div class="error-message">
-            @Message
-        </div>
-    }
-    <div>
-        <button type="button" class="primary-btn" @onclick="Register" disabled="@IsLoggingIn">
-            @(IsLoggingIn ? "Waiting for your passkey..." : "Create My Passkey")
-        </button>
-
-        <aside>
-            Already have a passkey for this app?
-            <button @onclick=Login disabled="@IsLoggingIn">
-                Use My Existing Passkey
-            </button>
-        </aside>
+@if (Message != null)
+{
+    <div class="error-message">
+        @Message
     </div>
-</section>
+}
+<div>
+    <button type="button" class="primary-btn" @onclick="Register" disabled="@IsLoggingIn">
+        @(IsLoggingIn ? "Saving..." : "Save")
+    </button>
+
+    <aside>
+        Already have a profile for this app?
+        <button @onclick=Login disabled="@IsLoggingIn">
+            Load My Profile
+        </button>
+    </aside>
+</div>
+
 
 @inject PasskeyAuthenticator Auth
 @inject NavigationManager Nav
