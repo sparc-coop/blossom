@@ -56,7 +56,7 @@
 
     section {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         gap: 8px;
         flex: 1;
         min-height: 0;
@@ -255,79 +255,13 @@
                         }
                     }
                 }
-
-                tovik-language {
-                    width: 100%;
-                    position: relative;
-
-                    ::deep select {
-                        appearance: none;
-                        padding: 1rem 2rem;
-                        border-radius: 20px;
-                        border: 1px solid var(--purple-100);
-                        background: transparent;
-                        font-size: 16px;
-                        font-family: sans-serif;
-                        width: 100%;
-
-                        option {
-                            background: var(--yellow-50);
-                        }
-                    }
-
-                    &::after {
-                        content: '';
-                        position: absolute;
-                        right: 2.2rem;
-                        top: 50%;
-                        transform: translateY(-50%) rotate(45deg);
-                        pointer-events: none;
-                        width: 6px;
-                        height: 6px;
-                        border-right: 1.5px solid black;
-                        border-bottom: 1.5px solid black;
-                    }
-                }
             }
-        }
-    }
-}
-
-@media (min-width: 768px) {
-    article section {
-        flex-direction: row;
-        flex-wrap: wrap;
-
-        .column {
-            width: calc(50% - 4px);
         }
     }
 }
 
 @media (min-width: 996px) {
-    article section {
-        flex-wrap: nowrap;
-
-        .column {
-            width: 320px;
-        }
-    }
-}
-
-@media (max-height: 634px) {
-    article section .column > section {
-        &.profile-customization {
-            > div:first-of-type {
-                width: 160px;
-
-                figure {
-                    height: 160px;
-                }
-            }
-
-            > div:first-of-type {
-                gap: 14px;
-            }
-        }
+    dialog[open] section {
+        flex-direction: row;
     }
 }

@@ -10,7 +10,7 @@
                 @{ int tabIndex = 0; }
                 @foreach (var emoji in Emojis)
                 {
-                    <li tabindex="@tabIndex++"
+                    <li tabindex="@(tabIndex++)"
                         @onclick="(() => SetEmoji(emoji))"                        
                         class="@(Emoji == emoji ? "selected" : "")">
                         @emoji
