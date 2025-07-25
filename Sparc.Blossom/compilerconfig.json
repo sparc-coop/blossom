@@ -14,5 +14,9 @@
   {
     "outputFile": "SparcEngine/Tovik/LanguageSelector.razor.css",
     "inputFile": "SparcEngine/Tovik/LanguageSelector.razor.scss"
+  },
+  {
+    "outputFile": "SparcEngine/Aura/Avatar/AuraAvatar.razor.css",
+    "inputFile": "SparcEngine/Aura/Avatar/AuraAvatar.razor.scss"
   }
 ]

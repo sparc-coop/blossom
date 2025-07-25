@@ -3,13 +3,7 @@
     <p>Customize your profile's avatar!</p>
 </header>
 <div>
-    <figure class="avatar @(HasEmoji ? "emoji" : "")" style="background-color: @UserAvatar.BackgroundColor">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-            <text x="50%" y="60%" font-size="80" text-anchor="middle" dominant-baseline="middle" style="fill: @UserAvatar.ForegroundColor">
-                @(!string.IsNullOrWhiteSpace(UserAvatar.Emoji) ? UserAvatar.Emoji : (!string.IsNullOrWhiteSpace(UserAvatar.Initials) ? UserAvatar.Initials : ""))
-            </text>
-        </svg>
-    </figure>
+    <AuraAvatar Avatar="UserAvatar" />
 </div>
 <div>
     <ColorSelector @bind-BackgroundColor="UserAvatar.BackgroundColor" />
@@ -19,8 +13,6 @@
 @code {
     [Parameter] public required BlossomAvatar UserAvatar { get; set; }
     [Parameter] public EventCallback<string> OnEmojiChanged { get; set; }
-
-    bool HasEmoji => !string.IsNullOrWhiteSpace(UserAvatar?.Emoji);
 
     private async Task HandleEmojiChanged(string emoji)
     {

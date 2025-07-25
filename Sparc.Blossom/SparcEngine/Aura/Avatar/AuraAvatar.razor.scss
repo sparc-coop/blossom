@@ -1,0 +1,35 @@
+figure {
+    height: 3rem;
+    width: 3rem;
+    border-radius: 200px;
+    margin: 0;
+
+    svg {
+        padding: 12%;
+    }
+
+    &:hover {
+        cursor: pointer;
+        svg {
+            animation: wiggle 1s ease-in-out;
+        }
+    }
+}
+
+@keyframes wiggle {
+    0% {
+        transform: rotate(0deg);
+    }
+    20% {
+        transform: rotate(-20deg);
+    }
+    50% {
+        transform: rotate(20deg);
+    }
+    80% {
+        transform: rotate(-20deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}

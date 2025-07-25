@@ -122,6 +122,11 @@
   gap: 8px;
   width: 100%;
 }
+::deep dialog[open] section .column > section > div p.message {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--purple-500);
+}
 ::deep dialog[open] section .column > section > div input, ::deep dialog[open] section .column > section > div select, ::deep dialog[open] section .column > section > div textarea {
   color: var(--purple-800);
 }
@@ -148,11 +153,7 @@
 }
 ::deep dialog[open] section .column > section > div figure {
   height: 220px;
-  border-radius: 200px;
-  margin: 0;
-}
-::deep dialog[open] section .column > section > div figure svg {
-  padding: 31px;
+  width: 220px;
 }
 ::deep dialog[open] section .column > section.app-links {
   padding: 1.6rem;

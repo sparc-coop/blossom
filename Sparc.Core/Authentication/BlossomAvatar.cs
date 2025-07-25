@@ -10,6 +10,7 @@ public class BlossomAvatar
     public string Id { get; set; }
     public string Username { get; set; } = "";
     public string Name { get; set; }
+    public string? PasskeyName { get; set; }
     public string Initials => string.IsNullOrWhiteSpace(Name) ? "" : string.Join(string.Empty, Name.Split(' ').Select(x => x[0]));
     public int VerificationLevel { get; set; } // 0 = Anonymous, 1 = Passkey, 2 = Email/Phone
     public bool IsOnline { get; set; }

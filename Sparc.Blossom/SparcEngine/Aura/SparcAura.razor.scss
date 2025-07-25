@@ -142,6 +142,12 @@
                     gap: 8px;
                     width: 100%;
 
+                    p.message {
+                        font-size: 1.2rem;
+                        font-weight: 500;
+                        color: var(--purple-500);
+                    }
+
                     input, select, textarea {
                          color: var(--purple-800);
                     }
@@ -172,12 +178,7 @@
 
                     figure {
                         height: 220px;
-                        border-radius: 200px;
-                        margin: 0;
-
-                        svg {
-                            padding: 31px;
-                        }
+                        width: 220px;
                     }
                 }
 
