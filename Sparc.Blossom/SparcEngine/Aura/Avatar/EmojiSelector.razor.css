@@ -3,6 +3,9 @@
   flex-direction: column;
   gap: 8px;
   height: 100%;
+  --purple-100: #DABEFA;
+  --purple-800: #2B1C45;
+  --gray-100: #E6E6E6;
 }
 .emoji-selector h3 {
   font-size: 16px;
@@ -20,7 +23,6 @@
 }
 
 .skintones, .emojis {
-  font-family: "Noto Emoji", sans-serif;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-evenly;
@@ -36,12 +38,13 @@
   border-radius: 8px;
   cursor: pointer;
   transition: 300ms ease-in-out;
+  font-family: "Noto Emoji", sans-serif;
 }
 .skintones li:hover, .emojis li:hover {
   background: var(--gray-100);
 }
 .skintones li.selected, .emojis li.selected {
-  background: var(--purple-900);
+  background: var(--purple-800);
   color: white;
 }
 

@@ -5,7 +5,10 @@
   margin: 0;
 }
 figure svg {
-  padding: 12%;
+  padding: 6%;
+}
+figure svg text {
+  font-family: "Noto Emoji", sans-serif;
 }
 figure:hover {
   cursor: pointer;

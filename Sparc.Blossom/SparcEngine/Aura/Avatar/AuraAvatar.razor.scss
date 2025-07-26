@@ -5,7 +5,11 @@ figure {
     margin: 0;
 
     svg {
-        padding: 12%;
+        padding: 6%;
+
+        text {
+            font-family: 'Noto Emoji', sans-serif;
+        }
     }
 
     &:hover {
