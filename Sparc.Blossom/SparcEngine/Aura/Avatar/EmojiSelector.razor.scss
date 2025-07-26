@@ -3,10 +3,6 @@
     flex-direction: column;
     gap: 8px;
     height: 100%;
-    --purple-100: #DABEFA;
-    --purple-800: #2B1C45;
-    --gray-100: #E6E6E6;
-
 
     h3 {
         font-size: 16px;
@@ -17,11 +13,10 @@
 
     .emoji-container {
         flex: 1;
-        /*max-height: 318px;*/
         overflow-y: auto;
         border: 1px solid var(--purple-100);
         border-radius: 8px;
-        padding: 8px 4.338px 0px 4.273px;
+        padding: 8px;
     }
 }
 
