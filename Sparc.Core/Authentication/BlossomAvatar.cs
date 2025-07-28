@@ -52,7 +52,7 @@ public class BlossomAvatar
         Id = id;
         Name = name;
         BackgroundColor = BackgroundColors().OrderBy(x => Guid.NewGuid()).First();
-        Emoji = Emojis().OrderBy(x => Guid.NewGuid()).First();
+        Emoji = "😀";
     }
 
     public static string CalculateForegroundColor(string backgroundColor)
