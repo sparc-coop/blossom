@@ -3,26 +3,60 @@
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div>
+    <h3>Available Chat Rooms</h3>
+    <ul>
+        @if (rooms == null)
+        {
+            <li>Loading rooms...</li>
+        }
+        else if (!rooms.Any())
+        {
+            <li>No rooms available.</li>
+        }
+        else
+        {
+            @foreach (var room in rooms)
+            {
+                <li>
+                    <button class="btn btn-link" @onclick="() => SelectRoom(room.Id)">
+                        @room.RoomName
+                    </button>
+                </li>
+            }
+        }
+    </ul>
+</div>
 
-Welcome to your new app.
-
-<ChatRoom RoomId="@RoomId"></ChatRoom>
+<div>
+    @if (!string.IsNullOrEmpty(RoomId))
+    {
+        <ChatRoom RoomId="@RoomId"></ChatRoom>
+    }
+</div>
 
 @code {
     private int currentCount = 0;
-    private string RoomId { get; set; } = "12b26e88-f1c2-45c9-a61c-7ba6df88751f";
+    private string? RoomId { get; set; }
+    private List<Room> rooms;
 
     protected async override Task OnInitializedAsync()
     {
         var room = new Room("Test Room");
         // var newRoom = await Chat.CreateRoomAsync(room);
-        var rooms = await Chat.GetRoomsAsync("userid");
+
+        rooms = await Chat.GetRoomsAsync();
+        if (rooms.Any())
+        {
+            RoomId = rooms.First().Id;
+        }
+
         var breakpoint = "";
     }
 
-    private void IncrementCount()
+    private void SelectRoom(string roomId)
     {
-        currentCount++;
+        RoomId = roomId;
+        StateHasChanged();
     }
 }

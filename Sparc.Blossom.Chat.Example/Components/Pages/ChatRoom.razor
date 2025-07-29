@@ -32,6 +32,12 @@
         await GetMessagesAsync();
     }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(RoomId))
+            await GetMessagesAsync();
+    }
+
     private async Task GetMessagesAsync()
     {
         messages = await Chat.GetMessagesAsync(RoomId);
