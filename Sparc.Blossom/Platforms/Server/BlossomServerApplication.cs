@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.Hosting;
 using System.Globalization;
 using System.Reflection;
@@ -28,9 +29,11 @@ public class BlossomServerApplication : IBlossomApplication
             Host.UseHsts();
         }
 
+        Host.UseRewriter(new RewriteOptions().AddRedirectToNonWwwPermanent());
         Host.UseHttpsRedirection();
         Host.MapStaticAssets();
         Host.UseAntiforgery();
+            
 
         if (builder.Services.Any(x => x.ServiceType == typeof(ICorsPolicyProvider)))
             Host.UseCors();
