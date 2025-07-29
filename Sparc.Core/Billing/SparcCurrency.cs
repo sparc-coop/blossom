@@ -37,7 +37,7 @@ public class SparcCurrency(RegionInfo region)
             .Select(culture => new RegionInfo(culture.Name))
             .Select(region => new SparcCurrency(region))
             .GroupBy(currency => currency.Id)
-            .Select(x => x.First())
+            .Select(x => x.OrderBy(y => y.NativeName.Contains("Dollar") ? 0 : 1).First()) // temp fix for cherokee native name for US
             .OrderBy(x => x.Name)
             .ToList();
     }
