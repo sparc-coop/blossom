@@ -1,0 +1,36 @@
+@if (Description != null)
+{
+    <meta name="description" content="@Description" />
+    <meta property="og:description" content="@Description" />
+}
+@if (Keywords != null)
+{
+    <meta name="keywords" content="@Keywords" />
+}
+@if (Author != null)
+{
+    <meta name="author" content="@Author" />
+}
+<meta name="robots" content="index, follow" />
+@if (Title != null)
+{
+    <meta property="og:title" content="@Title" />
+}
+<meta property="og:type" content="website" />
+@if (Url != null)
+{
+    <meta property="og:url" content="@Url" />
+}
+@if (LogoImage != null)
+{
+    <meta property="og:image" content="@LogoImage" />
+}
+
+@code {
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Description { get; set; }
+    [Parameter] public string? Author { get; set; }
+    [Parameter] public string? Keywords { get; set; }
+    [Parameter] public string? Url { get; set; }
+    [Parameter] public string? LogoImage { get; set; }
+}
