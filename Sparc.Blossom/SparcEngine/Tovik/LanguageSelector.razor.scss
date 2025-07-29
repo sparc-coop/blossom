@@ -7,10 +7,10 @@
 
     ::deep select {
         width: 100%;
-        background: transparent;
+        background-color: transparent;
         cursor: pointer;
         border: none;
-        background: var(--yellow-50);
+        background-color: var(--yellow-50);
 
         &:focus {
             outline: none;

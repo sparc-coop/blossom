@@ -7,10 +7,10 @@
 }
 .language-select ::deep select {
   width: 100%;
-  background: transparent;
+  background-color: transparent;
   cursor: pointer;
   border: none;
-  background: var(--yellow-50);
+  background-color: var(--yellow-50);
 }
 .language-select ::deep select:focus {
   outline: none;
