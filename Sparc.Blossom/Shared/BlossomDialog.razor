@@ -1,0 +1,28 @@
+﻿@using Microsoft.JSInterop
+
+<dialog id="@Id">
+    @ChildContent
+</dialog>
+
+@inject IJSRuntime Js
+@code {
+    [Parameter] public required RenderFragment ChildContent { get; set; }
+    string Id = $"dialog-{Guid.NewGuid().ToString("N").Substring(0, 8)}";
+
+    public async Task OpenAsync()
+    {
+        await Js.InvokeVoidAsync("eval", $"document.getElementById('{Id}').show()");
+    }
+
+    public async Task OpenModalAsync()
+    {
+        await Js.InvokeVoidAsync("eval", $"document.getElementById('{Id}').showModal()");
+    }
+
+    public async Task CloseAsync()
+    {
+        await Js.InvokeVoidAsync("eval", $"document.getElementById('{Id}').close()");
+    }
+
+
+}

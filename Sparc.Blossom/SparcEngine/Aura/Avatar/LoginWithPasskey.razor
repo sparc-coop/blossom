@@ -1,0 +1,109 @@
+﻿@using Sparc.Engine
+<header>
+    <h4>Save Your Profile</h4>
+    <p>
+        Save your profile securely with a passkey —- a modern, password-free method that stores your profile safely on your device.
+    </p>
+    <p>
+        Your passkey stays private and is never shared with us or any third parties.
+    </p>
+</header>
+
+<div>
+    @if (Message != null)
+    {
+        <p class="message">
+            @Message
+        </p>
+    }
+    <input type="text" @bind="PasskeyName" placeholder="Name your profile" @bind:event="oninput" />
+    <button type="button" class="primary-btn" @onclick="Register" disabled="@CantSave">
+        @SaveButtonText
+    </button>
+
+    <aside>
+        Already have a profile for this app?
+        <button @onclick=Login disabled="@IsLoggingIn">
+            Load My Profile
+        </button>
+    </aside>
+</div>
+
+
+@inject PasskeyAuthenticator Auth
+@inject NavigationManager Nav
+@inject ISparcAura Aura
+@inject SparcEvents Events
+@code
+{
+    [Parameter] public required BlossomAvatar UserAvatar { get; set; }
+    bool HasAtLeastOnePasskey => UserAvatar.VerificationLevel > 0;
+    bool IsLoggingIn;
+    string? Message;
+    string? PasskeyName;
+    bool CantSave => string.IsNullOrWhiteSpace(PasskeyName) || IsLoggingIn;
+    string SaveButtonText => 
+        IsLoggingIn ? "Saving..." 
+        : CantSave ? "Save"
+        : PasskeyName != UserAvatar.PasskeyName 
+        ? $"Save \"{PasskeyName}\" (new)"
+        : $"Save \"{PasskeyName}\"";
+
+    protected override void OnInitialized()
+    {
+        PasskeyName = UserAvatar.PasskeyName;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await Auth.InitializeAsync();
+    }
+
+    async Task Register()
+    {
+        IsLoggingIn = true;
+        Message = null;
+        StateHasChanged();
+
+        try
+        {
+            if (PasskeyName != UserAvatar.PasskeyName)
+            {
+                UserAvatar.PasskeyName = PasskeyName;
+                await Aura.UpdateUserInfo(UserAvatar);
+                await Auth.RegisterAsync();
+            }
+            else
+            {
+                await Aura.UpdateUserInfo(UserAvatar);
+                IsLoggingIn = false;
+                Message = "Your profile has been saved successfully!";
+            }
+            await Events.OnAvatarChanged(UserAvatar);
+        }
+        catch (Exception e)
+        {
+            IsLoggingIn = false;
+            Message = e.Message;
+        }
+    }
+
+    async Task Login()
+    {
+        IsLoggingIn = true;
+        Message = null;
+
+        StateHasChanged();
+
+        try
+        {
+            await Auth.LoginAsync();
+        }
+        catch (Exception e)
+        {
+            IsLoggingIn = false;
+            Message = e.Message;
+        }
+    }
+}

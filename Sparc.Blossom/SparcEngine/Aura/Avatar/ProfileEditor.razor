@@ -1,0 +1,31 @@
+﻿<header>
+    <h4>Tell us about you</h4>
+</header>
+<div class="account-details">
+    <label>
+        Name
+        <input @bind="UserAvatar.Username" @bind:event="oninput" placeholder="Your Name" @onblur=Save />
+    </label>
+    <label>
+        Pronouns (Optional)
+        <input @bind="UserAvatar.Pronouns" @bind:event="oninput" placeholder="She/her, He/him, They/them" @onblur=Save />
+    </label>
+
+    <label>
+        About You (Optional)
+        <textarea @bind="UserAvatar.Description"
+                  @bind:event="oninput"
+                  @onblur=Save
+                  placeholder="Enter a little about yourself" />
+    </label>
+</div>
+
+@inject ISparcAura Aura
+@code {
+    [Parameter] public required BlossomAvatar UserAvatar { get; set; }
+
+    async Task Save()
+    {
+        await Aura.UpdateUserInfo(UserAvatar);
+    }
+}

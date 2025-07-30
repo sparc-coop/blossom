@@ -1,4 +1,6 @@
-﻿namespace Sparc.Blossom.Authentication;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Sparc.Blossom.Authentication;
 
 public static class HttpContextExtensions
 {

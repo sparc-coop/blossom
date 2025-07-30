@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http;
 using Sparc.Blossom.Authentication;
+using Sparc.Engine.Aura;
 
 namespace Sparc.Blossom.Platforms.Server;
 
@@ -8,7 +10,7 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
 {
     private readonly RequestDelegate _next = next;
 
-    public async Task InvokeAsync(HttpContext context, IBlossomAuthenticator auth)
+    public async Task InvokeAsync(HttpContext context, IBlossomAuthenticator auth, ISparcAura aura)
     {
         if (context.IsStaticFileRequest())
         {
@@ -16,14 +18,23 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
             return;
         }
 
-        var priorUser = BlossomUser.FromPrincipal(context.User);
-        var user = await auth.GetAsync(context.User);
-
-        if (user != null && (context.User.Identity?.IsAuthenticated != true || !priorUser.Equals(user)))
+        if (context.Request.Query.ContainsKey("_auth"))
         {
-            context.User = await auth.LoginAsync(context.User);
-            await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, context.User, new() { IsPersistent = true });
+            // Handle TOTP requests separately
+            var authCode = context.Request.Query["_auth"].ToString();
+            var matchingUser = await aura.Login(authCode);
+            if (matchingUser != null)
+            {
+                await auth.LoginAsync(matchingUser.ToUser().ToPrincipal());
+                context.Response.Redirect(context.Request.PathBase + context.Request.Path);
+            }
+
+            await _next(context);
+            return;
         }
+
+        if (context.User.Identity?.IsAuthenticated != true)
+            await auth.RegisterAsync();
 
         await _next(context);
     }

@@ -1,14 +1,22 @@
 ﻿[
   {
-    "outputFile": "Authentication/BlossomAuthenticator.razor.css",
-    "inputFile": "Authentication/BlossomAuthenticator.razor.scss"
+    "outputFile": "SparcEngine/Aura/SparcAura.razor.css",
+    "inputFile": "SparcEngine/Aura/SparcAura.razor.scss"
   },
   {
-    "outputFile": "Data/BlossomGrid.razor.css",
-    "inputFile": "Data/BlossomGrid.razor.scss"
+    "outputFile": "SparcEngine/Aura/Avatar/ColorSelector.razor.css",
+    "inputFile": "SparcEngine/Aura/Avatar/ColorSelector.razor.scss"
   },
   {
-    "outputFile": "Data/BlossomSearch.razor.css",
-    "inputFile": "Data/BlossomSearch.razor.scss"
+    "outputFile": "SparcEngine/Aura/Avatar/EmojiSelector.razor.css",
+    "inputFile": "SparcEngine/Aura/Avatar/EmojiSelector.razor.scss"
+  },
+  {
+    "outputFile": "SparcEngine/Tovik/LanguageSelector.razor.css",
+    "inputFile": "SparcEngine/Tovik/LanguageSelector.razor.scss"
+  },
+  {
+    "outputFile": "SparcEngine/Aura/Avatar/AuraAvatar.razor.css",
+    "inputFile": "SparcEngine/Aura/Avatar/AuraAvatar.razor.scss"
   }
 ]

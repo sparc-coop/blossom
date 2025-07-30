@@ -17,7 +17,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public DateTime DateModified { get; private set; }
     public DateTime? LastLogin { get; private set; }
     public string? LastPageVisited { get; set; }
-    public string? Token { get; set; }
     public BlossomAvatar Avatar { get; set; } = new();
 
     public List<BlossomIdentity> Identities { get; set; } = [];
@@ -77,14 +76,20 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         RegisterClaims();
     }
 
-    public virtual ClaimsPrincipal ToPrincipal()
+    public virtual ClaimsIdentity ToIdentity()
     {
         RegisterBaseClaims();
-
+        
         var defaultIdentity = Identities.FirstOrDefault()
             ?? new BlossomIdentity(Id, "Anonymous");
 
-        return new ClaimsPrincipal(defaultIdentity.ToIdentity(this));
+        return defaultIdentity.ToIdentity(this);
+    }
+
+    public virtual ClaimsPrincipal ToPrincipal()
+    {
+        var identity = ToIdentity();
+        return new ClaimsPrincipal(identity);
     }
 
     public ClaimsPrincipal ToPrincipal(string authenticationType, string externalId)
@@ -193,6 +198,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         Avatar.Emoji = avatar.Emoji;
         Avatar.HearOthers = avatar.HearOthers;
         Avatar.MuteMe = avatar.MuteMe;
+        Avatar.PasskeyName = avatar.PasskeyName;
     }
 
     internal void GoOnline(string connectionId)
@@ -222,6 +228,31 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         var identity = new BlossomIdentity(externalId, authenticationType);
         Identities.Add(identity);
+
+        Avatar.VerificationLevel = Identity("Email") != null ? 2
+            : Identity("Passkey") != null ? 1
+            : 0;
+
         return identity;
-    }    
+    }
+
+    public SparcProduct? Product(string productId) => Products.FirstOrDefault(x => x.ProductId == productId);
+
+    public void Fulfill(SparcProduct product)
+    {
+        var existing = Product(product.ProductId);
+        if (existing != null)
+        {
+            existing.MaxUsage += product.MaxUsage;
+            existing.OrderIds.AddRange(product.OrderIds);
+        }
+        else
+            Products.Add(product);
+    }
+
+    public BlossomIdentity UpsertIdentity(string authenticationType, string externalId)
+    {
+        Identities.RemoveAll(x => x.Type == authenticationType);
+        return AddIdentity(authenticationType, externalId);
+    }
 }

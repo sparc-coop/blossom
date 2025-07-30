@@ -1,0 +1,55 @@
+@using System.Globalization
+@using Microsoft.JSInterop
+@using Sparc.Blossom.Authentication
+@using Microsoft.AspNetCore.Components.Forms
+@using Sparc.Engine.Aura
+@using Sparc.Engine.Tovik
+
+<div class="language-select" translate="no">
+    @if (Languages.Any())
+    {
+        <InputSelect @bind-Value="SelectedLanguageId" @bind-Value:after="ChangeLanguage" >
+            @foreach (var language in Languages.OrderBy(x => x.NativeName))
+            {
+                <option value="@language.Id">
+                    @language.NativeName @(language.NativeName == language.DisplayName ? "" : $"({language.DisplayName})")
+                </option>
+            }
+        </InputSelect>
+    }
+    <div class="language-select-progress-bar">
+        <div class="progress-bar-value"></div>
+    </div>
+</div>
+
+@inject ITovik Tovik
+@inject ISparcAura Aura 
+@inject IJSRuntime Js
+@code {
+    [Parameter] public required BlossomAvatar Avatar { get; set; }
+    IEnumerable<Sparc.Engine.Language> Languages { get; set; } = [];
+    string SelectedLanguageId = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        Languages = await Tovik.GetLanguages();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        SelectedLanguageId = Avatar.Language?.Id
+                ?? Languages.FirstOrDefault(l => l.Id == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)?.Id
+                ?? string.Empty;
+        await NotifyTovik();
+    }
+
+    async Task ChangeLanguage()
+    {
+        Avatar.Language = Languages.FirstOrDefault(l => l.Id == SelectedLanguageId);
+        await Aura.UpdateUserInfo(Avatar);
+        await NotifyTovik();
+    }
+
+    async Task NotifyTovik()
+        => await Js.InvokeVoidAsync("eval", "document.dispatchEvent(new CustomEvent('tovik-user-language-changed', { detail: '" + SelectedLanguageId + "' }));");
+}

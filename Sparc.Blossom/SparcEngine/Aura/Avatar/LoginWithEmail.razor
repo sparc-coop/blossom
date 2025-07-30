@@ -1,0 +1,51 @@
+<div class="verify-contact">
+    <header>
+        <h4>Verify Contact</h4>
+        <p>To keep your account secure, help with recovery, and support cross-device access, please verify your contact. This setting is optional.</p>
+    </header>
+    <div>
+        <input type="text" placeholder="Phone number or Email" />
+        <button type="button" class="primary-btn">Verify</button>
+    </div>
+    <ul>
+        <li>
+            <div>
+                <span>xxx-xxx-5678</span>
+                @if (IsVerified)
+                {
+                    <Check />
+                }
+            </div>
+            <button>Unlink</button>
+        </li>
+        <li>
+            <div>
+                <span>xxxxx@Kuviocreative.com</span>
+                @if (IsVerified)
+                {
+                    <Check />
+                }
+            </div>
+            <button>Unlink</button>
+        </li>
+    </ul>
+</div>
+
+@code {
+    private bool IsVerified = false;
+    private string VerificationCode { get; set; } = "";
+    private void VerifyCode(string code)
+    {
+        VerificationCode = code;
+        // var success = await SparcEngine.VerifyCode(new VerificationRequest(CurrentVerificationDestination, VerificationCode));
+        // if (success)
+        // {
+        //     await SparcEngine.UserInfo();
+        //     StateHasChanged();
+        // }
+        // else
+        // {
+        //     // VerificationError = "Invalid verification code. Please try again.";
+        // }
+    }
+}

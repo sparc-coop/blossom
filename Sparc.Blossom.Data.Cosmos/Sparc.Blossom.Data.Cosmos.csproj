@@ -20,7 +20,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.2.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.7" />
 	</ItemGroup>
 
 	<ItemGroup>

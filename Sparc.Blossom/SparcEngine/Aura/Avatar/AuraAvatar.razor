@@ -1,0 +1,12 @@
+<figure class="avatar @(HasEmoji ? "emoji" : "")" style="background-color: @Avatar.BackgroundColor">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <text x="50%" y="50%" style="fill: @Avatar.ForegroundColor">
+            @(!string.IsNullOrWhiteSpace(Avatar.Emoji) ? Avatar.Emoji : (!string.IsNullOrWhiteSpace(Avatar.Initials) ? Avatar.Initials : ""))
+        </text>
+    </svg>
+</figure>
+
+@code {
+    [Parameter] public required BlossomAvatar Avatar { get; set; }
+    private bool HasEmoji => !string.IsNullOrWhiteSpace(Avatar?.Emoji);
+}

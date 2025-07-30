@@ -2,10 +2,12 @@
 using Sparc.Blossom.Authentication;
 using Sparc.Core;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Sparc.Engine;
 
 public record EditHistory(DateTime Timestamp, string Text);
+public record TovikContentTranslated(TextContent Content, int WordCount, decimal? Cost = null, string? Description = null) : BlossomEvent(Content);
 
 public record ContentTranslation(string Id, Language Language, string? SourceContentId = null)
 {
@@ -133,12 +135,31 @@ public class TextContent : BlossomEntity<string>
         }
     }
 
-    public void AddCharge(long ticks, decimal cost, string description)
+    private int WordCount()
     {
-        Charge += ticks;
-        Cost -= cost;
-        //if (ticks > 0)
-        //Broadcast(new CostIncurred(this, description, ticks));
+        var textToCount = string.IsNullOrWhiteSpace(OriginalText) ? Text : OriginalText;
+
+        if (string.IsNullOrWhiteSpace(textToCount))
+            return 0;
+
+        var matches = Regex.Matches(textToCount, @"[\p{L}\p{N}]+", RegexOptions.Multiline);
+        return matches.Count;
+    }
+
+    public void AddCharge(decimal? costPerWord = null, string? description = null)
+    {
+        var wordCount = WordCount();
+        if (wordCount > 0)
+        {
+            Charge += wordCount;
+        }
+        
+        var cost = costPerWord.HasValue ? costPerWord.Value * wordCount : 0;
+        if (cost > 0)
+            Cost -= cost;
+
+        if (cost > 0 || Charge > 0)
+            Broadcast(new TovikContentTranslated(this, wordCount, cost, description));
     }
 
     internal void Delete()

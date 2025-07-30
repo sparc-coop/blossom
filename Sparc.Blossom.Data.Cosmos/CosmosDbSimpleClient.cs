@@ -2,39 +2,31 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.Extensions.Configuration;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbSimpleClient<T>
+public class CosmosDbSimpleClient<T>(DbContext context, CosmosClient client)
 {
-    public CosmosClient Client { get; }
+    public CosmosClient Client { get; private set; } = client;
     public IEntityType? EntityType { get; }
-    public Container Container { get; }
-    public DbContext Context { get; }
+    public Container Container { get; } = client.GetContainer(context.Database.GetCosmosDatabaseId(), context.Model.FindEntityType(typeof(T))?.GetContainer() ?? throw new Exception($"Container name not found for entity type {typeof(T)}"));
+    public DbContext Context { get; } = context;
 
-    public CosmosDbSimpleClient(DbContext context, IConfiguration config)
+    public static CosmosClient CreateClient(IConfiguration config)
     {
-        var db = context.Database.GetCosmosDatabaseId();
-        EntityType = context.Model.FindEntityType(typeof(T));
-        
-        var containerName = (EntityType?.GetContainer())
-            ?? throw new Exception($"Container name not found for entity type {typeof(T)}");
-
         var options = new CosmosClientOptions
         {
             UseSystemTextJsonSerializerWithOptions = new()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            }
+            },
+            ConnectionMode = ConnectionMode.Direct
         };
 
         var connectionString = config.GetConnectionString("Cosmos")
             ?? throw new Exception("Cosmos connection string not found in configuration.");
 
-        Client = new CosmosClient(connectionString, options);
-        Container = Client.GetContainer(db, containerName);
-        Context = context;
+        return new CosmosClient(connectionString, options);
     }
 }

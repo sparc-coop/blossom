@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.Extensions.Hosting;
 using System.Globalization;
 using System.Reflection;
 
@@ -25,9 +29,11 @@ public class BlossomServerApplication : IBlossomApplication
             Host.UseHsts();
         }
 
+        Host.UseRewriter(new RewriteOptions().AddRedirectToNonWwwPermanent());
         Host.UseHttpsRedirection();
         Host.MapStaticAssets();
         Host.UseAntiforgery();
+            
 
         if (builder.Services.Any(x => x.ServiceType == typeof(ICorsPolicyProvider)))
             Host.UseCors();
@@ -90,7 +96,7 @@ public class BlossomServerApplication : IBlossomApplication
 
     void UseBlossomAuthentication()
     {
-        Host.UseCookiePolicy(new() { MinimumSameSitePolicy = SameSiteMode.None });
+        Host.UseCookiePolicy(new() { MinimumSameSitePolicy = SameSiteMode.Lax });
         Host.UseAuthentication();
         Host.UseAuthorization();
         Host.UseMiddleware<BlossomAuthenticatorMiddleware>();

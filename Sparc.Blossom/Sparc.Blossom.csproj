@@ -1,7 +1,8 @@
-﻿<Project>
-	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.Razor" Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''" />
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+	
+	<!--<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.Razor" Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''" />
 	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.Web" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''" />
-	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />-->
 
 	<PropertyGroup>
 		<TargetFrameworks>net9.0</TargetFrameworks>
@@ -32,18 +33,24 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Mapster" Version="7.4.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.6" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.6" />
-		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.6" />
-		<PackageReference Include="System.Net.Http.Json" Version="9.0.6" />
-		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.6" />
+	  <None Remove="SparcEngine\Aura\Avatar\LoginWithPasskey.razor.js" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<!--<None Include="..\Sparc.Blossom.ApiGenerator\bin\$(Configuration)\netstandard2.0\Sparc.Blossom.ApiGenerator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />-->
-		<None Include="compilerconfig.json" />
+	  <Content Include="SparcEngine\Aura\Avatar\LoginWithPasskey.razor.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Mapster" Version="7.4.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.7" />
+		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.6" />
+		<PackageReference Include="System.Net.Http.Json" Version="9.0.7" />
+		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.7" />
+		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.7.0" />
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -111,7 +118,7 @@
 		<DefineConstants>SERVER</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.7" />
 		<Compile Remove="**\*.xaml.cs" />
 		<None Include="**\*.xaml.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 		<Compile Remove="**\*.xaml" />
@@ -146,9 +153,13 @@
 	  <Folder Include="buildTransitive\" />
 	  <Folder Include="wwwroot\" />
 	</ItemGroup>
+	<ItemGroup>
+	  <None Include="compilerconfig.json" />
+	  <None Include="SparcEngine\Aura\Avatar\LoginWithPasskey.razor" />
+	</ItemGroup>
 
 	<!-- Android -->
-	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.Razor" Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''" />
+	<!--<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.Razor" Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''" />
 	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.Web" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''" />
-	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />-->
 </Project>

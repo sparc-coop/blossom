@@ -1,4 +1,5 @@
 ﻿
+using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Engine;
@@ -36,6 +37,24 @@ public record Language
         DisplayName = displayName;
         NativeName = nativeName;
         IsRightToLeft = isRightToLeft;
+    }
+
+    public static Language FromCulture(string id)
+    {
+        var language = new Language(id);
+
+        try
+        {
+            var culture = new CultureInfo(id);
+            language.DisplayName = culture.DisplayName;
+            language.NativeName = culture.NativeName;
+            language.IsRightToLeft = culture.TextInfo.IsRightToLeft;
+        }
+        catch (CultureNotFoundException)
+        {
+            // If the culture is not found, we keep the default values
+        }
+        return language;
     }
 
     public override string ToString()

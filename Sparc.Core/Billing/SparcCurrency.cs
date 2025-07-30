@@ -13,8 +13,9 @@ public class SparcCurrency(RegionInfo region)
     public string Symbol { get; set; } = region.CurrencySymbol;
     public string NativeName { get; set; } = region.CurrencyNativeName;
 
-    public static SparcCurrency From(string currencyOrCulture)
+    public static SparcCurrency From(string? currencyOrCulture)
     {
+        currencyOrCulture ??= CultureInfo.CurrentUICulture.Name;
         var allCultures = CultureInfo.GetCultures(CultureTypes.SpecificCultures);
 
         var matchingRegion = allCultures
@@ -36,7 +37,7 @@ public class SparcCurrency(RegionInfo region)
             .Select(culture => new RegionInfo(culture.Name))
             .Select(region => new SparcCurrency(region))
             .GroupBy(currency => currency.Id)
-            .Select(x => x.First())
+            .Select(x => x.OrderBy(y => y.NativeName.Contains("Dollar") ? 0 : 1).First()) // temp fix for cherokee native name for US
             .OrderBy(x => x.Name)
             .ToList();
     }
