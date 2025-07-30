@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sparc.Blossom.ApiGenerator\Sparc.Blossom.ApiGenerator.csproj" />
     <ProjectReference Include="..\Sparc.Blossom\Sparc.Blossom.csproj" />
     <ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
   </ItemGroup>
