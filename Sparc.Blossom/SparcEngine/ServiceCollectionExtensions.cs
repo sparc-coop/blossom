@@ -2,6 +2,7 @@
 using Refit;
 using Sparc.Engine.Aura;
 using Sparc.Engine.Billing;
+using Sparc.Engine.Chat;
 using Sparc.Engine.Tovik;
 
 namespace Sparc.Engine;
@@ -27,6 +28,11 @@ public static class ServiceCollectionExtensions
             .AddStandardResilienceHandler();
 
         services.AddRefitClient<ITovik>()
+            .ConfigureHttpClient(x => x.BaseAddress = uri)
+            .AddHttpMessageHandler<SparcAuraTokenHandler>()
+            .AddStandardResilienceHandler();
+
+        services.AddRefitClient<ISparcChat>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
             .AddHttpMessageHandler<SparcAuraTokenHandler>()
             .AddStandardResilienceHandler();
