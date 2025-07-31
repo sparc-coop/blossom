@@ -36,22 +36,19 @@
 </div>
 
 @code {
-    private int currentCount = 0;
     private string? RoomId { get; set; }
-    private List<Room> rooms;
+    private List<Room> rooms = [];
 
     protected async override Task OnInitializedAsync()
     {
         var room = new Room("Test Room");
         // var newRoom = await Chat.CreateRoomAsync(room);
 
-        rooms = await Chat.GetRoomsAsync();
+        rooms = await Chats.GetRoomsAsync();
         if (rooms.Any())
         {
             RoomId = rooms.First().Id;
         }
-
-        var breakpoint = "";
     }
 
     private void SelectRoom(string roomId)

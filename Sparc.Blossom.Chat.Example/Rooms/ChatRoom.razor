@@ -1,4 +1,5 @@
 ﻿@using Sparc.Core.Chat
+@using Sparc.Engine.Chat
 
 <h3>Chat</h3>
 
@@ -13,14 +14,14 @@
         }
 
     </div>
-    <input @bind="currentMessage.Body" placeholder="Type a message..." style="width:80%; padding:5px;" />
+    <input @bind="currentMessage" placeholder="Type a message..." style="width:80%; padding:5px;" />
     <button @onclick="SendMessage" style="padding:5px 10px; margin-left:5px;">Send</button>
 </div>
 
 @code {
-    [Parameter] public string RoomId { get; set; }
+    [Parameter] public required string RoomId { get; set; }
     private List<MessageEvent> messages = new List<MessageEvent>();
-    private MessageEvent currentMessage = new MessageEvent();
+    private string currentMessage = "";
 
     protected async override Task OnInitializedAsync()
     {
@@ -40,19 +41,17 @@
 
     private async Task GetMessagesAsync()
     {
-        messages = await Chat.GetMessagesAsync(RoomId);
+        messages = await Chats.GetMessagesAsync(RoomId);
     }
 
     private async Task SendMessage()
     {
-        if (!string.IsNullOrWhiteSpace(currentMessage.Body))
+        if (!string.IsNullOrWhiteSpace(currentMessage))
         {
-            currentMessage.RoomId = RoomId;
-            currentMessage.Sender = "System";
-
-            await Chat.SendMessageAsync(currentMessage);
+            var txnId = Guid.NewGuid().ToString();
+            await Chats.SendMessageAsync(RoomId, "m.room.message", txnId, new(currentMessage));
             
-            currentMessage = new MessageEvent();
+            currentMessage = "";
             await GetMessagesAsync();
         }
     }

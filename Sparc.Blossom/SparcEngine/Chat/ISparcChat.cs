@@ -6,9 +6,6 @@ namespace Sparc.Engine.Chat;
 
 public interface ISparcChat
 {
-    [Get("/_amtrix/celint/v3/users/{}/status")]
-    Task<MatrixPresence> GetUserAsync();
-    
     [Get("/_matrix/client/v3/publicRooms")]
     Task<List<Room>> GetRoomsAsync();
 
