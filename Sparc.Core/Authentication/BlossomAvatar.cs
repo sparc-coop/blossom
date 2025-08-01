@@ -20,6 +20,10 @@ public class BlossomAvatar
     public Language? Language { get; set; }
     public SparcCurrency? Currency { get; set; }
     public List<Language> LanguagesSpoken { get; set; } = [];
+    public string Presence { get; set; } = "offline";
+    public string? StatusMsg { get; set; }
+    public long? LastActiveAt { get; set; }
+
 
     public string? Emoji { get; set; }
     public string? SkinTone { get; set; }
