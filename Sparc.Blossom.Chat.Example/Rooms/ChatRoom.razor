@@ -20,7 +20,7 @@
 
 @code {
     [Parameter] public required string RoomId { get; set; }
-    private List<MessageEvent> messages = new List<MessageEvent>();
+    private List<MatrixMessage> messages = new List<MatrixMessage>();
     private string currentMessage = "";
 
     protected async override Task OnInitializedAsync()
