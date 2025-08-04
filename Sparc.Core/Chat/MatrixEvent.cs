@@ -16,7 +16,7 @@ public class MatrixEvent : BlossomEntity<string>, MediatR.INotification
     }
 
     public string EventId { get { return Id; } set { Id = value; } }
-    public int Depth { get; set; } = 1;
+    public long Depth { get; set; } = 1;
     public long OriginServerTs { get; set; }
     public List<string> PrevEvents { get; set; } = [];
     public string RoomId { get; set; }
