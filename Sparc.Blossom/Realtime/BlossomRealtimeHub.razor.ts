@@ -19,6 +19,6 @@ class BlossomSyncProtocol implements ISyncProtocol {
         onError: (error: any, again?: number) => void): void {
 
         // This should be an adapter for the Blossom realtime hub
-
+        // tailored after https://github.com/dexie/Dexie.js/blob/master/samples/remote-sync/websocket/WebSocketSyncProtocol.js
     }
 }
