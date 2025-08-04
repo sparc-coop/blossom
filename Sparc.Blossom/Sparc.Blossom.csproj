@@ -151,7 +151,6 @@
 	<ItemGroup>
 	  <Folder Include="Authentication\Icons\" />
 	  <Folder Include="buildTransitive\" />
-	  <Folder Include="wwwroot\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include="compilerconfig.json" />
