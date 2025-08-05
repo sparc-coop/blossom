@@ -1,0 +1,65 @@
+﻿.contact-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.contact-actions button {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  gap: 24px;
+}
+.contact-actions button div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: start;
+  gap: 4px;
+}
+.contact-actions button div p {
+  color: var(--grey-900, #131313);
+  font-family: Poppins;
+  font-size: 1.4rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 20px; /* 142.857% */
+}
+.contact-actions button div aside {
+  color: var(--grey-600, #474747);
+  font-family: Poppins;
+  font-size: 1.4rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 142.857% */
+}
+.contact-actions button:last-child {
+  width: fit-content;
+  margin: 0 auto;
+  margin-top: 12px;
+  padding: 0;
+  border: 1px solid transparent;
+  background: none;
+}
+
+@media only screen and (min-width: 1080px) {
+  .contact-actions button {
+    border-radius: 8px;
+    border: 1px solid var(--grey-200, #C9C9C9);
+    background: var(--white, #FFF);
+  }
+  .contact-actions button.confirm-btn ::deep svg path {
+    stroke: var(--green);
+  }
+  .contact-actions button.edit-btn ::deep svg path {
+    stroke: var(--tertiary-blue);
+  }
+  .contact-actions button.decline-btn ::deep svg path {
+    stroke: var(--red);
+  }
+  .contact-actions button:last-child {
+    border: 1px solid transparent;
+    background: none;
+  }
+}

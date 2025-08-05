@@ -1,0 +1,28 @@
+﻿<nav class="top-bar">
+    <div class="left">
+        <button class="back-btn icon-btn"><ArrowLeftIcon Color="#7A7A7A" /></button>
+        <div class="user-card">
+            <div class="user-img">
+            </div>
+            <div class="user-info">
+                <h4>FirstName LastName</h4>
+                <aside>Role</aside>
+            </div>
+        </div>
+    </div>
+    <div class="right chat-actions">
+        <button class="voice-btn icon-btn" @onclick=ToggleVoiceMode><VoiceMessageIcon Color="@(voiceMode ? "#1573FE" : "#7A7A7A")" /></button>
+        <button class="more-btn icon-btn"><MoreIcon Color="#7A7A7A" /></button>
+    </div>
+</nav>
+
+@code {
+    [Parameter] public EventCallback<bool> OnToggleVoiceMode { get; set; }
+    bool voiceMode = false;
+
+    void ToggleVoiceMode()
+    {
+        voiceMode = !voiceMode;
+        OnToggleVoiceMode.InvokeAsync(voiceMode);
+    }
+}

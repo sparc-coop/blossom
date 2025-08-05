@@ -1,0 +1,78 @@
+﻿[
+  {
+    "outputFile": "wwwroot/app.css",
+    "inputFile": "Html.scss"
+  },
+  {
+    "outputFile": "Shared/MainLayout.razor.css",
+    "inputFile": "Shared/MainLayout.razor.scss"
+  },
+  {
+    "outputFile": "Shared/AppLayout.razor.css",
+    "inputFile": "Shared/AppLayout.razor.scss"
+  },
+  {
+    "outputFile": "Shared/NavMenu.razor.css",
+    "inputFile": "Shared/NavMenu.razor.scss"
+  },
+  {
+    "outputFile": "Shared/SideBar.razor.css",
+    "inputFile": "Shared/SideBar.razor.scss"
+  },
+  {
+    "outputFile": "Shared/TopBar.razor.css",
+    "inputFile": "Shared/TopBar.razor.scss"
+  },
+  {
+    "outputFile": "Shared/BottomBar.razor.css",
+    "inputFile": "Shared/BottomBar.razor.scss"
+  },
+  {
+    "outputFile": "Shared/Components/UserCard.razor.css",
+    "inputFile": "Shared/Components/UserCard.razor.scss"
+  },
+  {
+    "outputFile": "Shared/Components/ContactCard.razor.css",
+    "inputFile": "Shared/Components/ContactCard.razor.scss"
+  },
+  {
+    "outputFile": "Shared/Components/ProgressBar.razor.css",
+    "inputFile": "Shared/Components/ProgressBar.razor.scss"
+  },
+  {
+    "outputFile": "Shared/Components/MyContactActions.razor.css",
+    "inputFile": "Shared/Components/MyContactActions.razor.scss"
+  },
+  {
+    "outputFile": "Shared/Components/NewContactActions.razor.css",
+    "inputFile": "Shared/Components/NewContactActions.razor.scss"
+  },
+  {
+    "outputFile": "Shared/Components/ChatCard.razor.css",
+    "inputFile": "Shared/Components/ChatCard.razor.scss"
+  },
+  {
+    "outputFile": "Shared/Components/MessageCard.razor.css",
+    "inputFile": "Shared/Components/MessageCard.razor.scss"
+  },
+  {
+    "outputFile": "Shared/Components/ChatBar.razor.css",
+    "inputFile": "Shared/Components/ChatBar.razor.scss"
+  },
+  {
+    "outputFile": "Pages/Index.razor.css",
+    "inputFile": "Pages/Index.razor.scss"
+  },
+  {
+    "outputFile": "Pages/EditContact.razor.css",
+    "inputFile": "Pages/EditContact.razor.scss"
+  },
+  {
+    "outputFile": "Pages/NewContact.razor.css",
+    "inputFile": "Pages/NewContact.razor.scss"
+  },
+  {
+    "outputFile": "Pages/Chat.razor.css",
+    "inputFile": "Pages/Chat.razor.scss"
+  }
+]

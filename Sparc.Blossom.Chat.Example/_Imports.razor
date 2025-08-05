@@ -9,7 +9,19 @@
 @using Sparc.Blossom.Chat.Example
 @using Sparc.Blossom.Chat.Example.Rooms
 @using Sparc.Blossom.Chat.Example.Shared
-@using Sparc.Blossom.Chat.Example.Shared.Layout
+@using Sparc.Blossom.Chat.Example.Shared.Components
+@using Sparc.Blossom.Chat.Example.Shared.Assets
+@using Sparc.Blossom.Chat.Example.Shared.Icons
 @using Sparc.Engine.Chat
 
+@using Sparc.Blossom.Authentication
+@using Sparc.Core.Chat
+
 @inject ISparcChat Chats
+
+@inject IJSRuntime Js
+@inject NavigationManager Nav
+
+@* Remove later *@
+@using Sparc.MCN.Users
+@using Sparc.MCN.Messages

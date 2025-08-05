@@ -1,0 +1,67 @@
+﻿@page "/chat"
+@using Sparc.MCN.Users
+@using Sparc.MCN.Messages
+
+@layout AppLayout
+
+<TopBar OnToggleVoiceMode=ToggleVoiceMode />
+
+<main>
+    @foreach (var msg in messages)
+    {
+        <div class="message-container @(msg.Sender == "User" ? "my-message" : "")">
+            <MessageCard Message=@msg />
+        </div>
+    }
+</main>
+
+<ChatBar OnSendMessage=SendMessage VoiceMode=@voiceMode MessageSent=messageSent />
+
+@code {
+    [CascadingParameter] User? User { get; set; }
+
+    [Parameter] public required string RoomId { get; set; }
+    private List<MessageEvent> messages = new List<MessageEvent>();
+    private string currentMessage = "";
+
+    bool voiceMode = false;
+    bool messageSent = false;
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(RoomId))
+        {
+            throw new ArgumentException("RoomId must be provided", nameof(RoomId));
+        }
+
+        await GetMessagesAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(RoomId))
+            await GetMessagesAsync();
+    }
+
+    private async Task GetMessagesAsync()
+    {
+        messages = await Chats.GetMessagesAsync(RoomId);
+    }
+
+    private async Task SendMessage()
+    {
+        if (!string.IsNullOrWhiteSpace(currentMessage))
+        {
+            var txnId = Guid.NewGuid().ToString();
+            await Chats.SendMessageAsync(RoomId, "m.room.message", txnId, new(currentMessage));
+
+            currentMessage = "";
+            await GetMessagesAsync();
+        }
+    }
+
+    void ToggleVoiceMode(bool voiceBool)
+    {
+        voiceMode = voiceBool;
+    }
+}

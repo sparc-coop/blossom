@@ -1,0 +1,41 @@
+.progress {
+    &-bar {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0;
+    }
+
+    &-step {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        &.completed {
+            .progress-circle {
+                background: var(--tertiary-blue);
+            }
+        }
+
+        &:last-child {
+            width: fit-content;
+        }
+    }
+
+    &-circle {
+        aspect-ratio: 1/1;
+        width: 10px;
+        height: 10px;
+        border: 1px solid var(--tertiary-blue);
+        border-radius: 50%;
+        background: none;
+    }
+
+    &-line {
+        width: 100%;
+        border-top: 1px solid var(--tertiary-blue);
+    }
+}

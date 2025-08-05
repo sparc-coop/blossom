@@ -27,11 +27,15 @@
         }
     </ul>
 </div>
+<div style="max-height: 500px; max-width: 500px">
+    
+</div>
 
 <div>
     @if (!string.IsNullOrEmpty(RoomId))
     {
-        <ChatRoom RoomId="@RoomId"></ChatRoom>
+        @* <ChatRoomNew RoomId="@RoomId"></ChatRoomNew> *@
+        <Chat RoomId="@RoomId"></Chat>
     }
 </div>
 

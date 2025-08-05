@@ -1,0 +1,143 @@
+﻿<div class="contact-card">
+    <header>
+        <UserCard FirstName=@User.FirstName LastName=@User.LastName />
+        <button class="settings-btn icon-btn">
+            <SettingsIcon />
+        </button>
+    </header>
+    <hr/>
+    <div class="contact-info">
+        <div class="name">
+            <div class="prefix contact-group">
+                <aside>Prefix</aside>
+                <p>
+                    @if (!String.IsNullOrEmpty(User.Prefix))
+                    {
+                        @User.Prefix
+                    }
+                </p>
+            </div>
+            <div class="firstName contact-group">
+                <aside>First Name</aside>
+                <p>
+                    @if (!String.IsNullOrEmpty(User.Prefix))
+                    {
+                        @User.FirstName
+                    }
+                </p>
+            </div>
+            <div class="lastName contact-group">
+                <aside>Last Name</aside>
+                <p>
+                    @if (!String.IsNullOrEmpty(User.Prefix))
+                    {
+                        @User.LastName
+                    }
+                </p>
+            </div>
+            <div class="suffix contact-group">
+                <aside>Suffix</aside>
+                <p>
+                    @if (!String.IsNullOrEmpty(User.Suffix))
+                    {
+                        @User.Suffix
+                    }
+                </p>
+            </div>
+        </div>
+        <div class="address contact-group">
+            <aside>Address</aside>
+            <div class="address-details">
+                @if (!String.IsNullOrEmpty(User.Contact.Address1))
+                {
+                    <p class="address1">@User.Contact.Address1</p>
+                }
+                @if (!String.IsNullOrEmpty(User.Contact.Address2))
+                {
+                    <p class="address2">@User.Contact.Address2</p>
+                }
+                @if (!String.IsNullOrEmpty(User.Contact.AddressString)) 
+                {
+                    <p>
+                        @User.Contact.AddressString
+                    
+                    </p>
+                }
+                @if (!String.IsNullOrEmpty(User.Contact.Country))
+                {
+                    <p>
+                        @User.Contact.Country
+
+                    </p>
+                }
+            </div>
+        </div>
+        <div class="contact-methods contact-group">
+            <aside>Contact Info</aside>
+
+            @foreach (var num in User.Contact.PhoneNumbers)
+            {
+                if (!String.IsNullOrEmpty(num.Number))
+                {
+                    <div class="contact-item">
+                        <PhoneIcon />
+                        <p>@num.Number</p>
+                        <aside>(@num.Type)</aside>
+                    </div>
+                }
+            }
+
+            @foreach (var email in User.Contact.EmailAddresses)
+            {
+                if (!String.IsNullOrEmpty(email.Address))
+                {
+                    <div class="contact-item">
+                        <EmailIcon />
+                        <p>@email.Address</p>
+                        <aside>(@email.Type)</aside>
+                    </div>
+                }
+            }
+
+            @* @if (!String.IsNullOrEmpty(User.Contact.PhoneNumbers.FirstOrDefault(x => x.Type == "Home"));
+            {
+                <div class="contact-item">
+                    <PhoneIcon />
+                    <p>@User.Contact.HomePhone</p>
+                    <aside>Home Phone</aside>
+                </div>
+            }
+
+            @if (!String.IsNullOrEmpty(User.Contact.MobilePhone))
+            {            
+                <div class="contact-item">
+                    <PhoneIcon />
+                    <p>@User.Contact.MobilePhone</p>
+                    <aside>Mobile Phone</aside>
+                </div>
+            }
+
+            @if (!String.IsNullOrEmpty(User.Contact.WorkPhone))
+            {
+                <div class="contact-item">
+                    <PhoneIcon />
+                    <p>@User.Contact.WorkPhone</p>
+                    <aside>Work Phone</aside>
+                </div>
+            }
+
+            @if (!String.IsNullOrEmpty(User.Contact.Email))
+            {
+                <div class="contact-item">
+                    <EmailIcon />
+                    <p>@User.Contact.Email</p>
+                    <aside>Email</aside>
+                </div>
+            } *@
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public User User { get; set; }
+}

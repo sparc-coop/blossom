@@ -1,0 +1,19 @@
+﻿.user-card {
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: center;
+  gap: 6px;
+}
+.user-card img {
+  width: 32px;
+  height: 32px;
+}
+.user-card span {
+  color: var(--white, #FFF);
+  font-family: Poppins;
+  font-size: 1.7rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 117.647% */
+}
