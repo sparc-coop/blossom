@@ -50,11 +50,11 @@
     bool preventDefault = false;
     ElementReference TextArea;
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
         if (MessageSent)
         {
-            ResetInput();
+            await ResetInput();
         }
     }
 

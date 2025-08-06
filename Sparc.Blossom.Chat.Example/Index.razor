@@ -5,59 +5,132 @@
 
 <div>
     <h3>Available Chat Rooms</h3>
-    <ul>
-        @if (rooms == null)
-        {
-            <li>Loading rooms...</li>
-        }
-        else if (!rooms.Any())
-        {
-            <li>No rooms available.</li>
-        }
-        else
-        {
-            @foreach (var room in rooms)
-            {
-                <li>
-                    <button class="btn btn-link" @onclick="() => SelectRoom(room.Id)">
-                        @room.RoomName
-                    </button>
-                </li>
-            }
-        }
-    </ul>
+
+    <button class="btn btn-sm btn-primary" @onclick="GoToCreateRoom">Create New Room</button>
+
+    @if (Rooms == null)
+    {
+        <p><em>Loading rooms…</em></p>
+    }
+    else if (!Rooms.Any())
+    {
+        <p><em>No rooms available.</em></p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Room Name</th>
+                        <th style="width:120px">Membership</th>
+                        <th style="width:120px">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var room in Rooms)
+                    {
+                        <tr>
+                            <td @onclick="() => GoToRoom(room.Id)">@room.RoomName</td>
+                            @if (UserIsInRoom(room.Id))
+                            {
+                                <td>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => LeaveRoom(room.Id)">
+                                        Leave
+                                    </button>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    <button class="btn btn-sm btn-primary" @onclick="() => JoinRoom(room.Id)">
+                                        Join
+                                    </button>
+                                </td>
+                            }
+                            <td>
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteRoom(room.Id)">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
 <div style="max-height: 500px; max-width: 500px">
     
 </div>
 
-<div>
+@* <div>
     @if (!string.IsNullOrEmpty(RoomId))
     {
-        @* <ChatRoomNew RoomId="@RoomId"></ChatRoomNew> *@
         <Chat RoomId="@RoomId"></Chat>
     }
-</div>
-
+</div> *@
+@inject ISparcAura Aura
 @code {
-    private string? RoomId { get; set; }
-    private List<Room> rooms = [];
+    BlossomUser? User { get; set; }
+    private List<Room> Rooms = [];
 
     protected async override Task OnInitializedAsync()
     {
-        var room = new Room("Test Room");
+        // var room = new Room("Test Room");
         // var newRoom = await Chat.CreateRoomAsync(room);
-
-        rooms = await Chats.GetRoomsAsync();
-        if (rooms.Any())
-        {
-            RoomId = rooms.First().Id;
-        }
+        User = await Aura.UserInfo();
+        await GetAllRooms();
     }
 
-    private void SelectRoom(string roomId)
+    private async Task GetAllRooms()
     {
-        RoomId = roomId;
+        Rooms = await Chats.GetRoomsAsync();
+    }
+
+    private void GoToRoom(string roomId)
+    {
+        Nav.NavigateTo("/room/" + roomId);
+    }
+
+    private void GoToCreateRoom()
+    {
+        Nav.NavigateTo("/room/create");
+    }
+
+    private async Task JoinRoom(string roomId)
+    {
+        var room = await Chats.JoinRoomAsync(roomId);
+        await GetAllRooms();
         StateHasChanged();
+    }
+
+    private async Task LeaveRoom(string roomId)
+    {
+        var room = await Chats.LeaveRoomAsync(roomId);
+        await GetAllRooms();
+        StateHasChanged();
+    }
+
+    private async Task DeleteRoom(string roomId)
+    {
+        var deletedRoom = await Chats.DeleteRoomAsync(roomId);
+        await GetAllRooms();
+        StateHasChanged();
+    }
+
+    private bool UserIsInRoom(string roomId)
+    {
+        var room = Rooms.Where(x => x.Id == roomId).FirstOrDefault();
+        var matrixId = User?.Identities?.FirstOrDefault(x => x.Type == "Matrix")?.Id;
+        var membership = room?.Memberships.FirstOrDefault(x => x.UserId == matrixId);
+        if (membership != null && membership.Membership == "join")
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

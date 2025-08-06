@@ -1,0 +1,31 @@
+﻿@page "/room/create"
+@using Sparc.Core.Chat
+
+<PageTitle>Create a new room</PageTitle>
+
+<div>
+    <h3>Create a room</h3>
+    <div>
+        <label>Room Name</label>
+        <input type="text" @bind="roomName" placeholder="Select a room name" />
+    </div>
+    <div>
+        <button class="btn btn-sm btn-primary" @onclick="CreateNewRoom">Create</button>
+    </div>
+    
+</div>
+
+
+@code {
+    string roomName = "";
+
+    private async Task CreateNewRoom()
+    {
+        // var room = new Room(roomName);
+        var room = new CreateRoomRequest(roomName, false, "private");
+        var newRoom = await Chats.CreateRoomAsync(room);
+
+        Nav.NavigateTo("/");
+    }
+
+}

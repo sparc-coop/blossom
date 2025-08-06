@@ -1,13 +1,11 @@
-﻿@page "/chat"
-@using Sparc.MCN.Users
-@using Sparc.MCN.Messages
+﻿@page "/room/{roomId}"
 
 @layout AppLayout
 
 <TopBar OnToggleVoiceMode=ToggleVoiceMode />
 
 <main>
-    @foreach (var msg in messages)
+    @foreach (var msg in messages.OrderByDescending(m => m.CreatedDate))
     {
         <div class="message-container @(msg.Sender == "User" ? "my-message" : "")">
             <MessageCard Message=@msg />
@@ -17,10 +15,12 @@
 
 <ChatBar OnSendMessage=SendMessage VoiceMode=@voiceMode MessageSent=messageSent />
 
-@code {
-    [CascadingParameter] User? User { get; set; }
+@inject ISparcAura Aura
 
+@code {
     [Parameter] public required string RoomId { get; set; }
+
+    BlossomUser? User { get; set; }
     private List<MessageEvent> messages = new List<MessageEvent>();
     private string currentMessage = "";
 
@@ -33,6 +33,8 @@
         {
             throw new ArgumentException("RoomId must be provided", nameof(RoomId));
         }
+        
+        User = await Aura.UserInfo();
 
         await GetMessagesAsync();
     }

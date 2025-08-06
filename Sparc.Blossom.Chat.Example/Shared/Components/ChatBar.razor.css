@@ -1,8 +1,9 @@
 ﻿.chat-bar {
-  width: calc(100% - 32px);
+  /*width: calc(100% - 32px);*/
+  width: 100%;
   min-height: 32px;
   padding: 16px;
-  position: relative;
+  position: fixed;
   bottom: 0;
   left: 0;
   z-index: 20;

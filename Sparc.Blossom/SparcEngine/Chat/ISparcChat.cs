@@ -12,6 +12,9 @@ public interface ISparcChat
     [Post("/_matrix/client/v3/createRoom")]
     Task<Room> CreateRoomAsync(CreateRoomRequest request);
 
+    [Post("/_matrix/client/v3/deleteRoom/{roomId}")]
+    Task<Room> DeleteRoomAsync(string roomId);
+
     [Post("/_matrix/client/v3/join/{roomId}")]
     Task<Room> JoinRoomAsync(string roomId);
 
@@ -30,4 +33,5 @@ public interface ISparcChat
 
 public record InviteToRoomRequest(string UserId);
 public record CreateRoomRequest(string Name, bool IsDirect, string Visibility = "private", List<string>? Invite = null);
+public record DeleteRoomRequest(string RoomId);
 public record SendMessageRequest(string Body, string MsgType = "m.text");
