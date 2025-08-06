@@ -29,7 +29,12 @@ public static class ServiceCollectionExtensions
         services.AddRefitClient<ITovik>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
             .AddHttpMessageHandler<SparcAuraTokenHandler>()
-            .AddStandardResilienceHandler();
+            .AddStandardResilienceHandler(x =>
+            {
+                x.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(240);
+                x.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(240);
+                x.AttemptTimeout.Timeout = TimeSpan.FromSeconds(120);
+            });
 
         services.AddSparcAura();
 
