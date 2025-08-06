@@ -1,4 +1,5 @@
 ﻿using Sparc.Engine;
+using Sparc.Engine.Chat;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
@@ -72,7 +73,11 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
             AddClaim("locale", Avatar.Locale.Id);
         if (Avatar.Currency != null)
             AddClaim("currency", Avatar.Currency.Id);
-        
+        if (Avatar.Presence != null)
+            AddClaim("presence", Avatar.Presence.Presence); 
+        if (Avatar.Presence?.StatusMsg != null) 
+            AddClaim("statusMsg", Avatar.Presence.StatusMsg);
+
         RegisterClaims();
     }
 
@@ -199,9 +204,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         Avatar.HearOthers = avatar.HearOthers;
         Avatar.MuteMe = avatar.MuteMe;
         Avatar.PasskeyName = avatar.PasskeyName;
-        Avatar.Presence = avatar.Presence;
-        Avatar.StatusMsg = avatar.StatusMsg;
-        Avatar.LastActiveAt = avatar.LastActiveAt;
     }
 
     internal void GoOnline(string connectionId)

@@ -27,14 +27,6 @@
             }
         }
     </ul>
-    <h4>Define Status</h4>
-    <select @onchange="HandlePresence">
-        <option value="">Select...</option>
-        <option value="online">Online</option>
-        <option value="offline">Offline</option>
-        <option value="unavailable">Unavailable</option>
-    </select>
-    <p>Current Status: @Avatar?.Presence</p>
 </div>
 
 <div>
@@ -65,20 +57,5 @@
     {
         RoomId = roomId;
         StateHasChanged();
-    }
-
-    private async Task HandlePresence(ChangeEventArgs e)
-    {
-        var selectedValue = e.Value?.ToString();
-
-        var user = await Chats.GetUserAsync();
-        Avatar = user;
-
-        if (string.IsNullOrEmpty(selectedValue) || Avatar == null)
-            return;
-
-        Avatar.Presence = selectedValue;
-        var presence = new MatrixPresence(Avatar);
-        await Chats.SetPresenceAsync(Avatar.Id, presence);
     }
 }
