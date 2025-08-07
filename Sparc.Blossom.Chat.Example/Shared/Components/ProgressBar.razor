@@ -1,0 +1,21 @@
+﻿<div class="progress-bar">
+    <div class="progress-step @(Step >  0 ? "completed" : "")">
+        <div class="progress-circle">
+
+        </div>
+        <div class="progress-line"></div>
+    </div>
+    <div class="progress-step  @(Step > 1  ? "completed" : "")">
+        <div class="progress-circle">
+        </div>
+        <div class="progress-line"></div>
+    </div>
+    <div class="progress-step  @(Step > 2 ? "completed" : "")">
+        <div class="progress-circle">
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Step { get; set; } = 1;
+}

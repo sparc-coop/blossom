@@ -1,0 +1,29 @@
+﻿<nav class="sidebar">
+    <div class="logo" @onclick='() => Nav.NavigateTo("/")'>
+        <PrimaryLogo />
+    </div>
+    <div class="sidebar-bottom">
+        <header class="hero">
+            <div class="hero-img">
+                <img src="/images/Group 41.svg" />
+            </div>
+            <div class="hero-text">
+                <h2>Adam is Asking to Confirm Your Contact.</h2>
+                <div class="subheader">
+                    <p>Welcome to MCN, we're here to help you reconnect with friends, family, and coworkers, safely and securely.</p>
+                    <p>We <strong>never sell or share your contacts</strong> with third parties.</p>
+                    <p>Adam has added you to their contact list and is requesting you to confirm if your contact information is correct.</p>
+                </div>
+            </div>
+        </header>
+        <section>
+            <div class="confirm-contact">
+                <p>Hi, Beth! How are you doing? Just wanted to check if your contact info is up to date.</p>
+                <UserCard FirstName="Adam" LastName="Wheller"></UserCard>
+                <div class="btn-container">
+                    <button class="primary-btn">I'd like to reply</button>
+                </div>
+            </div>
+        </section>
+    </div>
+</nav>

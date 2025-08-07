@@ -1,0 +1,31 @@
+﻿@inherits LayoutComponentBase
+
+<div class="layout-container">
+    <SideBar />
+
+    <main>
+        <div class="content-toggle @(ShowContent ? "up" : "")" @onclick=ToggleContent>
+            @if (ShowContent)
+            {
+                <ChevronUpIcon />
+            }
+            else
+            {
+                <ChevronDownIcon />
+            }
+        </div>
+        <article id="main-content" class="main-content @(ShowContent ? "show" : "")">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    bool ShowContent;
+
+    void ToggleContent()
+    {
+        ShowContent = !ShowContent;
+        Js.InvokeVoidAsync("scrollToElement", "main-content");
+    }
+}

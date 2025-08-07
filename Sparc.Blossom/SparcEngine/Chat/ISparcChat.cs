@@ -9,8 +9,14 @@ public interface ISparcChat
     [Get("/_matrix/client/v3/publicRooms")]
     Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null);
 
+    [Get("/_matrix/client/v3/getRoomInfo/{roomId}")]
+    Task<Room> GetRoomInfoAsync(string roomId);
+
     [Post("/_matrix/client/v3/createRoom")]
     Task<MatrixRoom> CreateRoomAsync(CreateRoomRequest request);
+
+    [Post("/_matrix/client/v3/deleteRoom/{roomId}")]
+    Task<Room> DeleteRoomAsync(string roomId);
 
     [Post("/_matrix/client/v3/join/{roomId}")]
     Task<MatrixRoom> JoinRoomAsync(string roomId);
@@ -48,3 +54,4 @@ public record CreateRoomRequest(
     Dictionary<string, object>? CreationContent = null);
 public record CreateRoomResponse(string RoomId);
 public record SendMessageRequest(string Body, string MsgType = "m.text");
+public record DeleteRoomRequest(string RoomId);

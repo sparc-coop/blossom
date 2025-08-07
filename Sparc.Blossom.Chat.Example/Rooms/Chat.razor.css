@@ -1,0 +1,63 @@
+﻿main {
+  height: calc(100vh - 176px);
+  padding: 16px;
+  padding-top: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--grey-100);
+  font-family: Inter;
+  font-size: 1.3rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.6rem;
+  position: relative;
+  z-index: 10;
+}
+
+.message-container {
+  width: 100%;
+  display: flex;
+  justify-content: start;
+}
+.message-container ::deep .message-card {
+  max-width: 80%;
+  display: flex;
+  flex-direction: row;
+  justify-content: start;
+  align-items: end;
+  gap: 8px;
+}
+.message-container ::deep .message-card p {
+  width: fit-content;
+  max-width: 80%;
+  padding: 12px;
+  border-radius: 0 8px 8px 8px;
+  border: 1px solid transparent;
+  background: white;
+  color: var(--grey-900);
+  text-wrap: wrap;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+.message-container ::deep .message-card aside {
+  color: var(--grey-500, #616161);
+  font-family: Poppins;
+  font-size: 1rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 1.4rem; /* 140% */
+  text-wrap: nowrap;
+}
+.message-container.my-message {
+  justify-content: end;
+}
+.message-container.my-message ::deep .message-card {
+  flex-direction: row-reverse;
+  justify-content: end;
+}
+.message-container.my-message ::deep .message-card p {
+  border-radius: 8px 8px 0 8px;
+  background: var(--tertiary-blue);
+  color: white;
+}
