@@ -14,6 +14,7 @@ public class UserCharge() : BlossomEntity<string>(Guid.NewGuid().ToString())
         Currency = "Word";
         Description = tovik.Description;
         Domain = tovik.Content.Domain;
+        Response = tovik.Response;
     }
     
     public string UserId { get; set; } = null!;
@@ -25,4 +26,5 @@ public class UserCharge() : BlossomEntity<string>(Guid.NewGuid().ToString())
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public string? Description { get; set; }
     public string? PaymentIntentId { get; set; }
+    public string? Response { get; set; }
 }

@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 namespace Sparc.Engine;
 
 public record EditHistory(DateTime Timestamp, string Text);
-public record TovikContentTranslated(TextContent Content, int WordCount, decimal? Cost = null, string? Description = null) : BlossomEvent(Content);
+public record TovikContentTranslated(TextContent Content, int WordCount, decimal? Cost = null, string? Description = null, string? Response = null) : BlossomEvent(Content);
 
 public record ContentTranslation(string Id, Language Language, string? SourceContentId = null)
 {
@@ -146,7 +146,7 @@ public class TextContent : BlossomEntity<string>
         return matches.Count;
     }
 
-    public void AddCharge(decimal? costPerWord = null, string? description = null)
+    public void AddCharge(decimal? costPerWord = null, string? description = null, string? response = null)
     {
         var wordCount = WordCount();
         if (wordCount > 0)
@@ -159,7 +159,7 @@ public class TextContent : BlossomEntity<string>
             Cost -= cost;
 
         if (cost > 0 || Charge > 0)
-            Broadcast(new TovikContentTranslated(this, wordCount, cost, description));
+            Broadcast(new TovikContentTranslated(this, wordCount, cost, description, response));
     }
 
     internal void Delete()
