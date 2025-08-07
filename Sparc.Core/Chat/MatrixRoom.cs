@@ -13,6 +13,8 @@ public class MatrixRoom(string roomId, string? roomType)
     public string? CanonicalAlias { get; set; }
     public string? JoinRule { get; set; }
 
+    public string LocalId => RoomId.Split(':').First();
+
     public static MatrixRoom From(IEnumerable<MatrixEvent> events)
     {
         var orderedEvents = events.OrderBy(x => x.Depth);

@@ -21,35 +21,30 @@
     [Parameter] public required string RoomId { get; set; }
 
     BlossomUser? User { get; set; }
-    private List<MessageEvent> messages = new List<MessageEvent>();
+    private List<MatrixEvent<MatrixMessage>> messages = [];
     private string currentMessage = "";
-    private Room? Room { get; set; }
+    private MatrixRoom? Room { get; set; }
 
     bool voiceMode = false;
     bool messageSent = false;
 
     protected async override Task OnInitializedAsync()
     {
-        if (string.IsNullOrWhiteSpace(RoomId))
-        {
-            throw new ArgumentException("RoomId must be provided", nameof(RoomId));
-        }
-        
         User = await Aura.UserInfo();
-        Room = await Chats.GetRoomInfoAsync(RoomId);
-
-        await GetMessagesAsync();
     }
 
     protected override async Task OnParametersSetAsync()
     {
         if (!string.IsNullOrWhiteSpace(RoomId))
+        {
+            Room = await Chats.GetRoomSummaryAsync(RoomId);
             await GetMessagesAsync();
+        }
     }
 
     private async Task GetMessagesAsync()
     {
-        messages = await Chats.GetMessagesAsync(RoomId);
+        messages = await Chats.GetMessagesAsync(Room!.RoomId);
     }
 
     private async Task SendMessage(string messageText)
@@ -57,7 +52,7 @@
         if (!string.IsNullOrWhiteSpace(messageText))
         {
             var txnId = Guid.NewGuid().ToString();
-            await Chats.SendMessageAsync(RoomId, "m.room.message", txnId, new(messageText));
+            await Chats.SendMessageAsync(Room!.RoomId, "m.room.message", txnId, new(messageText));
 
             // currentMessage = "";
             await GetMessagesAsync();

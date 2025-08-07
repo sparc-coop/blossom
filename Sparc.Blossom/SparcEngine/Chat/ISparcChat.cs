@@ -1,5 +1,4 @@
 ﻿using Refit;
-using Sparc.Blossom.Authentication;
 using Sparc.Core.Chat;
 
 namespace Sparc.Engine.Chat;
@@ -9,14 +8,14 @@ public interface ISparcChat
     [Get("/_matrix/client/v3/publicRooms")]
     Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null);
 
-    [Get("/_matrix/client/v3/getRoomInfo/{roomId}")]
-    Task<Room> GetRoomInfoAsync(string roomId);
+    [Get("/_matrix/client/v1/room_summary/{roomId}")]
+    Task<MatrixRoom> GetRoomSummaryAsync(string roomId);
 
     [Post("/_matrix/client/v3/createRoom")]
     Task<MatrixRoom> CreateRoomAsync(CreateRoomRequest request);
 
     [Post("/_matrix/client/v3/deleteRoom/{roomId}")]
-    Task<Room> DeleteRoomAsync(string roomId);
+    Task<MatrixRoom> DeleteRoomAsync(string roomId);
 
     [Post("/_matrix/client/v3/join/{roomId}")]
     Task<MatrixRoom> JoinRoomAsync(string roomId);

@@ -1,11 +1,11 @@
 ﻿<nav class="top-bar">
     <div class="left">
-        <button class="back-btn icon-btn"><ArrowLeftIcon Color="#7A7A7A" /></button>
+        <button class="back-btn icon-btn" @onclick=Back><ArrowLeftIcon Color="#7A7A7A" /></button>
         <div class="user-card">
             <div class="user-img">
             </div>
             <div class="user-info">
-                <h4>@(Room != null ? Room.RoomName : "")</h4>
+                <h4>@(Room != null ? (Room.Name ?? Room.RoomId.Substring(0, 16)) : "")</h4>
                 <aside>@(Room != null ? Room.Topic : "")</aside>
             </div>
         </div>
@@ -16,9 +16,10 @@
     </div>
 </nav>
 
+@inject NavigationManager Nav
 @code {
     [Parameter] public EventCallback<bool> OnToggleVoiceMode { get; set; }
-    [Parameter] public Room? Room { get; set; }
+    [Parameter] public MatrixRoom? Room { get; set; }
     bool voiceMode = false;
 
     void ToggleVoiceMode()
@@ -26,4 +27,6 @@
         voiceMode = !voiceMode;
         OnToggleVoiceMode.InvokeAsync(voiceMode);
     }
+
+    void Back() => Nav.NavigateTo("/");
 }

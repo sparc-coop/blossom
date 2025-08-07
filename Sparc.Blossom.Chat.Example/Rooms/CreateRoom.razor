@@ -22,7 +22,7 @@
     private async Task CreateNewRoom()
     {
         // var room = new Room(roomName);
-        var room = new CreateRoomRequest(roomName, false, "private");
+        var room = new CreateRoomRequest(roomName, "public");
         var newRoom = await Chats.CreateRoomAsync(room);
 
         Nav.NavigateTo("/");

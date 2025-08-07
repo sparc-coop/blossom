@@ -32,11 +32,11 @@
                     @foreach (var room in Rooms)
                     {
                         <tr>
-                            <td @onclick="() => GoToRoom(room.Id)">@room.RoomName</td>
-                            @if (UserIsInRoom(room.Id))
+                            <td @onclick="() => GoToRoom(room)">@(room.Name ?? room.RoomId.Substring(0, 8))</td>
+                            @if (UserIsInRoom(room))
                             {
                                 <td>
-                                    <button class="btn btn-sm btn-danger" @onclick="() => LeaveRoom(room.Id)">
+                                    <button class="btn btn-sm btn-danger" @onclick="() => LeaveRoom(room)">
                                         Leave
                                     </button>
                                 </td>
@@ -44,13 +44,13 @@
                             else
                             {
                                 <td>
-                                    <button class="btn btn-sm btn-primary" @onclick="() => JoinRoom(room.Id)">
+                                    <button class="btn btn-sm btn-primary" @onclick="() => JoinRoom(room)">
                                         Join
                                     </button>
                                 </td>
                             }
                             <td>
-                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteRoom(room.Id)">
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteRoom(room)">
                                     Delete
                                 </button>
                             </td>
@@ -65,34 +65,26 @@
     
 </div>
 
-@* <div>
-    @if (!string.IsNullOrEmpty(RoomId))
-    {
-        <Chat RoomId="@RoomId"></Chat>
-    }
-</div>
 
 @inject NavigationManager Nav
 @code {
     private string? RoomId { get; set; }
-    private List<MatrixRoom> rooms = [];
+    private List<MatrixRoom> Rooms = [];
 
     protected async override Task OnInitializedAsync()
     {
-        // var room = new Room("Test Room");
-        // var newRoom = await Chat.CreateRoomAsync(room);
-        User = await Aura.UserInfo();
         await GetAllRooms();
     }
 
     private async Task GetAllRooms()
     {
-        Rooms = await Chats.GetRoomsAsync();
+        var response = await Chats.GetRoomsAsync();
+        Rooms = response.Chunk;
     }
 
-    private void GoToRoom(string roomId)
+    private void GoToRoom(MatrixRoom room)
     {
-        Nav.NavigateTo("/room/" + roomId);
+        Nav.NavigateTo("/room/" + room.LocalId);
     }
 
     private void GoToCreateRoom()
@@ -100,29 +92,29 @@
         Nav.NavigateTo("/room/create");
     }
 
-    private async Task JoinRoom(string roomId)
+    private async Task JoinRoom(MatrixRoom room)
     {
-        var room = await Chats.JoinRoomAsync(roomId);
+        await Chats.JoinRoomAsync(room.RoomId);
         await GetAllRooms();
         StateHasChanged();
     }
 
-    private async Task LeaveRoom(string roomId)
+    private async Task LeaveRoom(MatrixRoom room)
     {
-        var room = await Chats.LeaveRoomAsync(roomId);
+        await Chats.LeaveRoomAsync(room.RoomId);
         await GetAllRooms();
         StateHasChanged();
         var response = await Chats.GetRoomsAsync();
-        rooms = response.Chunk;
-        if (rooms.Any())
+        Rooms = response.Chunk;
+        if (Rooms.Any())
         {
-            RoomId = rooms.First().RoomId;
+            RoomId = Rooms.First().RoomId;
         }
     }
 
-    private async Task DeleteRoom(string roomId)
+    private async Task DeleteRoom(MatrixRoom room)
     {
-        var deletedRoom = await Chats.DeleteRoomAsync(roomId);
+        var deletedRoom = await Chats.DeleteRoomAsync(room.RoomId);
         await GetAllRooms();
         StateHasChanged();
     }
@@ -133,18 +125,8 @@
         Nav.Refresh(true);
     }
 
-    private bool UserIsInRoom(string roomId)
+    private bool UserIsInRoom(MatrixRoom room)
     {
-        var room = Rooms.Where(x => x.Id == roomId).FirstOrDefault();
-        var matrixId = User?.Identities?.FirstOrDefault(x => x.Type == "Matrix")?.Id;
-        var membership = room?.Memberships.FirstOrDefault(x => x.UserId == matrixId);
-        if (membership != null && membership.Membership == "join")
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return true;
     }
 }
