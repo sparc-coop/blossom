@@ -5,24 +5,16 @@ using System.Text.Json;
 
 namespace Sparc.Core.Chat;
 
-public class MatrixEvent : BlossomEntity<string>, MediatR.INotification
+public class MatrixEvent(string type, string roomId, string sender) : BlossomEntity<string>(), MediatR.INotification
 {
-    public MatrixEvent(string type, string roomId, string sender) : base()
-    {
-        Type = type;
-        RoomId = roomId;
-        Sender = sender;
-        OriginServerTs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-    }
-
     public string EventId { get { return Id; } set { Id = value; } }
     public long Depth { get; set; } = 1;
-    public long OriginServerTs { get; set; }
+    public long OriginServerTs { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     public List<string> PrevEvents { get; set; } = [];
-    public string RoomId { get; set; }
-    public string Sender { get; set; }
+    public string RoomId { get; set; } = roomId;
+    public string Sender { get; set; } = sender;
     public string? StateKey { get; set; }
-    public string Type { get; set; } = string.Empty;
+    public string Type { get; set; } = type;
 
     // For event signing and verification 
     public MatrixEventHash Hashes { get; set; }
