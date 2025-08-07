@@ -38,11 +38,11 @@
 
 @code {
     private string? RoomId { get; set; }
-    private List<Room> rooms = [];
+    private List<MatrixRoom> rooms = [];
 
     protected async override Task OnInitializedAsync()
     {
-        var room = new Room("Test Room");
+        var room = new MatrixRoom("Test Room");
         // var newRoom = await Chat.CreateRoomAsync(room);
 
         rooms = await Chats.GetRoomsAsync();

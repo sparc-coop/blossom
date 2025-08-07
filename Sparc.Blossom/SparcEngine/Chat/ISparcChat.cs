@@ -7,22 +7,22 @@ namespace Sparc.Engine.Chat;
 public interface ISparcChat
 {
     [Get("/_matrix/client/v3/publicRooms")]
-    Task<List<Room>> GetRoomsAsync();
+    Task<List<MatrixRoom>> GetRoomsAsync();
 
     [Post("/_matrix/client/v3/createRoom")]
-    Task<Room> CreateRoomAsync(CreateRoomRequest request);
+    Task<MatrixRoom> CreateRoomAsync(CreateRoomRequest request);
 
     [Post("/_matrix/client/v3/join/{roomId}")]
-    Task<Room> JoinRoomAsync(string roomId);
+    Task<MatrixRoom> JoinRoomAsync(string roomId);
 
     [Post("/_matrix/client/v3/rooms/{roomId}/leave")]
-    Task<Room> LeaveRoomAsync(string roomId);
+    Task<MatrixRoom> LeaveRoomAsync(string roomId);
 
     [Post("/_matrix/client/v3/rooms/{roomId}/invite")]
-    Task<Room> InviteToRoomAsync(string roomId, InviteToRoomRequest request);
+    Task<MatrixRoom> InviteToRoomAsync(string roomId, InviteToRoomRequest request);
 
     [Get("/_matrix/client/v3/rooms/{roomId}/messages")]
-    Task<List<MatrixMessageEvent>> GetMessagesAsync(string roomId);
+    Task<List<MatrixEvent<MatrixMessage>>> GetMessagesAsync(string roomId);
 
     [Post("/_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}")]
     Task<MatrixEvent> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request);
