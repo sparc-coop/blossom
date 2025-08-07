@@ -1,16 +1,28 @@
-﻿using Sparc.Blossom;
+﻿namespace Sparc.Core.Chat;
 
-namespace Sparc.Core.Chat;
-
-public class MatrixRoom(string roomName) : BlossomEntity<string>(Guid.NewGuid().ToString())
+public class MatrixRoom(string roomId, string? roomType)
 {
-    public string RoomId { get { return Id; } set { Id = value; } } // Partition key
-    public string RoomName { get; set; } = roomName;
-    public string CreatorUserId { get; set; } = string.Empty;
-    public bool IsPrivate { get; set; }
+    public string RoomId { get; set; } = roomId;
+    public string? RoomType { get; set; } = roomType;
+    public int NumJoinedMembers { get; set; }
+    public bool GuestCanJoin { get; set; }
+    public bool WorldReadable { get; set; }
+    public string? Name { get; set; }
+    public string? Topic { get; set; }
+    public string? AvatarUrl { get; set; }
+    public string? CanonicalAlias { get; set; }
+    public string? JoinRule { get; set; }
 
-    public ICollection<RoomMembership> Memberships { get; set; } = new List<RoomMembership>();
+    public static MatrixRoom From(IEnumerable<MatrixEvent> events)
+    {
+        var orderedEvents = events.OrderBy(x => x.Depth);
+
+        var rootEvent = events.OfType<MatrixEvent<CreateRoom>>().First();
+
+        var room = new MatrixRoom(rootEvent.RoomId, rootEvent.Content.Type);
+        foreach (var ev in orderedEvents)
+            ev.ApplyTo(room);
+
+        return room;
+    }
 }
-
-public record PreviousRoom(string RoomId, string EventId);
-public record CreateRoom(string RoomVersion = "1", bool Federate = true, string? Type = null, PreviousRoom? PreviousRoom = null);

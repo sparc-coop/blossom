@@ -20,12 +20,13 @@
             @foreach (var room in rooms)
             {
                 <li>
-                    <button class="btn btn-link" @onclick="() => SelectRoom(room.Id)">
-                        @room.RoomName
+                    <button class="btn btn-link" @onclick="() => SelectRoom(room.RoomId)">
+                        @(room.Name ?? room.RoomId)
                     </button>
                 </li>
             }
         }
+        <li><button @onclick=Create>Create New Room</button></li>
     </ul>
 </div>
 
@@ -36,19 +37,18 @@
     }
 </div>
 
+@inject NavigationManager Nav
 @code {
     private string? RoomId { get; set; }
     private List<MatrixRoom> rooms = [];
 
     protected async override Task OnInitializedAsync()
     {
-        var room = new MatrixRoom("Test Room");
-        // var newRoom = await Chat.CreateRoomAsync(room);
-
-        rooms = await Chats.GetRoomsAsync();
+        var response = await Chats.GetRoomsAsync();
+        rooms = response.Chunk;
         if (rooms.Any())
         {
-            RoomId = rooms.First().Id;
+            RoomId = rooms.First().RoomId;
         }
     }
 
@@ -56,5 +56,11 @@
     {
         RoomId = roomId;
         StateHasChanged();
+    }
+
+    async Task Create()
+    {
+        var room = await Chats.CreateRoomAsync(new(Visibility: "public"));
+        Nav.Refresh(true);
     }
 }

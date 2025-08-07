@@ -6,8 +6,16 @@ using System.Text.Json.Serialization;
 
 namespace Sparc.Core.Chat;
 
-[JsonDerivedType(typeof(MatrixEvent<MatrixMessage>), "m.room.message")]
+[JsonDerivedType(typeof(MatrixEvent<CanonicalAlias>), "m.room.canonical_alias")]
 [JsonDerivedType(typeof(MatrixEvent<CreateRoom>), "m.room.create")]
+[JsonDerivedType(typeof(MatrixEvent<JoinRules>), "m.room.join_rules")]
+[JsonDerivedType(typeof(MatrixEvent<ChangeMembershipState>), "m.room.member")]
+[JsonDerivedType(typeof(MatrixEvent<AdjustPowerLevels>), "m.room.power_levels")]
+[JsonDerivedType(typeof(MatrixEvent<MatrixMessage>), "m.room.message")]
+[JsonDerivedType(typeof(MatrixEvent<HistoryVisibility>), "m.room.history_visibility")]
+[JsonDerivedType(typeof(MatrixEvent<GuestAccess>), "m.room.guest_access")]
+[JsonDerivedType(typeof(MatrixEvent<RoomName>), "m.room.name")]
+[JsonDerivedType(typeof(MatrixEvent<RoomTopic>), "m.room.topic")]
 public class MatrixEvent(string roomId, string sender) : BlossomEntity<string>(), MediatR.INotification
 {
     public string Type { get; set; } = "";
@@ -28,6 +36,10 @@ public class MatrixEvent(string roomId, string sender) : BlossomEntity<string>()
     {
         return new MatrixEvent<T>(roomId, sender, content, previousEvents);
     }
+
+    public virtual void ApplyTo(MatrixRoom room)
+    { 
+    }
     
     // Special magic to be able to save & query polymorphically to/from Cosmos
     public static string Types<T>() =>  
@@ -40,6 +52,18 @@ public class MatrixEvent(string roomId, string sender) : BlossomEntity<string>()
             .GetCustomAttributes(typeof(JsonDerivedTypeAttribute), false)
             .OfType<JsonDerivedTypeAttribute>()
             .ToDictionary(attr => attr.DerivedType, attr => attr.TypeDiscriminator!.ToString());
+
+    public static string OpaqueId(int length = 64)
+    {
+        // Generate a random string of characters and digits
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var random = new Random();
+        var result = new char[length];
+        for (int i = 0; i < length; i++)
+            result[i] = chars[random.Next(chars.Length)];
+
+        return new string(result);
+    }
 }
 
 public class MatrixEvent<T> : MatrixEvent
@@ -87,6 +111,17 @@ public class MatrixEvent<T> : MatrixEvent
                     .Replace("+", "-")
                     .Replace("/", "_");
     }
+
+    public override void ApplyTo(MatrixRoom room)
+    {
+        if (Content is IMatrixRoomEvent ev)
+            ev.ApplyTo(room);
+    }
+}
+
+public interface IMatrixRoomEvent
+{
+    void ApplyTo(MatrixRoom room);
 }
 
 public record MatrixEventHash(string Sha256);

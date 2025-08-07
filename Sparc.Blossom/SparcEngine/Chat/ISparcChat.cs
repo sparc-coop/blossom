@@ -7,7 +7,7 @@ namespace Sparc.Engine.Chat;
 public interface ISparcChat
 {
     [Get("/_matrix/client/v3/publicRooms")]
-    Task<List<MatrixRoom>> GetRoomsAsync();
+    Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null);
 
     [Post("/_matrix/client/v3/createRoom")]
     Task<MatrixRoom> CreateRoomAsync(CreateRoomRequest request);
@@ -32,14 +32,19 @@ public interface ISparcChat
 
     [Put("/_matrix/client/v3/presence/{userId}/status")]
     Task SetPresenceAsync(string userId, MatrixPresence presence);
-
-    [Get("/_matrix/client/v3/matrixUser")]
-    Task<string> GetMatrixUserAsync();
-
-    [Get("/_matrix/client/v3/user")]
-    Task<BlossomAvatar> GetUserAsync();
 }
 
 public record InviteToRoomRequest(string UserId);
-public record CreateRoomRequest(string Name, bool IsDirect, string Visibility = "private", List<string>? Invite = null);
+public record CreateRoomRequest(
+    string? Name = null,
+    string Visibility = "private",
+    string? Topic = null,
+    string RoomVersion = "1",
+    string? RoomAliasName = null,
+    string? Preset = null,
+    bool? IsDirect = null,
+    List<string>? Invite = null,
+    List<StateEvent>? InitialState = null,
+    Dictionary<string, object>? CreationContent = null);
+public record CreateRoomResponse(string RoomId);
 public record SendMessageRequest(string Body, string MsgType = "m.text");
