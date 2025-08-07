@@ -1,5 +1,6 @@
 ﻿using Sparc.Core.Billing;
 using Sparc.Engine;
+using Sparc.Engine.Chat;
 using System.Drawing;
 using System.Globalization;
 
@@ -20,6 +21,8 @@ public class BlossomAvatar
     public Language? Language { get; set; }
     public SparcCurrency? Currency { get; set; }
     public List<Language> LanguagesSpoken { get; set; } = [];
+    public MatrixPresence Presence { get; set; }
+
 
     public string? Emoji { get; set; }
     public string? SkinTone { get; set; }

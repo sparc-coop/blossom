@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
+@using Sparc.Blossom.Chat.Example.Rooms
+
 <div class="page">
     <div class="sidebar">
         <NavMenu />
@@ -7,7 +9,9 @@
 
     <main>
         <div class="top-row px-4">
-            <Sparc.Blossom.SparcEngine.Aura.SparcAura />
+            <Sparc.Blossom.SparcEngine.Aura.SparcAura>
+                <Presence Avatar="context" />
+            </Sparc.Blossom.SparcEngine.Aura.SparcAura>
         </div>
 
         <article class="content px-4">

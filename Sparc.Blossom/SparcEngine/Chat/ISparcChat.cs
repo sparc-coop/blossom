@@ -26,6 +26,18 @@ public interface ISparcChat
 
     [Post("/_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}")]
     Task<MatrixEvent> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request);
+
+    [Get("/_matrix/client/v3/presence/{userId}/status")]
+    Task<MatrixPresence> GetPresenceAsync(string userId);
+
+    [Put("/_matrix/client/v3/presence/{userId}/status")]
+    Task SetPresenceAsync(string userId, MatrixPresence presence);
+
+    [Get("/_matrix/client/v3/matrixUser")]
+    Task<string> GetMatrixUserAsync();
+
+    [Get("/_matrix/client/v3/user")]
+    Task<BlossomAvatar> GetUserAsync();
 }
 
 public record InviteToRoomRequest(string UserId);

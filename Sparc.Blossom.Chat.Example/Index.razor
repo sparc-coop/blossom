@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Sparc.Core.Chat
+@using Sparc.Blossom.Authentication
 
 <PageTitle>Home</PageTitle>
 
@@ -38,6 +39,7 @@
 @code {
     private string? RoomId { get; set; }
     private List<Room> rooms = [];
+    private BlossomAvatar? Avatar;
 
     protected async override Task OnInitializedAsync()
     {
