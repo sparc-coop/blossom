@@ -22,7 +22,7 @@ public interface ISparcChat
     Task<Room> InviteToRoomAsync(string roomId, InviteToRoomRequest request);
 
     [Get("/_matrix/client/v3/rooms/{roomId}/messages")]
-    Task<List<MatrixMessage>> GetMessagesAsync(string roomId);
+    Task<List<MatrixMessageEvent>> GetMessagesAsync(string roomId);
 
     [Post("/_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}")]
     Task<MatrixEvent> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request);

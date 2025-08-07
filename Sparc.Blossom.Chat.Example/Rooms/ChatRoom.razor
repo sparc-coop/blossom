@@ -9,7 +9,7 @@
         {
             @foreach (var msg in messages)
             {
-                <div class="message" style="margin-bottom:5px;">@msg.Sender: @msg.Body</div>
+                <div class="message" style="margin-bottom:5px;">@msg.Sender: @msg.Content.Body</div>
             }
         }
 
@@ -20,7 +20,7 @@
 
 @code {
     [Parameter] public required string RoomId { get; set; }
-    private List<MatrixMessage> messages = new List<MatrixMessage>();
+    private List<MatrixMessageEvent> messages = new List<MatrixMessageEvent>();
     private string currentMessage = "";
 
     protected async override Task OnInitializedAsync()
