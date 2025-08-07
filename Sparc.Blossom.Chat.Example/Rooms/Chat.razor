@@ -2,12 +2,12 @@
 
 @layout AppLayout
 
-<TopBar OnToggleVoiceMode=ToggleVoiceMode />
+<TopBar OnToggleVoiceMode=ToggleVoiceMode Room="Room" />
 
 <main>
-    @foreach (var msg in messages.OrderByDescending(m => m.CreatedDate))
+    @foreach (var msg in messages)
     {
-        <div class="message-container @(msg.Sender == "User" ? "my-message" : "")">
+        <div class="message-container @(IsUserMessage(msg.Sender) ? "my-message" : "")">
             <MessageCard Message=@msg />
         </div>
     }
@@ -23,6 +23,7 @@
     BlossomUser? User { get; set; }
     private List<MessageEvent> messages = new List<MessageEvent>();
     private string currentMessage = "";
+    private Room? Room { get; set; }
 
     bool voiceMode = false;
     bool messageSent = false;
@@ -35,6 +36,7 @@
         }
         
         User = await Aura.UserInfo();
+        Room = await Chats.GetRoomInfoAsync(RoomId);
 
         await GetMessagesAsync();
     }
@@ -50,14 +52,14 @@
         messages = await Chats.GetMessagesAsync(RoomId);
     }
 
-    private async Task SendMessage()
+    private async Task SendMessage(string messageText)
     {
-        if (!string.IsNullOrWhiteSpace(currentMessage))
+        if (!string.IsNullOrWhiteSpace(messageText))
         {
             var txnId = Guid.NewGuid().ToString();
-            await Chats.SendMessageAsync(RoomId, "m.room.message", txnId, new(currentMessage));
+            await Chats.SendMessageAsync(RoomId, "m.room.message", txnId, new(messageText));
 
-            currentMessage = "";
+            // currentMessage = "";
             await GetMessagesAsync();
         }
     }
@@ -65,5 +67,18 @@
     void ToggleVoiceMode(bool voiceBool)
     {
         voiceMode = voiceBool;
+    }
+
+    private bool IsUserMessage(string userId)
+    {
+        var matrixId = User?.Identities?.FirstOrDefault(x => x.Type == "Matrix")?.Id;
+        if (userId == matrixId)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

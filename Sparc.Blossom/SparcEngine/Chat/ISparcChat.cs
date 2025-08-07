@@ -8,6 +8,8 @@ public interface ISparcChat
 {
     [Get("/_matrix/client/v3/publicRooms")]
     Task<List<Room>> GetRoomsAsync();
+    [Get("/_matrix/client/v3/getRoomInfo/{roomId}")]
+    Task<Room> GetRoomInfoAsync(string roomId);
 
     [Post("/_matrix/client/v3/createRoom")]
     Task<Room> CreateRoomAsync(CreateRoomRequest request);
