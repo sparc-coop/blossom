@@ -2,7 +2,7 @@
 using Refit;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Billing;
-using Sparc.Engine.Chat;
+using Sparc.Blossom.Realtime;
 using Sparc.Engine.Tovik;
 
 namespace Sparc.Engine;

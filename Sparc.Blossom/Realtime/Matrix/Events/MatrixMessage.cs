@@ -1,4 +1,4 @@
-﻿namespace Sparc.Core.Chat;
+﻿namespace Sparc.Blossom.Realtime.Matrix;
 
 public record MatrixMessage(string Body, string MsgType = "m.text");
 

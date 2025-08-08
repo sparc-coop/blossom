@@ -1,10 +1,10 @@
-﻿using Sparc.Blossom;
+﻿
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Sparc.Core.Chat;
+namespace Sparc.Blossom.Realtime.Matrix;
 
 [JsonDerivedType(typeof(MatrixEvent<CanonicalAlias>), "m.room.canonical_alias")]
 [JsonDerivedType(typeof(MatrixEvent<CreateRoom>), "m.room.create")]
@@ -51,7 +51,7 @@ public class MatrixEvent(string roomId, string sender) : BlossomEntity<string>()
         typeof(MatrixEvent)
             .GetCustomAttributes(typeof(JsonDerivedTypeAttribute), false)
             .OfType<JsonDerivedTypeAttribute>()
-            .ToDictionary(attr => attr.DerivedType, attr => attr.TypeDiscriminator!.ToString());
+            .ToDictionary(attr => attr.DerivedType, attr => attr.TypeDiscriminator!.ToString()!);
 
     public static string OpaqueId(int length = 64)
     {

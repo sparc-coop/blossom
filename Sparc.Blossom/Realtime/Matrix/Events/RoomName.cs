@@ -1,4 +1,4 @@
-﻿namespace Sparc.Core.Chat;
+﻿namespace Sparc.Blossom.Realtime.Matrix;
 
 public record RoomName(string Name) : IMatrixRoomEvent
 {

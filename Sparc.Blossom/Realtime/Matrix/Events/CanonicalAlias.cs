@@ -1,4 +1,4 @@
-﻿namespace Sparc.Core.Chat;
+﻿namespace Sparc.Blossom.Realtime.Matrix;
 
 public record CanonicalAlias(string? Alias = null, List<string>? AltAliases = null) : IMatrixRoomEvent
 {

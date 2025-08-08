@@ -1,4 +1,4 @@
-﻿namespace Sparc.Core.Chat;
+﻿namespace Sparc.Blossom.Realtime.Matrix;
 
 public record AdjustPowerLevels(
     int Ban = 50,

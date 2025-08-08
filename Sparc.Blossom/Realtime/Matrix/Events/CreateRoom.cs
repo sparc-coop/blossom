@@ -1,4 +1,4 @@
-﻿namespace Sparc.Core.Chat;
+﻿namespace Sparc.Blossom.Realtime.Matrix;
 
 public record PreviousRoom(string RoomId, string EventId);
 public record CreateRoom(

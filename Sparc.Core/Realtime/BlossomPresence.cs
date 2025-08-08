@@ -1,8 +1,8 @@
 ﻿using Sparc.Blossom.Authentication;
 
-namespace Sparc.Engine.Chat;
+namespace Sparc.Blossom.Realtime;
 
-public class MatrixPresence // converts from avatar
+public class BlossomPresence // converts from avatar
 {
     public string Presence { get; set; } = "offline"; // "online", "offline", "unavailable"
     public string? StatusMsg { get; set; }
@@ -12,9 +12,9 @@ public class MatrixPresence // converts from avatar
     //public string? AvatarUrl { get; set; } 
     //public string? DisplayName { get; set; }
 
-    public MatrixPresence() { }
+    public BlossomPresence() { }
 
-    public MatrixPresence(BlossomAvatar avatar)
+    public BlossomPresence(BlossomAvatar avatar)
     {
         if (avatar?.Presence != null)
         {
@@ -51,7 +51,7 @@ public class MatrixPresence // converts from avatar
     {
         if (avatar != null)
         {
-            avatar.Presence = new MatrixPresence
+            avatar.Presence = new BlossomPresence
             {
                 Presence = this.Presence,
                 StatusMsg = this.StatusMsg,

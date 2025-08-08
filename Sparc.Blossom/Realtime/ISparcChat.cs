@@ -1,7 +1,7 @@
 ﻿using Refit;
-using Sparc.Core.Chat;
+using Sparc.Blossom.Realtime.Matrix;
 
-namespace Sparc.Engine.Chat;
+namespace Sparc.Blossom.Realtime;
 
 public interface ISparcChat
 {
@@ -33,10 +33,10 @@ public interface ISparcChat
     Task<MatrixEvent> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request);
 
     [Get("/_matrix/client/v3/presence/{userId}/status")]
-    Task<MatrixPresence> GetPresenceAsync(string userId);
+    Task<BlossomPresence> GetPresenceAsync(string userId);
 
     [Put("/_matrix/client/v3/presence/{userId}/status")]
-    Task SetPresenceAsync(string userId, MatrixPresence presence);
+    Task SetPresenceAsync(string userId, BlossomPresence presence);
 }
 
 public record InviteToRoomRequest(string UserId);
