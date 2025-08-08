@@ -30,13 +30,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
         Builder.RootComponents.Add<TApp>("#app");
         Builder.RootComponents.Add<HeadOutlet>("head::after");
 
-        if (!isAuthenticationAdded)
-        {
-            // No-config Blossom User setup
-            AddAuthentication<BlossomUser>();
-            Services.AddSingleton<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
-        }
-
+        AddAuthentication<BlossomUser>();
         RegisterBlossomEntities(callingAssembly);
         AddBlossomRepository();
 
@@ -50,12 +44,16 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
     public override void AddAuthentication<TUser>()
     {
         Services.AddAuthorizationCore();
-        
-        Services.AddScoped<AuthenticationStateProvider, BlossomBrowserAuthenticationStateProvider<TUser>>()
-            .AddScoped<BlossomDefaultAuthenticator<TUser>>()
-            .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<TUser>>();
-
+        Services.AddScoped<AuthenticationStateProvider, BlossomBrowserAuthenticationStateProvider<TUser>>();
         Services.AddScoped(_ => new ClaimsPrincipal(new ClaimsIdentity()));
         Services.AddScoped(s => BlossomUser.FromPrincipal(s.GetRequiredService<ClaimsPrincipal>()));
+
+        if (!isAuthenticationAdded)
+        {
+            // No-config Blossom User setup
+            Services.AddScoped<BlossomDefaultAuthenticator<BlossomUser>>()
+                .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<BlossomUser>>();
+            Services.AddSingleton<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
+        }
     }
 }
