@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace Sparc.Engine.Aura;
+namespace Sparc.Blossom.Authentication;
 
 public class SparcAuraCookieHandler(IHttpContextAccessor httpContextAccessor) : DelegatingHandler
 {

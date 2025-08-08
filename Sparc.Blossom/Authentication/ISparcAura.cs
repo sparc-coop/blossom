@@ -1,7 +1,7 @@
 ﻿using Refit;
-using Sparc.Blossom.Authentication;
+using Sparc.Engine;
 
-namespace Sparc.Engine.Aura;
+namespace Sparc.Blossom.Authentication;
 
 public interface ISparcAura
 {

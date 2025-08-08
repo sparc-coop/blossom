@@ -33,11 +33,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="SparcEngine\Aura\Avatar\LoginWithPasskey.razor.js" />
+	  <None Remove="Authentication\Avatar\LoginWithPasskey.razor.js" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="SparcEngine\Aura\Avatar\LoginWithPasskey.razor.js" />
+	  <Content Include="Authentication\Avatar\LoginWithPasskey.razor.js" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -149,13 +149,11 @@
 	  </None>
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="Authentication\Icons\" />
 	  <Folder Include="buildTransitive\" />
-	  <Folder Include="NewFolder\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include="compilerconfig.json" />
-	  <None Include="SparcEngine\Aura\Avatar\LoginWithPasskey.razor" />
+	  <None Include="Authentication\Avatar\LoginWithPasskey.razor" />
 	</ItemGroup>
 
 	<!-- Android -->

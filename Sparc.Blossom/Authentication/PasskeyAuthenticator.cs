@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
-using Sparc.Blossom.SparcEngine.Aura.Icons;
-using Sparc.Engine.Aura;
 
 namespace Sparc.Blossom.Authentication;
 
 public class PasskeyAuthenticator(
     IJSRuntime js, 
     ISparcAura aura, 
-    IBlossomAuthenticator auth,
     NavigationManager nav)
 {
     const string ApiKey = "sparcaura:public:b227c6af0d244323aaab033cc9d392c8";

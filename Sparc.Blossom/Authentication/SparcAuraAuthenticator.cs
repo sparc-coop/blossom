@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http;
-using Sparc.Blossom.Authentication;
 using System.Security.Claims;
 
-namespace Sparc.Engine.Aura;
+namespace Sparc.Blossom.Authentication;
 
 public class SparcAuraAuthenticator(ISparcAura aura, IHttpContextAccessor http) : IBlossomAuthenticator
 {

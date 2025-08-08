@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Http;
-using Sparc.Blossom.Authentication;
 using System.Net.Http.Headers;
 
-namespace Sparc.Engine.Aura;
+namespace Sparc.Blossom.Authentication;
 
 public class SparcAuraTokenHandler(IHttpContextAccessor http) : DelegatingHandler
 {
