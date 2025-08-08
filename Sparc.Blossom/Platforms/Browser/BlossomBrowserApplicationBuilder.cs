@@ -34,7 +34,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
         RegisterBlossomEntities(callingAssembly);
         AddBlossomRepository();
 
-        Services.AddScoped<TimeProvider, BrowserTimeProvider>();
+        Services.AddSingleton<TimeProvider, BrowserTimeProvider>();
         AddBlossomRealtime(callingAssembly);
 
         var host = Builder.Build();
