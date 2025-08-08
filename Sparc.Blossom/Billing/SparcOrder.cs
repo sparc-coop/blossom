@@ -1,7 +1,4 @@
-﻿using Sparc.Blossom;
-using Sparc.Engine;
-
-namespace Sparc.Blossom.Billing;
+﻿namespace Sparc.Blossom.Billing;
 
 public class SparcOrder() : BlossomEntity<string>(RandomSerialNumber(4, 3))  
 {

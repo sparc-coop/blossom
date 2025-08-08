@@ -5,11 +5,11 @@ using Sparc.Blossom.Billing;
 using Sparc.Blossom.Realtime;
 using Sparc.Blossom.Content;
 
-namespace Sparc.Engine;
+namespace Sparc.Blossom.Engine;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddSparcEngine(this IServiceCollection services, string? url = null)
+    public static void AddBlossomEngine(this IServiceCollection services, string? url = null)
     {
         url ??= "https://engine.sparc.coop";
         var uri = new Uri(url);
