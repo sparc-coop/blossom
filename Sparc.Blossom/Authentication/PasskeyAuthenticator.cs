@@ -11,7 +11,7 @@ public class PasskeyAuthenticator(
     const string ApiKey = "sparcaura:public:b227c6af0d244323aaab033cc9d392c8";
 
     readonly Lazy<Task<IJSObjectReference>> Auth = js.Import(
-        "./Blossom/SparcEngine/Aura/Avatar/LoginWithPasskey.razor.js");
+        "./Blossom/Authentication/Avatar/LoginWithPasskey.razor.js");
 
     public string? Message { get; private set; }
 

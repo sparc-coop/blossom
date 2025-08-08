@@ -29,18 +29,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Remove="compilerconfig.json" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Remove="Authentication\Avatar\LoginWithPasskey.razor.js" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Include="Authentication\Avatar\LoginWithPasskey.razor.js" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.7" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.7" />
@@ -150,10 +138,6 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="buildTransitive\" />
-	</ItemGroup>
-	<ItemGroup>
-	  <None Include="compilerconfig.json" />
-	  <None Include="Authentication\Avatar\LoginWithPasskey.razor" />
 	</ItemGroup>
 
 	<!-- Android -->
