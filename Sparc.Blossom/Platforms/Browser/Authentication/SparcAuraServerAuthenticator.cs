@@ -1,11 +1,8 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class SparcAuraAuthenticator(ISparcAura aura, IHttpContextAccessor http) : IBlossomAuthenticator
+public class SparcAuraBrowserAuthenticator(ISparcAura aura, IRepository<BlossomUser> users) : IBlossomAuthenticator
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
     public BlossomUser? User { get; private set; }
@@ -38,11 +35,9 @@ public class SparcAuraAuthenticator(ISparcAura aura, IHttpContextAccessor http) 
         User = BlossomUser.FromPrincipal(principal);
         LoginState = LoginStates.LoggedIn;
 
-        if (http.HttpContext != null)
-        {
-            http.HttpContext.User = principal;
-            await http.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, http.HttpContext.User, new() { IsPersistent = true });
-        }
+        await LogoutAsync(principal);
+
+        await users.AddAsync(User);
 
         return principal;
     }
@@ -60,8 +55,9 @@ public class SparcAuraAuthenticator(ISparcAura aura, IHttpContextAccessor http) 
         User = null;
         LoginState = LoginStates.LoggedOut;
 
-        if (http.HttpContext != null)
-            await http.HttpContext.SignOutAsync();
+        var allUsers = users.Query.ToList();
+        foreach (var user in allUsers)
+            await users.DeleteAsync(user);
 
         return principal;
     }

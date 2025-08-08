@@ -162,11 +162,11 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
             _items.Add(item);
     }
 
-    public static BlossomInMemoryRepository<T> FromUrl<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
+    public static async Task<BlossomInMemoryRepository<T>> FromUrlAsync<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
     {
         using var client = new HttpClient();
         var webRequest = new HttpRequestMessage(HttpMethod.Get, url);
-        var response = client.Send(webRequest);
+        var response = await client.SendAsync(webRequest);
         if (!response.IsSuccessStatusCode)
             return new([]);
 

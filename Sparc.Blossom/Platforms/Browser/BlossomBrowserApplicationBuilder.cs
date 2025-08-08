@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Sparc.Blossom.Authentication;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
@@ -24,22 +23,25 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
         Configuration = Builder.Configuration;
     }
 
-    public override IBlossomApplication Build()
+    public override IBlossomApplication Build(Assembly? entityAssembly = null)
     {
+        var callingAssembly = entityAssembly ?? Assembly.GetCallingAssembly();
+
         Builder.RootComponents.Add<TApp>("#app");
         Builder.RootComponents.Add<HeadOutlet>("head::after");
 
-        if (!_isAuthenticationAdded)
+        if (!isAuthenticationAdded)
         {
             // No-config Blossom User setup
             AddAuthentication<BlossomUser>();
             Services.AddSingleton<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
         }
 
-        var assembly = Assembly.GetCallingAssembly();
-        RegisterBlossomEntities(assembly);
+        RegisterBlossomEntities(callingAssembly);
         AddBlossomRepository();
-        AddBlossomRealtime(assembly);
+
+        Services.AddScoped<TimeProvider, BrowserTimeProvider>();
+        AddBlossomRealtime(callingAssembly);
 
         var host = Builder.Build();
         return new BlossomBrowserApplication<TApp>(host);
@@ -49,13 +51,11 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
     {
         Services.AddAuthorizationCore();
         
-        Services.AddScoped<AuthenticationStateProvider, SparcEngineAuthenticationStateProvider<TUser>>()
+        Services.AddScoped<AuthenticationStateProvider, BlossomBrowserAuthenticationStateProvider<TUser>>()
             .AddScoped<BlossomDefaultAuthenticator<TUser>>()
             .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<TUser>>();
 
         Services.AddScoped(_ => new ClaimsPrincipal(new ClaimsIdentity()));
-        Services.AddScoped<BlossomUser>(s => BlossomUser.FromPrincipal(s.GetRequiredService<ClaimsPrincipal>()));    
-
-        _isAuthenticationAdded = true;
+        Services.AddScoped(s => BlossomUser.FromPrincipal(s.GetRequiredService<ClaimsPrincipal>()));
     }
 }

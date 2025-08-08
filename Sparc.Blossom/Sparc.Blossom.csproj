@@ -5,7 +5,7 @@
 	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />-->
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0</TargetFrameworks>
+		<TargetFrameworks>net9.0;net9.0-browser</TargetFrameworks>
 		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>-->
 
 		<SingleProject>true</SingleProject>
@@ -38,7 +38,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.7" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.7.0" />
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -106,6 +105,7 @@
 		<DefineConstants>SERVER</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
+		<!--<FrameworkReference Include="Microsoft.AspNetCore.App" />-->
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.7" />
 		<Compile Remove="**\*.xaml.cs" />
 		<None Include="**\*.xaml.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />

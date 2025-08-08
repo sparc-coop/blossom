@@ -18,8 +18,8 @@ public static class ServiceCollectionExtensions
             });
 
         services.AddCascadingAuthenticationState();
-        services.AddScoped<SparcAuraAuthenticator>()
-            .AddScoped<IBlossomAuthenticator, SparcAuraAuthenticator>()
+        services.AddScoped<SparcAuraServerAuthenticator>()
+            .AddScoped<IBlossomAuthenticator, SparcAuraServerAuthenticator>()
             .AddScoped<PasskeyAuthenticator>();
 
         services.AddTransient(s =>

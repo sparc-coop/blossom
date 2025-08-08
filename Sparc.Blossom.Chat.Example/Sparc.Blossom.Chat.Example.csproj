@@ -7,20 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="compilerconfig.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="compilerconfig.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Sparc.Blossom\Sparc.Blossom.csproj" />
     <ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Shared\Layout\" />
   </ItemGroup>
 
 </Project>

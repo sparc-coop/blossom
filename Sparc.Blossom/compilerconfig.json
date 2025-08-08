@@ -1,22 +1,22 @@
 ﻿[
   {
-    "outputFile": "SparcEngine/Aura/SparcAura.razor.css",
-    "inputFile": "SparcEngine/Aura/SparcAura.razor.scss"
+    "outputFile": "Authentication/SparcAura.razor.css",
+    "inputFile": "Authentication/SparcAura.razor.scss"
   },
   {
-    "outputFile": "SparcEngine/Aura/Avatar/ColorSelector.razor.css",
-    "inputFile": "SparcEngine/Aura/Avatar/ColorSelector.razor.scss"
+    "outputFile": "Authentication/Avatar/ColorSelector.razor.css",
+    "inputFile": "Authentication/Avatar/ColorSelector.razor.scss"
   },
   {
-    "outputFile": "SparcEngine/Aura/Avatar/EmojiSelector.razor.css",
-    "inputFile": "SparcEngine/Aura/Avatar/EmojiSelector.razor.scss"
+    "outputFile": "Authentication/Avatar/EmojiSelector.razor.css",
+    "inputFile": "Authentication/Avatar/EmojiSelector.razor.scss"
   },
   {
-    "outputFile": "SparcEngine/Tovik/LanguageSelector.razor.css",
-    "inputFile": "SparcEngine/Tovik/LanguageSelector.razor.scss"
+    "outputFile": "Content/LanguageSelector.razor.css",
+    "inputFile": "Content/LanguageSelector.razor.scss"
   },
   {
-    "outputFile": "SparcEngine/Aura/Avatar/AuraAvatar.razor.css",
-    "inputFile": "SparcEngine/Aura/Avatar/AuraAvatar.razor.scss"
+    "outputFile": "Authentication/Avatar/AuraAvatar.razor.css",
+    "inputFile": "Authentication/Avatar/AuraAvatar.razor.scss"
   }
 ]
