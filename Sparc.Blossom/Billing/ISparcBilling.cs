@@ -1,7 +1,6 @@
 ﻿using Refit;
-using Sparc.Core.Billing;
 
-namespace Sparc.Engine.Billing;
+namespace Sparc.Blossom.Billing;
 
 public interface ISparcBilling
 {

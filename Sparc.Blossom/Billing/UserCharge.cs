@@ -1,7 +1,6 @@
-﻿using Sparc.Blossom;
-using Sparc.Engine;
+﻿using Sparc.Engine;
 
-namespace Sparc.Core.Billing;
+namespace Sparc.Blossom.Billing;
 
 public class UserCharge() : BlossomEntity<string>(Guid.NewGuid().ToString())
 {

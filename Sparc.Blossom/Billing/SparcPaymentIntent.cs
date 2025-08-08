@@ -1,4 +1,4 @@
-﻿namespace Sparc.Core.Billing;
+﻿namespace Sparc.Blossom.Billing;
 
 public class SparcPaymentIntent
 {

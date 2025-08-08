@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Refit;
 using Sparc.Blossom.Authentication;
-using Sparc.Engine.Billing;
+using Sparc.Blossom.Billing;
 using Sparc.Engine.Chat;
 using Sparc.Engine.Tovik;
 

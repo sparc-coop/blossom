@@ -1,4 +1,4 @@
-﻿namespace Sparc.Engine;
+﻿namespace Sparc.Blossom.Billing;
 
 public class SparcProduct(string productId)
 {
