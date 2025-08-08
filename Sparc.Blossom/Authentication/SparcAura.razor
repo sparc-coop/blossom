@@ -1,5 +1,5 @@
 ﻿@using Sparc.Blossom.Shared
-@using Sparc.Engine
+@using Sparc.Blossom.Realtime
 
 @if (UserAvatar != null)
 {
@@ -28,7 +28,7 @@
                         <header>
                             <h4>Language</h4>
                         </header>
-                        <Sparc.Blossom.SparcEngine.Tovik.LanguageSelector Avatar="UserAvatar" />
+                        <Sparc.Blossom.Content.LanguageSelector Avatar="UserAvatar" />
                         @if (ChildContent != null)
                         {
                             @ChildContent(UserAvatar)

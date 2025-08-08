@@ -1,7 +1,7 @@
 ﻿using Refit;
 using Sparc.Blossom.Authentication;
 
-namespace Sparc.Engine.Tovik;
+namespace Sparc.Blossom.Content;
 
 public interface ITovik
 {

@@ -1,4 +1,4 @@
-﻿namespace Sparc.Engine;
+﻿namespace Sparc.Blossom.Content;
 
 public interface ISpeaker
 {

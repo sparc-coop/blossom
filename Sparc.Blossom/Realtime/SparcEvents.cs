@@ -1,7 +1,7 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Billing;
 
-namespace Sparc.Engine;
+namespace Sparc.Blossom.Realtime;
 
 public class SparcEvents
 {

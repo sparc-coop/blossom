@@ -2,7 +2,6 @@
 @using Microsoft.JSInterop
 @using Sparc.Blossom.Authentication
 @using Microsoft.AspNetCore.Components.Forms
-@using Sparc.Engine.Tovik
 
 <div class="language-select" translate="no">
     @if (Languages.Any())
@@ -26,7 +25,7 @@
 @inject IJSRuntime Js
 @code {
     [Parameter] public required BlossomAvatar Avatar { get; set; }
-    IEnumerable<Sparc.Engine.Language> Languages { get; set; } = [];
+    IEnumerable<Sparc.Blossom.Content.Language> Languages { get; set; } = [];
     string SelectedLanguageId = "";
 
     protected override async Task OnInitializedAsync()
