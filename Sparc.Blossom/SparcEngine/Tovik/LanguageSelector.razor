@@ -27,6 +27,7 @@
 @inject IJSRuntime Js
 @code {
     [Parameter] public required BlossomAvatar Avatar { get; set; }
+    [SupplyParameterFromQuery] public string? Lang { get; set; }
     IEnumerable<Sparc.Engine.Language> Languages { get; set; } = [];
     string SelectedLanguageId = "";
 
@@ -37,7 +38,8 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        SelectedLanguageId = Avatar.Language?.Id
+        SelectedLanguageId = Lang
+                ?? Avatar.Language?.Id
                 ?? Languages.FirstOrDefault(l => l.Id == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)?.Id
                 ?? string.Empty;
         await NotifyTovik();
