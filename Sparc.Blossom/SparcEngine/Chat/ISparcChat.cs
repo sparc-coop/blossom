@@ -37,6 +37,9 @@ public interface ISparcChat
 
     [Put("/_matrix/client/v3/presence/{userId}/status")]
     Task SetPresenceAsync(string userId, MatrixPresence presence);
+
+    [Get("/_matrix/client/v3/presence-event/{userId}/status")]
+    Task<MatrixPresence> GetPresenceEventAsync(string userId);
 }
 
 public record InviteToRoomRequest(string UserId);
