@@ -63,7 +63,7 @@ public class TextContent : BlossomEntity<string>
 
     public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, toLanguage.Id)
     {
-        Id = IdHash(sourceContent.Text, toLanguage);
+        Id = sourceContent.Id; // this hash is coming from the client, so we use the source content's ID
         SourceContentId = sourceContent.Id;
         User = sourceContent.User;
         Audio = sourceContent.Audio?.Voice == null ? null : new(null, 0, sourceContent.Audio.Voice);

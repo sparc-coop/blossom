@@ -48,12 +48,12 @@ public class SparcCurrency(RegionInfo region)
 
         var region = new RegionInfo(culture.Name);
         if (region.ISOCurrencySymbol == Id)
-            return amount.ToString("C", culture);
+            return amount.ToString("C0", culture);
 
         var matchingCulture = CultureInfo.GetCultures(CultureTypes.SpecificCultures)
             .FirstOrDefault(c => new RegionInfo(c.Name).ISOCurrencySymbol == Id);
         if (matchingCulture != null)
-            return amount.ToString("C", matchingCulture);
+            return amount.ToString("C0", matchingCulture);
 
         return $"{Id} {amount:N0}";
     }
