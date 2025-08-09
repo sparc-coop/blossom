@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Cosmos.Linq;
+﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom.Data;
@@ -21,6 +22,17 @@ public static class CosmosDbExtensions
                 yield return item;
             }
         }
+    }
+
+    public static async Task<T?> FindAsync<T>(this IRepository<T> repository, string partitionKey, string id) where T : BlossomEntity<string>
+    {
+        if (repository is CosmosDbRepository<T> cosmosRepository)
+            return await cosmosRepository.FindAsync(id, new PartitionKey(partitionKey));
+
+        if (repository is CosmosDbSimpleRepository<T> cosmosSimpleRepository)
+            return await cosmosSimpleRepository.FindAsync(id, new PartitionKey(partitionKey));
+
+        return await repository.FindAsync(id);
     }
 
     public static async Task<List<T>> ToListAsync<T>(this IQueryable<T> query)

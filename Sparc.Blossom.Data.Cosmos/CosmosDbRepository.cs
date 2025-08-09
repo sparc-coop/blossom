@@ -37,6 +37,20 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
         return await Context.Set<T>().FindAsync(id);
     }
 
+    public async Task<T?> FindAsync(string id, PartitionKey partitionKey)
+    {
+        try
+        {
+            var result = await Context.Set<T>().WithPartitionKey(partitionKey)
+                .SingleAsync(x => x.Id == id);
+            return result;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     public async Task<T?> FindAsync(ISpecification<T> spec)
     {
         return await EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(base.ApplySpecification(spec));

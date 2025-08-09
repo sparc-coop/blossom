@@ -21,6 +21,19 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         return result.FirstOrDefault();
     }
 
+    public async Task<T?> FindAsync(string id, PartitionKey partitionKey)
+    {
+        try
+        {
+            var result = await Client.Container.ReadItemAsync<T>(id, partitionKey);
+            return result;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public async Task<T?> FindAsync(ISpecification<T> spec)
     {
         var result = await ApplySpecification(spec).ToListAsync();
