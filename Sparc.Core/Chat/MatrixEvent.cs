@@ -1,4 +1,5 @@
 ﻿using Sparc.Blossom;
+using Sparc.Engine.Chat;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -16,6 +17,8 @@ namespace Sparc.Core.Chat;
 [JsonDerivedType(typeof(MatrixEvent<GuestAccess>), "m.room.guest_access")]
 [JsonDerivedType(typeof(MatrixEvent<RoomName>), "m.room.name")]
 [JsonDerivedType(typeof(MatrixEvent<RoomTopic>), "m.room.topic")]
+[JsonDerivedType(typeof(MatrixEvent<MatrixPresence>), "m.presence")]
+
 public class MatrixEvent(string roomId, string sender) : BlossomEntity<string>(), MediatR.INotification
 {
     public string Type { get; set; } = "";
