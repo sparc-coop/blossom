@@ -15,4 +15,4 @@ public interface ITovik
     Task<List<TextContent>> CrawlAsync(TovikCrawlRequest request);
 }
 
-public record TovikCrawlRequest(string Domain, List<string> ToLanguages);
+public record TovikCrawlRequest(string Domain, List<string> ToLanguages, string FromLanguage = "en");
