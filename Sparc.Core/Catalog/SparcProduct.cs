@@ -13,6 +13,8 @@ public class SparcProduct(string productId)
     public bool HasExceededUsage => TotalUsage > MaxUsage;
 }
 
+public record SparcProductActivationOptions(int MaxUsage);
+
 public record GetProductResponse
 (
     string Id,

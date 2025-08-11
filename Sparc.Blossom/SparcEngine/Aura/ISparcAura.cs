@@ -15,7 +15,7 @@ public interface ISparcAura
     Task<SparcCode> Register();
 
     [Post("/aura/activate/{productId}")]
-    Task<SparcProduct> Activate(string productId);
+    Task<SparcProduct> Activate(string productId, SparcProductActivationOptions? options = null);
 
     [Post("/aura/login")]
     Task<BlossomLogin> Login(string? emailOrToken = null);
