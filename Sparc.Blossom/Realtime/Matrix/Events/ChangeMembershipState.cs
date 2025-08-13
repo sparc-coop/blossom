@@ -8,7 +8,7 @@ public record ChangeMembershipState(
     string? Reason = null,
     bool? IsDirect = null) : IMatrixRoomEvent
 {
-    public void ApplyTo(MatrixRoom room)
+    public void ApplyTo(MatrixRoomSummary room)
     {
         switch (Membership)
         {

@@ -40,10 +40,10 @@ public class MatrixEvents(
         return result.Cast<MatrixEvent<T>>().ToList();
     }
 
-    internal async Task<MatrixRoom> GetRoomAsync(string roomId)
+    internal async Task<MatrixRoomSummary> GetRoomAsync(string roomId)
     {
         var allRoomEvents = await GetAllAsync(roomId);
-        return MatrixRoom.From(allRoomEvents);
+        return MatrixRoomSummary.From(allRoomEvents);
     }
 
     internal IQueryable<MatrixEvent> Query<T>()

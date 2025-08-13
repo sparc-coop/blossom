@@ -9,34 +9,41 @@ public interface ISparcChat
     Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null);
 
     [Get("/_matrix/client/v1/room_summary/{roomId}")]
-    Task<MatrixRoom> GetRoomSummaryAsync(string roomId);
+    Task<MatrixRoomSummary> GetRoomSummaryAsync(string roomId);
 
     [Post("/_matrix/client/v3/createRoom")]
-    Task<MatrixRoom> CreateRoomAsync(CreateRoomRequest request);
+    Task<RoomIdResponse> CreateRoomAsync(CreateRoomRequest request);
 
     [Post("/_matrix/client/v3/deleteRoom/{roomId}")]
-    Task<MatrixRoom> DeleteRoomAsync(string roomId);
+    Task<EmptyResponse> DeleteRoomAsync(string roomId);
 
     [Post("/_matrix/client/v3/join/{roomId}")]
-    Task<MatrixRoom> JoinRoomAsync(string roomId);
+    Task<RoomIdResponse> JoinRoomAsync(string roomId);
 
     [Post("/_matrix/client/v3/rooms/{roomId}/leave")]
-    Task<MatrixRoom> LeaveRoomAsync(string roomId);
+    Task<EmptyResponse> LeaveRoomAsync(string roomId);
 
     [Post("/_matrix/client/v3/rooms/{roomId}/invite")]
-    Task<MatrixRoom> InviteToRoomAsync(string roomId, InviteToRoomRequest request);
+    Task<EmptyResponse> InviteToRoomAsync(string roomId, InviteToRoomRequest request);
 
     [Get("/_matrix/client/v3/rooms/{roomId}/messages")]
     Task<List<MatrixEvent<MatrixMessage>>> GetMessagesAsync(string roomId);
 
     [Post("/_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}")]
-    Task<MatrixEvent> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request);
+    Task<SendMessageReponse> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request);
 
     [Get("/_matrix/client/v3/presence/{userId}/status")]
     Task<BlossomPresence> GetPresenceAsync(string userId);
 
     [Put("/_matrix/client/v3/presence/{userId}/status")]
     Task SetPresenceAsync(string userId, BlossomPresence presence);
+
+    [Get("/_matrix/client/v3/sync")]
+    Task<GetSyncResponse> SyncAsync(string? Filter = null,
+        bool FullState = false,
+        string? SetPresence = null,
+        string? Since = null,
+        int Timeout = 0);
 }
 
 public record InviteToRoomRequest(string UserId);
@@ -51,7 +58,8 @@ public record CreateRoomRequest(
     List<string>? Invite = null,
     List<StateEvent>? InitialState = null,
     Dictionary<string, object>? CreationContent = null);
-public record CreateRoomResponse(string RoomId);
+public record EmptyResponse();
+public record RoomIdResponse(string RoomId);
 public record SendMessageRequest(string Body, string MsgType = "m.text");
 public record DeleteRoomRequest(string RoomId);
 

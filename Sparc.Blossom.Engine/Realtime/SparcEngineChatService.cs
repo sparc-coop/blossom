@@ -5,16 +5,16 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Realtime;
 
-public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<BlossomUser> auth)
-    : IBlossomEndpoints
+public class SparcEngineChatService(ClaimsPrincipal principal, MatrixEvents events, SparcAuthenticator<BlossomUser> auth)
+    : IBlossomEndpoints, ISparcChat
 {
-    private async Task<BlossomPresence> GetPresenceAsync(ClaimsPrincipal principal, string userId)
+    public async Task<BlossomPresence> GetPresenceAsync(string userId)
     {
         var user = await auth.GetAsync(principal);
         return new BlossomPresence(user.Avatar);
     }
 
-    private async Task SetPresenceAsync(ClaimsPrincipal principal, string userId, BlossomPresence presence)
+    public async Task SetPresenceAsync(string userId, BlossomPresence presence)
     {
         var user = await auth.GetAsync(principal);
         presence.ApplyToAvatar(user.Avatar);
@@ -22,11 +22,11 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
         await auth.UpdateAsync(user);
     }
 
-    private async Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null)
+    public async Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null)
     {
         var createdRooms = await events.Query<CreateRoom>().ToListAsync();
 
-        var rooms = new List<MatrixRoom>();
+        var rooms = new List<MatrixRoomSummary>();
         // Eventually do this in the background to show a published room directory
         foreach (var createdRoom in createdRooms)
         {
@@ -37,7 +37,7 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
         return new(rooms);
     }
 
-    private async Task<MatrixRoom> GetRoomSummaryAsync(string roomId)
+    public async Task<MatrixRoomSummary> GetRoomSummaryAsync(string roomId)
     {
         if (!roomId.Contains(':'))
             roomId = roomId + ":" + MatrixEvents.Domain;
@@ -45,7 +45,7 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
         return await events.GetRoomAsync(roomId);
     }
 
-    private async Task<CreateRoomResponse> CreateRoomAsync(CreateRoomRequest request)
+    public async Task<RoomIdResponse> CreateRoomAsync(CreateRoomRequest request)
     {
         var roomId = "!" + MatrixEvent.OpaqueId() + ":" + MatrixEvents.Domain;
         await events.PublishAsync(roomId, new CreateRoom());
@@ -90,7 +90,7 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
         return new(roomId);
     }
 
-    private async Task<MatrixRoom> DeleteRoomAsync(string roomId)
+    public async Task<EmptyResponse> DeleteRoomAsync(string roomId)
     {
         //var memberships = await Memberships.Query
         //    .Where(m => m.RoomId == roomId)
@@ -109,63 +109,62 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
         //    await Rooms.DeleteAsync(room);
 
         //return room;
-        return null;
+        return new();
     }
 
-    private async Task JoinRoomAsync(string roomId)
+    public async Task<RoomIdResponse> JoinRoomAsync(string roomId)
     {
         await events.PublishAsync(roomId, new ChangeMembershipState("join", events.MatrixSenderId!));
+        return new(roomId);
     }
 
-    private async Task LeaveRoomAsync(string roomId)
+    public async Task<EmptyResponse> LeaveRoomAsync(string roomId)
     {
         await events.PublishAsync(roomId, new ChangeMembershipState("leave", events.MatrixSenderId!));
+        return new();
     }
 
-    private async Task InviteToRoomAsync(string roomId, InviteToRoomRequest request)
+    public async Task<EmptyResponse> InviteToRoomAsync(string roomId, InviteToRoomRequest request)
     {
         await events.PublishAsync(roomId, new ChangeMembershipState("invite", request.UserId));
+        return new();
     }
 
-    private async Task<SendMessageReponse> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request)
+    public async Task<SendMessageReponse> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request)
     {
         var ev = await events.PublishAsync(roomId, new MatrixMessage(request.Body));
         return new(ev.EventId);
     }
 
-    private async Task<List<MatrixEvent<MatrixMessage>>> GetMessagesAsync(string roomId)
+    public async Task<List<MatrixEvent<MatrixMessage>>> GetMessagesAsync(string roomId)
     {
         return await events.GetAllAsync<MatrixMessage>(roomId);
     }
 
-    //private async Task<GetSyncResponse> GetSyncAsync()
-    //{
-    //    var user = await auth.GetAsync(principal);
-    //    return await events.GetSyncAsync(user, since, timeout);
-    //}
+    public Task<GetSyncResponse> SyncAsync(string? Filter = null, bool FullState = false, string? SetPresence = null, string? Since = null, int Timeout = 0)
+    {
+        throw new NotImplementedException();
+    }
 
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var chatGroup = endpoints.MapGroup("/_matrix/client/v3");
 
         //chatGroup.MapGet("/sync", GetSyncAsync);
-        chatGroup.MapGet("/publicRooms", GetRoomsAsync);
-        chatGroup.MapPost("/createRoom", CreateRoomAsync);
-        chatGroup.MapPost("/deleteRoom/{roomId}", DeleteRoomAsync);
-        chatGroup.MapPost("/join/{roomId}", JoinRoomAsync);
-        chatGroup.MapPost("/rooms/{roomId}/leave", LeaveRoomAsync);
-        chatGroup.MapPost("/rooms/{roomId}/invite", InviteToRoomAsync);
-        chatGroup.MapGet("/rooms/{roomId}/messages", GetMessagesAsync);
+        chatGroup.MapGet("/publicRooms", async (SparcEngineChatService chats) => await chats.GetRoomsAsync());
+        chatGroup.MapPost("/createRoom", async (SparcEngineChatService chats, CreateRoomRequest request) => await chats.CreateRoomAsync(request));
+        chatGroup.MapPost("/deleteRoom/{roomId}", async (SparcEngineChatService chats, string roomId) => await chats.DeleteRoomAsync(roomId));
+        chatGroup.MapPost("/join/{roomId}", async (SparcEngineChatService chats, string roomId) => await chats.JoinRoomAsync(roomId));
+        chatGroup.MapPost("/rooms/{roomId}/leave", async (SparcEngineChatService chats, string roomId) => await chats.LeaveRoomAsync(roomId));
+        chatGroup.MapPost("/rooms/{roomId}/invite", async (SparcEngineChatService chats, string roomId, InviteToRoomRequest request) => await chats.InviteToRoomAsync(roomId, request));
+        chatGroup.MapGet("/rooms/{roomId}/messages", async (SparcEngineChatService chats, string roomId) => await chats.GetMessagesAsync(roomId));
         chatGroup.MapPost("/rooms/{roomId}/send/{eventType}/{txnId}", SendMessageAsync);
 
         // Map the presence endpoint
-        chatGroup.MapGet("/presence/{userId}/status", async (ClaimsPrincipal principal, string userId) =>
+        chatGroup.MapGet("/presence/{userId}/status", async (SparcEngineChatService chats, string userId) => await chats.GetPresenceAsync(userId));
+        chatGroup.MapPut("/presence/{userId}/status", async (SparcEngineChatService chats, string userId, BlossomPresence presence) =>
         {
-            return await GetPresenceAsync(principal, userId);
-        });
-        chatGroup.MapPut("/presence/{userId}/status", async (ClaimsPrincipal principal, string userId, BlossomPresence presence) =>
-        {
-            await SetPresenceAsync(principal, userId, presence);
+            await chats.SetPresenceAsync(userId, presence);
             return Results.Ok();
         });
 

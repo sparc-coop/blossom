@@ -1,6 +1,6 @@
 ﻿namespace Sparc.Blossom.Realtime.Matrix;
 
-public class MatrixRoom(string roomId, string? roomType)
+public class MatrixRoomSummary(string roomId, string? roomType)
 {
     public string RoomId { get; set; } = roomId;
     public string? RoomType { get; set; } = roomType;
@@ -15,13 +15,13 @@ public class MatrixRoom(string roomId, string? roomType)
 
     public string LocalId => RoomId.Split(':').First();
 
-    public static MatrixRoom From(IEnumerable<MatrixEvent> events)
+    public static MatrixRoomSummary From(IEnumerable<MatrixEvent> events)
     {
         var orderedEvents = events.OrderBy(x => x.Depth);
 
         var rootEvent = events.OfType<MatrixEvent<CreateRoom>>().First();
 
-        var room = new MatrixRoom(rootEvent.RoomId, rootEvent.Content.Type);
+        var room = new MatrixRoomSummary(rootEvent.RoomId, rootEvent.Content.Type);
         foreach (var ev in orderedEvents)
             ev.ApplyTo(room);
 

@@ -2,7 +2,7 @@
 
 public record RoomTopic(string Topic) : IMatrixRoomEvent
 {
-    public void ApplyTo(MatrixRoom room)
+    public void ApplyTo(MatrixRoomSummary room)
     {
         room.Topic = Topic;
     }

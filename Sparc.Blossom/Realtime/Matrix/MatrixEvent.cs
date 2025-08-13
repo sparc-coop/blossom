@@ -37,7 +37,7 @@ public class MatrixEvent(string roomId, string sender) : BlossomEntity<string>()
         return new MatrixEvent<T>(roomId, sender, content, previousEvents);
     }
 
-    public virtual void ApplyTo(MatrixRoom room)
+    public virtual void ApplyTo(MatrixRoomSummary room)
     { 
     }
     
@@ -112,7 +112,7 @@ public class MatrixEvent<T> : MatrixEvent
                     .Replace("/", "_");
     }
 
-    public override void ApplyTo(MatrixRoom room)
+    public override void ApplyTo(MatrixRoomSummary room)
     {
         if (Content is IMatrixRoomEvent ev)
             ev.ApplyTo(room);
@@ -121,7 +121,7 @@ public class MatrixEvent<T> : MatrixEvent
 
 public interface IMatrixRoomEvent
 {
-    void ApplyTo(MatrixRoom room);
+    void ApplyTo(MatrixRoomSummary room);
 }
 
 public record MatrixEventHash(string Sha256);
