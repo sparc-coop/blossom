@@ -1,0 +1,26 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+
+@using Sparc.Blossom.Chat.Example
+@using Sparc.Blossom.Chat.Example.Rooms
+@using Sparc.Blossom.Chat.Example.Shared
+@using Sparc.Blossom.Chat.Example.Shared.Components
+@using Sparc.Blossom.Chat.Example.Shared.Assets
+@using Sparc.Blossom.Chat.Example.Shared.Icons
+@using Sparc.Blossom.Realtime
+@using Sparc.Blossom.Realtime.Matrix
+@using Sparc.Blossom.Authentication
+
+@inject ISparcChat Chats
+
+@inject IJSRuntime Js
+@inject NavigationManager Nav
+
+@* Remove later *@
+@using Sparc.MCN.Users

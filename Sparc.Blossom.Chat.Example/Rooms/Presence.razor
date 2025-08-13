@@ -1,0 +1,52 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using Sparc.Blossom.Authentication
+
+<div class="presence-selector">
+    <h4>Status</h4>
+
+    @if (Avatar.Presence != null)
+    {
+        <select value="@Avatar.Presence.Presence" @onchange="OnPresenceChanged">
+            <option value="online">🟢 Online</option>
+            <option value="unavailable">🟡 Away</option>
+            <option value="offline">⚫ Offline</option>
+        </select>
+
+        <input type="text" @bind="@Avatar.Presence.StatusMsg" @onblur="SavePresenceMsg" placeholder="Status message..." />
+    }
+</div>
+
+
+@inject ISparcAura Aura
+@code {
+    [Parameter] public required BlossomAvatar Avatar { get; set; }
+
+    protected override void OnParametersSet()
+    {
+        if (Avatar.Presence == null)
+        {
+            Avatar.Presence = new BlossomPresence
+            {
+                Presence = "offline",
+                StatusMsg = null,
+                LastActiveAgo = null
+            };
+        }
+    }
+
+    private async Task SavePresenceMsg()
+    {
+        await Chats.SetPresenceAsync(Avatar.Id, Avatar.Presence);
+    }
+
+    private async Task OnPresenceChanged(ChangeEventArgs e)
+    {
+        var status = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(status))
+            return;
+
+        Avatar.Presence.Presence = status;
+        await Aura.UpdateUserInfo(Avatar);
+        await Chats.SetPresenceAsync(Avatar.Id, Avatar.Presence);
+    }
+}

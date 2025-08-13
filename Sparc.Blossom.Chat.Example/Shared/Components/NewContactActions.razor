@@ -1,0 +1,33 @@
+﻿<div class="contact-actions">
+    <button class="confirm-btn secondary-btn">
+        <CheckCircledIcon />
+        <div>
+            <p>Save to my MCN contact</p>
+            <aside>Save this info to my secured contacts.</aside>
+        </div>
+        <div class="recommended">Best</div>
+    </button>
+    <button class="download-btn secondary-btn">
+        <DownloadIcon />
+        <div>
+            <p>I'd like to update</p>
+            <aside>Some information is changed</aside>
+        </div>
+
+    </button>
+    <button class="decline-btn secondary-btn">
+        <CloseIcon />
+        <div>
+            <p>No, it's not me</p>
+            <aside>I am not this person</aside>
+        </div>
+    </button>
+    <button class="text-btn">Do you need help?</button>
+</div>
+
+
+@code {
+    [Parameter] public EventCallback OnConfirmContact { get; set; }
+    [Parameter] public EventCallback OnEditContact { get; set; }
+    [Parameter] public EventCallback OnDeclineContact { get; set; }
+}

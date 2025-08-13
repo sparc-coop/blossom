@@ -1,8 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Sparc.Blossom.Authentication;
-using Sparc.Engine.Aura;
 
 namespace Sparc.Blossom.Platforms.Server;
 

@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Data.SqlServe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sparc.Blossom.Data.AzureStorage", "Sparc.Blossom.Data.AzureStorage\Sparc.Blossom.Data.AzureStorage.csproj", "{D535D2C5-8982-414B-BA87-D193F9CAFFF3}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sparc.Blossom.Authentication", "Sparc.Blossom.Authentication", "{83F7C43B-B59D-4A53-9A86-23491B5AAC40}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sparc.Blossom", "Sparc.Blossom", "{83F7C43B-B59D-4A53-9A86-23491B5AAC40}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sparc.Blossom.Data", "Sparc.Blossom.Data", "{3E532811-D187-4747-95F7-F774F0DBA5EA}"
 EndProject
@@ -44,6 +44,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sparc.Blossom.Cloud.AuthExample", "Sparc.Blossom.Cloud.AuthExample\Sparc.Blossom.Cloud.AuthExample.csproj", "{8C0285E9-C878-0022-4D2C-068C840CED0C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sparc.Core", "Sparc.Core\Sparc.Core.csproj", "{5E8A0A39-C6F5-64DD-9BF8-F8AC1ED30219}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sparc.Blossom.Engine", "Sparc.Blossom.Engine\Sparc.Blossom.Engine.csproj", "{D735B49B-87CF-0DED-63BE-9D4F685C9767}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -298,6 +300,22 @@ Global
 		{5E8A0A39-C6F5-64DD-9BF8-F8AC1ED30219}.Release|x64.Build.0 = Release|Any CPU
 		{5E8A0A39-C6F5-64DD-9BF8-F8AC1ED30219}.Release|x86.ActiveCfg = Release|Any CPU
 		{5E8A0A39-C6F5-64DD-9BF8-F8AC1ED30219}.Release|x86.Build.0 = Release|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Debug|arm64.Build.0 = Debug|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Debug|x64.Build.0 = Debug|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Debug|x86.Build.0 = Debug|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Release|arm64.ActiveCfg = Release|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Release|arm64.Build.0 = Release|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Release|x64.ActiveCfg = Release|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Release|x64.Build.0 = Release|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Release|x86.ActiveCfg = Release|Any CPU
+		{D735B49B-87CF-0DED-63BE-9D4F685C9767}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

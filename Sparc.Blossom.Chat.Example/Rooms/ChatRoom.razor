@@ -1,0 +1,57 @@
+﻿@using Sparc.Blossom.Realtime.Matrix
+
+<h3>Chat in @RoomId</h3>
+
+<div class="chat-container">
+    <div class="messages" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+        @if (messages.Any())
+        {
+            @foreach (var msg in messages)
+            {
+                <div class="message" style="margin-bottom:5px;">@msg.Sender: @msg.Content.Body</div>
+            }
+        }
+
+    </div>
+    <input @bind="currentMessage" placeholder="Type a message..." style="width:80%; padding:5px;" />
+    <button @onclick="SendMessage" style="padding:5px 10px; margin-left:5px;">Send</button>
+</div>
+
+@code {
+    [Parameter] public required string RoomId { get; set; }
+    private List<MatrixEvent<MatrixMessage>> messages = [];
+    private string currentMessage = "";
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(RoomId))
+        {
+            throw new ArgumentException("RoomId must be provided", nameof(RoomId));
+        }
+
+        await GetMessagesAsync();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(RoomId))
+            await GetMessagesAsync();
+    }
+
+    private async Task GetMessagesAsync()
+    {
+        messages = await Chats.GetMessagesAsync(RoomId);
+    }
+
+    private async Task SendMessage()
+    {
+        if (!string.IsNullOrWhiteSpace(currentMessage))
+        {
+            var txnId = Guid.NewGuid().ToString();
+            await Chats.SendMessageAsync(RoomId, "m.room.message", txnId, new(currentMessage));
+            
+            currentMessage = "";
+            await GetMessagesAsync();
+        }
+    }
+}

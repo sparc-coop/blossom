@@ -1,6 +1,6 @@
 ﻿using Sparc.Blossom;
 
-namespace Sparc.Engine;
+namespace Sparc.Blossom.Content;
 
 public record SourceContent(string PageId, string ContentId);
 public record TranslateContentRequest(Dictionary<string, string> ContentDictionary, bool AsHtml, string LanguageId);

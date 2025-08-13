@@ -1,0 +1,18 @@
+﻿@inherits LayoutComponentBase
+
+<div class="layout-container">
+    <nav>
+        <Sparc.Blossom.Authentication.SparcAura>
+            <Presence Avatar="context" />
+        </Sparc.Blossom.Authentication.SparcAura>
+    </nav>
+
+    <main>
+        <article id="main-content" class="main-content show">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+}

@@ -1,0 +1,31 @@
+﻿@using Sparc.Blossom.Realtime
+
+<header>
+    <h4>Avatar</h4>
+    <p>Customize your profile's avatar!</p>
+</header>
+<div>
+    <AuraAvatar Avatar="UserAvatar" />
+</div>
+<div>
+    <ColorSelector @bind-BackgroundColor="UserAvatar.BackgroundColor" @bind-BackgroundColor:after=Save />
+    <EmojiSelector Emoji="@UserAvatar.Emoji" EmojiChanged="HandleEmojiChanged" />
+</div>
+
+@inject ISparcAura Aura
+@inject SparcEvents Events
+@code {
+    [Parameter] public required BlossomAvatar UserAvatar { get; set; }
+
+    private async Task HandleEmojiChanged(string emoji)
+    {
+        UserAvatar.Emoji = emoji;
+        await Save();
+    }
+
+    async Task Save()
+    {
+        await Aura.UpdateUserInfo(UserAvatar);
+        await Events.OnAvatarChanged(UserAvatar);
+    }
+}

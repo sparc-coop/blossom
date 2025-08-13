@@ -1,0 +1,13 @@
+﻿<div class="message-card">
+    <p>
+        @Message.Content.Body
+    </p>
+    <aside>@DateTimeOffset.FromUnixTimeMilliseconds(Message.OriginServerTs).ToLocalTime().ToString("HH:mm")</aside>
+</div>
+
+@code {
+    [CascadingParameter] User? User { get; set; }
+    [Parameter] public required MatrixEvent<MatrixMessage> Message { get; set; }
+
+    // need logic for handling long strings
+}

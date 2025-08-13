@@ -166,9 +166,9 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
     }
 }
 
-public class BlossomAggregateOptions<T>(IRepository<T> repository, IHttpContextAccessor http)
+public class BlossomAggregateOptions<T>(IRepository<T> repository, ClaimsPrincipal principal)
     where T : BlossomEntity
 {
     public IRepository<T> Repository { get; } = repository;
-    public ClaimsPrincipal User => http.HttpContext?.User ?? new ClaimsPrincipal(new ClaimsIdentity());
+    public ClaimsPrincipal User => principal;
 }

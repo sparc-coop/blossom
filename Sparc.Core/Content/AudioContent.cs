@@ -1,4 +1,4 @@
-﻿namespace Sparc.Engine;
+﻿namespace Sparc.Blossom.Content;
 
 public record AudioContent(string? Url, long Duration, string Voice)
 {
