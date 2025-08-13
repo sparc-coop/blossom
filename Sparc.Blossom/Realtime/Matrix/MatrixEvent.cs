@@ -16,6 +16,7 @@ namespace Sparc.Blossom.Realtime.Matrix;
 [JsonDerivedType(typeof(MatrixEvent<GuestAccess>), "m.room.guest_access")]
 [JsonDerivedType(typeof(MatrixEvent<RoomName>), "m.room.name")]
 [JsonDerivedType(typeof(MatrixEvent<RoomTopic>), "m.room.topic")]
+[JsonDerivedType(typeof(MatrixEvent<BlossomPresence>), "m.presence")]
 public class MatrixEvent(string roomId, string sender) : BlossomEntity<string>(), MediatR.INotification
 {
     public string Type { get; set; } = "";

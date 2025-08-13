@@ -20,6 +20,7 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
         presence.ApplyToAvatar(user.Avatar);
         user.UpdateAvatar(user.Avatar);
         await auth.UpdateAsync(user);
+        await events.PublishAsync(userId, presence);
     }
 
     private async Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null)
