@@ -21,3 +21,5 @@ public record GetProductResponse
     string Currency,
     string FormattedPrice
 );
+
+public record SparcProductActivationOptions(int MaxUsage);
