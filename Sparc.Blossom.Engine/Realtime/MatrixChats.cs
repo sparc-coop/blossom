@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Realtime;
 
-public class SparcEngineChatService(ClaimsPrincipal principal, MatrixEvents events, SparcAuthenticator<BlossomUser> auth)
+public class MatrixChats(ClaimsPrincipal principal, MatrixEvents events, SparcAuthenticator<BlossomUser> auth)
     : IBlossomEndpoints, ISparcChat
 {
     public async Task<BlossomPresence> GetPresenceAsync(string userId)
@@ -151,18 +151,18 @@ public class SparcEngineChatService(ClaimsPrincipal principal, MatrixEvents even
         var chatGroup = endpoints.MapGroup("/_matrix/client/v3");
 
         //chatGroup.MapGet("/sync", GetSyncAsync);
-        chatGroup.MapGet("/publicRooms", async (SparcEngineChatService chats) => await chats.GetRoomsAsync());
-        chatGroup.MapPost("/createRoom", async (SparcEngineChatService chats, CreateRoomRequest request) => await chats.CreateRoomAsync(request));
-        chatGroup.MapPost("/deleteRoom/{roomId}", async (SparcEngineChatService chats, string roomId) => await chats.DeleteRoomAsync(roomId));
-        chatGroup.MapPost("/join/{roomId}", async (SparcEngineChatService chats, string roomId) => await chats.JoinRoomAsync(roomId));
-        chatGroup.MapPost("/rooms/{roomId}/leave", async (SparcEngineChatService chats, string roomId) => await chats.LeaveRoomAsync(roomId));
-        chatGroup.MapPost("/rooms/{roomId}/invite", async (SparcEngineChatService chats, string roomId, InviteToRoomRequest request) => await chats.InviteToRoomAsync(roomId, request));
-        chatGroup.MapGet("/rooms/{roomId}/messages", async (SparcEngineChatService chats, string roomId) => await chats.GetMessagesAsync(roomId));
+        chatGroup.MapGet("/publicRooms", async (MatrixChats chats) => await chats.GetRoomsAsync());
+        chatGroup.MapPost("/createRoom", async (MatrixChats chats, CreateRoomRequest request) => await chats.CreateRoomAsync(request));
+        chatGroup.MapPost("/deleteRoom/{roomId}", async (MatrixChats chats, string roomId) => await chats.DeleteRoomAsync(roomId));
+        chatGroup.MapPost("/join/{roomId}", async (MatrixChats chats, string roomId) => await chats.JoinRoomAsync(roomId));
+        chatGroup.MapPost("/rooms/{roomId}/leave", async (MatrixChats chats, string roomId) => await chats.LeaveRoomAsync(roomId));
+        chatGroup.MapPost("/rooms/{roomId}/invite", async (MatrixChats chats, string roomId, InviteToRoomRequest request) => await chats.InviteToRoomAsync(roomId, request));
+        chatGroup.MapGet("/rooms/{roomId}/messages", async (MatrixChats chats, string roomId) => await chats.GetMessagesAsync(roomId));
         chatGroup.MapPost("/rooms/{roomId}/send/{eventType}/{txnId}", SendMessageAsync);
 
         // Map the presence endpoint
-        chatGroup.MapGet("/presence/{userId}/status", async (SparcEngineChatService chats, string userId) => await chats.GetPresenceAsync(userId));
-        chatGroup.MapPut("/presence/{userId}/status", async (SparcEngineChatService chats, string userId, BlossomPresence presence) =>
+        chatGroup.MapGet("/presence/{userId}/status", async (MatrixChats chats, string userId) => await chats.GetPresenceAsync(userId));
+        chatGroup.MapPut("/presence/{userId}/status", async (MatrixChats chats, string userId, BlossomPresence presence) =>
         {
             await chats.SetPresenceAsync(userId, presence);
             return Results.Ok();

@@ -8,7 +8,7 @@ public static class ServiceCollectionExtensions
     {
         builder.Services
             .AddTransient<MatrixEvents>()
-            .AddTransient<SparcEngineChatService>();
+            .AddTransient<MatrixChats>();
 
         return builder;
     }
@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
         using var scope = app.Services.CreateScope();
         var chatSvc = scope
             .ServiceProvider
-            .GetRequiredService<SparcEngineChatService>();
+            .GetRequiredService<MatrixChats>();
 
         chatSvc.Map(app);
         return app;
