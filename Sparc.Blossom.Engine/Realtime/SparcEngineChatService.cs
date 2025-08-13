@@ -138,10 +138,17 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
         return await events.GetAllAsync<MatrixMessage>(roomId);
     }
 
+    //private async Task<GetSyncResponse> GetSyncAsync()
+    //{
+    //    var user = await auth.GetAsync(principal);
+    //    return await events.GetSyncAsync(user, since, timeout);
+    //}
+
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var chatGroup = endpoints.MapGroup("/_matrix/client/v3");
 
+        //chatGroup.MapGet("/sync", GetSyncAsync);
         chatGroup.MapGet("/publicRooms", GetRoomsAsync);
         chatGroup.MapPost("/createRoom", CreateRoomAsync);
         chatGroup.MapPost("/deleteRoom/{roomId}", DeleteRoomAsync);
