@@ -54,3 +54,53 @@ public record CreateRoomRequest(
 public record CreateRoomResponse(string RoomId);
 public record SendMessageRequest(string Body, string MsgType = "m.text");
 public record DeleteRoomRequest(string RoomId);
+
+public record GetSyncResponse(
+    string next_batch,
+    Rooms rooms,
+    AccountData account_data,
+    Presence presence,
+    ToDevice to_device,
+    Dictionary<string, int> device_one_time_keys_count,
+    DeviceLists device_lists);
+
+public record Rooms(
+    Dictionary<string, JoinedRoom> join,
+    Dictionary<string, InvitedRoom> invite,
+    Dictionary<string, KnockedRoom> knock,
+    Dictionary<string, LeftRoom> leave);
+
+public record AccountData(List<ClientEvent> events);
+public record Presence(List<ClientEvent> events);
+public record ToDevice(List<ClientEvent> events);
+public record DeviceLists(List<string> changed, List<string> left);
+
+public record JoinedRoom(
+    AccountData account_data,
+    Ephemeral ephemeral,
+    State state,
+    RoomSummary summary,
+    Timeline timeline,
+    UnreadNotificationCounts unread_notifications,
+    Dictionary<string, ThreadNotificationCounts>? unread_thread_notifications);
+
+public record InvitedRoom(InviteState invite_state);
+public record KnockedRoom(KnockState knock_state);
+public record LeftRoom(AccountData account_data, State state, Timeline timeline);
+
+public record InviteState(List<StrippedStateEvent> events);
+public record KnockState(List<StrippedStateEvent> events);
+
+public record Ephemeral(List<ClientEvent> events);
+public record State(List<ClientEventWithState> events);
+public record RoomSummary(Dictionary<string, object>? dummy = null);
+public record Timeline(List<ClientEventWithState> events, bool limited, string? prev_batch);
+public record UnreadNotificationCounts(int notification_count, int highlight_count);
+public record ThreadNotificationCounts(int notification_count, int highlight_count);
+
+public record ClientEvent(string type, object content, string? sender = null);
+public record ClientEventWithState(string type, object content, string sender, string? state_key = null);
+
+public record StrippedStateEvent(string type, string state_key, string sender, object content);
+public record RoomFilter(RoomEventFilter? room, RoomEventFilter? room_state);
+public record RoomEventFilter(int? limit = null, bool? lazy_load_members = null);
