@@ -22,7 +22,7 @@ public class MatrixChats(ClaimsPrincipal principal, MatrixEvents events, SparcAu
         await auth.UpdateAsync(user);
     }
 
-    public async Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null)
+    public async Task<GetPublicRoomsResponse> GetPublicRoomsAsync(int? limit = null, string? since = null, string? server = null)
     {
         var createdRooms = await events.Query<CreateRoom>().ToListAsync();
 
@@ -90,28 +90,6 @@ public class MatrixChats(ClaimsPrincipal principal, MatrixEvents events, SparcAu
         return new(roomId);
     }
 
-    public async Task<EmptyResponse> DeleteRoomAsync(string roomId)
-    {
-        //var memberships = await Memberships.Query
-        //    .Where(m => m.RoomId == roomId)
-        //    .ToListAsync();
-
-        //if (memberships != null)
-        //{
-        //    foreach (var membership in memberships)
-        //    {
-        //        await Memberships.DeleteAsync(membership);
-        //    }
-        //}
-
-        //var room = await Rooms.FindAsync(roomId);
-        //if (room != null)
-        //    await Rooms.DeleteAsync(room);
-
-        //return room;
-        return new();
-    }
-
     public async Task<RoomIdResponse> JoinRoomAsync(string roomId)
     {
         await events.PublishAsync(roomId, new ChangeMembershipState("join", events.MatrixSenderId!));
@@ -141,9 +119,17 @@ public class MatrixChats(ClaimsPrincipal principal, MatrixEvents events, SparcAu
         return await events.GetAllAsync<MatrixMessage>(roomId);
     }
 
-    public Task<GetSyncResponse> SyncAsync(string? Filter = null, bool FullState = false, string? SetPresence = null, string? Since = null, int Timeout = 0)
+    public async Task<GetSyncResponse> SyncAsync(string? Since = null, string? Filter = null, bool FullState = false, string? SetPresence = null, int Timeout = 0)
     {
-        throw new NotImplementedException();
+        var since = long.Parse(Since ?? "0");
+
+        var roomUpdates = await events.GetRoomUpdatesAsync(since);
+
+        var lastTimestamp = roomUpdates.Join.Count > 0 
+            ? roomUpdates.Join.Values.Max(x => x.Timeline.Events.Max(y => y.OriginServerTs)).ToString() 
+            : DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
+
+        return new(lastTimestamp, roomUpdates, new([]), new([]));
     }
 
     public void Map(IEndpointRouteBuilder endpoints)
@@ -151,14 +137,15 @@ public class MatrixChats(ClaimsPrincipal principal, MatrixEvents events, SparcAu
         var chatGroup = endpoints.MapGroup("/_matrix/client/v3");
 
         //chatGroup.MapGet("/sync", GetSyncAsync);
-        chatGroup.MapGet("/publicRooms", async (MatrixChats chats) => await chats.GetRoomsAsync());
+        chatGroup.MapGet("/publicRooms", async (MatrixChats chats) => await chats.GetPublicRoomsAsync());
         chatGroup.MapPost("/createRoom", async (MatrixChats chats, CreateRoomRequest request) => await chats.CreateRoomAsync(request));
-        chatGroup.MapPost("/deleteRoom/{roomId}", async (MatrixChats chats, string roomId) => await chats.DeleteRoomAsync(roomId));
         chatGroup.MapPost("/join/{roomId}", async (MatrixChats chats, string roomId) => await chats.JoinRoomAsync(roomId));
         chatGroup.MapPost("/rooms/{roomId}/leave", async (MatrixChats chats, string roomId) => await chats.LeaveRoomAsync(roomId));
         chatGroup.MapPost("/rooms/{roomId}/invite", async (MatrixChats chats, string roomId, InviteToRoomRequest request) => await chats.InviteToRoomAsync(roomId, request));
         chatGroup.MapGet("/rooms/{roomId}/messages", async (MatrixChats chats, string roomId) => await chats.GetMessagesAsync(roomId));
         chatGroup.MapPost("/rooms/{roomId}/send/{eventType}/{txnId}", SendMessageAsync);
+        chatGroup.MapGet("/sync", async (MatrixChats chats, string? since, string? filter, bool fullState, string? setPresence, int timeout) =>
+            await chats.SyncAsync(since, filter, fullState, setPresence, timeout));
 
         // Map the presence endpoint
         chatGroup.MapGet("/presence/{userId}/status", async (MatrixChats chats, string userId) => await chats.GetPresenceAsync(userId));

@@ -6,16 +6,13 @@ namespace Sparc.Blossom.Realtime;
 public interface ISparcChat
 {
     [Get("/_matrix/client/v3/publicRooms")]
-    Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null);
+    Task<GetPublicRoomsResponse> GetPublicRoomsAsync(int? limit = null, string? since = null, string? server = null);
 
     [Get("/_matrix/client/v1/room_summary/{roomId}")]
     Task<MatrixRoomSummary> GetRoomSummaryAsync(string roomId);
 
     [Post("/_matrix/client/v3/createRoom")]
     Task<RoomIdResponse> CreateRoomAsync(CreateRoomRequest request);
-
-    [Post("/_matrix/client/v3/deleteRoom/{roomId}")]
-    Task<EmptyResponse> DeleteRoomAsync(string roomId);
 
     [Post("/_matrix/client/v3/join/{roomId}")]
     Task<RoomIdResponse> JoinRoomAsync(string roomId);
@@ -39,10 +36,10 @@ public interface ISparcChat
     Task SetPresenceAsync(string userId, BlossomPresence presence);
 
     [Get("/_matrix/client/v3/sync")]
-    Task<GetSyncResponse> SyncAsync(string? Filter = null,
+    Task<GetSyncResponse> SyncAsync(string? Since = null,
+        string? Filter = null,
         bool FullState = false,
         string? SetPresence = null,
-        string? Since = null,
         int Timeout = 0);
 }
 
@@ -68,7 +65,7 @@ public record GetSyncResponse(
     Rooms Rooms,
     EventList AccountData,
     EventList Presence,
-    EventList ToDevice,
+    EventList? ToDevice = null,
     Dictionary<string, int>? DeviceOneTimeKeysCount = null,
     DeviceLists? DeviceLists = null);
 
@@ -79,6 +76,7 @@ public record Rooms(
     Dictionary<string, LeftRoom> Leave);
 
 public record EventList(List<MatrixEvent> Events);
+public record StrippedStateEventList(List<MatrixStrippedStateEvent> Events);
 public record DeviceLists(List<string> Changed, List<string> Left);
 
 public record JoinedRoom(
@@ -88,10 +86,21 @@ public record JoinedRoom(
     RoomSummary Summary,
     Timeline Timeline,
     NotificationCounts UnreadNotifications,
-    Dictionary<string, NotificationCounts>? UnreadThreadNotifications);
+    Dictionary<string, NotificationCounts>? UnreadThreadNotifications)
+{
+    public JoinedRoom() : this(
+        new EventList([]),
+        new EventList([]),
+        new EventList([]),
+        new RoomSummary([], 0, 0),
+        new Timeline([], false, null),
+        new NotificationCounts(0, 0),
+        null)
+    { }
+}
 
-public record InvitedRoom(EventList InviteState);
-public record KnockedRoom(EventList KnockState);
+public record InvitedRoom(StrippedStateEventList InviteState);
+public record KnockedRoom(StrippedStateEventList KnockState);
 public record LeftRoom(EventList AccountData, EventList State, EventList Timeline);
 
 public record RoomSummary(List<string> Heroes, int InvitedMemberCount, int JoinedMemberCount);

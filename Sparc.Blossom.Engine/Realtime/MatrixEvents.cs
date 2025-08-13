@@ -1,6 +1,7 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 using Sparc.Blossom.Realtime.Matrix;
+using System.Collections.Generic;
 
 namespace Sparc.Blossom.Realtime;
 
@@ -21,11 +22,15 @@ public class MatrixEvents(
         return ev;
     }
 
-    internal async Task<List<MatrixEvent>> GetAllAsync(string roomId)
+    internal async Task<List<MatrixEvent>> GetAllAsync(string roomId, long? since = null)
     {
-        return await events.Query
-            .Where(x => x.RoomId == roomId)
-            .OrderBy(x => x.Depth)
+        var query = events.Query.Where(x => x.RoomId == roomId);
+
+        if (since.HasValue)
+            query = query.Where(x => x.OriginServerTs > since.Value);
+
+        return await query
+            .OrderBy(x => x.OriginServerTs)
             .ToListAsync();
     }
 
@@ -34,10 +39,63 @@ public class MatrixEvents(
         var type = MatrixEvent.Types<T>();
         var result = await events.Query
             .Where(e => e.RoomId == roomId && e.Type == type)
-            .OrderBy(x => x.Depth)
+            .OrderBy(x => x.OriginServerTs)
             .ToListAsync();
 
         return result.Cast<MatrixEvent<T>>().ToList();
+    }
+
+    internal async Task<Rooms> GetRoomUpdatesAsync(long since)
+    {
+        var userId = await GetMatrixSenderIdAsync();
+
+        var events = await Query<ChangeMembershipState>(since)
+            .Where(e => e.StateKey == userId)
+            .ToListAsync();
+
+        var membershipChanges = events.Cast<MatrixEvent<ChangeMembershipState>>().ToList();
+
+        var joinedRooms = membershipChanges.Where(e => e.Content.Membership == "join")
+            .GroupBy(x => x.RoomId)
+            .ToDictionary(x => x.Key, x => new JoinedRoom());
+
+        foreach (var joinedRoom in joinedRooms)
+        {
+            var allRoomEvents = await GetAllAsync(joinedRoom.Key, since);
+            joinedRoom.Value.Timeline.Events.AddRange(allRoomEvents.Where(x => x.Type == MatrixEvent.Types<MatrixMessage>()));
+        }
+
+        var invitedRooms = membershipChanges.Where(e => e.Content.Membership == "invite")
+            .GroupBy(x => x.RoomId)
+            .ToDictionary(x => x.Key, x => new InvitedRoom(new([])));
+
+        foreach (var invitedRoom in invitedRooms)
+        {
+            var strippedInvites = await GetStrippedStateEventsAsync(invitedRoom.Key, since);
+            invitedRoom.Value.InviteState.Events.AddRange(strippedInvites.Select(x => new MatrixStrippedStateEvent(x)));
+        }
+
+        var rooms = new Rooms(joinedRooms, invitedRooms, [], []);
+        return rooms;
+    }
+
+    readonly List<string> StrippedStateTypes =
+    [
+        MatrixEvent.Types<CreateRoom>(),
+        MatrixEvent.Types<RoomName>(),
+        MatrixEvent.Types<RoomTopic>(),
+        MatrixEvent.Types<JoinRules>(),
+        MatrixEvent.Types<CanonicalAlias>()
+    ];
+    internal async Task<List<MatrixEvent>> GetStrippedStateEventsAsync(string roomId, long? since = null)
+    {
+        var query = events.Query
+            .Where(e => e.RoomId == roomId && StrippedStateTypes.Contains(e.Type));
+
+        if (since.HasValue)
+            query = query.Where(e => e.OriginServerTs > since.Value);
+
+        return await query.ToListAsync();
     }
 
     internal async Task<MatrixRoomSummary> GetRoomAsync(string roomId)
@@ -46,12 +104,17 @@ public class MatrixEvents(
         return MatrixRoomSummary.From(allRoomEvents);
     }
 
-    internal IQueryable<MatrixEvent> Query<T>()
+    internal IQueryable<MatrixEvent> Query<T>(long? since = null)
     {
         var type = MatrixEvent.Types<T>();
-        return events.Query
-            .Where(e => e.Type == type)
-            .OrderBy(x => x.Depth);
+
+        var query = events.Query
+            .Where(e => e.Type == type);
+
+        if (since.HasValue)
+            query = query.Where(e => e.OriginServerTs > since.Value);
+
+        return query.OrderBy(x => x.OriginServerTs);
     }
 
     private async Task<string> GetMatrixSenderIdAsync()
