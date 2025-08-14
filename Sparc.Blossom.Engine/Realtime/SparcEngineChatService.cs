@@ -17,9 +17,10 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
     private async Task SetPresenceAsync(ClaimsPrincipal principal, string userId, BlossomPresence presence)
     {
         var user = await auth.GetAsync(principal);
-        presence.ApplyToAvatar(user.Avatar);
-        user.UpdateAvatar(user.Avatar);
-        await auth.UpdateAsync(user);
+        // Instead of this, make an Update from IEnumerable<MatrixEvent> method in Blossom Avatar itself
+        //presence.ApplyToAvatar(user.Avatar);
+        //user.UpdateAvatar(user.Avatar);
+        //await auth.UpdateAsync(user);
         await events.PublishAsync(userId, presence);
     }
 

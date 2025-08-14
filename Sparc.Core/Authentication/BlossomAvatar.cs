@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Globalization;
 using Sparc.Blossom.Realtime;
 using Sparc.Blossom.Content;
+using Sparc.Blossom.Realtime.Matrix;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -55,6 +56,11 @@ public class BlossomAvatar
         Name = name;
         BackgroundColor = BackgroundColors().OrderBy(x => Guid.NewGuid()).First();
         Emoji = "😀";
+    }
+
+    // The stub for updating BlossomAvatar from a list of Events
+    public void Update(IEnumerable<MatrixEvent<BlossomPresence>> events)
+    { 
     }
 
     public static string CalculateForegroundColor(string backgroundColor)
