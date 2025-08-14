@@ -2,6 +2,8 @@
 
 namespace Sparc.Blossom.Realtime;
 
+// I think this should be MatrixPresence (or MatrixPresenceUpdated),
+// as it directly matches the Matrix spec
 public class BlossomPresence
 {
     public string Presence { get; set; } = "offline"; // "online", "offline", "unavailable"

@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Globalization;
 using Sparc.Blossom.Realtime;
 using Sparc.Blossom.Content;
-using Sparc.Blossom.Realtime.Matrix;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -22,6 +21,7 @@ public class BlossomAvatar
     public Language? Language { get; set; }
     public SparcCurrency? Currency { get; set; }
     public List<Language> LanguagesSpoken { get; set; } = [];
+    // This can be a different entity of any form that we want
     public BlossomPresence Presence { get; set; } = new();
 
     public string? Emoji { get; set; }
@@ -59,7 +59,10 @@ public class BlossomAvatar
     }
 
     // The stub for updating BlossomAvatar from a list of Events
-    public void Update(IEnumerable<MatrixEvent<BlossomPresence>> events)
+    // Step 1: Disconnect the BlossomPresence entity from a MatrixPresenceUpdated entity,
+    // and change this to receive the MatrixPresenceUpdated entities directly.
+    // Step 2: Implement the logic to update the BlossomAvatar based on the events.
+    public void Update(IEnumerable<BlossomPresence> events)
     { 
     }
 
