@@ -62,9 +62,15 @@ public class BlossomAvatar
     // Step 1: Disconnect the BlossomPresence entity from a MatrixPresenceUpdated entity,
     // and change this to receive the MatrixPresenceUpdated entities directly.
     // Step 2: Implement the logic to update the BlossomAvatar based on the events.
-    public void Update(IEnumerable<BlossomPresence> events)
-    { 
-    }
+    public void Update(IEnumerable<MatrixPresenceUpdated> events)
+    {
+        if (events == null) return;
+
+        foreach (var matrixPresence in events)
+        {
+            Presence.UpdateFromMatrix(matrixPresence, true);
+        }
+    }     
 
     public static string CalculateForegroundColor(string backgroundColor)
     {

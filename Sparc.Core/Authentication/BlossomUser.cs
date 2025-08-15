@@ -204,6 +204,10 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         Avatar.HearOthers = avatar.HearOthers;
         Avatar.MuteMe = avatar.MuteMe;
         Avatar.PasskeyName = avatar.PasskeyName;
+        Avatar.Presence.Presence = avatar.Presence.Presence;
+        Avatar.Presence.StatusMsg = avatar.Presence.StatusMsg;
+        Avatar.Presence.LastActiveAt = avatar.Presence.LastActiveAt;
+        Avatar.Presence.CurrentlyActive = avatar.Presence.CurrentlyActive;
     }
 
     internal void GoOnline(string connectionId)
