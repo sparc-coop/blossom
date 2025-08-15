@@ -1,0 +1,41 @@
+﻿<nav>
+    <div class="right">
+        <button class="profile-btn">
+            <img src="/images/Profile.svg" />
+        </button>
+        <button class="menu-btn" @onclick=ToggleMobileMenu>
+            <img src="icons/Menu.svg" />
+        </button>
+    </div>
+    <div class="nav-menu @(showMobileMenu ? "show" : "")">
+        <SecondaryLogo />
+        <ul>
+            <li><a href="/demo">Demo</a></li>
+            <li><a href="/">Domain</a></li>
+            <li><a href="/install">Installation</a></li>
+        </ul>
+    </div>
+    <div class="nav-mask">
+        <img src="/images/NavShape.png" />
+    </div>
+</nav>
+<div class="nav-overlay @(showOverlay ? "show" : "")" @onclick=ToggleMobileMenu></div>
+
+@code {
+    bool showMobileMenu;
+    bool showOverlay;
+
+    async Task ToggleMobileMenu()
+    {
+        showMobileMenu = !showMobileMenu;
+
+        if (showMobileMenu)
+        {
+            showOverlay = true;
+        } else
+        {
+            await Task.Delay(1500);
+            showOverlay = false;
+        }
+    }
+}

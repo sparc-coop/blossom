@@ -5,7 +5,7 @@
 	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.WebAssembly" Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'" />-->
 
 	<PropertyGroup>
-		<TargetFrameworks>net9.0</TargetFrameworks>
+		<TargetFrameworks>net9.0;net9.0-browser</TargetFrameworks>
 		<!--<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>-->
 
 		<SingleProject>true</SingleProject>
@@ -33,14 +33,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Remove="SparcEngine\Aura\Avatar\LoginWithPasskey.razor.js" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Content Include="SparcEngine\Aura\Avatar\LoginWithPasskey.razor.js" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.7" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.7" />
@@ -50,7 +42,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="9.0.7" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.7.0" />
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -100,7 +91,7 @@
 		<UseBlazorWebAssembly>true</UseBlazorWebAssembly>
 	</PropertyGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'">
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.7" />
 		<Compile Remove="**\*.xaml.cs" />
 		<None Include="**\*.xaml.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 		<Compile Remove="**\*.xaml" />
@@ -118,6 +109,7 @@
 		<DefineConstants>SERVER</DefineConstants>
 	</PropertyGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
+		<!--<FrameworkReference Include="Microsoft.AspNetCore.App" />-->
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.7" />
 		<Compile Remove="**\*.xaml.cs" />
 		<None Include="**\*.xaml.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
@@ -149,13 +141,10 @@
 	  </None>
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="Authentication\Icons\" />
 	  <Folder Include="buildTransitive\" />
-	  <Folder Include="wwwroot\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include="compilerconfig.json" />
-	  <None Include="SparcEngine\Aura\Avatar\LoginWithPasskey.razor" />
 	</ItemGroup>
 
 	<!-- Android -->

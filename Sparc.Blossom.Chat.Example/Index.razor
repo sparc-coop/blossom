@@ -1,0 +1,130 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<div>
+    <h3>Available Chat Rooms</h3>
+
+    <button class="btn btn-sm btn-primary" @onclick="GoToCreateRoom">Create New Room</button>
+
+    @if (Rooms == null)
+    {
+        <p><em>Loading rooms…</em></p>
+    }
+    else if (!Rooms.Any())
+    {
+        <p><em>No rooms available.</em></p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Room Name</th>
+                        <th style="width:120px">Membership</th>
+                        <th style="width:120px">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var room in Rooms)
+                    {
+                        <tr>
+                            <td @onclick="() => GoToRoom(room)">@(room.Name ?? room.RoomId.Substring(0, 8))</td>
+                            @if (UserIsInRoom(room))
+                            {
+                                <td>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => LeaveRoom(room)">
+                                        Leave
+                                    </button>
+                                </td>
+                            }
+                            else
+                            {
+                                <td>
+                                    <button class="btn btn-sm btn-primary" @onclick="() => JoinRoom(room)">
+                                        Join
+                                    </button>
+                                </td>
+                            }
+                            <td>
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteRoom(room)">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+<div style="max-height: 500px; max-width: 500px">
+    
+</div>
+
+
+@inject NavigationManager Nav
+@code {
+    private string? RoomId { get; set; }
+    private List<MatrixRoom> Rooms = [];
+
+    protected async override Task OnInitializedAsync()
+    {
+        await GetAllRooms();
+    }
+
+    private async Task GetAllRooms()
+    {
+        var response = await Chats.GetRoomsAsync();
+        Rooms = response.Chunk;
+    }
+
+    private void GoToRoom(MatrixRoom room)
+    {
+        Nav.NavigateTo("/room/" + room.LocalId);
+    }
+
+    private void GoToCreateRoom()
+    {
+        Nav.NavigateTo("/room/create");
+    }
+
+    private async Task JoinRoom(MatrixRoom room)
+    {
+        await Chats.JoinRoomAsync(room.RoomId);
+        await GetAllRooms();
+        StateHasChanged();
+    }
+
+    private async Task LeaveRoom(MatrixRoom room)
+    {
+        await Chats.LeaveRoomAsync(room.RoomId);
+        await GetAllRooms();
+        StateHasChanged();
+        var response = await Chats.GetRoomsAsync();
+        Rooms = response.Chunk;
+        if (Rooms.Any())
+        {
+            RoomId = Rooms.First().RoomId;
+        }
+    }
+
+    private async Task DeleteRoom(MatrixRoom room)
+    {
+        var deletedRoom = await Chats.DeleteRoomAsync(room.RoomId);
+        await GetAllRooms();
+        StateHasChanged();
+    }
+
+    async Task Create()
+    {
+        var room = await Chats.CreateRoomAsync(new(Visibility: "public"));
+        Nav.Refresh(true);
+    }
+
+    private bool UserIsInRoom(MatrixRoom room)
+    {
+        return true;
+    }
+}

@@ -1,7 +1,8 @@
-﻿using Sparc.Core.Billing;
-using Sparc.Engine;
+﻿using Sparc.Blossom.Billing;
 using System.Drawing;
 using System.Globalization;
+using Sparc.Blossom.Realtime;
+using Sparc.Blossom.Content;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -20,6 +21,7 @@ public class BlossomAvatar
     public Language? Language { get; set; }
     public SparcCurrency? Currency { get; set; }
     public List<Language> LanguagesSpoken { get; set; } = [];
+    public BlossomPresence Presence { get; set; } = new();
 
     public string? Emoji { get; set; }
     public string? SkinTone { get; set; }

@@ -4,7 +4,7 @@ using Sparc.Core;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-namespace Sparc.Engine;
+namespace Sparc.Blossom.Content;
 
 public record EditHistory(DateTime Timestamp, string Text);
 public record TovikContentTranslated(TextContent Content, int WordCount, decimal? Cost = null, string? Description = null, string? Response = null) : BlossomEvent(Content);

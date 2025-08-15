@@ -5,11 +5,11 @@ namespace Sparc.Blossom;
 
 public static partial class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddRemoteRepository<T, TResponse>
+    public static async Task<IServiceCollection> AddRemoteRepository<T, TResponse>
         (this IServiceCollection services, string url, Func<TResponse, IEnumerable<T>> transformer)
         where T : class
     {
-        var results = BlossomInMemoryRepository<T>.FromUrl(url, transformer);
+        var results = await BlossomInMemoryRepository<T>.FromUrlAsync(url, transformer);
         services.AddScoped<IRepository<T>>(_ => results);
 
         return services;

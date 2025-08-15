@@ -1,6 +1,6 @@
 ﻿using Sparc.Blossom;
 
-namespace Sparc.Engine;
+namespace Sparc.Blossom.Authentication;
 
 public class SparcDomain(string domain) : BlossomEntity<string>(Guid.NewGuid().ToString())
 {

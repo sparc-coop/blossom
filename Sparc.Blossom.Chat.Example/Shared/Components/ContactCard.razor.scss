@@ -1,0 +1,80 @@
+.contact-card {
+    width: var(--container-width) !important;
+    max-width: 339px;
+    padding: 18px 23px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    gap: 18px;
+    border-radius: 8px;
+    background: var(--white, #FFF);
+    /* Shadow/Elevation/Level 2 */
+    box-shadow: 0px 10px 20px 0px rgba(0, 18, 65, 0.04), 0px 2px 6px 0px rgba(0, 18, 65, 0.04), 0px 0px 1px 0px rgba(0, 18, 65, 0.04);
+
+    header {
+        display: flex;
+        flex-direction: row !important;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    ::deep .user-card {
+        span {
+            color: var(--primary);
+            font-weight: 500;
+        }
+    }
+
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+
+        .contact-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        aside {
+            color: var(--grey-300, #999);
+            font-family: Poppins;
+            font-size: 1rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 14px; /* 140% */
+        }
+
+        p {
+            color: var(--grey-800, #212121);
+            font-family: Inter;
+            font-size: 1.4rem;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 20px; /* 142.857% */
+            letter-spacing: -0.24px;
+        }
+
+        .name {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .address {
+            &-details {
+            }
+        }
+
+        .contact-methods {
+            .contact-item {
+                display: flex;
+                flex-direction: row;
+                justify-content: start;
+                align-items: center;
+                gap: 8px;
+            }
+        }
+    }
+}

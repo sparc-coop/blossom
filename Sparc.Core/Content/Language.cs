@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
 
-namespace Sparc.Engine;
+namespace Sparc.Blossom.Content;
 
 public record Language
 {
