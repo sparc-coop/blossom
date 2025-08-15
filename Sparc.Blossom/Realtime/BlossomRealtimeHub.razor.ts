@@ -1,8 +1,8 @@
-﻿import { ApplyRemoteChangesFunction, IPersistedContext, ISyncProtocol, PollContinuation, ReactiveContinuation } from './Dexie/api';
-import { Dexie } from './Dexie/dexie';
-import { IDatabaseChange } from './Dexie/dexie-observable/api';
-import './Dexie/dexie-observable/dexie-observable';
-import './Dexie/dexie-syncable/dexie-syncable';
+﻿import { ApplyRemoteChangesFunction, IPersistedContext, ISyncProtocol, PollContinuation, ReactiveContinuation } from '../Data/Dexie/api';
+import { Dexie } from '../Data/Dexie/dexie';
+import { IDatabaseChange } from '../Data/Dexie/dexie-observable/api';
+import '../Data/Dexie/dexie-observable/dexie-observable';
+import '../Data/Dexie/dexie-syncable/dexie-syncable';
 
 class BlossomSyncProtocol implements ISyncProtocol {
     partialsThreshold?: number;

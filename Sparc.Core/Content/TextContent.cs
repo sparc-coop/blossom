@@ -1,5 +1,4 @@
-﻿using Sparc.Blossom;
-using Sparc.Blossom.Authentication;
+﻿using Sparc.Blossom.Authentication;
 using Sparc.Core;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -37,7 +36,7 @@ public class TextContent : BlossomEntity<string>
     public string? PageId { get; internal set; }
 
     [JsonConstructor]
-    private TextContent()
+    internal TextContent()
     { }
 
     public TextContent(string domain, string languageId)
