@@ -29,7 +29,7 @@ internal class OpenAITranslationQuestion : OpenAIQuestion<OpenAITranslations>
         : base($"Translate the following to {toLanguage.DisplayName}:\n\n")
     {
         Instructions = "You are a translator seeking to accurately translate messages, using the same tone as the provided context, if any. If any message is not translatable, use the original message in the output, don't skip it.";
-        var messageJson = JsonSerializer.Serialize(messages.Select(x => new { x.Text }), TranslateAllUnicode);
+        var messageJson = JsonSerializer.Serialize(messages.Select(x => x.Text), TranslateAllUnicode);
         Text += messageJson;
 
         if (!string.IsNullOrWhiteSpace(additionalContext))
