@@ -17,7 +17,7 @@ public record ContentTranslation(string Id, Language Language, string? SourceCon
 public class TextContent : BlossomEntity<string>
 {
     public string Domain { get; set; } = null!;
-    public string? Path { get; set; }
+    public string Path { get; set; } = "";
     public string? SourceContentId { get; set; }
     public string LanguageId { get; set; } = null!;
     public Language Language { get; set; } = null!;
@@ -34,23 +34,23 @@ public class TextContent : BlossomEntity<string>
     public string OriginalText { get; set; } = "";
     internal List<EditHistory> EditHistory { get; set; } = [];
     public string Html { get; set; } = "";
-    public string? PageId { get; internal set; }
 
     [JsonConstructor]
     private TextContent()
     { }
 
-    public TextContent(string domain, string languageId)
+    public TextContent(string domain, string pageId, string languageId)
     {
         Id = Guid.NewGuid().ToString();
         Domain = domain;
+        Path = pageId;
         User = new BlossomUser().Avatar;
         Language = new(languageId);
         LanguageId = Language.Id;
     }
 
-    public TextContent(string domain, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
-        : this(domain, language.Id)
+    public TextContent(string domain, string pageId, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
+        : this(domain, pageId, language.Id)
     {
         Id = IdHash(text, language);
         User = user?.Avatar;
@@ -61,7 +61,7 @@ public class TextContent : BlossomEntity<string>
         SetText(text);
     }
 
-    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, toLanguage.Id)
+    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, sourceContent.Path, toLanguage.Id)
     {
         Id = sourceContent.Id; // this hash is coming from the client, so we use the source content's ID
         SourceContentId = sourceContent.Id;

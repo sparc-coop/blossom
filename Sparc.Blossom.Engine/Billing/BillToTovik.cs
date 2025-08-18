@@ -8,6 +8,7 @@ namespace Sparc.Blossom.Billing;
 public class BillToTovik(
     IRepository<BlossomUser> users,
     IRepository<SparcDomain> domains,
+    IRepository<Page> pages,
     IRepository<UserCharge> charges) : INotificationHandler<TovikContentTranslated>
 {
     public async Task Handle(TovikContentTranslated item, CancellationToken cancellationToken)
@@ -16,11 +17,37 @@ public class BillToTovik(
         var domain = await domains.Query.Where(d => d.Domain == item.Content.Domain)
             .FirstOrDefaultAsync();
 
+        await RegisterTovikUsage(item, domain);
+        await RegisterPageView(item);
+        await CalculateWordUsage(item, domain);
+    }
+
+    private async Task RegisterTovikUsage(TovikContentTranslated item, SparcDomain? domain)
+    {
         var userToCharge = domain?.TovikUserId ?? Guid.Empty.ToString();
-        
+
         var charge = new UserCharge(userToCharge, item);
         await charges.AddAsync(charge);
+    }
 
+    private async Task RegisterPageView(TovikContentTranslated item)
+    {
+        var page = await pages.Query
+                    .Where(p => p.Domain == item.Content.Domain && p.Path == item.Content.Path)
+                    .FirstOrDefaultAsync();
+
+        if (page == null)
+        {
+            page = new Page(item.Content);
+            await pages.AddAsync(page);
+        }
+
+        page.RegisterTovikUsage(item);
+        await pages.UpdateAsync(page);
+    }
+
+    private async Task CalculateWordUsage(TovikContentTranslated item, SparcDomain? domain)
+    {
         if (domain == null)
             return;
 

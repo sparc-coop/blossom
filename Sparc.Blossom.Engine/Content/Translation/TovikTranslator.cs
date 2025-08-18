@@ -116,7 +116,7 @@ public class TovikTranslator(
             .Where(x => x.Domain == domainName)
             .FirstOrDefaultAsync();
 
-        if (domain?.TovikUsage < 1000)
+        if (domain != null && domain.TovikUsage <= 10)
             return true;
 
         if (domain?.TovikUserId != null)
@@ -162,7 +162,7 @@ public class TovikTranslator(
             ?? throw new ArgumentException($"Language {toLanguage} not found");
 
         var from = await GetLanguageAsync(fromLanguage);
-        var message = new TextContent("", from!, text);
+        var message = new TextContent("", "", from!, text);
         var result = await TranslateAsync([message], [language]);
         return result?.FirstOrDefault()?.Text;
     }

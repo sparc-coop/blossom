@@ -177,7 +177,7 @@ public class SparcAuthenticator<T>(
         {
             product = new SparcProduct(productId)
             {
-                MaxUsage = options?.MaxUsage ?? 1000
+                MaxUsage = options?.MaxUsage ?? 10
             };
             user.Fulfill(product);
             await Users.UpdateAsync((T)user);

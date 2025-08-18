@@ -10,7 +10,7 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
     internal static List<Language>? Languages;
 
     public int Priority => 2;
-    decimal CostPerWord => 10.00m / 1_000_000 * 5; // $25 per million characters, assuming average 5 characters per word
+    decimal CostPerWord => 10.00m / 1_000_000 * 5; // $10 per million characters, assuming average 5 characters per word
 
 
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, IEnumerable<Language> toLanguages, string? additionalContext = null)

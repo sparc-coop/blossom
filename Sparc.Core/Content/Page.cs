@@ -1,4 +1,6 @@
-﻿using Sparc.Blossom;
+﻿using Sparc.Blossom.Authentication;
+using Sparc.Core;
+using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Content;
 
@@ -8,43 +10,41 @@ public record TranslateContentResponse(string Domain, string Path, string Id, st
 
 public class Page : BlossomEntity<string>
 {
-    public string Domain { get; private set; }
-    public string Path { get; private set; }
-    public string Name { get; private set; }
-    public SourceContent? SourceContent { get; private set; }
-    public List<Language> Languages { get; private set; }
-    public DateTime StartDate { get; private set; }
-    public DateTime? LastActiveDate { get; private set; }
-    public DateTime? EndDate { get; private set; }
-    public AudioContent? Audio { get; private set; }
+    public string Domain { get; set; }
+    public string Path { get; set; }
+    public string Name { get; set; }
+    public SourceContent? SourceContent { get; set; }
+    public Dictionary<string, int> TovikUsage { get; set; } = [];
+    public DateTime DateRegistered { get; set; } = DateTime.UtcNow;
+    public DateTime? LastActiveDate { get; set; } = DateTime.UtcNow;
+    public DateTime? EndDate { get; set; }
+    public AudioContent? Audio { get; set; }
     private ICollection<TextContent> Contents { get; set; } = [];
 
-    internal Page(string pageId)
-    {
-        Id = pageId;
-        Domain = new Uri(pageId).Host;
-        Path = new Uri(pageId).AbsolutePath;
-        Name = "New Page";
-        Languages = [];
-        StartDate = DateTime.UtcNow;
-        LastActiveDate = DateTime.UtcNow;
+    [JsonConstructor]
+    private Page()
+    { 
+        Id = string.Empty;
+        Domain = string.Empty;
+        Path = string.Empty;
+        Name = string.Empty;
     }
 
     private Page(string domain, string path)
     {
-        Id = new Uri(new Uri(domain), path).ToString();
+        Id = BlossomHash.MD5($"{domain}:{path}");
         Domain = domain;
         Path = path;
-        Name = "New Page";
-        Languages = [];
-        StartDate = DateTime.UtcNow;
-        LastActiveDate = DateTime.UtcNow;
+        Name = Id;
     }
 
     public Page(string domain, string path, string name) : this(domain, path)
     {
         Name = name;
     }
+
+    public Page(TextContent content) : this(content.Domain, content.Path)
+    { }
 
     public Page(Uri uri, string name) : this(uri.Host, uri.AbsolutePath, name)
     {
@@ -60,12 +60,12 @@ public class Page : BlossomEntity<string>
         //Translations = page.Translations;
     }
 
-    public void AddLanguage(Language language)
+    public void RegisterTovikUsage(TovikContentTranslated content)
     {
-        if (Languages.Any(x => x.Matches(language)))
-            return;
-
-        Languages.Add(language);
+        if (TovikUsage.ContainsKey(content.Content.LanguageId))
+            TovikUsage[content.Content.LanguageId] += content.WordCount;
+        else
+            TovikUsage[content.Content.LanguageId] = content.WordCount;
     }
 
     //internal async Task<ICollection<TextContent>> TranslateAsync(Language toLanguage, BlossomTranslator provider)
@@ -106,7 +106,7 @@ public class Page : BlossomEntity<string>
 
     public Task<ICollection<TextContent>> LoadOriginalContentAsync(IRepository<TextContent> repository)
     {
-        Contents = repository.Query.Where(x => x.PageId == Id && x.SourceContentId == null).ToList();
+        Contents = repository.Query.Where(x => x.Path == Id && x.SourceContentId == null).ToList();
         return Task.FromResult(Contents);
     }
 
