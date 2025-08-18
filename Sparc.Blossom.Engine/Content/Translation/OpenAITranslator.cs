@@ -41,7 +41,7 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
     private readonly int _timeoutSeconds = 15;
     decimal CostPerToken = 0.40m / 1_000_000;
 
-    public int Priority => 2;
+    public int Priority => 0;
 
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, IEnumerable<Language> toLanguages, string? additionalContext = null)
     {
