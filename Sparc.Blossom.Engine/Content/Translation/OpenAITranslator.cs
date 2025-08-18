@@ -25,12 +25,18 @@ internal class OpenAITranslationQuestion : OpenAIQuestion<OpenAITranslations>
         Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
     };
     
-    public OpenAITranslationQuestion(IEnumerable<TextContent> messages, Language toLanguage) 
+    public OpenAITranslationQuestion(IEnumerable<TextContent> messages, Language toLanguage, string? additionalContext = null) 
         : base($"Translate the following to {toLanguage.DisplayName}:\n\n")
     {
-        Instructions = "You are a translator seeking to accurately translate messages, using the same tone as the provided context, if any.";
+        Instructions = "You are a translator seeking to accurately translate messages, using the same tone as the provided context, if any. If any message is not translatable, use the original message in the output, don't skip it.";
         var messageJson = JsonSerializer.Serialize(messages.Select(x => new { x.Text }), TranslateAllUnicode);
         Text += messageJson;
+
+        if (!string.IsNullOrWhiteSpace(additionalContext))
+        {
+            Context.Add($"Here is a sampling of other content on the page:");
+            Context.Add(additionalContext);
+        }
     }
 }
 
@@ -59,7 +65,7 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
             {
                 foreach (var toLanguage in toLanguages)
                 {
-                    var question = new OpenAITranslationQuestion(safeBatch, toLanguage);
+                    var question = new OpenAITranslationQuestion(safeBatch, toLanguage, additionalContext);
                     var answer = await AskOpenAIAsync(question);
                     if (answer.Value == null)
                         continue;
