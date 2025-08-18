@@ -146,6 +146,17 @@ public class TextContent : BlossomEntity<string>
         return matches.Count;
     }
 
+    public TextContent AddCharge(int numTokens, decimal costPerToken, string? description = null)
+    {
+        Charge += numTokens;
+        Cost -= numTokens * costPerToken;
+
+        if (numTokens > 0 || Charge > 0)
+            Broadcast(new TovikContentTranslated(this, numTokens, numTokens * costPerToken, description));
+
+        return this;
+    }
+
     public void AddCharge(decimal? costPerWord = null, string? description = null, string? response = null)
     {
         var wordCount = WordCount();

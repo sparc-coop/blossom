@@ -30,4 +30,6 @@ public class SparcDomain(string domain) : BlossomEntity<string>(Guid.NewGuid().T
             return null;
         }
     }
+
+    public Uri ToUri() => new($"https://{Domain}/");
 }
