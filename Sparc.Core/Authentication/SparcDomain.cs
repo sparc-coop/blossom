@@ -5,7 +5,7 @@ namespace Sparc.Blossom.Authentication;
 public class SparcDomain(string domain) : BlossomEntity<string>(Guid.NewGuid().ToString())
 {
     public string Domain { get; set; } = Normalize(domain) ?? throw new Exception($"Invalid domain name: {domain}");
-    public List<string> Exemptions{ get; set; } = new();
+    public List<string> Exemptions { get; set; } = new();
     public DateTime? DateConnected { get; set; }
     public int TovikUsage { get; set; }
     public string? TovikUserId { get; set; }
@@ -28,6 +28,23 @@ public class SparcDomain(string domain) : BlossomEntity<string>(Guid.NewGuid().T
         catch (Exception)
         {
             return null;
+        }
+    }
+
+    public async Task<bool> VerifyAsync()
+    {
+        var htmlToLookFor = "tovik.js";
+        var html = await new HttpClient().GetStringAsync($"https://{Domain}");
+
+        if (html.Contains(htmlToLookFor))
+        {
+            DateConnected = DateTime.UtcNow;
+            return true;
+        }
+        else
+        {
+            DateConnected = null;
+            return false;
         }
     }
 

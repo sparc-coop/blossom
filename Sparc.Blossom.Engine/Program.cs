@@ -60,6 +60,27 @@ app.UseCors();
 
 app.MapGet("/aura/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 app.MapGet("/hi", () => "Hi from Sparc!");
+app.MapGet("/upgrade", async (IRepository<BlossomUser> users, IRepository<SparcDomain> domains) =>
+{
+    var usersWithTovik = await users.Query.Where(x => x.Products.Any()).ToListAsync();
+    foreach (var user in usersWithTovik)
+    {
+        var tovik = user.Product("Tovik");
+        if (tovik != null)
+        {
+            tovik.MaxUsage = tovik.MaxUsage == 1000 ? 10 : tovik.MaxUsage / (100000 / 500);
+            tovik.TotalUsage = 0;
+        }
+        await users.UpdateAsync(user);
+    }
+
+    var domainsWithTovik = await domains.Query.ToListAsync();
+    foreach (var domain in domainsWithTovik)
+    {
+        domain.TovikUsage = 0;
+        await domains.UpdateAsync(domain);
+    }
+});
 
 using var scope = app.Services.CreateScope();
 scope.ServiceProvider.GetRequiredService<TovikTranslator>().Map(app);

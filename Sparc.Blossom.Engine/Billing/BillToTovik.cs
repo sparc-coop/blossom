@@ -2,7 +2,6 @@
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
-using Twilio.Rest;
 
 namespace Sparc.Blossom.Billing;
 
@@ -20,7 +19,9 @@ public class BillToTovik(
 
         await RegisterTovikUsage(item, domain);
         await RegisterPageView(item, domain);
-        await CalculateTokenUsage(item, domain);
+
+        if (domain?.TovikUserId != null && new Random().Next(100) == 8)
+            await CalculateTokenUsage(domain.TovikUserId);
     }
 
     private async Task RegisterTovikUsage(TovikContentTranslated item, SparcDomain? domain)
@@ -53,27 +54,28 @@ public class BillToTovik(
         await domains.UpdateAsync(domain);
     }
 
-    private async Task CalculateTokenUsage(TovikContentTranslated item, SparcDomain? domain)
+    private async Task CalculateTokenUsage(string userId)
     {
-        if (domain == null)
-            return;
-
-        // Every 100th or so call, recalculate usage and bill Tovik user
-        var random = new Random().Next(100);
-        if (random != 8)
-            return;
-
         var user = await users.Query
-            .Where(u => u.Id == domain.TovikUserId)
+            .Where(u => u.Id == userId)
             .FirstOrDefaultAsync();
+
+        if (user == null)
+            return;
 
         var product = user?.Product("Tovik");
         if (product == null)
             return;
 
-        product.TotalUsage = charges.Query
-            .Where(x => x.UserId == domain.TovikUserId)
-            .Sum(x => x.Amount);
+        var userDomains = await domains.Query
+            .Where(d => d.TovikUserId == user!.Id)
+            .Select(x => x.Domain)
+            .ToListAsync();
+
+        product.TotalUsage = pages.Query
+            .Where(x => userDomains.Contains(x.Domain))
+            .Count();
+
         await users.UpdateAsync(user!);
 
     }
