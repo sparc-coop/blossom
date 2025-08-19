@@ -21,5 +21,6 @@ public record GetProductResponse
     string Name,
     decimal Price,
     string Currency,
-    string FormattedPrice
+    string FormattedPrice,
+    string FormattedZeroPrice
 );

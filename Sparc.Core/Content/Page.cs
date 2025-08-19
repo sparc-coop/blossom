@@ -92,6 +92,8 @@ public class Page : BlossomEntity<string>
     //    return Contents;
     //}
 
+    public string AbsolutePath(string? language = null) => $"https://{Domain}{Path}" + (language == null ? "" : $"?lang={language}");
+
     internal async Task SpeakAsync(ISpeaker speaker, List<TextContent> contents)
     {
         Audio = await speaker.SpeakAsync(contents);
