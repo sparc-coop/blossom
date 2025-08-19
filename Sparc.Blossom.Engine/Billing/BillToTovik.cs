@@ -2,6 +2,7 @@
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
+using Twilio.Rest;
 
 namespace Sparc.Blossom.Billing;
 
@@ -18,8 +19,8 @@ public class BillToTovik(
             .FirstOrDefaultAsync();
 
         await RegisterTovikUsage(item, domain);
-        await RegisterPageView(item);
-        await CalculateWordUsage(item, domain);
+        await RegisterPageView(item, domain);
+        await CalculateTokenUsage(item, domain);
     }
 
     private async Task RegisterTovikUsage(TovikContentTranslated item, SparcDomain? domain)
@@ -30,7 +31,7 @@ public class BillToTovik(
         await charges.AddAsync(charge);
     }
 
-    private async Task RegisterPageView(TovikContentTranslated item)
+    private async Task RegisterPageView(TovikContentTranslated item, SparcDomain? domain)
     {
         var page = await pages.Query
                     .Where(p => p.Domain == item.Content.Domain && p.Path == item.Content.Path)
@@ -44,9 +45,15 @@ public class BillToTovik(
 
         page.RegisterTovikUsage(item);
         await pages.UpdateAsync(page);
+
+        if (domain == null)
+            return;
+
+        domain.TovikUsage = pages.Query.Where(x => x.Domain == item.Content.Domain).Count();
+        await domains.UpdateAsync(domain);
     }
 
-    private async Task CalculateWordUsage(TovikContentTranslated item, SparcDomain? domain)
+    private async Task CalculateTokenUsage(TovikContentTranslated item, SparcDomain? domain)
     {
         if (domain == null)
             return;
@@ -69,8 +76,5 @@ public class BillToTovik(
             .Sum(x => x.Amount);
         await users.UpdateAsync(user!);
 
-        domain.TovikUsage = (int)charges.Query.Where(x => x.Domain == item.Content.Domain)
-            .Sum(x => x.Amount);
-        await domains.UpdateAsync(domain);
     }
 }

@@ -7,10 +7,10 @@ public class UserCharge() : BlossomEntity<string>(Guid.NewGuid().ToString())
     public UserCharge(string userId, TovikContentTranslated tovik) : this()
     {
         UserId = userId;
-        Amount = tovik.WordCount;
+        Amount = tovik.TokenCount;
         InternalCost = tovik.Cost;
         ProductId = "Tovik";
-        Currency = "Word";
+        Currency = "Token";
         Description = tovik.Description;
         Domain = tovik.Content.Domain;
         Response = tovik.Response;

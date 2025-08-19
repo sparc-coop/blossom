@@ -63,9 +63,9 @@ public class Page : BlossomEntity<string>
     public void RegisterTovikUsage(TovikContentTranslated content)
     {
         if (TovikUsage.ContainsKey(content.Content.LanguageId))
-            TovikUsage[content.Content.LanguageId] += content.WordCount;
+            TovikUsage[content.Content.LanguageId] += content.TokenCount;
         else
-            TovikUsage[content.Content.LanguageId] = content.WordCount;
+            TovikUsage[content.Content.LanguageId] = content.TokenCount;
     }
 
     //internal async Task<ICollection<TextContent>> TranslateAsync(Language toLanguage, BlossomTranslator provider)
