@@ -60,20 +60,21 @@ app.UseCors();
 
 app.MapGet("/aura/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 app.MapGet("/hi", () => "Hi from Sparc!");
-app.MapGet("/upgrade", async (IRepository<Page> pages, IRepository<SparcDomain> domains, IRepository<UserCharge> charges) =>
+app.MapGet("/upgrade-2", async (IRepository<Page> pages, IRepository<SparcDomain> domains, IRepository<UserCharge> charges) =>
 {
     var domainsWithTovik = await domains.Query.ToListAsync();
     foreach (var domain in domainsWithTovik)
     {
-        var domainPages = await pages.Query.Where(p => p.Domain == domain.Domain).ToListAsync();
-        domain.PagesPerLanguage = domainPages.SelectMany(p => p.TovikUsage.Keys)
-            .GroupBy(lang => lang)
-            .ToDictionary(g => g.Key, g => g.Count());
-        domain.LastTranslatedDate = await charges.Query
+        var lastTranslated = await charges.Query
             .Where(charges => charges.Domain == domain.Domain)
             .OrderByDescending(charges => charges.Timestamp)
             .Select(charges => charges.Timestamp)
             .FirstOrDefaultAsync();
+
+        if (lastTranslated == default)
+            domain.LastTranslatedDate = null;
+        else
+            domain.LastTranslatedDate = lastTranslated;
         await domains.UpdateAsync(domain);
     }
 });
