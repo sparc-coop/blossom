@@ -51,6 +51,13 @@ public class BillToTovik(
             return;
 
         domain.TovikUsage = pages.Query.Where(x => x.Domain == item.Content.Domain).Count();
+        domain.PagesPerLanguage = pages.Query
+            .Where(x => x.Domain == item.Content.Domain)
+            .SelectMany(p => p.TovikUsage.Keys)
+            .GroupBy(lang => lang)
+            .ToDictionary(g => g.Key, g => g.Count());
+        domain.LastTranslatedDate = DateTime.UtcNow;
+
         await domains.UpdateAsync(domain);
     }
 
