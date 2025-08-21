@@ -57,10 +57,7 @@ public class TovikTranslator(
 
     private async Task<TextContent> GetOrTranslateAsync(TextContent content, Language toLanguage)
     {
-        var newId = TextContent.IdHash(content.Text, toLanguage);
-        var existing = await Content.Query
-            .Where(x => x.Domain == content.Domain && x.Id == newId)
-            .FirstOrDefaultAsync();
+        var existing = await Content.FindAsync(content.Domain, content.Id);
 
         if (existing != null)
             return existing;
@@ -83,17 +80,14 @@ public class TovikTranslator(
         var results = new ConcurrentBag<TextContent>();
         await Parallel.ForEachAsync(contents, async (content, _) =>
         {
-            var newId = TextContent.IdHash(content.Text, toLanguage);
-            var existing = await Content.Query
-                .Where(x => x.Domain == content.Domain && x.Id == newId)
-                .FirstOrDefaultAsync();
+            var existing = await Content.FindAsync(content.Domain, content.Id);
 
             if (existing != null)
                 results.Add(existing);
         });
 
         var needsTranslation = contents
-            .Where(content => !results.Any(x => x.Id == TextContent.IdHash(content.Text, toLanguage)))
+            .Where(content => !results.Any(x => x.Id == content.Id))
             .ToList();
 
         if (!await CanTranslate(needsTranslation))

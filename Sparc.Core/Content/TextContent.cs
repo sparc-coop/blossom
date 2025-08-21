@@ -52,7 +52,6 @@ public class TextContent : BlossomEntity<string>
     public TextContent(string domain, string pageId, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
         : this(domain, pageId, language.Id)
     {
-        Id = IdHash(text, language);
         User = user?.Avatar;
         Language = user?.Avatar.Language ?? language;
         Audio = user?.Avatar.Language?.VoiceId == null ? null : new(null, 0, user.Avatar.Language.VoiceId);
@@ -73,7 +72,7 @@ public class TextContent : BlossomEntity<string>
         SetText(text);
     }
 
-    public static string IdHash(string? text, Language language) => BlossomHash.MD5($"{text}:{language}");
+    //public static string IdHash(string? text, Language language) => BlossomHash.MD5($"{text}:{language}");
 
     //internal async Task<TextContent?> TranslateAsync(Language language, IRepository<TextContent> contents, BlossomTranslator provider)
     //{
