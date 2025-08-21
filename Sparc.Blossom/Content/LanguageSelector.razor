@@ -26,9 +26,10 @@
 @code {
     [Parameter] public BlossomAvatar? Avatar { get; set; }
     [Parameter] public EventCallback<Language> OnLanguageChanged { get; set; }
-    IEnumerable<Sparc.Blossom.Content.Language> Languages { get; set; } = [];
+    public IEnumerable<Sparc.Blossom.Content.Language> Languages { get; set; } = [];
     [SupplyParameterFromQuery] public string? Lang { get; set; }
     string SelectedLanguageId = "";
+    public bool IsSpinning;
 
     protected override async Task OnInitializedAsync()
     {
@@ -42,10 +43,17 @@
             await NotifyTovik();
     }
 
-    protected override async Task OnParametersSetAsync()
+    protected override void OnParametersSet()
     {
-        if (Avatar?.Language != null && Avatar.Language.Id != SelectedLanguageId)
+        if (!IsSpinning && Avatar?.Language != null && Avatar.Language.Id != SelectedLanguageId)
             SelectedLanguageId = Avatar.Language.Id;
+    }
+
+    public async Task SetLanguage(string id)
+    {
+        SelectedLanguageId = id;
+        IsSpinning = false;
+        await ChangeLanguage();
     }
 
     async Task ChangeLanguage()
@@ -61,6 +69,24 @@
             await Aura.UpdateUserInfo(Avatar);
             await NotifyTovik();
         }
+    }
+
+    public async Task Spin()
+    {
+        IsSpinning = true;
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
+        var numSpins = 0;
+        while (++numSpins < 10 && await timer.WaitForNextTickAsync())
+        {
+            var randomLanguage = Languages.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
+            if (randomLanguage != null)
+            {
+                SelectedLanguageId = randomLanguage.Id;
+                StateHasChanged();
+            }
+        }
+
+        await NotifyTovik();
     }
 
     async Task NotifyTovik()

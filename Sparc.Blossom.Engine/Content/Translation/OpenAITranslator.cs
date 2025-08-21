@@ -44,10 +44,10 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
 {
     private readonly string _defaultModel = "gpt-4.1-nano";
     private readonly int _maxRetries = 3;
-    private readonly int _timeoutSeconds = 15;
+    private readonly int _timeoutSeconds = 30;
     decimal CostPerToken = 0.40m / 1_000_000;
 
-    public int Priority => 2;
+    public int Priority => 0;
 
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, IEnumerable<Language> toLanguages, string? additionalContext = null)
     {
@@ -71,11 +71,13 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
                         continue;
 
                     var translations = safeBatch.Zip(answer.Value.Text,
-                        (message, translation) => new TextContent(message, toLanguage, translation)
-                        .AddCharge(answer.TokensUsed, CostPerToken, $"OpenAI translation of {message.OriginalText} to {message.LanguageId}"));
+                        (message, translation) => new TextContent(message, toLanguage, translation));
 
                     foreach (var translatedMessage in translations)
+                    {
+                        translatedMessage.AddCharge(answer.TokensUsed, CostPerToken, $"OpenAI translation of {translatedMessage.OriginalText} to {translatedMessage.LanguageId}");
                         translatedMessages.Add(translatedMessage);
+                    }
                 }
             }
         });

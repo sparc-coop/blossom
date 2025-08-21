@@ -1,17 +1,26 @@
 ﻿using MediatR;
+using Microsoft.Azure.Cosmos.Linq;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Billing;
 
+public class BillToTovikHandler(BlossomQueue<BillToTovik> biller)  : INotificationHandler<TovikContentTranslated>
+{
+    public async Task Handle(TovikContentTranslated notification, CancellationToken cancellationToken)
+    {
+        await biller.AddAsync(async (x, token) => await x.ExecuteAsync(notification, token));
+    }
+}
+
 public class BillToTovik(
     IRepository<BlossomUser> users,
     IRepository<SparcDomain> domains,
     IRepository<Page> pages,
-    IRepository<UserCharge> charges) : INotificationHandler<TovikContentTranslated>
+    IRepository<UserCharge> charges)
 {
-    public async Task Handle(TovikContentTranslated item, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(TovikContentTranslated item, CancellationToken cancellationToken)
     {
         // Get owning user
         var domain = await domains.Query.Where(d => d.Domain == item.Content.Domain)
@@ -50,12 +59,18 @@ public class BillToTovik(
         if (domain == null)
             return;
 
-        domain.TovikUsage = pages.Query.Where(x => x.Domain == item.Content.Domain).Count();
-        domain.PagesPerLanguage = pages.Query
+        domain.TovikUsage = await pages.Query.Where(x => x.Domain == item.Content.Domain).CountAsync();
+
+        var ppl = await pages.Query
             .Where(x => x.Domain == item.Content.Domain)
-            .SelectMany(p => p.TovikUsage.Keys)
-            .GroupBy(lang => lang)
+            .Select(p => p.TovikUsage)
+            .ToListAsync();
+
+        domain.PagesPerLanguage = ppl
+            .SelectMany(x => x.Keys)
+            .GroupBy(g => g)
             .ToDictionary(g => g.Key, g => g.Count());
+
         domain.LastTranslatedDate = DateTime.UtcNow;
 
         await domains.UpdateAsync(domain);

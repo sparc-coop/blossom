@@ -22,6 +22,7 @@ builder.AddSparcBilling();
 builder.AddSparcChat();
 builder.Services.AddScoped(_ => new OpenAIClient(builder.Configuration.GetConnectionString("OpenAI")!));
 builder.AddTovikTranslator();
+builder.Services.AddBlossomService<BillToTovik>();
 
 builder.Services.AddMediatR(options =>
 {
