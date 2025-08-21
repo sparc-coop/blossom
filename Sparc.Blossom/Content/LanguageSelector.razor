@@ -24,7 +24,8 @@
 @inject ISparcAura Aura 
 @inject IJSRuntime Js
 @code {
-    [Parameter] public required BlossomAvatar Avatar { get; set; }
+    [Parameter] public BlossomAvatar? Avatar { get; set; }
+    [Parameter] public EventCallback<Language> OnLanguageChanged { get; set; }
     IEnumerable<Sparc.Blossom.Content.Language> Languages { get; set; } = [];
     [SupplyParameterFromQuery] public string? Lang { get; set; }
     string SelectedLanguageId = "";
@@ -32,22 +33,34 @@
     protected override async Task OnInitializedAsync()
     {
         Languages = await Tovik.GetLanguages();
+        SelectedLanguageId = Lang
+                ?? Avatar?.Language?.Id
+                ?? Languages.FirstOrDefault(l => l.Id == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)?.Id
+                ?? string.Empty;
+
+        if (!OnLanguageChanged.HasDelegate)
+            await NotifyTovik();
     }
 
     protected override async Task OnParametersSetAsync()
     {
-        SelectedLanguageId = Lang
-                ?? Avatar.Language?.Id
-                ?? Languages.FirstOrDefault(l => l.Id == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)?.Id
-                ?? string.Empty;
-        await NotifyTovik();
+        if (Avatar?.Language != null && Avatar.Language.Id != SelectedLanguageId)
+            SelectedLanguageId = Avatar.Language.Id;
     }
 
     async Task ChangeLanguage()
     {
-        Avatar.Language = Languages.FirstOrDefault(l => l.Id == SelectedLanguageId);
-        await Aura.UpdateUserInfo(Avatar);
-        await NotifyTovik();
+        var selectedLanguage = Languages.FirstOrDefault(l => l.Id == SelectedLanguageId);
+        if (OnLanguageChanged.HasDelegate)
+        {
+            await OnLanguageChanged.InvokeAsync(selectedLanguage);
+        }
+        else if (Avatar != null)
+        {
+            Avatar.Language = selectedLanguage;
+            await Aura.UpdateUserInfo(Avatar);
+            await NotifyTovik();
+        }
     }
 
     async Task NotifyTovik()
