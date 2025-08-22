@@ -28,7 +28,7 @@ internal class OpenAITranslationQuestion : OpenAIQuestion<OpenAITranslations>
         : base($"Translate the following to {toLanguage.DisplayName}:\n\n")
     {
         Instructions = "You are a translator seeking to accurately translate messages, using the same tone as the provided context, if any. If any message is not translatable, use the original message in the output, don't skip it.";
-        var messageJson = JsonSerializer.Serialize(messages.Select(x => x.Text), TranslateAllUnicode);
+        var messageJson = JsonSerializer.Serialize(messages.Select(x => x.Text?.Replace('\u00A0',' ')), TranslateAllUnicode);
         Text += messageJson;
 
         if (!string.IsNullOrWhiteSpace(additionalContext))
@@ -66,7 +66,7 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
                 {
                     var question = new OpenAITranslationQuestion(safeBatch, toLanguage, additionalContext);
                     var answer = await AskOpenAIAsync(question);
-                    if (answer.Value == null)
+                    if (answer.Value?.Text == null)
                         continue;
 
                     var translations = safeBatch.Zip(answer.Value.Text,
