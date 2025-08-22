@@ -1,4 +1,4 @@
-import { Dexie } from './Dexie/dexie';
+import { Dexie } from './dexie';
 
 export default class DexieDatabase {
     private static _db: Dexie | null = null;
