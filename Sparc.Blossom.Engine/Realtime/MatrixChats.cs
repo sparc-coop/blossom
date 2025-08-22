@@ -20,6 +20,7 @@ public class MatrixChats(ClaimsPrincipal principal, MatrixEvents events, SparcAu
         presence.ApplyToAvatar(user.Avatar);
         user.UpdateAvatar(user.Avatar);
         await auth.UpdateAsync(user);
+        await events.PublishAsync(userId, presence);
     }
 
     public async Task<GetPublicRoomsResponse> GetPublicRoomsAsync(int? limit = null, string? since = null, string? server = null)

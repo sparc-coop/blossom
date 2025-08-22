@@ -1,49 +1,104 @@
 ﻿using MediatR;
+using Microsoft.Azure.Cosmos.Linq;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Billing;
 
+public class BillToTovikHandler(BlossomQueue<BillToTovik> biller)  : INotificationHandler<TovikContentTranslated>
+{
+    public async Task Handle(TovikContentTranslated notification, CancellationToken cancellationToken)
+    {
+        await biller.AddAsync(async (x, token) => await x.ExecuteAsync(notification, token));
+    }
+}
+
 public class BillToTovik(
     IRepository<BlossomUser> users,
     IRepository<SparcDomain> domains,
-    IRepository<UserCharge> charges) : INotificationHandler<TovikContentTranslated>
+    IRepository<Page> pages,
+    IRepository<UserCharge> charges)
 {
-    public async Task Handle(TovikContentTranslated item, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(TovikContentTranslated item, CancellationToken cancellationToken)
     {
         // Get owning user
         var domain = await domains.Query.Where(d => d.Domain == item.Content.Domain)
             .FirstOrDefaultAsync();
 
+        await RegisterTovikUsage(item, domain);
+        await RegisterPageView(item, domain);
+
+        if (domain?.TovikUserId != null && new Random().Next(100) == 8)
+            await CalculateTokenUsage(domain.TovikUserId);
+    }
+
+    private async Task RegisterTovikUsage(TovikContentTranslated item, SparcDomain? domain)
+    {
         var userToCharge = domain?.TovikUserId ?? Guid.Empty.ToString();
-        
+
         var charge = new UserCharge(userToCharge, item);
         await charges.AddAsync(charge);
+    }
+
+    private async Task RegisterPageView(TovikContentTranslated item, SparcDomain? domain)
+    {
+        var page = await pages.Query
+                    .Where(p => p.Domain == item.Content.Domain && p.Path == item.Content.Path)
+                    .FirstOrDefaultAsync();
+
+        if (page == null)
+        {
+            page = new Page(item.Content);
+            await pages.AddAsync(page);
+        }
+
+        page.RegisterTovikUsage(item);
+        await pages.UpdateAsync(page);
 
         if (domain == null)
             return;
 
-        // Every 100th or so call, recalculate usage and bill Tovik user
-        var random = new Random().Next(100);
-        if (random != 8)
-            return;
+        domain.TovikUsage = await pages.Query.Where(x => x.Domain == item.Content.Domain).CountAsync();
 
+        var ppl = await pages.Query
+            .Where(x => x.Domain == item.Content.Domain)
+            .Select(p => p.TovikUsage)
+            .ToListAsync();
+
+        domain.PagesPerLanguage = ppl
+            .SelectMany(x => x.Keys)
+            .GroupBy(g => g)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        domain.LastTranslatedDate = DateTime.UtcNow;
+
+        await domains.UpdateAsync(domain);
+    }
+
+    private async Task CalculateTokenUsage(string userId)
+    {
         var user = await users.Query
-            .Where(u => u.Id == domain.TovikUserId)
+            .Where(u => u.Id == userId)
             .FirstOrDefaultAsync();
+
+        if (user == null)
+            return;
 
         var product = user?.Product("Tovik");
         if (product == null)
             return;
 
-        product.TotalUsage = charges.Query
-            .Where(x => x.UserId == domain.TovikUserId)
-            .Sum(x => x.Amount);
+        var userDomains = await domains.Query
+            .Where(d => d.TovikUserId == user!.Id)
+            .Select(x => x.Domain)
+            .ToListAsync();
+
+        product.TotalUsage = pages.Query
+            .Where(x => userDomains.Contains(x.Domain))
+            .Count();
+
         await users.UpdateAsync(user!);
 
-        domain.TovikUsage = (int)charges.Query.Where(x => x.Domain == item.Content.Domain)
-            .Sum(x => x.Amount);
-        await domains.UpdateAsync(domain);
     }
 }

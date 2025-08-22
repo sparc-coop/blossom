@@ -21,6 +21,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.7.0" />
+		<PackageReference Include="OpenAI" Version="2.3.0" />
 		<PackageReference Include="Otp.NET" Version="1.4.0" />
 		<PackageReference Include="Passwordless" Version="2.0.0" />
 		<PackageReference Include="Scalar.AspNetCore" Version="2.6.3" />

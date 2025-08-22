@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 namespace Sparc.Blossom.Content;
 
 public record EditHistory(DateTime Timestamp, string Text);
-public record TovikContentTranslated(TextContent Content, int WordCount, decimal? Cost = null, string? Description = null, string? Response = null) : BlossomEvent(Content);
+public record TovikContentTranslated(TextContent Content, int TokenCount, decimal? Cost = null, string? Description = null, string? Response = null) : BlossomEvent(Content);
 
 public record ContentTranslation(string Id, Language Language, string? SourceContentId = null)
 {
@@ -16,7 +16,7 @@ public record ContentTranslation(string Id, Language Language, string? SourceCon
 public class TextContent : BlossomEntity<string>
 {
     public string Domain { get; set; } = null!;
-    public string? Path { get; set; }
+    public string Path { get; set; } = "";
     public string? SourceContentId { get; set; }
     public string LanguageId { get; set; } = null!;
     public Language Language { get; set; } = null!;
@@ -33,25 +33,24 @@ public class TextContent : BlossomEntity<string>
     public string OriginalText { get; set; } = "";
     internal List<EditHistory> EditHistory { get; set; } = [];
     public string Html { get; set; } = "";
-    public string? PageId { get; internal set; }
 
     [JsonConstructor]
     internal TextContent()
     { }
 
-    public TextContent(string domain, string languageId)
+    public TextContent(string domain, string pageId, string languageId)
     {
         Id = Guid.NewGuid().ToString();
         Domain = domain;
+        Path = pageId;
         User = new BlossomUser().Avatar;
         Language = new(languageId);
         LanguageId = Language.Id;
     }
 
-    public TextContent(string domain, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
-        : this(domain, language.Id)
+    public TextContent(string domain, string pageId, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
+        : this(domain, pageId, language.Id)
     {
-        Id = IdHash(text, language);
         User = user?.Avatar;
         Language = user?.Avatar.Language ?? language;
         Audio = user?.Avatar.Language?.VoiceId == null ? null : new(null, 0, user.Avatar.Language.VoiceId);
@@ -60,9 +59,9 @@ public class TextContent : BlossomEntity<string>
         SetText(text);
     }
 
-    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, toLanguage.Id)
+    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, sourceContent.Path, toLanguage.Id)
     {
-        Id = IdHash(sourceContent.Text, toLanguage);
+        Id = sourceContent.Id; // this hash is coming from the client, so we use the source content's ID
         SourceContentId = sourceContent.Id;
         User = sourceContent.User;
         Audio = sourceContent.Audio?.Voice == null ? null : new(null, 0, sourceContent.Audio.Voice);
@@ -72,7 +71,7 @@ public class TextContent : BlossomEntity<string>
         SetText(text);
     }
 
-    public static string IdHash(string? text, Language language) => BlossomHash.MD5($"{text}:{language}");
+    //public static string IdHash(string? text, Language language) => BlossomHash.MD5($"{text}:{language}");
 
     //internal async Task<TextContent?> TranslateAsync(Language language, IRepository<TextContent> contents, BlossomTranslator provider)
     //{
@@ -143,6 +142,17 @@ public class TextContent : BlossomEntity<string>
 
         var matches = Regex.Matches(textToCount, @"[\p{L}\p{N}]+", RegexOptions.Multiline);
         return matches.Count;
+    }
+
+    public TextContent AddCharge(int numTokens, decimal costPerToken, string? description = null)
+    {
+        Charge += numTokens;
+        Cost -= numTokens * costPerToken;
+
+        if (numTokens > 0 || Charge > 0)
+            Broadcast(new TovikContentTranslated(this, numTokens, numTokens * costPerToken, description));
+
+        return this;
     }
 
     public void AddCharge(decimal? costPerWord = null, string? description = null, string? response = null)

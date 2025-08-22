@@ -89,7 +89,8 @@ public class Orders(
             product.Name,
             price ?? 0,
             sparcCurrency.Id,
-            sparcCurrency.ToString(price ?? 0));
+            sparcCurrency.ToString(price ?? 0),
+            sparcCurrency.ToString(0));
     }
 
     public async Task<SparcCurrency> SetCurrencyAsync(SparcCurrency currency)

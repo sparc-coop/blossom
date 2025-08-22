@@ -23,6 +23,6 @@ public class Contents(BlossomAggregateOptions<TextContent> options)
     //    return [];
     //}
 
-    public BlossomQuery<TextContent> All(string pageId) => Query().Where(content => content.PageId == pageId && content.SourceContentId == null);
+    public BlossomQuery<TextContent> All(string pageId) => Query().Where(content => content.Path == pageId && content.SourceContentId == null);
 
 }
