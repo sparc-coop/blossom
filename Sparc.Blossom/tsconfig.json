@@ -8,6 +8,7 @@
     "outDir": "wwwroot"
   },
   "include": [
+    "Data/**/*",
     "Realtime/**/*"
   ]
 }
