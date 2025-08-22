@@ -5,8 +5,7 @@
     "removeComments": false,
     "sourceMap": true,
     "target": "es2023",
-    "outDir": "wwwroot",
-    "moduleResolution": "node"
+    "outDir": "wwwroot"
   },
   "include": [
     "Realtime/**/*"
