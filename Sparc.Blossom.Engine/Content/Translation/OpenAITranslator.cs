@@ -8,7 +8,6 @@ using System.ComponentModel;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Unicode;
 
 namespace Sparc.Blossom.Content;
 
@@ -22,7 +21,7 @@ internal class OpenAITranslationQuestion : OpenAIQuestion<OpenAITranslations>
 {
     static readonly JsonSerializerOptions TranslateAllUnicode = new()
     {
-        Encoder = JavaScriptEncoder.Create(UnicodeRanges.All)
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
     
     public OpenAITranslationQuestion(IEnumerable<TextContent> messages, Language toLanguage, string? additionalContext = null) 
