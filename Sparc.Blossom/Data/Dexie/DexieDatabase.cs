@@ -2,7 +2,7 @@
 using Microsoft.JSInterop;
 using System.Reflection;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Data.Dexie;
 
 public class DexieDatabase(IJSRuntime js)
 {
@@ -33,11 +33,10 @@ public class DexieDatabase(IJSRuntime js)
         return set;
     }
 
-    public async Task<IQueryable<T>> Query<T>(ISpecification<T> spec) 
+    public async Task<DexieQuery<T>> Query<T>(ISpecification<T> spec) 
     {
         var query = new DexieQuery<T>(this);
-        var result = await query.ExecuteAsync(spec);
-        return result.AsQueryable();
+        return await query.ApplyAsync(spec);
     }
 
     void RegisterRepository(Type entity)

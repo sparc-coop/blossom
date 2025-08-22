@@ -1,11 +1,14 @@
 ﻿using Ardalis.Specification;
 using Microsoft.JSInterop;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Data.Dexie;
 
 public class DexieQuery<T>(DexieDatabase db)
 {
+    IJSObjectReference? Query;
+    
     void CheckIndex(string propertyName)
     {
         var typeName = typeof(T).Name.ToLower();
@@ -14,70 +17,59 @@ public class DexieQuery<T>(DexieDatabase db)
             throw new InvalidOperationException($"Property '{propertyName}' is not indexed in the database.");
     }
 
-    public async Task<List<T>> ExecuteAsync(ISpecification<T> spec)
+    public async Task<DexieQuery<T>> ApplyAsync(ISpecification<T> spec)
     {
-        var query = await db.Set<T>();
-        foreach (var where in spec.WhereExpressions)
-            query = await Where(query, where);
-        foreach (var order in spec.OrderExpressions)
-            query = await OrderBy(query, order);
+        Query = await db.Set<T>();
 
-        var result = await query.InvokeAsync<List<T>>("toArray");
+        foreach (var where in spec.WhereExpressions)
+            Query = await Where(Query, where);
+        if (spec.Skip > 0)
+            Query = await Query.InvokeAsync<IJSObjectReference>("offset", spec.Skip);
+        if (spec.Take > 0)
+            Query = await Query.InvokeAsync<IJSObjectReference>("limit", spec.Take);
+        foreach (var order in spec.OrderExpressions)
+            Query = await OrderBy(Query, order);
+
+        return this;
+    }
+
+    public async Task<int> CountAsync()
+    {
+        Query ??= await db.Set<T>();
+        var result = await Query.InvokeAsync<int>("count");
+        return result;
+    }
+
+    public async Task<List<T>> ToListAsync()
+    {
+        Query ??= await db.Set<T>();
+        var result = await Query.InvokeAsync<List<T>>("toArray");
         return result;
     }
 
     public async Task<IJSObjectReference> Where(IJSObjectReference set, WhereExpressionInfo<T> where)
     {
-        if (where.Filter.Body is BinaryExpression binary)
-        {
-            // Left: property access
-            var member = binary.Left as MemberExpression;
-            var propertyName = member?.Member.Name ?? throw new InvalidOperationException("Left side is not a property.");
-            CheckIndex(propertyName);
+        var expression = new DexieQueryExpression();
+        expression.Visit(where.Filter);
 
-            // Operator: ExpressionType (e.g., Equal, GreaterThan)
-            var op = binary.NodeType switch
-            {
-                ExpressionType.Equal => "equals",
-                ExpressionType.NotEqual => "notEqual",
-                ExpressionType.GreaterThan => "above",
-                ExpressionType.GreaterThanOrEqual => "aboveOrEqual",
-                ExpressionType.LessThan => "below",
-                ExpressionType.LessThanOrEqual => "belowOrEqual",
-                _ => throw new NotSupportedException($"Operator {binary.NodeType} is not supported."),
-            };
-
-            // Right: constant or value
-            object? value = null;
-            if (binary.Right is ConstantExpression constExpr)
-                value = constExpr.Value;
-            else if (binary.Right is MemberExpression rightMember)
-            {
-                // Handles captured variables
-                var objectMember = Expression.Lambda(rightMember).Compile().DynamicInvoke();
-                value = objectMember;
-            }
-
-            set = await set.InvokeAsync<IJSObjectReference>("where", propertyName);
-            set = await set.InvokeAsync<IJSObjectReference>(op, value);
-            return set;
-        }
-        throw new NotSupportedException("Only simple binary expressions are supported.");
+        set = await set.InvokeAsync<IJSObjectReference>("where", expression.Field);
+        set = await set.InvokeAsync<IJSObjectReference>(expression.Op, expression.Value);
+        return set;
     }
 
     public async Task<IJSObjectReference> OrderBy(IJSObjectReference set, OrderExpressionInfo<T> order)
     {
-        var member = order.KeySelector.Body as MemberExpression 
+        var member = order.KeySelector.Body as MemberExpression
             ?? throw new InvalidOperationException("Order expression is not a property access.");
-        
+
         var propertyName = member.Member.Name;
         CheckIndex(propertyName);
 
-        set = await set.InvokeAsync<IJSObjectReference>("orderBy", propertyName);
-        
+        set = await set.InvokeAsync<IJSObjectReference>("sortBy", propertyName);
+
         if (order.OrderType == OrderTypeEnum.OrderByDescending)
             set = await set.InvokeAsync<IJSObjectReference>("reverse");
-        
+
         return set;
     }
 }

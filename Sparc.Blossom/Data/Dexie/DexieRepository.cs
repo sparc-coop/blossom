@@ -1,7 +1,7 @@
 ﻿using Ardalis.Specification;
 using Microsoft.JSInterop;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Data.Dexie;
 
 public class DexieRepository<T>(DexieDatabase db) : IRepository<T>
     where T : BlossomEntity<T>
@@ -23,12 +23,14 @@ public class DexieRepository<T>(DexieDatabase db) : IRepository<T>
 
     public async Task<bool> AnyAsync(ISpecification<T> spec)
     {
-        return await db.Any<T>(spec);
+        var result = await FindAsync(spec);
+        return result != null;
     }
 
     public async Task<int> CountAsync(ISpecification<T> spec)
     {
-        return await db.Count<T>(spec);
+        var query = await db.Query(spec);
+        return await query.CountAsync();
     }
 
     public async Task DeleteAsync(T item)
@@ -47,7 +49,8 @@ public class DexieRepository<T>(DexieDatabase db) : IRepository<T>
     public async Task ExecuteAsync(object id, Action<T> action)
     {
         var entity = await FindAsync(id);
-        await ExecuteAsync(entity, action);
+        if (entity != null)
+            await ExecuteAsync(entity, action);
     }
 
     public async Task ExecuteAsync(T entity, Action<T> action)
@@ -65,7 +68,9 @@ public class DexieRepository<T>(DexieDatabase db) : IRepository<T>
 
     public async Task<T?> FindAsync(ISpecification<T> spec)
     {
-        return await db.FirstOrDefault<T>(spec);
+        var query = await db.Query(spec.Query.Skip(0).Take(1).Specification);
+        var result = await query.ToListAsync();
+        return result.FirstOrDefault();
     }
 
     public IQueryable<T> FromSqlRaw(string sql, params object[] parameters)
@@ -75,7 +80,8 @@ public class DexieRepository<T>(DexieDatabase db) : IRepository<T>
 
     public async Task<List<T>> GetAllAsync(ISpecification<T> spec)
     {
-        return await db.Query<T>(spec);
+        var result = await db.Query(spec);
+        return await result.ToListAsync();
     }
 
     public async Task UpdateAsync(T item)

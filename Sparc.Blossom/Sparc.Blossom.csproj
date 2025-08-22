@@ -150,9 +150,6 @@
 	<ItemGroup>
 	  <None Include="compilerconfig.json" />
 	</ItemGroup>
-	<ItemGroup>
-	  <None Include="wwwroot\js\dexie\dexie.mjs" />
-	</ItemGroup>
 
 	<!-- Android -->
 	<!--<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.Razor" Condition="$(TargetFramework.Contains('-browser')) != true AND $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != ''" />

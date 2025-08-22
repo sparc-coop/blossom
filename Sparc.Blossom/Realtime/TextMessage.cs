@@ -5,9 +5,10 @@ namespace Sparc.Blossom.Realtime;
 
 public class TextMessage : TextContent
 {
-    public string RoomId { get; set; } = null!;
+    [BlossomIndex]
+    public string RoomId { get; set; } = "";
 
-    public TextMessage(string domain, string roomId, string languageId) : base(domain, languageId)
+    public TextMessage(string domain, string roomId, string languageId) : base(domain, roomId, languageId)
     {
         Id = Guid.NewGuid().ToString();
         RoomId = roomId;

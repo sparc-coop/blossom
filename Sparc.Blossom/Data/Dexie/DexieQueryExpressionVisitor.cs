@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Data.Dexie;
 
-public class DexieQueryExpressionVisitor : ExpressionVisitor
+public class DexieQueryExpression : ExpressionVisitor
 {
     public string Field { get; private set; } = "";
     public string Op { get; private set; } = "";

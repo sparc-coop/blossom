@@ -7,4 +7,4 @@ class BlossomSyncProtocol {
         // tailored after https://github.com/dexie/Dexie.js/blob/master/samples/remote-sync/websocket/WebSocketSyncProtocol.js
     }
 }
-//# sourceMappingURL=BlossomRealtimeHub.razor.js.map
+//# sourceMappingURL=BlossomRealtimeHub.js.map
