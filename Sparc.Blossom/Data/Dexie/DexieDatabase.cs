@@ -6,7 +6,7 @@ namespace Sparc.Blossom.Data.Dexie;
 
 public class DexieDatabase(IJSRuntime js)
 {
-    readonly Lazy<Task<IJSObjectReference>> Dexie = js.Import("./Data/DexieDatabase.js");
+    readonly Lazy<Task<IJSObjectReference>> Dexie = js.Import("./Blossom/Data/Dexie/DexieDatabase.js");
     internal readonly Dictionary<string, List<string>> Repositories = [];
     public IJSObjectReference? Db { get; private set; }
 
@@ -14,22 +14,23 @@ public class DexieDatabase(IJSRuntime js)
     {
         var dexie = await Dexie.Value;
 
-        name ??= Assembly.GetCallingAssembly().GetName().Name?.Split(".").Last()
+        name ??= Assembly.GetEntryAssembly().GetName().Name?.Split(".").Last()
             ?? "Blossom";
 
-        foreach (var entity in Assembly.GetCallingAssembly().GetEntities())
+        foreach (var entity in Assembly.GetEntryAssembly().GetEntities())
             RegisterRepository(entity);
 
-        await dexie.InvokeVoidAsync("DexieDatabase.init", name, Repositories, version);
-        Db = await dexie.InvokeAsync<IJSObjectReference>("DexieDatabase.db");
+        await dexie.InvokeVoidAsync("init", name, Repositories, version);
+        Db = await dexie.InvokeAsync<IJSObjectReference>("db");
     }
 
     public async Task<IJSObjectReference> Set<T>()
     {
         if (Db == null)
-            throw new Exception("Database not initialized. Call InitializeAsync first.");
+            await InitializeAsync(1);
 
-        var set = await Db.InvokeAsync<IJSObjectReference>("set", typeof(T).Name.ToLower());
+        var dexie = await Dexie.Value;
+        var set = await dexie.InvokeAsync<IJSObjectReference>("repository", typeof(T).Name.ToLower());
         return set;
     }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
+using Sparc.Blossom.Data.Dexie;
 
 namespace Sparc.Blossom;
 
@@ -18,5 +19,13 @@ public static partial class ServiceCollectionExtensions
     public static Lazy<Task<IJSObjectReference>> Import(this IJSRuntime js, string module)
     {
         return new(() => js.InvokeAsync<IJSObjectReference>("import", module).AsTask());
+    }
+
+    public static IServiceCollection AddDexie<T>(this IServiceCollection services)
+        where T : BlossomEntity<string>
+    {
+        services.AddSingleton<DexieDatabase>();
+        services.AddScoped(typeof(IRepository<T>), typeof(DexieRepository<T>));
+        return services;
     }
 }

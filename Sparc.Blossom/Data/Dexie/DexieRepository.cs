@@ -4,7 +4,7 @@ using Microsoft.JSInterop;
 namespace Sparc.Blossom.Data.Dexie;
 
 public class DexieRepository<T>(DexieDatabase db) : IRepository<T>
-    where T : BlossomEntity<T>
+    where T : BlossomEntity<string>
 {
     public IQueryable<T> Query => throw new NotImplementedException();
     List<string> Indexes => db.Repositories[typeof(T).Name.ToLower()];

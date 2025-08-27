@@ -161,6 +161,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <None Include="compilerconfig.json" />
+	  <None Include="wwwroot\Data\Dexie\DexieDatabase.js" />
 	</ItemGroup>
 
 	<!-- Android -->

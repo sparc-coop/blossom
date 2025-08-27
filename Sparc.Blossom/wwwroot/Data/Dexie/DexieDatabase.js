@@ -1,23 +1,23 @@
-import { Dexie } from './dexie';
-export default class DexieDatabase {
-    static _db = null;
-    static init(name, repositories, version) {
-        if (DexieDatabase._db) {
-            throw new Error('Database is already initialized.');
-        }
-        let stores = {};
-        repositories.forEach((value, key) => {
-            stores[key] = value.join(',');
-        });
-        DexieDatabase._db = new Dexie(name);
-        DexieDatabase._db.version(version).stores(stores);
-        //DexieDatabase._db.syncProtocol = new BlossomSyncProtocol();
+﻿import { Dexie } from './dexie.mjs';
+let _db = null;
+
+export function init(name, repositories, version) {
+    console.log('initting', name, repositories, version);
+
+    if (_db) {
+        throw new Error('Database is already initialized.');
     }
-    static get db() {
-        return DexieDatabase._db;
+    let stores = {};
+    for (let [key, value] of Object.entries(repositories)) {
+        stores[key] = value.join(',');
     }
-    static repository(name) {
-        return DexieDatabase._db[name];
-    }
+    _db = new Dexie(name);
+    _db.version(version).stores(stores);
+    //DexieDatabase._db.syncProtocol = new BlossomSyncProtocol();
 }
-//# sourceMappingURL=DexieDatabase.js.map
+
+export function db() { return _db; }
+
+export function repository(name) {
+    return _db[name];
+}
