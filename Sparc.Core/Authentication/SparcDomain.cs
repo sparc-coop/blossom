@@ -51,5 +51,25 @@ public class SparcDomain(string domain) : BlossomEntity<string>(Guid.NewGuid().T
     }
 
     public Uri ToUri() => new($"https://{Domain}/");
+    public static Uri? ToNormalizedUri(string url)
+    {
+        url = url.Trim().ToLower();
+        if (string.IsNullOrWhiteSpace(url) || (!url.Contains("localhost") && !url.Contains(".")))
+            return null;
+
+        if (!url.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            url = "https://" + url;
+
+        try
+        {
+            var uri = new Uri(url);
+            return uri;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     public string FaviconUri => $"https://{Domain}/favicon.ico";
 }
