@@ -110,6 +110,12 @@ public class TovikTranslator(
             .Where(x => x.Domain == domainName)
             .FirstOrDefaultAsync();
 
+        if (domain == null)
+        {
+            domain = new SparcDomain(domainName);
+            await domains.AddAsync(domain);
+        }
+
         if (domain != null && domain.TovikUsage <= 10)
             return true;
 
