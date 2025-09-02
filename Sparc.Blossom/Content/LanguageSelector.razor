@@ -25,10 +25,11 @@
 @inject IJSRuntime Js
 @code {
     [Parameter] public BlossomAvatar? Avatar { get; set; }
+    [Parameter] public string? InitialLanguageId { get; set; }
     [Parameter] public EventCallback<Language> OnLanguageChanged { get; set; }
     public IEnumerable<Sparc.Blossom.Content.Language> Languages { get; set; } = [];
     [SupplyParameterFromQuery] public string? Lang { get; set; }
-    string SelectedLanguageId = "";
+    public string SelectedLanguageId = "";
     public bool IsSpinning;
 
     protected override async Task OnInitializedAsync()
@@ -36,11 +37,14 @@
         Languages = await Tovik.GetLanguages();
         SelectedLanguageId = Lang
                 ?? Avatar?.Language?.Id
+                ?? InitialLanguageId
                 ?? Languages.FirstOrDefault(l => l.Id == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)?.Id
                 ?? string.Empty;
 
         if (!OnLanguageChanged.HasDelegate)
             await NotifyTovik();
+        else if (Avatar == null && InitialLanguageId == null)
+            await PickRandom();
     }
 
     protected override void OnParametersSet()
@@ -71,20 +75,25 @@
         }
     }
 
+    public async Task PickRandom()
+    {
+        var randomLanguage = Languages.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
+        if (randomLanguage != null)
+        {
+            SelectedLanguageId = randomLanguage.Id;
+            StateHasChanged();
+            if (OnLanguageChanged.HasDelegate)
+                await OnLanguageChanged.InvokeAsync(randomLanguage);
+        }
+    }
+
     public async Task Spin()
     {
         IsSpinning = true;
         using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
         var numSpins = 0;
         while (++numSpins < 10 && await timer.WaitForNextTickAsync())
-        {
-            var randomLanguage = Languages.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
-            if (randomLanguage != null)
-            {
-                SelectedLanguageId = randomLanguage.Id;
-                StateHasChanged();
-            }
-        }
+            await PickRandom();
 
         await NotifyTovik();
     }

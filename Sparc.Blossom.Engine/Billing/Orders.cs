@@ -16,11 +16,20 @@ public class Orders(
 
     public async Task<SparcOrder> GetAsync(string id)
     {
-        var order = await Repository.FindAsync(id)
+        var order = await Repository.FindAsync(id) 
+            ?? await Repository.Query.Where(x => x.PaymentIntentId == id).FirstOrDefaultAsync()
             ?? throw new InvalidOperationException($"Order with ID {id} not found.");
 
         if (order.UserId != User.Id())
             throw new UnauthorizedAccessException("You do not have permission to access this order.");
+
+        // Check on fulfillment if needed
+        if (order.FulfilledDate == null && order.PaymentIntentId != null)
+        {
+            var intent = await stripe.GetPaymentIntentAsync(order.PaymentIntentId);
+            if (intent?.Status == "succeeded")
+                order = await Fulfill(order, order.UserId);
+        }
 
         return order;
     }

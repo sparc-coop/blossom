@@ -5,38 +5,73 @@
 @using Microsoft.Extensions.Configuration
 @using Microsoft.AspNetCore.Components.Web
 @implements IDisposable
+@if (PaymentIntentId == null)
+{
+    <form id="payment-form" @onsubmit="Pay" @onsubmit:preventDefault="true">
+        <CurrencySelector Avatar="Avatar" />
+        <div id="@Id" @ref=PaymentForm>
+            <p style="font-size: 16px">Loading payment form...</p>
+        </div>
 
-<form id="payment-form" @onsubmit="Pay" @onsubmit:preventDefault="true">
-    <CurrencySelector Avatar="Avatar" />
-    
-    <div id="@Id" @ref=PaymentForm>
-        <p style="font-size: 16px">Loading payment form...</p>
-    </div>
+        @if (Intent != null)
+        {
+            <label>
+                <span>Would you like an email receipt? Enter your email here (optional)</span>
+                <input @bind="Order.Email" placeholder="Email" />
+            </label>
 
-    @if (Intent != null)
+            <button id="submit-button" type="submit" class="btn primary-btn">
+                Pay @Intent.FormattedAmount
+            </button>
+        }
+
+        <div id="error-message" style="color:red; margin-top: 10px;"></div>
+    </form>
+}
+else if (Order?.PaymentIntentId != null)
+{
+    if (Order.FulfilledDate != null)
     {
-        <label>
-            <span>Would you like an email receipt? Enter your email here (optional)</span>
-            <input @bind="Order.Email" placeholder="Email" />
-        </label>
-
-        <button id="submit-button" type="submit" class="btn primary-btn">
-            Pay @Intent.FormattedAmount
-        </button>
+        <header>
+            <h2>Thank you for your purchase!</h2>
+        </header>
+        <div class="purchased">
+            <p>Your Order ID is:</p>
+            <h4>@Order.OrderId</h4>
+            <p>Tovik Pro has been enabled on your account, and you can start configuring your domains right away!</p>
+            <p>If you provided an email address, a receipt has been emailed to you.</p>
+            <p>Thank you so much for supporting Tovik!</p>
+            <a class="button primary-btn" href="/Install">Start Exploring Tovik</a>
+        </div>
     }
+    else
+    {
+        <header>
+            <h2>Processing your payment...</h2>
+        </header>
+        <div class="processing">
+            <p>This usually takes less than a minute. Please do not refresh or navigate away from this page.</p>
+        </div>
+    }
+}
 
-    <div id="error-message" style="color:red; margin-top: 10px;"></div>
-</form>
 
 @inject IConfiguration Configuration
+
 @inject SparcEvents Events
+
 @inject ISparcBilling Billing
+
 @inject IJSRuntime Js
+
 @inject NavigationManager Nav
+
 @code {
     [Parameter] public required string ProductId { get; set; } = default!;
     [Parameter] public required string StripeProductId { get; set; } = default!;
     [Parameter] public required BlossomAvatar Avatar { get; set; } = default!;
+    [Parameter] public StripeAppearance? Appearance { get; set; }
+    [Parameter][SupplyParameterFromQuery] public string? PaymentIntentId { get; set; }
     SparcOrder Order = new();
     SparcPaymentIntent? Intent;
     Lazy<Task<IJSObjectReference>> Auth = null!;
@@ -51,7 +86,10 @@
         Order.ProductId = ProductId;
         Order.StripeProductId = StripeProductId;
         Events.CurrencyChanged += OnCurrencyChanged;
-        await InitiateStripePayment();
+        if (PaymentIntentId == null)
+            await InitiateStripePayment();
+        else
+            await CheckOnStripePayment();
     }
 
     private async Task OnCurrencyChanged(SparcCurrency currency)
@@ -70,11 +108,36 @@
             StateHasChanged();
 
             var stripe = await Auth.Value;
-            await stripe.InvokeVoidAsync("initialize", PaymentForm, Intent);
+            await stripe.InvokeVoidAsync("initialize", PaymentForm, Intent, Appearance);
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error creating PaymentIntent: {ex.Message}");
+        }
+    }
+
+    public async Task CheckOnStripePayment()
+    {
+        Order = await Billing.GetOrderAsync(PaymentIntentId!);
+        if (Order.PaymentIntentId != null && Order.FulfilledDate == null)
+        {
+            var timer = new PeriodicTimer(TimeSpan.FromSeconds(5));
+            try
+            {
+                while (await timer.WaitForNextTickAsync())
+                {
+                    Order = await Billing.GetOrderAsync(PaymentIntentId!);
+                    if (Order.FulfilledDate != null)
+                    {
+                        StateHasChanged();
+                        break;
+                    }
+                }
+            }
+            finally
+            {
+                timer.Dispose();
+            }
         }
     }
 

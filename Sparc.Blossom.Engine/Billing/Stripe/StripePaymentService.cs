@@ -195,6 +195,11 @@ public class StripePaymentService
         }
     }
 
+    internal async Task<PaymentIntent> GetPaymentIntentAsync(string paymentIntentId)
+    {
+        return await new PaymentIntentService().GetAsync(paymentIntentId);
+    }
+
     static readonly HashSet<string> ZeroDecimalCurrencies = new(StringComparer.OrdinalIgnoreCase)
     {
         "bif", "clp", "djf", "gnf", "jpy", "kmf", "krw", "mga", "pyg", "rwf",

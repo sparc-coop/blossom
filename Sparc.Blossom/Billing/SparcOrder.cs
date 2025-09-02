@@ -17,7 +17,7 @@ public class SparcOrder() : BlossomEntity<string>(RandomSerialNumber(4, 3))
         FulfilledDate = DateTime.UtcNow;
         return new SparcProduct(ProductId)
         {
-            MaxUsage = 10,
+            MaxUsage = 500,
             OrderIds = [ Id ]
         };
     }

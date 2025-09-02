@@ -4,7 +4,7 @@
     paymentElement: null
 };
 
-function initialize(element, intent) {
+function initialize(element, intent, appearance) {
     element.innerHTML = "";
     if (stripeIntegration.paymentElement) {
         try { stripeIntegration.paymentElement.unmount(); }
@@ -12,10 +12,27 @@ function initialize(element, intent) {
     }
     console.log("initPaymentForm called with:", intent, element);
 
+    // remove any null values from appearance
+    if (appearance) {
+        for (const key in appearance.variables) {
+            if (appearance.variables[key] === null) {
+                delete appearance.variables[key];
+            }
+        }
+
+        for (const key in appearance.rules) {
+            for (const subKey in appearance.rules[key]) {
+                if (appearance.rules[key][subKey] === null) {
+                    delete appearance.rules[key][subKey];
+                }
+            }
+        }
+    }
+
     stripeIntegration.stripe = Stripe(intent.publishableKey);
     stripeIntegration.elements = stripeIntegration.stripe.elements({
         clientSecret: intent.clientSecret,
-        appearance: {
+        appearance: appearance ?? {
             theme: 'flat',
 
             variables: {
@@ -43,6 +60,7 @@ function initialize(element, intent) {
     });
 
     const paymentElement = stripeIntegration.elements.create("payment");
+    console.log('here we go', paymentElement);
     paymentElement.mount('#' + element.id);
 }
 
