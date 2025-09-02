@@ -1,0 +1,50 @@
+@using System.Globalization
+@using Sparc.Blossom.Authentication
+@using Sparc.Blossom.Realtime
+@using Microsoft.AspNetCore.Components.Web
+
+<div class="currency-selector-container">
+    <header>
+        <h4>Currency</h4>
+    </header>
+
+    <div class="currency-selector">
+        @if (Avatar != null)
+        {
+            <select value="@Avatar.Currency?.Id" @onchange="OnCurrencyChanged" translate="no">
+                <option value="">Choose a currency...</option>
+                @foreach (var cur in Currencies.OrderBy(x => x.NativeName))
+                {
+                    <option value="@cur.Id" selected="@(Avatar.Currency?.Id == cur.Id ? "selected" : null)">
+                        @cur.NativeName (@cur.Symbol@(cur.NativeName == cur.Name ? "" : (" " + cur.Name)))
+                    </option>
+                }
+            </select>
+        }
+    </div>
+</div>
+
+@inject SparcEvents Events
+@inject ISparcAura Aura
+@inject ISparcBilling Billing
+@code {
+    [Parameter] public required BlossomAvatar Avatar { get; set; }
+    List<SparcCurrency> Currencies = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Currencies.Any())
+            Currencies = await Billing.GetCurrenciesAsync();
+    }
+
+    private async Task OnCurrencyChanged(ChangeEventArgs e)
+    {
+        var currency = e.Value?.ToString();
+        if (string.IsNullOrWhiteSpace(currency))
+            return;
+
+        Avatar.Currency = Currencies.First(c => c.Id == currency);
+        await Aura.UpdateUserInfo(Avatar);
+        await Events.OnCurrencyChanged(Avatar.Currency);
+    }
+}

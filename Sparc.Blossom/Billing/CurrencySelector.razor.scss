@@ -1,0 +1,26 @@
+header h4 {
+    font-size: 1.6rem;
+    font-weight: 500;
+    line-height: 140%;
+}
+
+.currency-selector {
+    border-radius: 32px;
+    border: 1px solid var(--purple-100);
+    padding: 8px 16px;
+    box-sizing: border-box;
+    width: 100%;
+
+    ::deep select {
+        width: 100%;
+        background: transparent;
+        cursor: pointer;
+        border: none;
+        background: var(--yellow-50);
+
+        &:focus {
+            outline: none;
+            border-color: var(--purple-300);
+        }
+    }
+}
