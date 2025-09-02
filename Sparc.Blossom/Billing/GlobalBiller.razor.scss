@@ -1,0 +1,49 @@
+﻿form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+
+    label {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        span {
+            font-size: 1.2rem;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 140%; /* 16.8px */
+            letter-spacing: -0.12px;
+        }
+
+        input {
+            display: flex;
+            padding: 16px;
+            margin-top: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 10px;
+            border-radius: 26px;
+            border: 1px solid var(--purple-100);
+        }
+
+        select {
+            width: 50%;
+        }
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+
+        label {
+            width: 50%;
+        }
+    }
+}

@@ -1,0 +1,106 @@
+﻿@using Sparc.Blossom.Authentication
+@using Sparc.Blossom.Billing
+@using Microsoft.JSInterop
+@using Sparc.Blossom.Realtime
+@using Microsoft.Extensions.Configuration
+@using Microsoft.AspNetCore.Components.Web
+@implements IDisposable
+
+<form id="payment-form" @onsubmit="Pay" @onsubmit:preventDefault="true">
+    <CurrencySelector Avatar="Avatar" />
+    
+    <div id="@Id" @ref=PaymentForm>
+        <p style="font-size: 16px">Loading payment form...</p>
+    </div>
+
+    @if (Intent != null)
+    {
+        <label>
+            <span>Would you like an email receipt? Enter your email here (optional)</span>
+            <input @bind="Order.Email" placeholder="Email" />
+        </label>
+
+        <button id="submit-button" type="submit" class="btn primary-btn">
+            Pay @Intent.FormattedAmount
+        </button>
+    }
+
+    <div id="error-message" style="color:red; margin-top: 10px;"></div>
+</form>
+
+@inject IConfiguration Configuration
+@inject SparcEvents Events
+@inject ISparcBilling Billing
+@inject IJSRuntime Js
+@inject NavigationManager Nav
+@code {
+    [Parameter] public required string ProductId { get; set; } = default!;
+    [Parameter] public required string StripeProductId { get; set; } = default!;
+    [Parameter] public required BlossomAvatar Avatar { get; set; } = default!;
+    SparcOrder Order = new();
+    SparcPaymentIntent? Intent;
+    Lazy<Task<IJSObjectReference>> Auth = null!;
+    ElementReference PaymentForm;
+    string Id => $"payment-form-{Guid.NewGuid()}";
+    record PaymentResult(bool Succeeded, string? ErrorMessage = null);
+
+    protected override async Task OnInitializedAsync()
+    {
+        Auth = Js.Import("./Blossom/Billing/GlobalBiller.razor.js");
+        Order.Currency = Avatar.Currency?.Id;
+        Order.ProductId = ProductId;
+        Order.StripeProductId = StripeProductId;
+        Events.CurrencyChanged += OnCurrencyChanged;
+        await InitiateStripePayment();
+    }
+
+    private async Task OnCurrencyChanged(SparcCurrency currency)
+    {
+        Order.Currency = currency.Id;
+        await InitiateStripePayment();
+    }
+
+    public async Task InitiateStripePayment()
+    {
+        try
+        {
+            Intent = await Billing.StartCheckoutAsync(Order);
+            Order.PaymentIntentId = Intent.PaymentIntentId;
+
+            StateHasChanged();
+
+            var stripe = await Auth.Value;
+            await stripe.InvokeVoidAsync("initialize", PaymentForm, Intent);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error creating PaymentIntent: {ex.Message}");
+        }
+    }
+
+    public async Task Pay()
+    {
+        if (Order.Email != null)
+            Intent = await Billing.StartCheckoutAsync(Order);
+
+        var dotNetHelper = DotNetObjectReference.Create(this);
+
+        var returnUrl = $"{Nav.Uri}?paymentIntentId={Intent!.PaymentIntentId}";
+        var stripe = await Auth.Value;
+        var result = await stripe.InvokeAsync<PaymentResult>("pay", returnUrl);
+        if (result.Succeeded)
+            Nav.NavigateTo(returnUrl, forceLoad: true);
+    }
+
+    [JSInvokable]
+    public Task HandlePaymentSuccess()
+    {
+        Console.WriteLine("Payment successful signal received from JavaScript.");
+        return InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Events.CurrencyChanged -= OnCurrencyChanged;
+    }
+}

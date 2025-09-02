@@ -18,5 +18,9 @@
   {
     "outputFile": "Authentication/Avatar/AuraAvatar.razor.css",
     "inputFile": "Authentication/Avatar/AuraAvatar.razor.scss"
+  },
+  {
+    "outputFile": "Billing/GlobalBiller.razor.css",
+    "inputFile": "Billing/GlobalBiller.razor.scss"
   }
 ]
