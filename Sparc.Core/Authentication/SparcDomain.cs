@@ -11,6 +11,8 @@ public class SparcDomain(string domain) : BlossomEntity<string>(Guid.NewGuid().T
     public Dictionary<string, int> PagesPerLanguage { get; set; } = [];
     public int TovikUsage { get; set; }
     public string? TovikUserId { get; set; }
+    public string LanguageSelectorPosition { get; set; } = "none";
+    public string? LanguageSelectorThemeColor { get; set; }
 
     public static string? Normalize(string domain)
     {
