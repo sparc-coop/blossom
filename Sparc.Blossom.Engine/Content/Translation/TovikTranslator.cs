@@ -91,11 +91,14 @@ public class TovikTranslator(
         return translations.FirstOrDefault();
     }
 
-    public async Task<List<TextContent>> BulkTranslate(List<TextContent> contents)
+    public async Task<List<TextContent>> GetAll(List<TextContent> contents, Language? toLanguage = null)
     {
-        var user = await auth.GetAsync(principal);
+        if (toLanguage == null)
+        {
+            var user = await auth.GetAsync(principal);
+            toLanguage = user?.Avatar.Language;
+        }
 
-        var toLanguage = user?.Avatar.Language;
         if (toLanguage == null)
             return contents;
 
@@ -107,6 +110,16 @@ public class TovikTranslator(
             if (existing != null)
                 results.Add(existing);
         });
+
+        return results.ToList();
+    }
+
+    public async Task<List<TextContent>> BulkTranslate(List<TextContent> contents)
+    {
+        var user = await auth.GetAsync(principal);
+        var toLanguage = user?.Avatar.Language;
+
+        var results = await GetAll(contents, toLanguage);
 
         var needsTranslation = contents
             .Where(content => !results.Any(x => x.Id == content.Id))
@@ -281,6 +294,11 @@ public class TovikTranslator(
         group.MapPost("single", async (TovikTranslator translator, TextContent content) =>
         {
             var result = await translator.SingleTranslate(content);
+            return Results.Ok(result);
+        });
+        group.MapPost("all", async (TovikTranslator translator, List<TextContent> contents) =>
+        {
+            var result = await translator.GetAll(contents);
             return Results.Ok(result);
         });
         group.MapPost("bulk", async (TovikTranslator translator, List<TextContent> contents) =>
