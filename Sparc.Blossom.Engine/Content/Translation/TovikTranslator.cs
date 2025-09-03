@@ -69,6 +69,28 @@ public class TovikTranslator(
         return translation;
     }
 
+    public async Task<TextContent> SingleTranslate(TextContent content)
+    {
+        var user = await auth.GetAsync(principal);
+
+        var toLanguage = user?.Avatar.Language;
+        if (toLanguage == null)
+            return content;
+
+        var needsTranslation = new List<TextContent>();
+        needsTranslation.Add(content);
+
+
+        if (!await CanTranslate(needsTranslation))
+            throw new Exception("You've reached your Tovik translation limit!");
+
+        var additionalContext = string.Join("\n", content.Text);
+        var translations = await TranslateAsync(needsTranslation, [toLanguage], additionalContext);
+        await Content.AddAsync(translations);
+
+        return translations.FirstOrDefault();
+    }
+
     public async Task<List<TextContent>> BulkTranslate(List<TextContent> contents)
     {
         var user = await auth.GetAsync(principal);
@@ -256,6 +278,11 @@ public class TovikTranslator(
         group.MapGet("languages", GetLanguagesAsync).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
         group.MapGet("language", (ClaimsPrincipal principal, HttpRequest request) => GetLanguage(principal.Get("language") ?? request.Headers.AcceptLanguage));
         group.MapPost("language", async (TovikTranslator translator, Language language) => await translator.SetLanguage(language));
+        group.MapPost("single", async (TovikTranslator translator, TextContent content) =>
+        {
+            var result = await translator.SingleTranslate(content);
+            return Results.Ok(result);
+        });
         group.MapPost("bulk", async (TovikTranslator translator, List<TextContent> contents) =>
         {
             try
