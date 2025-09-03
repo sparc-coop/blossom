@@ -93,7 +93,7 @@ public class TovikTranslator(
         if (!await CanTranslate(needsTranslation))
             throw new Exception("You've reached your Tovik translation limit!");
 
-        var additionalContext = string.Join("\n", contents.Select(x => x.Text));
+        var additionalContext = string.Join("\n", contents.Select(x => x.Text).OrderBy(x => Guid.NewGuid()).Take(20));
         var translations = await TranslateAsync(needsTranslation, [toLanguage], additionalContext);
         await Content.AddAsync(translations);
 
@@ -109,6 +109,12 @@ public class TovikTranslator(
         var domain = await domains.Query
             .Where(x => x.Domain == domainName)
             .FirstOrDefaultAsync();
+
+        if (domain == null)
+        {
+            domain = new SparcDomain(domainName);
+            await domains.AddAsync(domain);
+        }
 
         if (domain != null && domain.TovikUsage <= 10)
             return true;
