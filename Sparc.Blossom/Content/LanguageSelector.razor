@@ -4,37 +4,31 @@
 @using Microsoft.AspNetCore.Components.Forms
 
 <div class="language-select" translate="no">
-    @if (Languages.Any())
-    {
-        <InputSelect @bind-Value="SelectedLanguageId" @bind-Value:after="ChangeLanguage" >
-            @foreach (var language in Languages.OrderBy(x => x.NativeName))
-            {
-                <option value="@language.Id">
-                    @language.NativeName @(language.NativeName == language.DisplayName ? "" : $"({language.DisplayName})")
-                </option>
-            }
-        </InputSelect>
-    }
+    <InputSelect @bind-Value="SelectedLanguageId" @bind-Value:after="ChangeLanguage">
+        @foreach (var language in Sparc.Blossom.Content.Language.All.OrderBy(x => x.NativeName))
+        {
+            <option value="@language.Id">
+                @language.NativeName @(language.NativeName == language.DisplayName ? "" : $"({language.DisplayName})")
+            </option>
+        }
+    </InputSelect>
     <div class="language-select-progress-bar">
         <div class="progress-bar-value"></div>
     </div>
 </div>
 
 @inject ITovik Tovik
-@inject ISparcAura Aura 
+@inject ISparcAura Aura
 @inject IJSRuntime Js
 @code {
-    // [Parameter] public BlossomAvatar? Avatar { get; set; }
     [Parameter] public string? InitialLanguageId { get; set; }
     [Parameter] public EventCallback<Language> OnLanguageChanged { get; set; }
-    public IEnumerable<Sparc.Blossom.Content.Language> Languages { get; set; } = [];
     [SupplyParameterFromQuery] public string? Lang { get; set; }
     public string SelectedLanguageId = "";
-    public bool IsSpinning; 
+    public bool IsSpinning;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        Languages = await Tovik.GetLanguages();
         if (string.IsNullOrWhiteSpace(SelectedLanguageId))
             SelectedLanguageId = Lang
                 ?? InitialLanguageId
@@ -46,18 +40,15 @@
         if (!firstRender)
             return;
 
-        if (string.IsNullOrWhiteSpace(SelectedLanguageId))
+        if (InitialLanguageId == null && string.IsNullOrWhiteSpace(SelectedLanguageId))
         {
             var tovikLanguage = await Js.InvokeAsync<string?>("eval", "localStorage.getItem('tovik-lang')")
                 ?? await Js.InvokeAsync<string>("eval", "navigator.language");
             SelectedLanguageId = Language.Find(tovikLanguage)?.Id ?? "";
+            StateHasChanged();
         }
 
-        if (!string.IsNullOrWhiteSpace(SelectedLanguageId) && !OnLanguageChanged.HasDelegate)
-            await NotifyTovik();
-        else if (InitialLanguageId == null)
-            await PickRandom(); 
-
+        await ChangeLanguage();
     }
 
     public async Task SetLanguage(string id)
@@ -69,7 +60,7 @@
 
     async Task ChangeLanguage()
     {
-        var selectedLanguage = Languages.FirstOrDefault(l => l.Id == SelectedLanguageId);
+        var selectedLanguage = Sparc.Blossom.Content.Language.Find(SelectedLanguageId);
         if (OnLanguageChanged.HasDelegate)
         {
             await OnLanguageChanged.InvokeAsync(selectedLanguage);
@@ -78,29 +69,6 @@
         {
             await NotifyTovik();
         }
-    }
-
-    public async Task PickRandom()
-    {
-        var randomLanguage = Languages.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
-        if (randomLanguage != null)
-        {
-            SelectedLanguageId = randomLanguage.Id;
-            StateHasChanged();
-            if (OnLanguageChanged.HasDelegate)
-                await OnLanguageChanged.InvokeAsync(randomLanguage);
-        }
-    }
-
-    public async Task Spin()
-    {
-        IsSpinning = true;
-        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(100));
-        var numSpins = 0;
-        while (++numSpins < 10 && await timer.WaitForNextTickAsync())
-            await PickRandom();
-
-        await NotifyTovik();
     }
 
     async Task NotifyTovik()
