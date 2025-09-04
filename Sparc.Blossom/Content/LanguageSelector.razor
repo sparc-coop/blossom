@@ -24,33 +24,40 @@
 @inject ISparcAura Aura 
 @inject IJSRuntime Js
 @code {
-    [Parameter] public BlossomAvatar? Avatar { get; set; }
+    // [Parameter] public BlossomAvatar? Avatar { get; set; }
     [Parameter] public string? InitialLanguageId { get; set; }
     [Parameter] public EventCallback<Language> OnLanguageChanged { get; set; }
     public IEnumerable<Sparc.Blossom.Content.Language> Languages { get; set; } = [];
     [SupplyParameterFromQuery] public string? Lang { get; set; }
     public string SelectedLanguageId = "";
-    public bool IsSpinning;
+    public bool IsSpinning; 
 
     protected override async Task OnInitializedAsync()
     {
         Languages = await Tovik.GetLanguages();
-        SelectedLanguageId = Lang
-                ?? Avatar?.Language?.Id
+        if (string.IsNullOrWhiteSpace(SelectedLanguageId))
+            SelectedLanguageId = Lang
                 ?? InitialLanguageId
-                ?? Languages.FirstOrDefault(l => l.Id == CultureInfo.CurrentUICulture.TwoLetterISOLanguageName)?.Id
                 ?? string.Empty;
-
-        if (!OnLanguageChanged.HasDelegate)
-            await NotifyTovik();
-        else if (Avatar == null && InitialLanguageId == null)
-            await PickRandom();
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!IsSpinning && Avatar?.Language != null && Avatar.Language.Id != SelectedLanguageId)
-            SelectedLanguageId = Avatar.Language.Id;
+        if (!firstRender)
+            return;
+
+        if (string.IsNullOrWhiteSpace(SelectedLanguageId))
+        {
+            var tovikLanguage = await Js.InvokeAsync<string?>("eval", "localStorage.getItem('tovik-lang')")
+                ?? await Js.InvokeAsync<string>("eval", "navigator.language");
+            SelectedLanguageId = Language.Find(tovikLanguage)?.Id ?? "";
+        }
+
+        if (!string.IsNullOrWhiteSpace(SelectedLanguageId) && !OnLanguageChanged.HasDelegate)
+            await NotifyTovik();
+        else if (InitialLanguageId == null)
+            await PickRandom(); 
+
     }
 
     public async Task SetLanguage(string id)
@@ -67,10 +74,8 @@
         {
             await OnLanguageChanged.InvokeAsync(selectedLanguage);
         }
-        else if (Avatar != null)
+        else
         {
-            Avatar.Language = selectedLanguage;
-            await Aura.UpdateUserInfo(Avatar);
             await NotifyTovik();
         }
     }

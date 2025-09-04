@@ -14,29 +14,10 @@ public class TovikTranslator(
     ClaimsPrincipal principal,
     SparcAuthenticator<BlossomUser> auth) : IBlossomEndpoints
 {
-    internal static List<Language>? Languages;
-
     internal IEnumerable<ITranslator> Translators { get; } = translators;
     public IRepository<TextContent> Content { get; } = content;
 
-    public async Task<List<Language>> GetLanguagesAsync()
-    {
-        if (Languages == null)
-        {
-            Languages = [];
-            foreach (var translator in Translators.OrderBy(x => x.Priority))
-            {
-                var languages = await translator.GetLanguagesAsync();
-                Languages.AddRange(languages.Where(x => !Languages.Any(y => y.Matches(x))));
-            }
-        }
-
-        Languages = Languages.OrderBy(x => x.DisplayName)
-            .ThenBy(x => x.DialectId == null ? 1 : 0)
-            .ToList();
-
-        return Languages;
-    }
+    public async Task<List<Language>> GetLanguagesAsync() => Language.All;
 
     async Task<Language?> GetLanguageAsync(string language)
     {
@@ -69,17 +50,21 @@ public class TovikTranslator(
         return translation;
     }
 
-    public async Task<TextContent> SingleTranslate(TextContent content)
+    public async Task<TextContent?> SingleTranslate(TextContent content, Language? toLanguage = null)
     {
-        var user = await auth.GetAsync(principal);
+        if (toLanguage == null)
+        {
+            var user = await auth.GetAsync(principal);
+            toLanguage = user?.Avatar.Language;
+        }
 
-        var toLanguage = user?.Avatar.Language;
         if (toLanguage == null)
             return content;
 
-        var needsTranslation = new List<TextContent>();
-        needsTranslation.Add(content);
-
+        var needsTranslation = new List<TextContent>
+        {
+            content
+        };
 
         if (!await CanTranslate(needsTranslation))
             throw new Exception("You've reached your Tovik translation limit!");
@@ -213,52 +198,14 @@ public class TovikTranslator(
     internal async Task<Language> SetLanguage(Language language)
     {
         var user = await auth.GetAsync(principal);
-        user.Avatar.Language = GetLanguage(language.Id);
+        user.Avatar.Language = Language.Find(language.Id);
         await auth.UpdateAsync(principal, user.Avatar);
         return language;
     }
 
-    internal static List<string> GetLanguageIds(string? languageClaim)
-    {
-        if (string.IsNullOrWhiteSpace(languageClaim))
-            return [];
-
-        var languages = languageClaim
-            .Split(',')
-            .Select(l => l.Split(';')[0].Trim())
-            .Where(l => !string.IsNullOrWhiteSpace(l))
-            .ToList();
-
-        if (languages.Count == 0)
-            return [];
-
-        return languages;
-    }
-
-    internal static Language? GetLanguage(string? languageClaim)
-    {
-        if (Languages == null || string.IsNullOrWhiteSpace(languageClaim))
-            return null;
-
-        var languages = GetLanguageIds(languageClaim);
-        // Try to find a matching language in LanguagesSpoken or create a new one
-        foreach (var langCode in languages)
-        {
-            // Try to match by Id or DialectId
-            var match = Languages
-                .OrderBy(x => x.DialectId != null ? 0 : 1)
-                .FirstOrDefault(l => l.Matches(langCode));
-
-            if (match != null)
-                return match;
-        }
-
-        return null;
-    }
-
     internal static BlossomRegion? GetLocale(string languageClaim)
     {
-        var languages = GetLanguageIds(languageClaim);
+        var languages = Language.IdsFrom(languageClaim);
 
         try
         {
@@ -289,16 +236,18 @@ public class TovikTranslator(
         var group = endpoints.MapGroup("translate").RequireCors("Tovik");
         group.MapPost("", async (TovikTranslator translator, HttpRequest request, TextContent content) => await translator.Get(content));
         group.MapGet("languages", GetLanguagesAsync).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
-        group.MapGet("language", (ClaimsPrincipal principal, HttpRequest request) => GetLanguage(principal.Get("language") ?? request.Headers.AcceptLanguage));
+        group.MapGet("language", (ClaimsPrincipal principal, HttpRequest request) => Language.Find(principal.Get("language") ?? request.Headers.AcceptLanguage));
         group.MapPost("language", async (TovikTranslator translator, Language language) => await translator.SetLanguage(language));
-        group.MapPost("single", async (TovikTranslator translator, TextContent content) =>
+        group.MapPost("single", async (TovikTranslator translator, HttpRequest request, TextContent content) =>
         {
-            var result = await translator.SingleTranslate(content);
+            var toLanguage = Language.Find(request.Headers.AcceptLanguage);
+            var result = await translator.SingleTranslate(content, toLanguage);
             return Results.Ok(result);
         });
-        group.MapPost("all", async (TovikTranslator translator, List<TextContent> contents) =>
+        group.MapPost("all", async (TovikTranslator translator, HttpRequest request, List <TextContent> contents) =>
         {
-            var result = await translator.GetAll(contents);
+            var toLanguage = Language.Find(request.Headers.AcceptLanguage);
+            var result = await translator.GetAll(contents, toLanguage);
             return Results.Ok(result);
         });
         group.MapPost("bulk", async (TovikTranslator translator, List<TextContent> contents) =>

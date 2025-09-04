@@ -201,7 +201,7 @@ public class SparcAuthenticator<T>(
             var acceptLanguage = http.HttpContext.Request.Headers.AcceptLanguage;
             if (User.Avatar.Language == null && !string.IsNullOrWhiteSpace(acceptLanguage))
             {
-                var newLanguage = TovikTranslator.GetLanguage(acceptLanguage!);
+                var newLanguage = Language.Find(acceptLanguage!);
                 if (newLanguage != null)
                     User.ChangeLanguage(newLanguage);
 
@@ -211,7 +211,7 @@ public class SparcAuthenticator<T>(
 
                 if (User.Avatar.Currency == null)
                 {
-                    var languageId = TovikTranslator.GetLanguageIds(acceptLanguage).FirstOrDefault();
+                    var languageId = Language.IdsFrom(acceptLanguage).FirstOrDefault();
                     if (languageId != null)
                         User.Avatar.Currency = SparcCurrency.From(languageId);
                 }

@@ -1,5 +1,4 @@
-﻿
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Content;
@@ -26,7 +25,8 @@ public record Language
 
         if (id.Contains('-'))
         {
-            DialectId = id.Split('-').Last();
+            var elements = id.Split('-');
+            DialectId = string.Join("-", elements.Skip(1));
             DisplayName = DisplayName.Split('(').First().Trim();
             NativeName = NativeName.Split('(').First().Trim();
         }
@@ -80,11 +80,59 @@ public record Language
         if (elements.Length == 1)
             return LanguageId.Equals(langCode, StringComparison.OrdinalIgnoreCase);
 
-        if (elements.Length == 2)
+        if (elements.Length >= 2)
+        {
+            var dialectId = string.Join("-", elements.Skip(1));
             return LanguageId.Equals(elements[0], StringComparison.OrdinalIgnoreCase) &&
-                    (DialectId == null || DialectId.Equals(elements[1], StringComparison.OrdinalIgnoreCase));
+                    (DialectId == null || DialectId.Equals(dialectId, StringComparison.OrdinalIgnoreCase));
+        }
 
         return false;
+    }
+
+    public static List<Language> All = CultureInfo
+        .GetCultures(CultureTypes.SpecificCultures)
+        .Select(c => FromCulture(c.Name))
+        .OrderBy(l => l.DisplayName)
+        .ThenBy(x => x.DialectId == null ? 1 : 0)
+        .ToList();
+
+    public static Language? Find(string? languageClaim)
+    {
+        if (string.IsNullOrWhiteSpace(languageClaim))
+            return null;
+
+        var languages = Language.IdsFrom(languageClaim);
+        // Try to find a matching language in LanguagesSpoken or create a new one
+        foreach (var langCode in languages)
+        {
+            // Try to match by Id or DialectId
+            var match = All
+                .OrderBy(x => x.DialectId != null ? 0 : 1)
+                .FirstOrDefault(l => l.Matches(langCode));
+
+            if (match != null)
+                return match;
+        }
+
+        return null;
+    }
+
+    public static List<string> IdsFrom(string? languageClaim)
+    {
+        if (string.IsNullOrWhiteSpace(languageClaim))
+            return [];
+
+        var languages = languageClaim!
+            .Split(',')
+            .Select(l => l.Split(';')[0].Trim())
+            .Where(l => !string.IsNullOrWhiteSpace(l))
+            .ToList();
+
+        if (languages.Count == 0)
+            return [];
+
+        return languages;
     }
 }
 
