@@ -13,6 +13,9 @@ public interface ITovik
 
     [Post("/translate/crawl")]
     Task<List<TextContent>> CrawlAsync(TovikCrawlRequest request);
+
+    [Get("/domains/{domain}/settings")]
+    Task<SparcDomain> GetDomainSettings([AliasAs("domain")] string domain);
 }
 
 public record TovikCrawlRequest(string Domain, List<string> ToLanguages, string FromLanguage = "en");

@@ -1,4 +1,6 @@
-﻿using Sparc.Blossom.Authentication;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos.Spatial;
+using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 using System.Collections.Concurrent;
 using System.Globalization;
@@ -249,6 +251,23 @@ public class TovikTranslator(
                     .Select(g => g.Select(x => x.item));
     }
 
+    public async Task<object> GetDomainSettings(string domain)
+    {
+        var domainEntity = await domains.Query
+            .Where(d => d.Domain == domain)
+            .Select(d => new { d.LanguageSelectorPosition, d.LanguageSelectorThemeColor })
+            .FirstOrDefaultAsync();
+
+        if (domainEntity == null)
+            throw new Exception("Domain not found.");
+
+        return new
+        {
+            domainEntity.LanguageSelectorPosition,
+            domainEntity.LanguageSelectorThemeColor
+        };
+    }
+
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("translate").RequireCors("Tovik");
@@ -267,5 +286,8 @@ public class TovikTranslator(
                 return Results.StatusCode(429);
             }
         });
+
+        var domainGroup = endpoints.MapGroup("domains").RequireCors("Tovik");
+        domainGroup.MapGet("{domain}/settings", async (TovikTranslator translator, string domain) => await translator.GetDomainSettings(domain));
     }
 }
