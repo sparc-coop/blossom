@@ -14,14 +14,23 @@
     <InputSelect @bind-Value="SelectedLanguageId" @bind-Value:after="ChangeLanguage">
         @foreach (var language in Sparc.Blossom.Content.Language.All.GroupBy(x => x.LanguageId).OrderBy(x => x.First().LanguageNativeName))
         {
-            <optgroup label="@language.First().LanguageNativeName">
-                @foreach (var sublanguage in language.OrderBy(x => x.NativeName))
-                {
-                    <option value="@sublanguage.Id">
-                        @sublanguage.NativeName
-                    </option>
-                }
-            </optgroup>
+            @if (language.Count() == 1)
+            {
+                <option value="@language.First().Id">
+                    @language.First().NativeName
+                </option>
+            }
+            else
+            {
+                <optgroup label="@language.First().LanguageNativeName">
+                    @foreach (var sublanguage in language.OrderBy(x => x.NativeName))
+                    {
+                        <option value="@sublanguage.Id">
+                            @sublanguage.NativeName
+                        </option>
+                    }
+                </optgroup>
+            }
         }
     </InputSelect>
     <div class="language-select-progress-bar">
