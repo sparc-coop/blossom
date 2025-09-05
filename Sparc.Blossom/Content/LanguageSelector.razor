@@ -2,14 +2,26 @@
 @using Microsoft.JSInterop
 @using Sparc.Blossom.Authentication
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
 
 <div class="language-select" translate="no">
+    @if (NativeLanguageId != null && SelectedLanguageId != NativeLanguageId)
+    {
+        <button @onclick="@(() => SetLanguage(NativeLanguageId))">
+            <Sparc.Blossom.Content.Icons.Back />
+        </button>
+    }
     <InputSelect @bind-Value="SelectedLanguageId" @bind-Value:after="ChangeLanguage">
-        @foreach (var language in Sparc.Blossom.Content.Language.All.OrderBy(x => x.NativeName))
+        @foreach (var language in Sparc.Blossom.Content.Language.All.GroupBy(x => x.LanguageId).OrderBy(x => x.First().LanguageNativeName))
         {
-            <option value="@language.Id">
-                @language.NativeName @(language.NativeName == language.DisplayName ? "" : $"({language.DisplayName})")
-            </option>
+            <optgroup label="@language.First().LanguageNativeName">
+                @foreach (var sublanguage in language.OrderBy(x => x.NativeName))
+                {
+                    <option value="@sublanguage.Id">
+                        @sublanguage.NativeName
+                    </option>
+                }
+            </optgroup>
         }
     </InputSelect>
     <div class="language-select-progress-bar">
@@ -26,6 +38,7 @@
     [SupplyParameterFromQuery] public string? Lang { get; set; }
     public string SelectedLanguageId = "";
     public bool IsSpinning;
+    string? NativeLanguageId;
 
     protected override void OnInitialized()
     {
@@ -40,10 +53,12 @@
         if (!firstRender)
             return;
 
+        NativeLanguageId = await Js.InvokeAsync<string>("eval", "navigator.language");
+
         if (InitialLanguageId == null && string.IsNullOrWhiteSpace(SelectedLanguageId))
         {
             var tovikLanguage = await Js.InvokeAsync<string?>("eval", "localStorage.getItem('tovik-lang')")
-                ?? await Js.InvokeAsync<string>("eval", "navigator.language");
+                ?? NativeLanguageId;
             SelectedLanguageId = Language.Find(tovikLanguage)?.Id ?? "";
             StateHasChanged();
         }
