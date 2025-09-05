@@ -25,10 +25,16 @@ internal class OpenAITranslationQuestion : OpenAIQuestion<OpenAITranslations>
     };
     
     public OpenAITranslationQuestion(IEnumerable<TextContent> messages, Language toLanguage, string? additionalContext = null) 
-        : base($"Translate the following to {toLanguage.DisplayName}:\n\n")
+        : base($"")
     {
         Instructions = "You are a translator seeking to accurately translate messages, using the same tone as the provided context, if any. If any message is not translatable, use the original message in the output, don't skip it.";
-        var messageJson = JsonSerializer.Serialize(messages.Select(x => x.Text?.Replace('\u00A0',' ')), TranslateAllUnicode);
+        
+        if (toLanguage.DialectDisplayName != null && toLanguage.DialectDisplayName != toLanguage.LanguageDisplayName)
+            Text += $"Translate the following to {toLanguage.LanguageDisplayName}. Use the {toLanguage.DialectDisplayName} dialect of {toLanguage.LanguageDisplayName} when possible:\n\n";
+        else
+            Text += $"Translate the following to {toLanguage.DisplayName}:\n\n";
+
+        var messageJson = JsonSerializer.Serialize(messages.Select(x => x.Text?.Replace('\u00A0', ' ')), TranslateAllUnicode);
         Text += messageJson;
 
         if (!string.IsNullOrWhiteSpace(additionalContext))

@@ -11,6 +11,10 @@ public record Language
     public string? VoiceId { get; set; }
     public string DisplayName { get; set; } = "";
     public string NativeName { get; set; } = "";
+    public string LanguageDisplayName { get; set; } = "";
+    public string LanguageNativeName { get; set; } = "";
+    public string? DialectDisplayName { get; set; }
+    public string? DialectNativeName { get; set; }
     public bool? IsRightToLeft { get; set; }
 
     public Language() {}
@@ -23,13 +27,7 @@ public record Language
         DisplayName = "";
         NativeName = "";
 
-        if (id.Contains('-'))
-        {
-            var elements = id.Split('-');
-            DialectId = string.Join("-", elements.Skip(1));
-            DisplayName = DisplayName.Split('(').First().Trim();
-            NativeName = NativeName.Split('(').First().Trim();
-        }
+        CalculateNames();
     }
 
     public Language(string id, string displayName, string nativeName, bool? isRightToLeft) : this(id)
@@ -37,6 +35,8 @@ public record Language
         DisplayName = displayName;
         NativeName = nativeName;
         IsRightToLeft = isRightToLeft;
+
+        CalculateNames();
     }
 
     public static Language FromCulture(string id)
@@ -49,6 +49,8 @@ public record Language
             language.DisplayName = culture.DisplayName;
             language.NativeName = culture.NativeName;
             language.IsRightToLeft = culture.TextInfo.IsRightToLeft;
+            language.CalculateNames();
+            
         }
         catch (CultureNotFoundException)
         {
@@ -60,6 +62,22 @@ public record Language
     public override string ToString()
     {
         return LanguageId + (DialectId != null ? "-" + DialectId : "");
+    }
+
+    private void CalculateNames()
+    {
+        if (Id.Contains('-'))
+        {
+            var elements = Id.Split('-');
+            DialectId = string.Join("-", elements.Skip(1));
+            LanguageDisplayName = DisplayName.Split('(').First().Trim();
+            LanguageNativeName = NativeName.Split('(').First().Trim();
+            if (DisplayName.Contains('('))
+            {
+                DialectDisplayName = DisplayName.Split('(').Last().Trim(')', ' ');
+                DialectNativeName = NativeName.Split('(').Last().Trim(')', ' ');
+            }
+        }
     }
 
     public bool Matches(Language language)
