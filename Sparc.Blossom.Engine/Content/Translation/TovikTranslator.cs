@@ -122,6 +122,8 @@ public class TovikTranslator(
 
     private async Task<bool> CanTranslate(List<TextContent> contents)
     {
+        return true; // Temporarily disable limits
+
         var domainName = contents.FirstOrDefault()?.Domain;
         if (string.IsNullOrWhiteSpace(domainName))
             return true;
