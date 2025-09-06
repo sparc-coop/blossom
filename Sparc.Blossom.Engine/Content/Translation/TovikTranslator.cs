@@ -116,8 +116,6 @@ public class TovikTranslator(
 
     private async Task<bool> CanTranslate(List<TextContent> contents)
     {
-        return true; // Temporarily disable limits
-
         var domainName = contents.FirstOrDefault()?.Domain;
         if (string.IsNullOrWhiteSpace(domainName))
             return true;
@@ -132,18 +130,8 @@ public class TovikTranslator(
             await domains.AddAsync(domain);
         }
 
-        if (domain != null && domain.TovikUsage <= 10)
+        if (domain != null && domain.TovikUsage <= 500)
             return true;
-
-        if (domain?.TovikUserId != null)
-        {
-            var domainOwner = await users.FindAsync(domain.TovikUserId);
-            var tovik = domainOwner?.Product("Tovik");
-            if (tovik == null || tovik.HasExceededUsage)
-                return false;
-            else
-                return true;
-        }
 
         return false;
     }

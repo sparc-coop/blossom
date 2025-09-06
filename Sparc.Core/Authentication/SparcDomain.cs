@@ -1,8 +1,9 @@
 ﻿using Sparc.Blossom;
+using Sparc.Core;
 
 namespace Sparc.Blossom.Authentication;
 
-public class SparcDomain(string domain) : BlossomEntity<string>(Guid.NewGuid().ToString())
+public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(domain))
 {
     public string Domain { get; set; } = Normalize(domain) ?? throw new Exception($"Invalid domain name: {domain}");
     public List<string> Exemptions { get; set; } = [];
