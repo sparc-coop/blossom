@@ -11,10 +11,11 @@ using System.Text.Json;
 
 namespace Sparc.Blossom.Content;
 
+public record OpenAITranslation(string Id, string Text);
 public class OpenAITranslations
 {
-    [Description("The translated text in the target language.")]
-    public List<string> Text { get; set; } = [];
+    [Description("The original given ID of the original text as Id, and the translated text in the target language as Text.")]
+    public List<OpenAITranslation> Text { get; set; } = [];
 }
 
 internal class OpenAITranslationQuestion : OpenAIQuestion<OpenAITranslations>
@@ -27,21 +28,19 @@ internal class OpenAITranslationQuestion : OpenAIQuestion<OpenAITranslations>
     public OpenAITranslationQuestion(IEnumerable<TextContent> messages, Language toLanguage, string? additionalContext = null) 
         : base($"")
     {
-        Instructions = "You are a translator seeking to accurately translate messages, using the same tone as the provided context, if any. If any message is not translatable, use the original message in the output, don't skip it.";
+        Instructions = "You are a translator seeking to accurately translate messages, using the same tone as the provided context, if any. If any message is not translatable, use the original message in the output, don't skip it. The answer should always contain the same quantity of translations as the input.";
         
         if (toLanguage.DialectDisplayName != null && toLanguage.DialectDisplayName != toLanguage.LanguageDisplayName)
             Text += $"Translate the following to {toLanguage.LanguageDisplayName}. Use the {toLanguage.DialectDisplayName} dialect of {toLanguage.LanguageDisplayName} when possible:\n\n";
         else
             Text += $"Translate the following to {toLanguage.DisplayName}:\n\n";
 
-        var messageJson = JsonSerializer.Serialize(messages.Select(x => x.Text?.Replace('\u00A0', ' ')), TranslateAllUnicode);
+        var textToTranslate = messages.Select(x => new OpenAITranslation(x.Id.Substring(0, 4), x.Text?.Replace('\u00A0', ' ')));
+        var messageJson = JsonSerializer.Serialize(textToTranslate, TranslateAllUnicode);
         Text += messageJson;
 
         if (!string.IsNullOrWhiteSpace(additionalContext))
-        {
-            Context.Add($"Here is a sampling of other content on the page:");
             Context.Add(additionalContext);
-        }
     }
 }
 
@@ -75,8 +74,9 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
                     if (answer.Value?.Text == null)
                         continue;
 
-                    var translations = safeBatch.Zip(answer.Value.Text,
-                        (message, translation) => new TextContent(message, toLanguage, translation));
+                    var translations = new List<TextContent>();
+                    foreach (var translation in safeBatch.Where(x => answer.Value.Text.Any(y => x.Id.StartsWith(y.Id))))
+                        translations.Add(new TextContent(translation, toLanguage, answer.Value.Text.First(y => translation.Id.StartsWith(y.Id)).Text));
 
                     foreach (var translatedMessage in translations)
                     {

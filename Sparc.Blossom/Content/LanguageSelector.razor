@@ -4,38 +4,48 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Web
 
-<div class="language-select" translate="no">
-    @if (NativeLanguageId != null && SelectedLanguageId != NativeLanguageId)
+
+<div class="language-select-container">
+    <div class="language-select @(IsVisible ? "show" : "")" translate="no">
+        @if (NativeLanguageId != null && SelectedLanguageId != NativeLanguageId)
+        {
+            <button @onclick="@(() => SetLanguage(NativeLanguageId))">
+                <Sparc.Blossom.Content.Icons.Back />
+            </button>
+        }
+        <InputSelect @bind-Value="SelectedLanguageId" @bind-Value:after="ChangeLanguage">
+            @foreach (var language in Sparc.Blossom.Content.Language.All.GroupBy(x => x.LanguageId).OrderBy(x => x.First().LanguageNativeName))
+            {
+                @if (language.Count() == 1)
+                {
+                    <option value="@language.First().Id">
+                        @language.First().NativeName
+                    </option>
+                }
+                else
+                {
+                    <optgroup label="@language.First().LanguageNativeName">
+                        @foreach (var sublanguage in language.OrderBy(x => x.NativeName))
+                        {
+                            <option value="@sublanguage.Id">
+                                @sublanguage.NativeName
+                            </option>
+                        }
+                    </optgroup>
+                }
+            }
+        </InputSelect>
+        <div class="language-select-progress-bar">
+            <div class="progress-bar-value"></div>
+        </div>
+    </div>
+
+    @if (WithButton)
     {
-        <button @onclick="@(() => SetLanguage(NativeLanguageId))">
-            <Sparc.Blossom.Content.Icons.Back />
+        <button class="secondary-btn @(IsVisible ? "selected" : "")" @onclick=ToggleVisibility>
+            <Sparc.Blossom.Content.Icons.Globe />
         </button>
     }
-    <InputSelect @bind-Value="SelectedLanguageId" @bind-Value:after="ChangeLanguage">
-        @foreach (var language in Sparc.Blossom.Content.Language.All.GroupBy(x => x.LanguageId).OrderBy(x => x.First().LanguageNativeName))
-        {
-            @if (language.Count() == 1)
-            {
-                <option value="@language.First().Id">
-                    @language.First().NativeName
-                </option>
-            }
-            else
-            {
-                <optgroup label="@language.First().LanguageNativeName">
-                    @foreach (var sublanguage in language.OrderBy(x => x.NativeName))
-                    {
-                        <option value="@sublanguage.Id">
-                            @sublanguage.NativeName
-                        </option>
-                    }
-                </optgroup>
-            }
-        }
-    </InputSelect>
-    <div class="language-select-progress-bar">
-        <div class="progress-bar-value"></div>
-    </div>
 </div>
 
 @inject ITovik Tovik
@@ -43,14 +53,20 @@
 @inject IJSRuntime Js
 @code {
     [Parameter] public string? InitialLanguageId { get; set; }
+    [Parameter] public bool WithButton { get; set; } = false;
+    [Parameter] public bool Visible { get; set; }
     [Parameter] public EventCallback<Language> OnLanguageChanged { get; set; }
     [SupplyParameterFromQuery] public string? Lang { get; set; }
     public string SelectedLanguageId = "";
     public bool IsSpinning;
+    public bool IsVisible;
+    void ToggleVisibility() => IsVisible = !IsVisible;
     string? NativeLanguageId;
 
     protected override void OnInitialized()
     {
+        if (!WithButton || Visible) IsVisible = true;
+
         if (string.IsNullOrWhiteSpace(SelectedLanguageId))
             SelectedLanguageId = Lang
                 ?? InitialLanguageId
@@ -69,8 +85,11 @@
             var tovikLanguage = await Js.InvokeAsync<string?>("eval", "localStorage.getItem('tovik-lang')")
                 ?? NativeLanguageId;
             SelectedLanguageId = Language.Find(tovikLanguage)?.Id ?? "";
+            if (SelectedLanguageId != NativeLanguageId)
+                IsVisible = true;
             StateHasChanged();
         }
+
 
         await ChangeLanguage();
     }

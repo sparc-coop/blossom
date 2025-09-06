@@ -28,7 +28,10 @@ public record JsonSchemaProperty
 
         if (JsonType(type) == "array")
         {
-            Items = new JsonSchema(JsonType(type.GenericTypeArguments[0]));
+            if (type.GenericTypeArguments[0] == typeof(OpenAITranslation))
+                Items = new JsonSchema(typeof(OpenAITranslation));
+            else
+                Items = new JsonSchema(JsonType(type.GenericTypeArguments[0]));
         }
 
         if (type == typeof(DateTime) || type == typeof(DateTime?) || type == typeof(DateOnly) || type == typeof(DateOnly?))
@@ -46,6 +49,7 @@ public record JsonSchemaProperty
         return type switch
         {
             Type t when t == typeof(List<string>) => "array",
+            Type t when t == typeof(List<OpenAITranslation>) => "array",
             Type t when t == typeof(List<double>) => "array",
             Type t when t == typeof(string) => "string",
             Type t when t == typeof(int) => "integer",

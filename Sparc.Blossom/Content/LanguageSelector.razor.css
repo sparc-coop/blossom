@@ -1,12 +1,20 @@
-﻿.language-select {
+﻿.language-select-container {
+  display: flex;
+  gap: 8px;
+}
+
+.language-select {
   border-radius: 32px;
   border: 1px solid var(--purple-100);
   padding: 8px 16px;
   box-sizing: border-box;
   width: 100%;
-  display: flex;
   gap: 2px;
   align-items: center;
+  display: none;
+}
+.language-select.show {
+  display: flex;
 }
 .language-select > button {
   background-color: transparent;
