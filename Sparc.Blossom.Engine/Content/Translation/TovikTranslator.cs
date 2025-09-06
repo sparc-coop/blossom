@@ -50,7 +50,7 @@ public class TovikTranslator(
         return translation;
     }
 
-    public async Task<TextContent?> SingleTranslate(TextContent content, Language? toLanguage = null)
+    public async Task<List<TextContent>> SingleTranslate(List<TextContent> contents, Language? toLanguage = null, string? additionalContext = null)
     {
         if (toLanguage == null)
         {
@@ -59,21 +59,15 @@ public class TovikTranslator(
         }
 
         if (toLanguage == null)
-            return content;
+            return contents;
 
-        var needsTranslation = new List<TextContent>
-        {
-            content
-        };
-
-        if (!await CanTranslate(needsTranslation))
+        if (!await CanTranslate(contents))
             throw new Exception("You've reached your Tovik translation limit!");
 
-        var additionalContext = string.Join("\n", content.Text);
-        var translations = await TranslateAsync(needsTranslation, [toLanguage], additionalContext);
+        var translations = await TranslateAsync(contents, [toLanguage], additionalContext);
         await Content.AddAsync(translations);
 
-        return translations.FirstOrDefault();
+        return translations;
     }
 
     public async Task<List<TextContent>> GetAll(List<TextContent> contents, Language? toLanguage = null)
@@ -240,13 +234,13 @@ public class TovikTranslator(
         group.MapGet("languages", GetLanguagesAsync).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
         group.MapGet("language", (ClaimsPrincipal principal, HttpRequest request) => Language.Find(principal.Get("language") ?? request.Headers.AcceptLanguage));
         group.MapPost("language", async (TovikTranslator translator, Language language) => await translator.SetLanguage(language));
-        group.MapPost("single", async (TovikTranslator translator, HttpRequest request, TextContent content) =>
+        group.MapPost("untranslated", async (TovikTranslator translator, HttpRequest request, TranslationRequest translationRequest) =>
         {
             var toLanguage = Language.Find(request.Headers.AcceptLanguage);
-            var result = await translator.SingleTranslate(content, toLanguage);
+            var result = await translator.SingleTranslate(translationRequest.Content, toLanguage, translationRequest.AdditionalContext);
             return Results.Ok(result);
         });
-        group.MapPost("all", async (TovikTranslator translator, HttpRequest request, List <TextContent> contents) =>
+        group.MapPost("all", async (TovikTranslator translator, HttpRequest request, List<TextContent> contents) =>
         {
             var toLanguage = Language.Find(request.Headers.AcceptLanguage);
             var result = await translator.GetAll(contents, toLanguage);
