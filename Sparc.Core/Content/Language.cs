@@ -116,9 +116,9 @@ public record Language
         .ToList();
 
     private static List<string> GoodRandomLanguages = [
-        "es-ES", "fr-FR", "de-DE", "it-IT", "ja-JP", "zh-CN", "ru-RU",
-        "pt-BR", "ar-SA", "ko-KR", "nl-NL", "sv-SE", "fi-FI", "no-NO", "da-DK",
-        "pl-PL", "tr-TR", "hi-IN", "he-IL", "th-TH", "vi-VN", "id-ID", "ms-MY"
+        "es-ES", "fr-FR", "de-DE", "it-IT", "ja-JP", "pt-BR", 
+        "ko-KR", "nl-NL", "sv-SE", "fi-FI", "no-NO", "da-DK",
+        "pl-PL"
     ];
     public static Language Random => All
         .Where(x => GoodRandomLanguages.Contains(x.Id))

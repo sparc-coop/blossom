@@ -68,6 +68,7 @@ public class BillToTovik(
             .ToDictionary(g => g.Key, g => g.Count());
 
         domain.LastTranslatedDate = DateTime.UtcNow;
+        domain.LastTranslatedLanguage = item.Content.Language.Id;
 
         await domains.UpdateAsync(domain);
     }

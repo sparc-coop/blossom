@@ -9,6 +9,7 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
     public List<string> Exemptions { get; set; } = [];
     public DateTime? DateConnected { get; set; }
     public DateTime? LastTranslatedDate { get; set; }
+    public string? LastTranslatedLanguage { get; set; }
     public Dictionary<string, int> PagesPerLanguage { get; set; } = [];
     public int TovikUsage { get; set; }
     public string? TovikUserId { get; set; }
