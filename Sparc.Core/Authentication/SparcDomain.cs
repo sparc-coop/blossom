@@ -1,4 +1,4 @@
-﻿using Sparc.Blossom;
+﻿using Sparc.Blossom.Billing;
 using Sparc.Core;
 
 namespace Sparc.Blossom.Authentication;
@@ -12,6 +12,7 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
     public Dictionary<string, int> PagesPerLanguage { get; set; } = [];
     public int TovikUsage { get; set; }
     public string? TovikUserId { get; set; }
+    public List<SparcProduct> Products { get; set; } = [];
 
     public static string? Normalize(string domain)
     {
@@ -70,6 +71,37 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
         {
             return null;
         }
+    }
+
+    public SparcProduct? Product(string productId) => Products.FirstOrDefault(x => x.ProductId == productId);
+
+    public SparcProduct AddProduct(string productId)
+    {
+        var existing = Products.FirstOrDefault(x => x.ProductId == productId);
+        if (existing != null)
+            return existing;
+
+        var product = new SparcProduct(productId);
+        Products.Add(product);
+
+        return product;
+    }
+
+    public bool HasProduct(string productName)
+    {
+        return Products.Any(x => x.ProductId.Equals(productName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    public void Fulfill(SparcProduct product)
+    {
+        var existing = Product(product.ProductId);
+        if (existing != null)
+        {
+            existing.MaxUsage += product.MaxUsage;
+            existing.OrderIds.AddRange(product.OrderIds);
+        }
+        else
+            Products.Add(product);
     }
 
     public string FaviconUri => $"https://{Domain}/favicon.ico";

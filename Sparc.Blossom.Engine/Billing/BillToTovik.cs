@@ -15,7 +15,6 @@ public class BillToTovikHandler(BlossomQueue<BillToTovik> biller)  : INotificati
 }
 
 public class BillToTovik(
-    IRepository<BlossomUser> users,
     IRepository<SparcDomain> domains,
     IRepository<Page> pages,
     IRepository<UserCharge> charges)
@@ -28,9 +27,6 @@ public class BillToTovik(
 
         await RegisterTovikUsage(item, domain);
         await RegisterPageView(item, domain);
-
-        if (domain?.TovikUserId != null && new Random().Next(100) == 8)
-            await CalculateTokenUsage(domain.TovikUserId);
     }
 
     private async Task RegisterTovikUsage(TovikContentTranslated item, SparcDomain? domain)
@@ -74,31 +70,5 @@ public class BillToTovik(
         domain.LastTranslatedDate = DateTime.UtcNow;
 
         await domains.UpdateAsync(domain);
-    }
-
-    private async Task CalculateTokenUsage(string userId)
-    {
-        var user = await users.Query
-            .Where(u => u.Id == userId)
-            .FirstOrDefaultAsync();
-
-        if (user == null)
-            return;
-
-        var product = user?.Product("Tovik");
-        if (product == null)
-            return;
-
-        var userDomains = await domains.Query
-            .Where(d => d.TovikUserId == user!.Id)
-            .Select(x => x.Domain)
-            .ToListAsync();
-
-        product.TotalUsage = pages.Query
-            .Where(x => userDomains.Contains(x.Domain))
-            .Count();
-
-        await users.UpdateAsync(user!);
-
     }
 }

@@ -8,7 +8,7 @@ public class Orders(
     BlossomAggregateOptions<SparcOrder> options, 
     StripePaymentService stripe, 
     SparcAuthenticator<BlossomUser> auth,
-    IRepository<BlossomUser> users,
+    IRepository<SparcDomain> domains,
     IConfiguration config) 
     : BlossomAggregate<SparcOrder>(options), IBlossomEndpoints
 {
@@ -28,7 +28,7 @@ public class Orders(
         {
             var intent = await stripe.GetPaymentIntentAsync(order.PaymentIntentId);
             if (intent?.Status == "succeeded")
-                order = await Fulfill(order, order.UserId);
+                order = await Fulfill(order);
         }
 
         return order;
@@ -61,7 +61,7 @@ public class Orders(
         {
             var order = await Repository.FindAsync(intent.Metadata["OrderId"]);
             if (order != null && order.FulfilledDate == null)
-                await Fulfill(order, order.UserId);
+                await Fulfill(order);
         }
 
         return Results.Ok();
@@ -72,17 +72,18 @@ public class Orders(
         var order = await Repository.Query.Where(x => x.Id == id && x.FulfilledDate == null).FirstOrDefaultAsync() 
             ?? throw new InvalidOperationException($"Order with ID {id} not found.");
         
-        return await Fulfill(order, User.Id());
+        return await Fulfill(order);
     }
 
-    private async Task<SparcOrder> Fulfill(SparcOrder order, string userId)
+    private async Task<SparcOrder> Fulfill(SparcOrder order)
     {
         var product = order.Fulfill();
         await Repository.UpdateAsync(order);
-        
-        var user = await users.FindAsync(userId);
-        user?.Fulfill(product);
-        await users.UpdateAsync(user!);
+
+        var sparcDomain = new SparcDomain(order.Domain);
+        var domain = await domains.Query.Where(x => x.Domain == sparcDomain.Domain).FirstOrDefaultAsync() ?? sparcDomain;
+        domain.Fulfill(product);
+        await domains.UpdateAsync(domain!);
         
         return order;
     }

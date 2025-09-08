@@ -35,7 +35,10 @@ internal class OpenAITranslationQuestion : OpenAIQuestion<OpenAITranslations>
         else
             Text += $"Translate the following to {toLanguage.DisplayName}:\n\n";
 
-        var textToTranslate = messages.Select(x => new OpenAITranslation(x.Id.Substring(0, 4), x.Text?.Replace('\u00A0', ' ')));
+        var textToTranslate = messages
+            .Where(x => x.Text != null)
+            .Select(x => new OpenAITranslation(x.Id.Substring(0, 4), x.Text!.Replace('\u00A0', ' ')));
+
         var messageJson = JsonSerializer.Serialize(textToTranslate, TranslateAllUnicode);
         Text += messageJson;
 

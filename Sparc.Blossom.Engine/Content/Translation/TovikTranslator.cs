@@ -10,14 +10,13 @@ public class TovikTranslator(
     IEnumerable<ITranslator> translators,
     IRepository<TextContent> content,
     IRepository<SparcDomain> domains,
-    IRepository<BlossomUser> users,
     ClaimsPrincipal principal,
     SparcAuthenticator<BlossomUser> auth) : IBlossomEndpoints
 {
     internal IEnumerable<ITranslator> Translators { get; } = translators;
     public IRepository<TextContent> Content { get; } = content;
 
-    public async Task<List<Language>> GetLanguagesAsync() => Language.All;
+    public Task<List<Language>> GetLanguagesAsync() => Task.FromResult(Language.All);
 
     async Task<Language?> GetLanguageAsync(string language)
     {

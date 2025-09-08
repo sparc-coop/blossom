@@ -21,7 +21,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public BlossomAvatar Avatar { get; set; } = new();
 
     public List<BlossomIdentity> Identities { get; set; } = [];
-    public List<SparcProduct> Products { get; set; } = [];
     internal Dictionary<string, string> Claims { get; set; } = [];
     internal Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
     public string? Identity(string authenticationType) => 
@@ -107,23 +106,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public void ChangeUsername(string username)
     {
         Avatar.Username = username;
-    }
-
-    public SparcProduct AddProduct(string productId)
-    {
-        var existing = Products.FirstOrDefault(x => x.ProductId == productId);
-        if (existing != null)
-            return existing;
-
-        var product = new SparcProduct(productId);
-        Products.Add(product);
-
-        return product;
-    }
-
-    public bool HasProduct(string productName)
-    {
-        return Products.Any(x => x.ProductId.Equals(productName, StringComparison.OrdinalIgnoreCase));
     }
 
     public void Login()
@@ -241,19 +223,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         return identity;
     }
 
-    public SparcProduct? Product(string productId) => Products.FirstOrDefault(x => x.ProductId == productId);
-
-    public void Fulfill(SparcProduct product)
-    {
-        var existing = Product(product.ProductId);
-        if (existing != null)
-        {
-            existing.MaxUsage += product.MaxUsage;
-            existing.OrderIds.AddRange(product.OrderIds);
-        }
-        else
-            Products.Add(product);
-    }
 
     public BlossomIdentity UpsertIdentity(string authenticationType, string externalId)
     {
