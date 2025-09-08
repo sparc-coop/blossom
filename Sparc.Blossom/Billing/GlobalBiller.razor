@@ -62,15 +62,10 @@ else if (Order?.PaymentIntentId != null)
 
 
 @inject IConfiguration Configuration
-
 @inject SparcEvents Events
-
 @inject ISparcBilling Billing
-
 @inject IJSRuntime Js
-
 @inject NavigationManager Nav
-
 @code {
     [Parameter] public required string ProductId { get; set; } = default!;
     [Parameter] public required string StripeProductId { get; set; } = default!;
@@ -101,7 +96,7 @@ else if (Order?.PaymentIntentId != null)
             await CheckOnStripePayment();
     }
 
-    protected override async void OnParametersSet()
+    protected override void OnParametersSet()
     {
         if (Domain != null)
             Order.Domain = Domain;
