@@ -115,6 +115,17 @@ public record Language
         .ThenBy(x => x.DialectId == null ? 1 : 0)
         .ToList();
 
+    private static List<string> GoodRandomLanguages = [
+        "es-ES", "fr-FR", "de-DE", "it-IT", "ja-JP", "zh-CN", "ru-RU",
+        "pt-BR", "ar-SA", "ko-KR", "nl-NL", "sv-SE", "fi-FI", "no-NO", "da-DK",
+        "pl-PL", "tr-TR", "hi-IN", "he-IL", "th-TH", "vi-VN", "id-ID", "ms-MY"
+    ];
+    public static Language Random => All
+        .Where(x => GoodRandomLanguages.Contains(x.Id))
+        .OrderBy(x => Guid.NewGuid())
+        .First();
+
+
     public static Language? Find(string? languageClaim)
     {
         if (string.IsNullOrWhiteSpace(languageClaim))
