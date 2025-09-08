@@ -82,7 +82,7 @@ public class Orders(
 
         var sparcDomain = new SparcDomain(order.Domain);
         var domain = await domains.Query.Where(x => x.Domain == sparcDomain.Domain).FirstOrDefaultAsync() ?? sparcDomain;
-        domain.Fulfill(product);
+        domain.Fulfill(product, order.UserId);
         await domains.UpdateAsync(domain!);
         
         return order;

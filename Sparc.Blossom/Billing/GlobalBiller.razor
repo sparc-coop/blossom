@@ -20,12 +20,17 @@
                 <input @bind="Order.Email" placeholder="Email" />
             </label>
 
+            <label>
+                <span>Enter the domain name where you will be installing Tovik:</span>
+                <input @bind="Order.Domain" placeholder="example.com" required />
+            </label>
+
+            <div id="error-message">@ErrorMessage</div>
+
             <button id="submit-button" type="submit" class="btn primary-btn">
                 Pay @Intent.FormattedAmount
             </button>
         }
-
-        <div id="error-message" style="color:red; margin-top: 10px;"></div>
     </form>
 }
 else if (Order?.PaymentIntentId != null)
@@ -72,10 +77,13 @@ else if (Order?.PaymentIntentId != null)
     [Parameter] public required BlossomAvatar Avatar { get; set; } = default!;
     [Parameter] public StripeAppearance? Appearance { get; set; }
     [Parameter][SupplyParameterFromQuery] public string? PaymentIntentId { get; set; }
+    [Parameter] public string? Domain { get; set; }
+
     SparcOrder Order = new();
     SparcPaymentIntent? Intent;
     Lazy<Task<IJSObjectReference>> Auth = null!;
     ElementReference PaymentForm;
+    string? ErrorMessage;
     string Id => $"payment-form-{Guid.NewGuid()}";
     record PaymentResult(bool Succeeded, string? ErrorMessage = null);
 
@@ -85,11 +93,18 @@ else if (Order?.PaymentIntentId != null)
         Order.Currency = Avatar.Currency?.Id;
         Order.ProductId = ProductId;
         Order.StripeProductId = StripeProductId;
+
         Events.CurrencyChanged += OnCurrencyChanged;
         if (PaymentIntentId == null)
             await InitiateStripePayment();
         else
             await CheckOnStripePayment();
+    }
+
+    protected override async void OnParametersSet()
+    {
+        if (Domain != null)
+            Order.Domain = Domain;
     }
 
     private async Task OnCurrencyChanged(SparcCurrency currency)
@@ -102,6 +117,7 @@ else if (Order?.PaymentIntentId != null)
     {
         try
         {
+            ErrorMessage = null;
             Intent = await Billing.StartCheckoutAsync(Order);
             Order.PaymentIntentId = Intent.PaymentIntentId;
 
@@ -112,6 +128,7 @@ else if (Order?.PaymentIntentId != null)
         }
         catch (Exception ex)
         {
+            ErrorMessage = $"Something went wrong! {ex.Message}";
             Console.Error.WriteLine($"Error creating PaymentIntent: {ex.Message}");
         }
     }
@@ -143,16 +160,34 @@ else if (Order?.PaymentIntentId != null)
 
     public async Task Pay()
     {
-        if (Order.Email != null)
-            Intent = await Billing.StartCheckoutAsync(Order);
+        ErrorMessage = null;
 
-        var dotNetHelper = DotNetObjectReference.Create(this);
+        if (string.IsNullOrWhiteSpace(Order.Domain))
+        {
+            ErrorMessage = "Please enter a domain name for your Tovik installation.";
+            return;
+        }
 
-        var returnUrl = $"{Nav.Uri}?paymentIntentId={Intent!.PaymentIntentId}";
-        var stripe = await Auth.Value;
-        var result = await stripe.InvokeAsync<PaymentResult>("pay", returnUrl);
-        if (result.Succeeded)
-            Nav.NavigateTo(returnUrl, forceLoad: true);
+        try
+        {
+            var domain = new SparcDomain(Order.Domain);
+
+            if (Order.Email != null || domain != null)
+                Intent = await Billing.StartCheckoutAsync(Order);
+
+            var dotNetHelper = DotNetObjectReference.Create(this);
+
+            var querySeparator = Nav.Uri.Contains('?') ? "&" : "?";
+            var returnUrl = $"{Nav.Uri}{querySeparator}paymentIntentId={Intent!.PaymentIntentId}";
+            var stripe = await Auth.Value;
+            var result = await stripe.InvokeAsync<PaymentResult>("pay", returnUrl);
+            if (result.Succeeded)
+                Nav.NavigateTo(returnUrl, forceLoad: true);
+        }
+        catch (Exception e)
+        {
+            ErrorMessage = e.Message;
+        }
     }
 
     [JSInvokable]

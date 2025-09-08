@@ -92,7 +92,7 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
         return Products.Any(x => x.ProductId.Equals(productName, StringComparison.OrdinalIgnoreCase));
     }
 
-    public void Fulfill(SparcProduct product)
+    public void Fulfill(SparcProduct product, string userId)
     {
         var existing = Product(product.ProductId);
         if (existing != null)
@@ -102,6 +102,8 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
         }
         else
             Products.Add(product);
+
+        TovikUserId = userId;
     }
 
     public string FaviconUri => $"https://{Domain}/favicon.ico";
