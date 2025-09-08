@@ -8,18 +8,26 @@ namespace Sparc.Blossom.Realtime;
 public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<BlossomUser> auth)
     : IBlossomEndpoints
 {
-    private async Task<BlossomPresence> GetPresenceAsync(ClaimsPrincipal principal, string userId)
+    // Step 3: Try to implement this for other users
+    private async Task<BlossomPresence> GetPresenceAsync(string userId)
     {
-        var user = await auth.GetAsync(principal);
-        return new BlossomPresence(user.Avatar);
+        var presenceEvents = await events.GetAllAsync<MatrixPresenceUpdated>(userId);
+        var latestPresence = presenceEvents
+            .OrderByDescending(e => e.EventId) 
+            .FirstOrDefault();
+
+        if (latestPresence != null && latestPresence.Content != null)
+        {
+            return new BlossomPresence { Presence = latestPresence.Content.Presence };
+        }
+
+        return new BlossomPresence { Presence = "offline" };
     }
 
-    private async Task SetPresenceAsync(ClaimsPrincipal principal, string userId, BlossomPresence presence)
+    private async Task SetPresenceAsync(string userId, MatrixPresenceUpdated presence)
     {
-        var user = await auth.GetAsync(principal);
-        presence.ApplyToAvatar(user.Avatar);
-        user.UpdateAvatar(user.Avatar);
-        await auth.UpdateAsync(user);
+        presence.CurrentlyActive = presence.Presence == "online";
+        presence.LastActiveAt ??= DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         await events.PublishAsync(userId, presence);
     }
 
@@ -160,13 +168,13 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
         chatGroup.MapPost("/rooms/{roomId}/send/{eventType}/{txnId}", SendMessageAsync);
 
         // Map the presence endpoint
-        chatGroup.MapGet("/presence/{userId}/status", async (ClaimsPrincipal principal, string userId) =>
+        chatGroup.MapGet("/presence/{userId}/status", async (string userId) =>
         {
-            return await GetPresenceAsync(principal, userId);
+            return await GetPresenceAsync(userId);
         });
-        chatGroup.MapPut("/presence/{userId}/status", async (ClaimsPrincipal principal, string userId, BlossomPresence presence) =>
+        chatGroup.MapPut("/presence/{userId}/status", async (string userId, MatrixPresenceUpdated presence) =>
         {
-            await SetPresenceAsync(principal, userId, presence);
+            await SetPresenceAsync(userId, presence);
             return Results.Ok();
         });
 

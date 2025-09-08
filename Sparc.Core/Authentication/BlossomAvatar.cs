@@ -21,6 +21,7 @@ public class BlossomAvatar
     public Language? Language { get; set; }
     public SparcCurrency? Currency { get; set; }
     public List<Language> LanguagesSpoken { get; set; } = [];
+    // This can be a different entity of any form that we want
     public BlossomPresence Presence { get; set; } = new();
 
     public string? Emoji { get; set; }
@@ -56,6 +57,20 @@ public class BlossomAvatar
         BackgroundColor = BackgroundColors().OrderBy(x => Guid.NewGuid()).First();
         Emoji = "😀";
     }
+
+    // The stub for updating BlossomAvatar from a list of Events
+    // Step 1: Disconnect the BlossomPresence entity from a MatrixPresenceUpdated entity,
+    // and change this to receive the MatrixPresenceUpdated entities directly.
+    // Step 2: Implement the logic to update the BlossomAvatar based on the events.
+    public void Update(IEnumerable<MatrixPresenceUpdated> events)
+    {
+        if (events == null) return;
+
+        foreach (var matrixPresence in events)
+        {
+            Presence.UpdateFromMatrix(matrixPresence, true);
+        }
+    }     
 
     public static string CalculateForegroundColor(string backgroundColor)
     {

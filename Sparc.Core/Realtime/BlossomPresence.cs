@@ -1,63 +1,27 @@
-﻿using Sparc.Blossom.Authentication;
+﻿namespace Sparc.Blossom.Realtime;
 
-namespace Sparc.Blossom.Realtime;
-
-public class BlossomPresence // converts from avatar
+public class BlossomPresence
 {
-    public string Presence { get; set; } = "offline"; // "online", "offline", "unavailable"
+    public string Presence { get; set; } = "offline";
     public string? StatusMsg { get; set; }
-    public long? LastActiveAgo { get; set; }
-    public bool? CurrentlyActive { get; set; } // milliseconds
+    public bool CurrentlyActive { get; set; }
+    public long? LastActiveAt { get; set; }
 
-    //public string? AvatarUrl { get; set; } 
-    //public string? DisplayName { get; set; }
+    public long? LastActiveAgo =>
+        LastActiveAt.HasValue
+            ? Math.Max(0, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - LastActiveAt.Value)
+            : null;
 
-    public BlossomPresence() { }
-
-    public BlossomPresence(BlossomAvatar avatar)
+    public void UpdateFromMatrix(MatrixPresenceUpdated matrixPresence, bool isProactiveEvent)
     {
-        if (avatar?.Presence != null)
-        {
-            Presence = avatar.Presence.Presence;
-            StatusMsg = avatar.Presence.StatusMsg;
-            LastActiveAgo = avatar.Presence.LastActiveAgo;
+        if (matrixPresence == null) return;
 
-            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            if (LastActiveAgo.HasValue)
-                CurrentlyActive = (now - LastActiveAgo.Value) < 300_000; // 5 minutes
-            else
-                CurrentlyActive = false;
-        }
-        else
-        {
-            Presence = "offline";
-            CurrentlyActive = false;
-        }
-    }
+        Presence = matrixPresence.Presence;
+        StatusMsg = matrixPresence.StatusMsg;
+        CurrentlyActive = matrixPresence.CurrentlyActive || Presence == "online"; ;
 
-    public void UpdateFromAvatar(BlossomAvatar avatar)
-    {
-        if (avatar?.Presence != null)
-        {
-            Presence = avatar.Presence.Presence;
-            StatusMsg = avatar.Presence.StatusMsg;
-            LastActiveAgo = avatar.Presence.LastActiveAgo;
-            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            CurrentlyActive = LastActiveAgo.HasValue && (now - LastActiveAgo.Value) < 300_000;
-        }
-    }
-
-    public void ApplyToAvatar(BlossomAvatar avatar)
-    {
-        if (avatar != null)
-        {
-            avatar.Presence = new BlossomPresence
-            {
-                Presence = this.Presence,
-                StatusMsg = this.StatusMsg,
-                LastActiveAgo = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                CurrentlyActive = this.CurrentlyActive
-            };
-        }
+        if (isProactiveEvent || matrixPresence.LastActiveAt.HasValue)
+            LastActiveAt = matrixPresence.LastActiveAt ?? DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     }
 }
+
