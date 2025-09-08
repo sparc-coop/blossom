@@ -10,8 +10,6 @@ function initialize(element, intent, appearance) {
         try { stripeIntegration.paymentElement.unmount(); }
         catch (__) { }
     }
-    console.log("initPaymentForm called with:", intent, element);
-
     // remove any null values from appearance
     if (appearance) {
         for (const key in appearance.variables) {
@@ -60,7 +58,6 @@ function initialize(element, intent, appearance) {
     });
 
     const paymentElement = stripeIntegration.elements.create("payment");
-    console.log('here we go', paymentElement);
     paymentElement.mount('#' + element.id);
 }
 
@@ -79,20 +76,25 @@ async function pay(returnUrl) {
 
     console.log("Elements submitted successfully. Confirming payment...");
 
-    const { error, paymentIntent } = await stripeIntegration.stripe.confirmPayment({
-        elements,
-        confirmParams: { return_url: returnUrl },
-        redirect: "if_required"
-    });
+    try {
+        const { error, paymentIntent } = await stripeIntegration.stripe.confirmPayment({
+            elements,
+            confirmParams: { return_url: returnUrl },
+            redirect: "if_required"
+        });
 
-    if (error) {
-        return { succeeded: false, message: error.message };
+        if (error) {
+            return { succeeded: false, message: error.message };
+        }
+
+        return {
+            succeeded: paymentIntent?.status === "succeeded",
+            message: paymentIntent?.status === "succeeded" ? "Payment succeeded" : "Payment not completed"
+        };
+    } catch (e) {
+        console.error("Error during payment confirmation:", e);
+        return { succeeded: false, message: e.message };
     }
-
-    return {
-        succeeded: paymentIntent?.status === "succeeded",
-        message: paymentIntent?.status === "succeeded" ? "Payment succeeded" : "Payment not completed"
-    };
 }
 
 export { initialize, pay };

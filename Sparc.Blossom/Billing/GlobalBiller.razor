@@ -178,6 +178,8 @@ else if (Order?.PaymentIntentId != null)
             var result = await stripe.InvokeAsync<PaymentResult>("pay", returnUrl);
             if (result.Succeeded)
                 Nav.NavigateTo(returnUrl, forceLoad: true);
+            else
+                ErrorMessage = result.ErrorMessage;
         }
         catch (Exception e)
         {
