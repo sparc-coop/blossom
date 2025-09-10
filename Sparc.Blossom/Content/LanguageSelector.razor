@@ -35,7 +35,7 @@
                 }
             }
         </InputSelect>
-        <div class="language-select-progress-bar">
+        <div class="language-select-progress-bar @(IsLoading ? "show" : "")">
             <div class="progress-bar-value"></div>
         </div>
     </div>
@@ -55,6 +55,7 @@
     [Parameter] public string? InitialLanguageId { get; set; }
     [Parameter] public bool WithButton { get; set; } = false;
     [Parameter] public bool Visible { get; set; }
+    [Parameter] public bool IsLoading { get; set; }
     [Parameter] public EventCallback<Language> OnLanguageChanged { get; set; }
     [SupplyParameterFromQuery] public string? Lang { get; set; }
     public string SelectedLanguageId = "";

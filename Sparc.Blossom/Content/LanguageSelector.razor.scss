@@ -1,6 +1,8 @@
 .language-select-container {
     display: flex;
     gap: 8px;
+    position: relative;
+    overflow: hidden;
 }
 
 .language-select {
@@ -42,11 +44,15 @@
     }
 
     .language-select-progress-bar {
+        position: absolute;
+        bottom: 0;
+        left: 20px;
+        right: 20px;
         height: 4px;
         background-color: transparent;
-        width: 100%;
         overflow: hidden;
         display: none;
+        border-radius: 20px;
 
         &.show {
             display: block;
