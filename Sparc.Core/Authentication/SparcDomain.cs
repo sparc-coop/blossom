@@ -14,6 +14,7 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
     public int TovikUsage { get; set; }
     public string? TovikUserId { get; set; }
     public List<SparcProduct> Products { get; set; } = [];
+    public bool IsBlocked { get; set; }
 
     public static string? Normalize(string domain)
     {
