@@ -77,19 +77,14 @@ public class TovikTranslator(
             toLanguage = user?.Avatar.Language;
         }
 
-        if (toLanguage == null)
+        if (toLanguage == null || !contents.Any())
             return contents;
 
-        var results = new ConcurrentBag<TextContent>();
-        await Parallel.ForEachAsync(contents, async (content, _) =>
-        {
-            var existing = await Content.FindAsync(content.Domain, content.Id);
-
-            if (existing != null)
-                results.Add(existing);
-        });
-
-        return results.ToList();
+        var domain = contents.First().Domain;
+        var ids = contents.Select(x => x.Id).ToList();
+        
+        var existing = await Content.Query(domain).Where(x => ids.Contains(x.Id)).ToListAsync();
+        return existing;
     }
 
     public async Task<List<TextContent>> BulkTranslate(List<TextContent> contents)
