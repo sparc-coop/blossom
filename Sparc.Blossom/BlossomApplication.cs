@@ -13,7 +13,11 @@ public interface IBlossomApplication
 public class BlossomApplication
 {
     public static BlossomApplicationBuilder CreateBuilder<TApp>(string[]? args = null)
+#if ANDROID || IOS || WINDOWS
+        where TApp : Application
+#else
         where TApp : IComponent
+#endif
     {
 #if BROWSER
         return new Platforms.Browser.BlossomBrowserApplicationBuilder<TApp>(args);

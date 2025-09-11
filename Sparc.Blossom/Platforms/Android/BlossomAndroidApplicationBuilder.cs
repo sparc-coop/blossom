@@ -16,7 +16,7 @@ public class BlossomAndroidApplicationBuilder : BlossomApplicationBuilder
     {
         MauiBuilder = MauiApp.CreateBuilder();
 
-        if (!_isAuthenticationAdded)
+        if (!isAuthenticationAdded)
         {
             // No-config Blossom User setup
             AddAuthentication<BlossomUser>();
@@ -50,14 +50,14 @@ public class BlossomAndroidApplicationBuilder : BlossomApplicationBuilder
 
         Services.AddScoped(_ => new ClaimsPrincipal(new ClaimsIdentity()));
 
-        _isAuthenticationAdded = true;
+        //isAuthenticationAdded = true;
     }
 
-    public override IBlossomApplication Build()
+    public override IBlossomApplication Build(Assembly? entityAssembly = null)
     {
         var callingAssembly = Assembly.GetCallingAssembly();
 
-        if (!_isAuthenticationAdded)
+        if (!isAuthenticationAdded)
         {
             AddAuthentication<BlossomUser>();
             Services.AddSingleton<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
