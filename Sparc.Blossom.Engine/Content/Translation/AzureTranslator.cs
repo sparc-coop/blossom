@@ -1,5 +1,6 @@
 ﻿using Azure;
 using Azure.AI.Translation.Text;
+using Sparc.Blossom.Content.Tovik;
 
 namespace Sparc.Blossom.Content;
 
@@ -13,31 +14,26 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
     decimal CostPerWord => 10.00m / 1_000_000 * 5; // $10 per million characters, assuming average 5 characters per word
 
 
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, IEnumerable<Language> toLanguages, string? additionalContext = null)
+    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
     {
-        var translatedMessages = new List<TextContent>();
-        var azureLanguages = toLanguages.Select(AzureLanguage).Where(x => x != null).ToList();
-
-        var batches = TovikTranslator.Batch(azureLanguages, 10);
+        var azureLanguage = AzureLanguage(options.OutputLanguage!);
 
         await ConnectAsync();
-        foreach (var batch in batches)
+        var azureOptions = new TextTranslationTranslateOptions(
+            targetLanguages: [options.OutputLanguage!.Id],
+            content: messages.Select(x => x.Text));
+
+        var response = await Client!.TranslateAsync(azureOptions);
+        var translations = messages.Zip(response.Value);
+
+        var translatedMessages = new List<TextContent>();
+        foreach (var (sourceContent, result) in translations)
         {
-            var options = new TextTranslationTranslateOptions(
-                targetLanguages: batch.Select(x => x!.Id),
-                content: messages.Select(x => x.Text));
+            var newContent = result.Translations.Select(translation =>
+                new TextContent(sourceContent, options.OutputLanguage!, translation.Text));
 
-            var response = await Client!.TranslateAsync(options);
-            var translations = messages.Zip(response.Value);
-
-            foreach (var (sourceContent, result) in translations)
-            {
-                var newContent = result.Translations.Select(translation =>
-                    new TextContent(sourceContent, toLanguages.First(x => x.Matches(translation.TargetLanguage)), translation.Text));
-
-                translatedMessages.AddRange(newContent);
-                translatedMessages.ForEach(x => x.AddCharge(CostPerWord, $"Azure translation of {x.OriginalText} to {x.LanguageId}"));
-            }
+            translatedMessages.AddRange(newContent);
+            translatedMessages.ForEach(x => x.AddCharge(CostPerWord, $"Azure translation of {x.OriginalText} to {x.LanguageId}"));
         }
 
         return translatedMessages;
@@ -67,12 +63,12 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
 
         return Languages;
     }
-    
+
     private Task ConnectAsync()
     {
-         Client ??= new(new AzureKeyCredential(configuration.GetConnectionString("Cognitive")!),
-            new Uri("https://api.cognitive.microsofttranslator.com"),
-            "southcentralus");
+        Client ??= new(new AzureKeyCredential(configuration.GetConnectionString("Cognitive")!),
+           new Uri("https://api.cognitive.microsofttranslator.com"),
+           "southcentralus");
 
         return Task.CompletedTask;
     }

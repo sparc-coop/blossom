@@ -3,49 +3,11 @@
 using OpenAI;
 using OpenAI.Responses;
 using Sparc.Blossom.Content.OpenAI;
+using Sparc.Blossom.Content.Tovik;
 using System.Collections.Concurrent;
-using System.ComponentModel;
 using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 
 namespace Sparc.Blossom.Content;
-
-public record OpenAITranslation(string Id, string Text);
-public class OpenAITranslations
-{
-    [Description("The original given ID of the original text as Id, and the translated text in the target language as Text.")]
-    public List<OpenAITranslation> Text { get; set; } = [];
-}
-
-internal class OpenAITranslationQuestion : OpenAIQuestion<OpenAITranslations>
-{
-    static readonly JsonSerializerOptions TranslateAllUnicode = new()
-    {
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-    };
-    
-    public OpenAITranslationQuestion(IEnumerable<TextContent> messages, Language toLanguage, string? additionalContext = null) 
-        : base($"")
-    {
-        Instructions = "You are a translator seeking to accurately translate messages, using the same tone as the provided context, if any. If any message is not translatable, use the original message in the output, don't skip it. The answer should always contain the same quantity of translations as the input.";
-        
-        if (toLanguage.DialectDisplayName != null && toLanguage.DialectDisplayName != toLanguage.LanguageDisplayName)
-            Text += $"Translate the following to {toLanguage.LanguageDisplayName}. Use the {toLanguage.DialectDisplayName} dialect of {toLanguage.LanguageDisplayName} when possible:\n\n";
-        else
-            Text += $"Translate the following to {toLanguage.DisplayName}:\n\n";
-
-        var textToTranslate = messages
-            .Where(x => x.Text != null)
-            .Select(x => new OpenAITranslation(x.Id.Substring(0, 4), x.Text!.Replace('\u00A0', ' ')));
-
-        var messageJson = JsonSerializer.Serialize(textToTranslate, TranslateAllUnicode);
-        Text += messageJson;
-
-        if (!string.IsNullOrWhiteSpace(additionalContext))
-            Context.Add(additionalContext);
-    }
-}
 
 internal class OpenAITranslator(OpenAIClient client) : ITranslator
 {
@@ -56,7 +18,7 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
 
     public int Priority => 0;
 
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, IEnumerable<Language> toLanguages, string? additionalContext = null)
+    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
     {
         var fromLanguages = messages.GroupBy(x => x.Language);
         var batches = TovikTranslator.Batch(messages, 5);
@@ -70,23 +32,20 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
 
             foreach (var fromLanguage in fromLanguages)
             {
-                foreach (var toLanguage in toLanguages)
-                {
-                    var question = new OpenAITranslationQuestion(safeBatch, toLanguage, additionalContext);
+                    var question = new TovikTranslationQuestion(safeBatch, options);
                     var answer = await AskOpenAIAsync(question);
                     if (answer.Value?.Text == null)
                         continue;
 
                     var translations = new List<TextContent>();
                     foreach (var translation in safeBatch.Where(x => answer.Value.Text.Any(y => x.Id.StartsWith(y.Id))))
-                        translations.Add(new TextContent(translation, toLanguage, answer.Value.Text.First(y => translation.Id.StartsWith(y.Id)).Text));
+                        translations.Add(new TextContent(translation, options.OutputLanguage ?? translation.Language, answer.Value.Text.First(y => translation.Id.StartsWith(y.Id)).Text));
 
                     foreach (var translatedMessage in translations)
                     {
                         translatedMessage.AddCharge(answer.TokensUsed, CostPerToken, $"OpenAI translation of {translatedMessage.OriginalText} to {translatedMessage.LanguageId}");
                         translatedMessages.Add(translatedMessage);
                     }
-                }
             }
         });
 

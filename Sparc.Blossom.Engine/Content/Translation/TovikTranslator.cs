@@ -1,6 +1,6 @@
 ﻿using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Content.Tovik;
 using Sparc.Blossom.Data;
-using System.Collections.Concurrent;
 using System.Globalization;
 using System.Security.Claims;
 
@@ -63,7 +63,7 @@ public class TovikTranslator(
         if (!await CanTranslate(contents))
             throw new Exception("You've reached your Tovik translation limit!");
 
-        var translations = await TranslateAsync(contents, [toLanguage], additionalContext);
+        var translations = await TranslateAsync(contents, new(toLanguage, AdditionalContext: additionalContext));
         await Content.AddAsync(translations);
 
         return translations;
@@ -82,7 +82,7 @@ public class TovikTranslator(
 
         var domain = contents.First().Domain;
         var ids = contents.Select(x => x.Id).ToList();
-        
+
         var existing = await Content.Query(domain).Where(x => ids.Contains(x.Id)).ToListAsync();
         return existing;
     }
@@ -102,7 +102,7 @@ public class TovikTranslator(
             throw new Exception("You've reached your Tovik translation limit!");
 
         var additionalContext = string.Join("\n", contents.Select(x => x.Text).OrderBy(x => Guid.NewGuid()).Take(20));
-        var translations = await TranslateAsync(needsTranslation, [toLanguage], additionalContext);
+        var translations = await TranslateAsync(needsTranslation, new(toLanguage, AdditionalContext: additionalContext));
         await Content.AddAsync(translations);
 
         return results.Union(translations).ToList();
@@ -131,24 +131,13 @@ public class TovikTranslator(
     }
 
     public async Task<TextContent?> TranslateAsync(TextContent message, Language toLanguage, string? additionalContext = null)
-        => (await TranslateAsync([message], [toLanguage], additionalContext)).FirstOrDefault();
+        => (await TranslateAsync([message], new(toLanguage, AdditionalContext: additionalContext))).FirstOrDefault();
 
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, List<Language> toLanguages, string? additionalContext = null)
+    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
     {
-        var translatedMessages = new List<TextContent>();
-
-        foreach (var toLanguage in toLanguages)
-        {
-            var translators = messages.GroupBy(x => GetBestTranslator(x.Language, toLanguage));
-            foreach (var messageList in translators)
-            {
-                var result = await messageList.Key.TranslateAsync(messageList.ToList(), [toLanguage], additionalContext);
-                foreach (var message in result)
-                    translatedMessages.Add(message);
-            }
-        }
-
-        return translatedMessages.ToList();
+        var translator = Translators.OrderBy(x => x.Priority).First();
+        var result = await translator.TranslateAsync(messages.ToList(), options);
+        return result;
     }
 
     internal async Task<string?> TranslateAsync(string text, string fromLanguage, string toLanguage)
@@ -161,7 +150,7 @@ public class TovikTranslator(
 
         var from = await GetLanguageAsync(fromLanguage);
         var message = new TextContent("", "", from!, text);
-        var result = await TranslateAsync([message], [language]);
+        var result = await TranslateAsync([message], new(language));
         return result?.FirstOrDefault()?.Text;
     }
 

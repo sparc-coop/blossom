@@ -1,4 +1,6 @@
 ﻿using DeepL;
+using Sparc.Blossom.Content.Tovik;
+using System.Linq;
 
 namespace Sparc.Blossom.Content;
 
@@ -12,18 +14,18 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
     public int Priority => 1;
     decimal CostPerWord => 25.00m / 1_000_000 * 5; // $25 per million characters, assuming average 5 characters per word
 
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, IEnumerable<Language> toLanguages, string? additionalContext = null)
+    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
     {
         Client ??= new(configuration.GetConnectionString("DeepL")!);
 
-        var options = new TextTranslateOptions
+        var deepLOptions = new TextTranslateOptions
         {
-            Context = additionalContext,
+            Context = options.AdditionalContext,
             ModelType = ModelType.PreferQualityOptimized
         };
 
         var fromLanguages = messages.GroupBy(x => SourceLanguage(x.Language));
-        var toDeepLLanguages = toLanguages.Select(TargetLanguage).Where(x => x != null).ToList();
+        var toDeepLLanguage = TargetLanguage(options.OutputLanguage!);
 
         var batches = TovikTranslator.Batch(messages, 50);
 
@@ -36,15 +38,12 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
 
             foreach (var sourceLanguage in fromLanguages)
             {
-                foreach (var targetLanguage in toDeepLLanguages)
-                {
-                    var safeTargetLanguage = targetLanguage.ToString() == "en" ? "en-US" : targetLanguage.ToString(); // en is deprecated
-                    var texts = safeBatch.Select(x => x.Text);
-                    var result = await Client.TranslateTextAsync(texts!, sourceLanguage.Key.ToString(), safeTargetLanguage, options);
-                    var newContent = safeBatch.Zip(result, (message, translation) => new TextContent(message, targetLanguage, translation.Text));
-                    translatedMessages.AddRange(newContent);
-                    translatedMessages.ForEach(x => x.AddCharge(CostPerWord, $"DeepL translation of {x.OriginalText} to {x.LanguageId}"));
-                }
+                var safeTargetLanguage = toDeepLLanguage.ToString() == "en" ? "en-US" : toDeepLLanguage.ToString(); // en is deprecated
+                var texts = safeBatch.Select(x => x.Text);
+                var result = await Client.TranslateTextAsync(texts!, sourceLanguage.Key.ToString(), safeTargetLanguage, deepLOptions);
+                var newContent = safeBatch.Zip(result, (message, translation) => new TextContent(message, options.OutputLanguage!, translation.Text));
+                translatedMessages.AddRange(newContent);
+                translatedMessages.ForEach(x => x.AddCharge(CostPerWord, $"DeepL translation of {x.OriginalText} to {x.LanguageId}"));
             }
         }
 
@@ -77,7 +76,7 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
             return SourceLanguages.Union(TargetLanguages).ToList();
 
         Client ??= new(configuration.GetConnectionString("DeepL")!);
-        
+
         var sources = await Client.GetSourceLanguagesAsync();
         var targets = await Client.GetTargetLanguagesAsync();
 

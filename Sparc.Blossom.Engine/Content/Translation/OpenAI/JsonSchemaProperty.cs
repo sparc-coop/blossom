@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Sparc.Blossom.Content.Tovik;
+using System.ComponentModel;
 using System.Reflection;
 
 namespace Sparc.Blossom.Content.OpenAI;
@@ -28,8 +29,8 @@ public record JsonSchemaProperty
 
         if (JsonType(type) == "array")
         {
-            if (type.GenericTypeArguments[0] == typeof(OpenAITranslation))
-                Items = new JsonSchema(typeof(OpenAITranslation));
+            if (type.GenericTypeArguments[0] == typeof(TovikTranslation))
+                Items = new JsonSchema(typeof(TovikTranslation));
             else
                 Items = new JsonSchema(JsonType(type.GenericTypeArguments[0]));
         }
@@ -49,7 +50,7 @@ public record JsonSchemaProperty
         return type switch
         {
             Type t when t == typeof(List<string>) => "array",
-            Type t when t == typeof(List<OpenAITranslation>) => "array",
+            Type t when t == typeof(List<TovikTranslation>) => "array",
             Type t when t == typeof(List<double>) => "array",
             Type t when t == typeof(string) => "string",
             Type t when t == typeof(int) => "integer",
