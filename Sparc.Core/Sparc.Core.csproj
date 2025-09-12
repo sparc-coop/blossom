@@ -18,12 +18,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Ardalis.Specification" Version="9.2.0" />
+		<PackageReference Include="Ardalis.Specification" Version="9.3.1" />
 		<PackageReference Include="MediatR" Version="12.5.0" />
-		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.7" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.0-rc.1.25451.107" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="System.Drawing.Common" Version="9.0.7" />
-		<PackageReference Include="System.Text.Json" Version="9.0.7" />
+		<PackageReference Include="System.Drawing.Common" Version="10.0.0-rc.1.25451.107" />
+		<PackageReference Include="System.Text.Json" Version="10.0.0-rc.1.25451.107" />
 		<PackageReference Include="SystemTextJsonPatch" Version="4.2.0" />
 	</ItemGroup>
 
