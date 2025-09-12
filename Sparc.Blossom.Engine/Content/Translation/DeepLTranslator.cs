@@ -33,7 +33,7 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
         foreach (var batch in batches)
         {
             var safeBatch = batch.Where(x => !string.IsNullOrWhiteSpace(x.Text)).ToList();
-            if (!safeBatch.Any())
+            if (safeBatch.Count == 0)
                 continue;
 
             foreach (var sourceLanguage in fromLanguages)
