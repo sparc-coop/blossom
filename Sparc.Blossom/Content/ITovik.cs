@@ -1,5 +1,6 @@
 ﻿using Refit;
 using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Content.Tovik;
 
 namespace Sparc.Blossom.Content;
 
@@ -13,7 +14,11 @@ public interface ITovik
 
     [Post("/translate/crawl")]
     Task<List<TextContent>> CrawlAsync(TovikCrawlRequest request);
+
+    [Post("/translate/innervoice")]
+    Task<TextContent> TranslateAsync(TovikTranslationRequest request);
 }
 
 public record TovikCrawlRequest(string Domain, List<string> ToLanguages, string FromLanguage = "en");
 public record TranslationRequest(List<TextContent> Content, string? AdditionalContext = null);
+public record TovikTranslationRequest(TextContent Content, TovikTranslationOptions Options);

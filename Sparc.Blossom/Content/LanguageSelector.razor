@@ -14,7 +14,7 @@
             </button>
         }
         <InputSelect @bind-Value="SelectedLanguageId" @bind-Value:after="ChangeLanguage">
-            @foreach (var language in Sparc.Blossom.Content.Language.All.GroupBy(x => x.LanguageId).OrderBy(x => x.First().LanguageNativeName))
+            @foreach (var language in Languages.GroupBy(x => x.LanguageId).OrderBy(x => x.First().LanguageNativeName))
             {
                 @if (language.Count() == 1)
                 {
@@ -63,8 +63,9 @@
     public bool IsVisible;
     void ToggleVisibility() => IsVisible = !IsVisible;
     string? NativeLanguageId;
+    List<Language> Languages = [];
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (!WithButton || Visible) IsVisible = true;
 
@@ -72,6 +73,12 @@
             SelectedLanguageId = Lang
                 ?? InitialLanguageId
                 ?? string.Empty;
+
+        Languages = Sparc.Blossom.Content.Language.All;
+
+        // Fallback to server-side language list for WASM, which has a limited set
+        if (Languages.Count < 300)
+            Languages = (await Tovik.GetLanguages()).ToList();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -85,7 +92,9 @@
         {
             var tovikLanguage = await Js.InvokeAsync<string?>("eval", "localStorage.getItem('tovik-lang')")
                 ?? NativeLanguageId;
-            SelectedLanguageId = Language.Find(tovikLanguage)?.Id ?? "";
+            SelectedLanguageId = Language.Find(tovikLanguage)?.Id
+                ?? Languages.FirstOrDefault(x => x.Id == tovikLanguage)?.Id
+                ?? "";
             if (SelectedLanguageId != NativeLanguageId)
                 IsVisible = true;
             StateHasChanged();
@@ -104,7 +113,7 @@
 
     async Task ChangeLanguage()
     {
-        var selectedLanguage = Sparc.Blossom.Content.Language.Find(SelectedLanguageId);
+        var selectedLanguage = Languages.FirstOrDefault(x => x.Id == SelectedLanguageId);
         if (OnLanguageChanged.HasDelegate)
         {
             await OnLanguageChanged.InvokeAsync(selectedLanguage);

@@ -2,44 +2,53 @@
 
 namespace Sparc.Blossom.Content.Tovik;
 
-public record TovikTranslationOptions(
-    Language? OutputLanguage = null,
-    decimal? SlangOrProper = null,
-    decimal? CasualOrFormal = null,
-    decimal? FunnyOrSerious = null,
-    decimal? IrreverentOrRespectful = null,
-    decimal? EnthusiasticOrMatterOfFact = null,
-    string? AdditionalContext = null)
+public class TovikTranslationOptions
 {
+    public Language? OutputLanguage { get; set; }
+    public decimal SlangOrProper { get; set; } = 0.5M;
+    public decimal CasualOrFormal { get; set; } = 0.5M;
+    public decimal FunnyOrSerious { get; set; } = 0.5M;
+    public decimal IrreverentOrRespectful { get; set; } = 0.5M;
+    public decimal EnthusiasticOrMatterOfFact { get; set; } = 0.5M;
+    public string? AdditionalContext { get; set; }
+
     public string ToPrompt()
     {
         var prompt = new StringBuilder();
+        if (IsDefaultTone)
+            prompt.AppendLine($"Translate the following array of text, using the following rules:");
+        else
+            prompt.AppendLine($"Translate and update the tone of the following array of text, using the following rules:");
+
+        if (OutputLanguage != null)
+            prompt.AppendLine($"- Translate each item into {OutputLanguage.LanguageDisplayName}.");
 
         if (OutputLanguage?.DialectDisplayName != null && OutputLanguage.DialectDisplayName != OutputLanguage.LanguageDisplayName)
-        {
-            prompt.AppendLine($"Translate the following to {OutputLanguage.LanguageDisplayName}. ");
-            prompt.AppendLine($"Use the {OutputLanguage.DialectDisplayName} dialect of {OutputLanguage.LanguageDisplayName} when possible:");
-        }
-        else if (OutputLanguage != null)
-            prompt.AppendLine($"Translate the following to {OutputLanguage.DisplayName}:");
+            prompt.AppendLine($"- Use the {OutputLanguage.DialectDisplayName} dialect of {OutputLanguage.LanguageDisplayName} when possible.");
 
-        if (SlangOrProper != null)
-            prompt.AppendLine(SlangOrProperMappings[Round(SlangOrProper.Value)]);
+        if (SlangOrProper != 0.5M)
+            prompt.AppendLine("- " + SlangOrProperMappings[Round(SlangOrProper)]);
 
-        if (CasualOrFormal != null)
-            prompt.AppendLine(CasualOrFormalMappings[Round(CasualOrFormal.Value)]);
+        if (CasualOrFormal != 0.5M)
+            prompt.AppendLine("- " + CasualOrFormalMappings[Round(CasualOrFormal)]);
 
-        if (FunnyOrSerious != null)
-            prompt.AppendLine(FunnyOrSeriousMappings[Round(FunnyOrSerious.Value)]);
+        if (FunnyOrSerious != 0.5M)
+            prompt.AppendLine("- " + FunnyOrSeriousMappings[Round(FunnyOrSerious)]);
 
-        if (IrreverentOrRespectful != null)
-            prompt.AppendLine(IrreverentOrRespectfulMappings[Round(IrreverentOrRespectful.Value)]);
+        if (IrreverentOrRespectful != 0.5M)
+            prompt.AppendLine("- " + IrreverentOrRespectfulMappings[Round(IrreverentOrRespectful)]);
 
-        if (EnthusiasticOrMatterOfFact != null)
-            prompt.AppendLine(EnthusiasticOrMatterOfFactMappings[Round(EnthusiasticOrMatterOfFact.Value)]);
+        if (EnthusiasticOrMatterOfFact != 0.5M)
+            prompt.AppendLine("- " + EnthusiasticOrMatterOfFactMappings[Round(EnthusiasticOrMatterOfFact)]);
 
         return prompt.ToString();
     }
+
+    bool IsDefaultTone => SlangOrProper == 0.5M
+        && CasualOrFormal == 0.5M
+        && FunnyOrSerious == 0.5M
+        && IrreverentOrRespectful == 0.5M
+        && EnthusiasticOrMatterOfFact == 0.5M;
 
     static decimal Round(decimal value) => Math.Round(value * 10) / 10;
 
