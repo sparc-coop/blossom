@@ -53,7 +53,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
             // No-config Blossom User setup
             Services.AddScoped<BlossomDefaultAuthenticator<BlossomUser>>()
                 .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<BlossomUser>>();
-            Services.AddSingleton<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
+            Services.AddScoped<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
         }
     }
 }
