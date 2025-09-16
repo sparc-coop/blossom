@@ -1,6 +1,8 @@
-﻿using Sparc.Blossom.Authentication;
+﻿using HtmlAgilityPack;
+using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content.Tovik;
 using Sparc.Blossom.Data;
+using System;
 using System.Globalization;
 using System.Security.Claims;
 
@@ -71,9 +73,24 @@ public class TovikTranslator(
 
     public async Task<TextContent> TranslateToEntity(TextContent content, TovikTranslationOptions options)
     {
+        if (content.Text?.StartsWith("http") == true)
+        {
+            var handler = new HttpClientHandler()
+            {
+                AutomaticDecompression = System.Net.DecompressionMethods.All
+            };
+
+            var client = new HttpClient(handler);
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; https://engine.sparc.coop)");
+            var html = await client.GetStringAsync(content.Text);
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+            content.Text = doc.DocumentNode.SelectSingleNode("//body")?.InnerHtml ?? html;
+        }
+
         var translator = Translators.OrderBy(x => x.Priority).First();
-        var result = await translator.TranslateAsync([content], options);
-        return result.Single();
+        var result = await translator.TranslateAsync(content, options);
+        return result;
     }
 
     public async Task<List<TextContent>> GetAll(List<TextContent> contents, Language? toLanguage = null)

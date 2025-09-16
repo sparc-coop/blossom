@@ -17,6 +17,16 @@ public interface ITovik
 
     [Post("/translate/entity")]
     Task<TextContent> TranslateAsync(TovikTranslationRequest request);
+
+    public async Task<T?> TranslateAsync<T>(TextContent content, TovikTranslationOptions? options = null)
+    {
+        options ??= new();
+        options.Schema = new(typeof(T));
+        var request = new TovikTranslationRequest(content, options);
+        var result = await TranslateAsync(request);
+        var obj = result.Cast<T>();
+        return obj;
+    }
 }
 
 public record TovikCrawlRequest(string Domain, List<string> ToLanguages, string FromLanguage = "en");

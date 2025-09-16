@@ -4,6 +4,10 @@ namespace Sparc.Blossom;
 
 public record JsonSchema(string Type, bool? AdditionalProperties = false)
 {
+    public JsonSchema() : this("object")
+    {
+    }
+    
     public JsonSchema(Type type, IEnumerable<PropertyInfo>? properties = null) : this("object")
     {
         properties ??= type

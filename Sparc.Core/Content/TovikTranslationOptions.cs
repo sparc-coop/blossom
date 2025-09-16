@@ -16,10 +16,12 @@ public class TovikTranslationOptions
     public string ToPrompt()
     {
         var prompt = new StringBuilder();
-        if (IsDefaultTone)
-            prompt.AppendLine($"Translate the following array of text, using the following rules:");
+        if (Schema != null)
+            prompt.AppendLine("Extract data from the following text into the supplied JSON schema.");
+        else if (IsDefaultTone)
+            prompt.AppendLine($"Translate the following text, using the following rules:");
         else
-            prompt.AppendLine($"Translate and update the tone of the following array of text, using the following rules:");
+            prompt.AppendLine($"Translate and update the tone of the following text, using the following rules:");
 
         if (OutputLanguage != null)
             prompt.AppendLine($"- Translate each item into {OutputLanguage.LanguageDisplayName}.");
@@ -41,9 +43,6 @@ public class TovikTranslationOptions
 
         if (EnthusiasticOrMatterOfFact != 0.5M)
             prompt.AppendLine("- " + EnthusiasticOrMatterOfFactMappings[Round(EnthusiasticOrMatterOfFact)]);
-
-        if (Schema != null)
-            prompt.AppendLine("- " + $"Convert the text to match the supplied JSON schema.");
 
         return prompt.ToString();
     }

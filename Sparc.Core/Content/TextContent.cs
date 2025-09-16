@@ -185,8 +185,9 @@ public class TextContent : BlossomEntity<string>
         {
             return JsonSerializer.Deserialize<T>(Text!);
         }
-        catch
+        catch (Exception e)
         {
+            Console.WriteLine(e.Message);
             return default;
         }
     }

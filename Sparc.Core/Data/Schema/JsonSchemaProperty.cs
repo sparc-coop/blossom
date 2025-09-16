@@ -1,10 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
+using System.Collections;
 
 namespace Sparc.Blossom;
 public record JsonSchemaProperty
 {
-    internal JsonSchemaProperty() 
+    public JsonSchemaProperty() 
     { 
         Type = ["string", "null"];
     }
@@ -19,12 +20,13 @@ public record JsonSchemaProperty
     {
         if (type == typeof(object))
             Type = ["string", "integer", "number", "boolean", "null"];
-        else
+        else 
             Type = [JsonType(type), "null"];
 
-        if (JsonType(type) == "array")
-            Items = new JsonSchema(JsonType(type.GenericTypeArguments[0]));
-        else if (type.IsGenericType && type.GenericTypeArguments[0] != null)
+        if (JsonType(type) == "object")
+            Properties = new JsonSchema(type);
+
+        if (type.IsGenericType && type.GenericTypeArguments[0] != null)
             Items = new JsonSchema(type.GenericTypeArguments[0]);
 
         if (type == typeof(DateTime) || type == typeof(DateTime?))
@@ -37,7 +39,7 @@ public record JsonSchemaProperty
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
             type = Nullable.GetUnderlyingType(type)!;
 
-        return type switch
+        var jsonType = type switch
         {
             Type t when t == typeof(List<string>) => "array",
             Type t when t == typeof(List<double>) => "array",
@@ -49,8 +51,13 @@ public record JsonSchemaProperty
             Type t when t == typeof(decimal) => "number",
             Type t when t == typeof(bool) => "boolean",
             Type t when t == typeof(DateTime) => "string",
-            _ => "string"
+            _ => "object"
         };
+
+        if (jsonType == "object" && typeof(IEnumerable).IsAssignableFrom(type))
+            jsonType = "array";
+
+        return jsonType;
     }
 
     public void ToMultiple()
@@ -64,5 +71,6 @@ public record JsonSchemaProperty
     public string? Format { get; set; }
     public List<string>? Enum { get; set; }
     public JsonSchema? Items { get; set; }
+    public JsonSchema? Properties { get; set; }
     public string? Description { get; set; }
 }

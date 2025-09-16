@@ -9,6 +9,9 @@ public record BlossomSchema
     public bool Strict { get; set; }
     public JsonSchema Schema { get; set; } = new("object");
 
+    public BlossomSchema()
+    { }
+
     public BlossomSchema(Type type)
     {
         Name = type.Name;
