@@ -2,14 +2,14 @@
 using System.Text.Json.Nodes;
 
 namespace Sparc.Blossom.Content.OpenAI;
-internal class OpenAIAnswer<T>()
+internal class OpenAIAnswer()
 {
     public string Name { get; set; } = string.Empty;
     public string? Text { get; set; }
     public string? Error { get; set; }
     public int TokensUsed { get; set; }
     public object? GenericTypedAnswer { get; internal set; }
-    public T? Value { get; set; }
+    public dynamic? Value { get; set; }
     internal string? ResponseId { get; private set; }
     bool IsExpanded;
     bool HasAnswer;
@@ -33,13 +33,13 @@ internal class OpenAIAnswer<T>()
         }
 
         var unwrapped = this[Name]?.ToString();
-        if (unwrapped != null && typeof(T) != typeof(string))
-            Value = JsonSerializer.Deserialize<T>(unwrapped);
+        if (unwrapped != null)
+            Value = JsonSerializer.Deserialize<dynamic>(unwrapped);
         else if (unwrapped == null)
         {
             try
             {
-                Value = JsonSerializer.Deserialize<T>(response);
+                Value = JsonSerializer.Deserialize<dynamic>(response);
             }
             catch (JsonException)
             {

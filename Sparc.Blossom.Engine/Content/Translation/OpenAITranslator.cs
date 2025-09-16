@@ -18,44 +18,59 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
 
     public int Priority => 0;
 
+    public async Task<TextContent> TranslateAsync(TextContent message, TovikTranslationOptions options)
+    {
+        var question = new TovikTranslationQuestion(message, options);
+        var answer = await AskOpenAIAsync(question);
+
+        var result = new TextContent(message, options.OutputLanguage ?? message.Language, answer.Text!)
+        {
+            Type = options.Schema?.Name
+        };
+
+        return result;
+    }
+
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
     {
         var fromLanguages = messages.GroupBy(x => x.Language);
         var batches = TovikTranslator.Batch(messages, 5);
 
         var translatedMessages = new ConcurrentBag<TextContent>();
-        await Parallel.ForEachAsync(batches, async (batch, _) =>
-        {
-            var safeBatch = batch.Where(x => !string.IsNullOrWhiteSpace(x.Text)).ToList();
-            if (safeBatch.Count == 0)
-                return;
 
-            foreach (var fromLanguage in fromLanguages)
-            {
-                    var question = new TovikTranslationQuestion(safeBatch, options);
-                    var answer = await AskOpenAIAsync(question);
-                    if (answer.Value?.Text == null)
-                        continue;
+        // TODO: Refactor to use TovikTranslations again when able
+        //await Parallel.ForEachAsync(batches, async (batch, _) =>
+        //{
+        //    var safeBatch = batch.Where(x => !string.IsNullOrWhiteSpace(x.Text)).ToList();
+        //    if (safeBatch.Count == 0)
+        //        return;
 
-                    var translations = new List<TextContent>();
-                    foreach (var translation in safeBatch.Where(x => answer.Value.Text.Any(y => x.Id.StartsWith(y.Id))))
-                        translations.Add(new TextContent(translation, options.OutputLanguage ?? translation.Language, answer.Value.Text.First(y => translation.Id.StartsWith(y.Id)).Text));
+        //    foreach (var fromLanguage in fromLanguages)
+        //    {
+        //            var question = new TovikTranslationQuestion(safeBatch, options);
+        //            var answer = await AskOpenAIAsync(question);
+        //            if (answer.Value?.Text == null)
+        //                continue;
 
-                    foreach (var translatedMessage in translations)
-                    {
-                        translatedMessage.AddCharge(answer.TokensUsed, CostPerToken, $"OpenAI translation of {translatedMessage.OriginalText} to {translatedMessage.LanguageId}");
-                        translatedMessages.Add(translatedMessage);
-                    }
-            }
-        });
+        //            var translations = new List<TextContent>();
+        //            foreach (var translation in safeBatch.Where(x => answer.Value.Text.Any(y => x.Id.StartsWith(y.Id))))
+        //                translations.Add(new TextContent(translation, options.OutputLanguage ?? translation.Language, answer.Value.Text.First(y => translation.Id.StartsWith(y.Id)).Text));
+
+        //            foreach (var translatedMessage in translations)
+        //            {
+        //                translatedMessage.AddCharge(answer.TokensUsed, CostPerToken, $"OpenAI translation of {translatedMessage.OriginalText} to {translatedMessage.LanguageId}");
+        //                translatedMessages.Add(translatedMessage);
+        //            }
+        //    }
+        //});
 
         return translatedMessages.ToList();
     }
 
-    private async Task<OpenAIAnswer<T>> AskOpenAIAsync<T>(OpenAIQuestion<T> question)
+    private async Task<OpenAIAnswer> AskOpenAIAsync(OpenAIQuestion question)
     { 
         int attempt = 0;
-        var answer = new OpenAIAnswer<T>();
+        var answer = new OpenAIAnswer();
 
         while (attempt < _maxRetries)
         {
@@ -109,7 +124,7 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
         return answer;
     }
 
-    private ResponseCreationOptions CreateResponseOptions<T>(OpenAIQuestion<T> question)
+    private ResponseCreationOptions CreateResponseOptions(OpenAIQuestion question)
     {
         var options = new ResponseCreationOptions()
         {

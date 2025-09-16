@@ -14,6 +14,11 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
     public int Priority => 1;
     decimal CostPerWord => 25.00m / 1_000_000 * 5; // $25 per million characters, assuming average 5 characters per word
 
+    public async Task<TextContent> TranslateAsync(TextContent message, TovikTranslationOptions options)
+    {
+        var result = await TranslateAsync([message], options);
+        return result.First();
+    }
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
     {
         Client ??= new(configuration.GetConnectionString("DeepL")!);

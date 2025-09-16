@@ -11,7 +11,7 @@ public class TovikTranslationOptions
     public decimal IrreverentOrRespectful { get; set; } = 0.5M;
     public decimal EnthusiasticOrMatterOfFact { get; set; } = 0.5M;
     public string? AdditionalContext { get; set; }
-    public object? Schema { get; set; }
+    public BlossomSchema? Schema { get; set; }
 
     public string ToPrompt()
     {

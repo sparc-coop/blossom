@@ -1,6 +1,7 @@
 ﻿using Sparc.Blossom;
 using Sparc.Blossom.Authentication;
 using Sparc.Core;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
@@ -27,6 +28,7 @@ public class TextContent : BlossomEntity<string>
     public DateTime? DeletedDate { get; set; }
     public BlossomAvatar? User { get; set; }
     public AudioContent? Audio { get; set; }
+    public string? Type { get; set; }
     public string? Text { get; set; }
     public List<ContentTranslation> Translations { get; set; } = [];
     internal long Charge { get; set; }
@@ -177,6 +179,17 @@ public class TextContent : BlossomEntity<string>
         DeletedDate = DateTime.UtcNow;
     }
 
+    public T? Cast<T>()
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<T>(Text!);
+        }
+        catch
+        {
+            return default;
+        }
+    }
 
     public TextContent SetText(string text)
     {

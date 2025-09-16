@@ -1,12 +1,12 @@
 ﻿namespace Sparc.Blossom.Content.OpenAI;
 
-internal class OpenAIQuestion<T>(string text)
+internal class OpenAIQuestion(string text)
 {
     public List<string> Context { get; set; } = [];
     public string Text { get; set; } = text;
     public string? PreviousResponseId { get; set; }
     public string? Instructions { get; set; }
-    public BlossomSchema Schema { get; set; } = new(typeof(T));
+    public BlossomSchema? Schema { get; set; }
 
     public string? PromptText => Context.Count != 0
             ? $"Given the following context:\n{ContextText}\n\nQuestion: {Text}"

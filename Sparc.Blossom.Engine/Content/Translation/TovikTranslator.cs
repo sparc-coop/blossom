@@ -69,14 +69,7 @@ public class TovikTranslator(
         return translations;
     }
 
-    public async Task<object> TranslateToEntity(TextContent content, TovikTranslationOptions options)
-    {
-        var translator = Translators.OfType<OpenAITranslator>().First();
-        var result = await translator.TranslateAsync([content], options);
-        return result;
-    }
-
-    public async Task<TextContent> TranslateInnerVoice(TextContent content, TovikTranslationOptions options)
+    public async Task<TextContent> TranslateToEntity(TextContent content, TovikTranslationOptions options)
     {
         var translator = Translators.OrderBy(x => x.Priority).First();
         var result = await translator.TranslateAsync([content], options);
@@ -242,9 +235,9 @@ public class TovikTranslator(
                 return Results.StatusCode(429);
             }
         });
-        group.MapPost("innervoice", async (TovikTranslator translator, TovikTranslationRequest request) =>
+        group.MapPost("entity", async (TovikTranslator translator, TovikTranslationRequest request) =>
         {
-            var result = await translator.TranslateInnerVoice(request.Content, request.Options);
+            var result = await translator.TranslateToEntity(request.Content, request.Options);
             return Results.Ok(result);
         });
     }

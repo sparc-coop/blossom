@@ -15,7 +15,7 @@ public interface ITovik
     [Post("/translate/crawl")]
     Task<List<TextContent>> CrawlAsync(TovikCrawlRequest request);
 
-    [Post("/translate/innervoice")]
+    [Post("/translate/entity")]
     Task<TextContent> TranslateAsync(TovikTranslationRequest request);
 }
 
