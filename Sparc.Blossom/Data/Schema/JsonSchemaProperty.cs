@@ -33,7 +33,7 @@ public record JsonSchemaProperty
             Description = " Format in ISO 8601.";
     }
 
-    private static string JsonType(Type type)
+    internal static string JsonType(Type type)
     {
         // Get underlying type if property type is nullable
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))

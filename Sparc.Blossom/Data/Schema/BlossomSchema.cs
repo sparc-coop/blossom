@@ -24,7 +24,8 @@ public record BlossomSchema
 
     public override string ToString()
     {
-        return JsonSerializer.Serialize(Schema, serializerOptions);
+        var schema = JsonSerializer.Serialize(Schema, serializerOptions);
+        return schema;
     }
 
     public static string Format(string type) => type switch

@@ -126,6 +126,7 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
 
     private ResponseCreationOptions CreateResponseOptions(OpenAIQuestion question)
     {
+        Console.WriteLine("using schema: " + question.Schema?.ToString());
         var options = new ResponseCreationOptions()
         {
             Temperature = 0.2f,
@@ -142,7 +143,14 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
         return options;
     }
 
-    BinaryData SchemaToBinary(BlossomSchema schema) => BinaryData.FromString(schema.ToString());
+    BinaryData SchemaToBinary(BlossomSchema schema)
+    {
+        var lines = schema.ToString().Split('\n');
+        var filteredLines = lines.Where(line => !line.Contains(": null")).ToArray();
+        var filteredJson = string.Join('\n', filteredLines);
+
+        return BinaryData.FromString(filteredJson);
+    }
 
     private static string ToVariableName(string name)
     {
