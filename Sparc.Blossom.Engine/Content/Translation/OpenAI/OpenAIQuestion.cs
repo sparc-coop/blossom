@@ -6,7 +6,7 @@ internal class OpenAIQuestion<T>(string text)
     public string Text { get; set; } = text;
     public string? PreviousResponseId { get; set; }
     public string? Instructions { get; set; }
-    public OpenAISchema Schema { get; set; } = new(typeof(T));
+    public BlossomSchema Schema { get; set; } = new(typeof(T));
 
     public string? PromptText => Context.Count != 0
             ? $"Given the following context:\n{ContextText}\n\nQuestion: {Text}"

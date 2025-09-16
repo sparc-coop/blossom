@@ -119,13 +119,15 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
             TextOptions = new()
             {
                 TextFormat = question.Schema != null
-                    ? ResponseTextFormat.CreateJsonSchemaFormat(ToVariableName(question.Schema!.Name), question.Schema.ToBinary(), jsonSchemaIsStrict: true)
+                    ? ResponseTextFormat.CreateJsonSchemaFormat(ToVariableName(question.Schema!.Name), SchemaToBinary(question.Schema), jsonSchemaIsStrict: true)
                     : ResponseTextFormat.CreateTextFormat()
             }
         };
 
         return options;
     }
+
+    BinaryData SchemaToBinary(BlossomSchema schema) => BinaryData.FromString(schema.ToString());
 
     private static string ToVariableName(string name)
     {

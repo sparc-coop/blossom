@@ -1,15 +1,15 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Sparc.Blossom.Content.OpenAI;
-public record OpenAISchema
+namespace Sparc.Blossom;
+public record BlossomSchema
 {
     public string Name { get; set; } = "";
     public string? Description { get; set; }
     public bool Strict { get; set; }
     public JsonSchema Schema { get; set; } = new("object");
 
-    public OpenAISchema(Type type)
+    public BlossomSchema(Type type)
     {
         Name = type.Name;
         Description = type.Name;
@@ -18,7 +18,6 @@ public record OpenAISchema
     }
 
     static readonly JsonSerializerOptions serializerOptions = new(JsonSerializerOptions.Web) { WriteIndented = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
-    internal BinaryData ToBinary() => BinaryData.FromString(ToString());
 
     public override string ToString()
     {

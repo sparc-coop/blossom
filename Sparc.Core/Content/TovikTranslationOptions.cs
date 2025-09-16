@@ -11,6 +11,7 @@ public class TovikTranslationOptions
     public decimal IrreverentOrRespectful { get; set; } = 0.5M;
     public decimal EnthusiasticOrMatterOfFact { get; set; } = 0.5M;
     public string? AdditionalContext { get; set; }
+    public object? Schema { get; set; }
 
     public string ToPrompt()
     {
@@ -40,6 +41,9 @@ public class TovikTranslationOptions
 
         if (EnthusiasticOrMatterOfFact != 0.5M)
             prompt.AppendLine("- " + EnthusiasticOrMatterOfFactMappings[Round(EnthusiasticOrMatterOfFact)]);
+
+        if (Schema != null)
+            prompt.AppendLine("- " + $"Convert the text to match the supplied JSON schema.");
 
         return prompt.ToString();
     }

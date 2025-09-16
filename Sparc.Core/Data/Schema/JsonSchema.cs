@@ -1,7 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection;
+﻿using System.Reflection;
 
-namespace Sparc.Blossom.Content.OpenAI;
+namespace Sparc.Blossom;
 
 public record JsonSchema(string Type, bool? AdditionalProperties = false)
 {
@@ -17,7 +16,6 @@ public record JsonSchema(string Type, bool? AdditionalProperties = false)
         );
     }
 
-    [NotMapped]
     public Dictionary<string, JsonSchemaProperty>? Properties { get; set; }
     public List<string>? Required => Properties?.Select(x => x.Key).ToList();
 }

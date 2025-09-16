@@ -69,6 +69,13 @@ public class TovikTranslator(
         return translations;
     }
 
+    public async Task<object> TranslateToEntity(TextContent content, TovikTranslationOptions options)
+    {
+        var translator = Translators.OfType<OpenAITranslator>().First();
+        var result = await translator.TranslateAsync([content], options);
+        return result;
+    }
+
     public async Task<TextContent> TranslateInnerVoice(TextContent content, TovikTranslationOptions options)
     {
         var translator = Translators.OrderBy(x => x.Priority).First();
