@@ -85,7 +85,12 @@ public class TovikTranslator(
             var html = await client.GetStringAsync(content.Text);
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
-            content.Text = doc.DocumentNode.SelectSingleNode("//body")?.InnerHtml ?? html;
+            var body = doc.DocumentNode.SelectSingleNode("//body");
+            // remove all script and style nodes
+            foreach (var script in body.SelectNodes("//script|//style") ?? Enumerable.Empty<HtmlNode>())
+                script.Remove();
+
+            content.Text = body.InnerHtml;
         }
 
         var translator = Translators.OrderBy(x => x.Priority).First();
