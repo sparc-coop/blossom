@@ -19,9 +19,12 @@ public interface ITovik
     Task<TextContent> TranslateAsync(TovikTranslationRequest request);
 
     public async Task<T?> TranslateAsync<T>(TextContent content, TovikTranslationOptions? options = null)
+        => await TranslateAsync<T, T>(content, options);
+
+    public async Task<T?> TranslateAsync<T, TSchema>(TextContent content, TovikTranslationOptions? options = null)
     {
         options ??= new();
-        options.Schema = new(typeof(T));
+        options.Schema = new(typeof(TSchema));
         var request = new TovikTranslationRequest(content, options);
         var result = await TranslateAsync(request);
         var obj = result.Cast<T>();
