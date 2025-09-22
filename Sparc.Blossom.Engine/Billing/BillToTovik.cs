@@ -6,7 +6,7 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Billing;
 
-public class BillToTovikHandler(BlossomQueue<BillToTovik> biller)  : INotificationHandler<TovikContentTranslated>
+public class TovikContentTranslatedHandler(BlossomQueue<BillToTovik> biller)  : INotificationHandler<TovikContentTranslated>
 {
     public async Task Handle(TovikContentTranslated notification, CancellationToken cancellationToken)
     {
@@ -17,10 +17,24 @@ public class BillToTovikHandler(BlossomQueue<BillToTovik> biller)  : INotificati
 public class BillToTovik(
     IRepository<SparcDomain> domains,
     IRepository<Page> pages,
-    IRepository<UserCharge> charges)
+    IRepository<UserCharge> charges,
+    CosmosDbSimpleRepository<TextContent> content
+    )
 {
     public async Task ExecuteAsync(TovikContentTranslated item, CancellationToken cancellationToken)
     {
+        Console.WriteLine("Billing: " + item.Content.Id);
+
+        try
+        {
+            // Cache-aside the translated content 
+            await content.UpdateNoPublishAsync(item.Content);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to cache translated content {item.Content.Id}: {ex.Message}");
+        }
+        
         // Get owning user
         var domain = await domains.Query.Where(d => d.Domain == item.Content.Domain)
             .FirstOrDefaultAsync();

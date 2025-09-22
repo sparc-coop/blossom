@@ -1,6 +1,5 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
-using System.Collections.Concurrent;
 using System.Globalization;
 using System.Security.Claims;
 
@@ -45,7 +44,7 @@ public class TovikTranslator(
         var translation = await TranslateAsync(content, toLanguage)
             ?? throw new InvalidOperationException("Translation failed.");
 
-        await Content.AddAsync(translation);
+        await PublishAsync([translation]);
         return translation;
     }
 
@@ -72,13 +71,13 @@ public class TovikTranslator(
             if (translator != null)
             {
                 var liveTranslations = await translator.TranslateAsync(request.Content, [toLanguage], request.AdditionalContext);
-                await Content.AddAsync(liveTranslations);
+                await PublishAsync(liveTranslations);
                 return liveTranslations;
             }
         }
 
         var translations = await TranslateAsync(request.Content, [toLanguage], request.AdditionalContext);
-        await Content.AddAsync(translations);
+        await PublishAsync(translations);
 
         return translations;
     }
@@ -117,7 +116,7 @@ public class TovikTranslator(
 
         var additionalContext = string.Join("\n", contents.Select(x => x.Text).OrderBy(x => Guid.NewGuid()).Take(20));
         var translations = await TranslateAsync(needsTranslation, [toLanguage], additionalContext);
-        await Content.AddAsync(translations);
+        await PublishAsync(translations);
 
         return results.Union(translations).ToList();
     }
@@ -213,6 +212,13 @@ public class TovikTranslator(
         {
             return null;
         }
+    }
+
+    async Task PublishAsync(IEnumerable<TextContent> contents)
+    {
+        if (Content is CosmosDbSimpleRepository<TextContent> cosmos)
+            foreach (var content in contents)
+                await cosmos.Publish(content);
     }
 
     internal static IEnumerable<IEnumerable<T>> Batch<T>(IEnumerable<T> items,
