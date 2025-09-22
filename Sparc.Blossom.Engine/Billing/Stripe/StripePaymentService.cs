@@ -76,37 +76,8 @@ public class StripePaymentService
     {
         currencyId = currencyId.ToLower();
 
-        var priceService = new PriceService();
-        var listOptions = new PriceListOptions
-        {
-            Product = productId,
-            Expand = ["data.currency_options"]
-        };
-
-        var pricesResult = await priceService.ListAsync(listOptions);
-        var basePrice = pricesResult.Data.FirstOrDefault();
-        if (basePrice?.UnitAmount == null)
-            return null;
-
-        var hasPrice = basePrice.CurrencyOptions.TryGetValue(currencyId, out var currentPrice);
-        var newPrice = ToStripePrice(await _rates.ConvertAsync(FromStripePrice(basePrice.UnitAmount.Value, "USD"), "USD", currencyId, true), currencyId);
-        var difference = currentPrice?.UnitAmount == null ? 1 : Math.Abs(newPrice - currentPrice.UnitAmount.Value) / (decimal)currentPrice.UnitAmount.Value;
-
-        if (difference > 0.2M)
-        {
-            // Stripe doesn't let you update prices directly, so just return the newly calculated price
-            //var priceUpdateOptions = new PriceUpdateOptions
-            //{
-            //    CurrencyOptions = new Dictionary<string, PriceCurrencyOptionsOptions>
-            //    {
-            //        { currencyId, new PriceCurrencyOptionsOptions { UnitAmount = newPrice } }
-            //    }
-            //};
-            //await priceService.UpdateAsync(basePrice.Id, priceUpdateOptions);
-            return stripeFormat ? newPrice : FromStripePrice(newPrice, currencyId);
-        }
-        
-        return stripeFormat ? currentPrice!.UnitAmount!.Value : FromStripePrice(currentPrice!.UnitAmount!.Value, currencyId);
+        var newPrice = ToStripePrice(await _rates.ConvertAsync(FromStripePrice(4900, "USD"), "USD", currencyId, true), currencyId);
+        return stripeFormat ? newPrice : FromStripePrice(newPrice, currencyId);
     }
 
     public async Task<string?> GetOrCreateCustomerAsync(SparcOrder order)
