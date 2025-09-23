@@ -155,6 +155,7 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
         var options = new ResponseCreationOptions()
         {
             Temperature = 0.2f,
+            ServiceTier = new ResponseServiceTier("priority"),
             Instructions = question.Instructions,
             PreviousResponseId = question.PreviousResponseId,
             TextOptions = new()
