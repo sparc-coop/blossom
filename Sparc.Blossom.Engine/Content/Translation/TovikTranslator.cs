@@ -116,7 +116,7 @@ public class TovikTranslator(
             throw new Exception("You've reached your Tovik translation limit!");
 
         var additionalContext = string.Join("\n", contents.Select(x => x.Text).OrderBy(x => Guid.NewGuid()).Take(20));
-        var translations = await TranslateAsync(needsTranslation, [toLanguage], additionalContext);
+        var translations = await TranslateAsync(needsTranslation, [toLanguage!], additionalContext);
         await PublishAsync(translations);
 
         return results.Union(translations).ToList();

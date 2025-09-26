@@ -5,6 +5,11 @@
 @using Microsoft.Extensions.Configuration
 @using Microsoft.AspNetCore.Components.Web
 @implements IDisposable
+
+<HeadContent>
+    <script src="https://js.stripe.com/v3"></script>
+</HeadContent>
+
 @if (PaymentIntentId == null)
 {
     <form id="payment-form" @onsubmit="Pay" @onsubmit:preventDefault="true">
