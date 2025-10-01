@@ -9,6 +9,7 @@ public class TovikTranslator(
     IEnumerable<ITranslator> translators,
     IRepository<TextContent> content,
     IRepository<SparcDomain> domains,
+    IRepository<Page> pages,
     ClaimsPrincipal principal,
     SparcAuthenticator<BlossomUser> auth) : IBlossomEndpoints
 {
@@ -215,6 +216,19 @@ public class TovikTranslator(
         }
     }
 
+    private async Task Visit(Visit visit, Language language)
+    {
+        var page = await pages.Query
+            .Where(x => x.Domain == visit.Domain && x.Path == visit.Path)
+            .FirstOrDefaultAsync();
+
+        if (page == null)
+            return;
+
+        page.RegisterVisit(language);
+        await pages.UpdateAsync(page);
+    }
+
     async Task PublishAsync(IEnumerable<TextContent> contents)
     {
         if (Content is CosmosDbSimpleRepository<TextContent> cosmos)
@@ -237,6 +251,13 @@ public class TovikTranslator(
         group.MapGet("languages", GetLanguagesAsync).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
         group.MapGet("language", (ClaimsPrincipal principal, HttpRequest request) => Language.Find(principal.Get("language") ?? request.Headers.AcceptLanguage));
         group.MapPost("language", async (TovikTranslator translator, Language language) => await translator.SetLanguage(language));
+        group.MapPost("visit", async (TovikTranslator translator, HttpRequest request, Visit visit) =>
+        {
+            var language = Language.Find(request.Headers.AcceptLanguage);
+            await translator.Visit(visit, language);
+            return Results.Ok();
+        });
+
         group.MapPost("untranslated", async (TovikTranslator translator, HttpRequest request, TranslationRequest translationRequest) =>
         {
             var toLanguage = Language.Find(request.Headers.AcceptLanguage);

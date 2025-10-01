@@ -15,6 +15,7 @@ public class Page : BlossomEntity<string>
     public string Name { get; set; }
     public SourceContent? SourceContent { get; set; }
     public Dictionary<string, int> TovikUsage { get; set; } = [];
+    public Dictionary<string, int> Visits { get; set; } = [];
     public DateTime DateRegistered { get; set; } = DateTime.UtcNow;
     public DateTime? LastActiveDate { get; set; } = DateTime.UtcNow;
     public DateTime? EndDate { get; set; }
@@ -66,6 +67,15 @@ public class Page : BlossomEntity<string>
             TovikUsage[content.Content.LanguageId] += content.TokenCount;
         else
             TovikUsage[content.Content.LanguageId] = content.TokenCount;
+    }
+
+    public void RegisterVisit(Language language)
+    {
+        LastActiveDate = DateTime.UtcNow;
+        if (Visits.ContainsKey(language.Id))
+            Visits[language.Id] += 1;
+        else
+            Visits[language.Id] = 1;
     }
 
     //internal async Task<ICollection<TextContent>> TranslateAsync(Language toLanguage, BlossomTranslator provider)

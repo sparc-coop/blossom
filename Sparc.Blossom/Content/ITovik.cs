@@ -17,3 +17,4 @@ public interface ITovik
 
 public record TovikCrawlRequest(string Domain, List<string> ToLanguages, string FromLanguage = "en");
 public record TranslationRequest(List<TextContent> Content, string? AdditionalContext = null, string? Model = null);
+public record Visit(string Domain, string Path);
