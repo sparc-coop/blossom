@@ -76,7 +76,7 @@ public class StripePaymentService
     {
         currencyId = currencyId.ToLower();
 
-        var newPrice = ToStripePrice(await _rates.ConvertAsync(FromStripePrice(4900, "USD"), "USD", currencyId, true), currencyId);
+        var newPrice = ToStripePrice(await _rates.ConvertAsync(FromStripePrice(3900, "USD"), "USD", currencyId, true), currencyId);
         return stripeFormat ? newPrice : FromStripePrice(newPrice, currencyId);
     }
 
