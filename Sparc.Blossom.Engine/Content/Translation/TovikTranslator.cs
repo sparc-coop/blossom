@@ -65,6 +65,8 @@ public class TovikTranslator(
         if (!await CanTranslate(request.Content))
             throw new Exception("You've reached your Tovik translation limit!");
 
+        var options = new TovikTranslationOptions { OutputLanguage = toLanguage, AdditionalContext = request.AdditionalContext };
+
         if (request.Model != null)
         {
             var translator = Translators
@@ -74,13 +76,13 @@ public class TovikTranslator(
 
             if (translator != null)
             {
-                var liveTranslations = await translator.TranslateAsync(request.Content, [toLanguage], request.AdditionalContext);
+                var liveTranslations = await translator.TranslateAsync(request.Content, options);
                 await PublishAsync(liveTranslations);
                 return liveTranslations;
             }
         }
 
-        var translations = await TranslateAsync(request.Content, [toLanguage], request.AdditionalContext);
+        var translations = await TranslateAsync(request.Content, options);
         await PublishAsync(translations);
 
         return translations;
@@ -146,7 +148,7 @@ public class TovikTranslator(
             throw new Exception("You've reached your Tovik translation limit!");
 
         var additionalContext = string.Join("\n", contents.Select(x => x.Text).OrderBy(x => Guid.NewGuid()).Take(20));
-        var translations = await TranslateAsync(needsTranslation, [toLanguage!], additionalContext);
+        var translations = await TranslateAsync(needsTranslation, new TovikTranslationOptions { OutputLanguage = toLanguage, AdditionalContext = additionalContext });
         await PublishAsync(translations);
 
         return results.Union(translations).ToList();
