@@ -83,6 +83,9 @@ app.MapGet("/upgrade-2", async (IRepository<Page> pages, IRepository<SparcDomain
 using var scope = app.Services.CreateScope();
 scope.ServiceProvider.GetRequiredService<TovikTranslator>().Map(app);
 
+foreach (var translator in scope.ServiceProvider.GetServices<ITranslator>())
+    await translator.GetLanguagesAsync();
+
 if (!string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("Cognitive")))
 {
     var translator = scope.ServiceProvider.GetRequiredService<TovikTranslator>();

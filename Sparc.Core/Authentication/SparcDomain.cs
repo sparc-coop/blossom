@@ -16,6 +16,8 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
     public List<SparcProduct> Products { get; set; } = [];
     public bool IsBlocked { get; set; }
 
+    public string ToAbsoluteUrl(string? relativeUrl = null) => $"https://{Domain.TrimEnd('/')}/{relativeUrl?.TrimStart('/')}";
+
     public static string? Normalize(string domain)
     {
         domain = domain.Trim().ToLower();

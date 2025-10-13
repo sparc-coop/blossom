@@ -80,7 +80,7 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         });
     }
 
-    private async Task Publish(T item)
+    public async Task Publish(T item)
     {
         var events = item.Publish();
         try
@@ -92,6 +92,11 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         {
             Console.WriteLine(e.Message);
         }
+    }
+
+    public async Task UpdateNoPublishAsync(T item)
+    {
+        await Client.Container.UpsertItemAsync(item);
     }
 
     public async Task UpdateAsync(T item)

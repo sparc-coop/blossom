@@ -8,94 +8,96 @@
 @typeparam DefaultLayout
 
 <Router AppAssembly="@typeof(Program).Assembly" AdditionalAssemblies="@GetAdditionalAssemblies()">
-    <Found Context="routeData">
-        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
-            <NotAuthorized>
-                @if (!context.User.Identity?.IsAuthenticated == true)
-                {
-                }
-                else if (NotAuthorized is not null)
-                {
-                    @NotAuthorized
-                }
-                else
-                {
-                    <div class="blossom-authentication">
-                        You are not authorized to access
-                        this resource.
-                    </div>
-                }
-            </NotAuthorized>
-            <Authorizing>
-                @if (Authorizing is not null)
-                {
-                    @Authorizing
-                }
-                else
-                {
-                    <div class="blossom-authentication">
-                        Logging you in...
-                    </div>
-                }
-            </Authorizing>
-        </AuthorizeRouteView>
-    </Found>
-    <NotFound>
-        <LayoutView Layout="@typeof(DefaultLayout)">
-            @if (NotFound is not null)
-            {
-                @NotFound
-            }
-            else
-            {
-                <p>Sorry, there's nothing at this address.</p>
-            }
-        </LayoutView>
-    </NotFound>
+	<Found Context="routeData">
+		<CascadingValue Value="routeData">
+			<AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(DefaultLayout)">
+				<NotAuthorized>
+					@if (!context.User.Identity?.IsAuthenticated == true)
+					{
+					}
+					else if (NotAuthorized is not null)
+					{
+						@NotAuthorized
+					}
+					else
+					{
+						<div class="blossom-authentication">
+							You are not authorized to access
+							this resource.
+						</div>
+					}
+				</NotAuthorized>
+				<Authorizing>
+					@if (Authorizing is not null)
+					{
+						@Authorizing
+					}
+					else
+					{
+						<div class="blossom-authentication">
+							Logging you in...
+						</div>
+					}
+				</Authorizing>
+			</AuthorizeRouteView>
+		</CascadingValue>
+	</Found>
+	<NotFound>
+		<LayoutView Layout="@typeof(DefaultLayout)">
+			@if (NotFound is not null)
+			{
+				@NotFound
+			}
+			else
+			{
+				<p>Sorry, there's nothing at this address.</p>
+			}
+		</LayoutView>
+	</NotFound>
 </Router>
 
 @inject System.TimeProvider TimeProvider
 @inject Microsoft.JSInterop.IJSRuntime Js
 
 @code {
-    [Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
-    [Parameter] public RenderFragment Authorizing { get; set; } = null!;
-    [Parameter] public RenderFragment NotFound { get; set; } = null!;
-    [Parameter] public RenderFragment Loading { get; set; } = null!;
+	[Parameter] public RenderFragment NotAuthorized { get; set; } = null!;
+	[Parameter] public RenderFragment Authorizing { get; set; } = null!;
+	[Parameter] public RenderFragment NotFound { get; set; } = null!;
+	[Parameter] public RenderFragment Loading { get; set; } = null!;
 
-    // [Parameter] public Type ProgramType { get; set; } = default!;
-    // [Parameter] public Type LayoutType { get; set; } = default!;
-    [Parameter] public IEnumerable<Assembly>? ExtraAssemblies { get; set; }
+	// [Parameter] public Type ProgramType { get; set; } = default!;
+	// [Parameter] public Type LayoutType { get; set; } = default!;
+	[Parameter] public IEnumerable<Assembly>? ExtraAssemblies { get; set; }
 
-    private Assembly[] GetAdditionalAssemblies()
-    {
-        var assemblies = new List<Assembly>();
+	private Assembly[] GetAdditionalAssemblies()
+	{
+		var assemblies = new List<Assembly>();
 
-        if (typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName)
-        {
-            assemblies.Add(this.GetType().Assembly);
-        }
-        else
-        {
-            assemblies.Add(this.GetType().Assembly);
-            assemblies.Add(typeof(DefaultLayout).Assembly);
-        }
+		if (typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName)
+		{
+			assemblies.Add(this.GetType().Assembly);
+		}
+		else
+		{
+			assemblies.Add(this.GetType().Assembly);
+			assemblies.Add(typeof(DefaultLayout).Assembly);
+		}
 
-        if (ExtraAssemblies is not null)
-        {
-            assemblies.AddRange(ExtraAssemblies);
-        }
+		if (ExtraAssemblies is not null)
+		{
+			assemblies.AddRange(ExtraAssemblies);
+		}
 
-        return assemblies.Distinct().ToArray();
-    }
+		return assemblies.Distinct().ToArray();
+	}
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && TimeProvider is Sparc.Blossom.BrowserTimeProvider browserTimeProvider)
-            await browserTimeProvider.InitializeAsync();
-    }
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender && TimeProvider is Sparc.Blossom.BrowserTimeProvider browserTimeProvider)
+			await browserTimeProvider.InitializeAsync();
+	}
 
-    public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
-    ? new[] { this.GetType().Assembly }
-        : new[] { this.GetType().Assembly, typeof(DefaultLayout).Assembly };
+	public System.Reflection.Assembly[] AdditionalAssemblies => typeof(DefaultLayout).Assembly.FullName == typeof(Program).Assembly.FullName
+	? new[] { this.GetType().Assembly }
+		: new[] { this.GetType().Assembly, typeof(DefaultLayout).Assembly };
 }

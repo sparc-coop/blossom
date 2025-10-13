@@ -2,7 +2,6 @@
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content.Tovik;
 using Sparc.Blossom.Data;
-using System;
 using System.Globalization;
 using System.Security.Claims;
 
@@ -12,6 +11,7 @@ public class TovikTranslator(
     IEnumerable<ITranslator> translators,
     IRepository<TextContent> content,
     IRepository<SparcDomain> domains,
+    IRepository<Page> pages,
     ClaimsPrincipal principal,
     SparcAuthenticator<BlossomUser> auth) : IBlossomEndpoints
 {
@@ -47,11 +47,11 @@ public class TovikTranslator(
         var translation = await TranslateAsync(content, toLanguage)
             ?? throw new InvalidOperationException("Translation failed.");
 
-        await Content.AddAsync(translation);
+        await PublishAsync([translation]);
         return translation;
     }
 
-    public async Task<List<TextContent>> SingleTranslate(List<TextContent> contents, Language? toLanguage = null, string? additionalContext = null)
+    public async Task<List<TextContent>> SingleTranslate(TranslationRequest request, Language? toLanguage = null)
     {
         if (toLanguage == null)
         {
@@ -60,13 +60,28 @@ public class TovikTranslator(
         }
 
         if (toLanguage == null)
-            return contents;
+            return request.Content;
 
-        if (!await CanTranslate(contents))
+        if (!await CanTranslate(request.Content))
             throw new Exception("You've reached your Tovik translation limit!");
 
-        var translations = await TranslateAsync(contents, new() { OutputLanguage = toLanguage, AdditionalContext = additionalContext });
-        await Content.AddAsync(translations);
+        if (request.Model != null)
+        {
+            var translator = Translators
+                .OrderBy(x => x.Priority == 0 ? 99 : x.Priority)
+                .Where(x => x.CanTranslate(request.Content.First().Language, toLanguage))
+                .FirstOrDefault();
+
+            if (translator != null)
+            {
+                var liveTranslations = await translator.TranslateAsync(request.Content, [toLanguage], request.AdditionalContext);
+                await PublishAsync(liveTranslations);
+                return liveTranslations;
+            }
+        }
+
+        var translations = await TranslateAsync(request.Content, [toLanguage], request.AdditionalContext);
+        await PublishAsync(translations);
 
         return translations;
     }
@@ -131,8 +146,8 @@ public class TovikTranslator(
             throw new Exception("You've reached your Tovik translation limit!");
 
         var additionalContext = string.Join("\n", contents.Select(x => x.Text).OrderBy(x => Guid.NewGuid()).Take(20));
-        var translations = await TranslateAsync(needsTranslation, new() { OutputLanguage = toLanguage, AdditionalContext = additionalContext });
-        await Content.AddAsync(translations);
+        var translations = await TranslateAsync(needsTranslation, [toLanguage!], additionalContext);
+        await PublishAsync(translations);
 
         return results.Union(translations).ToList();
     }
@@ -219,6 +234,26 @@ public class TovikTranslator(
         }
     }
 
+    private async Task Visit(Visit visit, Language language)
+    {
+        var page = await pages.Query
+            .Where(x => x.Domain == visit.Domain && x.Path == visit.Path)
+            .FirstOrDefaultAsync();
+
+        if (page == null)
+            return;
+
+        page.RegisterVisit(language);
+        await pages.UpdateAsync(page);
+    }
+
+    async Task PublishAsync(IEnumerable<TextContent> contents)
+    {
+        if (Content is CosmosDbSimpleRepository<TextContent> cosmos)
+            foreach (var content in contents)
+                await cosmos.Publish(content);
+    }
+
     internal static IEnumerable<IEnumerable<T>> Batch<T>(IEnumerable<T> items,
                                                        int maxItems)
     {
@@ -234,10 +269,17 @@ public class TovikTranslator(
         group.MapGet("languages", GetLanguagesAsync).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
         group.MapGet("language", (ClaimsPrincipal principal, HttpRequest request) => Language.Find(principal.Get("language") ?? request.Headers.AcceptLanguage));
         group.MapPost("language", async (TovikTranslator translator, Language language) => await translator.SetLanguage(language));
+        group.MapPost("visit", async (TovikTranslator translator, HttpRequest request, Visit visit) =>
+        {
+            var language = Language.Find(request.Headers.AcceptLanguage);
+            await translator.Visit(visit, language);
+            return Results.Ok();
+        });
+
         group.MapPost("untranslated", async (TovikTranslator translator, HttpRequest request, TranslationRequest translationRequest) =>
         {
             var toLanguage = Language.Find(request.Headers.AcceptLanguage);
-            var result = await translator.SingleTranslate(translationRequest.Content, toLanguage, translationRequest.AdditionalContext);
+            var result = await translator.SingleTranslate(translationRequest, toLanguage);
             return Results.Ok(result);
         });
         group.MapPost("all", async (TovikTranslator translator, HttpRequest request, List<TextContent> contents) =>

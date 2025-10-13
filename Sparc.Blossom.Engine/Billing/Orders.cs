@@ -92,11 +92,11 @@ public class Orders(
     {
         var sparcCurrency = SparcCurrency.From(currency ?? User.Get("currency") ?? request.Headers.AcceptLanguage);
 
-        var product = await stripe.GetProductAsync(productId);
+        //var product = await stripe.GetProductAsync(productId);
         var price = await stripe.GetPriceAsync(productId, sparcCurrency.Id);
 
         return new GetProductResponse(productId,
-            product.Name,
+            "Tovik",
             price ?? 0,
             sparcCurrency.Id,
             sparcCurrency.ToString(price ?? 0),
