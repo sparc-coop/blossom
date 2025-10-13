@@ -43,7 +43,7 @@ public abstract class BlossomApplicationBuilder
 
             Services.AddScoped(
                 typeof(IRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)),
-                typeof(BlossomInMemoryRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)));
+                typeof(BlossomRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)));
         }
 
         foreach (var aggregate in aggregates)
@@ -70,7 +70,7 @@ public abstract class BlossomApplicationBuilder
     protected void AddBlossomRepository()
     {
         if (!Services.Any(x => x.ServiceType == typeof(IRepository<>)))
-            Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
+            Services.AddScoped(typeof(IRepository<>), typeof(BlossomRepository<>));
 
         //Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
         Services.AddScoped<BlossomHubProxy>();

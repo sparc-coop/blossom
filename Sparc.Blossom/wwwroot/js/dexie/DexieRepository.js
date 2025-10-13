@@ -23,6 +23,10 @@ export async function register(dbName, doc, callback) {
     return subscription;
 }
 
+export async function getAll(dbName) {
+    return await db(dbName).docs.toArray();
+}
+
 export async function add(dbName, doc) {
     console.log('adding', doc);
     await db(dbName).docs.add(doc);

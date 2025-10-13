@@ -34,7 +34,7 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
         {
             // No-config Blossom User setup
             AddAuthentication<BlossomUser>();
-            Services.AddSingleton<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
+            Services.AddSingleton<IRepository<BlossomUser>, BlossomRepository<BlossomUser>>();
         }
 
         AddBlossomServer();

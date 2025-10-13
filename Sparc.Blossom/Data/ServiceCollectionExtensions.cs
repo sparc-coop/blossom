@@ -5,15 +5,15 @@ namespace Sparc.Blossom;
 
 public static partial class ServiceCollectionExtensions
 {
-    public static async Task<IServiceCollection> AddRemoteRepository<T, TResponse>
-        (this IServiceCollection services, string url, Func<TResponse, IEnumerable<T>> transformer)
-        where T : class
-    {
-        var results = await BlossomInMemoryRepository<T>.FromUrlAsync(url, transformer);
-        services.AddScoped<IRepository<T>>(_ => results);
+    //public static async Task<IServiceCollection> AddRemoteRepository<T, TResponse>
+    //    (this IServiceCollection services, string url, Func<TResponse, IEnumerable<T>> transformer)
+    //    where T : class
+    //{
+    //    var results = await BlossomRepository<T>.FromUrlAsync(url, transformer);
+    //    services.AddScoped<IRepository<T>>(_ => );
 
-        return services;
-    }
+    //    return services;
+    //}
 
     public static Lazy<Task<IJSObjectReference>> Import(this IJSRuntime js, string module)
     {

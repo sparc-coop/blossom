@@ -3,13 +3,9 @@ using System.Text.Json;
 
 namespace Sparc.Blossom;
 
-public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
+public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T> where T : class
 {
-    public BlossomInMemoryRepository()
-    {
-    }
-    
-    public BlossomInMemoryRepository(IEnumerable<T> items)
+    public void Load(IEnumerable<T> items)
     {
         if (items.Any())
             _items = items.ToList();
@@ -19,10 +15,10 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
 
     public IQueryable<T> Query => _items.AsQueryable();
 
-    public Task AddAsync(T item)
+    public async Task AddAsync(T item)
     {
         _items.Add(item);
-        return Task.CompletedTask;
+        await dexie.AddAsync(item);
     }
 
     public async Task AddAsync(IEnumerable<T> items)
@@ -162,22 +158,20 @@ public class BlossomInMemoryRepository<T> : IRepository<T> where T : class
             _items.Add(item);
     }
 
-    public static async Task<BlossomInMemoryRepository<T>> FromUrlAsync<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
+    public async Task AddFromUrlAsync<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
     {
         using var client = new HttpClient();
         var webRequest = new HttpRequestMessage(HttpMethod.Get, url);
         var response = await client.SendAsync(webRequest);
         if (!response.IsSuccessStatusCode)
-            return new([]);
+            return;
 
         using var reader = new StreamReader(response.Content.ReadAsStream());
         var json = reader.ReadToEnd();
 
         var items = JsonSerializer.Deserialize<TResponse>(json, new JsonSerializerOptions {  PropertyNameCaseInsensitive = true });
         if (items != null)
-            return new(transformer(items));
-
-        return new([]);
+            Load(transformer(items));
     }
 
     public Task<int> CountAsync()
