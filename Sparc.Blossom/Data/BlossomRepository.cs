@@ -3,20 +3,16 @@ using System.Text.Json;
 
 namespace Sparc.Blossom;
 
-public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T> where T : class
+public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T> 
+    where T : class
 {
-    public void Load(IEnumerable<T> items)
-    {
-        if (items.Any())
-            _items = items.ToList();
-    }
-    
     internal static List<T> _items = [];
 
     public IQueryable<T> Query => _items.AsQueryable();
 
     public async Task AddAsync(T item)
     {
+        BlossomRepository<T>.UpdateTimestamp(item);
         _items.Add(item);
         await dexie.AddAsync(item);
     }
@@ -27,25 +23,28 @@ public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T> whe
             await AddAsync(item);
     }
 
-    public Task<bool> AnyAsync(ISpecification<T> spec)
+    public async Task<bool> AnyAsync(ISpecification<T> spec)
     {
-        return Task.FromResult(spec.Evaluate(_items).Any());
+        await SyncAsync();
+        return spec.Evaluate(_items).Any();
     }
 
-    public Task<int> CountAsync(ISpecification<T> spec)
+    public async Task<int> CountAsync(ISpecification<T> spec)
     {
-        return Task.FromResult(spec.Evaluate(_items).Count());
+        await SyncAsync();
+        return spec.Evaluate(_items).Count();
     }
 
-    public Task DeleteAsync(T item)
+    public async Task DeleteAsync(T item)
     {
+        BlossomRepository<T>.UpdateTimestamp(item);
         try
         {
             _items.Remove(item);
+            await dexie.DeleteAsync(item);
         }
         catch
         { }
-        return Task.CompletedTask;
     }
 
     public async Task DeleteAsync(IEnumerable<T> items)
@@ -61,43 +60,47 @@ public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T> whe
             await ExecuteAsync(item, action);
     }
 
-    public Task ExecuteAsync(T entity, Action<T> action)
+    public async Task ExecuteAsync(T entity, Action<T> action)
     {
         if (entity != null)
+        {
             action(entity);
-
-        return Task.CompletedTask;
+            await UpdateAsync(entity);
+        }
     }
 
-    public Task<T?> FindAsync(object id)
+    public async Task<T?> FindAsync(object id)
     {
+        await SyncAsync();
+
         if (typeof(T).IsAssignableTo(typeof(BlossomEntity<string>)))
         {
             var itemsWithStringIds = _items.Cast<BlossomEntity<string>>().ToList();
             var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
-            return Task.FromResult(item);
+            return item;
         }
 
         if (typeof(T).IsAssignableTo(typeof(BlossomEntity<int>)))
         {
             var itemsWithStringIds = _items.Cast<BlossomEntity<int>>().ToList();
             var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
-            return Task.FromResult(item);
+            return item;
         }
 
         if (typeof(T).IsAssignableTo(typeof(BlossomEntity<DateTime>)))
         {
             var itemsWithStringIds = _items.Cast<BlossomEntity<DateTime>>().ToList();
             var item = itemsWithStringIds.FirstOrDefault(x => x.Id.Equals(id) == true) as T;
-            return Task.FromResult(item);
+            return item;
         }
 
         throw new Exception("The item for this repository is not a Root.");
     }
 
-    public Task<T?> FindAsync(ISpecification<T> spec)
+    public async Task<T?> FindAsync(ISpecification<T> spec)
     {
-        return Task.FromResult(spec.Evaluate(_items).FirstOrDefault());
+        await SyncAsync();
+        return spec.Evaluate(_items).FirstOrDefault();
     }
 
     public IQueryable<T> FromSqlRaw(string sql, params object[] parameters)
@@ -105,29 +108,30 @@ public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T> whe
         throw new NotImplementedException();
     }
 
-    public Task<List<T>> GetAllAsync()
+    public async Task<List<T>> GetAllAsync()
     {
-        return Task.FromResult(_items);
+        await SyncAsync();
+        return _items.ToList();
     }
 
-    public Task<List<T>> GetAllAsync(ISpecification<T> spec)
+    public async Task<List<T>> GetAllAsync(ISpecification<T> spec)
     {
-        return Task.FromResult(spec.Evaluate(_items).ToList());
+        await SyncAsync();
+        return spec.Evaluate(_items).ToList();
     }
 
     public async Task UpdateAsync(T item)
     {
-        object? id = (item as BlossomEntity<string>)?.Id;
-        id ??= (item as BlossomEntity<int>)?.Id;
-
-        if (id == null)
-            throw new Exception("The item passed to UpdateAsync has no Id set.");
-
+        object? id = ((item as BlossomEntity)?.GenericId) 
+            ?? throw new Exception("The item passed to UpdateAsync has no Id set.");
+        
         var existingItem = await FindAsync(id);
         if (existingItem != null)
-            await DeleteAsync(existingItem);
+            _items.Remove(existingItem);
 
-        await AddAsync(item);
+        BlossomRepository<T>.UpdateTimestamp(item);
+        _items.Add(item);
+        await dexie.UpdateAsync(item);
     }
 
     public async Task UpdateAsync(IEnumerable<T> items)
@@ -150,12 +154,20 @@ public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T> whe
             if (value != null)
                 property.SetValue(item, value);
         }
+
+        BlossomRepository<T>.UpdateTimestamp(item);
+        await dexie.UpdateAsync(item);
     }
 
-    internal void Add(IEnumerable<T> items)
+    internal async Task Add(IEnumerable<T> items)
     {
         foreach (var item in items)
+        {
+            BlossomRepository<T>.UpdateTimestamp(item);
             _items.Add(item);
+        }
+
+        await dexie.AddAsync(items);
     }
 
     public async Task AddFromUrlAsync<TResponse>(string url, Func<TResponse, IEnumerable<T>> transformer)
@@ -171,16 +183,47 @@ public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T> whe
 
         var items = JsonSerializer.Deserialize<TResponse>(json, new JsonSerializerOptions {  PropertyNameCaseInsensitive = true });
         if (items != null)
-            Load(transformer(items));
+        {
+            _items.Clear();
+            _items.AddRange(transformer(items));
+        }
     }
 
-    public Task<int> CountAsync()
+    public async Task<int> CountAsync()
     {
-        return Task.FromResult(_items.Count());
+        await SyncAsync();
+        return _items.Count;
     }
 
-    public Task<List<T>> SyncAsync()
+    public async Task SyncAsync()
     {
-        throw new NotImplementedException();
+        if (!typeof(T).IsAssignableTo(typeof(BlossomEntity)))
+        {
+            _items.Clear();
+            _items.AddRange(await dexie.GetAllAsync());
+        }
+        else
+        {
+            var asOfRevision = _items.OfType<BlossomEntity>().Max(x => x.Revision);
+            var items = await dexie.GetAllAsync(asOfRevision);
+            
+            foreach (var item in items)
+            {
+                var id = (item as BlossomEntity)?.GenericId;
+                if (id == null)
+                    continue;
+                var existingItem = await FindAsync(id);
+                if (existingItem != null)
+                    _items.Remove(existingItem);
+
+                _items.Add(item);
+            }
+        }
+    }
+
+    private static void UpdateTimestamp(T item)
+    {
+        if (item is BlossomEntity entity)
+            entity.Revision = DateTime.UtcNow.Ticks;
     }
 }

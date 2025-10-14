@@ -6,28 +6,13 @@ using System.Linq.Expressions;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
+public class CosmosDbRepository<T>(DbContext context, CosmosDbDatabaseProvider dbProvider) 
+    : RepositoryBase<T>(context), IRepository<T>
     where T : BlossomEntity<string>
 {
-    public IQueryable<T> Query { get; }
-    public DbContext Context { get; }
-    protected CosmosDbDatabaseProvider DbProvider { get; }
-
-    //private static bool IsCreated;
-
-    public CosmosDbRepository(DbContext context, CosmosDbDatabaseProvider dbProvider) : base(context)
-    {
-        Context = context;
-        DbProvider = dbProvider;
-
-        //if (!IsCreated)
-        //{
-        //    Context.Database.EnsureCreatedAsync().Wait();
-        //    IsCreated = true;
-        //}
-        //Mediator = mediator;
-        Query = context.Set<T>();
-    }
+    public IQueryable<T> Query { get; } = context.Set<T>();
+    public DbContext Context { get; } = context;
+    protected CosmosDbDatabaseProvider DbProvider { get; } = dbProvider;
 
     public async Task<T?> FindAsync(object id)
     {
@@ -64,6 +49,11 @@ public class CosmosDbRepository<T> : RepositoryBase<T>, IRepository<T>
     public async Task<bool> AnyAsync(ISpecification<T> spec)
     {
         return await AnyAsync(spec, default);
+    }
+
+    public async Task<List<T>> GetAllAsync()
+    {
+        return await Context.Set<T>().ToListAsync();
     }
 
     public async Task<List<T>> GetAllAsync(ISpecification<T> spec)

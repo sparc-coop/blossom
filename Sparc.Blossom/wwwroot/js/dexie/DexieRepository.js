@@ -6,7 +6,7 @@ function db(dbName) {
     if (!dbs[dbName]) {
         dbs[dbName] = new Dexie(dbName);
         dbs[dbName].version(1).stores({
-            docs: 'id'
+            docs: 'id, revision'
         });
     }
     return dbs[dbName];
@@ -23,8 +23,11 @@ export async function register(dbName, doc, callback) {
     return subscription;
 }
 
-export async function getAll(dbName) {
-    return await db(dbName).docs.toArray();
+export async function getAll(dbName, revision) {
+    if (revision)
+        return await db(dbName).docs.where('revision').above(revision).toArray();
+    else
+        return await db(dbName).docs.toArray();
 }
 
 export async function add(dbName, doc) {

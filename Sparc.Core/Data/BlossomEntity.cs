@@ -10,6 +10,7 @@ public abstract class BlossomEntity
     [System.Text.Json.Serialization.JsonIgnore]
     public virtual object GenericId { get; } = null!;
     protected List<BlossomEvent>? _events;
+    public long? Revision { get; set; }
 
     // Event system
     public List<BlossomEvent> Publish()

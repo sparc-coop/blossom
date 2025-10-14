@@ -1,9 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.JSInterop;
+﻿using Microsoft.JSInterop;
 
 namespace Sparc.Blossom;
 
-public static partial class ServiceCollectionExtensions
+public static class ServiceCollectionExtensions
 {
     //public static async Task<IServiceCollection> AddRemoteRepository<T, TResponse>
     //    (this IServiceCollection services, string url, Func<TResponse, IEnumerable<T>> transformer)

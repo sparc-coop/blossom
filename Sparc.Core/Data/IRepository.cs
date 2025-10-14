@@ -18,6 +18,7 @@ public interface IRepository<T>
     Task ExecuteAsync(T entity, Action<T> action);
     Task<T?> FindAsync(object id);
     Task<T?> FindAsync(ISpecification<T> spec);
+    Task<List<T>> GetAllAsync();
     Task<List<T>> GetAllAsync(ISpecification<T> spec);
     Task<int> CountAsync(ISpecification<T> spec);
     Task<bool> AnyAsync(ISpecification<T> spec);

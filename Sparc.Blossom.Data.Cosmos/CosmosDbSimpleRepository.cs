@@ -50,6 +50,11 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         return await AnyAsync(spec, default);
     }
 
+    public async Task<List<T>> GetAllAsync()
+    {
+        return await Query.ToListAsync();
+    }
+
     public async Task<List<T>> GetAllAsync(ISpecification<T> spec)
     {
         return await ListAsync(spec);

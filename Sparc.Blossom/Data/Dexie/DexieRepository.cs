@@ -53,6 +53,10 @@ public class DexieRepository<T>(IJSRuntime js) : IRepository<T>
         throw new NotImplementedException();
     }
 
+    public async Task<List<T>> GetAllAsync() => await ExecuteAsync<List<T>>("getAll", null);
+
+    public async Task<List<T>> GetAllAsync(long? asOfRevision = null) => await ExecuteAsync<List<T>>("getAll", asOfRevision);
+
     public Task<List<T>> GetAllAsync(ISpecification<T> spec)
     {
         throw new NotImplementedException();
@@ -68,10 +72,10 @@ public class DexieRepository<T>(IJSRuntime js) : IRepository<T>
         await dexie.InvokeVoidAsync(identifier, DbName, item);
     }
 
-    async Task<TResult> ExecuteAsync<TResult>(string identifier, object item)
+    async Task<TResult> ExecuteAsync<TResult>(string identifier, object? item)
     {
-        var pouch = await Dexie();
-        return await pouch.InvokeAsync<TResult>(identifier, DbName, item);
+        var dexie = await Dexie();
+        return await dexie.InvokeAsync<TResult>(identifier, DbName, item);
     }
 
     async Task<IJSObjectReference> Dexie()
