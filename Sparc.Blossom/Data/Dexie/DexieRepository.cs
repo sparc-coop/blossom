@@ -6,7 +6,7 @@ namespace Sparc.Blossom;
 public class DexieRepository<T>(IJSRuntime js) : IRepository<T>
 {
     public IJSRuntime Js { get; } = js;
-    readonly Lazy<Task<IJSObjectReference>> _dexie = js.Import("./js/dexie/DexieRepository.js");
+    readonly Lazy<Task<IJSObjectReference>> _dexie = js.Import("./Blossom/js/dexie/DexieRepository.js");
     static string DbName => typeof(T).Name.ToLower();
 
     public IQueryable<T> Query => throw new NotImplementedException();

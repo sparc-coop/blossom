@@ -132,6 +132,11 @@ public class AzureBlobRepository(BlobServiceClient client) : IRepository<Blossom
         throw new NotImplementedException();
     }
 
+    public async Task<List<BlossomFile>> GetAllAsync()
+    {
+        throw new NotImplementedException();
+    }
+
     public Task<List<BlossomFile>> GetAllAsync(ISpecification<BlossomFile> spec)
     {
         throw new NotImplementedException();

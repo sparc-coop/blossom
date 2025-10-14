@@ -72,7 +72,11 @@ public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T>
     public async Task<T?> FindAsync(object id)
     {
         await SyncAsync();
+        return FindInternalAsync(id);
+    }
 
+    private static T? FindInternalAsync(object id)
+    {
         if (typeof(T).IsAssignableTo(typeof(BlossomEntity<string>)))
         {
             var itemsWithStringIds = _items.Cast<BlossomEntity<string>>().ToList();
@@ -197,6 +201,7 @@ public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T>
 
     public async Task SyncAsync()
     {
+        Console.WriteLine($"Syncing {typeof(T).Name}...");
         if (!typeof(T).IsAssignableTo(typeof(BlossomEntity)))
         {
             _items.Clear();
@@ -206,13 +211,14 @@ public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T>
         {
             var asOfRevision = _items.OfType<BlossomEntity>().Max(x => x.Revision);
             var items = await dexie.GetAllAsync(asOfRevision);
-            
+            Console.WriteLine($"  Found {items.Count} new items for {typeof(T).Name} since revision {asOfRevision}.");
+
             foreach (var item in items)
             {
                 var id = (item as BlossomEntity)?.GenericId;
                 if (id == null)
                     continue;
-                var existingItem = await FindAsync(id);
+                var existingItem = FindInternalAsync(id);
                 if (existingItem != null)
                     _items.Remove(existingItem);
 

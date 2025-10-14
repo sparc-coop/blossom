@@ -1,10 +1,10 @@
-﻿import './dexie.mjs';
+﻿import * as Dexie from './dexie.mjs';
 
 let dbs = {};
 
 function db(dbName) {
     if (!dbs[dbName]) {
-        dbs[dbName] = new Dexie(dbName);
+        dbs[dbName] = new Dexie.Dexie(dbName);
         dbs[dbName].version(1).stores({
             docs: 'id, revision'
         });
