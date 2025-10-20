@@ -70,10 +70,10 @@ public abstract class BlossomApplicationBuilder
     protected void AddBlossomRepository()
     {
         Services.AddScoped(typeof(BlossomRepository<>));
-        //Services.AddScoped(typeof(DexieRepository<>));
+        Services.AddScoped(typeof(DexieRepository<>));
 
         if (!Services.Any(x => x.ServiceType == typeof(IRepository<>)))
-            Services.AddScoped(typeof(IRepository<>), typeof(BlossomInMemoryRepository<>));
+            Services.AddScoped(typeof(IRepository<>), typeof(BlossomRepository<>));
 
         //Services.AddScoped(typeof(IRealtimeRepository<>), typeof(BlossomRealtimeRepository<>));
         Services.AddScoped<BlossomHubProxy>();
