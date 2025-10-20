@@ -34,7 +34,7 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
         {
             // No-config Blossom User setup
             AddAuthentication<BlossomUser>();
-            Services.AddSingleton<IRepository<BlossomUser>, BlossomRepository<BlossomUser>>();
+            Services.AddScoped<IRepository<BlossomUser>, BlossomInMemoryRepository<BlossomUser>>();
         }
 
         AddBlossomServer();
@@ -45,7 +45,7 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
 
         AddBlossomRepository();
 
-        Services.AddScoped<TimeProvider, BrowserTimeProvider>();
+        //Services.AddScoped<TimeProvider, BrowserTimeProvider>();
 
         Services.AddServerSideBlazor();
         Services.AddHttpContextAccessor();
