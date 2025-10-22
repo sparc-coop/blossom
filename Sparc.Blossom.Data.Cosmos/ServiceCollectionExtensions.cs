@@ -33,16 +33,7 @@ public static class ServiceCollectionExtensions
         if (string.IsNullOrEmpty(connectionString) || string.IsNullOrEmpty(databaseName))
             throw new InvalidOperationException("Please provide a database connection string (in appsettings.json ConnectionStrings, named Database) and a database name (in appsettings.json, named Database).");
         
-        // Bug fix for Blossom Realtime (events executing in parallel with a scoped context)
-        services.AddDbContext<T>(options => options.UseCosmos(connectionString, databaseName, options =>
-        {
-            options.ConnectionMode(ConnectionMode.Direct);
-        }), serviceLifetime);
-        
-        services.Add(new ServiceDescriptor(typeof(DbContext), typeof(T), serviceLifetime));
-        services.AddTransient(sp => new CosmosDbDatabaseProvider(sp.GetRequiredService<DbContext>(), databaseName));
-
-        services.Add(new ServiceDescriptor(typeof(IRepository<>), typeof(CosmosDbSimpleRepository<>), serviceLifetime));
+        services.AddCosmos<T>(connectionString, databaseName, serviceLifetime);
         return services;
     }
 
