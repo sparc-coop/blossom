@@ -10,6 +10,7 @@ public class TovikTranslationOptions
     public decimal FunnyOrSerious { get; set; } = 0.5M;
     public decimal IrreverentOrRespectful { get; set; } = 0.5M;
     public decimal EnthusiasticOrMatterOfFact { get; set; } = 0.5M;
+    public string? Instructions { get; set; }
     public string? AdditionalContext { get; set; }
     public BlossomSchema? Schema { get; set; }
 

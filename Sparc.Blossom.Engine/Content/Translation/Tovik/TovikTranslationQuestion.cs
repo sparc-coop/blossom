@@ -14,10 +14,12 @@ internal class TovikTranslationQuestion : OpenAIQuestion
     public TovikTranslationQuestion(TextContent message, TovikTranslationOptions options)
     : base(options.ToPrompt())
     {
-        Instructions = "You are a translation and tone‑shaping assistant.\r\n" +
+        Instructions = 
+            options.Instructions ?? (
+            "You are a translation and tone‑shaping assistant.\r\n" +
             "For the following message, adjust grammar, vocabulary, idioms, and sentence structure to match the specified tone levels, while preserving the original meaning.\r\n\r\n" +
             "If an output language is also provided, first translate the message into that language, then adjust the grammar, vocabulary, idioms, and sentence structure.\r\n\r\n" +
-            "If the message is not translatable, use the original message in the output.";
+            "If the message is not translatable, use the original message in the output.");
 
         if (options.Schema != null)
             Schema = options.Schema;
