@@ -25,6 +25,7 @@ public class CosmosDbSimpleClient<T>(DbContext context, CosmosClient client)
         };
 
         var connectionString = config.GetConnectionString("Cosmos")
+            ?? config.GetConnectionString("Database")
             ?? throw new Exception("Cosmos connection string not found in configuration.");
 
         return new CosmosClient(connectionString, options);
