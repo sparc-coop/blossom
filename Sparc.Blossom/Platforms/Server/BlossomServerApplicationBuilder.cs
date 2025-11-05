@@ -59,7 +59,8 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
     public override void AddAuthentication<TUser>()
     {
         Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(options => {
+            .AddCookie(options =>
+            {
                 options.Cookie.SameSite = SameSiteMode.Lax;
                 options.ExpireTimeSpan = TimeSpan.FromDays(30);
             });
@@ -69,8 +70,8 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
             .AddScoped<BlossomDefaultAuthenticator<TUser>>()
             .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<TUser>>();
 
-        Services.AddTransient(s => 
-            s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User 
+        Services.AddTransient(s =>
+            s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User
             ?? new ClaimsPrincipal(new ClaimsIdentity()));
 
         Services.AddTransient(s => BlossomUser.FromPrincipal(s.GetRequiredService<ClaimsPrincipal>()));
@@ -79,7 +80,8 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
     public override void AddAuthentication<TAuthenticator, TUser>()
     {
         Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie(options => {
+            .AddCookie(options =>
+            {
                 options.Cookie.SameSite = SameSiteMode.Lax;
                 options.ExpireTimeSpan = TimeSpan.FromDays(30);
             });
@@ -109,8 +111,12 @@ public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
     protected override void AddBlossomRealtime(Assembly assembly) => AddBlossomRealtime<BlossomHub>(assembly);
 
     void AddBlossomRealtime<THub>(Assembly assembly)
-    { 
-        var signalR = Services.AddSignalR()
+    {
+        var signalR = Services.AddSignalR(e =>
+        {
+            e.EnableDetailedErrors = true;
+            e.MaximumReceiveMessageSize = 102400000; // for Dexie repository data transfer
+        })
             .AddJsonProtocol(options =>
             {
                 options.PayloadSerializerOptions.PropertyNamingPolicy = null;

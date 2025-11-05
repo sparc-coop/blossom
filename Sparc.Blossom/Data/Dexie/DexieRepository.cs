@@ -75,8 +75,16 @@ public class DexieRepository<T>(IServiceProvider services) : IRepository<T>
 
     async Task<TResult> ExecuteAsync<TResult>(string identifier, object? item)
     {
-        var dexie = await Dexie();
-        return await dexie.InvokeAsync<TResult>(identifier, CancellationToken.None, DbName, item);
+        try
+        {
+            var dexie = await Dexie();
+            return await dexie.InvokeAsync<TResult>(identifier, CancellationToken.None, DbName, item);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return default;
+        }
     }
 
     async Task<IJSObjectReference> Dexie()

@@ -24,6 +24,7 @@ export async function register(dbName, doc, callback) {
 }
 
 export async function getAll(dbName, revision) {
+    console.log('getall', dbName, revision);
     if (revision)
         return await db(dbName).docs.where('revision').above(revision).toArray();
     else
