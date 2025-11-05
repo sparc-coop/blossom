@@ -70,13 +70,13 @@ public class DexieRepository<T>(IServiceProvider services) : IRepository<T>
     async Task ExecuteAsync(string identifier, object item)
     {
         var dexie = await Dexie();
-        await dexie.InvokeVoidAsync(identifier, DbName, item);
+        await dexie.InvokeVoidAsync(identifier, CancellationToken.None, DbName, item);
     }
 
     async Task<TResult> ExecuteAsync<TResult>(string identifier, object? item)
     {
         var dexie = await Dexie();
-        return await dexie.InvokeAsync<TResult>(identifier, DbName, item);
+        return await dexie.InvokeAsync<TResult>(identifier, CancellationToken.None, DbName, item);
     }
 
     async Task<IJSObjectReference> Dexie()
