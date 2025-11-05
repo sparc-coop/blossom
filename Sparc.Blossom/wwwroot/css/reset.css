@@ -67,6 +67,7 @@ input:where( [type="submit"], [type="reset"], [type="button"] ) {
 
 :where(button) {
     cursor: pointer;
+    -webkit-user-select: none;
     user-select: none;
 }
 
