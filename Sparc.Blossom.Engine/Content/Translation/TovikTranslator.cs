@@ -92,22 +92,8 @@ public class TovikTranslator(
     {
         if (content.Text?.StartsWith("http") == true)
         {
-            var handler = new HttpClientHandler()
-            {
-                AutomaticDecompression = System.Net.DecompressionMethods.All
-            };
-
-            var client = new HttpClient(handler);
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (compatible; https://engine.sparc.coop)");
-            var html = await client.GetStringAsync(content.Text);
-            var doc = new HtmlDocument();
-            doc.LoadHtml(html);
-            var body = doc.DocumentNode.SelectSingleNode("//body");
-            // remove all script and style nodes
-            foreach (var script in body.SelectNodes("//script|//style") ?? Enumerable.Empty<HtmlNode>())
-                script.Remove();
-
-            content.Text = body.InnerHtml;
+            var html = new HtmlTranslator(content.Text);
+            content.Text = await html.TranslateAsync();
         }
 
         var translator = Translators.OrderBy(x => x.Priority).First();
