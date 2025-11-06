@@ -202,28 +202,35 @@ public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T>
     public async Task SyncAsync()
     {
         Console.WriteLine($"Syncing {typeof(T).Name}...");
-        if (!typeof(T).IsAssignableTo(typeof(BlossomEntity)))
+        try
         {
-            _items.Clear();
-            _items.AddRange(await dexie.GetAllAsync());
-        }
-        else
-        {
-            var asOfRevision = _items.OfType<BlossomEntity>().Max(x => x.Revision);
-            var items = await dexie.GetAllAsync(asOfRevision);
-            Console.WriteLine($"  Found {items.Count} new items for {typeof(T).Name} since revision {asOfRevision}.");
-
-            foreach (var item in items)
+            if (!typeof(T).IsAssignableTo(typeof(BlossomEntity)))
             {
-                var id = (item as BlossomEntity)?.GenericId;
-                if (id == null)
-                    continue;
-                var existingItem = FindInternalAsync(id);
-                if (existingItem != null)
-                    _items.Remove(existingItem);
-
-                _items.Add(item);
+                _items.Clear();
+                _items.AddRange(await dexie.GetAllAsync());
             }
+            else
+            {
+                var asOfRevision = _items.OfType<BlossomEntity>().Max(x => x.Revision);
+                var items = await dexie.GetAllAsync(asOfRevision);
+                Console.WriteLine($"  Found {items.Count} new items for {typeof(T).Name} since revision {asOfRevision}.");
+
+                foreach (var item in items)
+                {
+                    var id = (item as BlossomEntity)?.GenericId;
+                    if (id == null)
+                        continue;
+                    var existingItem = FindInternalAsync(id);
+                    if (existingItem != null)
+                        _items.Remove(existingItem);
+
+                    _items.Add(item);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error syncing {typeof(T).Name}: {ex.Message}");
         }
     }
 
