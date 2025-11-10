@@ -213,6 +213,8 @@ public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T>
             {
                 var asOfRevision = _items.OfType<BlossomEntity>().Max(x => x.Revision);
                 var items = await dexie.GetAllAsync(asOfRevision);
+                if (items == null)
+                    return;
                 Console.WriteLine($"  Found {items.Count} new items for {typeof(T).Name} since revision {asOfRevision}.");
 
                 foreach (var item in items)

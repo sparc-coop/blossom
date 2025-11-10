@@ -13,7 +13,7 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
 {
     private readonly string _defaultModel = "gpt-4.1-nano";
     private readonly int _maxRetries = 3;
-    private readonly int _timeoutSeconds = 30;
+    private readonly int _timeoutSeconds = 60;
     decimal CostPerToken = 0.40m / 1_000_000;
 
     public int Priority => 0;
@@ -129,7 +129,7 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
         Console.WriteLine("using schema: " + question.Schema?.ToString());
         var options = new ResponseCreationOptions()
         {
-            Temperature = 0.2f,
+            Temperature = _defaultModel.Contains("4.1") ? 0.2f : null,
             ServiceTier = new ResponseServiceTier("priority"),
             Instructions = question.Instructions,
             PreviousResponseId = question.PreviousResponseId,
@@ -140,6 +140,14 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
                     : ResponseTextFormat.CreateTextFormat()
             }
         };
+
+        if (_defaultModel.Contains("5"))
+        {
+            options.ReasoningOptions = new()
+            {
+                ReasoningEffortLevel = ResponseReasoningEffortLevel.Low
+            };
+        }
 
         return options;
     }

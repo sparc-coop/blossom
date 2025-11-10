@@ -26,14 +26,18 @@ public class HtmlTranslator(string url)
     private static void RemoveUnneededTags(HtmlNode body)
     {
         // Clean up all unneeded tags, keep only text and basic formatting
-        var tagsToRemove = new[] { "script", "style", "iframe", "noscript", "svg", "input" };
+        var tagsToRemove = new[] { "script", "style", "iframe", "noscript", "svg", "input", "link", "button" };
         foreach (var tag in tagsToRemove)
             foreach (var element in body.SelectNodes("//" + tag) ?? Enumerable.Empty<HtmlNode>())
                 element.Remove();
 
-        var attributesToRemove = new[] { "class", "id", "style", "width", "height" };
+        var attributesToRemove = new[] { "class", "id", "style", "width", "height", "href", "target" };
         foreach (var element in body.DescendantsAndSelf())
+        {
             foreach (var attribute in attributesToRemove.Where(x => element.Attributes.Contains(x)).ToList())
                 element.Attributes.Remove(attribute);
+
+            element.GetDataAttributes().ToList().ForEach(attr => element.Attributes.Remove(attr));
+        }
     }
 }
