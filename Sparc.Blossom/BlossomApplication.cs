@@ -16,9 +16,9 @@ public class BlossomApplication
         where TApp : IComponent
     {
 #if BROWSER
-        return new Platforms.Browser.BlossomBrowserApplicationBuilder<TApp>(args);
+        return new Platforms.Browser.BlossomBrowserApplicationBuilder<BlossomApp<TApp>>(args);
 #elif SERVER
-        return new Platforms.Server.BlossomServerApplicationBuilder<TApp>(args ?? []);
+        return new Platforms.Server.BlossomServerApplicationBuilder(args ?? []);
 #elif ANDROID
         return new Platforms.Android.BlossomAndroidApplicationBuilder(args ?? Array.Empty<string>());
 #elif IOS

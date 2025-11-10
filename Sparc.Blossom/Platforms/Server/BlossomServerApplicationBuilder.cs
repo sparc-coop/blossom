@@ -15,7 +15,7 @@ using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Platforms.Server;
 
-public class BlossomServerApplicationBuilder<TApp> : BlossomApplicationBuilder
+public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
 {
     public WebApplicationBuilder Builder { get; }
 
