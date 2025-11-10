@@ -30,7 +30,12 @@ public static class BrowserServiceCollectionExtensions
         services.AddRefitClient<ITovik>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
             .AddHttpMessageHandler<SparcAuraBrowserTokenHandler>()
-            .AddStandardResilienceHandler();
+            .AddStandardResilienceHandler(x =>
+            {
+                x.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(240);
+                x.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(240);
+                x.AttemptTimeout.Timeout = TimeSpan.FromSeconds(120);
+            });
 
         services.AddRefitClient<ISparcChat>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)

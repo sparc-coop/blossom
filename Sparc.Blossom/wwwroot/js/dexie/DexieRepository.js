@@ -1,4 +1,4 @@
-﻿import * as Dexie from './dexie.mjs';
+﻿import * as Dexie from './dexie.js';
 
 let dbs = {};
 
