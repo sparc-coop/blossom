@@ -9,9 +9,4 @@ public static class SqlServerExtensions
     {
         return ((SqlServerRepository<T>)repository).Include(paths);
     }
-
-    public static async Task UpdateWhereAsync<T>(this IRepository<T> repository, Expression<Func<T, bool>> where, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> update) where T : class
-    {
-        await ((SqlServerRepository<T>)repository).UpdateWhereAsync(where, update);
-    }
 }
