@@ -168,9 +168,4 @@ public class SqlServerRepository<TContext, T>(IDbContextFactory<TContext> factor
 
         await context.SaveChangesAsync();
     }
-
-    public async Task UpdateWhereAsync(Expression<Func<T, bool>> where, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> update)
-    {
-        await Factory.CreateDbContext().Set<T>().Where(where).ExecuteUpdateAsync(update);
-    }
 }

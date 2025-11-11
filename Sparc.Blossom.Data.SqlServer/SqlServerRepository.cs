@@ -162,9 +162,4 @@ public class SqlServerRepository<T> : RepositoryBase<T>, IRepository<T> where T 
 
         await CommitAsync();
     }
-
-    public async Task UpdateWhereAsync(Expression<Func<T, bool>> where, Expression<Func<SetPropertyCalls<T>, SetPropertyCalls<T>>> update)
-    {
-        await Command.Where(where).ExecuteUpdateAsync(update);
-    }
 }

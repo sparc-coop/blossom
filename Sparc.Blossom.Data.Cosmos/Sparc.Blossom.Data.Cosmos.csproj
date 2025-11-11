@@ -4,7 +4,7 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>10.0.0-rc.2</Version>
+		<Version>10.0.0</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Sparc Cooperative</Authors>
@@ -20,7 +20,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="10.0.0-rc.2.25502.107" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="10.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
