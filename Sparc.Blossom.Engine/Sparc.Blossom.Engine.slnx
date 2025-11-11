@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/_Blossom/">
+    <Project Path="../Sparc.Blossom.Data.AzureStorage/Sparc.Blossom.Data.AzureStorage.csproj" />
+    <Project Path="../Sparc.Blossom.Data.Cosmos/Sparc.Blossom.Data.Cosmos.csproj" />
+    <Project Path="../Sparc.Blossom.Realtime.Twilio/Sparc.Blossom.Realtime.Twilio.csproj" />
+    <Project Path="../Sparc.Blossom/Sparc.Blossom.csproj" />
+    <Project Path="../Sparc.Core/Sparc.Core.csproj" />
+  </Folder>
+</Solution>

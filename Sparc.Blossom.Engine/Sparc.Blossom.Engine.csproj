@@ -52,4 +52,8 @@
 		<ProjectReference Include="../Sparc.Blossom.Data.AzureStorage/Sparc.Blossom.Data.AzureStorage.csproj" />
 		<ProjectReference Include="../Sparc.Blossom.Realtime.Twilio/Sparc.Blossom.Realtime.Twilio.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Marketing\" />
+	</ItemGroup>
 </Project>
