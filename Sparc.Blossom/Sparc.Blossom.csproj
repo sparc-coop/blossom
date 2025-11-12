@@ -37,7 +37,6 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.10" />
-		<PackageReference Include="System.Net.Http.Json" Version="10.0.0" />
 		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.0" />
 		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
