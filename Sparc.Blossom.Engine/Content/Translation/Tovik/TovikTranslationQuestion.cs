@@ -24,7 +24,7 @@ internal class TovikTranslationQuestion : OpenAIQuestion
         if (options.Schema != null)
             Schema = options.Schema;
 
-        Text += message.Text!.Replace('\u00A0', ' ');
+        Text += "\r\n\r\nText to translate: " + message.Text!.Replace('\u00A0', ' ');
     }
 
 

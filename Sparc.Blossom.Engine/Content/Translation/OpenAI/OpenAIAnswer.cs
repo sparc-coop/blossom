@@ -24,6 +24,7 @@ internal class OpenAIAnswer()
         if (string.IsNullOrWhiteSpace(Name))
         {
             GenericTypedAnswer = response;
+            IsExpanded = true;
         }
         else if (this[Name] != null || HasAnswer)
         {
@@ -32,19 +33,24 @@ internal class OpenAIAnswer()
             GenericTypedAnswer = this[Name];
         }
 
-        var unwrapped = this[Name]?.ToString();
-        if (unwrapped != null)
-            Value = JsonSerializer.Deserialize<dynamic>(unwrapped);
-        else if (unwrapped == null)
+        try
         {
-            try
+
+            var unwrapped = this[Name]?.ToString();
+            if (unwrapped != null)
+                Value = JsonSerializer.Deserialize<dynamic>(unwrapped);
+            else if (unwrapped == null)
             {
-                Value = JsonSerializer.Deserialize<dynamic>(response);
-            }
-            catch (JsonException)
-            {
+                try
+                {
+                    Value = JsonSerializer.Deserialize<dynamic>(response);
+                }
+                catch (JsonException)
+                {
+                }
             }
         }
+        catch { }
 
         Log("Info", $"Answer set to {response} via {responseId}. {tokensUsed} tokens used.");
     }
