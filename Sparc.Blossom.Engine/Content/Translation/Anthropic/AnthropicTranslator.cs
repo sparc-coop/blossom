@@ -5,12 +5,13 @@ using Anthropic.SDK.Messaging;
 using Sparc.Blossom.Content.OpenAI;
 using Sparc.Blossom.Content.Tovik;
 using System.Collections.Concurrent;
+using System.Text.Json;
 
 namespace Sparc.Blossom.Content;
 
 internal class AnthropicTranslator(AnthropicClient client) : ITranslator
 {
-    readonly string _defaultModel = AnthropicModels.Claude45Haiku;
+    readonly string _defaultModel = AnthropicModels.Claude35Haiku;
     decimal CostPerToken = 5m / 1_000_000;
 
     public int Priority => 0;
@@ -31,16 +32,16 @@ internal class AnthropicTranslator(AnthropicClient client) : ITranslator
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
     {
         var fromLanguages = messages.GroupBy(x => x.Language);
-        var batches = TovikTranslator.Batch(messages, 5);
+        var batches = TovikTranslator.Batch(messages, 10);
 
         var translatedMessages = new ConcurrentBag<TextContent>();
         await Parallel.ForEachAsync(batches, async (batch, _) =>
         {
             var question = new TovikTranslationQuestion(batch, options);
             var answer = await AskAsync(question);
-            foreach (var translation in batch.Where(x => answer.Value != null && answer.Value!.Any(y => x.Id.StartsWith(y.Id))))
+            foreach (var translation in batch.Where(x => answer.Value != null && answer.Value!.Text.Any(y => x.Id.StartsWith(y.Id))))
             {
-                var textContent = new TextContent(translation, options.OutputLanguage ?? translation.Language, answer.Value!.First(y => translation.Id.StartsWith(y.Id)).Text);
+                var textContent = new TextContent(translation, options.OutputLanguage ?? translation.Language, answer.Value!.Text.First(y => translation.Id.StartsWith(y.Id)).Text);
                 textContent.AddCharge(answer.TokensUsed, CostPerToken, $"Anthropic translation of {textContent.OriginalText} to {textContent.LanguageId}");
                 translatedMessages.Add(textContent);
             }
@@ -49,9 +50,9 @@ internal class AnthropicTranslator(AnthropicClient client) : ITranslator
         return translatedMessages.ToList();
     }
 
-    private async Task<BlossomAnswer<List<TovikTranslation>>> AskAsync(BlossomQuestion question)
+    private async Task<BlossomAnswer<TovikTranslations>> AskAsync(BlossomQuestion question)
     {
-        var answer = new BlossomAnswer<List<TovikTranslation>>();
+        var answer = new BlossomAnswer<TovikTranslations>();
 
         try
         {
@@ -61,7 +62,7 @@ internal class AnthropicTranslator(AnthropicClient client) : ITranslator
             var now = DateTime.UtcNow;
             options.Messages = [new(RoleType.User, question.Instructions), new(RoleType.User, question.PromptText)];
             var response = await client.Messages.GetClaudeMessageAsync(options);
-            var content = response.Message;
+            var content = response.Content.OfType<ToolUseContent>().FirstOrDefault()?.Input.ToJsonString();
 
             var timeTook = (DateTime.UtcNow - now).TotalMilliseconds;
             answer.Log("Info", $"Answer {response.Id} in {timeTook}ms: {content}");
@@ -93,6 +94,7 @@ internal class AnthropicTranslator(AnthropicClient client) : ITranslator
         return answer;
     }
 
+    public record AnthropicInputSchema(BlossomSchema input_schema);
     private MessageParameters CreateResponseOptions(BlossomQuestion question)
     {
         Console.WriteLine("using schema: " + question.Schema?.ToString());
@@ -106,7 +108,7 @@ internal class AnthropicTranslator(AnthropicClient client) : ITranslator
 
         if (question.Schema != null)
         {
-            var tool = new Function("structured_output", "Return JSON corresponding strictly to the supplied input schema.", question.Schema.ToString());
+            var tool = new Function("structured_output", "Return JSON corresponding strictly to the supplied input schema.",  question.Schema.ToString());
             options.ToolChoice = new() { Type = ToolChoiceType.Tool, Name = "structured_output" };
             options.Tools = [tool];
         }
