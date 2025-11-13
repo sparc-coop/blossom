@@ -2,20 +2,32 @@
 using System.Text.Json.Nodes;
 
 namespace Sparc.Blossom.Content.OpenAI;
-internal class OpenAIAnswer()
+
+internal class BlossomAnswer : BlossomAnswer<dynamic>
+{ }
+
+internal class BlossomAnswer<T>()
 {
     public string Name { get; set; } = string.Empty;
     public string? Text { get; set; }
     public string? Error { get; set; }
     public int TokensUsed { get; set; }
+    public T? Value { get; set; }
     public object? GenericTypedAnswer { get; internal set; }
-    public dynamic? Value { get; set; }
     internal string? ResponseId { get; private set; }
     bool IsExpanded;
     bool HasAnswer;
 
     public virtual void SetResponse(string responseId, string response, int tokensUsed)
     {
+        if (response.Contains("```json"))
+        {
+            // Extract JSON from code block
+            var startIndex = response.IndexOf("```json") + "```json".Length;
+            var endIndex = response.IndexOf("```", startIndex);
+            response = response[startIndex..endIndex].Trim();
+        }
+        
         ResponseId = responseId;
         TokensUsed = tokensUsed;
         Text = response;
@@ -24,7 +36,6 @@ internal class OpenAIAnswer()
         if (string.IsNullOrWhiteSpace(Name))
         {
             GenericTypedAnswer = response;
-            IsExpanded = true;
         }
         else if (this[Name] != null || HasAnswer)
         {
@@ -35,18 +46,21 @@ internal class OpenAIAnswer()
 
         try
         {
+            var unwrapped = Name == null
+                ? null
+                : this[Name]?.ToString();
 
-            var unwrapped = this[Name]?.ToString();
             if (unwrapped != null)
-                Value = JsonSerializer.Deserialize<dynamic>(unwrapped);
-            else if (unwrapped == null)
+                Value = JsonSerializer.Deserialize<T>(unwrapped);
+            else
             {
                 try
                 {
-                    Value = JsonSerializer.Deserialize<dynamic>(response);
+                    Value = JsonSerializer.Deserialize<T>(response);
                 }
-                catch (JsonException)
+                catch (JsonException e)
                 {
+                    Console.WriteLine(e.Message);
                 }
             }
         }
@@ -95,3 +109,4 @@ internal class OpenAIAnswer()
         //Logs.Add(new UnlimitedLog(DateTime.UtcNow, type, message));
     }
 }
+

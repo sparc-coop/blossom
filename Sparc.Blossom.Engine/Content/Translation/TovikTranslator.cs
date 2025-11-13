@@ -70,7 +70,7 @@ public class TovikTranslator(
         if (request.Model != null)
         {
             var translator = Translators
-                .OrderBy(x => x.Priority == 0 ? 99 : x.Priority)
+                .OrderBy(x => x.Priority)
                 .Where(x => x.CanTranslate(request.Content.First().Language, toLanguage))
                 .FirstOrDefault();
 

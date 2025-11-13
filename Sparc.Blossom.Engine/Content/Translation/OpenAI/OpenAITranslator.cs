@@ -16,7 +16,7 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
     private readonly int _timeoutSeconds = 60;
     decimal CostPerToken = 0.40m / 1_000_000;
 
-    public int Priority => 0;
+    public int Priority => 1;
 
     public async Task<TextContent> TranslateAsync(TextContent message, TovikTranslationOptions options)
     {
@@ -67,10 +67,10 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
         return translatedMessages.ToList();
     }
 
-    private async Task<OpenAIAnswer> AskOpenAIAsync(OpenAIQuestion question)
+    private async Task<BlossomAnswer> AskOpenAIAsync(BlossomQuestion question)
     { 
         int attempt = 0;
-        var answer = new OpenAIAnswer();
+        var answer = new BlossomAnswer();
 
         while (attempt < _maxRetries)
         {
@@ -124,7 +124,7 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
         return answer;
     }
 
-    private ResponseCreationOptions CreateResponseOptions(OpenAIQuestion question)
+    private ResponseCreationOptions CreateResponseOptions(BlossomQuestion question)
     {
         Console.WriteLine("using schema: " + question.Schema?.ToString());
         var options = new ResponseCreationOptions()

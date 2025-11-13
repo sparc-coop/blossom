@@ -18,18 +18,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Anthropic.SDK" Version="5.8.0" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.10.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.0.0" />
 		<PackageReference Include="OpenAI" Version="2.6.0" />
 		<PackageReference Include="Otp.NET" Version="1.4.0" />
 		<PackageReference Include="Passwordless" Version="2.1.0-beta.4" />
 		<PackageReference Include="Scalar.AspNetCore" Version="2.10.3" />
 		<PackageReference Include="Markdig" Version="0.43.0" />
 		<PackageReference Include="Azure.AI.Translation.Text" Version="1.0.0" />
-		<PackageReference Include="DeepL.net" Version="1.16.0" />
-		<PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.46.0" />
+		<PackageReference Include="DeepL.net" Version="1.17.0" />
+		<PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.47.0" />
 		<PackageReference Include="NAudio.Lame" Version="2.0.1" />
 		<PackageReference Include="SlackNet" Version="0.17.5" />
 		<PackageReference Include="Stripe.net" Version="49.2.0" />

@@ -4,7 +4,7 @@ using System.Text.Json;
 
 namespace Sparc.Blossom.Content.Tovik;
 
-internal class TovikTranslationQuestion : OpenAIQuestion
+internal class TovikTranslationQuestion : BlossomQuestion
 {
     static readonly JsonSerializerOptions TranslateAllUnicode = new()
     {

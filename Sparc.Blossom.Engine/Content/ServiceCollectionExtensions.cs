@@ -8,6 +8,7 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<ITranslator, AzureTranslator>()
             .AddScoped<ITranslator, DeepLTranslator>()
             .AddScoped<ITranslator, OpenAITranslator>()
+            .AddScoped<ITranslator, AnthropicTranslator>()
             .AddScoped<TovikTranslator>()
             .AddScoped<BlossomAggregateOptions<TextContent>>()
             .AddScoped<BlossomAggregate<TextContent>>()

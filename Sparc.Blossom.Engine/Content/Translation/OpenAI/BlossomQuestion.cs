@@ -1,6 +1,6 @@
 ﻿namespace Sparc.Blossom.Content.OpenAI;
 
-internal class OpenAIQuestion(string text)
+internal class BlossomQuestion(string text)
 {
     public List<string> Context { get; set; } = [];
     public string Text { get; set; } = text;
@@ -16,4 +16,12 @@ internal class OpenAIQuestion(string text)
         PreviousResponseId == null
         ? string.Join("\n", Context.Where(x => !string.IsNullOrWhiteSpace(x)))
         : "";
+}
+
+internal class BlossomQuestion<T> : BlossomQuestion
+{
+    public BlossomQuestion(string text) : base(text)
+    {
+        Schema = new(typeof(T));
+    }
 }

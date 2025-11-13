@@ -1,3 +1,4 @@
+using Anthropic.SDK;
 using MediatR.NotificationPublishers;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http.Json;
@@ -21,6 +22,10 @@ builder.AddSparcAuthentication<BlossomUser>();
 builder.AddSparcBilling();
 builder.AddSparcChat();
 builder.Services.AddScoped(_ => new OpenAIClient(builder.Configuration.GetConnectionString("OpenAI")!));
+
+Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", builder.Configuration.GetConnectionString("Anthropic"));
+builder.Services.AddHttpClient<AnthropicClient>().AddStandardResilienceHandler();
+
 builder.AddTovikTranslator();
 builder.Services.AddBlossomService<BillToTovik>();
 
