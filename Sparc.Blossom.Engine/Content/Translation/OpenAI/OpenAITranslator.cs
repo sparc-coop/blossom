@@ -16,12 +16,12 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
     private readonly int _timeoutSeconds = 60;
     decimal CostPerToken = 0.40m / 1_000_000;
 
-    public int Priority => 1;
+    public int Priority => 0;
 
     public async Task<TextContent> TranslateAsync(TextContent message, TovikTranslationOptions options)
     {
         var question = new TovikTranslationQuestion(message, options);
-        var answer = await AskOpenAIAsync(question);
+        var answer = await AskAsync(question);
 
         var result = new TextContent(message, options.OutputLanguage ?? message.Language, answer.Text!)
         {
@@ -38,39 +38,38 @@ internal class OpenAITranslator(OpenAIClient client) : ITranslator
 
         var translatedMessages = new ConcurrentBag<TextContent>();
 
-        // TODO: Refactor to use TovikTranslations again when able
-        //await Parallel.ForEachAsync(batches, async (batch, _) =>
-        //{
-        //    var safeBatch = batch.Where(x => !string.IsNullOrWhiteSpace(x.Text)).ToList();
-        //    if (safeBatch.Count == 0)
-        //        return;
+        await Parallel.ForEachAsync(batches, async (batch, _) =>
+        {
+            var safeBatch = batch.Where(x => !string.IsNullOrWhiteSpace(x.Text)).ToList();
+            if (safeBatch.Count == 0)
+                return;
 
-        //    foreach (var fromLanguage in fromLanguages)
-        //    {
-        //            var question = new TovikTranslationQuestion(safeBatch, options);
-        //            var answer = await AskOpenAIAsync(question);
-        //            if (answer.Value?.Text == null)
-        //                continue;
+            foreach (var fromLanguage in fromLanguages)
+            {
+                var question = new TovikTranslationQuestion(safeBatch, options);
+                var answer = await AskAsync(question);
+                if (answer.Value?.Text == null)
+                    continue;
 
-        //            var translations = new List<TextContent>();
-        //            foreach (var translation in safeBatch.Where(x => answer.Value.Text.Any(y => x.Id.StartsWith(y.Id))))
-        //                translations.Add(new TextContent(translation, options.OutputLanguage ?? translation.Language, answer.Value.Text.First(y => translation.Id.StartsWith(y.Id)).Text));
+                var translations = new List<TextContent>();
+                foreach (var translation in safeBatch.Where(x => answer.Value.Text.Any(y => x.Id.StartsWith(y.Id))))
+                    translations.Add(new TextContent(translation, options.OutputLanguage ?? translation.Language, answer.Value.Text.First(y => translation.Id.StartsWith(y.Id)).Text));
 
-        //            foreach (var translatedMessage in translations)
-        //            {
-        //                translatedMessage.AddCharge(answer.TokensUsed, CostPerToken, $"OpenAI translation of {translatedMessage.OriginalText} to {translatedMessage.LanguageId}");
-        //                translatedMessages.Add(translatedMessage);
-        //            }
-        //    }
-        //});
+                foreach (var translatedMessage in translations)
+                {
+                    translatedMessage.AddCharge(answer.TokensUsed, CostPerToken, $"OpenAI translation of {translatedMessage.OriginalText} to {translatedMessage.LanguageId}");
+                    translatedMessages.Add(translatedMessage);
+                }
+            }
+        });
 
         return translatedMessages.ToList();
     }
 
-    private async Task<BlossomAnswer> AskOpenAIAsync(BlossomQuestion question)
+    private async Task<BlossomAnswer<T>> AskAsync<T>(BlossomQuestion<T> question)
     { 
         int attempt = 0;
-        var answer = new BlossomAnswer();
+        var answer = new BlossomAnswer<T>();
 
         while (attempt < _maxRetries)
         {

@@ -14,7 +14,7 @@ internal class AnthropicTranslator(AnthropicClient client) : ITranslator
     readonly string _defaultModel = AnthropicModels.Claude35Haiku;
     decimal CostPerToken = 5m / 1_000_000;
 
-    public int Priority => 0;
+    public int Priority => 50;
 
     public async Task<TextContent> TranslateAsync(TextContent message, TovikTranslationOptions options)
     {
