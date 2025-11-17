@@ -1,7 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-
-namespace Sparc.Blossom.Authentication;
+﻿namespace Sparc.Blossom.Authentication;
 
 public class SparcCode(string code, int? remainingSeconds = null)
 {

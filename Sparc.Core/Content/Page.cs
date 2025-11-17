@@ -1,5 +1,4 @@
-﻿using Sparc.Blossom.Authentication;
-using Sparc.Core;
+﻿using Sparc.Core;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Content;
