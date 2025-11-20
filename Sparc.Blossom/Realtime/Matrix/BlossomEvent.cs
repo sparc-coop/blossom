@@ -4,7 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Sparc.Blossom.Realtime.Matrix;
+namespace Sparc.Blossom.Realtime;
 
 [JsonDerivedType(typeof(BlossomEvent<CanonicalAlias>), "m.room.canonical_alias")]
 [JsonDerivedType(typeof(BlossomEvent<CreateRoom>), "m.room.create")]

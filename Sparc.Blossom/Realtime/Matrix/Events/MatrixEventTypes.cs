@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom.Realtime.Matrix;
+﻿namespace Sparc.Blossom.Realtime;
 
 public enum HistoryVisibility
 {

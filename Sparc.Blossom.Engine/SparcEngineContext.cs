@@ -3,7 +3,7 @@ using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Billing;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data.Pouch;
-using Sparc.Blossom.Realtime.Matrix;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Engine;
 

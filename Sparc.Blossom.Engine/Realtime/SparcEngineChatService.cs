@@ -1,6 +1,5 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
-using Sparc.Blossom.Realtime.Matrix;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Realtime;
@@ -112,7 +111,7 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
         return new(ev.EventId);
     }
 
-    private async Task<List<Matrix.BlossomEvent<MatrixMessage>>> GetMessagesAsync(string roomId)
+    private async Task<List<BlossomEvent<MatrixMessage>>> GetMessagesAsync(string roomId)
     {
         return await events.GetAllAsync<MatrixMessage>(roomId);
     }

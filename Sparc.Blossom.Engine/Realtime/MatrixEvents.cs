@@ -1,6 +1,5 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
-using Sparc.Blossom.Realtime.Matrix;
 
 namespace Sparc.Blossom.Realtime;
 

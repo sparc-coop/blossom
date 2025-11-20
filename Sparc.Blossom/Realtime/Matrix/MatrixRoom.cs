@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom.Realtime.Matrix;
+﻿namespace Sparc.Blossom.Realtime;
 
 public class MatrixRoom(string roomId, string? roomType)
 {
@@ -7,7 +7,7 @@ public class MatrixRoom(string roomId, string? roomType)
     public int NumJoinedMembers { get; set; }
     public bool GuestCanJoin { get; set; }
     public bool WorldReadable { get; set; }
-    public string? Name { get; set; }
+    public string? Name { get; set; }   
     public string? Topic { get; set; }
     public string? AvatarUrl { get; set; }
     public string? CanonicalAlias { get; set; }
