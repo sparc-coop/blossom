@@ -5,24 +5,7 @@ namespace Sparc.Blossom.Content;
 
 public record SourceContent(string PageId, string ContentId);
 
-public class ContentSpace : BlossomEntity<string>
-{
-    public string Domain { get; set; }
-
-    [JsonConstructor]
-    protected ContentSpace()
-    {
-        Id = string.Empty;
-        Domain = string.Empty;
-    }
-
-    public ContentSpace(string domain)
-    {
-        Domain = domain;
-    }
-}
-
-public class Page : ContentSpace
+public class Page : BlossomSpace
 {
     public string Path { get; set; }
     public string Name { get; set; }
