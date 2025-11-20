@@ -1,4 +1,5 @@
 ﻿
+using Sparc.Blossom.Content;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -6,17 +7,17 @@ using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Realtime;
 
-[JsonDerivedType(typeof(BlossomEvent<CanonicalAlias>), "m.room.canonical_alias")]
-[JsonDerivedType(typeof(BlossomEvent<CreateRoom>), "m.room.create")]
-[JsonDerivedType(typeof(BlossomEvent<JoinRules>), "m.room.join_rules")]
-[JsonDerivedType(typeof(BlossomEvent<ChangeMembershipState>), "m.room.member")]
-[JsonDerivedType(typeof(BlossomEvent<AdjustPowerLevels>), "m.room.power_levels")]
-[JsonDerivedType(typeof(BlossomEvent<MatrixMessage>), "m.room.message")]
-[JsonDerivedType(typeof(BlossomEvent<HistoryVisibility>), "m.room.history_visibility")]
-[JsonDerivedType(typeof(BlossomEvent<GuestAccess>), "m.room.guest_access")]
-[JsonDerivedType(typeof(BlossomEvent<RoomName>), "m.room.name")]
-[JsonDerivedType(typeof(BlossomEvent<RoomTopic>), "m.room.topic")]
-[JsonDerivedType(typeof(BlossomEvent<BlossomPresence>), "m.presence")]
+//[JsonDerivedType(typeof(BlossomEvent<CanonicalAlias>), "m.room.canonical_alias")]
+//[JsonDerivedType(typeof(BlossomEvent<CreateRoom>), "m.room.create")]
+//[JsonDerivedType(typeof(BlossomEvent<JoinRules>), "m.room.join_rules")]
+//[JsonDerivedType(typeof(BlossomEvent<ChangeMembershipState>), "m.room.member")]
+//[JsonDerivedType(typeof(BlossomEvent<AdjustPowerLevels>), "m.room.power_levels")]
+//[JsonDerivedType(typeof(BlossomEvent<MatrixMessage>), "m.room.message")]
+//[JsonDerivedType(typeof(BlossomEvent<HistoryVisibility>), "m.room.history_visibility")]
+//[JsonDerivedType(typeof(BlossomEvent<GuestAccess>), "m.room.guest_access")]
+//[JsonDerivedType(typeof(BlossomEvent<RoomName>), "m.room.name")]
+//[JsonDerivedType(typeof(BlossomEvent<RoomTopic>), "m.room.topic")]
+//[JsonDerivedType(typeof(BlossomEvent<BlossomPresence>), "m.presence")]
 public class BlossomEvent(string roomId, string sender) : BlossomEntity<string>(), MediatR.INotification
 {
     public string Type { get; set; } = "";
@@ -38,7 +39,7 @@ public class BlossomEvent(string roomId, string sender) : BlossomEntity<string>(
         return new BlossomEvent<T>(roomId, sender, content, previousEvents);
     }
 
-    public virtual void ApplyTo(MatrixRoom room)
+    public virtual void ApplyTo(BlossomSpace room)
     { 
     }
     
@@ -113,16 +114,16 @@ public class BlossomEvent<T> : BlossomEvent
                     .Replace("/", "_");
     }
 
-    public override void ApplyTo(MatrixRoom room)
+    public override void ApplyTo(BlossomSpace space)
     {
         if (Content is IMatrixRoomEvent ev)
-            ev.ApplyTo(room);
+            ev.ApplyTo(space);
     }
 }
 
 public interface IMatrixRoomEvent
 {
-    void ApplyTo(MatrixRoom room);
+    void ApplyTo(BlossomSpace space);
 }
 
 public record MatrixEventHash(string Sha256);

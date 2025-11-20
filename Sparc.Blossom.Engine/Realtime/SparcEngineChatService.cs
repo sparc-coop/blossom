@@ -4,7 +4,7 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Realtime;
 
-public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<BlossomUser> auth)
+public class SparcEngineChatService(BlossomEvents events, SparcAuthenticator<BlossomUser> auth)
     : IBlossomEndpoints
 {
     private async Task<BlossomPresence> GetPresenceAsync(ClaimsPrincipal principal, string userId)
@@ -40,14 +40,14 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
     private async Task<MatrixRoom> GetRoomSummaryAsync(string roomId)
     {
         if (!roomId.Contains(':'))
-            roomId = roomId + ":" + MatrixEvents.Domain;
+            roomId = roomId + ":" + BlossomEvents.Domain;
 
         return await events.GetRoomAsync(roomId);
     }
 
     private async Task<CreateRoomResponse> CreateRoomAsync(CreateRoomRequest request)
     {
-        var roomId = "!" + BlossomEvent.OpaqueId() + ":" + MatrixEvents.Domain;
+        var roomId = "!" + BlossomEvent.OpaqueId() + ":" + BlossomEvents.Domain;
         await events.PublishAsync(roomId, new CreateRoom());
         await events.PublishAsync(roomId, new ChangeMembershipState("join", events.MatrixSenderId!));
         await events.PublishAsync(roomId, new AdjustPowerLevels());

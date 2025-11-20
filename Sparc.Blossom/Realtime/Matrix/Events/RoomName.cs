@@ -1,9 +1,3 @@
 ﻿namespace Sparc.Blossom.Realtime;
 
-public record RoomName(string Name) : IMatrixRoomEvent
-{
-    public void ApplyTo(MatrixRoom room)
-    {
-        room.Name = Name;
-    }
-}
+public record RoomName(string Name);

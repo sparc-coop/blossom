@@ -3,7 +3,7 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Realtime;
 
-public class MatrixEvents(
+public class BlossomEvents(
     IRepository<BlossomEvent> events,
     IHttpContextAccessor http,
     SparcAuthenticator<BlossomUser> auth)

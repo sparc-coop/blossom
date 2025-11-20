@@ -7,7 +7,7 @@ public static class ServiceCollectionExtensions
     )
     {
         builder.Services
-            .AddTransient<MatrixEvents>()
+            .AddTransient<BlossomEvents>()
             .AddTransient<SparcEngineChatService>();
 
         return builder;

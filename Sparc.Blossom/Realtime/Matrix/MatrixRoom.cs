@@ -1,6 +1,8 @@
-﻿namespace Sparc.Blossom.Realtime;
+﻿using Sparc.Blossom.Content;
 
-public class MatrixRoom(string roomId, string? roomType)
+namespace Sparc.Blossom.Realtime;
+
+public class MatrixRoom(string roomId, string? roomType) : BlossomSpace
 {
     public string RoomId { get; set; } = roomId;
     public string? RoomType { get; set; } = roomType;

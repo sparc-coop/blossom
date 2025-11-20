@@ -12,6 +12,9 @@ public static class AssemblyExtensions
             (baseType.IsGenericType && x.BaseType?.IsGenericType == true && x.BaseType.GetGenericTypeDefinition() == baseType)
             || x.BaseType == baseType);
 
+    public static IEnumerable<Type> GetDerivedTypes(this AppDomain domain, Type baseType)
+        => domain.GetAssemblies().Where(x => !x.IsDynamic).SelectMany(x => x.GetDerivedTypes(baseType));
+
     public static IEnumerable<Type> GetEntities(this Assembly assembly)
         => assembly.GetDerivedTypes(typeof(BlossomEntity<>));
 

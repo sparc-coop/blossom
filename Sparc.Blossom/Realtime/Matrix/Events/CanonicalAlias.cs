@@ -1,10 +1,3 @@
 ﻿namespace Sparc.Blossom.Realtime;
 
-public record CanonicalAlias(string? Alias = null, List<string>? AltAliases = null) : IMatrixRoomEvent
-{
-    public void ApplyTo(MatrixRoom room)
-    {
-        if (Alias != null)
-            room.CanonicalAlias = Alias;
-    }
-}
+public record CanonicalAlias(string? Alias = null, List<string>? AltAliases = null);
