@@ -14,7 +14,7 @@ public class BlossomSpace : BlossomEntity<string>
     [JsonConstructor]
     protected BlossomSpace()
     {
-        Id = string.Empty;
+        Id = Guid.NewGuid().ToString();
         Domain = string.Empty;
     }
 

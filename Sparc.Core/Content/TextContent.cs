@@ -16,7 +16,7 @@ public record ContentTranslation(string Id, Language Language, string? SourceCon
 public class TextContent : BlossomEntity<string>
 {
     public string Domain { get; set; } = null!;
-    public string Path { get; set; } = "";
+    public string SpaceId { get; set; } = "";
     public string? SourceContentId { get; set; }
     public string LanguageId { get; set; } = null!;
     public Language Language { get; set; } = null!;
@@ -42,7 +42,7 @@ public class TextContent : BlossomEntity<string>
     {
         Id = Guid.NewGuid().ToString();
         Domain = domain;
-        Path = pageId;
+        SpaceId = pageId;
         User = new BlossomUser().Avatar;
         Language = new(languageId);
         LanguageId = Language.Id;
@@ -59,7 +59,7 @@ public class TextContent : BlossomEntity<string>
         SetText(text);
     }
 
-    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, sourceContent.Path, toLanguage.Id)
+    public TextContent(TextContent sourceContent, Language toLanguage, string text) : this(sourceContent.Domain, sourceContent.SpaceId, toLanguage.Id)
     {
         Id = sourceContent.Id; // this hash is coming from the client, so we use the source content's ID
         SourceContentId = sourceContent.Id;

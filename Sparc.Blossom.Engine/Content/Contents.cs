@@ -7,7 +7,7 @@ public class Contents(BlossomAggregateOptions<TextContent> options)
          ((content.Text != null && content.Text.ToLower().Contains(searchTerm) == true) ||
          (content.OriginalText != null && content.OriginalText.ToLower().Contains(searchTerm) == true) ||
          (content.Domain != null && content.Domain.ToLower().Contains(searchTerm) == true) ||
-         (content.Path != null && content.Path.ToLower().Contains(searchTerm) == true)));
+         (content.SpaceId != null && content.SpaceId.ToLower().Contains(searchTerm) == true)));
 
     //public async Task<IEnumerable<TextContent>> GetAll(string pageId, string? fallbackLanguageId = null)
     //{
@@ -23,6 +23,6 @@ public class Contents(BlossomAggregateOptions<TextContent> options)
     //    return [];
     //}
 
-    public BlossomQuery<TextContent> All(string pageId) => Query().Where(content => content.Path == pageId && content.SourceContentId == null);
+    public BlossomQuery<TextContent> All(string pageId) => Query().Where(content => content.SpaceId == pageId && content.SourceContentId == null);
 
 }

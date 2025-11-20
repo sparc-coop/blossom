@@ -54,7 +54,7 @@ public class BillToTovik(
     private async Task RegisterPageView(TovikContentTranslated item, SparcDomain? domain)
     {
         var page = await pages.Query
-                    .Where(p => p.Domain == item.Content.Domain && p.Path == item.Content.Path)
+                    .Where(p => p.Domain == item.Content.Domain && p.Path == item.Content.SpaceId)
                     .FirstOrDefaultAsync();
 
         if (page == null)

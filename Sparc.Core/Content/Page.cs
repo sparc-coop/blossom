@@ -32,7 +32,7 @@ public class Page : BlossomSpace
         Name = name;
     }
 
-    public Page(TextContent content) : this(content.Domain, content.Path)
+    public Page(TextContent content) : this(content.Domain, content.SpaceId)
     { }
 
     public Page(Uri uri, string name) : this(uri.Host, uri.AbsolutePath, name)
