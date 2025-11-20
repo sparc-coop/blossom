@@ -260,7 +260,7 @@ public class TovikTranslator(
         group.MapPost("visit", async (TovikTranslator translator, HttpRequest request, Visit visit) =>
         {
             var language = Language.Find(request.Headers.AcceptLanguage);
-            await translator.Visit(visit, language);
+            await translator.Visit(visit, language!);
             return Results.Ok();
         });
 

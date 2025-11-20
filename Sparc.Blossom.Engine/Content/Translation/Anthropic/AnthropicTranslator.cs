@@ -25,7 +25,7 @@ internal class AnthropicTranslator(AnthropicClient client)
 
             var timeTook = (DateTime.UtcNow - now).TotalMilliseconds;
             answer.Log("Info", $"Answer {response.Id} in {timeTook}ms: {content}");
-            answer.SetResponse(response.Id, content.ToString(), response.Usage.OutputTokens);
+            answer.SetResponse(response.Id, content!.ToString(), response.Usage.OutputTokens);
 
             return answer;
         }
