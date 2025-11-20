@@ -6,18 +6,18 @@ using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Realtime.Matrix;
 
-[JsonDerivedType(typeof(MatrixEvent<CanonicalAlias>), "m.room.canonical_alias")]
-[JsonDerivedType(typeof(MatrixEvent<CreateRoom>), "m.room.create")]
-[JsonDerivedType(typeof(MatrixEvent<JoinRules>), "m.room.join_rules")]
-[JsonDerivedType(typeof(MatrixEvent<ChangeMembershipState>), "m.room.member")]
-[JsonDerivedType(typeof(MatrixEvent<AdjustPowerLevels>), "m.room.power_levels")]
-[JsonDerivedType(typeof(MatrixEvent<MatrixMessage>), "m.room.message")]
-[JsonDerivedType(typeof(MatrixEvent<HistoryVisibility>), "m.room.history_visibility")]
-[JsonDerivedType(typeof(MatrixEvent<GuestAccess>), "m.room.guest_access")]
-[JsonDerivedType(typeof(MatrixEvent<RoomName>), "m.room.name")]
-[JsonDerivedType(typeof(MatrixEvent<RoomTopic>), "m.room.topic")]
-[JsonDerivedType(typeof(MatrixEvent<BlossomPresence>), "m.presence")]
-public class MatrixEvent(string roomId, string sender) : BlossomEntity<string>(), MediatR.INotification
+[JsonDerivedType(typeof(BlossomEvent<CanonicalAlias>), "m.room.canonical_alias")]
+[JsonDerivedType(typeof(BlossomEvent<CreateRoom>), "m.room.create")]
+[JsonDerivedType(typeof(BlossomEvent<JoinRules>), "m.room.join_rules")]
+[JsonDerivedType(typeof(BlossomEvent<ChangeMembershipState>), "m.room.member")]
+[JsonDerivedType(typeof(BlossomEvent<AdjustPowerLevels>), "m.room.power_levels")]
+[JsonDerivedType(typeof(BlossomEvent<MatrixMessage>), "m.room.message")]
+[JsonDerivedType(typeof(BlossomEvent<HistoryVisibility>), "m.room.history_visibility")]
+[JsonDerivedType(typeof(BlossomEvent<GuestAccess>), "m.room.guest_access")]
+[JsonDerivedType(typeof(BlossomEvent<RoomName>), "m.room.name")]
+[JsonDerivedType(typeof(BlossomEvent<RoomTopic>), "m.room.topic")]
+[JsonDerivedType(typeof(BlossomEvent<BlossomPresence>), "m.presence")]
+public class BlossomEvent(string roomId, string sender) : BlossomEntity<string>(), MediatR.INotification
 {
     public string Type { get; set; } = "";
     public string EventId { get { return Id; } set { Id = value; } }
@@ -33,9 +33,9 @@ public class MatrixEvent(string roomId, string sender) : BlossomEntity<string>()
     public Dictionary<string, Dictionary<string, string>> Signatures { get; set; } = [];
     public MatrixUnsignedData Unsigned => new(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - OriginServerTs);
 
-    public static MatrixEvent<T> Create<T>(string roomId, string sender, T content, List<MatrixEvent>? previousEvents = null)
+    public static BlossomEvent<T> Create<T>(string roomId, string sender, T content, List<BlossomEvent>? previousEvents = null)
     {
-        return new MatrixEvent<T>(roomId, sender, content, previousEvents);
+        return new BlossomEvent<T>(roomId, sender, content, previousEvents);
     }
 
     public virtual void ApplyTo(MatrixRoom room)
@@ -44,12 +44,12 @@ public class MatrixEvent(string roomId, string sender) : BlossomEntity<string>()
     
     // Special magic to be able to save & query polymorphically to/from Cosmos
     public static string Types<T>() =>  
-        MatrixEventTypes.TryGetValue(typeof(MatrixEvent<>).MakeGenericType(typeof(T)), out var type) 
+        MatrixEventTypes.TryGetValue(typeof(BlossomEvent<>).MakeGenericType(typeof(T)), out var type) 
         ? type 
         : throw new NotImplementedException($"Matrix event type for {typeof(T).Name} is not implemented.");
 
     private static Dictionary<Type, string> MatrixEventTypes =>
-        typeof(MatrixEvent)
+        typeof(BlossomEvent)
             .GetCustomAttributes(typeof(JsonDerivedTypeAttribute), false)
             .OfType<JsonDerivedTypeAttribute>()
             .ToDictionary(attr => attr.DerivedType, attr => attr.TypeDiscriminator!.ToString()!);
@@ -67,15 +67,15 @@ public class MatrixEvent(string roomId, string sender) : BlossomEntity<string>()
     }
 }
 
-public class MatrixEvent<T> : MatrixEvent
+public class BlossomEvent<T> : BlossomEvent
 {
     public T Content { get; set; }
 
-    public MatrixEvent() : this(string.Empty, string.Empty, default!)
+    public BlossomEvent() : this(string.Empty, string.Empty, default!)
     {
     }
 
-    public MatrixEvent(string roomId, string sender, T content, List<MatrixEvent>? previousEvents = null) 
+    public BlossomEvent(string roomId, string sender, T content, List<BlossomEvent>? previousEvents = null) 
         : base(roomId, sender)
     {
         Type = Types<T>();

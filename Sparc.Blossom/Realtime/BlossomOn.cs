@@ -2,7 +2,7 @@
 
 namespace Sparc.Blossom;
 
-public abstract class BlossomOn<T> : INotificationHandler<T> where T : BlossomEvent
+public abstract class BlossomOn<T> : INotificationHandler<T> where T : BlossomEntityChanged
 {
     public abstract Task ExecuteAsync(T item);
 

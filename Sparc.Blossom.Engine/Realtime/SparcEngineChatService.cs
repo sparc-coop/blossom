@@ -48,7 +48,7 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
 
     private async Task<CreateRoomResponse> CreateRoomAsync(CreateRoomRequest request)
     {
-        var roomId = "!" + MatrixEvent.OpaqueId() + ":" + MatrixEvents.Domain;
+        var roomId = "!" + BlossomEvent.OpaqueId() + ":" + MatrixEvents.Domain;
         await events.PublishAsync(roomId, new CreateRoom());
         await events.PublishAsync(roomId, new ChangeMembershipState("join", events.MatrixSenderId!));
         await events.PublishAsync(roomId, new AdjustPowerLevels());
@@ -112,7 +112,7 @@ public class SparcEngineChatService(MatrixEvents events, SparcAuthenticator<Blos
         return new(ev.EventId);
     }
 
-    private async Task<List<MatrixEvent<MatrixMessage>>> GetMessagesAsync(string roomId)
+    private async Task<List<Matrix.BlossomEvent<MatrixMessage>>> GetMessagesAsync(string roomId)
     {
         return await events.GetAllAsync<MatrixMessage>(roomId);
     }

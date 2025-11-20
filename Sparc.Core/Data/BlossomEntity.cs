@@ -9,11 +9,11 @@ public abstract class BlossomEntity
     [Newtonsoft.Json.JsonIgnore]
     [System.Text.Json.Serialization.JsonIgnore]
     public virtual object GenericId { get; } = null!;
-    protected List<BlossomEvent>? _events;
+    protected List<BlossomEntityChanged>? _events;
     public long? Revision { get; set; }
 
     // Event system
-    public List<BlossomEvent> Publish()
+    public List<BlossomEntityChanged> Publish()
     {
         _events ??= [];
 
@@ -23,9 +23,9 @@ public abstract class BlossomEntity
         return domainEvents;
     }
 
-    protected void Broadcast<T>() where T : BlossomEvent => Broadcast((T)Activator.CreateInstance(typeof(T), this));
+    protected void Broadcast<T>() where T : BlossomEntityChanged => Broadcast((T)Activator.CreateInstance(typeof(T), this));
 
-    protected void Broadcast(BlossomEvent notification)
+    protected void Broadcast(BlossomEntityChanged notification)
     {
         _events ??= [];
         _events!.Add(notification);

@@ -5,23 +5,23 @@ using Sparc.Blossom.Realtime.Matrix;
 namespace Sparc.Blossom.Realtime;
 
 public class MatrixEvents(
-    IRepository<MatrixEvent> events,
+    IRepository<BlossomEvent> events,
     IHttpContextAccessor http,
     SparcAuthenticator<BlossomUser> auth)
 {
     public const string Domain = "sparc.coop";
     public string? MatrixSenderId;
 
-    public async Task<MatrixEvent> PublishAsync<T>(string roomId, T content)
+    public async Task<BlossomEvent> PublishAsync<T>(string roomId, T content)
     {
         var sender = await GetMatrixSenderIdAsync();
 
-        var ev = MatrixEvent.Create(roomId, sender, content);
+        var ev = BlossomEvent.Create(roomId, sender, content);
         await events.AddAsync(ev);
         return ev;
     }
 
-    internal async Task<List<MatrixEvent>> GetAllAsync(string roomId)
+    internal async Task<List<BlossomEvent>> GetAllAsync(string roomId)
     {
         return await events.Query
             .Where(x => x.RoomId == roomId)
@@ -29,15 +29,15 @@ public class MatrixEvents(
             .ToListAsync();
     }
 
-    internal async Task<List<MatrixEvent<T>>> GetAllAsync<T>(string roomId)
+    internal async Task<List<BlossomEvent<T>>> GetAllAsync<T>(string roomId)
     {
-        var type = MatrixEvent.Types<T>();
+        var type = BlossomEvent.Types<T>();
         var result = await events.Query
             .Where(e => e.RoomId == roomId && e.Type == type)
             .OrderBy(x => x.Depth)
             .ToListAsync();
 
-        return result.Cast<MatrixEvent<T>>().ToList();
+        return result.Cast<BlossomEvent<T>>().ToList();
     }
 
     internal async Task<MatrixRoom> GetRoomAsync(string roomId)
@@ -46,9 +46,9 @@ public class MatrixEvents(
         return MatrixRoom.From(allRoomEvents);
     }
 
-    internal IQueryable<MatrixEvent> Query<T>()
+    internal IQueryable<BlossomEvent> Query<T>()
     {
-        var type = MatrixEvent.Types<T>();
+        var type = BlossomEvent.Types<T>();
         return events.Query
             .Where(e => e.Type == type)
             .OrderBy(x => x.Depth);

@@ -3,31 +3,31 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom;
 
-public record BlossomEvent : MediatR.INotification
+public record BlossomEntityChanged : MediatR.INotification
 {
-    public BlossomEvent()
+    public BlossomEntityChanged()
     {
         // for JSON deserialization
         Name = "BlossomEvent";
     }
 
-    private BlossomEvent(string name)
+    private BlossomEntityChanged(string name)
     {
         Name = name;
     }
 
-    public BlossomEvent(BlossomEntity entity) : this(entity.GetType().Name)
+    public BlossomEntityChanged(BlossomEntity entity) : this(entity.GetType().Name)
     {
         EntityId = entity.GenericId.ToString();
         EntityType = entity.GetType().Name;
     }
 
-    public BlossomEvent(string name, BlossomEntity entity) : this(entity)
+    public BlossomEntityChanged(string name, BlossomEntity entity) : this(entity)
     {
         Name = name;
     }
 
-    public BlossomEvent(IBlossomEntityProxy proxy) : this(proxy.GetType().Name)
+    public BlossomEntityChanged(IBlossomEntityProxy proxy) : this(proxy.GetType().Name)
     {
         EntityType = proxy.GetType().Name;
     }
@@ -53,31 +53,31 @@ public record BlossomEvent : MediatR.INotification
     }
 }
 
-public record BlossomEvent<T> : BlossomEvent where T : BlossomEntity
+public record BlossomEntityChanged<T> : BlossomEntityChanged where T : BlossomEntity
 {
     public T Entity { get; private set; }
 
-    public BlossomEvent(T entity) : base(entity)
+    public BlossomEntityChanged(T entity) : base(entity)
     {
         Entity = entity;
     }
 
-    public BlossomEvent(BlossomEvent<T> previous) : base(previous)
+    public BlossomEntityChanged(BlossomEntityChanged<T> previous) : base(previous)
     {
         Entity = previous.Entity;
     }
 
-    public BlossomEvent(string name, T entity) : this(entity)
+    public BlossomEntityChanged(string name, T entity) : this(entity)
     {
         Name = name;
     }
 
-    public BlossomEvent(T entity, BlossomPatch changes) : this(entity)
+    public BlossomEntityChanged(T entity, BlossomPatch changes) : this(entity)
     {
         Changes = changes;
     }
 
-    public BlossomEvent(T entity, BlossomEvent<T> previous) : this(entity)
+    public BlossomEntityChanged(T entity, BlossomEntityChanged<T> previous) : this(entity)
     {
         PreviousId = previous.Id;
         Changes = new(previous.Entity, entity);

@@ -40,7 +40,7 @@ public static class ServiceCollectionExtensions
     public static EntityTypeBuilder<T> RealtimeEntity<T>(this ModelBuilder model, string? eventContainerName = null) where T : BlossomEntity
     {
         var entity = model.Entity<T>();
-        var eventEntity = model.Entity<BlossomEvent<T>>();
+        var eventEntity = model.Entity<BlossomEntityChanged<T>>();
         if (eventContainerName != null)
             eventEntity.ToContainer(eventContainerName);
 

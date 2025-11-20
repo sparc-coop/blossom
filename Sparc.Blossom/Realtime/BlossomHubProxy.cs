@@ -120,7 +120,7 @@ public class BlossomHubProxy(NavigationManager nav) : IAsyncDisposable
         }
     }
 
-    public async Task Watch(IEnumerable<IBlossomEntityProxy> entities, Action<IBlossomEntityProxy, BlossomEvent> action)
+    public async Task Watch(IEnumerable<IBlossomEntityProxy> entities, Action<IBlossomEntityProxy, BlossomEntityChanged> action)
     {
         if (!IsActive)
             return;
@@ -136,7 +136,7 @@ public class BlossomHubProxy(NavigationManager nav) : IAsyncDisposable
 
         foreach (var entity in entities)
         {
-            _subscriptions[SubscriptionId(entity)].Add(Connection!.On<BlossomEvent>(SubscriptionId(entity), evt =>
+            _subscriptions[SubscriptionId(entity)].Add(Connection!.On<BlossomEntityChanged>(SubscriptionId(entity), evt =>
             {
                 action(entity, evt);
                 StateHasChanged();

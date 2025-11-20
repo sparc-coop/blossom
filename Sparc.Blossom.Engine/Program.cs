@@ -32,7 +32,7 @@ builder.Services.AddBlossomService<BillToTovik>();
 builder.Services.AddMediatR(options =>
 {
     options.RegisterServicesFromAssemblyContaining<Program>();
-    options.RegisterServicesFromAssemblyContaining<BlossomEvent>();
+    options.RegisterServicesFromAssemblyContaining<BlossomEntityChanged>();
     options.NotificationPublisher = new TaskWhenAllPublisher();
     options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
 });

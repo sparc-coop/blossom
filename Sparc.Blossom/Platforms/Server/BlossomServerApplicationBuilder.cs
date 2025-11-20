@@ -127,7 +127,7 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
         Services.AddMediatR(options =>
         {
             options.RegisterServicesFromAssembly(assembly);
-            options.RegisterServicesFromAssemblyContaining<BlossomEvent>();
+            options.RegisterServicesFromAssemblyContaining<BlossomEntityChanged>();
             options.RegisterServicesFromAssemblyContaining<BlossomHub>();
             options.RegisterServicesFromAssemblyContaining<THub>();
             options.NotificationPublisher = new TaskWhenAllPublisher();

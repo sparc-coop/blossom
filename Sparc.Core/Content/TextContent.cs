@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 namespace Sparc.Blossom.Content;
 
 public record EditHistory(DateTime Timestamp, string Text);
-public record TovikContentTranslated(TextContent Content, int TokenCount, decimal? Cost = null, string? Description = null, string? Response = null) : BlossomEvent(Content);
+public record TovikContentTranslated(TextContent Content, int TokenCount, decimal? Cost = null, string? Description = null, string? Response = null) : BlossomEntityChanged(Content);
 
 public record ContentTranslation(string Id, Language Language, string? SourceContentId = null)
 {

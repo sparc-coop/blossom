@@ -27,10 +27,10 @@ public interface ISparcChat
     Task<MatrixRoom> InviteToRoomAsync(string roomId, InviteToRoomRequest request);
 
     [Get("/_matrix/client/v3/rooms/{roomId}/messages")]
-    Task<List<MatrixEvent<MatrixMessage>>> GetMessagesAsync(string roomId);
+    Task<List<Matrix.BlossomEvent<MatrixMessage>>> GetMessagesAsync(string roomId);
 
     [Post("/_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}")]
-    Task<MatrixEvent> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request);
+    Task<BlossomEvent> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request);
 
     [Get("/_matrix/client/v3/presence/{userId}/status")]
     Task<BlossomPresence> GetPresenceAsync(string userId);

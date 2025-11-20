@@ -15,11 +15,11 @@ public class MatrixRoom(string roomId, string? roomType)
 
     public string LocalId => RoomId.Split(':').First();
 
-    public static MatrixRoom From(IEnumerable<MatrixEvent> events)
+    public static MatrixRoom From(IEnumerable<BlossomEvent> events)
     {
         var orderedEvents = events.OrderBy(x => x.Depth);
 
-        var rootEvent = events.OfType<MatrixEvent<CreateRoom>>().First();
+        var rootEvent = events.OfType<BlossomEvent<CreateRoom>>().First();
 
         var room = new MatrixRoom(rootEvent.RoomId, rootEvent.Content.Type);
         foreach (var ev in orderedEvents)

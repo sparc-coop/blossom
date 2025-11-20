@@ -42,8 +42,8 @@ public abstract class BlossomApplicationBuilder
                 typeof(BlossomAggregate<>).MakeGenericType(entity));
 
             Services.AddScoped(
-                typeof(IRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)),
-                typeof(BlossomInMemoryRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)));
+                typeof(IRepository<>).MakeGenericType(typeof(BlossomEntityChanged<>).MakeGenericType(entity)),
+                typeof(BlossomInMemoryRepository<>).MakeGenericType(typeof(BlossomEntityChanged<>).MakeGenericType(entity)));
         }
 
         foreach (var aggregate in aggregates)
@@ -84,7 +84,7 @@ public abstract class BlossomApplicationBuilder
         Services.AddMediatR(options =>
         {
             options.RegisterServicesFromAssembly(assembly);
-            options.RegisterServicesFromAssemblyContaining<BlossomEvent>();
+            options.RegisterServicesFromAssemblyContaining<BlossomEntityChanged>();
             options.NotificationPublisher = new TaskWhenAllPublisher();
             options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
         });
