@@ -4,12 +4,26 @@ using System.Text.Json.Serialization;
 namespace Sparc.Blossom.Content;
 
 public record SourceContent(string PageId, string ContentId);
-public record TranslateContentRequest(Dictionary<string, string> ContentDictionary, bool AsHtml, string LanguageId);
-public record TranslateContentResponse(string Domain, string Path, string Id, string Language, Dictionary<string, TextContent> Content);
 
-public class Page : BlossomEntity<string>
+public class ContentSpace : BlossomEntity<string>
 {
     public string Domain { get; set; }
+
+    [JsonConstructor]
+    protected ContentSpace()
+    {
+        Id = string.Empty;
+        Domain = string.Empty;
+    }
+
+    public ContentSpace(string domain)
+    {
+        Domain = domain;
+    }
+}
+
+public class Page : ContentSpace
+{
     public string Path { get; set; }
     public string Name { get; set; }
     public SourceContent? SourceContent { get; set; }
@@ -22,7 +36,7 @@ public class Page : BlossomEntity<string>
     private ICollection<TextContent> Contents { get; set; } = [];
 
     [JsonConstructor]
-    private Page()
+    private Page() : base()
     { 
         Id = string.Empty;
         Domain = string.Empty;
@@ -30,7 +44,7 @@ public class Page : BlossomEntity<string>
         Name = string.Empty;
     }
 
-    private Page(string domain, string path)
+    private Page(string domain, string path) : base(domain)
     {
         Id = BlossomHash.MD5($"{domain}:{path}");
         Domain = domain;
