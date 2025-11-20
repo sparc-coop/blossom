@@ -7,17 +7,6 @@ using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Realtime;
 
-//[JsonDerivedType(typeof(BlossomEvent<CanonicalAlias>), "m.room.canonical_alias")]
-//[JsonDerivedType(typeof(BlossomEvent<CreateRoom>), "m.room.create")]
-//[JsonDerivedType(typeof(BlossomEvent<JoinRules>), "m.room.join_rules")]
-//[JsonDerivedType(typeof(BlossomEvent<ChangeMembershipState>), "m.room.member")]
-//[JsonDerivedType(typeof(BlossomEvent<AdjustPowerLevels>), "m.room.power_levels")]
-//[JsonDerivedType(typeof(BlossomEvent<MatrixMessage>), "m.room.message")]
-//[JsonDerivedType(typeof(BlossomEvent<HistoryVisibility>), "m.room.history_visibility")]
-//[JsonDerivedType(typeof(BlossomEvent<GuestAccess>), "m.room.guest_access")]
-//[JsonDerivedType(typeof(BlossomEvent<RoomName>), "m.room.name")]
-//[JsonDerivedType(typeof(BlossomEvent<RoomTopic>), "m.room.topic")]
-//[JsonDerivedType(typeof(BlossomEvent<BlossomPresence>), "m.presence")]
 public class BlossomEvent(string roomId, string sender) : BlossomEntity<string>(), MediatR.INotification
 {
     public string Type { get; set; } = "";
@@ -43,17 +32,17 @@ public class BlossomEvent(string roomId, string sender) : BlossomEntity<string>(
     { 
     }
     
-    // Special magic to be able to save & query polymorphically to/from Cosmos
-    public static string Types<T>() =>  
-        MatrixEventTypes.TryGetValue(typeof(BlossomEvent<>).MakeGenericType(typeof(T)), out var type) 
-        ? type 
-        : throw new NotImplementedException($"Matrix event type for {typeof(T).Name} is not implemented.");
+    //// Special magic to be able to save & query polymorphically to/from Cosmos
+    //public static string Types<T>() =>  
+    //    MatrixEventTypes.TryGetValue(typeof(BlossomEvent<>).MakeGenericType(typeof(T)), out var type) 
+    //    ? type 
+    //    : throw new NotImplementedException($"Matrix event type for {typeof(T).Name} is not implemented.");
 
-    private static Dictionary<Type, string> MatrixEventTypes =>
-        typeof(BlossomEvent)
-            .GetCustomAttributes(typeof(JsonDerivedTypeAttribute), false)
-            .OfType<JsonDerivedTypeAttribute>()
-            .ToDictionary(attr => attr.DerivedType, attr => attr.TypeDiscriminator!.ToString()!);
+    //private static Dictionary<Type, string> MatrixEventTypes =>
+    //    typeof(BlossomEvent)
+    //        .GetCustomAttributes(typeof(JsonDerivedTypeAttribute), false)
+    //        .OfType<JsonDerivedTypeAttribute>()
+    //        .ToDictionary(attr => attr.DerivedType, attr => attr.TypeDiscriminator!.ToString()!);
 
     public static string OpaqueId(int length = 64)
     {
@@ -79,7 +68,7 @@ public class BlossomEvent<T> : BlossomEvent
     public BlossomEvent(string roomId, string sender, T content, List<BlossomEvent>? previousEvents = null) 
         : base(roomId, sender)
     {
-        Type = Types<T>();
+        Type = typeof(T).Name;
         Content = content;
 
         if (previousEvents != null && previousEvents.Count > 0)

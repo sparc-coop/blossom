@@ -30,7 +30,7 @@ public class BlossomEvents(
 
     internal async Task<List<BlossomEvent<T>>> GetAllAsync<T>(string roomId)
     {
-        var type = BlossomEvent.Types<T>();
+        var type = typeof(T).Name;
         var result = await events.Query
             .Where(e => e.RoomId == roomId && e.Type == type)
             .OrderBy(x => x.Depth)
@@ -47,7 +47,7 @@ public class BlossomEvents(
 
     internal IQueryable<BlossomEvent> Query<T>()
     {
-        var type = BlossomEvent.Types<T>();
+        var type = typeof(T).Name;
         return events.Query
             .Where(e => e.Type == type)
             .OrderBy(x => x.Depth);
