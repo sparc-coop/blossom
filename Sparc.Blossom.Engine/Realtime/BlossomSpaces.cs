@@ -4,9 +4,23 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Realtime;
 
-public class SparcEngineChatService(BlossomEvents events, SparcAuthenticator<BlossomUser> auth)
+public class BlossomSpaces(
+    IRepository<BlossomEvent> events,
+    IHttpContextAccessor http,
+    SparcAuthenticator<BlossomUser> auth)
     : IBlossomEndpoints
 {
+    public const string Domain = "sparc.coop";
+    public string? MatrixSenderId;
+
+    internal IQueryable<BlossomEvent> Query<T>()
+    {
+        var type = typeof(T).Name;
+        return events.Query
+            .Where(e => e.Type == type)
+            .OrderBy(x => x.Depth);
+    }
+
     private async Task<BlossomPresence> GetPresenceAsync(ClaimsPrincipal principal, string userId)
     {
         var user = await auth.GetAsync(principal);
@@ -19,18 +33,18 @@ public class SparcEngineChatService(BlossomEvents events, SparcAuthenticator<Blo
         presence.ApplyToAvatar(user.Avatar);
         user.UpdateAvatar(user.Avatar);
         await auth.UpdateAsync(user);
-        await events.PublishAsync(userId, presence);
+        await PublishAsync(userId, presence);
     }
 
     private async Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null)
     {
-        var createdRooms = await events.Query<CreateRoom>().ToListAsync();
+        var createdRooms = await Query<CreateRoom>().ToListAsync();
 
         var rooms = new List<MatrixRoom>();
         // Eventually do this in the background to show a published room directory
         foreach (var createdRoom in createdRooms)
         {
-            var room = await events.GetRoomAsync(createdRoom.RoomId);
+            var room = await GetRoomAsync(createdRoom.RoomId);
             rooms.Add(room);
         }
 
@@ -40,35 +54,60 @@ public class SparcEngineChatService(BlossomEvents events, SparcAuthenticator<Blo
     private async Task<MatrixRoom> GetRoomSummaryAsync(string roomId)
     {
         if (!roomId.Contains(':'))
-            roomId = roomId + ":" + BlossomEvents.Domain;
+            roomId = roomId + ":" + Domain;
 
-        return await events.GetRoomAsync(roomId);
+        return await GetRoomAsync(roomId);
+    }
+
+    internal async Task<List<BlossomEvent>> GetAllAsync(string roomId)
+    {
+        return await events.Query
+            .Where(x => x.RoomId == roomId)
+            .OrderBy(x => x.Depth)
+            .ToListAsync();
+    }
+
+    internal async Task<List<BlossomEvent<T>>> GetAllAsync<T>(string roomId)
+    {
+        var type = typeof(T).Name;
+        var result = await events.Query
+            .Where(e => e.RoomId == roomId && e.Type == type)
+            .OrderBy(x => x.Depth)
+            .ToListAsync();
+
+        return result.Cast<BlossomEvent<T>>().ToList();
+    }
+
+    internal async Task<MatrixRoom> GetRoomAsync(string roomId)
+    {
+        var allRoomEvents = await GetAllAsync(roomId);
+        return MatrixRoom.From(allRoomEvents);
     }
 
     private async Task<CreateRoomResponse> CreateRoomAsync(CreateRoomRequest request)
     {
-        var roomId = "!" + BlossomEvent.OpaqueId() + ":" + BlossomEvents.Domain;
-        await events.PublishAsync(roomId, new CreateRoom());
-        await events.PublishAsync(roomId, new ChangeMembershipState("join", events.MatrixSenderId!));
-        await events.PublishAsync(roomId, new AdjustPowerLevels());
+        var roomId = "!" + BlossomEvent.OpaqueId() + ":" + Domain;
+        await PublishAsync(roomId, new CreateRoom());
+        await PublishAsync(roomId, new ChangeMembershipState("join", MatrixSenderId!));
+        await PublishAsync(roomId, new AdjustPowerLevels());
 
         if (!string.IsNullOrWhiteSpace(request.RoomAliasName))
-            await events.PublishAsync(roomId, new CanonicalAlias(request.RoomAliasName));
+            await PublishAsync(roomId, new CanonicalAlias(request.RoomAliasName));
 
         if (!string.IsNullOrWhiteSpace(request.Preset))
         {
             switch (request.Preset)
             {
                 case "public_chat":
-                    await events.PublishAsync(roomId, new JoinRules("public"));
-                    await events.PublishAsync(roomId, HistoryVisibility.Shared);
-                    await events.PublishAsync(roomId, GuestAccess.Forbidden);
+                    await PublishAsync(roomId, new JoinRules("public"));
+                    await PublishAsync(roomId, HistoryVisibility.Shared);
+                    await PublishAsync(roomId, GuestAccess.Forbidden);
                     break;
                 case "private_chat":
                 case "trusted_private_chat":
-                    await events.PublishAsync(roomId, new JoinRules("invite"));
-                    await events.PublishAsync(roomId, HistoryVisibility.Shared);
-                    await events.PublishAsync(roomId, GuestAccess.CanJoin);
+                    await PublishAsync(roomId, new JoinRules("invite"));
+                    await PublishAsync(roomId, HistoryVisibility.Shared);
+                    await PublishAsync(roomId, GuestAccess.CanJoin);
                     break;
                 default:
                     throw new NotSupportedException($"Preset '{request.Preset}' is not supported.");
@@ -76,15 +115,15 @@ public class SparcEngineChatService(BlossomEvents events, SparcAuthenticator<Blo
         }
 
         if (!string.IsNullOrWhiteSpace(request.Name))
-            await events.PublishAsync(roomId, new RoomName(request.Name));
+            await PublishAsync(roomId, new RoomName(request.Name));
 
         if (!string.IsNullOrWhiteSpace(request.Topic))
-            await events.PublishAsync(roomId, new RoomTopic(request.Topic));
+            await PublishAsync(roomId, new RoomTopic(request.Topic));
 
         if (request.Invite?.Count > 0)
         {
             foreach (var userId in request.Invite)
-                await events.PublishAsync(roomId, new ChangeMembershipState("invite", userId));
+                await PublishAsync(roomId, new ChangeMembershipState("invite", userId));
         }
 
         return new(roomId);
@@ -92,28 +131,60 @@ public class SparcEngineChatService(BlossomEvents events, SparcAuthenticator<Blo
 
     private async Task JoinRoomAsync(string roomId)
     {
-        await events.PublishAsync(roomId, new ChangeMembershipState("join", events.MatrixSenderId!));
+        await PublishAsync(roomId, new ChangeMembershipState("join", MatrixSenderId!));
     }
 
     private async Task LeaveRoomAsync(string roomId)
     {
-        await events.PublishAsync(roomId, new ChangeMembershipState("leave", events.MatrixSenderId!));
+        await PublishAsync(roomId, new ChangeMembershipState("leave", MatrixSenderId!));
     }
 
     private async Task InviteToRoomAsync(string roomId, InviteToRoomRequest request)
     {
-        await events.PublishAsync(roomId, new ChangeMembershipState("invite", request.UserId));
+        await PublishAsync(roomId, new ChangeMembershipState("invite", request.UserId));
     }
 
     private async Task<SendMessageReponse> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request)
     {
-        var ev = await events.PublishAsync(roomId, new MatrixMessage(request.Body));
+        var ev = await PublishAsync(roomId, new MatrixMessage(request.Body));
         return new(ev.EventId);
     }
 
     private async Task<List<BlossomEvent<MatrixMessage>>> GetMessagesAsync(string roomId)
     {
-        return await events.GetAllAsync<MatrixMessage>(roomId);
+        return await GetAllAsync<MatrixMessage>(roomId);
+    }
+
+    private async Task<BlossomEvent> PublishAsync<T>(string roomId, T content)
+    {
+        var sender = await GetMatrixSenderIdAsync();
+
+        var ev = BlossomEvent.Create(roomId, sender, content);
+        await events.AddAsync(ev);
+        return ev;
+    }
+
+    private async Task<string> GetMatrixSenderIdAsync()
+    {
+        if (MatrixSenderId != null)
+            return MatrixSenderId;
+
+        var principal = http.HttpContext?.User
+            ?? throw new InvalidOperationException("User not authenticated");
+
+        var user = await auth.GetAsync(principal);
+
+        // Ensure the user has a Matrix identity
+        var username = user.Avatar.Username.ToLowerInvariant();
+        var matrixId = $"@{username}:{Domain}";
+
+        if (!user.HasIdentity("Matrix"))
+        {
+            user.AddIdentity("Matrix", matrixId);
+            await auth.UpdateAsync(user);
+        }
+
+        return user.Identity("Matrix")!;
     }
 
     //private async Task<GetSyncResponse> GetSyncAsync()

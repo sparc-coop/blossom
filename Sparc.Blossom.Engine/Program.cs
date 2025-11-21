@@ -20,7 +20,7 @@ builder.Services.AddAzureStorage(builder.Configuration.GetConnectionString("Stor
 
 builder.AddSparcAuthentication<BlossomUser>();
 builder.AddSparcBilling();
-builder.AddSparcChat();
+builder.AddSparcSpaces();
 builder.Services.AddScoped(_ => new OpenAIClient(builder.Configuration.GetConnectionString("OpenAI")!));
 
 Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", builder.Configuration.GetConnectionString("Anthropic"));
@@ -52,7 +52,7 @@ var app = builder.Build();
 app.MapStaticAssets();
 app.UseSparcAuthentication<BlossomUser>();
 app.UseSparcBilling();
-app.UseSparcChat();
+app.UseSparcSpaces();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

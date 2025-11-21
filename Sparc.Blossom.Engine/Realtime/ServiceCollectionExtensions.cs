@@ -2,27 +2,17 @@
 
 public static class ServiceCollectionExtensions
 {
-    public static WebApplicationBuilder AddSparcChat(
-        this WebApplicationBuilder builder
-    )
+    public static WebApplicationBuilder AddSparcSpaces(this WebApplicationBuilder builder)
     {
-        builder.Services
-            .AddTransient<BlossomEvents>()
-            .AddTransient<SparcEngineChatService>();
-
+        builder.Services.AddTransient<BlossomSpaces>();
         return builder;
     }
 
-    public static WebApplication UseSparcChat(
-        this WebApplication app
-    )
+    public static WebApplication UseSparcSpaces(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
-        var chatSvc = scope
-            .ServiceProvider
-            .GetRequiredService<SparcEngineChatService>();
-
-        chatSvc.Map(app);
+        var spaces = scope.ServiceProvider.GetRequiredService<BlossomSpaces>();
+        spaces.Map(app);
         return app;
     }
 }

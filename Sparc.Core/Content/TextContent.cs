@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 namespace Sparc.Blossom.Content;
 
 public record EditHistory(DateTime Timestamp, string Text);
+public record BlossomVector(string? Model, float[] Value);
 public record TovikContentTranslated(TextContent Content, int TokenCount, decimal? Cost = null, string? Description = null, string? Response = null) : BlossomEntityChanged(Content);
 
 public record ContentTranslation(string Id, Language Language, string? SourceContentId = null)
@@ -33,6 +34,7 @@ public class TextContent : BlossomEntity<string>
     public string OriginalText { get; set; } = "";
     internal List<EditHistory> EditHistory { get; set; } = [];
     public string Html { get; set; } = "";
+    public BlossomVector? Vector { get; set; }
 
     [JsonConstructor]
     private TextContent()
