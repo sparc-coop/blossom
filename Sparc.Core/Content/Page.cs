@@ -19,7 +19,7 @@ public class Page : BlossomSpace
         Name = string.Empty;
     }
 
-    private Page(string domain, string path) : base(domain)
+    private Page(string domain, string path) : base(domain, path)
     {
         Id = BlossomHash.MD5($"{domain}:{path}");
         Domain = domain;

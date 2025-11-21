@@ -36,55 +36,55 @@ public class BlossomSpaces(
         await PublishAsync(userId, presence);
     }
 
-    private async Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null)
+    private async Task<GetPublicRoomsResponse> GetSpacesAsync(int? limit = null, string? since = null, string? server = null)
     {
         var createdRooms = await Query<CreateRoom>().ToListAsync();
 
-        var rooms = new List<MatrixRoom>();
+        var rooms = new List<BlossomSpace>();
         // Eventually do this in the background to show a published room directory
         foreach (var createdRoom in createdRooms)
         {
-            var room = await GetRoomAsync(createdRoom.RoomId);
+            var room = await GetSpaceAsync(createdRoom.RoomId);
             rooms.Add(room);
         }
 
         return new(rooms);
     }
 
-    private async Task<MatrixRoom> GetRoomSummaryAsync(string roomId)
-    {
-        if (!roomId.Contains(':'))
-            roomId = roomId + ":" + Domain;
-
-        return await GetRoomAsync(roomId);
-    }
-
-    internal async Task<List<BlossomEvent>> GetAllAsync(string roomId)
+    internal async Task<List<BlossomEvent>> GetAllAsync(string spaceId)
     {
         return await events.Query
-            .Where(x => x.RoomId == roomId)
+            .Where(x => x.RoomId == spaceId)
             .OrderBy(x => x.Depth)
             .ToListAsync();
     }
 
-    internal async Task<List<BlossomEvent<T>>> GetAllAsync<T>(string roomId)
+    internal async Task<List<BlossomEvent<T>>> GetAllAsync<T>(string spaceId)
     {
         var type = typeof(T).Name;
         var result = await events.Query
-            .Where(e => e.RoomId == roomId && e.Type == type)
+            .Where(e => e.RoomId == spaceId && e.Type == type)
             .OrderBy(x => x.Depth)
             .ToListAsync();
 
         return result.Cast<BlossomEvent<T>>().ToList();
     }
 
-    internal async Task<MatrixRoom> GetRoomAsync(string roomId)
+    internal async Task<BlossomSpace> GetSpaceAsync(string spaceId)
     {
-        var allRoomEvents = await GetAllAsync(roomId);
-        return MatrixRoom.From(allRoomEvents);
+        var allRoomEvents = await GetAllAsync(spaceId);
+        var orderedEvents = allRoomEvents.OrderBy(x => x.Depth);
+
+        var rootEvent = orderedEvents.OfType<BlossomEvent<CreateRoom>>().First();
+
+        var room = new BlossomSpace(Domain, rootEvent.RoomId, rootEvent.Content.Type);
+        foreach (var ev in orderedEvents)
+            ev.ApplyTo(room);
+
+        return room;
     }
 
-    private async Task<CreateRoomResponse> CreateRoomAsync(CreateRoomRequest request)
+    private async Task<CreateSpaceResponse> CreateSpaceAsync(CreateSpaceRequest request)
     {
         var roomId = "!" + BlossomEvent.OpaqueId() + ":" + Domain;
         await PublishAsync(roomId, new CreateRoom());
@@ -129,17 +129,17 @@ public class BlossomSpaces(
         return new(roomId);
     }
 
-    private async Task JoinRoomAsync(string roomId)
+    private async Task JoinSpaceAsync(string roomId)
     {
         await PublishAsync(roomId, new ChangeMembershipState("join", MatrixSenderId!));
     }
 
-    private async Task LeaveRoomAsync(string roomId)
+    private async Task LeaveSpaceAsync(string roomId)
     {
         await PublishAsync(roomId, new ChangeMembershipState("leave", MatrixSenderId!));
     }
 
-    private async Task InviteToRoomAsync(string roomId, InviteToRoomRequest request)
+    private async Task InviteToSpaceAsync(string roomId, InviteToSpaceRequest request)
     {
         await PublishAsync(roomId, new ChangeMembershipState("invite", request.UserId));
     }
@@ -198,11 +198,11 @@ public class BlossomSpaces(
         var chatGroup = endpoints.MapGroup("/_matrix/client/v3");
 
         //chatGroup.MapGet("/sync", GetSyncAsync);
-        chatGroup.MapGet("/publicRooms", GetRoomsAsync);
-        chatGroup.MapPost("/createRoom", CreateRoomAsync);
-        chatGroup.MapPost("/join/{roomId}", JoinRoomAsync);
-        chatGroup.MapPost("/rooms/{roomId}/leave", LeaveRoomAsync);
-        chatGroup.MapPost("/rooms/{roomId}/invite", InviteToRoomAsync);
+        chatGroup.MapGet("/publicRooms", GetSpacesAsync);
+        chatGroup.MapPost("/createRoom", CreateSpaceAsync);
+        chatGroup.MapPost("/join/{roomId}", JoinSpaceAsync);
+        chatGroup.MapPost("/rooms/{roomId}/leave", LeaveSpaceAsync);
+        chatGroup.MapPost("/rooms/{roomId}/invite", InviteToSpaceAsync);
         chatGroup.MapGet("/rooms/{roomId}/messages", GetMessagesAsync);
         chatGroup.MapPost("/rooms/{roomId}/send/{eventType}/{txnId}", SendMessageAsync);
 
@@ -218,6 +218,6 @@ public class BlossomSpaces(
         });
 
         var legacyChatGroup = endpoints.MapGroup("/_matrix/client/v1");
-        legacyChatGroup.MapGet("/room_summary/{roomId}", GetRoomSummaryAsync);
+        legacyChatGroup.MapGet("/room_summary/{roomId}", GetSpaceAsync);
     }
 }

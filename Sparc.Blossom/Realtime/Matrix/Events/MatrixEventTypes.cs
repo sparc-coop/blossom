@@ -17,7 +17,7 @@ public enum GuestAccess
 public record StateEvent(string Type, object Content, string StateKey = "");
 
 public record GetPublicRoomsResponse(
-    List<MatrixRoom> Chunk,
+    List<BlossomSpace> Chunk,
     string? NextBatch = null,
     string? PrevBatch = null,
     int? TotalRoomCountEstimate = null

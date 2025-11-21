@@ -37,7 +37,7 @@ public static class ServerServiceCollectionExtensions
                 x.AttemptTimeout.Timeout = TimeSpan.FromSeconds(120);
             });
 
-        services.AddRefitClient<ISparcChat>()
+        services.AddRefitClient<ISparcSpaces>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
             .AddHttpMessageHandler<SparcAuraTokenHandler>()
             .AddStandardResilienceHandler();

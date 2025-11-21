@@ -2,28 +2,28 @@
 
 namespace Sparc.Blossom.Realtime;
 
-public interface ISparcChat
+public interface ISparcSpaces
 {
     [Get("/_matrix/client/v3/publicRooms")]
-    Task<GetPublicRoomsResponse> GetRoomsAsync(int? limit = null, string? since = null, string? server = null);
+    Task<GetPublicRoomsResponse> GetSpacesAsync(int? limit = null, string? since = null, string? server = null);
 
     [Get("/_matrix/client/v1/room_summary/{roomId}")]
-    Task<MatrixRoom> GetRoomSummaryAsync(string roomId);
+    Task<BlossomSpace> GetSpaceAsync(string roomId);
 
     [Post("/_matrix/client/v3/createRoom")]
-    Task<MatrixRoom> CreateRoomAsync(CreateRoomRequest request);
+    Task<BlossomSpace> CreateSpaceAsync(CreateSpaceRequest request);
 
     [Post("/_matrix/client/v3/deleteRoom/{roomId}")]
-    Task<MatrixRoom> DeleteRoomAsync(string roomId);
+    Task<BlossomSpace> DeleteSpaceAsync(string roomId);
 
     [Post("/_matrix/client/v3/join/{roomId}")]
-    Task<MatrixRoom> JoinRoomAsync(string roomId);
+    Task<BlossomSpace> JoinSpaceAsync(string roomId);
 
     [Post("/_matrix/client/v3/rooms/{roomId}/leave")]
-    Task<MatrixRoom> LeaveRoomAsync(string roomId);
+    Task<BlossomSpace> LeaveSpaceAsync(string roomId);
 
     [Post("/_matrix/client/v3/rooms/{roomId}/invite")]
-    Task<MatrixRoom> InviteToRoomAsync(string roomId, InviteToRoomRequest request);
+    Task<BlossomSpace> InviteToSpaceAsync(string roomId, InviteToSpaceRequest request);
 
     [Get("/_matrix/client/v3/rooms/{roomId}/messages")]
     Task<List<BlossomEvent<MatrixMessage>>> GetMessagesAsync(string roomId);
@@ -38,8 +38,8 @@ public interface ISparcChat
     Task SetPresenceAsync(string userId, BlossomPresence presence);
 }
 
-public record InviteToRoomRequest(string UserId);
-public record CreateRoomRequest(
+public record InviteToSpaceRequest(string UserId);
+public record CreateSpaceRequest(
     string? Name = null,
     string Visibility = "private",
     string? Topic = null,
@@ -50,9 +50,9 @@ public record CreateRoomRequest(
     List<string>? Invite = null,
     List<StateEvent>? InitialState = null,
     Dictionary<string, object>? CreationContent = null);
-public record CreateRoomResponse(string RoomId);
+public record CreateSpaceResponse(string RoomId);
 public record SendMessageRequest(string Body, string MsgType = "m.text");
-public record DeleteRoomRequest(string RoomId);
+public record DeleteSpaceRequest(string RoomId);
 
 public record GetSyncResponse(
     string next_batch,
