@@ -96,6 +96,26 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
             ?? new ClaimsPrincipal(new ClaimsIdentity()));
     }
 
+    public override void AddBlossomEngine(string? url = null) => AddBlossomEngine<SparcAuraTokenHandler>(url);
+    protected override void AddSparcAura()
+    {
+        Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options => {
+                options.Cookie.Name = "Sparc." + Assembly.GetEntryAssembly()?.GetName().Name;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+            });
+
+        Services.AddCascadingAuthenticationState();
+        Services.AddScoped<SparcAuraServerAuthenticator>()
+            .AddScoped<IBlossomAuthenticator, SparcAuraServerAuthenticator>()
+            .AddScoped<PasskeyAuthenticator>();
+
+        Services.AddTransient(s =>
+            s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User
+            ?? new ClaimsPrincipal(new ClaimsIdentity()));
+    }
+
     void AddBlossomServer(IComponentRenderMode? renderMode = null)
     {
         var razor = Services.AddRazorComponents();

@@ -1,8 +1,12 @@
-﻿using Sparc.Blossom.Authentication;
-using System.Reflection;
-using MediatR.NotificationPublishers;
-using Microsoft.Extensions.DependencyInjection;
+﻿using MediatR.NotificationPublishers;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Refit;
+using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Billing;
+using Sparc.Blossom.Content;
+using Sparc.Blossom.Realtime;
+using System.Reflection;
 
 namespace Sparc.Blossom;
 
@@ -79,6 +83,44 @@ public abstract class BlossomApplicationBuilder
         Services.AddScoped<BlossomHubProxy>();
     }
 
+    public abstract void AddBlossomEngine(string? url = null);
+    protected void AddBlossomEngine<TTokenHandler>(string? url = null)
+        where TTokenHandler : DelegatingHandler
+    {
+        url ??= "https://engine.sparc.coop";
+        var uri = new Uri(url);
+
+        Services.AddTransient<TTokenHandler>();
+
+        Services.AddRefitClient<ISparcAura>()
+            .ConfigureHttpClient(x => x.BaseAddress = uri)
+            .AddHttpMessageHandler<TTokenHandler>()
+            .AddStandardResilienceHandler();
+
+        Services.AddRefitClient<ISparcBilling>()
+            .ConfigureHttpClient(x => x.BaseAddress = uri)
+            .AddHttpMessageHandler<TTokenHandler>()
+            .AddStandardResilienceHandler();
+
+        Services.AddRefitClient<ITovik>()
+            .ConfigureHttpClient(x => x.BaseAddress = uri)
+            .AddHttpMessageHandler<TTokenHandler>()
+            .AddStandardResilienceHandler(x =>
+            {
+                x.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(240);
+                x.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(240);
+                x.AttemptTimeout.Timeout = TimeSpan.FromSeconds(120);
+            });
+
+        Services.AddRefitClient<ISparcSpaces>()
+            .ConfigureHttpClient(x => x.BaseAddress = uri)
+            .AddHttpMessageHandler<TTokenHandler>()
+            .AddStandardResilienceHandler();
+
+        AddSparcAura();
+        Services.AddScoped<SparcEvents>();
+    }
+
     protected virtual void AddBlossomRealtime(Assembly assembly)
     {
         Services.AddMediatR(options =>
@@ -90,6 +132,7 @@ public abstract class BlossomApplicationBuilder
         });
     }
 
+    protected abstract void AddSparcAura();
 
     protected static IEnumerable<Type> GetDtos(Assembly assembly)
        => assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>))
