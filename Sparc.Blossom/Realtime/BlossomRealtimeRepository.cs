@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Sparc.Blossom.Authentication;
 using System.Security.Claims;
 
 namespace Sparc.Blossom;
@@ -11,8 +10,6 @@ public class BlossomRealtimeRepository<T>(IRepository<BlossomEntityChanged<T>> r
     public IRepository<BlossomEntityChanged<T>> Repository { get; } = repository;
     public IPublisher Publisher { get; } = publisher;
     ClaimsPrincipal User => principal;
-    string? UserId => User.Id();
-    IQueryable<BlossomEntityChanged<T>> UserEvents => Repository.Query.Where(x => x.UserId == UserId);
 
     public async Task<BlossomEntityChanged<T>?> GetAsync(string id)
     {
