@@ -68,7 +68,7 @@ internal class OpenAITranslator(OpenAIClient client)
         {
             options.ReasoningOptions = new()
             {
-                ReasoningEffortLevel = ResponseReasoningEffortLevel.Low
+                ReasoningEffortLevel = ResponseReasoningEffortLevel.Minimal
             };
         }
 

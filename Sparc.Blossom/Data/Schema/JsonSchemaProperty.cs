@@ -41,8 +41,6 @@ public record JsonSchemaProperty
 
         var jsonType = type switch
         {
-            Type t when t == typeof(List<string>) => "array",
-            Type t when t == typeof(List<double>) => "array",
             Type t when t == typeof(string) => "string",
             Type t when t == typeof(int) => "integer",
             Type t when t == typeof(long) => "integer",
@@ -51,6 +49,7 @@ public record JsonSchemaProperty
             Type t when t == typeof(decimal) => "number",
             Type t when t == typeof(bool) => "boolean",
             Type t when t == typeof(DateTime) => "string",
+            Type t when t.IsAssignableFrom(typeof(IList)) => "array",
             _ => "object"
         };
 

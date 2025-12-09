@@ -17,7 +17,8 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
         var question = new TovikTranslationQuestion(message, options);
         var answer = await AskAsync(question);
 
-        var result = new TextContent(message, options.OutputLanguage ?? message.Language, answer.Value!.Text.First().Text);
+        var text = answer.Value!.Text.FirstOrDefault()?.Text ?? answer.Text;
+        var result = new TextContent(message, options.OutputLanguage ?? message.Language, text);
         //{
         //    Type = options.Schema?.Name
         //};
