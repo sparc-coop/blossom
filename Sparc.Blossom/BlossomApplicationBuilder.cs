@@ -74,7 +74,7 @@ public abstract class BlossomApplicationBuilder
     protected void AddBlossomRepository()
     {
         Services.AddScoped(typeof(BlossomRepository<>));
-        Services.AddScoped(typeof(DexieRepository<>));
+        Services.AddScoped(typeof(AutomergeRepository<>));
 
         if (!Services.Any(x => x.ServiceType == typeof(IRepository<>)))
             Services.AddScoped(typeof(IRepository<>), typeof(BlossomRepository<>));
