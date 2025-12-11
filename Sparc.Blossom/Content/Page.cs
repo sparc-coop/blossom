@@ -1,4 +1,5 @@
-﻿using Sparc.Core;
+﻿using Sparc.Blossom.Spaces;
+using Sparc.Core;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Content;

@@ -1,4 +1,6 @@
-﻿namespace Sparc.Blossom.Realtime;
+﻿using Sparc.Blossom.Spaces;
+
+namespace Sparc.Blossom.Realtime;
 
 public enum HistoryVisibility
 {

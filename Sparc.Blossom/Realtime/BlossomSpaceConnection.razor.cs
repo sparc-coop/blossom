@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
 
-namespace Sparc.Blossom.Realtime;
+namespace Sparc.Blossom.Spaces;
 
 public class BlossomSpaceConnectionProvider(string baseUri)
 {

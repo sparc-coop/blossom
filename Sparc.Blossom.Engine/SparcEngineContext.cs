@@ -4,6 +4,7 @@ using Sparc.Blossom.Billing;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data.Pouch;
 using Sparc.Blossom.Realtime;
+using Sparc.Blossom.Spaces;
 
 namespace Sparc.Blossom.Engine;
 
@@ -46,5 +47,10 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
           .ToContainer("Events")
           .HasPartitionKey(e => e.SpaceId)
           .HasKey(x => x.Id);
+
+        model.Entity<BlossomSpace>()
+            .ToContainer("Spaces")
+            .HasPartitionKey(s => s.Domain)
+            .HasKey(x => x.Id);
     }
 }

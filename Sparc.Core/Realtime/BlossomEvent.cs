@@ -24,10 +24,6 @@ public class BlossomEvent(string spaceId, string sender) : BlossomEntity<string>
     {
         return new BlossomEvent<T>(spaceId, sender, content, previousEvents);
     }
-
-    public virtual void ApplyTo(BlossomSpace space)
-    { 
-    }
     
     //// Special magic to be able to save & query polymorphically to/from Cosmos
     //public static string Types<T>() =>  
@@ -99,17 +95,6 @@ public class BlossomEvent<T> : BlossomEvent
                     .Replace("+", "-")
                     .Replace("/", "_");
     }
-
-    public override void ApplyTo(BlossomSpace space)
-    {
-        if (Content is IBlossomEvent ev)
-            ev.ApplyTo(space);
-    }
-}
-
-public interface IBlossomEvent
-{
-    void ApplyTo(BlossomSpace space);
 }
 
 public record MatrixEventHash(string Sha256);

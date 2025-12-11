@@ -6,6 +6,7 @@ using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Billing;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Realtime;
+using Sparc.Blossom.Spaces;
 using System.Reflection;
 
 namespace Sparc.Blossom;

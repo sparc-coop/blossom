@@ -1,6 +1,7 @@
 ﻿using Refit;
+using Sparc.Blossom.Realtime;
 
-namespace Sparc.Blossom.Realtime;
+namespace Sparc.Blossom.Spaces;
 
 public interface ISparcSpaces
 {

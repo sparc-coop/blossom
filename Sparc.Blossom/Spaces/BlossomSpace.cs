@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Spaces;
 
 public class BlossomSpace : BlossomEntity<string>
 {
@@ -20,6 +20,7 @@ public class BlossomSpace : BlossomEntity<string>
     public DateTime DateRegistered { get; set; } = DateTime.UtcNow;
     public DateTime? LastActiveDate { get; set; } = DateTime.UtcNow;
     public DateTime? EndDate { get; set; }
+    public List<SparcEntityType> EntityTypes { get; set; } = [];
 
 
     [JsonConstructor]

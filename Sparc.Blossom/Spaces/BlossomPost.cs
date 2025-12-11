@@ -1,7 +1,7 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Spaces;
 
 public class BlossomPost : TextContent
 {
@@ -13,4 +13,10 @@ public class BlossomPost : TextContent
     { }
 
     public string PostId { get { return Id; } set { Id = value; } }
+
+    public List<SparcEntity> Entities { get; set; } = [];
+    public async Task ExtractEntities(ITovik tovik, List<SparcEntityType> entityTypes)
+    {
+        Entities = await tovik.ExtractGraphAsync(new(this, entityTypes));
+    }
 }

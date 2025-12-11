@@ -79,9 +79,6 @@ public class BlossomSpaces(
         var rootEvent = orderedEvents.OfType<BlossomEvent<CreateSpace>>().First();
 
         var space = new BlossomSpace(Domain, rootEvent.SpaceId, rootEvent.Content.Type);
-        foreach (var ev in orderedEvents)
-            ev.ApplyTo(space);
-
         return space;
     }
 
