@@ -4,37 +4,37 @@ namespace Sparc.Blossom.Realtime;
 
 public interface ISparcSpaces
 {
-    [Get("/_matrix/client/v3/publicRooms")]
-    Task<GetPublicRoomsResponse> GetSpacesAsync(int? limit = null, string? since = null, string? server = null);
+    [Get("/spaces")]
+    Task<GetPublicSpacesResponse> GetSpacesAsync(int? limit = null, string? since = null, string? server = null);
 
-    [Get("/_matrix/client/v1/room_summary/{roomId}")]
-    Task<BlossomSpace> GetSpaceAsync(string roomId);
+    [Get("/spaces/{spaceId}")]
+    Task<BlossomSpace> GetSpaceAsync(string spaceId);
 
-    [Post("/_matrix/client/v3/createRoom")]
+    [Post("/spaces")]
     Task<BlossomSpace> CreateSpaceAsync(CreateSpaceRequest request);
 
-    [Post("/_matrix/client/v3/deleteRoom/{roomId}")]
-    Task<BlossomSpace> DeleteSpaceAsync(string roomId);
+    [Delete("/spaces/{spaceId}")]
+    Task<BlossomSpace> DeleteSpaceAsync(string spaceId);
 
-    [Post("/_matrix/client/v3/join/{roomId}")]
-    Task<BlossomSpace> JoinSpaceAsync(string roomId);
+    [Post("/spaces/{spaceId}/join")]
+    Task<BlossomSpace> JoinSpaceAsync(string spaceId);
 
-    [Post("/_matrix/client/v3/rooms/{roomId}/leave")]
-    Task<BlossomSpace> LeaveSpaceAsync(string roomId);
+    [Post("/spaces/{spaceId}/leave")]
+    Task<BlossomSpace> LeaveSpaceAsync(string spaceId);
 
-    [Post("/_matrix/client/v3/rooms/{roomId}/invite")]
-    Task<BlossomSpace> InviteToSpaceAsync(string roomId, InviteToSpaceRequest request);
+    [Post("/spaces/{spaceId}/invite")]
+    Task<BlossomSpace> InviteToSpaceAsync(string spaceId, InviteToSpaceRequest request);
 
-    [Get("/_matrix/client/v3/rooms/{roomId}/messages")]
-    Task<List<BlossomEvent<MatrixMessage>>> GetMessagesAsync(string roomId);
+    [Get("/spaces/{spaceId}/posts")]
+    Task<List<BlossomPost>> GetPostsAsync(string spaceId);
 
-    [Post("/_matrix/client/v3/rooms/{roomId}/send/{eventType}/{txnId}")]
-    Task<BlossomEvent> SendMessageAsync(string roomId, string eventType, string txnId, SendMessageRequest request);
+    [Post("/spaces/rooms/{spaceId}/send/{eventType}/{txnId}")]
+    Task<BlossomEvent> SendMessageAsync(string spaceId, string eventType, string txnId, SendMessageRequest request);
 
-    [Get("/_matrix/client/v3/presence/{userId}/status")]
+    [Get("/spaces/presence/{userId}/status")]
     Task<BlossomPresence> GetPresenceAsync(string userId);
 
-    [Put("/_matrix/client/v3/presence/{userId}/status")]
+    [Put("/spaces/presence/{userId}/status")]
     Task SetPresenceAsync(string userId, BlossomPresence presence);
 }
 
@@ -50,9 +50,9 @@ public record CreateSpaceRequest(
     List<string>? Invite = null,
     List<StateEvent>? InitialState = null,
     Dictionary<string, object>? CreationContent = null);
-public record CreateSpaceResponse(string RoomId);
+public record CreateSpaceResponse(string spaceId);
 public record SendMessageRequest(string Body, string MsgType = "m.text");
-public record DeleteSpaceRequest(string RoomId);
+public record DeleteSpaceRequest(string spaceId);
 
 public record GetSyncResponse(
     string next_batch,

@@ -4,6 +4,7 @@ namespace Sparc.Blossom;
 
 public class BlossomSpace : BlossomEntity<string>
 {
+    public string SpaceId {  get { return Id;  } set { Id = value; } }
     public string Domain { get; set; }
     public string Name { get; set; } = string.Empty;
     public string RoomId { get; set; }

@@ -37,21 +37,21 @@ public class TextContent : BlossomEntity<string>
     public BlossomVector? Vector { get; set; }
 
     [JsonConstructor]
-    private TextContent()
+    protected TextContent()
     { }
 
-    public TextContent(string domain, string pageId, string languageId)
+    public TextContent(string domain, string spaceId, string languageId)
     {
         Id = Guid.NewGuid().ToString();
         Domain = domain;
-        SpaceId = pageId;
+        SpaceId = spaceId;
         User = new BlossomUser().Avatar;
         Language = new(languageId);
         LanguageId = Language.Id;
     }
 
-    public TextContent(string domain, string pageId, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
-        : this(domain, pageId, language.Id)
+    public TextContent(string domain, string spaceId, Language language, string text, BlossomUser? user = null, string? originalText = null, string contentType = "Text")
+        : this(domain, spaceId, language.Id)
     {
         User = user?.Avatar;
         Language = user?.Avatar.Language ?? language;

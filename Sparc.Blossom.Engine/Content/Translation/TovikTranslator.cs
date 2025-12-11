@@ -1,8 +1,10 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content.Tovik;
 using Sparc.Blossom.Data;
+using Sparc.Blossom.Spaces;
 using System.Globalization;
 using System.Security.Claims;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Sparc.Blossom.Content;
 
@@ -87,6 +89,23 @@ public class TovikTranslator(
         return translations;
     }
 
+    public record GraphExtractionResult(List<SparcEntityBase> Entities, List<SparcRelationship> Relationships);
+    public async Task<List<SparcEntity>> ExtractGraph(TovikExtractGraphRequest request)
+    {
+        var options = new TovikTranslationOptions
+        {
+            Instructions = SparcPrompts.GraphExtraction(request.EntityTypes),
+            Schema = new BlossomSchema(typeof(GraphExtractionResult))
+        };
+
+        var graph = await TranslateAsync<GraphExtractionResult>(request.Content, options);
+        if (graph?.Entities == null)
+            return [];
+
+        var entities = graph.Entities.Select(x => new SparcEntity(x, graph.Relationships));
+        return entities.ToList();
+    }
+
     public async Task<TextContent> TranslateToEntity(TextContent content, TovikTranslationOptions options)
     {
         if (content.Text?.StartsWith("http") == true)
@@ -169,6 +188,17 @@ public class TovikTranslator(
         var translator = Translators.OrderBy(x => x.Priority).First();
         var result = await translator.TranslateAsync(messages.ToList(), options);
         return result;
+    }
+
+    public async Task<T?> TranslateAsync<T>(TextContent message, TovikTranslationOptions options)
+        => (await TranslateAsync<T>([message], options)).FirstOrDefault();
+
+    public async Task<List<T>> TranslateAsync<T>(IEnumerable<TextContent> messages, TovikTranslationOptions options)
+    {
+        options.Schema = new(typeof(T));
+        var translator = Translators.OrderBy(x => x.Priority).First();
+        var result = await translator.TranslateAsync(messages.ToList(), options);
+        return result.Cast<T>().ToList();
     }
 
     internal async Task<string?> TranslateAsync(string text, string fromLanguage, string toLanguage)
@@ -289,6 +319,11 @@ public class TovikTranslator(
         group.MapPost("entity", async (TovikTranslator translator, TovikTranslationRequest request) =>
         {
             var result = await translator.TranslateToEntity(request.Content, request.Options);
+            return Results.Ok(result);
+        });
+        group.MapPost("graph", async (TovikTranslator translator, TovikExtractGraphRequest request) =>
+        {
+            var result = await translator.ExtractGraph(request);
             return Results.Ok(result);
         });
     }

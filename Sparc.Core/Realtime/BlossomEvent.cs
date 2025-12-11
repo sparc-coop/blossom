@@ -4,14 +4,14 @@ using System.Text.Json;
 
 namespace Sparc.Blossom.Realtime;
 
-public class BlossomEvent(string roomId, string sender) : BlossomEntity<string>(), MediatR.INotification
+public class BlossomEvent(string spaceId, string sender) : BlossomEntity<string>(), MediatR.INotification
 {
     public string Type { get; set; } = "";
     public string EventId { get { return Id; } set { Id = value; } }
     public long Depth { get; set; } = 1;
     public long OriginServerTs { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     public List<string> PrevEvents { get; set; } = [];
-    public string RoomId { get; set; } = roomId;
+    public string SpaceId { get; set; } = spaceId;
     public string Sender { get; set; } = sender;
     public string? StateKey { get; set; }
 
@@ -20,12 +20,12 @@ public class BlossomEvent(string roomId, string sender) : BlossomEntity<string>(
     public Dictionary<string, Dictionary<string, string>> Signatures { get; set; } = [];
     public MatrixUnsignedData Unsigned => new(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - OriginServerTs);
 
-    public static BlossomEvent<T> Create<T>(string roomId, string sender, T content, List<BlossomEvent>? previousEvents = null)
+    public static BlossomEvent<T> Create<T>(string spaceId, string sender, T content, List<BlossomEvent>? previousEvents = null)
     {
-        return new BlossomEvent<T>(roomId, sender, content, previousEvents);
+        return new BlossomEvent<T>(spaceId, sender, content, previousEvents);
     }
 
-    public virtual void ApplyTo(BlossomSpace room)
+    public virtual void ApplyTo(BlossomSpace space)
     { 
     }
     
@@ -62,8 +62,8 @@ public class BlossomEvent<T> : BlossomEvent
     {
     }
 
-    public BlossomEvent(string roomId, string sender, T content, List<BlossomEvent>? previousEvents = null) 
-        : base(roomId, sender)
+    public BlossomEvent(string spaceId, string sender, T content, List<BlossomEvent>? previousEvents = null) 
+        : base(spaceId, sender)
     {
         Type = typeof(T).Name;
         Content = content;
@@ -102,12 +102,12 @@ public class BlossomEvent<T> : BlossomEvent
 
     public override void ApplyTo(BlossomSpace space)
     {
-        if (Content is IMatrixRoomEvent ev)
+        if (Content is IBlossomEvent ev)
             ev.ApplyTo(space);
     }
 }
 
-public interface IMatrixRoomEvent
+public interface IBlossomEvent
 {
     void ApplyTo(BlossomSpace space);
 }

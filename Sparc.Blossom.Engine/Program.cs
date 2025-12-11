@@ -10,6 +10,7 @@ using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
 using Sparc.Blossom.Engine;
 using Sparc.Blossom.Realtime;
+using Sparc.Blossom.Spaces;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();

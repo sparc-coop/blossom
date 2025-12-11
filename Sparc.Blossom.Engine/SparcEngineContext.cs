@@ -44,7 +44,7 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
 
         model.Entity<BlossomEvent>()
           .ToContainer("Events")
-          .HasPartitionKey(e => e.RoomId)
+          .HasPartitionKey(e => e.SpaceId)
           .HasKey(x => x.Id);
     }
 }

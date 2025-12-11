@@ -1,6 +1,7 @@
 ﻿using Refit;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content.Tovik;
+using Sparc.Blossom.Spaces;
 
 namespace Sparc.Blossom.Content;
 
@@ -18,6 +19,9 @@ public interface ITovik
     [Post("/translate/entity")]
     Task<TextContent> TranslateAsync(TovikTranslationRequest request);
 
+    [Post("/translate/graph")]
+    Task<List<SparcEntity>> ExtractGraphAsync(TovikExtractGraphRequest request);
+
     public async Task<T?> TranslateAsync<T>(TextContent content, TovikTranslationOptions? options = null)
         => await TranslateAsync<T, T>(content, options);
 
@@ -33,6 +37,7 @@ public interface ITovik
 }
 
 public record TovikCrawlRequest(string Domain, List<string> ToLanguages, string FromLanguage = "en");
+public record TovikExtractGraphRequest(TextContent Content, List<SparcEntityType> EntityTypes);
 public record TranslationRequest(List<TextContent> Content, string? AdditionalContext = null, string? Model = null);
 public record Visit(string Domain, string Path);
 public record TovikTranslationRequest(TextContent Content, TovikTranslationOptions Options);
