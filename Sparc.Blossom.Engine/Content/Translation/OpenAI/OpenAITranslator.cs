@@ -10,6 +10,42 @@ namespace Sparc.Blossom.Content;
 internal class OpenAITranslator(OpenAIClient client) 
     : AITranslator("gpt-4.1-nano", 0.40m / 1_000_000, 0)
 {
+    public override async Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages)
+    {
+        var model = "text-embedding-3-small";
+        var embeddings = client.GetEmbeddingClient(model);
+
+        var batchSize = 1000;
+        var offset = 0;
+        var vectors = new List<BlossomVector>();
+        do
+        {
+            var batch = messages
+                .Where(x => !string.IsNullOrWhiteSpace(x.Text))
+                //.OrderBy(x => x.Sequence)
+                .Skip(offset)
+                .Take(batchSize)
+                .ToList();
+
+            var inputs = batch.Select(x => x.Text).ToList();
+
+            if (!inputs.Any())
+                return [];
+
+            var outputs = await embeddings.GenerateEmbeddingsAsync(inputs);
+
+            foreach (var output in outputs.Value)
+            {
+                var text = batch.ElementAt(output.Index);
+                vectors.Add(new(text.SpaceId, model, output.ToFloats().ToArray(), text.Id));
+            }
+
+            offset += batchSize;
+        } while (offset < messages.Count());
+
+        return vectors;
+    }
+    
     public override async Task<BlossomAnswer<T>> AskAsync<T>(BlossomQuestion<T> question)
     {
         var answer = new BlossomAnswer<T>();

@@ -12,6 +12,9 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
     protected string DefaultModel = defaultModel;
     protected decimal CostPerToken = costPerToken;
 
+    public async Task<BlossomVector> VectorizeAsync(TextContent message) => (await VectorizeAsync([message])).First();
+    public abstract Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages);
+
     public async Task<TextContent> TranslateAsync(TextContent message, TovikTranslationOptions options)
     {
         var question = new TovikTranslationQuestion(message, options);

@@ -4,7 +4,6 @@ using Sparc.Blossom.Data;
 using Sparc.Blossom.Spaces;
 using System.Globalization;
 using System.Security.Claims;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Sparc.Blossom.Content;
 
@@ -13,6 +12,7 @@ public class TovikTranslator(
     IRepository<TextContent> content,
     IRepository<SparcDomain> domains,
     IRepository<Page> pages,
+    IRepository<BlossomVector> vectors,
     ClaimsPrincipal principal,
     SparcAuthenticator<BlossomUser> auth) : IBlossomEndpoints
 {
