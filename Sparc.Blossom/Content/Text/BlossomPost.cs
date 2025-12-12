@@ -1,7 +1,8 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
+using Sparc.Blossom.Spaces;
 
-namespace Sparc.Blossom.Spaces;
+namespace Sparc.Blossom.Content;
 
 public class BlossomPost : TextContent
 {

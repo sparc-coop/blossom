@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Content;
 
 public class BlossomVector : BlossomEntity<string>
 {
