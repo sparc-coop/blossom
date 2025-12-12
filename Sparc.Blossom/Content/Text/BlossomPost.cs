@@ -16,7 +16,7 @@ public class BlossomPost : TextContent
     public string PostId { get { return Id; } set { Id = value; } }
 
     public List<SparcEntity> Entities { get; set; } = [];
-    public async Task ExtractEntities(ITovik tovik, List<SparcEntityType> entityTypes)
+    public async Task ExtractEntities(ISparcContent tovik, List<SparcEntityType> entityTypes)
     {
         Entities = await tovik.ExtractGraphAsync(new(this, entityTypes));
     }

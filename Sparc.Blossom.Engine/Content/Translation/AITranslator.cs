@@ -1,8 +1,4 @@
-﻿#pragma warning disable OPENAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-
-using Sparc.Blossom.Content.OpenAI;
-using Sparc.Blossom.Content.Tovik;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
 namespace Sparc.Blossom.Content;
 
@@ -15,9 +11,9 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
     public async Task<BlossomVector> VectorizeAsync(TextContent message) => (await VectorizeAsync([message])).First();
     public abstract Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages);
 
-    public async Task<TextContent> TranslateAsync(TextContent message, TovikTranslationOptions options)
+    public async Task<TextContent> TranslateAsync(TextContent message, TranslationOptions options)
     {
-        var question = new TovikTranslationQuestion(message, options);
+        var question = new TranslationQuestion(message, options);
         var answer = await AskAsync(question);
 
         var text = answer.Value!.Text.FirstOrDefault()?.Text ?? answer.Text ?? "";
@@ -29,10 +25,10 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
         return result;
     }
 
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
+    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
     {
         var fromLanguages = messages.GroupBy(x => x.Language);
-        var batches = TovikTranslator.Batch(messages, 5);
+        var batches = Contents.Batch(messages, 5);
 
         var translatedMessages = new ConcurrentBag<TextContent>();
 
@@ -44,7 +40,7 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
 
             foreach (var fromLanguage in fromLanguages)
             {
-                var question = new TovikTranslationQuestion(safeBatch, options);
+                var question = new TranslationQuestion(safeBatch, options);
                 var answer = await AskAsync(question);
                 if (answer.Value?.Text == null)
                     continue;

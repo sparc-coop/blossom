@@ -187,7 +187,7 @@ public class SparcAuthenticator<T>(
                 if (newLanguage != null)
                     User.ChangeLanguage(newLanguage);
 
-                var newLocale = TovikTranslator.GetLocale(acceptLanguage!);
+                var newLocale = Contents.GetLocale(acceptLanguage!);
                 if (newLocale != null)
                     User.Avatar.Locale = newLocale;
 

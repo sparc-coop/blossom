@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace Sparc.Blossom.Content.OpenAI;
+namespace Sparc.Blossom.Content;
 
 internal class BlossomAnswer : BlossomAnswer<dynamic>
 { }

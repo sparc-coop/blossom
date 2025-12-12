@@ -27,7 +27,7 @@ builder.Services.AddScoped(_ => new OpenAIClient(builder.Configuration.GetConnec
 Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", builder.Configuration.GetConnectionString("Anthropic"));
 builder.Services.AddHttpClient<AnthropicClient>().AddStandardResilienceHandler();
 
-builder.AddTovikTranslator();
+builder.AddSparcContent();
 builder.Services.AddBlossomService<BillToTovik>();
 
 builder.Services.AddMediatR(options =>
@@ -87,14 +87,14 @@ app.MapGet("/upgrade-2", async (IRepository<Page> pages, IRepository<SparcDomain
 });
 
 using var scope = app.Services.CreateScope();
-scope.ServiceProvider.GetRequiredService<TovikTranslator>().Map(app);
+scope.ServiceProvider.GetRequiredService<Contents>().Map(app);
 
 foreach (var translator in scope.ServiceProvider.GetServices<ITranslator>())
     await translator.GetLanguagesAsync();
 
 if (!string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("Cognitive")))
 {
-    var translator = scope.ServiceProvider.GetRequiredService<TovikTranslator>();
+    var translator = scope.ServiceProvider.GetRequiredService<Contents>();
     await translator.GetLanguagesAsync();
 }
 app.Run();

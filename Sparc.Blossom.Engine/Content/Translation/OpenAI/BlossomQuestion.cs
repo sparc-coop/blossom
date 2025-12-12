@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom.Content.OpenAI;
+﻿namespace Sparc.Blossom.Content;
 
 internal class BlossomQuestion(string text)
 {

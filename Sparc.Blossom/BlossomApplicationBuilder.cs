@@ -103,7 +103,7 @@ public abstract class BlossomApplicationBuilder
             .AddHttpMessageHandler<TTokenHandler>()
             .AddStandardResilienceHandler();
 
-        Services.AddRefitClient<ITovik>()
+        Services.AddRefitClient<ISparcContent>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
             .AddHttpMessageHandler<TTokenHandler>()
             .AddStandardResilienceHandler(x =>

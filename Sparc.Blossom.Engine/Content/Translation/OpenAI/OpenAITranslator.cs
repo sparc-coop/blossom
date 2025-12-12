@@ -2,7 +2,6 @@
 
 using OpenAI;
 using OpenAI.Responses;
-using Sparc.Blossom.Content.OpenAI;
 using System.Text;
 
 namespace Sparc.Blossom.Content;

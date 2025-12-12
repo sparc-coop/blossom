@@ -1,25 +1,45 @@
 ﻿using System.Text;
 
-namespace Sparc.Blossom.Content.Tovik;
+namespace Sparc.Blossom.Content;
 
-public class TovikTranslationOptions
+public record Tones(
+    decimal SlangOrProper = 0.5M,
+    decimal CasualOrFormal = 0.5M,
+    decimal FunnyOrSerious = 0.5M,
+    decimal IrreverentOrRespectful = 0.5M,
+    decimal EnthusiasticOrMatterOfFact = 0.5M
+);
+
+public class TranslationOptions
 {
+    public TranslationOptions()
+    { }
+
+    public TranslationOptions(Language outputLanguage)
+    {
+        OutputLanguage = outputLanguage;
+    }
+
     public Language? OutputLanguage { get; set; }
-    public decimal SlangOrProper { get; set; } = 0.5M;
-    public decimal CasualOrFormal { get; set; } = 0.5M;
-    public decimal FunnyOrSerious { get; set; } = 0.5M;
-    public decimal IrreverentOrRespectful { get; set; } = 0.5M;
-    public decimal EnthusiasticOrMatterOfFact { get; set; } = 0.5M;
+    public Tones? Tone { get; set; }
     public string? Instructions { get; set; }
     public string? AdditionalContext { get; set; }
     public BlossomSchema? Schema { get; set; }
+
+    public void MatchTone(List<TextContent> content)
+    {
+        AdditionalContext ??= "";
+        var sampleContent = content.Select(x => x.Text).OrderBy(x => Guid.NewGuid()).Take(20);
+        AdditionalContext += "\n" + string.Join("\n", sampleContent);
+
+    }
 
     public string ToPrompt()
     {
         var prompt = new StringBuilder();
         if (Schema != null)
             prompt.AppendLine("Extract data from the following text into the supplied JSON schema.");
-        else if (IsDefaultTone)
+        else if (Tone == null)
             prompt.AppendLine($"Translate the following text, using the following rules:");
         else
             prompt.AppendLine($"Translate and update the tone of the following text, using the following rules:");
@@ -30,29 +50,26 @@ public class TovikTranslationOptions
         if (OutputLanguage?.DialectDisplayName != null && OutputLanguage.DialectDisplayName != OutputLanguage.LanguageDisplayName)
             prompt.AppendLine($"- Use the {OutputLanguage.DialectDisplayName} dialect of {OutputLanguage.LanguageDisplayName} when possible.");
 
-        if (SlangOrProper != 0.5M)
-            prompt.AppendLine("- " + SlangOrProperMappings[Round(SlangOrProper)]);
+        if (Tone != null)
+        {
+            if (Tone.SlangOrProper != 0.5M)
+                prompt.AppendLine("- " + SlangOrProperMappings[Round(Tone.SlangOrProper)]);
 
-        if (CasualOrFormal != 0.5M)
-            prompt.AppendLine("- " + CasualOrFormalMappings[Round(CasualOrFormal)]);
+            if (Tone.CasualOrFormal != 0.5M)
+                prompt.AppendLine("- " + CasualOrFormalMappings[Round(Tone.CasualOrFormal)]);
 
-        if (FunnyOrSerious != 0.5M)
-            prompt.AppendLine("- " + FunnyOrSeriousMappings[Round(FunnyOrSerious)]);
+            if (Tone.FunnyOrSerious != 0.5M)
+                prompt.AppendLine("- " + FunnyOrSeriousMappings[Round(Tone.FunnyOrSerious)]);
 
-        if (IrreverentOrRespectful != 0.5M)
-            prompt.AppendLine("- " + IrreverentOrRespectfulMappings[Round(IrreverentOrRespectful)]);
+            if (Tone.IrreverentOrRespectful != 0.5M)
+                prompt.AppendLine("- " + IrreverentOrRespectfulMappings[Round(Tone.IrreverentOrRespectful)]);
 
-        if (EnthusiasticOrMatterOfFact != 0.5M)
-            prompt.AppendLine("- " + EnthusiasticOrMatterOfFactMappings[Round(EnthusiasticOrMatterOfFact)]);
+            if (Tone.EnthusiasticOrMatterOfFact != 0.5M)
+                prompt.AppendLine("- " + EnthusiasticOrMatterOfFactMappings[Round(Tone.EnthusiasticOrMatterOfFact)]);
+        }
 
         return prompt.ToString();
     }
-
-    bool IsDefaultTone => SlangOrProper == 0.5M
-        && CasualOrFormal == 0.5M
-        && FunnyOrSerious == 0.5M
-        && IrreverentOrRespectful == 0.5M
-        && EnthusiasticOrMatterOfFact == 0.5M;
 
     static decimal Round(decimal value) => Math.Round(value * 10) / 10;
 

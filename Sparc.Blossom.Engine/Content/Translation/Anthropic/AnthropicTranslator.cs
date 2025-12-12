@@ -2,7 +2,6 @@
 using Anthropic.SDK.Common;
 using Anthropic.SDK.Constants;
 using Anthropic.SDK.Messaging;
-using Sparc.Blossom.Content.OpenAI;
 
 namespace Sparc.Blossom.Content;
 

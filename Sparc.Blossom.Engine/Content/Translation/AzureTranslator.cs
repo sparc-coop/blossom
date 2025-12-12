@@ -1,6 +1,5 @@
 ﻿using Azure;
 using Azure.AI.Translation.Text;
-using Sparc.Blossom.Content.Tovik;
 
 namespace Sparc.Blossom.Content;
 
@@ -13,13 +12,13 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
     public int Priority => 2;
     decimal CostPerWord => 10.00m / 1_000_000 * 5; // $10 per million characters, assuming average 5 characters per word
 
-    public async Task<TextContent> TranslateAsync(TextContent message, TovikTranslationOptions options)
+    public async Task<TextContent> TranslateAsync(TextContent message, TranslationOptions options)
     {
         var result = await TranslateAsync([message], options);
         return result.First();
     }
 
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
+    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
     {
         var azureLanguage = AzureLanguage(options.OutputLanguage!);
 

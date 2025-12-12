@@ -1,17 +1,16 @@
-﻿using Sparc.Blossom.Content.OpenAI;
-using System.Text.Encodings.Web;
+﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 
-namespace Sparc.Blossom.Content.Tovik;
+namespace Sparc.Blossom.Content;
 
-internal class TovikTranslationQuestion : BlossomQuestion<TovikTranslations>
+internal class TranslationQuestion : BlossomQuestion<TranslationResult>
 {
     static readonly JsonSerializerOptions TranslateAllUnicode = new()
     {
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public TovikTranslationQuestion(TextContent message, TovikTranslationOptions options)
+    public TranslationQuestion(TextContent message, TranslationOptions options)
     : base(options.ToPrompt())
     {
         Instructions = 
@@ -28,7 +27,7 @@ internal class TovikTranslationQuestion : BlossomQuestion<TovikTranslations>
     }
 
 
-    public TovikTranslationQuestion(IEnumerable<TextContent> messages, TovikTranslationOptions options) 
+    public TranslationQuestion(IEnumerable<TextContent> messages, TranslationOptions options) 
         : base(options.ToPrompt())
     {
         Instructions = "You are a translation and tone‑shaping assistant.\r\n" +
@@ -39,7 +38,7 @@ internal class TovikTranslationQuestion : BlossomQuestion<TovikTranslations>
         
         var textToTranslate = messages
             .Where(x => x.Text != null)
-            .Select(x => new TovikTranslation(x.Id.Substring(0, 4), x.Text!.Replace('\u00A0', ' ')));
+            .Select(x => new TextContentBase(x.Id.Substring(0, 4), x.Text!.Replace('\u00A0', ' ')));
 
         var messageJson = JsonSerializer.Serialize(textToTranslate, TranslateAllUnicode);
         Text += messageJson;
