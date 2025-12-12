@@ -9,10 +9,10 @@ internal class AzureSpeaker : ISpeaker
     readonly HttpClient Client;
     readonly string SubscriptionKey;
 
-    internal IFileRepository<BlossomFile> Files { get; }
+    internal IRepository<BlossomFile> Files { get; }
     internal static List<Voice>? Voices;
 
-    public AzureSpeaker(IConfiguration configuration, IFileRepository<BlossomFile> files)
+    public AzureSpeaker(IConfiguration configuration, IRepository<BlossomFile> files)
     {
         SubscriptionKey = configuration.GetConnectionString("Cognitive")!;
 

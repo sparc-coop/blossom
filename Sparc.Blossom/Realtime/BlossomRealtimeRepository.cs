@@ -4,7 +4,6 @@ using System.Security.Claims;
 namespace Sparc.Blossom;
 
 public class BlossomRealtimeRepository<T>(IRepository<BlossomEntityChanged<T>> repository, IPublisher publisher, ClaimsPrincipal principal)
-    : IRealtimeRepository<T>
     where T : BlossomEntity
 {
     public IRepository<BlossomEntityChanged<T>> Repository { get; } = repository;

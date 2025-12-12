@@ -16,9 +16,8 @@ public class BlossomIdentity(string id, string type)
 
     public string CreateHash(string code)
     {
-        using var md5 = MD5.Create();
         var inputBytes = Encoding.ASCII.GetBytes(Id + code);
-        return string.Concat(md5.ComputeHash(inputBytes).Select(x => x.ToString("x2")));
+        return string.Concat(SHA256.HashData(inputBytes).Select(x => x.ToString("x2")));
     }
 
     public ClaimsIdentity ToIdentity(BlossomUser user)

@@ -138,9 +138,9 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         return user;
     }
 
-    public bool Equals(BlossomUser other)
+    public bool Equals(BlossomUser? other)
     {
-        if (Id != other.Id) return false;
+        if (Id != other?.Id) return false;
         if (Avatar.Username != other.Avatar.Username) return false;
         if (Avatar.Language != other.Avatar.Language) return false;
         if (Avatar.Locale?.Id != other.Avatar.Locale?.Id) return false;

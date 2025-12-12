@@ -179,6 +179,6 @@ public class PouchDatum(string db, string pouchId, string rev) : BlossomEntity<s
             sb.Append(';');
         }
 
-        return BlossomHash.MD5(sb.ToString());
+        return BlossomHash.SHA256(sb.ToString());
     }
 }

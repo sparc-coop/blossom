@@ -27,11 +27,6 @@ public record BlossomEntityChanged : MediatR.INotification
         Name = name;
     }
 
-    public BlossomEntityChanged(IBlossomEntityProxy proxy) : this(proxy.GetType().Name)
-    {
-        EntityType = proxy.GetType().Name;
-    }
-
     public string Name { get; set; }
     public string EntityType { get; set; } = "";
     public string EntityId { get; set; } = "";
@@ -45,11 +40,6 @@ public record BlossomEntityChanged : MediatR.INotification
     public void SetUser(ClaimsPrincipal? user)
     {
         UserId = user?.Id();
-    }
-
-    public void ApplyTo(IBlossomEntityProxy entity)
-    {
-        Changes?.ApplyTo(entity);
     }
 }
 

@@ -22,7 +22,7 @@ public class Page : BlossomSpace
 
     private Page(string domain, string path) : base(domain, path)
     {
-        Id = BlossomHash.MD5($"{domain}:{path}");
+        Id = BlossomHash.SHA256($"{domain}:{path}");
         Domain = domain;
         Path = path;
         Name = Id;

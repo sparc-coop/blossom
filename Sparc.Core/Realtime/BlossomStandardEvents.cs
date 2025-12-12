@@ -1,10 +1,5 @@
 ﻿namespace Sparc.Blossom;
 
-public record BlossomEntityAdded<T>(T Entity) : BlossomEntityChanged<T>(Entity) where T : BlossomEntity;
-public record BlossomEntityUpdated<T>(string commandName, T Entity) : BlossomEntityChanged<T>(commandName, Entity) where T : BlossomEntity;
-public record BlossomEntityPatched<T>(T Entity, BlossomPatch changes) : BlossomEntityChanged<T>(Entity, changes) where T : BlossomEntity;
-public record BlossomEntityDeleted<T>(T Entity) : BlossomEntityChanged<T>(Entity) where T : BlossomEntity;
-
 public record BlossomEntityUndone<T> : BlossomEntityChanged<T> where T : BlossomEntity
 {
     public BlossomEntityUndone(BlossomEntityChanged<T> current, BlossomEntityChanged<T> previous) : base(previous.Entity, current)

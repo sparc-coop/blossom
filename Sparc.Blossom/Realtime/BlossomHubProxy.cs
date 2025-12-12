@@ -90,7 +90,7 @@ public class BlossomHubProxy(NavigationManager nav) : IAsyncDisposable
 
     public async Task Watch(IEnumerable<IBlossomEntityProxy> entities)
     {
-        await Watch(entities, (entity, ev) => ev.ApplyTo(entity));
+        await Watch(entities, (entity, ev) => ev.Changes?.ApplyTo(entity));
     }
 
     public async Task StopWatching(ComponentBase component)

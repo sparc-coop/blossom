@@ -6,8 +6,8 @@ public partial class PouchDbSpecification<T>
 {
     class MangoQueryExpressionVisitor : ExpressionVisitor
     {
-        public string Field { get; private set; }
-        public string Op { get; private set; }
+        public string Field { get; private set; } = "";
+        public string Op { get; private set; } = "";
         public object? Value { get; private set; }
 
         protected override Expression VisitBinary(BinaryExpression node)
