@@ -20,9 +20,9 @@ internal class OpenAITranslator(OpenAIClient client)
             answer.Log("Info", $"Asking {DefaultModel} {question.Text}" + (options.PreviousResponseId == null ? "" : $" from {options.PreviousResponseId}"));
 
             var now = DateTime.UtcNow;
-            var responder = client.GetOpenAIResponseClient(DefaultModel);
-
-            var response = await responder.CreateResponseAsync(question.PromptText, options);
+            var responder = client.GetResponsesClient(DefaultModel);
+            
+            var response = await responder.CreateResponseAsync(options);
             var message = response.Value.OutputItems.OfType<MessageResponseItem>().First();
             var content = message.Content.First();
 
@@ -47,10 +47,11 @@ internal class OpenAITranslator(OpenAIClient client)
         return answer;
     }
 
-    private ResponseCreationOptions CreateResponseOptions(BlossomQuestion question)
+    private CreateResponseOptions CreateResponseOptions(BlossomQuestion question)
     {
-        Console.WriteLine("using schema: " + question.Schema?.ToString());
-        var options = new ResponseCreationOptions()
+        List<ResponseItem> prompt = [ResponseItem.CreateUserMessageItem(question.PromptText)];
+
+        var options = new CreateResponseOptions(prompt)
         {
             Temperature = DefaultModel.Contains("4.1") ? 0.2f : null,
             ServiceTier = new ResponseServiceTier("priority"),
@@ -64,7 +65,7 @@ internal class OpenAITranslator(OpenAIClient client)
             }
         };
 
-        if (DefaultModel.Contains("5"))
+        if (DefaultModel.Contains('5'))
         {
             options.ReasoningOptions = new()
             {
