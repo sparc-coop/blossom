@@ -2,25 +2,17 @@
 using SlackNet.Events;
 using SlackNet.WebApi;
 
-namespace Sparc.Blossom.Content.Slack;
+namespace Sparc.Blossom.Plugins.Slack;
 
-public interface ISlackIntegrationService
-{
-    Task<IEnumerable<Conversation>> GetChannelsAsync(bool excludeArchived = true, int limit = 100);
-    Task<IEnumerable<string>> GetChannelIdsAsync(bool excludeArchived = true, int limit = 100);
-    Task<IEnumerable<MessageEvent>> GetMessagesAsync(IEnumerable<string> channelIds, int limit = 100);
-    Task PostMessageAsync(IEnumerable<string> channelIds, string text);
-}
-
-public class SlackIntegrationService : ISlackIntegrationService
+public class SlackIntegrationService
 {
     private readonly IConversationsApi _conversationsApi;
     private readonly IChatApi _chatApi;
 
-    public SlackIntegrationService(SlackIntegrationOptions opts)
+    public SlackIntegrationService(IConfiguration config)
     {
         var client = new SlackServiceBuilder()
-            .UseApiToken(opts.BotToken)
+            .UseApiToken(config.GetConnectionString("Slack"))
             .GetApiClient();
         _conversationsApi = client.Conversations;
         _chatApi = client.Chat;
@@ -32,19 +24,15 @@ public class SlackIntegrationService : ISlackIntegrationService
         return response.Id;
     }
 
-    public async Task<IEnumerable<Conversation>> GetChannelsAsync(bool excludeArchived = true, int limit = 100)
+    public async Task<IEnumerable<Conversation>> GetChannelsAsync(int limit = 100)
     {
-        var response = await _conversationsApi.List(false, 500);
-        var newChannels = response.Channels
-            .Where(c => c.Name == "meeting-notes")
-            .ToList();
-        return newChannels;
-        //return response.Channels;
+        var response = await _conversationsApi.List(false, limit);
+        return response.Channels;
     }
 
-    public async Task<IEnumerable<string>> GetChannelIdsAsync(bool excludeArchived = true, int limit = 100)
+    public async Task<IEnumerable<string>> GetChannelIdsAsync(int limit = 100)
     {
-        var channels = await GetChannelsAsync(excludeArchived, limit);
+        var channels = await GetChannelsAsync(limit);
         return channels.Select(c => c.Id);
     }
 

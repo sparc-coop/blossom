@@ -53,6 +53,11 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
             .HasPartitionKey(s => s.Domain)
             .HasKey(x => x.Id);
 
+        model.Entity<BlossomPost>()
+            .ToContainer("Posts")
+            .HasPartitionKey(p => p.SpaceId)
+            .HasKey(x => x.Id);
+
         model.Entity<BlossomVector>()
             .ToContainer("Vectors")
             .HasPartitionKey(v => v.SpaceId)
