@@ -56,22 +56,6 @@ public class Contents(
         return translations;
     }
 
-    public record GraphExtractionResult(List<SparcEntityBase> Entities, List<SparcRelationship> Relationships);
-    public async Task<List<SparcEntity>> ExtractGraph(ExtractGraphRequest request)
-    {
-        var options = new TranslationOptions
-        {
-            Instructions = SparcPrompts.GraphExtraction(request.EntityTypes),
-            Schema = new BlossomSchema(typeof(GraphExtractionResult))
-        };
-
-        var graph = await TranslateAsync<GraphExtractionResult>(request.Content, options);
-        if (graph?.Entities == null)
-            return [];
-
-        var entities = graph.Entities.Select(x => new SparcEntity(x, graph.Relationships));
-        return entities.ToList();
-    }
 
     public async Task<List<TextContent>> GetAll(List<TextContent> contents)
     {
@@ -227,12 +211,6 @@ public class Contents(
         {
             var options = singleContent.Options ?? DefaultOptions([singleContent.Content], request.Headers.AcceptLanguage);
             var result = await contents.Get(singleContent.Content, options);
-            return Results.Ok(result);
-        });
-
-        group.MapPost("graph", async (Contents contents, ExtractGraphRequest request) =>
-        {
-            var result = await contents.ExtractGraph(request);
             return Results.Ok(result);
         });
     }

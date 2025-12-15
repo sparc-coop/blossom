@@ -4,7 +4,7 @@ namespace Sparc.Blossom.Billing;
 
 public class UserCharge() : BlossomEntity<string>(Guid.NewGuid().ToString())
 {
-    public UserCharge(string userId, TovikContentTranslated tovik) : this()
+    public UserCharge(string userId, ContentPosted tovik) : this()
     {
         UserId = userId;
         Amount = tovik.TokenCount;

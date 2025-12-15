@@ -1,5 +1,6 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
+using Sparc.Blossom.Content.Tovik;
 using Sparc.Blossom.Data;
 using Sparc.Blossom.Realtime;
 using System.Security.Claims;
@@ -9,6 +10,7 @@ namespace Sparc.Blossom.Spaces;
 public class BlossomSpaces(
     IRepository<BlossomEvent> events,
     IHttpContextAccessor http,
+    Contents contents,
     SparcAuthenticator<BlossomUser> auth)
     : IBlossomEndpoints
 {
@@ -143,10 +145,26 @@ public class BlossomSpaces(
         await PublishAsync(spaceId, new ChangeMembershipState("invite", request.UserId));
     }
 
-    private async Task<SendMessageReponse> SendPostAsync(string spaceId, string eventType, string txnId, SendMessageRequest request)
+    public record GraphExtractionResult(List<SparcEntityBase> Entities, List<SparcRelationship> Relationships);
+    public async Task<List<SparcEntity>> ExtractGraph(ExtractGraphRequest request)
     {
-        var ev = await PublishAsync(spaceId, new MatrixMessage(request.Body));
-        return new(ev.EventId);
+        var options = new TranslationOptions
+        {
+            Instructions = SparcPrompts.GraphExtraction(request.EntityTypes),
+            Schema = new BlossomSchema(typeof(GraphExtractionResult))
+        };
+
+        var graph = await contents.TranslateAsync<GraphExtractionResult>(request.Content, options);
+        if (graph?.Entities == null)
+            return [];
+
+        var entities = graph.Entities.Select(x => new SparcEntity(x, graph.Relationships));
+        return entities.ToList();
+    }
+
+    private async Task<BlossomPost> PostAsync(string spaceId, BlossomPost post)
+    {
+        return post;
     }
 
     private async Task<List<BlossomEvent<MatrixMessage>>> GetPostsAsync(string spaceId)
@@ -186,25 +204,27 @@ public class BlossomSpaces(
         return user.Identity("Matrix")!;
     }
 
-    private async Task SendPostToVoidAsync(BlossomPost post)
-    {
-    }
-
-    private async Task IndexSpacesAsync()
+    private async Task IndexAsync()
     {
     }
 
     public void Map(IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapGet("/spaces", GetSpacesAsync);
-        endpoints.MapPost("/spaces", CreateSpaceAsync);
-        endpoints.MapPost("/spaces/{spaceId}/join", JoinSpaceAsync);
-        endpoints.MapPost("/spaces/{spaceId}/leave", LeaveSpaceAsync);
-        endpoints.MapPost("/spaces/{spaceId}/invite", InviteToSpaceAsync);
-        endpoints.MapGet("/spaces/{spaceId}/posts", GetPostsAsync);
-        endpoints.MapPost("/spaces/{spaceId}", SendPostAsync);
-        endpoints.MapPost("/spaces/void", SendPostToVoidAsync);
-        endpoints.MapPost("/spaces/index", IndexSpacesAsync);
+        var spaces = endpoints.MapGroup("/spaces");
+
+        endpoints.MapGet("", GetSpacesAsync);
+        endpoints.MapPost("", CreateSpaceAsync);
+        endpoints.MapPost("{spaceId}/join", JoinSpaceAsync);
+        endpoints.MapPost("{spaceId}/leave", LeaveSpaceAsync);
+        endpoints.MapPost("{spaceId}/invite", InviteToSpaceAsync);
+        endpoints.MapGet("{spaceId}/posts", GetPostsAsync);
+        endpoints.MapPost("{spaceId}", PostAsync);
+        endpoints.MapPost("{spaceId}/index", IndexAsync);
+        endpoints.MapPost("graph", async (BlossomSpaces spaces, ExtractGraphRequest request) =>
+        {
+            var result = await spaces.ExtractGraph(request);
+            return Results.Ok(result);
+        });
 
         // Map the presence endpoint
         endpoints.MapGet("/presence/{userId}/status", async (ClaimsPrincipal principal, string userId) =>

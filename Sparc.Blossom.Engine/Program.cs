@@ -28,7 +28,7 @@ Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", builder.Configuration.Ge
 builder.Services.AddHttpClient<AnthropicClient>().AddStandardResilienceHandler();
 
 builder.AddSparcContent();
-builder.Services.AddBlossomService<BillToTovik>();
+builder.Services.AddBlossomService<ProcessContent>();
 
 builder.Services.AddMediatR(options =>
 {

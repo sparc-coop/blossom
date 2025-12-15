@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 namespace Sparc.Blossom.Content;
 
 public record EditHistory(DateTime Timestamp, string Text);
-public record TovikContentTranslated(TextContent Content, int TokenCount, decimal? Cost = null, string? Description = null, string? Response = null) : BlossomEntityChanged(Content);
+public record ContentPosted(TextContent Content, int TokenCount, decimal? Cost = null, string? Description = null, string? Response = null) : BlossomEntityChanged(Content);
 
 public record ContentTranslation(string Id, Language Language, string? SourceContentId = null)
 {
@@ -150,7 +150,7 @@ public class TextContent : BlossomEntity<string>
         Cost -= numTokens * costPerToken;
 
         if (numTokens > 0 || Charge > 0)
-            Broadcast(new TovikContentTranslated(this, numTokens, numTokens * costPerToken, description));
+            Broadcast(new ContentPosted(this, numTokens, numTokens * costPerToken, description));
 
         return this;
     }
@@ -168,7 +168,7 @@ public class TextContent : BlossomEntity<string>
             Cost -= cost;
 
         if (cost > 0 || Charge > 0)
-            Broadcast(new TovikContentTranslated(this, wordCount, cost, description, response));
+            Broadcast(new ContentPosted(this, wordCount, cost, description, response));
     }
 
     internal void Delete()

@@ -40,7 +40,7 @@ public class Page : BlossomSpace
     {
     }
 
-    public void RegisterTovikUsage(TovikContentTranslated content)
+    public void RegisterTovikUsage(ContentPosted content)
     {
         if (TovikUsage.ContainsKey(content.Content.LanguageId))
             TovikUsage[content.Content.LanguageId] += content.TokenCount;

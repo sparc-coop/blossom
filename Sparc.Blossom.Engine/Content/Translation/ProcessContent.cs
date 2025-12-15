@@ -6,22 +6,22 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Billing;
 
-public class TovikContentTranslatedHandler(BlossomQueue<BillToTovik> biller)  : INotificationHandler<TovikContentTranslated>
+public class TovikContentTranslatedHandler(BlossomQueue<ProcessContent> biller)  : INotificationHandler<ContentPosted>
 {
-    public async Task Handle(TovikContentTranslated notification, CancellationToken cancellationToken)
+    public async Task Handle(ContentPosted notification, CancellationToken cancellationToken)
     {
         await biller.AddAsync(async (x, token) => await x.ExecuteAsync(notification, token));
     }
 }
 
-public class BillToTovik(
+public class ProcessContent(
     IRepository<SparcDomain> domains,
     IRepository<Page> pages,
     IRepository<UserCharge> charges,
     CosmosDbSimpleRepository<TextContent> content
     )
 {
-    public async Task ExecuteAsync(TovikContentTranslated item, CancellationToken cancellationToken)
+    public async Task ExecuteAsync(ContentPosted item, CancellationToken cancellationToken)
     {
         Console.WriteLine("Billing: " + item.Content.Id);
 
@@ -43,7 +43,7 @@ public class BillToTovik(
         await RegisterPageView(item, domain);
     }
 
-    private async Task RegisterTovikUsage(TovikContentTranslated item, SparcDomain? domain)
+    private async Task RegisterTovikUsage(ContentPosted item, SparcDomain? domain)
     {
         var userToCharge = domain?.TovikUserId ?? Guid.Empty.ToString();
 
@@ -51,7 +51,7 @@ public class BillToTovik(
         await charges.AddAsync(charge);
     }
 
-    private async Task RegisterPageView(TovikContentTranslated item, SparcDomain? domain)
+    private async Task RegisterPageView(ContentPosted item, SparcDomain? domain)
     {
         var page = await pages.Query
                     .Where(p => p.Domain == item.Content.Domain && p.Path == item.Content.SpaceId)
