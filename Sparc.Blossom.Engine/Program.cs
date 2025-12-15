@@ -1,4 +1,5 @@
 using Anthropic.SDK;
+using Anthropic.SDK.Batches;
 using MediatR.NotificationPublishers;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http.Json;
@@ -72,9 +73,67 @@ app.MapGet("/aura/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 app.MapGet("/hi", () => "Hi from Sparc!");
 app.MapGet("/slack/channels", async (SlackIntegrationService slack) =>
 {
-    var channels = await slack.GetChannelsAsync();
+    var channels = new List<SlackNet.Conversation>();
+    await foreach (var channelBatch in slack.GetChannelsAsync(1000))
+        channels.AddRange(channelBatch);
+
     return channels.Select(c => new { c.Id, c.Name });
 });
+
+app.MapGet("/slack/messages/{id}", async (SlackIntegrationService slack, string id) =>
+{
+    var allMessages = new List<SlackNet.Events.MessageEvent>();
+    await foreach (var messageBatch in slack.GetMessagesAsync([id], 10000))
+        allMessages.AddRange(messageBatch);
+    return allMessages;
+});
+
+app.MapGet("/slack/import", async (SlackIntegrationService slack, IRepository<BlossomPost> repo) =>
+{
+    var existingMessages = await repo.Query.Where(x => x.SpaceId == "slacktest").ToListAsync();
+    if (existingMessages.Any())
+        await repo.DeleteAsync(existingMessages);
+    
+    var channels = new List<SlackNet.Conversation>();
+    var english = Language.Find("en-US");
+    await foreach (var channelBatch in slack.GetChannelsAsync(1000))
+    {
+        await foreach (var messageBatch in slack.GetMessagesAsync(channelBatch.Select(x => x.Id), 10000))
+        {
+            var posts = messageBatch.Select(x => new BlossomPost("kuviocreative.com", "slacktest", english!, x.Text, new() { Avatar = new(x.User, x.User) }));
+            await repo.AddAsync(posts);
+        }
+    }
+});
+
+app.MapGet("/slack/vectorize", async (IRepository<BlossomPost> repo, IEnumerable<ITranslator> translators, IRepository<BlossomVector> vectorRepo) =>
+{
+    var messages = await repo.Query.Where(x => x.Domain == "kuviocreative.com" && x.SpaceId == "slacktest").ToListAsync();
+    var offset = 0;
+    var batchSize = 1000;
+
+    do
+    {
+        var batch = messages
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Text))
+                    //.OrderBy(x => x.Sequence)
+                    .Skip(offset)
+                    .Take(batchSize)
+                    .ToList();
+
+        var ids = batch.Select(x => x.Id).ToList();
+        var existing = await vectorRepo.Query.Where(x => ids.Contains(x.TargetUrl)).Select(x => x.TargetUrl).ToListAsync();
+        batch = batch.Where(x => !existing.Contains(x.Id)).ToList();
+        if (batch.Count > 0)
+        {
+            var translator = translators.OfType<OpenAITranslator>().First();
+            var vectors = await translator.VectorizeAsync(batch);
+            await vectorRepo.AddAsync(vectors);
+        }
+        offset += batchSize;
+    } while (offset < messages.Count());
+});
+ 
 
 using var scope = app.Services.CreateScope();
 scope.ServiceProvider.GetRequiredService<Contents>().Map(app);

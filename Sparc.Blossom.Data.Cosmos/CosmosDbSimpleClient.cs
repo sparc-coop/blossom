@@ -9,9 +9,9 @@ namespace Sparc.Blossom.Data;
 public class CosmosDbSimpleClient<T>(DbContext context, CosmosClient client)
 {
     public CosmosClient Client { get; private set; } = client;
-    public IEntityType? EntityType { get; }
     public Container Container { get; } = client.GetContainer(context.Database.GetCosmosDatabaseId(), context.Model.FindEntityType(typeof(T))?.GetContainer() ?? throw new Exception($"Container name not found for entity type {typeof(T)}"));
     public DbContext Context { get; } = context;
+    IReadOnlyList<IProperty>? PartitionKeyProperties { get; } = context.Model.FindEntityType(typeof(T))?.GetPartitionKeyProperties();
 
     public static CosmosClient CreateClient(IConfiguration config)
     {
@@ -30,5 +30,20 @@ public class CosmosDbSimpleClient<T>(DbContext context, CosmosClient client)
             ?? throw new Exception("Cosmos connection string not found in configuration.");
 
         return new CosmosClient(connectionString, options);
+    }
+
+    public PartitionKey GetPartitionKey(T item)
+    {
+        if (item == null || PartitionKeyProperties == null || PartitionKeyProperties.Count == 0)
+            return PartitionKey.None;
+
+        var partitionKey = new PartitionKeyBuilder();
+        foreach (var property in PartitionKeyProperties)
+        {
+            var value = item.GetType().GetProperty(property.Name)?.GetValue(item)?.ToString();
+            partitionKey.Add(value);
+        }
+
+        return partitionKey.Build();
     }
 }

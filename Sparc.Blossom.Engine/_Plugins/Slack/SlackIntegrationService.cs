@@ -24,36 +24,45 @@ public class SlackIntegrationService
         return response.Id;
     }
 
-    public async Task<IEnumerable<Conversation>> GetChannelsAsync(int limit = 100)
+    public async IAsyncEnumerable<List<Conversation>> GetChannelsAsync(int limit = 100)
     {
-        var response = await _conversationsApi.List(false, limit);
-        return response.Channels;
+        ConversationListResponse? response = null;
+        string? cursor = null;
+        int count = 0;
+        do
+        {
+            response = await _conversationsApi.List(false, 100, cursor: cursor);
+            count += response.Channels.Count;
+            yield return response.Channels.ToList();
+            cursor = response.ResponseMetadata.NextCursor;
+        } while (!string.IsNullOrWhiteSpace(cursor) && count < limit);
     }
 
-    public async Task<IEnumerable<string>> GetChannelIdsAsync(int limit = 100)
+    public async IAsyncEnumerable<List<MessageEvent>> GetMessagesAsync(IEnumerable<string> channelIds, int limitPerChannel = 100)
     {
-        var channels = await GetChannelsAsync(limit);
-        return channels.Select(c => c.Id);
-    }
-
-    public async Task<IEnumerable<MessageEvent>> GetMessagesAsync(IEnumerable<string> channelIds, int limit = 100)
-    {
-        var allMessages = new List<MessageEvent>();
         foreach (var channelId in channelIds)
         {
-            try
+            int count = 0;
+            string? cursor = null;
+            List<MessageEvent> allMessages;
+
+            do
             {
-                var history = await _conversationsApi.History(channelId);
-                allMessages.AddRange(history.Messages.Cast<MessageEvent>());
-            }
-            catch (SlackException ex) when (ex.ErrorMessages.First() == "not_in_channel")
-            {
-                await _conversationsApi.Join(channelId);
-                var history = await _conversationsApi.History(channelId);
-                allMessages.AddRange(history.Messages.Cast<MessageEvent>());
-            }
+                try
+                {
+                    var history = await _conversationsApi.History(channelId, limit: 100, cursor: cursor);
+                    count += history.Messages.Count;
+                    cursor = history.ResponseMetadata?.NextCursor;
+                    allMessages = history.Messages.Where(x => string.IsNullOrWhiteSpace(x.Subtype)).ToList();
+                }
+                catch
+                {
+                    continue;
+                }
+
+                yield return allMessages;
+            } while (!string.IsNullOrWhiteSpace(cursor) && count < limitPerChannel);
         }
-        return allMessages;
     }
 
     public async Task PostMessageAsync(IEnumerable<string> channelIds, string text)
