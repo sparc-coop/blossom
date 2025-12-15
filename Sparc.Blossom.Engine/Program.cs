@@ -9,6 +9,7 @@ using Sparc.Blossom.Billing;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
 using Sparc.Blossom.Engine;
+using Sparc.Blossom.Plugins.Slack;
 using Sparc.Blossom.Realtime;
 using Sparc.Blossom.Spaces;
 
@@ -23,6 +24,8 @@ builder.AddSparcAuthentication<BlossomUser>();
 builder.AddSparcBilling();
 builder.AddSparcSpaces();
 builder.Services.AddScoped(_ => new OpenAIClient(builder.Configuration.GetConnectionString("OpenAI")!));
+
+builder.Services.AddSlackIntegration();
 
 Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", builder.Configuration.GetConnectionString("Anthropic"));
 builder.Services.AddHttpClient<AnthropicClient>().AddStandardResilienceHandler();
@@ -67,23 +70,10 @@ app.UseCors();
 
 app.MapGet("/aura/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 app.MapGet("/hi", () => "Hi from Sparc!");
-app.MapGet("/upgrade-2", async (IRepository<Page> pages, IRepository<SparcDomain> domains, IRepository<UserCharge> charges) =>
+app.MapGet("/slack/channels", async (SlackIntegrationService slack) =>
 {
-    var domainsWithTovik = await domains.Query.ToListAsync();
-    foreach (var domain in domainsWithTovik)
-    {
-        var lastTranslated = await charges.Query
-            .Where(charges => charges.Domain == domain.Domain)
-            .OrderByDescending(charges => charges.Timestamp)
-            .Select(charges => charges.Timestamp)
-            .FirstOrDefaultAsync();
-
-        if (lastTranslated == default)
-            domain.LastTranslatedDate = null;
-        else
-            domain.LastTranslatedDate = lastTranslated;
-        await domains.UpdateAsync(domain);
-    }
+    var channels = await slack.GetChannelsAsync();
+    return channels.Select(c => new { c.Id, c.Name });
 });
 
 using var scope = app.Services.CreateScope();
