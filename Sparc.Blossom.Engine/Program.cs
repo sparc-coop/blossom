@@ -133,6 +133,14 @@ app.MapGet("/slack/vectorize", async (IRepository<BlossomPost> repo, IEnumerable
         offset += batchSize;
     } while (offset < messages.Count());
 });
+
+app.MapGet("/slack/cluster", async (IRepository<BlossomVector> repo) =>
+{
+    var vectors = await repo.Query.Take(1000).ToListAsync();
+    var clusterer = new Sparc.Blossom.Plugins.MLNet.VectorClusterer();
+    var model = await clusterer.Train(vectors);
+    await clusterer.Transform(model, vectors);
+});
  
 
 using var scope = app.Services.CreateScope();
