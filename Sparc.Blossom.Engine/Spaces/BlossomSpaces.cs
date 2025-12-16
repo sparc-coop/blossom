@@ -2,17 +2,20 @@
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Content.Tovik;
 using Sparc.Blossom.Data;
+using Sparc.Blossom.Plugins.MLNet;
 using Sparc.Blossom.Realtime;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Spaces;
 
 public class BlossomSpaces(
+    BlossomAggregateOptions<BlossomSpace> options,
     IRepository<BlossomEvent> events,
     IHttpContextAccessor http,
+    VectorClusterer clusterer,
     Contents contents,
     SparcAuthenticator<BlossomUser> auth)
-    : IBlossomEndpoints
+    : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
     public const string Domain = "sparc.coop";
     public string? MatrixSenderId;
@@ -83,6 +86,18 @@ public class BlossomSpaces(
 
         var space = new BlossomSpace(Domain, rootEvent.SpaceId, rootEvent.Content.Type);
         return space;
+    }
+
+    private async Task<BlossomSpace> GetOrCreate(string domain, string spaceId)
+    {
+        var existing = await Repository.FindAsync(domain, spaceId);
+        if (existing == null)
+        {
+            existing = new BlossomSpace(domain, spaceId);
+            await Repository.AddAsync(existing);
+        }    
+
+        return existing;
     }
 
     private async Task<CreateSpaceResponse> CreateSpaceAsync(CreateSpaceRequest request)
@@ -162,6 +177,18 @@ public class BlossomSpaces(
         return entities.ToList();
     }
 
+    public async Task<List<BlossomSpace>> Discover(string spaceId)
+    {
+        var existing = await Repository.Query.Where(x => x.ParentSpaceId == spaceId).ToListAsync();
+        await Repository.DeleteAsync(existing);
+        
+        var space = await GetOrCreate(spaceId, spaceId);
+        var spaces = await clusterer.Discover(space, 20, 0.1M);
+        await Repository.UpdateAsync(space);
+        await Repository.AddAsync(spaces);
+        return spaces;
+    }
+
     private async Task<BlossomPost> PostAsync(string spaceId, BlossomPost post)
     {
         return post;
@@ -212,15 +239,16 @@ public class BlossomSpaces(
     {
         var spaces = endpoints.MapGroup("/spaces");
 
-        endpoints.MapGet("", GetSpacesAsync);
-        endpoints.MapPost("", CreateSpaceAsync);
-        endpoints.MapPost("{spaceId}/join", JoinSpaceAsync);
-        endpoints.MapPost("{spaceId}/leave", LeaveSpaceAsync);
-        endpoints.MapPost("{spaceId}/invite", InviteToSpaceAsync);
-        endpoints.MapGet("{spaceId}/posts", GetPostsAsync);
-        endpoints.MapPost("{spaceId}", PostAsync);
-        endpoints.MapPost("{spaceId}/index", IndexAsync);
-        endpoints.MapPost("graph", async (BlossomSpaces spaces, ExtractGraphRequest request) =>
+        spaces.MapGet("", GetSpacesAsync);
+        spaces.MapPost("", CreateSpaceAsync);
+        spaces.MapPost("{spaceId}/join", JoinSpaceAsync);
+        spaces.MapPost("{spaceId}/leave", LeaveSpaceAsync);
+        spaces.MapPost("{spaceId}/invite", InviteToSpaceAsync);
+        spaces.MapGet("{spaceId}/posts", GetPostsAsync);
+        spaces.MapGet("{spaceId}/discover", Discover);
+        spaces.MapPost("{spaceId}", PostAsync);
+        spaces.MapPost("{spaceId}/index", IndexAsync);
+        spaces.MapPost("graph", async (BlossomSpaces spaces, ExtractGraphRequest request) =>
         {
             var result = await spaces.ExtractGraph(request);
             return Results.Ok(result);

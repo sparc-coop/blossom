@@ -71,22 +71,6 @@ app.UseCors();
 
 app.MapGet("/aura/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 app.MapGet("/hi", () => "Hi from Sparc!");
-app.MapGet("/slack/channels", async (SlackIntegrationService slack) =>
-{
-    var channels = new List<SlackNet.Conversation>();
-    await foreach (var channelBatch in slack.GetChannelsAsync(1000))
-        channels.AddRange(channelBatch);
-
-    return channels.Select(c => new { c.Id, c.Name });
-});
-
-app.MapGet("/slack/messages/{id}", async (SlackIntegrationService slack, string id) =>
-{
-    var allMessages = new List<SlackNet.Events.MessageEvent>();
-    await foreach (var messageBatch in slack.GetMessagesAsync([id], 10000))
-        allMessages.AddRange(messageBatch);
-    return allMessages;
-});
 
 app.MapGet("/slack/import", async (SlackIntegrationService slack, IRepository<BlossomPost> repo) =>
 {
@@ -133,15 +117,6 @@ app.MapGet("/slack/vectorize", async (IRepository<BlossomPost> repo, IEnumerable
         offset += batchSize;
     } while (offset < messages.Count());
 });
-
-app.MapGet("/slack/cluster", async (IRepository<BlossomVector> repo) =>
-{
-    var vectors = await repo.Query.Take(1000).ToListAsync();
-    var clusterer = new Sparc.Blossom.Plugins.MLNet.VectorClusterer();
-    var model = await clusterer.Train(vectors);
-    await clusterer.Transform(model, vectors);
-});
- 
 
 using var scope = app.Services.CreateScope();
 scope.ServiceProvider.GetRequiredService<Contents>().Map(app);

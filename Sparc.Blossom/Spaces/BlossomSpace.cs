@@ -4,10 +4,10 @@ namespace Sparc.Blossom.Spaces;
 
 public class BlossomSpace : BlossomEntity<string>
 {
-    public string SpaceId {  get { return Id;  } set { Id = value; } }
     public string Domain { get; set; }
+    public string SpaceId {  get { return Id;  } set { Id = value; } }
+    public string? ParentSpaceId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string RoomId { get; set; }
     public string? RoomType { get; set; }
     public int NumJoinedMembers { get; set; }
     public bool GuestCanJoin { get; set; }
@@ -16,25 +16,35 @@ public class BlossomSpace : BlossomEntity<string>
     public string? AvatarUrl { get; set; }
     public string? CanonicalAlias { get; set; }
     public string? JoinRule { get; set; }
-    public string LocalId => RoomId.Split(':').First();
     public DateTime DateRegistered { get; set; } = DateTime.UtcNow;
     public DateTime? LastActiveDate { get; set; } = DateTime.UtcNow;
     public DateTime? EndDate { get; set; }
+    public string? ModelUrl { get; set; }
     public List<SparcEntityType> EntityTypes { get; set; } = [];
 
 
     [JsonConstructor]
-    protected BlossomSpace() : base("")
+    protected BlossomSpace() : base(Guid.NewGuid().ToString())
     {
         Domain = string.Empty;
-        RoomId = string.Empty;
     }
 
-    public BlossomSpace(string domain, string roomId, string? roomType = null) : base(roomId)
+    public BlossomSpace(string domain, string spaceId, string? roomType = null) : base(spaceId)
     {
         Domain = domain;
-        RoomId = roomId;
+        SpaceId = spaceId;
         RoomType = roomType;
     }
+
+    public BlossomSpace(string domain) : base(Guid.NewGuid().ToString())
+    {
+        Domain = domain;
+        RoomType = "Ephemeral";
+    }
+
+    public BlossomSpace CreateChild() => new(Domain)
+    {
+        ParentSpaceId = SpaceId
+    };
 }
 

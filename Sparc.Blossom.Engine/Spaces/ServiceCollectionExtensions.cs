@@ -1,10 +1,15 @@
-﻿namespace Sparc.Blossom.Spaces;
+﻿using Sparc.Blossom.Plugins.MLNet;
+
+namespace Sparc.Blossom.Spaces;
 
 public static class ServiceCollectionExtensions
 {
     public static WebApplicationBuilder AddSparcSpaces(this WebApplicationBuilder builder)
     {
-        builder.Services.AddTransient<BlossomSpaces>();
+        builder.Services.AddTransient<BlossomSpaces>()
+            .AddScoped<BlossomAggregateOptions<BlossomSpace>>()
+            .AddScoped<BlossomAggregate<BlossomSpace>>()
+            .AddTransient<VectorClusterer>();
         return builder;
     }
 

@@ -10,6 +10,13 @@ public class BlossomFile
         Stream = stream;
     }
 
+    public BlossomFile(Uri sourceUri, string fileName)
+    {
+        fileName = fileName.Replace(sourceUri.AbsoluteUri, "");
+        FolderName = fileName.Split('/').First();
+        FileName = fileName.Replace(FolderName + "/", "");
+    }
+
     public BlossomFile(string fileName, AccessTypes? accessType = null, Stream? stream = null)
     {
         FolderName = Path.GetDirectoryName(fileName) ?? string.Empty;

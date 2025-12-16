@@ -2,59 +2,91 @@
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Sparc.Blossom.Content;
+using Sparc.Blossom.Data;
+using Sparc.Blossom.Spaces;
 using static Microsoft.ML.Transforms.LpNormNormalizingEstimatorBase;
 
 namespace Sparc.Blossom.Plugins.MLNet;
 
-public class FixedVector(string targetUrl, float[] vector)
+public class VectorClusterer(
+    IRepository<BlossomVector> vectors,
+    AzureBlobRepository files)
 {
-    public string TargetUrl { get; set; } = targetUrl;
-    [VectorType(1536)]
-    public float[] Vector { get; set; } = vector;
-}
+    public MLContext Context { get; } = new MLContext(seed: 1);
 
-public class VectorClusterer
-{
-    public MLContext Context { get; }
-
-    public VectorClusterer()
+    public async Task<List<BlossomSpace>> Discover(BlossomSpace space, int numSpaces, decimal sampleSize = 1M)
     {
-        Context = new MLContext(seed: 1);
+        var data = await LoadAsync(space, sampleSize);
+        var model = NormalizedKMeans(numSpaces).Fit(data);
+        await SaveModelAsync(model, space, data.Schema);
+        return await ExtractSpaces(space, model);
     }
 
-    public IDataView Load(IEnumerable<BlossomVector> vectors)
+    private EstimatorChain<ClusteringPredictionTransformer<KMeansModelParameters>> NormalizedKMeans(int numSpaces)
     {
-        return Context.Data.LoadFromEnumerable(vectors.Select(x => new FixedVector(x.TargetUrl, x.Vector)));
+        var normalize = Context.Transforms.NormalizeLpNorm("Vector", norm: NormFunction.L2);
+        var kmeans = Context.Clustering.Trainers.KMeans(featureColumnName: "Vector", numberOfClusters: numSpaces);
+        var pipeline = normalize.Append(kmeans);
+        return pipeline;
     }
 
-    public async Task<ITransformer> Train(IEnumerable<BlossomVector> vectors)
+    private async Task<IDataView> LoadAsync(BlossomSpace space, decimal sampleSize)
     {
-        // Convert BlossomVector to a class suitable for ML.NET
-        var data = Load(vectors);
+        var query = vectors.Query.Where(x => x.SpaceId == space.Id);
+        int take = (int)(query.Count() * sampleSize);
 
-        // Normalize the vectors (L2 normalization)
-        var pipeline = Context.Transforms.NormalizeLpNorm("Vector", norm: NormFunction.L2)
-            .Append(Context.Clustering.Trainers.KMeans(
-                featureColumnName: "Vector",
-                numberOfClusters: 10));
+        var spaceVectors = await query
+            .OrderBy(x => x.Id)
+            .Take(take)
+            .ToListAsync();
 
-        var model = pipeline.Fit(data);
+        return await LoadAsync(spaceVectors);
+    }
 
-        var kmeans = model.LastTransformer.Model;
-        Console.WriteLine($"Cluster centroids:");
+    private async Task<IDataView> LoadAsync(IEnumerable<BlossomVector> vectors)
+    { 
+        return Context.Data.LoadFromEnumerable(FixedVector.From(vectors));
+    }
+
+    private async Task<ITransformer> LoadModelAsync(BlossomSpace space)
+    {
+        var file = await files.FindAsync(space.ModelUrl!) 
+            ?? throw new Exception("Model not found");
+        
+        return Context.Model.Load(file.Stream, out _);
+    }
+
+    private async Task SaveModelAsync(ITransformer model, BlossomSpace space, DataViewSchema schema)
+    {
+        using var stream = new MemoryStream();
+        Context.Model.Save(model, schema, stream);
+
+        var file = new BlossomFile("models", $"{space.SpaceId}/{Guid.NewGuid()}.zip", AccessTypes.Private, stream);
+        await files.AddAsync(file);
+        space.ModelUrl = file.Url;
+    } 
+
+    private async Task<List<BlossomSpace>> ExtractSpaces(BlossomSpace rootSpace, TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model)
+    {
         VBuffer<float>[] centroids = [];
-        kmeans.GetClusterCentroids(ref centroids, out int k);
+        model!.LastTransformer.Model.GetClusterCentroids(ref centroids, out int k);
+
+        var newSpaces = new List<BlossomSpace>();
         for (int i = 0; i < k; i++)
         {
-            Console.WriteLine($"Centroid {i}: {string.Join(", ", centroids[i].DenseValues())}");
+            var space = rootSpace.CreateChild();
+            newSpaces.Add(space);
+
+            var vector = new BlossomVector(space.SpaceId, "text-embedding-3-small", [.. centroids[i].DenseValues()], space.SpaceId);
+            await vectors.AddAsync(vector);
         }
 
-        return model;
+        return newSpaces;
     }
 
     public async Task Transform(ITransformer transformer, IEnumerable<BlossomVector> vectors)
     {
-        var data = Load(vectors);
+        var data = Context.Data.LoadFromEnumerable(FixedVector.From(vectors));
         var predictions = transformer.Transform(data);
         var clusteredResults = Context.Data.CreateEnumerable<ClusteringPrediction>(predictions, reuseRowObject: false).ToList();
         // Output the clustering results
