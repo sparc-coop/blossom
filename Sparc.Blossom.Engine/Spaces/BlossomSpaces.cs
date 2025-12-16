@@ -12,7 +12,7 @@ public class BlossomSpaces(
     BlossomAggregateOptions<BlossomSpace> options,
     IRepository<BlossomEvent> events,
     IHttpContextAccessor http,
-    VectorClusterer clusterer,
+    BlossomVectors vectors,
     Contents contents,
     SparcAuthenticator<BlossomUser> auth)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
@@ -182,8 +182,8 @@ public class BlossomSpaces(
         var existing = await Repository.Query.Where(x => x.ParentSpaceId == spaceId).ToListAsync();
         await Repository.DeleteAsync(existing);
         
-        var space = await GetOrCreate(spaceId, spaceId);
-        var spaces = await clusterer.Discover(space, 20, 0.1M);
+        var space = await GetOrCreate("kuviocreative.com", spaceId);
+        var spaces = await vectors.Discover(space, 20, 0.1M);
         await Repository.UpdateAsync(space);
         await Repository.AddAsync(spaces);
         return spaces;
@@ -194,9 +194,11 @@ public class BlossomSpaces(
         return post;
     }
 
-    private async Task<List<BlossomEvent<MatrixMessage>>> GetPostsAsync(string spaceId)
+    private async Task<List<BlossomPost>> GetPostsAsync(string spaceId)
     {
-        return await GetAllAsync<MatrixMessage>(spaceId);
+        var space = await GetOrCreate("kuviocreative.com", spaceId);
+        var posts = await vectors.GetRelevantPostsAsync(space, 50);
+        return posts.OrderBy(x => x.Timestamp).ToList();
     }
 
     private async Task<BlossomEvent> PublishAsync<T>(string spaceId, T content)

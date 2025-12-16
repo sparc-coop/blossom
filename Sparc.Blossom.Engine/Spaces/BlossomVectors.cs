@@ -3,13 +3,14 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
-using Sparc.Blossom.Spaces;
+using Sparc.Blossom.Plugins.MLNet;
 using static Microsoft.ML.Transforms.LpNormNormalizingEstimatorBase;
 
-namespace Sparc.Blossom.Plugins.MLNet;
+namespace Sparc.Blossom.Spaces;
 
-public class VectorClusterer(
-    IRepository<BlossomVector> vectors,
+public class BlossomVectors(
+    IRepository<BlossomVector> vectors, 
+    IRepository<BlossomPost> posts,
     AzureBlobRepository files)
 {
     public MLContext Context { get; } = new MLContext(seed: 1);
@@ -20,6 +21,30 @@ public class VectorClusterer(
         var model = NormalizedKMeans(numSpaces).Fit(data);
         await SaveModelAsync(model, space, data.Schema);
         return await ExtractSpaces(space, model);
+    }
+
+    public async Task<List<BlossomPost>> GetRelevantPostsAsync(BlossomSpace space, int count)
+    {
+        var spaceVector = await vectors.Query
+            .Where(x => x.SpaceId == space.Id && x.TargetUrl == space.Id)
+            .Select(x => x.Vector)
+            .FirstOrDefaultAsync()
+            ?? throw new Exception("Space vector not found");
+
+        var query = $@"
+            SELECT TOP {count} VALUE c.TargetUrl
+            FROM c
+            WHERE c.SpaceId = '{space.ParentSpaceId}' AND c.TargetUrl != '{space.ParentSpaceId}'
+            ORDER BY VectorDistance(c.Vector, {new BlossomVector(spaceVector)})";
+
+        var cosmosVectors = vectors as CosmosDbSimpleRepository<BlossomVector>;
+        var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<string>(query, space.ParentSpaceId);
+
+        var postsInSpace = await posts.Query
+            .Where(x => similarVectorsInSpace.Contains(x.PostId))
+            .ToListAsync();
+
+        return postsInSpace;
     }
 
     private EstimatorChain<ClusteringPredictionTransformer<KMeansModelParameters>> NormalizedKMeans(int numSpaces)
@@ -97,12 +122,5 @@ public class VectorClusterer(
             Console.WriteLine($"Vector TargetUrl: {prediction.TargetUrl}, Assigned Cluster: {prediction.PredictedLabel}, Score: {prediction.Score}");
         }
     }
-}
-
-public class ClusteringPrediction
-{
-    public string TargetUrl { get; set; } = "";
-    public uint PredictedLabel { get; set; }
-    public float[] Score { get; set; } = [];
 }
 

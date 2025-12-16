@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
         builder.Services.AddTransient<BlossomSpaces>()
             .AddScoped<BlossomAggregateOptions<BlossomSpace>>()
             .AddScoped<BlossomAggregate<BlossomSpace>>()
-            .AddTransient<VectorClusterer>();
+            .AddTransient<BlossomVectors>();
         return builder;
     }
 
