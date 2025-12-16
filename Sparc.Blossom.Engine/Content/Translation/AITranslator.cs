@@ -35,7 +35,7 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
     {
         var fromLanguages = messages.GroupBy(x => x.Language);
-        var batches = Contents.Batch(messages, 5);
+        var batches = messages.Batch(5);
 
         var translatedMessages = new ConcurrentBag<TextContent>();
 

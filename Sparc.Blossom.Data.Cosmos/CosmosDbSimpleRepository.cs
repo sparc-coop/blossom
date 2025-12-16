@@ -2,7 +2,6 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using MediatR;
 using Microsoft.Azure.Cosmos;
-using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom.Data;
 

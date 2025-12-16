@@ -172,14 +172,6 @@ public class Contents(
                 await cosmos.Publish(content);
     }
 
-    internal static IEnumerable<IEnumerable<T>> Batch<T>(IEnumerable<T> items,
-                                                       int maxItems)
-    {
-        return items.Select((item, inx) => new { item, inx })
-                    .GroupBy(x => x.inx / maxItems)
-                    .Select(g => g.Select(x => x.item));
-    }
-
     private static TranslationOptions? DefaultOptions(List<TextContent> content, string? userLanguage)
     {
         // Automatically translate to user's preferred language if not specified

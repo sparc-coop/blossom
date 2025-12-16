@@ -32,7 +32,7 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
         var fromLanguages = messages.GroupBy(x => SourceLanguage(x.Language));
         var toDeepLLanguage = TargetLanguage(options.OutputLanguage!);
 
-        var batches = Contents.Batch(messages, 50);
+        var batches = messages.Batch(50);
 
         var translatedMessages = new List<TextContent>();
         foreach (var batch in batches)
