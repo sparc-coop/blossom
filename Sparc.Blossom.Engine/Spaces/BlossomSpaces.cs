@@ -183,7 +183,7 @@ public class BlossomSpaces(
         await Repository.DeleteAsync(existing);
         
         var space = await GetOrCreate("kuviocreative.com", spaceId);
-        var spaces = await vectors.Discover(space, 20, 0.1M);
+        var spaces = await vectors.Discover(space, 50, 0.1M);
         await Repository.UpdateAsync(space);
         await Repository.AddAsync(spaces);
 
@@ -210,6 +210,12 @@ public class BlossomSpaces(
         var space = await GetOrCreate("kuviocreative.com", spaceId);
         var posts = await vectors.GetRelevantPostsAsync(space, 50);
         return posts.OrderBy(x => x.Timestamp).ToList();
+    }
+
+    private async Task<string> GetSimplePostsAsync(string spaceId)
+    {
+        var posts = await GetPostsAsync(spaceId);
+        return string.Join("\r\n\r\n----------------------------------------------------------------\r\n\r\n", posts.Select(x => $"({x.Timestamp}) {x.User?.Username}: {x.Text}"));
     }
 
     private async Task<BlossomEvent> PublishAsync<T>(string spaceId, T content)
@@ -258,6 +264,7 @@ public class BlossomSpaces(
         spaces.MapPost("{spaceId}/leave", LeaveSpaceAsync);
         spaces.MapPost("{spaceId}/invite", InviteToSpaceAsync);
         spaces.MapGet("{spaceId}/posts", GetPostsAsync);
+        spaces.MapGet("{spaceId}/simpleposts", GetSimplePostsAsync);
         spaces.MapGet("{spaceId}/discover", Discover);
         spaces.MapPost("{spaceId}", PostAsync);
         spaces.MapPost("{spaceId}/index", IndexAsync);
