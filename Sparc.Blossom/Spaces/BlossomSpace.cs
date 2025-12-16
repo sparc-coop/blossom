@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Sparc.Blossom.Content;
+using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Spaces;
 
@@ -13,6 +14,7 @@ public class BlossomSpace : BlossomEntity<string>
     public bool GuestCanJoin { get; set; }
     public bool WorldReadable { get; set; }
     public string? Topic { get; set; }
+    public string? Description { get; set; }
     public string? AvatarUrl { get; set; }
     public string? CanonicalAlias { get; set; }
     public string? JoinRule { get; set; }
@@ -46,5 +48,15 @@ public class BlossomSpace : BlossomEntity<string>
     {
         ParentSpaceId = SpaceId
     };
+
+    public void SetSummary(BlossomSummary? summary)
+    {
+        if (summary == null)
+            return;
+
+        Name = summary.Name;
+        Topic = summary.Topic;
+        Description = summary.Description;
+    }
 }
 

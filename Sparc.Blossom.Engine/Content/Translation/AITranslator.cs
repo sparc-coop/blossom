@@ -25,6 +25,13 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
         return result;
     }
 
+    public async Task<BlossomSummary?> SummarizeAsync(IEnumerable<TextContent> messages)
+    {
+        var question = new SummaryQuestion(messages, 1047576);
+        var answer = await AskAsync(question);
+        return answer.Value;
+    }
+
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
     {
         var fromLanguages = messages.GroupBy(x => x.Language);

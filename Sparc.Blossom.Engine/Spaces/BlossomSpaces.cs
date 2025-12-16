@@ -2,7 +2,6 @@
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Content.Tovik;
 using Sparc.Blossom.Data;
-using Sparc.Blossom.Plugins.MLNet;
 using Sparc.Blossom.Realtime;
 using System.Security.Claims;
 
@@ -11,6 +10,7 @@ namespace Sparc.Blossom.Spaces;
 public class BlossomSpaces(
     BlossomAggregateOptions<BlossomSpace> options,
     IRepository<BlossomEvent> events,
+    IEnumerable<ITranslator> translators,
     IHttpContextAccessor http,
     BlossomVectors vectors,
     Contents contents,
@@ -186,6 +186,17 @@ public class BlossomSpaces(
         var spaces = await vectors.Discover(space, 20, 0.1M);
         await Repository.UpdateAsync(space);
         await Repository.AddAsync(spaces);
+
+        // Summarize spaces
+        var aiTranslator = translators.OfType<AITranslator>().First();
+        foreach (var newSpace in spaces)
+        {
+            var messages = await GetPostsAsync(newSpace.SpaceId);
+            var summary = await aiTranslator.SummarizeAsync(messages);
+            newSpace.SetSummary(summary);
+            await Repository.UpdateAsync(newSpace);
+        }
+
         return spaces;
     }
 

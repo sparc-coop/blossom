@@ -13,7 +13,7 @@ internal class TranslationQuestion : BlossomQuestion<TranslationResult>
     public TranslationQuestion(TextContent message, TranslationOptions options)
     : base(options.ToPrompt())
     {
-        Instructions = 
+        Instructions =
             options.Instructions ?? (
             "You are a translation and tone‑shaping assistant.\r\n" +
             "For the following message, adjust grammar, vocabulary, idioms, and sentence structure to match the specified tone levels, while preserving the original meaning.\r\n\r\n" +
@@ -27,7 +27,7 @@ internal class TranslationQuestion : BlossomQuestion<TranslationResult>
     }
 
 
-    public TranslationQuestion(IEnumerable<TextContent> messages, TranslationOptions options) 
+    public TranslationQuestion(IEnumerable<TextContent> messages, TranslationOptions options)
         : base(options.ToPrompt())
     {
         Instructions = "You are a translation and tone‑shaping assistant.\r\n" +
@@ -35,7 +35,7 @@ internal class TranslationQuestion : BlossomQuestion<TranslationResult>
             "If an output language is also provided, first translate each message into that language, then adjust the grammar, vocabulary, idioms, and sentence structure.\r\n\r\n" +
             "If any message is not translatable, use the original message in the output, don't skip it. " +
             "The answer should always contain the same quantity of translations as the input.";
-        
+
         var textToTranslate = messages
             .Where(x => x.Text != null)
             .Select(x => new TextContentBase(x.Id.Substring(0, 4), x.Text!.Replace('\u00A0', ' ')));
