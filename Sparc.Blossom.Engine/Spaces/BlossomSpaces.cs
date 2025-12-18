@@ -43,19 +43,13 @@ public class BlossomSpaces(
         await PublishAsync(userId, presence);
     }
 
-    private async Task<GetPublicSpacesResponse> GetSpacesAsync(int? limit = null, string? since = null, string? server = null)
+    private async Task<List<BlossomSpace>> GetSpacesAsync(string domain, string rootSpaceId, int? limit = null)
     {
-        var createdSpaces = await Query<CreateSpace>().ToListAsync();
+        var spaces = await Repository.Query
+            .Where(x => x.Domain == domain && x.ParentSpaceId == rootSpaceId)
+            .ToListAsync();
 
-        var spaces = new List<BlossomSpace>();
-        // Eventually do this in the background to show a published room directory
-        foreach (var createdSpace in createdSpaces)
-        {
-            var space = await GetSpaceAsync(createdSpace.SpaceId);
-            spaces.Add(space);
-        }
-
-        return new(spaces);
+        return spaces;
     }
 
     internal async Task<List<BlossomEvent>> GetAllAsync(string spaceId)
