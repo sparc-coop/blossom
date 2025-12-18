@@ -173,7 +173,7 @@ public class BlossomSpaces(
         await Repository.DeleteAsync(existing);
         
         var space = await GetOrCreate("kuviocreative.com", spaceId);
-        var spaces = await vectors.Discover(space, 50, 0.1M);
+        var spaces = await vectors.Discover(space, 10);
         await Repository.UpdateAsync(space);
         await Repository.AddAsync(spaces);
 

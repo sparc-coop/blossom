@@ -74,7 +74,7 @@ app.MapGet("/hi", () => "Hi from Sparc!");
 
 app.MapGet("/slack/import", async (SlackIntegrationService slack, IRepository<BlossomPost> repo) =>
 {
-    var existingMessages = await repo.Query.Where(x => x.SpaceId == "slacktest").ToListAsync();
+    var existingMessages = await repo.Query.Where(x => x.SpaceId == "conseris").ToListAsync();
     if (existingMessages.Any())
         await repo.DeleteAsync(existingMessages);
     
@@ -82,9 +82,13 @@ app.MapGet("/slack/import", async (SlackIntegrationService slack, IRepository<Bl
     var english = Language.Find("en-US");
     await foreach (var channelBatch in slack.GetChannelsAsync(1000))
     {
-        await foreach (var messageBatch in slack.GetMessagesAsync(channelBatch.Select(x => x.Id), 10000))
+        var conserisChannel = channelBatch.FirstOrDefault(x => x.Name == "conseris");
+        if (conserisChannel == null)
+            continue;
+
+        await foreach (var messageBatch in slack.GetMessagesAsync([conserisChannel.Id], 10000))
         {
-            var posts = messageBatch.Select(x => new BlossomPost("kuviocreative.com", "slacktest", english!, x.Text, new() { Avatar = new(x.User, x.User) }));
+            var posts = messageBatch.Select(x => new BlossomPost("kuviocreative.com", "conseris", english!, x.Text, new() { Avatar = new(x.User, x.User) }));
             await repo.AddAsync(posts);
         }
     }
@@ -92,7 +96,7 @@ app.MapGet("/slack/import", async (SlackIntegrationService slack, IRepository<Bl
 
 app.MapGet("/slack/vectorize", async (IRepository<BlossomPost> repo, IEnumerable<ITranslator> translators, IRepository<BlossomVector> vectorRepo) =>
 {
-    var messages = await repo.Query.Where(x => x.Domain == "kuviocreative.com" && x.SpaceId == "slacktest").ToListAsync();
+    var messages = await repo.Query.Where(x => x.Domain == "kuviocreative.com" && x.SpaceId == "conseris").ToListAsync();
     var offset = 0;
     var batchSize = 1000;
 

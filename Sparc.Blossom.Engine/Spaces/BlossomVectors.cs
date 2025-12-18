@@ -20,11 +20,42 @@ public class BlossomVectors(
         var data = await LoadAsync(space, sampleSize);
         var model = NormalizedKMeans(numSpaces).Fit(data);
         await SaveModelAsync(model, space, data.Schema);
-        return await ExtractSpaces(space, model);
+        var spaces = await ExtractSpaces(space, model);
+        await AssignDataToSpaces(model, spaces, data);
+        return spaces;
     }
 
-    public async Task<List<BlossomPost>> GetRelevantPostsAsync(BlossomSpace space, int count)
+    private async Task AssignDataToSpaces(TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model, List<BlossomSpace> spaces, IDataView data)
     {
+        var parentSpaceId = spaces.First().ParentSpaceId;
+        var query = await vectors.Query.Where(x => x.SpaceId == parentSpaceId).ToListAsync();
+        var fixedVectors = FixedVector.From(query);
+        var predictor = Context.Model.CreatePredictionEngine<FixedVector, ClusteringPrediction>(model);
+
+        foreach (var vector in fixedVectors)
+        {
+            var prediction = predictor.Predict(vector);
+            var post = await posts.FindAsync(vector.TargetUrl);
+            if (post != null)
+            {
+                post.MostRelevantSpaceId = spaces[(int)prediction.PredictedLabel - 1].Id;
+                await posts.UpdateAsync(post);
+                Console.WriteLine($"Assigned post {post.Id} to space {post.MostRelevantSpaceId}.");
+            }
+        }
+    }
+
+    public async Task<List<BlossomPost>> GetRelevantPostsAsync(BlossomSpace space, int count, bool fuzzy = false)
+    {
+        if (!fuzzy)
+        {
+            var exactPosts = await posts.Query
+                .Where(x => x.MostRelevantSpaceId == space.Id)
+                .Take(count)
+                .ToListAsync();
+            return exactPosts;
+        }
+        
         var spaceVector = await vectors.Query
             .Where(x => x.SpaceId == space.Id && x.TargetUrl == space.Id)
             .Select(x => x.Vector)
