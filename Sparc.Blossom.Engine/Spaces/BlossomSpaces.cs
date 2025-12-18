@@ -71,14 +71,10 @@ public class BlossomSpaces(
         return result.Cast<BlossomEvent<T>>().ToList();
     }
 
-    internal async Task<BlossomSpace> GetSpaceAsync(string spaceId)
+    internal async Task<BlossomSpace> GetSpaceAsync(string domain, string spaceId)
     {
-        var allSpaceEvents = await GetAllAsync(spaceId);
-        var orderedEvents = allSpaceEvents.OrderBy(x => x.Depth);
-
-        var rootEvent = orderedEvents.OfType<BlossomEvent<CreateSpace>>().First();
-
-        var space = new BlossomSpace(Domain, rootEvent.SpaceId, rootEvent.Content.Type);
+        var space = await Repository.FindAsync(domain, spaceId)
+            ?? throw new InvalidOperationException($"Space '{spaceId}' not found in domain '{domain}'.");
         return space;
     }
 
@@ -254,6 +250,7 @@ public class BlossomSpaces(
 
         spaces.MapGet("", GetSpacesAsync);
         spaces.MapPost("", CreateSpaceAsync);
+        spaces.MapGet("{spaceId}", GetSpaceAsync);
         spaces.MapPost("{spaceId}/join", JoinSpaceAsync);
         spaces.MapPost("{spaceId}/leave", LeaveSpaceAsync);
         spaces.MapPost("{spaceId}/invite", InviteToSpaceAsync);
