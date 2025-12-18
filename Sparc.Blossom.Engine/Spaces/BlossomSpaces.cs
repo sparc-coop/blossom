@@ -167,13 +167,13 @@ public class BlossomSpaces(
         return entities.ToList();
     }
 
-    public async Task<List<BlossomSpace>> Discover(string spaceId, int numSpaces = 10)
+    public async Task<List<BlossomSpace>> Discover(string spaceId)
     {
         var existing = await Repository.Query.Where(x => x.ParentSpaceId == spaceId).ToListAsync();
         await Repository.DeleteAsync(existing);
         
         var space = await GetOrCreate("kuviocreative.com", spaceId);
-        var spaces = await vectors.Discover(space, numSpaces);
+        var spaces = await vectors.Discover(space);
         await Repository.UpdateAsync(space);
         await Repository.AddAsync(spaces);
 

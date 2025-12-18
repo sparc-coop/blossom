@@ -15,10 +15,10 @@ public class BlossomVectors(
 {
     public MLContext Context { get; } = new MLContext(seed: 1);
 
-    public async Task<List<BlossomSpace>> Discover(BlossomSpace space, int numSpaces, decimal sampleSize = 1M)
+    public async Task<List<BlossomSpace>> Discover(BlossomSpace space, decimal sampleSize = 1M)
     {
         var data = await LoadAsync(space, sampleSize);
-        var model = NormalizedKMeans(numSpaces).Fit(data);
+        var model = NormalizedKMeans(data).Fit(data);
         await SaveModelAsync(model, space, data.Schema);
         var spaces = await ExtractSpaces(space, model);
         await AssignDataToSpaces(model, spaces, data);
@@ -58,10 +58,31 @@ public class BlossomVectors(
         return postsInSpace;
     }
 
-    private EstimatorChain<ClusteringPredictionTransformer<KMeansModelParameters>> NormalizedKMeans(int numSpaces)
+    private EstimatorChain<ClusteringPredictionTransformer<KMeansModelParameters>> NormalizedKMeans(IDataView data, int maxSpaces = 100)
+    {
+        var scores = new List<double>();
+        for (var numSpaces = 1; numSpaces <= maxSpaces; numSpaces++)
+        {
+            var model = CreateModel(numSpaces);
+            var predictions = model.Fit(data).Transform(data);
+            var metrics = Context.Clustering.Evaluate(predictions);
+            scores.Add(metrics.AverageDistance);
+        }
+
+        var elbowK = FindElbow(scores, 1);
+        return CreateModel(elbowK);
+    }
+
+    private EstimatorChain<ClusteringPredictionTransformer<KMeansModelParameters>> CreateModel(int numSpaces)
     {
         var normalize = Context.Transforms.NormalizeLpNorm("Vector", norm: NormFunction.L2);
-        var kmeans = Context.Clustering.Trainers.KMeans(featureColumnName: "Vector", numberOfClusters: numSpaces);
+        var options = new KMeansTrainer.Options
+        {
+            InitializationAlgorithm = KMeansTrainer.InitializationAlgorithm.KMeansPlusPlus,
+            FeatureColumnName = "Vector",
+            NumberOfClusters = numSpaces
+        };
+        var kmeans = Context.Clustering.Trainers.KMeans(options);
         var pipeline = normalize.Append(kmeans);
         return pipeline;
     }
@@ -146,5 +167,36 @@ public class BlossomVectors(
             Console.WriteLine($"Vector TargetUrl: {prediction.TargetUrl}, Assigned Cluster: {prediction.PredictedLabel}, Score: {prediction.Score}");
         }
     }
+
+    public static int FindElbow(List<double> inertias, int minK = 1)
+    {
+        int n = inertias.Count;
+        // Normalize inertia values between 0 and 1
+        double maxVal = inertias.Max();
+        double minVal = inertias.Min();
+        List<double> norm = inertias.Select(v => (v - minVal) / (maxVal - minVal)).ToList();
+
+        // Create straight line from first to last point
+        List<double> line = [];
+        for (int i = 0; i < n; i++)
+        {
+            double frac = (double)i / (n - 1);
+            line.Add(1 - frac); // decreasing line from 1 to 0
+        }
+
+        // Compute difference between curve and line
+        List<double> diffs = new List<double>();
+        for (int i = 0; i < n; i++)
+        {
+            diffs.Add(line[i] - norm[i]);
+        }
+
+        // Find index of maximum deviation
+        int elbowIndex = diffs.IndexOf(diffs.Max());
+
+        // Adjust for minK offset
+        return minK + elbowIndex;
+    }
+
 }
 

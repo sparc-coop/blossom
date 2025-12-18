@@ -12,7 +12,7 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
         Instructions = "You are an assistant that summarizes messages into a brief overview that will be used for room identification.\r\n" +
             "Analyze the provided messages and extract the main themes to create a concise summary.\r\n\r\n" +
             "The summary should include:\r\n" +
-            "- Name: A short, descriptive room title for the collection of messages.\r\n" +
+            "- Name: A short, 2 to 3 word descriptive room title for the collection of messages. This name should be extremely specific to the primary subject matter of the room. All lower case, words hyphenated.\r\n" +
             "- Topic: The 10-20 word primary subject matter discussed in the messages.\r\n" +
             "- Description: A 50-100 word overview highlighting the key points and themes.";
 
@@ -34,7 +34,7 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
         Instructions = "You are an assistant that summarizes messages into a brief overview that will be used for room identification.\r\n" +
             "Analyze the provided messages and extract the main themes to create a concise summary.\r\n\r\n" +
             "The summary should include:\r\n" +
-            "- Name: A short, descriptive room title for the collection of messages.\r\n" +
+            "- Name: A short, 2 to 3 word descriptive room title for the collection of messages. This name should be extremely specific to the primary subject matter of the room. All lower case, words hyphenated.\r\n" +
             "- Topic: The 10-20 word primary subject matter discussed in the messages.\r\n" +
             "- Description: A 50-100 word overview highlighting the key points and themes.";
 
