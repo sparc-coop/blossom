@@ -88,7 +88,10 @@ app.MapGet("/slack/import", async (SlackIntegrationService slack, IRepository<Bl
 
         await foreach (var messageBatch in slack.GetMessagesAsync([conserisChannel.Id], 10000))
         {
-            var posts = messageBatch.Select(x => new BlossomPost("kuviocreative.com", "conseris", english!, x.Text, new() { Avatar = new(x.User, x.User) }));
+            var posts = messageBatch.Select(x => new BlossomPost("kuviocreative.com", "conseris", english!, x.Text, new() { Avatar = new(x.User, x.User) })
+            {
+                Timestamp = x.Timestamp
+            });
             await repo.AddAsync(posts);
         }
     }
@@ -96,6 +99,10 @@ app.MapGet("/slack/import", async (SlackIntegrationService slack, IRepository<Bl
 
 app.MapGet("/slack/vectorize", async (IRepository<BlossomPost> repo, IEnumerable<ITranslator> translators, IRepository<BlossomVector> vectorRepo) =>
 {
+    var existing = await vectorRepo.Query.Where(x => x.SpaceId == "conseris").ToListAsync();
+    if (existing.Count != 0)
+        await vectorRepo.DeleteAsync(existing);
+
     var messages = await repo.Query.Where(x => x.Domain == "kuviocreative.com" && x.SpaceId == "conseris").ToListAsync();
     var offset = 0;
     var batchSize = 1000;
@@ -110,8 +117,8 @@ app.MapGet("/slack/vectorize", async (IRepository<BlossomPost> repo, IEnumerable
                     .ToList();
 
         var ids = batch.Select(x => x.Id).ToList();
-        var existing = await vectorRepo.Query.Where(x => ids.Contains(x.TargetUrl)).Select(x => x.TargetUrl).ToListAsync();
-        batch = batch.Where(x => !existing.Contains(x.Id)).ToList();
+        //var existing = await vectorRepo.Query.Where(x => ids.Contains(x.TargetUrl)).Select(x => x.TargetUrl).ToListAsync();
+        //batch = batch.Where(x => !existing.Contains(x.Id)).ToList();
         if (batch.Count > 0)
         {
             var translator = translators.OfType<OpenAITranslator>().First();

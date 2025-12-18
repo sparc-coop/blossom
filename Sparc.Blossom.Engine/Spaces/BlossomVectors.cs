@@ -25,26 +25,6 @@ public class BlossomVectors(
         return spaces;
     }
 
-    private async Task AssignDataToSpaces(TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model, List<BlossomSpace> spaces, IDataView data)
-    {
-        var parentSpaceId = spaces.First().ParentSpaceId;
-        var query = await vectors.Query.Where(x => x.SpaceId == parentSpaceId).ToListAsync();
-        var fixedVectors = FixedVector.From(query);
-        var predictor = Context.Model.CreatePredictionEngine<FixedVector, ClusteringPrediction>(model);
-
-        foreach (var vector in fixedVectors)
-        {
-            var prediction = predictor.Predict(vector);
-            var post = await posts.FindAsync(vector.TargetUrl);
-            if (post != null)
-            {
-                post.MostRelevantSpaceId = spaces[(int)prediction.PredictedLabel - 1].Id;
-                await posts.UpdateAsync(post);
-                Console.WriteLine($"Assigned post {post.Id} to space {post.MostRelevantSpaceId}.");
-            }
-        }
-    }
-
     public async Task<List<BlossomPost>> GetRelevantPostsAsync(BlossomSpace space, int count, bool fuzzy = false)
     {
         if (!fuzzy)
@@ -104,14 +84,6 @@ public class BlossomVectors(
         return Context.Data.LoadFromEnumerable(FixedVector.From(vectors));
     }
 
-    private async Task<ITransformer> LoadModelAsync(BlossomSpace space)
-    {
-        var file = await files.FindAsync(space.ModelUrl!) 
-            ?? throw new Exception("Model not found");
-        
-        return Context.Model.Load(file.Stream, out _);
-    }
-
     private async Task SaveModelAsync(ITransformer model, BlossomSpace space, DataViewSchema schema)
     {
         using var stream = new MemoryStream();
@@ -139,6 +111,27 @@ public class BlossomVectors(
 
         return newSpaces;
     }
+
+    private async Task AssignDataToSpaces(TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model, List<BlossomSpace> spaces, IDataView data)
+    {
+        var parentSpaceId = spaces.First().ParentSpaceId;
+        var query = await vectors.Query.Where(x => x.SpaceId == parentSpaceId).ToListAsync();
+        var fixedVectors = FixedVector.From(query);
+        var predictor = Context.Model.CreatePredictionEngine<FixedVector, ClusteringPrediction>(model);
+
+        foreach (var vector in fixedVectors)
+        {
+            var prediction = predictor.Predict(vector);
+            var post = await posts.FindAsync(vector.TargetUrl);
+            if (post != null)
+            {
+                post.MostRelevantSpaceId = spaces[(int)prediction.PredictedLabel - 1].Id;
+                await posts.UpdateAsync(post);
+                Console.WriteLine($"Assigned post {post.Id} to space {post.MostRelevantSpaceId}.");
+            }
+        }
+    }
+
 
     public async Task Transform(ITransformer transformer, IEnumerable<BlossomVector> vectors)
     {

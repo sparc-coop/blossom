@@ -23,10 +23,11 @@ internal class OpenAITranslator(OpenAIClient client)
                 .Where(x => !string.IsNullOrWhiteSpace(x.Text))
                 //.OrderBy(x => x.Sequence)
                 .Skip(offset)
+                .OrderBy(x => x.Timestamp)
                 .Take(batchSize)
                 .ToList();
 
-            var inputs = batch.Select(x => x.Text).ToList();
+            var inputs = batch.Select((x, i) => MessagesWithContext(x.Text, batch, i)).ToList();
 
             if (!inputs.Any())
                 return [];
@@ -44,7 +45,14 @@ internal class OpenAITranslator(OpenAIClient client)
 
         return vectors;
     }
-    
+
+    private static string MessagesWithContext(string? text, List<TextContent> batch, int i)
+    {
+        var previousMessages = batch.Index().Where(x => x.Index < i).Select(x => x.Item.Text).TakeLast(5);
+        var context = previousMessages.Any() ? "<PreviousMessages>" + string.Join("\n", previousMessages) + "</PreviousMessages>\n\n" : "";
+        return context + text;
+    }
+
     public override async Task<BlossomAnswer<T>> AskAsync<T>(BlossomQuestion<T> question)
     {
         var answer = new BlossomAnswer<T>();

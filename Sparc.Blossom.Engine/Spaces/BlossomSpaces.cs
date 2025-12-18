@@ -167,13 +167,13 @@ public class BlossomSpaces(
         return entities.ToList();
     }
 
-    public async Task<List<BlossomSpace>> Discover(string spaceId)
+    public async Task<List<BlossomSpace>> Discover(string spaceId, int numSpaces = 10)
     {
         var existing = await Repository.Query.Where(x => x.ParentSpaceId == spaceId).ToListAsync();
         await Repository.DeleteAsync(existing);
         
         var space = await GetOrCreate("kuviocreative.com", spaceId);
-        var spaces = await vectors.Discover(space, 10);
+        var spaces = await vectors.Discover(space, numSpaces);
         await Repository.UpdateAsync(space);
         await Repository.AddAsync(spaces);
 
@@ -187,8 +187,8 @@ public class BlossomSpaces(
             await Repository.UpdateAsync(newSpace);
         }
 
-        await aiTranslator.IntersectAsync(spaces);
-        await Repository.UpdateAsync(spaces);
+        //await aiTranslator.IntersectAsync(spaces);
+        //await Repository.UpdateAsync(spaces);
 
         return spaces;
     }
