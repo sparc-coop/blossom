@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Sparc.Blossom.Spaces;
+using System.Collections.Concurrent;
 
 namespace Sparc.Blossom.Content;
 
@@ -30,6 +31,16 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
         var question = new SummaryQuestion(messages, 1047576);
         var answer = await AskAsync(question);
         return answer.Value;
+    }
+
+    internal async Task IntersectAsync(List<BlossomSpace> spaces)
+    {
+        foreach (var space in spaces)
+        {
+            var question = new SummaryQuestion(space, spaces.Except([space]));
+            var answer = await AskAsync(question);
+            space.SetSummary(answer.Value);
+        }
     }
 
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
@@ -75,5 +86,4 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
     }
 
     public bool CanTranslate(Language fromLanguage, Language toLanguage) => true;
-
 }

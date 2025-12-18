@@ -187,6 +187,9 @@ public class BlossomSpaces(
             await Repository.UpdateAsync(newSpace);
         }
 
+        await aiTranslator.IntersectAsync(spaces);
+        await Repository.UpdateAsync(spaces);
+
         return spaces;
     }
 
