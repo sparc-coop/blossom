@@ -161,6 +161,9 @@ public class BlossomVectors(
                 post.MostRelevantSpaceId = spaces[clusterId].Id;
                 post.DistanceFromMostRelevantSpace = Math.Sqrt(prediction.Score[clusterId]);
                 post.DistanceFromRootSpace = rootVector.DistanceTo(vector.Vector);
+                post.DissentFromMostRelevantSpace = new BlossomVector(vector.Vector).DissentFrom(BlossomVector.Average(fixedVectors.Except([vector]).Select(x => new BlossomVector(x.Vector))));
+                post.DissentFromRootSpace = rootVector.DissentFrom(vector.Vector);
+
                 await posts.UpdateAsync(post);
                 Console.WriteLine($"Assigned post {post.Id} to space {post.MostRelevantSpaceId}.");
             }

@@ -30,6 +30,52 @@ public class BlossomVector : BlossomEntity<string>
     public string TargetUrl { get; init; } = "";
     public string? Text { get; set; }
 
+    public double DotProduct(float[] other)
+    {
+        var length = Math.Min(Vector.Length, other.Length);
+        double dot = 0;
+        for (int i = 0; i < length; i++)
+            dot += Vector[i] * other[i];
+
+        return dot;
+    }
+
+    public double Magnitude()
+    {
+        double sumSquares = 0;
+        for (int i = 0; i < Vector.Length; i++)
+            sumSquares += Vector[i] * Vector[i];
+
+        return Math.Sqrt(sumSquares);
+    }
+
+    public double Direction()
+    {
+        double angle = 0;
+        double sumSquares = 0;
+        for (int i = 0; i < Vector.Length; i++)
+        {
+            angle += Vector[i];
+            sumSquares += Vector[i] * Vector[i];
+        }
+        if (sumSquares == 0)
+            return 0;
+        return Math.Acos(angle / Math.Sqrt(sumSquares));
+    }
+
+    public double DirectionFrom(float[] other)
+    {
+        if (Vector.Length != other.Length)
+            throw new ArgumentException("Vectors must be of the same length to calculate direction.");
+        
+        var dot = DotProduct(other);
+        var magA = Magnitude();
+        var magB = new BlossomVector(other).Magnitude();
+        if (magA == 0 || magB == 0)
+            return 0;
+        return Math.Acos(dot / (magA * magB));
+    }
+
     public double DistanceTo(float[] other)
     {
         if (Vector.Length != other.Length)
@@ -42,6 +88,8 @@ public class BlossomVector : BlossomEntity<string>
         }
         return Math.Sqrt(sum);
     }
+
+    public double DissentFrom(float[] other) => DirectionFrom(other) / Math.PI;
 
     public override string ToString()
     {
@@ -57,9 +105,10 @@ public class BlossomVector : BlossomEntity<string>
         return str.ToString();
     }
 
-    public static float[] Average(List<BlossomVector> spaceVectors)
+    public static float[] Average(IEnumerable<BlossomVector> spaceVectors)
     {
-        var vectorLength = spaceVectors[0].Vector.Length;
+        var vectorLength = spaceVectors.First().Vector.Length;
+        var count = spaceVectors.Count();
         var avgVector = new float[vectorLength];
         foreach (var vec in spaceVectors)
         {
@@ -70,7 +119,7 @@ public class BlossomVector : BlossomEntity<string>
         }
         for (int i = 0; i < vectorLength; i++)
         {
-            avgVector[i] /= spaceVectors.Count;
+            avgVector[i] /= count;
         }
         return avgVector;
     }

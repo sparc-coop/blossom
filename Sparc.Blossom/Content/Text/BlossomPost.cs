@@ -20,8 +20,11 @@ public class BlossomPost : TextContent
     public string? MostRelevantSpaceId { get; set; }
     public double? DistanceFromRootSpace { get; set; }
     public double? DistanceFromMostRelevantSpace { get; set; }
+    public double? DissentFromMostRelevantSpace { get; set; }
 
     public List<SparcEntity> Entities { get; set; } = [];
+    public double DissentFromRootSpace { get; set; }
+
     public async Task ExtractEntities(ISparcContent tovik, List<SparcEntityType> entityTypes)
     {
         Entities = await tovik.ExtractGraphAsync(new(this, entityTypes));
