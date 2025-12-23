@@ -7,13 +7,16 @@ namespace Sparc.Blossom.Spaces;
 public interface ISparcSpaces
 {
     [Get("/spaces")]
-    Task<List<BlossomSpace>> GetSpacesAsync(string domain, string rootSpaceId, int? limit = null);
+    Task<List<BlossomSpace>> GetSpacesAsync(string domain, string? rootSpaceId = null, int? limit = null);
 
     [Get("/spaces/{spaceId}")]
     Task<BlossomSpace> GetSpaceAsync(string domain, string spaceId);
 
     [Post("/spaces")]
     Task<BlossomSpace> CreateSpaceAsync(CreateSpaceRequest request);
+
+    [Post("/spaces/{spaceId}")]
+    Task<BlossomPost> PostAsync(string spaceId, BlossomPost post);
 
     [Delete("/spaces/{spaceId}")]
     Task<BlossomSpace> DeleteSpaceAsync(string spaceId);

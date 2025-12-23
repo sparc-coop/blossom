@@ -1,4 +1,5 @@
-﻿using Microsoft.ML;
+﻿using DeepL;
+using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Sparc.Blossom.Content;
@@ -11,14 +12,15 @@ namespace Sparc.Blossom.Spaces;
 public class BlossomVectors(
     IRepository<BlossomVector> vectors, 
     IRepository<BlossomPost> posts,
+    IEnumerable<Content.ITranslator> translators,
     AzureBlobRepository files)
 {
     public MLContext Context { get; } = new MLContext(seed: 1);
 
     public async Task<List<BlossomSpace>> Discover(BlossomSpace space, decimal sampleSize = 1M)
     {
-        var data = await LoadAsync(space, sampleSize);
-        var model = NormalizedKMeans(data).Fit(data);
+        var (count, data) = await LoadAsync(space, sampleSize);
+        var model = NormalizedKMeans(data, Math.Min(count, 100)).Fit(data);
         await SaveModelAsync(model, space, data.Schema);
         var spaces = await ExtractSpaces(space, model);
         await AssignDataToSpaces(model, spaces, data);
@@ -61,6 +63,7 @@ public class BlossomVectors(
     private EstimatorChain<ClusteringPredictionTransformer<KMeansModelParameters>> NormalizedKMeans(IDataView data, int maxSpaces = 100)
     {
         var scores = new List<double>();
+
         for (var numSpaces = 1; numSpaces <= maxSpaces; numSpaces++)
         {
             var model = CreateModel(numSpaces);
@@ -87,7 +90,7 @@ public class BlossomVectors(
         return pipeline;
     }
 
-    private async Task<IDataView> LoadAsync(BlossomSpace space, decimal sampleSize)
+    private async Task<(int, IDataView)> LoadAsync(BlossomSpace space, decimal sampleSize)
     {
         var query = vectors.Query.Where(x => x.SpaceId == space.Id);
         int take = (int)(query.Count() * sampleSize);
@@ -97,7 +100,8 @@ public class BlossomVectors(
             .Take(take)
             .ToListAsync();
 
-        return await LoadAsync(spaceVectors);
+        var dataView = await LoadAsync(spaceVectors);
+        return (spaceVectors.Count, dataView);
     }
 
     private async Task<IDataView> LoadAsync(IEnumerable<BlossomVector> vectors)
@@ -198,5 +202,11 @@ public class BlossomVectors(
         return minK + elbowIndex;
     }
 
+    internal async Task AddAsync(BlossomPost post)
+    {
+        var translator = translators.OfType<OpenAITranslator>().First();
+        var vector = await translator.VectorizeAsync(post);
+        await vectors.AddAsync(vector);
+    }
 }
 

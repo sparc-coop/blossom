@@ -9,6 +9,7 @@ namespace Sparc.Blossom.Spaces;
 
 public class BlossomSpaces(
     BlossomAggregateOptions<BlossomSpace> options,
+    IRepository<BlossomPost> posts,
     IRepository<BlossomEvent> events,
     IEnumerable<ITranslator> translators,
     IHttpContextAccessor http,
@@ -43,7 +44,7 @@ public class BlossomSpaces(
         await PublishAsync(userId, presence);
     }
 
-    private async Task<List<BlossomSpace>> GetSpacesAsync(string domain, string rootSpaceId, int? limit = null)
+    private async Task<List<BlossomSpace>> GetSpacesAsync(string domain, string? rootSpaceId = null, int? limit = null)
     {
         var spaces = await Repository.Query
             .Where(x => x.Domain == domain && x.ParentSpaceId == rootSpaceId)
@@ -78,8 +79,11 @@ public class BlossomSpaces(
         return space;
     }
 
-    private async Task<BlossomSpace> GetOrCreate(string domain, string spaceId)
+    private async Task<BlossomSpace> GetOrCreate(string domain, string? spaceId)
     {
+        if (string.IsNullOrWhiteSpace(spaceId))
+            spaceId = Guid.NewGuid().ToString();
+        
         var existing = await Repository.FindAsync(domain, spaceId);
         if (existing == null)
         {
@@ -172,7 +176,7 @@ public class BlossomSpaces(
         var existing = await Repository.Query.Where(x => x.ParentSpaceId == spaceId).ToListAsync();
         await Repository.DeleteAsync(existing);
         
-        var space = await GetOrCreate("kuviocreative.com", spaceId);
+        var space = await GetOrCreate(Domain, spaceId);
         var spaces = await vectors.Discover(space);
         await Repository.UpdateAsync(space);
         await Repository.AddAsync(spaces);
@@ -195,12 +199,16 @@ public class BlossomSpaces(
 
     private async Task<BlossomPost> PostAsync(string spaceId, BlossomPost post)
     {
+        await GetOrCreate(Domain, post.SpaceId);
+        await posts.AddAsync(post);
+        await vectors.AddAsync(post);
+        await Discover(spaceId);
         return post;
     }
 
     private async Task<List<BlossomPost>> GetPostsAsync(string spaceId)
     {
-        var space = await GetOrCreate("kuviocreative.com", spaceId);
+        var space = await GetOrCreate(Domain, spaceId);
         var posts = await vectors.GetRelevantPostsAsync(space, 50);
         return posts.OrderBy(x => x.Timestamp).ToList();
     }
