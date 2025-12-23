@@ -187,7 +187,7 @@ public class BlossomSpaces(
 
         // Summarize spaces
         var aiTranslator = translators.OfType<AITranslator>().First();
-        foreach (var newSpace in spaces)
+        foreach (var newSpace in spaces.Union([space]))
         {
             var messages = await GetPostsAsync(newSpace.SpaceId);
             var summary = await aiTranslator.SummarizeAsync(messages);

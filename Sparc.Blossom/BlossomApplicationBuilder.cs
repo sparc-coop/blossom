@@ -116,7 +116,12 @@ public abstract class BlossomApplicationBuilder
         Services.AddRefitClient<ISparcSpaces>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
             .AddHttpMessageHandler<TTokenHandler>()
-            .AddStandardResilienceHandler();
+            .AddStandardResilienceHandler(x =>
+            {
+                x.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(240);
+                x.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(240);
+                x.AttemptTimeout.Timeout = TimeSpan.FromSeconds(120);
+            });
 
         AddSparcAura();
         Services.AddScoped<SparcEvents>();

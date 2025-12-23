@@ -19,7 +19,7 @@ public class BlossomVectors(
     public async Task<List<BlossomSpace>> Discover(BlossomSpace space, decimal sampleSize = 1M)
     {
         var (count, data, rootCentroid) = await LoadAsync(space, sampleSize);
-        var model = NormalizedKMeans(data, Math.Min(count, 100)).Fit(data);
+        var model = NormalizedKMeans(data, Math.Min((int)Math.Sqrt(count), 100)).Fit(data);
         await SaveModelAsync(model, space, data.Schema);
         var spaces = await ExtractSpaces(space, model);
         await AssignDataToSpaces(model, spaces, rootCentroid);
@@ -65,10 +65,17 @@ public class BlossomVectors(
 
         for (var numSpaces = 1; numSpaces <= maxSpaces; numSpaces++)
         {
-            var model = CreateModel(numSpaces);
-            var predictions = model.Fit(data).Transform(data);
-            var metrics = Context.Clustering.Evaluate(predictions);
-            scores.Add(metrics.AverageDistance);
+            try
+            {
+                var model = CreateModel(numSpaces);
+                var predictions = model.Fit(data).Transform(data);
+                var metrics = Context.Clustering.Evaluate(predictions);
+                scores.Add(metrics.AverageDistance);
+            }
+            catch
+            {
+                break;
+            }
         }
 
         var elbowK = FindElbow(scores, 1);
