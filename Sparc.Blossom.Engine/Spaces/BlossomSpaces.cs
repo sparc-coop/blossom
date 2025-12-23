@@ -46,8 +46,12 @@ public class BlossomSpaces(
 
     private async Task<List<BlossomSpace>> GetSpacesAsync(string domain, string? rootSpaceId = null, int? limit = null)
     {
-        var spaces = await Repository.Query
+        var spaces = rootSpaceId == null
+            ? await Repository.Query
             .Where(x => x.Domain == domain && x.RoomType == "Root")
+            .ToListAsync()
+            : await Repository.Query
+            .Where(x => x.Domain == domain && x.ParentSpaceId == rootSpaceId)
             .ToListAsync();
 
         return spaces;
@@ -83,13 +87,13 @@ public class BlossomSpaces(
     {
         if (string.IsNullOrWhiteSpace(spaceId))
             spaceId = Guid.NewGuid().ToString();
-        
+
         var existing = await Repository.FindAsync(domain, spaceId);
         if (existing == null)
         {
             existing = new BlossomSpace(domain, spaceId);
             await Repository.AddAsync(existing);
-        }    
+        }
 
         return existing;
     }
@@ -175,7 +179,7 @@ public class BlossomSpaces(
     {
         var existing = await Repository.Query.Where(x => x.ParentSpaceId == spaceId).ToListAsync();
         await Repository.DeleteAsync(existing);
-        
+
         var space = await GetOrCreate(Domain, spaceId);
         var spaces = await vectors.Discover(space);
         await Repository.UpdateAsync(space);
