@@ -1,5 +1,4 @@
-﻿using DeepL;
-using Microsoft.ML;
+﻿using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Sparc.Blossom.Content;
@@ -12,18 +11,18 @@ namespace Sparc.Blossom.Spaces;
 public class BlossomVectors(
     IRepository<BlossomVector> vectors, 
     IRepository<BlossomPost> posts,
-    IEnumerable<Content.ITranslator> translators,
+    IEnumerable<ITranslator> translators,
     AzureBlobRepository files)
 {
     public MLContext Context { get; } = new MLContext(seed: 1);
 
     public async Task<List<BlossomSpace>> Discover(BlossomSpace space, decimal sampleSize = 1M)
     {
-        var (count, data) = await LoadAsync(space, sampleSize);
+        var (count, data, rootCentroid) = await LoadAsync(space, sampleSize);
         var model = NormalizedKMeans(data, Math.Min(count, 100)).Fit(data);
         await SaveModelAsync(model, space, data.Schema);
         var spaces = await ExtractSpaces(space, model);
-        await AssignDataToSpaces(model, spaces, data);
+        await AssignDataToSpaces(model, spaces, rootCentroid);
         return spaces;
     }
 
@@ -90,7 +89,7 @@ public class BlossomVectors(
         return pipeline;
     }
 
-    private async Task<(int, IDataView)> LoadAsync(BlossomSpace space, decimal sampleSize)
+    private async Task<(int, IDataView, float[])> LoadAsync(BlossomSpace space, decimal sampleSize)
     {
         var query = vectors.Query.Where(x => x.SpaceId == space.Id);
         int take = (int)(query.Count() * sampleSize);
@@ -100,13 +99,10 @@ public class BlossomVectors(
             .Take(take)
             .ToListAsync();
 
-        var dataView = await LoadAsync(spaceVectors);
-        return (spaceVectors.Count, dataView);
-    }
+        var rootCentroid = BlossomVector.Average(spaceVectors);
 
-    private async Task<IDataView> LoadAsync(IEnumerable<BlossomVector> vectors)
-    { 
-        return Context.Data.LoadFromEnumerable(FixedVector.From(vectors));
+        var dataView = Context.Data.LoadFromEnumerable(FixedVector.From(spaceVectors));
+        return (spaceVectors.Count, dataView, rootCentroid);
     }
 
     private async Task SaveModelAsync(ITransformer model, BlossomSpace space, DataViewSchema schema)
@@ -137,9 +133,13 @@ public class BlossomVectors(
         return newSpaces;
     }
 
-    private async Task AssignDataToSpaces(TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model, List<BlossomSpace> spaces, IDataView data)
+    private async Task AssignDataToSpaces(TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model, List<BlossomSpace> spaces, float[] rootCentroid)
     {
+        // Save root centroid
         var parentSpaceId = spaces.First().ParentSpaceId;
+        var rootVector = new BlossomVector(parentSpaceId!, "text-embedding-3-small", rootCentroid, parentSpaceId!);
+        await vectors.UpdateAsync(rootVector);
+
         var query = await vectors.Query.Where(x => x.SpaceId == parentSpaceId).ToListAsync();
         var fixedVectors = FixedVector.From(query);
         var predictor = Context.Model.CreatePredictionEngine<FixedVector, ClusteringPrediction>(model);
@@ -150,13 +150,15 @@ public class BlossomVectors(
             var post = await posts.FindAsync(vector.TargetUrl);
             if (post != null)
             {
-                post.MostRelevantSpaceId = spaces[(int)prediction.PredictedLabel - 1].Id;
+                var clusterId = (int)prediction.PredictedLabel - 1;
+                post.MostRelevantSpaceId = spaces[clusterId].Id;
+                post.DistanceFromMostRelevantSpace = Math.Sqrt(prediction.Score[clusterId]);
+                post.DistanceFromRootSpace = rootVector.DistanceTo(vector.Vector);
                 await posts.UpdateAsync(post);
                 Console.WriteLine($"Assigned post {post.Id} to space {post.MostRelevantSpaceId}.");
             }
         }
     }
-
 
     public async Task Transform(ITransformer transformer, IEnumerable<BlossomVector> vectors)
     {

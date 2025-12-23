@@ -18,6 +18,8 @@ public class BlossomPost : TextContent
 
     public string PostId { get { return Id; } set { Id = value; } }
     public string? MostRelevantSpaceId { get; set; }
+    public double? DistanceFromRootSpace { get; set; }
+    public double? DistanceFromMostRelevantSpace { get; set; }
 
     public List<SparcEntity> Entities { get; set; } = [];
     public async Task ExtractEntities(ISparcContent tovik, List<SparcEntityType> entityTypes)
