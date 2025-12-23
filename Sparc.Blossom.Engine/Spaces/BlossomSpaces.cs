@@ -47,7 +47,7 @@ public class BlossomSpaces(
     private async Task<List<BlossomSpace>> GetSpacesAsync(string domain, string? rootSpaceId = null, int? limit = null)
     {
         var spaces = await Repository.Query
-            .Where(x => x.Domain == domain && x.ParentSpaceId == rootSpaceId)
+            .Where(x => x.Domain == domain && x.RoomType == "Root")
             .ToListAsync();
 
         return spaces;
@@ -183,7 +183,7 @@ public class BlossomSpaces(
 
         // Summarize spaces
         var aiTranslator = translators.OfType<AITranslator>().First();
-        foreach (var newSpace in spaces)
+        foreach (var newSpace in spaces.Union([space]))
         {
             var messages = await GetPostsAsync(newSpace.SpaceId);
             var summary = await aiTranslator.SummarizeAsync(messages);

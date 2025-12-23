@@ -9,7 +9,7 @@ public class BlossomSpace : BlossomEntity<string>
     public string SpaceId {  get { return Id;  } set { Id = value; } }
     public string? ParentSpaceId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? RoomType { get; set; }
+    public string RoomType { get; set; } = "Root";
     public int NumJoinedMembers { get; set; }
     public bool GuestCanJoin { get; set; }
     public bool WorldReadable { get; set; }
