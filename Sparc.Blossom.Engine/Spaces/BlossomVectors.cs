@@ -32,7 +32,7 @@ public class BlossomVectors(
         if (!fuzzy)
         {
             var exactPosts = await posts.Query
-                .Where(x => x.MostRelevantSpaceId == space.Id)
+                .Where(x => x.SpaceId == space.Id || x.MostRelevantSpaceId == space.Id)
                 .Take(count)
                 .ToListAsync();
             return exactPosts;
