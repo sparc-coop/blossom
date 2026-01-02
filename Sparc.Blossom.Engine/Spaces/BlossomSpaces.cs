@@ -192,6 +192,7 @@ public class BlossomSpaces(
             var messages = await GetPostsAsync(newSpace.SpaceId);
             var summary = await aiTranslator.SummarizeAsync(messages);
             newSpace.SetSummary(summary);
+            newSpace.SetConsensus(messages);
             await Repository.UpdateAsync(newSpace);
         }
 

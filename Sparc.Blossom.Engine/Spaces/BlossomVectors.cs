@@ -182,7 +182,7 @@ public class BlossomVectors(
         }
 
         await posts.UpdateAsync(postsInSpace);
-        //await vectors.UpdateAsync(postVectors);
+        await vectors.UpdateAsync(rootCentroid);
         await vectors.UpdateAsync(spaceVectors);
         return spaces;
     }

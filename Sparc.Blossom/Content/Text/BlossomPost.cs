@@ -16,7 +16,8 @@ public record LinkedSpace(string SpaceId, double? Distance, double? Alignment)
             spaceVector.SimilarityTo(postVector))
     { }
 
-    public double Score => Distance == null || Alignment == null ? 0 : (1 - Distance.Value) * Math.Abs(Alignment.Value);
+    public double Closeness => Distance == null ? 0 : 1 - Distance.Value;
+    public double Score => Distance == null || Alignment == null ? 0 : Closeness * Math.Abs(Alignment.Value);
 };
 
 public class BlossomPost : TextContent

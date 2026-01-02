@@ -29,7 +29,9 @@ public class BlossomSpace : BlossomEntity<string>
     public string? ModelUrl { get; set; }
     public List<SparcEntityType> EntityTypes { get; set; } = [];
     public double? Consensus { get; set; }
+    public double? Confidence { get; set; }
     public List<MetricHistory> ConsensusHistory { get; set; } = [];
+    public List<MetricHistory> ConfidenceHistory { get; set; } = [];
 
 
     [JsonConstructor]
@@ -66,5 +68,21 @@ public class BlossomSpace : BlossomEntity<string>
         Topic = summary.Topic;
         Description = summary.Description;
     }
+
+    public void SetConsensus(List<BlossomPost> messages)
+    {
+        Consensus = messages.Sum(x => x.LinkedSpace(Id)?.Closeness * x.LinkedSpace(Id)?.Alignment ?? 0) / messages.Sum(x => 1 - (x.LinkedSpace(Id)?.Distance ?? 1));
+        ConsensusHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Consensus.Value));
+
+        // Variance is the average of the squared differences from the Mean
+        Confidence = 1 / (1 + messages.Average(x => Math.Pow(x.LinkedSpace(Id)?.Distance ?? 1, 2)));
+        ConfidenceHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Confidence.Value));
+    }
+
+    public double ConsensusDelta => ConsensusHistory.Count < 2 ? 0 :
+        ConsensusHistory[0].Value - ConsensusHistory[1].Value;
+
+    public double ConfidenceDelta => ConfidenceHistory.Count < 2 ? 0 :
+        ConfidenceHistory[0].Value - ConfidenceHistory[1].Value;
 }
 
