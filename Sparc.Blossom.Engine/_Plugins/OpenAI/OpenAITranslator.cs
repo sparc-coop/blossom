@@ -37,7 +37,7 @@ internal class OpenAITranslator(OpenAIClient client)
             foreach (var output in outputs.Value)
             {
                 var text = batch.ElementAt(output.Index);
-                vectors.Add(new(text.SpaceId, model, output.ToFloats().ToArray(), text.Id));
+                vectors.Add(new(text.SpaceId, text.Id, model, output.ToFloats().ToArray()));
             }
 
             offset += batchSize;

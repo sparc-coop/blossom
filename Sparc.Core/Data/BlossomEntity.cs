@@ -10,7 +10,7 @@ public abstract class BlossomEntity
     [System.Text.Json.Serialization.JsonIgnore]
     public virtual object GenericId { get; } = null!;
     protected List<BlossomEntityChanged>? _events;
-    public long? Revision { get; set; }
+    public long? Revision { get; private set; }
 
     // Event system
     public List<BlossomEntityChanged> Publish()
@@ -73,6 +73,8 @@ public abstract class BlossomEntity
 
         throw new Exception($"Relationship {typeof(T).Name} on entity {GetType().Name} not found.");
     }
+
+    public void UpdateRevision() => Revision = DateTime.UtcNow.Ticks;
 
     PropertyInfo? GetCollectionProperty<T>() =>
     GetType().GetProperties().FirstOrDefault(x => typeof(ICollection<T>).IsAssignableFrom(x.PropertyType));

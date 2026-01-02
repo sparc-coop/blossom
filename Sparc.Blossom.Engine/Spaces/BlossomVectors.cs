@@ -1,9 +1,9 @@
-﻿using Microsoft.ML;
+﻿using MathNet.Numerics.LinearAlgebra;
+using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
-using Sparc.Blossom.Plugins.MLNet;
 using static Microsoft.ML.Transforms.LpNormNormalizingEstimatorBase;
 
 namespace Sparc.Blossom.Spaces;
@@ -16,47 +16,21 @@ public class BlossomVectors(
 {
     public MLContext Context { get; } = new MLContext(seed: 1);
 
-    public async Task<List<BlossomSpace>> Discover(BlossomSpace space, decimal sampleSize = 1M)
+    public async Task<List<BlossomSpace>> Discover(BlossomSpace rootSpace, decimal samplePercentage = 1M)
     {
-        var (count, data, rootCentroid) = await LoadAsync(space, sampleSize);
-        var model = NormalizedKMeans(data, Math.Min((int)Math.Sqrt(count), 100)).Fit(data);
-        await SaveModelAsync(model, space, data.Schema);
-        var spaces = await ExtractSpaces(space, model);
-        await AssignDataToSpaces(model, spaces, rootCentroid);
+        var (rootCentroid, vectors) = await LoadAsync(rootSpace, samplePercentage);
+        var model = Cluster(vectors);
+        //await SaveModelAsync(model, space, data.Schema);
+
+        var spaces = await CreateSpaces(rootSpace, rootCentroid, model);
         return spaces;
     }
 
-    public async Task<List<BlossomPost>> GetRelevantPostsAsync(BlossomSpace space, int count, bool fuzzy = false)
+    public TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> Cluster(List<BlossomVector> vectors)
     {
-        if (!fuzzy)
-        {
-            var exactPosts = await posts.Query
-                .Where(x => x.SpaceId == space.Id || x.MostRelevantSpaceId == space.Id)
-                .Take(count)
-                .ToListAsync();
-            return exactPosts;
-        }
-        
-        var spaceVector = await vectors.Query
-            .Where(x => x.SpaceId == space.Id && x.TargetUrl == space.Id)
-            .Select(x => x.Vector)
-            .FirstOrDefaultAsync()
-            ?? throw new Exception("Space vector not found");
-
-        var query = $@"
-            SELECT TOP {count} VALUE c.TargetUrl
-            FROM c
-            WHERE c.SpaceId = '{space.ParentSpaceId}' AND c.TargetUrl != '{space.ParentSpaceId}'
-            ORDER BY VectorDistance(c.Vector, {new BlossomVector(spaceVector)})";
-
-        var cosmosVectors = vectors as CosmosDbSimpleRepository<BlossomVector>;
-        var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<string>(query, space.ParentSpaceId);
-
-        var postsInSpace = await posts.Query
-            .Where(x => similarVectorsInSpace.Contains(x.PostId))
-            .ToListAsync();
-
-        return postsInSpace;
+        var data = ToDataView(vectors);
+        var kmeans = NormalizedKMeans(data, Math.Min(100, (int)Math.Sqrt(vectors.Count)));
+        return kmeans.Fit(data);
     }
 
     private EstimatorChain<ClusteringPredictionTransformer<KMeansModelParameters>> NormalizedKMeans(IDataView data, int maxSpaces = 100)
@@ -67,8 +41,7 @@ public class BlossomVectors(
         {
             try
             {
-                var model = CreateModel(numSpaces);
-                var predictions = model.Fit(data).Transform(data);
+                var predictions = NormalizedKMeansModel(numSpaces).Fit(data).Transform(data);
                 var metrics = Context.Clustering.Evaluate(predictions);
                 scores.Add(metrics.AverageDistance);
             }
@@ -79,10 +52,10 @@ public class BlossomVectors(
         }
 
         var elbowK = FindElbow(scores, 1);
-        return CreateModel(elbowK);
+        return NormalizedKMeansModel(elbowK);
     }
 
-    private EstimatorChain<ClusteringPredictionTransformer<KMeansModelParameters>> CreateModel(int numSpaces)
+    private EstimatorChain<ClusteringPredictionTransformer<KMeansModelParameters>> NormalizedKMeansModel(int numSpaces)
     {
         var normalize = Context.Transforms.NormalizeLpNorm("Vector", norm: NormFunction.L2);
         var options = new KMeansTrainer.Options
@@ -96,7 +69,7 @@ public class BlossomVectors(
         return pipeline;
     }
 
-    private async Task<(int, IDataView, float[])> LoadAsync(BlossomSpace space, decimal sampleSize)
+    private async Task<(BlossomVector root, List<BlossomVector> children)> LoadAsync(BlossomSpace space, decimal sampleSize)
     {
         var query = vectors.Query.Where(x => x.SpaceId == space.Id);
         int take = (int)(query.Count() * sampleSize);
@@ -106,11 +79,43 @@ public class BlossomVectors(
             .Take(take)
             .ToListAsync();
 
-        var rootCentroid = BlossomVector.Average(spaceVectors);
-
-        var dataView = Context.Data.LoadFromEnumerable(FixedVector.From(spaceVectors));
-        return (spaceVectors.Count, dataView, rootCentroid);
+        var rootCentroid = CalculateRootVector(spaceVectors);
+        return (rootCentroid, spaceVectors);
     }
+
+    private static BlossomVector CalculateRootVector(List<BlossomVector> spaceVectors)
+    {
+        var mean = BlossomVector.Average(spaceVectors);
+        var meanVector = Vector<float>.Build.Dense(mean.Vector);
+        Matrix<float> matrix = ToMatrix(spaceVectors);
+
+        // Subtract each vector by the mean
+        for (int i = 0; i < matrix.RowCount; i++)
+            matrix.SetRow(i, matrix.Row(i) - meanVector);
+
+        var svd = matrix.Svd(computeVectors: true);
+        var firstPrincipal = svd.VT.Row(0);
+        var rootCentroid = new BlossomVector(spaceVectors.First().SpaceId, [.. firstPrincipal])
+        {
+            Point = mean.Vector
+        };
+        Console.WriteLine($"Calculated root centroid with length {rootCentroid.Magnitude()}");
+        return rootCentroid;
+    }
+
+    private static Matrix<float> ToMatrix(List<BlossomVector> spaceVectors)
+    {
+        return Matrix<float>.Build.Dense(spaceVectors.Count, 1536, (i, j) => spaceVectors[i].Vector[j]);
+    }
+
+    private static SchemaDefinition BlossomVectorSchema()
+    {
+        var schema = SchemaDefinition.Create(typeof(BlossomVector), SchemaDefinition.Direction.Write);
+        schema[nameof(BlossomVector.Vector)].ColumnType = new VectorDataViewType(NumberDataViewType.Single, 1536);
+        return schema;
+    }
+
+    private IDataView ToDataView(List<BlossomVector> vectors) => Context.Data.LoadFromEnumerable(vectors, BlossomVectorSchema());
 
     private async Task SaveModelAsync(ITransformer model, BlossomSpace space, DataViewSchema schema)
     {
@@ -122,66 +127,115 @@ public class BlossomVectors(
         space.ModelUrl = file.Url;
     } 
 
-    private async Task<List<BlossomSpace>> ExtractSpaces(BlossomSpace rootSpace, TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model)
+    private static List<float[]> ExtractCentroids(TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model)
     {
         VBuffer<float>[] centroids = [];
         model!.LastTransformer.Model.GetClusterCentroids(ref centroids, out int k);
 
-        var newSpaces = new List<BlossomSpace>();
+        List<float[]> newVectors = [];
         for (int i = 0; i < k; i++)
-        {
-            var space = rootSpace.CreateChild();
-            newSpaces.Add(space);
+            newVectors.Add([.. centroids[i].DenseValues()]);
 
-            var vector = new BlossomVector(space.SpaceId, "text-embedding-3-small", [.. centroids[i].DenseValues()], space.SpaceId);
-            await vectors.AddAsync(vector);
-        }
-
-        return newSpaces;
+        return newVectors;
     }
 
-    private async Task AssignDataToSpaces(TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model, List<BlossomSpace> spaces, float[] rootCentroid)
+    private async Task<List<BlossomSpace>> CreateSpaces(BlossomSpace rootSpace, BlossomVector rootCentroid, TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model)
     {
-        // Save root centroid
-        var parentSpaceId = spaces.First().ParentSpaceId;
-        var rootVector = new BlossomVector(parentSpaceId!, "text-embedding-3-small", rootCentroid, parentSpaceId!);
-        await vectors.UpdateAsync(rootVector);
-
-        var query = await vectors.Query.Where(x => x.SpaceId == parentSpaceId).ToListAsync();
-        var fixedVectors = FixedVector.From(query);
-        var predictor = Context.Model.CreatePredictionEngine<FixedVector, ClusteringPrediction>(model);
-
-        foreach (var vector in fixedVectors)
+        var centroids = ExtractCentroids(model);
+        var spaces = centroids.Select(x => new BlossomSpace(rootSpace)).ToList();
+        var spaceVectors = centroids.Select((x, i) => new BlossomVector(spaces[i].Id, [])
         {
-            var prediction = predictor.Predict(vector);
-            var post = await posts.FindAsync(vector.TargetUrl);
-            if (post != null)
+            Point = x
+        }).ToList();
+
+        var predictor = Context.Model.CreatePredictionEngine<BlossomVector, ClusteringPrediction>(model, inputSchemaDefinition: BlossomVectorSchema());
+        var postsInSpace = await posts.Query.Where(x => x.SpaceId == rootSpace.Id).ToListAsync();
+        var postVectors = new List<BlossomVector>();
+        foreach (var post in postsInSpace)
+        {
+            var postVector = await vectors.FindAsync(post.SpaceId, post.Id);
+            if (postVector == null)
             {
-                var clusterId = (int)prediction.PredictedLabel - 1;
-                post.MostRelevantSpaceId = spaces[clusterId].Id;
-                post.DistanceFromMostRelevantSpace = Math.Sqrt(prediction.Score[clusterId]);
-                post.DistanceFromRootSpace = rootVector.DistanceTo(vector.Vector);
-                post.DissentFromMostRelevantSpace = new BlossomVector(vector.Vector).DissentFrom(BlossomVector.Average(fixedVectors.Except([vector]).Select(x => new BlossomVector(x.Vector))));
-                post.DissentFromRootSpace = rootVector.DissentFrom(vector.Vector);
-
-                await posts.UpdateAsync(post);
-                Console.WriteLine($"Assigned post {post.Id} to space {post.MostRelevantSpaceId}.");
+                Console.WriteLine($"Vector not found for post {post.Id}, skipping.");
+                continue;
             }
+            postVectors.Add(postVector);
+
+            var prediction = predictor.Predict(postVector);
+            post.UnlinkAllSpaces();
+            post.LinkToSpace(postVector, rootCentroid);
+            
+            var predictedSpace = spaceVectors[(int)prediction.PredictedLabel - 1];
+            post.LinkToSpace(postVector, predictedSpace);
+            Console.WriteLine($"Assigned post {post.Id} to space {predictedSpace.SpaceId}.");
         }
+
+        // Calculate PCA on each subspace
+        foreach (var spaceVector in spaceVectors)
+        {
+            var posts = postsInSpace.Where(x => x.LinkedSpace(spaceVector.SpaceId) != null).ToList();
+            var result = CalculateRootVector(posts.SelectMany(x => postVectors.Where(y => y.Id == x.Id)).ToList());
+            spaceVector.Vector = result.Vector;
+
+            foreach (var post in posts)
+                post.LinkToSpace(postVectors.First(x => x.Id == post.Id), spaceVector);
+        }
+
+        await posts.UpdateAsync(postsInSpace);
+        //await vectors.UpdateAsync(postVectors);
+        await vectors.UpdateAsync(spaceVectors);
+        return spaces;
     }
 
-    public async Task Transform(ITransformer transformer, IEnumerable<BlossomVector> vectors)
+    public async Task<List<string>> SearchAsync(BlossomSpace space, int count)
     {
-        var data = Context.Data.LoadFromEnumerable(FixedVector.From(vectors));
-        var predictions = transformer.Transform(data);
-        var clusteredResults = Context.Data.CreateEnumerable<ClusteringPrediction>(predictions, reuseRowObject: false).ToList();
-        // Output the clustering results
-        for (int i = 0; i < vectors.Count(); i++)
+        var spaceVector = await vectors.Query
+            .Where(x => x.SpaceId == space.Id && x.Id == space.Id)
+            .Select(x => x.Vector)
+            .FirstOrDefaultAsync()
+            ?? throw new Exception("Space vector not found");
+
+        var query = $@"
+            SELECT TOP {count} VALUE c.TargetUrl
+            FROM c
+            WHERE c.SpaceId = '{space.ParentSpaceId}' AND c.TargetUrl != '{space.ParentSpaceId}'
+            ORDER BY VectorDistance(c.Vector, {new BlossomVector(spaceVector)})";
+
+        var cosmosVectors = vectors as CosmosDbSimpleRepository<BlossomVector>;
+        var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<string>(query, space.ParentSpaceId);
+        return similarVectorsInSpace;
+    }
+
+    internal async Task IndexAsync(string spaceId)
+    {
+        var existing = await vectors.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
+        if (existing.Count != 0)
+            await vectors.DeleteAsync(existing);
+
+        var messages = await posts.Query.Where(x => x.Domain == BlossomSpaces.Domain && x.SpaceId == spaceId).ToListAsync();
+        var offset = 0;
+        var batchSize = 1000;
+
+        do
         {
-            var vector = vectors.ElementAt(i);
-            var prediction = clusteredResults[i];
-            Console.WriteLine($"Vector TargetUrl: {prediction.TargetUrl}, Assigned Cluster: {prediction.PredictedLabel}, Score: {prediction.Score}");
-        }
+            var batch = messages
+                        .Where(x => !string.IsNullOrWhiteSpace(x.Text))
+                        //.OrderBy(x => x.Sequence)
+                        .Skip(offset)
+                        .Take(batchSize)
+                        .ToList();
+
+            var ids = batch.Select(x => x.Id).ToList();
+            //var existing = await vectorRepo.Query.Where(x => ids.Contains(x.TargetUrl)).Select(x => x.TargetUrl).ToListAsync();
+            //batch = batch.Where(x => !existing.Contains(x.Id)).ToList();
+            if (batch.Count > 0)
+            {
+                var translator = translators.OfType<OpenAITranslator>().First();
+                var newVectors = await translator.VectorizeAsync(batch);
+                await vectors.AddAsync(newVectors);
+            }
+            offset += batchSize;
+        } while (offset < messages.Count);
     }
 
     public static int FindElbow(List<double> inertias, int minK = 1)

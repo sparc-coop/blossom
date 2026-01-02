@@ -1,7 +1,23 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Spaces;
+using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Content;
+
+public record LinkedSpace(string SpaceId, double? Distance, double? Alignment)
+{
+    [JsonConstructor]
+    protected LinkedSpace() : this("", null, null)
+    { }
+    
+    public LinkedSpace(BlossomVector postVector, BlossomVector spaceVector)
+        : this(spaceVector.SpaceId,
+            spaceVector.DistanceTo(postVector),
+            spaceVector.SimilarityTo(postVector))
+    { }
+
+    public double Score => Distance == null || Alignment == null ? 0 : (1 - Distance.Value) * Math.Abs(Alignment.Value);
+};
 
 public class BlossomPost : TextContent
 {
@@ -17,16 +33,19 @@ public class BlossomPost : TextContent
     }
 
     public string PostId { get { return Id; } set { Id = value; } }
-    public string? MostRelevantSpaceId { get; set; }
-    public double? DistanceFromRootSpace { get; set; }
-    public double? DistanceFromMostRelevantSpace { get; set; }
-    public double? DissentFromMostRelevantSpace { get; set; }
-
+    public List<LinkedSpace> LinkedSpaces { get; set; } = [];
     public List<SparcEntity> Entities { get; set; } = [];
-    public double DissentFromRootSpace { get; set; }
 
     public async Task ExtractEntities(ISparcContent tovik, List<SparcEntityType> entityTypes)
     {
         Entities = await tovik.ExtractGraphAsync(new(this, entityTypes));
+    }
+
+    public void UnlinkAllSpaces() => LinkedSpaces.Clear();
+    public LinkedSpace? LinkedSpace(string id) => LinkedSpaces.FirstOrDefault(x => x.SpaceId == id);
+    public void LinkToSpace(BlossomVector postVector, BlossomVector spaceVector)
+    {
+        LinkedSpaces.RemoveAll(x => x.SpaceId == spaceVector.SpaceId);
+        LinkedSpaces.Add(new(postVector, spaceVector));
     }
 }

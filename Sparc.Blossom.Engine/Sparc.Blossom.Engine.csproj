@@ -27,6 +27,7 @@
 	<ItemGroup>
 		<PackageReference Include="Anthropic.SDK" Version="5.8.0" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
+		<PackageReference Include="MathNet.Numerics" Version="5.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="10.1.0" />

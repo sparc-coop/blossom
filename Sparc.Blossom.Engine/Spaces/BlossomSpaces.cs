@@ -213,8 +213,15 @@ public class BlossomSpaces(
     private async Task<List<BlossomPost>> GetPostsAsync(string spaceId)
     {
         var space = await GetOrCreate(Domain, spaceId);
-        var posts = await vectors.GetRelevantPostsAsync(space, 50);
-        return posts.OrderBy(x => x.Timestamp).ToList();
+        var exactPosts = await posts.Query
+                .Where(x => x.Domain == space.Domain &&
+                (x.SpaceId == spaceId || 
+                x.LinkedSpaces.Any(y => y.SpaceId == space.Id)))
+                .OrderByDescending(x => x.Timestamp)
+                .Take(50)
+                .ToListAsync();
+
+        return exactPosts;
     }
 
     private async Task<string> GetSimplePostsAsync(string spaceId)
@@ -255,8 +262,9 @@ public class BlossomSpaces(
         return user.Identity("Matrix")!;
     }
 
-    private async Task IndexAsync()
+    private async Task IndexAsync(string spaceId)
     {
+        await vectors.IndexAsync(spaceId);
     }
 
     public void Map(IEndpointRouteBuilder endpoints)
@@ -271,9 +279,9 @@ public class BlossomSpaces(
         spaces.MapPost("{spaceId}/invite", InviteToSpaceAsync);
         spaces.MapGet("{spaceId}/posts", GetPostsAsync);
         spaces.MapGet("{spaceId}/simpleposts", GetSimplePostsAsync);
+        spaces.MapGet("{spaceId}/index", IndexAsync);
         spaces.MapGet("{spaceId}/discover", Discover);
         spaces.MapPost("{spaceId}", PostAsync);
-        spaces.MapPost("{spaceId}/index", IndexAsync);
         spaces.MapPost("graph", async (BlossomSpaces spaces, ExtractGraphRequest request) =>
         {
             var result = await spaces.ExtractGraph(request);

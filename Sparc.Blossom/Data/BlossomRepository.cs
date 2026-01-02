@@ -239,6 +239,6 @@ public class BlossomRepository<T>(DexieRepository<T> dexie) : IRepository<T>
     private static void UpdateTimestamp(T item)
     {
         if (item is BlossomEntity entity)
-            entity.Revision = DateTime.UtcNow.Ticks;
+            entity.UpdateRevision();
     }
 }

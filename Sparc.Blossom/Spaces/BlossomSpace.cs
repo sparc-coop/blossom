@@ -3,6 +3,11 @@ using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Spaces;
 
+public record MetricHistory(
+    DateTime Date,
+    double Value
+);
+
 public class BlossomSpace : BlossomEntity<string>
 {
     public string Domain { get; set; }
@@ -23,6 +28,8 @@ public class BlossomSpace : BlossomEntity<string>
     public DateTime? EndDate { get; set; }
     public string? ModelUrl { get; set; }
     public List<SparcEntityType> EntityTypes { get; set; } = [];
+    public double? Consensus { get; set; }
+    public List<MetricHistory> ConsensusHistory { get; set; } = [];
 
 
     [JsonConstructor]
@@ -35,7 +42,7 @@ public class BlossomSpace : BlossomEntity<string>
     {
         Domain = domain;
         SpaceId = spaceId;
-        RoomType = roomType;
+        RoomType = roomType ?? "Ephemeral";
     }
 
     public BlossomSpace(string domain) : base(Guid.NewGuid().ToString())
@@ -44,10 +51,11 @@ public class BlossomSpace : BlossomEntity<string>
         RoomType = "Ephemeral";
     }
 
-    public BlossomSpace CreateChild() => new(Domain)
+    public BlossomSpace(BlossomSpace rootSpace)
+        : this(rootSpace.Domain)
     {
-        ParentSpaceId = SpaceId
-    };
+        ParentSpaceId = rootSpace.SpaceId;
+    }
 
     public void SetSummary(BlossomSummary? summary)
     {

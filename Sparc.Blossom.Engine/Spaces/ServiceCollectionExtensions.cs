@@ -1,6 +1,4 @@
-﻿using Sparc.Blossom.Plugins.MLNet;
-
-namespace Sparc.Blossom.Spaces;
+﻿namespace Sparc.Blossom.Spaces;
 
 public static class ServiceCollectionExtensions
 {
