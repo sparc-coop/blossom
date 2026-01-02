@@ -206,7 +206,7 @@ public class BlossomSpaces(
     {
         await GetOrCreate(Domain, post.SpaceId);
         await posts.AddAsync(post);
-        await vectors.AddAsync(post);
+        await IndexAsync(post.SpaceId);
         await Discover(spaceId);
         return post;
     }
