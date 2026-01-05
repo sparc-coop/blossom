@@ -206,13 +206,17 @@ public class BlossomVectors(
         return similarVectorsInSpace;
     }
 
-    internal async Task IndexAsync(string spaceId)
+    internal async Task IndexAsync(string spaceId, int lastX, int lookback)
     {
         var existing = await vectors.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
         if (existing.Count != 0)
             await vectors.DeleteAsync(existing);
 
-        var messages = await posts.Query.Where(x => x.Domain == BlossomSpaces.Domain && x.SpaceId == spaceId).ToListAsync();
+        var messages = await posts.Query.Where(x => x.Domain == BlossomSpaces.Domain && x.SpaceId == spaceId)
+            .OrderByDescending(x => x.Timestamp)
+            .Take(lastX + lookback)
+            .ToListAsync();
+
         var offset = 0;
         var batchSize = 1000;
 
@@ -231,7 +235,7 @@ public class BlossomVectors(
             if (batch.Count > 0)
             {
                 var translator = translators.OfType<OpenAITranslator>().First();
-                var newVectors = await translator.VectorizeAsync(batch);
+                var newVectors = await translator.VectorizeAsync(batch, lastX, lookback);
                 await vectors.AddAsync(newVectors);
             }
             offset += batchSize;

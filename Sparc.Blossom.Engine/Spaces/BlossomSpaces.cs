@@ -206,7 +206,7 @@ public class BlossomSpaces(
     {
         await GetOrCreate(Domain, post.SpaceId);
         await posts.AddAsync(post);
-        await IndexAsync(post.SpaceId);
+        await vectors.AddAsync(post);
         await Discover(spaceId);
         return post;
     }
@@ -263,9 +263,9 @@ public class BlossomSpaces(
         return user.Identity("Matrix")!;
     }
 
-    private async Task IndexAsync(string spaceId)
+    private async Task IndexAsync(string spaceId, int lastX, int lookback)
     {
-        await vectors.IndexAsync(spaceId);
+        await vectors.IndexAsync(spaceId, lastX, lookback);
     }
 
     public void Map(IEndpointRouteBuilder endpoints)

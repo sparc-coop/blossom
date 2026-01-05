@@ -9,7 +9,7 @@ namespace Sparc.Blossom.Content;
 internal class OpenAITranslator(OpenAIClient client) 
     : AITranslator("gpt-4.1-nano", 0.40m / 1_000_000, 0)
 {
-    public override async Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages)
+    public override async Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages, int lastX, int lookback)
     {
         var model = "text-embedding-3-small";
         var embeddings = client.GetEmbeddingClient(model);
@@ -27,7 +27,9 @@ internal class OpenAITranslator(OpenAIClient client)
                 .Take(batchSize)
                 .ToList();
 
-            var inputs = batch.Select((x, i) => MessagesWithContext(x.Text, batch, i)).ToList();
+            var inputs = batch.Select((x, i) => MessagesWithContext(x.Text, batch, lookback, i))
+                .TakeLast(lastX)
+                .ToList();
 
             if (!inputs.Any())
                 return [];
@@ -46,9 +48,9 @@ internal class OpenAITranslator(OpenAIClient client)
         return vectors;
     }
 
-    private static string MessagesWithContext(string? text, List<TextContent> batch, int i)
+    private static string MessagesWithContext(string? text, List<TextContent> batch, int lookback, int i)
     {
-        var previousMessages = batch.Index().Where(x => x.Index < i).Select(x => x.Item.Text).TakeLast(5);
+        var previousMessages = batch.Index().Where(x => x.Index < i).Select(x => x.Item.Text).TakeLast(lookback);
         var context = previousMessages.Any() ? "<PreviousMessages>" + string.Join("\n", previousMessages) + "</PreviousMessages>\n\n" : "";
         return context + text;
     }
