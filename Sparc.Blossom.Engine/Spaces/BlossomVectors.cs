@@ -26,10 +26,8 @@ public class BlossomVectors(
     public async Task UpdateAsync(BlossomVector vector) => await vectors.UpdateAsync(vector);
     public async Task UpdateAsync(IEnumerable<BlossomVector> blossomVectors) => await vectors.UpdateAsync(blossomVectors);
 
-    public async Task<List<BlossomVector>> SearchAsync(BlossomSpace space, string type, int count, bool furthestAway = false)
+    public async Task<List<BlossomVector>> SearchAsync(string parentSpaceId, BlossomSpace space, string type, int count, bool furthestAway = false)
     {
-        var parentSpaceId = space.ParentSpaceId ?? space.Id;
-
         var spaceVector = await vectors.Query
             .Where(x => x.SpaceId == parentSpaceId && x.Id == space.Id)
             .Select(x => x.Vector)
@@ -44,7 +42,7 @@ public class BlossomVectors(
             ORDER BY VectorDistance(c.Vector, {new BlossomVector(spaceVector)})";
 
         var cosmosVectors = vectors as CosmosDbSimpleRepository<BlossomVector>;
-        var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<BlossomVector>(query, space.ParentSpaceId);
+        var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<BlossomVector>(query, parentSpaceId);
         if (furthestAway)
             similarVectorsInSpace = similarVectorsInSpace.TakeLast(count).ToList();
 

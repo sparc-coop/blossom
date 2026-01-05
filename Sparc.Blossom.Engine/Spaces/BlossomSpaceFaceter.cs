@@ -23,10 +23,10 @@ public class BlossomSpaceFaceter(
     List<BlossomVector>? Centroids;
     private PredictionEngine<BlossomVector, ClusteringPrediction>? Predictor;
 
-    public async Task<List<BlossomSpace>> RunAsync(BlossomSpace space, List<BlossomPost> posts, decimal sampleSize)
+    public async Task<List<BlossomSpace>> DivideAsync(BlossomSpace space, List<BlossomPost> posts, decimal sampleSize)
     {
         await vectors.ClearAsync(space.SpaceId);
-        
+
         PostVectors = await vectors.GetAsync(space.SpaceId, "Post", sampleSize);
         Root = BlossomVector.Average(PostVectors);
         await vectors.UpdateAsync(Root);
@@ -40,8 +40,15 @@ public class BlossomSpaceFaceter(
         foreach (var childSpace in spaces)
             await SummarizeAsync(childSpace, posts.Where(x => x.IsLinked(childSpace)));
 
+        return spaces;
+    }
+
+    public async Task<List<BlossomSpace>> FacetAsync(BlossomSpace space, List<BlossomPost> posts)
+    {
         // Factor into principal components
-        var facets = BlossomVector.ToPrincipalComponents(PostVectors, 5);
+        posts = posts.Where(x => x.IsLinked(space)).ToList();
+        var postVectors = PostVectors!.Where(x => posts.Any(y => y.Id == x.Id)).ToList();
+        var facets = BlossomVector.ToPrincipalComponents(postVectors, 3);
         var facetSpaces = new List<BlossomSpace>();
         foreach (var facet in facets)
         {
@@ -54,21 +61,18 @@ public class BlossomSpaceFaceter(
         await vectors.UpdateAsync(facets);
         foreach (var post in posts)
         {
-            var postVector = await vectors.FindAsync(post.SpaceId, post.Id);
+            var postVector = postVectors.FirstOrDefault(x => x.Id == post.Id);
             if (postVector == null)
                 continue;
 
             foreach (var facet in facets)
-            {
-                var score = postVector.Score(facet);
                 post.LinkToSpace(facet.Id, postVector.DistanceTo(facet), postVector.Score(facet));
-            }
         }
 
         foreach (var childFacetSpace in facetSpaces)
             await SummarizeAsync(childFacetSpace, posts);
 
-        return spaces.Union(facetSpaces).ToList();
+        return facetSpaces;
     }
 
     public async Task AssignAsync(IEnumerable<BlossomPost> posts, List<BlossomVector> spaces)
@@ -102,8 +106,8 @@ public class BlossomSpaceFaceter(
         var aiTranslator = translators.OfType<AITranslator>().First();
         if (space.RoomType == "Facet")
         {
-            var leftVectors = await vectors.SearchAsync(space, "Post", 5, true);
-            var rightVectors = await vectors.SearchAsync(space, "Post", 5);
+            var leftVectors = await vectors.SearchAsync(Root!.SpaceId, space, "Post", 5, true);
+            var rightVectors = await vectors.SearchAsync(Root!.SpaceId, space, "Post", 5);
             var leftPosts = assignedPosts
                 .Where(x => leftVectors.Any(v => v.TargetUrl == x.Id))
                 .ToList();
@@ -115,7 +119,7 @@ public class BlossomSpaceFaceter(
         }
         else
         {
-            var closestVectors = await vectors.SearchAsync(space, "Post", 10);
+            var closestVectors = await vectors.SearchAsync(Root!.SpaceId, space, "Post", 10);
 
             var matchingPosts = assignedPosts
                 .Where(x => closestVectors.Any(v => v.TargetUrl == x.Id))
