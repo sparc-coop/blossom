@@ -53,10 +53,11 @@ public class BlossomSpace : BlossomEntity<string>
         RoomType = "Ephemeral";
     }
 
-    public BlossomSpace(BlossomSpace rootSpace)
+    public BlossomSpace(BlossomSpace rootSpace, string? roomType = null)
         : this(rootSpace.Domain)
     {
         ParentSpaceId = rootSpace.SpaceId;
+        RoomType = roomType ?? "Ephemeral";
     }
 
     public void SetSummary(BlossomSummary? summary)

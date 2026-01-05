@@ -33,6 +33,13 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
         return answer.Value;
     }
 
+    public async Task<BlossomSummary?> SummarizeAsync(IEnumerable<TextContent> leftMessages, IEnumerable<TextContent> rightMessages)
+    {
+        var question = new SummaryQuestion(leftMessages, rightMessages, 1047576);
+        var answer = await AskAsync(question);
+        return answer.Value;
+    }
+
     internal async Task IntersectAsync(List<BlossomSpace> spaces)
     {
         foreach (var space in spaces)

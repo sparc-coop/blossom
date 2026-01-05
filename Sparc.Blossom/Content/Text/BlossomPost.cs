@@ -9,12 +9,6 @@ public record LinkedSpace(string SpaceId, double? Distance, double? Alignment)
     [JsonConstructor]
     protected LinkedSpace() : this("", null, null)
     { }
-    
-    public LinkedSpace(BlossomVector postVector, BlossomVector spaceVector)
-        : this(spaceVector.SpaceId,
-            spaceVector.DistanceTo(postVector),
-            spaceVector.SimilarityTo(postVector))
-    { }
 
     public double Closeness => Distance == null ? 0 : 1 - Distance.Value;
     public double Score => Distance == null || Alignment == null ? 0 : Closeness * Math.Abs(Alignment.Value);
@@ -44,9 +38,9 @@ public class BlossomPost : TextContent
 
     public void UnlinkAllSpaces() => LinkedSpaces.Clear();
     public LinkedSpace? LinkedSpace(string id) => LinkedSpaces.FirstOrDefault(x => x.SpaceId == id);
-    public void LinkToSpace(BlossomVector postVector, BlossomVector spaceVector)
+    public void LinkToSpace(string spaceId, double? distance, double? alignment)
     {
-        LinkedSpaces.RemoveAll(x => x.SpaceId == spaceVector.SpaceId);
-        LinkedSpaces.Add(new(postVector, spaceVector));
+        LinkedSpaces.RemoveAll(x => x.SpaceId == spaceId);
+        LinkedSpaces.Add(new(spaceId, distance, alignment));
     }
 }

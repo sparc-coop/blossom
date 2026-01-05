@@ -11,10 +11,10 @@ public class BlossomSpaces(
     BlossomAggregateOptions<BlossomSpace> options,
     IRepository<BlossomPost> posts,
     IRepository<BlossomEvent> events,
-    IEnumerable<ITranslator> translators,
     IHttpContextAccessor http,
     BlossomVectors vectors,
     Contents contents,
+    BlossomSpaceFaceter faceter,
     SparcAuthenticator<BlossomUser> auth)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
@@ -181,24 +181,12 @@ public class BlossomSpaces(
         await Repository.DeleteAsync(existing);
 
         var space = await GetOrCreate(Domain, spaceId);
-        var spaces = await vectors.Discover(space);
+        var spacePosts = await GetPostsAsync(spaceId, 10000);
+        var spaces = await faceter.RunAsync(space, spacePosts, 1M);
+
+        await posts.UpdateAsync(spacePosts);
         await Repository.UpdateAsync(space);
         await Repository.AddAsync(spaces);
-
-        // Summarize spaces
-        var aiTranslator = translators.OfType<AITranslator>().First();
-        foreach (var newSpace in spaces.Union([space]))
-        {
-            var messages = await GetPostsAsync(newSpace.SpaceId);
-            var summary = await aiTranslator.SummarizeAsync(messages);
-            newSpace.SetSummary(summary);
-            newSpace.SetConsensus(messages);
-            await Repository.UpdateAsync(newSpace);
-        }
-
-        //await aiTranslator.IntersectAsync(spaces);
-        //await Repository.UpdateAsync(spaces);
-
         return spaces;
     }
 
@@ -211,7 +199,7 @@ public class BlossomSpaces(
         return post;
     }
 
-    private async Task<List<BlossomPost>> GetPostsAsync(string spaceId)
+    private async Task<List<BlossomPost>> GetPostsAsync(string spaceId, int take = 50)
     {
         var space = await GetOrCreate(Domain, spaceId);
         var exactPosts = await posts.Query
@@ -219,7 +207,7 @@ public class BlossomSpaces(
                 (x.SpaceId == spaceId || 
                 x.LinkedSpaces.Any(y => y.SpaceId == space.Id)))
                 .OrderByDescending(x => x.Timestamp)
-                .Take(50)
+                .Take(take)
                 .ToListAsync();
 
         return exactPosts;
@@ -263,9 +251,9 @@ public class BlossomSpaces(
         return user.Identity("Matrix")!;
     }
 
-    private async Task IndexAsync(string spaceId, int lastX, int lookback)
+    private async Task IndexAsync(string spaceId)
     {
-        await vectors.IndexAsync(spaceId, lastX, lookback);
+        await vectors.IndexAsync(spaceId, 10000, 5);
     }
 
     public void Map(IEndpointRouteBuilder endpoints)

@@ -17,6 +17,33 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
             "- Description: A 50-100 word overview highlighting the key points and themes.";
 
         Text += "\r\n\r\nMessages: ";
+        AddMessages(messages, tokenLimit);
+    }
+
+    public SummaryQuestion(IEnumerable<TextContent> leftMessages, IEnumerable<TextContent> rightMessages, int tokenLimit) 
+        : base(
+    "Provide a concise summary of the following messages, including a name, topic, and description, and a constrasting set of topics between the left and right set of messages." +
+    "The summary should capture the main themes and key points discussed in the messages.")
+    {
+        Instructions = "You are an assistant that summarizes two sets of messages into a new semantic facet that will be used for room facets identification.\r\n" +
+                    "Analyze the provided messages and extract the main themes to create a concise summary.\r\n\r\n" +
+                    "The summary should include:\r\n" +
+                    "- Name: A short, 2 to 3 word descriptive facet title encompassing both sets of messages. This name should be extremely specific to the primary subject matter of the facet. All lower case, words hyphenated.\r\n" +
+                    "- Topic: The 10-20 word primary subject matter discussed in both sets of messages.\r\n" +
+                    "- Description: A 50-100 word overview highlighting the key points and themes shared by both sets of messages.";
+
+        Instructions += "- LeftTopic: A short, 2 to 3 word descriptive topic for the left set of messages that distinguishes it from the right set of messages.\r\n";
+        Instructions += "- RightTopic: A short, 2 to 3 word descriptive topic for the right set of messages that distinguishes it from the left set of messages.";
+
+        Text += "\r\n\r\nLeft Messages: ";
+        AddMessages(leftMessages, tokenLimit / 2);
+
+        Text += "\r\n\r\nRight Messages: ";
+        AddMessages(rightMessages, tokenLimit / 2);
+    }
+
+    private void AddMessages(IEnumerable<TextContent> messages, int tokenLimit)
+    {
         foreach (var message in messages)
         {
             if (Text.Length + message.Text!.Length > tokenLimit * 4 * 0.8)

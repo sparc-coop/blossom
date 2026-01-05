@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json.Serialization;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace Sparc.Blossom.Content;
 
@@ -10,31 +11,42 @@ public class BlossomVector : BlossomEntity<string>
     {
     }
 
-    public BlossomVector(string spaceId, string id, string model, float[] vector) 
+    public BlossomVector(string spaceId, string type, string id, string model, float[] vector) 
         : base(id)
     {
         SpaceId = spaceId;
+        Type = type;
         Model = model;
         Vector = vector;
     }
 
-    public BlossomVector(string spaceId, float[] vector) : base(spaceId)
+    public BlossomVector(string spaceId, string type, float[] vector) : base(spaceId)
     {
         SpaceId = spaceId;
+        Type = type;
         TargetUrl = spaceId;
         Model = "text-embedding-3-small";
-        Vector = vector;
+        if (type == "Space")
+        {
+            Point = Vector;
+            Vector = Normalize(vector);
+        }
+        else
+        {
+            Vector = vector;
+        }
     }
 
-    public BlossomVector(float[] vector) : this(Guid.NewGuid().ToString(), vector)
+    public BlossomVector(float[] vector) : this(Guid.NewGuid().ToString(), "Ephemeral", vector)
     {
     }
 
     public string SpaceId { get; init; } = "";
+    public string Type { get; init; } = "Ephemeral";
     public string Model { get; init; } = "";
     public float[] Vector { get; set; } = [];
-    public float[]? Point { get; set; }
-    public string TargetUrl { get; init; } = "";
+    public float[]? Point { get; init; }
+    public string TargetUrl { get; set; } = "";
     public string? Text { get; set; }
 
     public double DotProduct(BlossomVector other)
@@ -151,11 +163,36 @@ public class BlossomVector : BlossomEntity<string>
             avgVector[i] /= count;
         }
         
-        return new(spaceVectors.First().SpaceId, avgVector);
+        return new(spaceVectors.First().SpaceId, "Space", avgVector);
     }
 
-    public void SetMean(List<BlossomVector> spaceVectors)
+    private Vector<float> ToMathNetVector() => Vector<float>.Build.Dense(Vector);
+    public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
+        => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
+
+    public static List<BlossomVector> ToPrincipalComponents(List<BlossomVector> vectors, int numberOfComponents)
     {
-        Point = Average(spaceVectors).Vector;
+        var mean = Average(vectors);
+        var meanVector = mean.ToMathNetVector();
+        var matrix = ToMatrix(vectors);
+
+        // Subtract each vector by the mean
+        for (int i = 0; i < matrix.RowCount; i++)
+            matrix.SetRow(i, matrix.Row(i) - meanVector);
+
+        var svd = matrix.Svd(true);
+        var components = new List<BlossomVector>();
+        for (int i = 0; i < Math.Min(numberOfComponents, svd.VT.RowCount); i++)
+        {
+            var componentArray = svd.VT.Row(i).ToArray();
+            components.Add(new BlossomVector(vectors.First().SpaceId, "Facet", componentArray));
+        }
+
+        return components;
+    }
+
+    private float[] Normalize(float[] vector)
+    {
+        throw new NotImplementedException();
     }
 }
