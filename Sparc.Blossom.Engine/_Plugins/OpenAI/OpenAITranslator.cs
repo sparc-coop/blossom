@@ -39,7 +39,7 @@ internal class OpenAITranslator(OpenAIClient client)
             foreach (var output in outputs.Value)
             {
                 var text = batch.ElementAt(output.Index);
-                vectors.Add(new(text.SpaceId, "Post", text.Id, model, output.ToFloats().ToArray())
+                vectors.Add(new(text.SpaceId, "Post", text.Id, output.ToFloats().ToArray())
                 {
                     Text = text.Text
                 });

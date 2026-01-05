@@ -11,12 +11,12 @@ public class BlossomVector : BlossomEntity<string>
     {
     }
 
-    public BlossomVector(string spaceId, string type, string id, string model, float[] vector) 
+    public BlossomVector(string spaceId, string type, string id, float[] vector) 
         : base(id)
     {
         SpaceId = spaceId;
         Type = type;
-        Model = model;
+        TargetUrl = id;
         Vector = vector;
     }
 
@@ -26,15 +26,9 @@ public class BlossomVector : BlossomEntity<string>
         Type = type;
         TargetUrl = spaceId;
         Model = "text-embedding-3-small";
+        Vector = vector;
         if (type == "Space")
-        {
-            Point = Vector;
-            Vector = Normalize(vector);
-        }
-        else
-        {
-            Vector = vector;
-        }
+            Normalize();
     }
 
     public BlossomVector(float[] vector) : this(Guid.NewGuid().ToString(), "Ephemeral", vector)
@@ -45,7 +39,7 @@ public class BlossomVector : BlossomEntity<string>
     public string Type { get; init; } = "Ephemeral";
     public string Model { get; init; } = "";
     public float[] Vector { get; set; } = [];
-    public float[]? Point { get; init; }
+    public float[]? Point { get; private set; }
     public string TargetUrl { get; set; } = "";
     public string? Text { get; set; }
 
@@ -80,6 +74,19 @@ public class BlossomVector : BlossomEntity<string>
         if (sumSquares == 0)
             return 0;
         return Math.Acos(angle / Math.Sqrt(sumSquares));
+    }
+
+    public double? Score(BlossomVector axis)
+    {
+        if (axis.Point == null)
+            return null;
+        
+        // Center the vector according to the axis point
+        var centered = new float[Vector.Length];
+        for (int i = 0; i < Vector.Length; i++)
+            centered[i] = Vector[i] - axis.Vector[i];
+
+        return SimilarityTo(new BlossomVector(centered));
     }
 
     public double? SimilarityTo(BlossomVector other)
@@ -185,14 +192,20 @@ public class BlossomVector : BlossomEntity<string>
         for (int i = 0; i < Math.Min(numberOfComponents, svd.VT.RowCount); i++)
         {
             var componentArray = svd.VT.Row(i).ToArray();
-            components.Add(new BlossomVector(vectors.First().SpaceId, "Facet", componentArray));
+            components.Add(new BlossomVector(vectors.First().SpaceId, "Facet", Guid.NewGuid().ToString(), componentArray)
+            {
+                Point = mean.Vector
+            });
         }
 
         return components;
     }
 
-    private float[] Normalize(float[] vector)
+    private void Normalize()
     {
-        throw new NotImplementedException();
+        Point = Vector;
+        var vec = ToMathNetVector();
+        var normalized = vec.Normalize(vec.L2Norm());
+        Vector = [.. normalized];
     }
 }

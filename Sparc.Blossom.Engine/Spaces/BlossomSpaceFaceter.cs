@@ -19,44 +19,61 @@ public class BlossomSpaceFaceter(
 {
     public MLContext Context { get; } = new MLContext(seed: 1);
     BlossomVector? Root;
-    List<BlossomVector>? Children;
+    List<BlossomVector>? PostVectors;
+    List<BlossomVector>? Centroids;
     private PredictionEngine<BlossomVector, ClusteringPrediction>? Predictor;
 
     public async Task<List<BlossomSpace>> RunAsync(BlossomSpace space, List<BlossomPost> posts, decimal sampleSize)
     {
-        Children = await vectors.GetAsync(space.SpaceId, "Post", sampleSize);
-        Root = BlossomVector.Average(Children);
+        await vectors.ClearAsync(space.SpaceId);
+        
+        PostVectors = await vectors.GetAsync(space.SpaceId, "Post", sampleSize);
+        Root = BlossomVector.Average(PostVectors);
         await vectors.UpdateAsync(Root);
 
-        var model = Cluster(Children);
+        var model = Cluster(PostVectors);
         Predictor = Context.Model.CreatePredictionEngine<BlossomVector, ClusteringPrediction>(model, inputSchemaDefinition: BlossomVectorSchema());
 
         var spaces = await CreateSpaces(space, model);
-        await AssignAsync(posts);
+        await AssignAsync(posts, Centroids!);
 
         foreach (var childSpace in spaces)
-            await SummarizeAsync(childSpace, posts.Where(x => x.SpaceId == childSpace.Id));
+            await SummarizeAsync(childSpace, posts.Where(x => x.IsLinked(childSpace)));
 
         // Factor into principal components
-        var facets = BlossomVector.ToPrincipalComponents(Children, 5);
+        var facets = BlossomVector.ToPrincipalComponents(PostVectors, 5);
         var facetSpaces = new List<BlossomSpace>();
         foreach (var facet in facets)
         {
-            var facetSpace = new BlossomSpace(space, "Facet");
+            var facetSpace = new BlossomSpace(space, "Facet")
+            {
+                Id = facet.Id
+            };
             facetSpaces.Add(facetSpace);
-            facet.TargetUrl = facetSpace.Id;
         }
         await vectors.UpdateAsync(facets);
+        foreach (var post in posts)
+        {
+            var postVector = await vectors.FindAsync(post.SpaceId, post.Id);
+            if (postVector == null)
+                continue;
+
+            foreach (var facet in facets)
+            {
+                var score = postVector.Score(facet);
+                post.LinkToSpace(facet.Id, postVector.DistanceTo(facet), postVector.Score(facet));
+            }
+        }
 
         foreach (var childFacetSpace in facetSpaces)
-            await SummarizeAsync(childFacetSpace, posts.Where(x => x.SpaceId == childFacetSpace.Id));
+            await SummarizeAsync(childFacetSpace, posts);
 
         return spaces.Union(facetSpaces).ToList();
     }
 
-    public async Task AssignAsync(IEnumerable<BlossomPost> posts)
+    public async Task AssignAsync(IEnumerable<BlossomPost> posts, List<BlossomVector> spaces)
     {
-        if (Predictor == null || Root == null || Children == null)
+        if (Predictor == null || Root == null || PostVectors == null || Centroids == null)
             throw new InvalidOperationException("Model has not been trained. Please run RunAsync first.");
 
         var postVectors = new List<BlossomVector>();
@@ -74,9 +91,9 @@ public class BlossomSpaceFaceter(
             post.UnlinkAllSpaces();
             post.LinkToSpace(Root.SpaceId, postVector.DistanceTo(Root), postVector.AlignmentWith(Root));
 
-            var predictedSpace = Children[(int)prediction.PredictedLabel - 1];
-            post.LinkToSpace(predictedSpace.SpaceId, postVector.DistanceTo(predictedSpace), postVector.AlignmentWith(predictedSpace));
-            Console.WriteLine($"Assigned post {post.Id} to space {predictedSpace.SpaceId}.");
+            var predictedSpace = spaces[(int)prediction.PredictedLabel - 1];
+            post.LinkToSpace(predictedSpace.Id, postVector.DistanceTo(predictedSpace), postVector.AlignmentWith(predictedSpace));
+            Console.WriteLine($"Assigned post {post.Id} to space {predictedSpace.Id}.");
         }
     }
 
@@ -107,6 +124,8 @@ public class BlossomSpaceFaceter(
             var summary = await aiTranslator.SummarizeAsync(matchingPosts);
             space.SetSummary(summary);
         }
+
+        space.SetConsensus(assignedPosts);
     }
 
     private TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> Cluster(List<BlossomVector> vectors)
@@ -119,9 +138,9 @@ public class BlossomSpaceFaceter(
     private async Task<List<BlossomSpace>> CreateSpaces(BlossomSpace rootSpace, TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model)
     {
         var centroids = ExtractCentroids(model);
-        var spaces = centroids.Select(x => new BlossomSpace(rootSpace, "Room")).ToList();
-        var spaceVectors = centroids.Select((x, i) => new BlossomVector(spaces[i].Id, "Space", x)).ToList();
-        await vectors.UpdateAsync(spaceVectors);
+        var spaces = centroids.Select(x => new BlossomSpace(rootSpace, "Space")).ToList();
+        Centroids = centroids.Select((x, i) => new BlossomVector(rootSpace.Id, "Space", spaces[i].Id, x)).ToList();
+        await vectors.UpdateAsync(Centroids);
         return spaces;
     }
 

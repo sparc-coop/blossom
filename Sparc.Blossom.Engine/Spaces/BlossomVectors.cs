@@ -28,28 +28,32 @@ public class BlossomVectors(
 
     public async Task<List<BlossomVector>> SearchAsync(BlossomSpace space, string type, int count, bool furthestAway = false)
     {
+        var parentSpaceId = space.ParentSpaceId ?? space.Id;
+
         var spaceVector = await vectors.Query
-            .Where(x => x.SpaceId == space.Id && x.Id == space.Id)
+            .Where(x => x.SpaceId == parentSpaceId && x.Id == space.Id)
             .Select(x => x.Vector)
             .FirstOrDefaultAsync()
             ?? throw new Exception("Space vector not found");
 
-        var descending = furthestAway ? "DESC" : "";
-
+        var top = furthestAway ? 10000 : count;
         var query = $@"
-            SELECT TOP {count} c.id, c.Type, c.Text, c.TargetUrl
+            SELECT TOP {top} c.id, c.Type, c.Text, c.TargetUrl
             FROM c
-            WHERE c.SpaceId = '{space.ParentSpaceId ?? space.Id}' AND c.Type = '{type}'
-            ORDER BY VectorDistance(c.Vector, {new BlossomVector(spaceVector)}) {descending}";
+            WHERE c.SpaceId = '{parentSpaceId}' AND c.Type = '{type}'
+            ORDER BY VectorDistance(c.Vector, {new BlossomVector(spaceVector)})";
 
         var cosmosVectors = vectors as CosmosDbSimpleRepository<BlossomVector>;
         var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<BlossomVector>(query, space.ParentSpaceId);
+        if (furthestAway)
+            similarVectorsInSpace = similarVectorsInSpace.TakeLast(count).ToList();
+
         return similarVectorsInSpace;
     }
 
     internal async Task IndexAsync(string spaceId, int lastX, int lookback)
     {
-        var existing = await vectors.Query.Where(x => x.SpaceId == spaceId && x.Type == "Post").ToListAsync();
+        var existing = await vectors.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
         if (existing.Count != 0)
             await vectors.DeleteAsync(existing);
 
@@ -90,5 +94,12 @@ public class BlossomVectors(
         var translator = translators.OfType<OpenAITranslator>().First();
         var vector = await translator.VectorizeAsync(post);
         await vectors.AddAsync(vector);
+    }
+
+    internal async Task ClearAsync(string spaceId)
+    {
+        var existing = await vectors.Query.Where(x => x.SpaceId == spaceId && x.Type != "Post").ToListAsync();
+        if (existing.Count != 0)
+            await vectors.DeleteAsync(existing);
     }
 }

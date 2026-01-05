@@ -37,6 +37,7 @@ public class BlossomPost : TextContent
     }
 
     public void UnlinkAllSpaces() => LinkedSpaces.Clear();
+    public bool IsLinked(BlossomSpace space) => LinkedSpaces.Any(x => x.SpaceId == space.SpaceId);
     public LinkedSpace? LinkedSpace(string id) => LinkedSpaces.FirstOrDefault(x => x.SpaceId == id);
     public void LinkToSpace(string spaceId, double? distance, double? alignment)
     {

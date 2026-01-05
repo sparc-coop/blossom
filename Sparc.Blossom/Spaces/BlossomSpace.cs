@@ -14,12 +14,11 @@ public class BlossomSpace : BlossomEntity<string>
     public string SpaceId {  get { return Id;  } set { Id = value; } }
     public string? ParentSpaceId { get; set; }
     public string Name { get; set; } = string.Empty;
+    public BlossomSummary Summary { get; set; } = new("", "", "", null, null);
     public string RoomType { get; set; } = "Root";
     public int NumJoinedMembers { get; set; }
     public bool GuestCanJoin { get; set; }
     public bool WorldReadable { get; set; }
-    public string? Topic { get; set; }
-    public string? Description { get; set; }
     public string? AvatarUrl { get; set; }
     public string? CanonicalAlias { get; set; }
     public string? JoinRule { get; set; }
@@ -66,17 +65,32 @@ public class BlossomSpace : BlossomEntity<string>
             return;
 
         Name = summary.Name;
-        Topic = summary.Topic;
-        Description = summary.Description;
+        Summary = summary;
     }
 
-    public void SetConsensus(List<BlossomPost> messages)
+    public void SetConsensus(IEnumerable<BlossomPost> messages)
     {
-        Consensus = messages.Sum(x => x.LinkedSpace(Id)?.Closeness * x.LinkedSpace(Id)?.Alignment ?? 0) / messages.Sum(x => 1 - (x.LinkedSpace(Id)?.Distance ?? 1));
-        ConsensusHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Consensus.Value));
+        if (!messages.Any(x => x.IsLinked(this)))
+            return;
 
-        // Variance is the average of the squared differences from the Mean
-        Confidence = 1 / (1 + messages.Average(x => Math.Pow(x.LinkedSpace(Id)?.Distance ?? 1, 2)));
+        if (RoomType == "Facet")
+        {
+            Consensus = messages.Average(x => x.LinkedSpace(Id)?.Alignment ?? 0);
+            Confidence = 1 / (1 + messages.Average(x => Math.Pow(x.LinkedSpace(Id)?.Alignment ?? 1, 2)));
+        }
+        else
+        {
+            Consensus = messages.Sum(x => x.LinkedSpace(Id)?.Closeness * x.LinkedSpace(Id)?.Alignment ?? 0) / messages.Sum(x => 1 - (x.LinkedSpace(Id)?.Distance ?? 1));
+            // Variance is the average of the squared differences from the Mean
+            Confidence = 1 / (1 + messages.Average(x => Math.Pow(x.LinkedSpace(Id)?.Distance ?? 1, 2)));
+        }
+
+        if (double.IsNaN(Consensus.Value))
+            Consensus = 0;
+        if (double.IsNaN(Confidence.Value))
+            Confidence = 0;
+
+        ConsensusHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Consensus.Value));
         ConfidenceHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Confidence.Value));
     }
 
