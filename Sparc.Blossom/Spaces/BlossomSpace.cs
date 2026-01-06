@@ -27,6 +27,7 @@ public class BlossomSpace : BlossomEntity<string>
     public DateTime? EndDate { get; set; }
     public string? ModelUrl { get; set; }
     public List<SparcEntityType> EntityTypes { get; set; } = [];
+    public double? Weight { get; set; }
     public double? Consensus { get; set; }
     public double? Confidence { get; set; }
     public List<MetricHistory> ConsensusHistory { get; set; } = [];

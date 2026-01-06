@@ -40,6 +40,7 @@ public class BlossomVector : BlossomEntity<string>
     public string Model { get; init; } = "";
     public float[] Vector { get; set; } = [];
     public float[]? Point { get; private set; }
+    public double? Weight { get; private set; }
     public string TargetUrl { get; set; } = "";
     public string? Text { get; set; }
 
@@ -177,7 +178,7 @@ public class BlossomVector : BlossomEntity<string>
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
         => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
 
-    public static List<BlossomVector> ToPrincipalComponents(List<BlossomVector> vectors, int numberOfComponents)
+    public static List<BlossomVector> ToPrincipalComponents(List<BlossomVector> vectors, double varianceToExplain)
     {
         var mean = Average(vectors);
         var meanVector = mean.ToMathNetVector();
@@ -189,13 +190,18 @@ public class BlossomVector : BlossomEntity<string>
 
         var svd = matrix.Svd(true);
         var components = new List<BlossomVector>();
-        for (int i = 0; i < Math.Min(numberOfComponents, svd.VT.RowCount); i++)
+        for (int i = 0; i < svd.VT.RowCount; i++)
         {
             var componentArray = svd.VT.Row(i).ToArray();
+            
             components.Add(new BlossomVector(vectors.First().SpaceId, "Facet", Guid.NewGuid().ToString(), componentArray)
             {
-                Point = mean.Vector
+                Point = mean.Vector,
+                Weight = Math.Pow(svd.S[i], 2) / svd.S.Sum(x => x * x)
             });
+            
+            if (components.Sum(c => c.Weight) >= varianceToExplain)
+                break;
         }
 
         return components;

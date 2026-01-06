@@ -48,13 +48,14 @@ public class BlossomSpaceFaceter(
         // Factor into principal components
         posts = posts.Where(x => x.IsLinked(space)).ToList();
         var postVectors = PostVectors!.Where(x => posts.Any(y => y.Id == x.Id)).ToList();
-        var facets = BlossomVector.ToPrincipalComponents(postVectors, 3);
+        var facets = BlossomVector.ToPrincipalComponents(postVectors, 0.8);
         var facetSpaces = new List<BlossomSpace>();
         foreach (var facet in facets)
         {
             var facetSpace = new BlossomSpace(space, "Facet")
             {
-                Id = facet.Id
+                Id = facet.Id,
+                Weight = facet.Weight
             };
             facetSpaces.Add(facetSpace);
         }
@@ -213,7 +214,7 @@ public class BlossomSpaceFaceter(
         }
 
         // Compute difference between curve and line
-        List<double> diffs = new List<double>();
+        List<double> diffs = [];
         for (int i = 0; i < n; i++)
         {
             diffs.Add(line[i] - norm[i]);
