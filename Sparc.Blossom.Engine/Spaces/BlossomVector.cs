@@ -120,6 +120,20 @@ public class BlossomVector : BlossomEntity<string>
         return Math.Sqrt(sum);
     }
 
+    public double? PositionOnAxis(BlossomVector axis, double? axisMin = null, double? axisMax = null)
+    {
+        if (axis.Point == null)
+            return null;
+        
+        var centered = Center(new(axis.Point));
+        var rawPosition = centered.DotProduct(axis);
+        if (axisMin == null || axisMax == null)
+            return rawPosition;
+
+        var axisLength = axisMax - axisMin;
+        return (rawPosition - axisMin) / axisLength;
+    }
+
     public double? ClosenessTo(BlossomVector other)
     {
         var distance = DistanceTo(other);
@@ -174,6 +188,15 @@ public class BlossomVector : BlossomEntity<string>
         return new(spaceVectors.First().SpaceId, "Space", avgVector);
     }
 
+    public BlossomVector Center(BlossomVector centerPoint)
+    {
+        var centeredVector = new float[Vector.Length];
+        for (int i = 0; i < Vector.Length; i++)
+            centeredVector[i] = Vector[i] - centerPoint.Vector[i];
+
+        return new BlossomVector(centeredVector);
+    }
+
     private Vector<float> ToMathNetVector() => Vector<float>.Build.Dense(Vector);
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
         => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
@@ -181,12 +204,8 @@ public class BlossomVector : BlossomEntity<string>
     public static List<BlossomVector> ToPrincipalComponents(List<BlossomVector> vectors, double varianceToExplain)
     {
         var mean = Average(vectors);
-        var meanVector = mean.ToMathNetVector();
-        var matrix = ToMatrix(vectors);
-
-        // Subtract each vector by the mean
-        for (int i = 0; i < matrix.RowCount; i++)
-            matrix.SetRow(i, matrix.Row(i) - meanVector);
+        var centeredVectors = vectors.Select(v => v.Center(mean)).ToList();
+        var matrix = ToMatrix(centeredVectors);
 
         var svd = matrix.Svd(true);
         var components = new List<BlossomVector>();

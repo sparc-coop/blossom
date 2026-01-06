@@ -60,14 +60,21 @@ public class BlossomSpaceFaceter(
             facetSpaces.Add(facetSpace);
         }
         await vectors.UpdateAsync(facets);
-        foreach (var post in posts)
-        {
-            var postVector = postVectors.FirstOrDefault(x => x.Id == post.Id);
-            if (postVector == null)
-                continue;
 
-            foreach (var facet in facets)
-                post.LinkToSpace(facet.Id, postVector.DistanceTo(facet), postVector.Score(facet));
+        foreach (var facet in facets)
+        {
+            var axisPositions = postVectors.Where(x => posts.Any(y => y.Id == x.Id)).Select(x => x.PositionOnAxis(facet));
+            var minPosition = axisPositions.Min();
+            var maxPosition = axisPositions.Max();
+            
+            foreach (var post in posts)
+            {
+                var postVector = postVectors.FirstOrDefault(x => x.Id == post.Id);
+                if (postVector != null)
+                {
+                    post.LinkToSpace(facet.Id, postVector.PositionOnAxis(facet, minPosition, maxPosition), postVector.Score(facet));
+                }
+            }
         }
 
         foreach (var childFacetSpace in facetSpaces)
