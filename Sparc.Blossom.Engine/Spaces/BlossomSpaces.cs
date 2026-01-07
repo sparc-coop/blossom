@@ -182,16 +182,17 @@ public class BlossomSpaces(
 
         var space = await GetOrCreate(Domain, spaceId);
         var spacePosts = await GetPostsAsync(spaceId, 10000);
-        var spaces = await faceter.DivideAsync(space, spacePosts, 1M);
+        var answer = await faceter.AnswerAsync(space, spacePosts);
+        //var spaces = await faceter.DivideAsync(space, spacePosts, 1M);
         var facets = await faceter.FacetAsync(space, spacePosts);
-        foreach (var childSpace in spaces)
-            facets.AddRange(await faceter.FacetAsync(childSpace, spacePosts));
+        //foreach (var childSpace in spaces)
+        //    facets.AddRange(await faceter.FacetAsync(childSpace, spacePosts));
 
         await posts.UpdateAsync(spacePosts);
         await Repository.UpdateAsync(space);
-        await Repository.AddAsync(spaces);
+        //await Repository.AddAsync(spaces);
         await Repository.AddAsync(facets);
-        return spaces;
+        return facets;
     }
 
     private async Task<BlossomPost> PostAsync(string spaceId, BlossomPost post)

@@ -39,8 +39,10 @@ public class BlossomVector : BlossomEntity<string>
     public string Type { get; init; } = "Ephemeral";
     public string Model { get; init; } = "";
     public float[] Vector { get; set; } = [];
-    public float[]? Point { get; private set; }
-    public double? Weight { get; private set; }
+    public float[]? Point { get; set; }
+    public double Information { get; set; } = 1;
+    public double Maturity { get; set; } = 1;
+    public double Weight => Information * Maturity;
     public string TargetUrl { get; set; } = "";
     public string? Text { get; set; }
 
@@ -216,10 +218,10 @@ public class BlossomVector : BlossomEntity<string>
             components.Add(new BlossomVector(vectors.First().SpaceId, "Facet", Guid.NewGuid().ToString(), componentArray)
             {
                 Point = mean.Vector,
-                Weight = Math.Pow(svd.S[i], 2) / svd.S.Sum(x => x * x)
+                Information = Math.Pow(svd.S[i], 2) / svd.S.Sum(x => x * x)
             });
             
-            if (components.Sum(c => c.Weight) >= varianceToExplain)
+            if (components.Sum(c => c.Information) >= varianceToExplain)
                 break;
         }
 
@@ -232,5 +234,37 @@ public class BlossomVector : BlossomEntity<string>
         var vec = ToMathNetVector();
         var normalized = vec.Normalize(vec.L2Norm());
         Vector = [.. normalized];
+    }
+
+    internal double SetAnswer(IEnumerable<BlossomVector> vectors)
+    {
+        var prevVector = new BlossomVector(Vector);
+        Point = CalculateAnswer(vectors); // Provisional answer
+        Information = DistanceTo(prevVector) ?? 0;
+
+        foreach (var vector in vectors)
+            vector.UpdateMaturity(this);
+
+        // Calculate final answer using these weights
+        Point = CalculateAnswer(vectors);
+
+        return Information;
+    }
+
+    private static float[] CalculateAnswer(IEnumerable<BlossomVector> vectors)
+    {
+        var weightedVectors = vectors.Select(v => v.ToMathNetVector().Multiply((float)(v.Weight))).ToList();
+
+        var sumOfWeightedVectors = weightedVectors.Aggregate((a, b) => a + b);
+        var totalWeight = vectors.Sum(v => v.Weight);
+        var updatedVector = sumOfWeightedVectors.Divide((float)totalWeight);
+        return [..updatedVector];
+    }
+
+    private void UpdateMaturity(BlossomVector currentAnswer)
+    {
+        // Exponential decay based on how far this vector's Point is from the current answer
+        var distance = DistanceTo(currentAnswer);
+        Maturity = distance == null ? 1.0 : Math.Exp(-distance.Value);
     }
 }
