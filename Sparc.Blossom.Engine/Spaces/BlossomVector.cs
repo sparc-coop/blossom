@@ -28,7 +28,7 @@ public class BlossomVector : BlossomEntity<string>
         Model = "text-embedding-3-small";
         Vector = vector;
         if (type == "Space")
-            Normalize();
+            Vector = Normalize().Vector;
     }
 
     public BlossomVector(float[] vector) : this(Guid.NewGuid().ToString(), "Ephemeral", vector)
@@ -65,31 +65,15 @@ public class BlossomVector : BlossomEntity<string>
         return Math.Sqrt(sumSquares);
     }
 
-    public double Direction()
-    {
-        double angle = 0;
-        double sumSquares = 0;
-        for (int i = 0; i < Vector.Length; i++)
-        {
-            angle += Vector[i];
-            sumSquares += Vector[i] * Vector[i];
-        }
-        if (sumSquares == 0)
-            return 0;
-        return Math.Acos(angle / Math.Sqrt(sumSquares));
-    }
-
     public double? Score(BlossomVector axis)
     {
         if (axis.Point == null)
             return null;
-        
-        // Center the vector according to the axis point
-        var centered = new float[Vector.Length];
-        for (int i = 0; i < Vector.Length; i++)
-            centered[i] = Vector[i] - axis.Vector[i];
 
-        return SimilarityTo(new BlossomVector(centered));
+        // Center the vector according to the axis point
+        var centered = Center(new(axis.Point));
+
+        return centered.SimilarityTo(axis);
     }
 
     public double? SimilarityTo(BlossomVector other)
@@ -107,11 +91,11 @@ public class BlossomVector : BlossomEntity<string>
 
     public double? DistanceTo(BlossomVector other)
     {
-        if (Point == null && other.Point == null)
-            return null;
-
         var point1 = Point ?? Vector;
         var point2 = other.Point ?? other.Vector;
+
+        if (point1 == null || point2 == null)
+            return null;
 
         double sum = 0;
         for (int i = 0; i < point1.Length; i++)
@@ -127,13 +111,20 @@ public class BlossomVector : BlossomEntity<string>
         if (axis.Point == null)
             return null;
         
+        // Axis comes in already normalized, but needs to be centered
         var centered = Center(new(axis.Point));
+
+        // projection of centered onto axis unit vector
         var rawPosition = centered.DotProduct(axis);
+
         if (axisMin == null || axisMax == null)
             return rawPosition;
 
-        var axisLength = axisMax - axisMin;
-        return (rawPosition - axisMin) / axisLength;
+        var axisLength = axisMax.Value - axisMin.Value;
+        if (axisLength == 0)
+            return null;
+
+        return (rawPosition - axisMin.Value) / axisLength;
     }
 
     public double? ClosenessTo(BlossomVector other)
@@ -228,18 +219,17 @@ public class BlossomVector : BlossomEntity<string>
         return components;
     }
 
-    private void Normalize()
+    private BlossomVector Normalize()
     {
-        Point = Vector;
         var vec = ToMathNetVector();
-        var normalized = vec.Normalize(vec.L2Norm());
-        Vector = [.. normalized];
+        var normalized = vec.Normalize(2.0);
+        return new(SpaceId, Type, Id, [.. normalized]);
     }
 
     internal double SetAnswer(IEnumerable<BlossomVector> previousVectors)
     {
         var prevAnswer = new BlossomVector(previousVectors.Last().Point!);
-        var previousVectorsAndThis = previousVectors.Append(this);
+        var previousVectorsAndThis = previousVectors.Append(this).ToList();
         Point = CalculateAnswer(previousVectorsAndThis); // Provisional answer
         Information = DistanceTo(prevAnswer) ?? 0;
 
@@ -247,12 +237,12 @@ public class BlossomVector : BlossomEntity<string>
             vector.UpdateMaturity(this);
 
         // Calculate final answer using these weights
-        Point = CalculateAnswer(previousVectorsAndThis);
+        Point = CalculateAnswer(previousVectorsAndThis);                                                                                   
 
         return Information;
     }
 
-    private static float[] CalculateAnswer(IEnumerable<BlossomVector> previousVectors)
+    private static float[] CalculateAnswer(List<BlossomVector> previousVectors)
     {
         var weightedVectors = previousVectors.Select(v => v.ToMathNetVector().Multiply((float)v.Weight)).ToList();
 
