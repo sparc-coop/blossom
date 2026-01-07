@@ -253,7 +253,7 @@ public class BlossomVector : BlossomEntity<string>
 
     private static float[] CalculateAnswer(IEnumerable<BlossomVector> vectors)
     {
-        var weightedVectors = vectors.Select(v => v.ToMathNetVector().Multiply((float)(v.Weight))).ToList();
+        var weightedVectors = vectors.Select(v => v.ToMathNetVector().Multiply((float)v.Weight)).ToList();
 
         var sumOfWeightedVectors = weightedVectors.Aggregate((a, b) => a + b);
         var totalWeight = vectors.Sum(v => v.Weight);

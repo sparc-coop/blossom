@@ -51,7 +51,8 @@ public class BlossomSpaceFaceter(
         PostVectors = await vectors.GetAsync(space.SpaceId, "Post", 1M);
 
         var postsWithVectors = posts.OrderBy(x => x.Timestamp)
-            .Select(x => new PostVector(x, PostVectors.First(y => y.Id == x.Id)))
+            .Select(x => new PostVector(x, PostVectors.FirstOrDefault(y => y.Id == x.Id)))
+            .Where(x => x.Vector != null)
             .ToList();
         
         // Set the first post's answer to its own vector
@@ -77,7 +78,7 @@ public class BlossomSpaceFaceter(
         foreach (var post in postsWithVectors)
             post.Post.LinkToSpace(space.Id, post.Vector.DistanceTo(Root), post.Vector.AlignmentWith(Root));
 
-        await vectors.UpdateAsync(postsWithVectors.Select(x => x.Vector));
+        await vectors.UpdateAsync(postsWithVectors.Last().Vector);
         return Root;
     }
 
