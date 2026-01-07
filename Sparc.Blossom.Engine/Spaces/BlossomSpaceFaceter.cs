@@ -66,7 +66,7 @@ public class BlossomSpaceFaceter(
             if (i == 1)
                 item.Vector.Point = BlossomVector.Average([prev.Vector, item.Vector]).Vector;
             else
-                item.Vector.SetAnswer(postsWithVectors.Take(i + 1).Select(x => x.Vector));
+                item.Vector.SetAnswer(postsWithVectors.Take(i).Select(x => x.Vector));
 
             item.Post.Information = item.Vector.Information;
             prev.Post.Maturity = prev.Vector.Maturity;
@@ -76,7 +76,7 @@ public class BlossomSpaceFaceter(
         await vectors.UpdateAsync(Root);
 
         foreach (var post in postsWithVectors)
-            post.Post.LinkToSpace(space.Id, post.Vector.DistanceTo(Root), post.Vector.AlignmentWith(Root));
+            post.Post.LinkToSpace(space.Id, post.Vector.DistanceTo(new(Root.Vector)), post.Vector.AlignmentWith(new(Root.Vector)));
 
         await vectors.UpdateAsync(postsWithVectors.Last().Vector);
         return Root;

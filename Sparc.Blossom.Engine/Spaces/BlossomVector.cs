@@ -236,27 +236,28 @@ public class BlossomVector : BlossomEntity<string>
         Vector = [.. normalized];
     }
 
-    internal double SetAnswer(IEnumerable<BlossomVector> vectors)
+    internal double SetAnswer(IEnumerable<BlossomVector> previousVectors)
     {
-        var prevVector = new BlossomVector(Vector);
-        Point = CalculateAnswer(vectors); // Provisional answer
-        Information = DistanceTo(prevVector) ?? 0;
+        var prevAnswer = new BlossomVector(previousVectors.Last().Point!);
+        var previousVectorsAndThis = previousVectors.Append(this);
+        Point = CalculateAnswer(previousVectorsAndThis); // Provisional answer
+        Information = DistanceTo(prevAnswer) ?? 0;
 
-        foreach (var vector in vectors)
+        foreach (var vector in previousVectors)
             vector.UpdateMaturity(this);
 
         // Calculate final answer using these weights
-        Point = CalculateAnswer(vectors);
+        Point = CalculateAnswer(previousVectorsAndThis);
 
         return Information;
     }
 
-    private static float[] CalculateAnswer(IEnumerable<BlossomVector> vectors)
+    private static float[] CalculateAnswer(IEnumerable<BlossomVector> previousVectors)
     {
-        var weightedVectors = vectors.Select(v => v.ToMathNetVector().Multiply((float)v.Weight)).ToList();
+        var weightedVectors = previousVectors.Select(v => v.ToMathNetVector().Multiply((float)v.Weight)).ToList();
 
         var sumOfWeightedVectors = weightedVectors.Aggregate((a, b) => a + b);
-        var totalWeight = vectors.Sum(v => v.Weight);
+        var totalWeight = previousVectors.Sum(v => v.Weight);
         var updatedVector = sumOfWeightedVectors.Divide((float)totalWeight);
         return [..updatedVector];
     }
