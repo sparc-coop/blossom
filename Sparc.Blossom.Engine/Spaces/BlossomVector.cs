@@ -40,9 +40,7 @@ public class BlossomVector : BlossomEntity<string>
     public string Model { get; init; } = "";
     public float[] Vector { get; set; } = [];
     public float[]? Point { get; set; }
-    public double Information { get; set; } = 1;
-    public double Maturity { get; set; } = 1;
-    public double Weight => Information * Maturity;
+    public double CoherenceWeight { get; set; } = 0;
     public string TargetUrl { get; set; } = "";
     public string? Text { get; set; }
 
@@ -147,6 +145,67 @@ public class BlossomVector : BlossomEntity<string>
         return similarity == null ? null : (1.0 - similarity.Value) / 2.0;
     }
 
+    public static double Variance(List<BlossomVector> vectors, BlossomVector centerPoint)
+    {
+        double variance = 0;
+        foreach (var vec in vectors)
+        {
+            var dist = vec.DistanceTo(centerPoint);
+            if (dist != null)
+                variance += dist.Value * dist.Value;
+        }
+        return variance / vectors.Count;
+    }
+
+    public BlossomVector CoherenceAxis(List<BlossomVector> posts)
+    {
+        // the coherence weighted average of all post directions
+        var length = posts.First().Vector.Length;
+        var accum = new float[length];
+        var totalWeight = posts.Sum(x => x.CoherenceWeight);
+        foreach (var p in posts)
+        {
+            var w = (float)p.CoherenceWeight;
+            for (int i = 0; i < length; i++)
+                accum[i] += p.Vector[i] * w;
+        }
+        for (int i = 0; i < length; i++)
+            accum[i] /= (float)totalWeight;
+
+        return new BlossomVector(accum).Normalize();
+    }
+
+    public BlossomVector Add(BlossomVector other)
+    {
+        var sum = Vector.Select((x, i) => x + other.Vector[i]).ToArray();
+        return ThisWith(sum);
+    }
+
+    public BlossomVector Multiply(double scalar)
+    {
+        var result = Vector.Select(x => x * (float)scalar).ToArray();
+        return ThisWith(result);
+    }
+
+    public BlossomVector ThisWith(BlossomVector other) => ThisWith(other.Vector);
+    public BlossomVector ThisWith(float[] other) => new(SpaceId, Type, Id, other);
+
+    public void CalculateCoherenceWeight(List<BlossomVector> neighbors)
+    {
+        if (neighbors.Count == 0)
+        {
+            CoherenceWeight = 1;
+            return;
+        }    
+        
+        var allVectors = neighbors.Append(this).ToList();
+        var centerPoint = Average(neighbors);
+        var varianceBefore = Variance(neighbors, centerPoint);
+        var varianceAfter = Variance(allVectors, centerPoint);
+        var delta = varianceBefore - varianceAfter; 
+        CoherenceWeight = Math.Max(0, delta);
+    }
+
     public override string ToString()
     {
         var str = new StringBuilder();
@@ -161,21 +220,22 @@ public class BlossomVector : BlossomEntity<string>
         return str.ToString();
     }
 
-    public static BlossomVector Average(IEnumerable<BlossomVector> spaceVectors)
+    public static BlossomVector Average(IEnumerable<BlossomVector> spaceVectors, Func<BlossomVector, double>? weightingFunction = null)
     {
         var vectorLength = spaceVectors.First().Vector.Length;
-        var count = spaceVectors.Count();
         var avgVector = new float[vectorLength];
         foreach (var vec in spaceVectors)
         {
             for (int i = 0; i < vectorLength; i++)
             {
-                avgVector[i] += vec.Vector[i];
+                avgVector[i] += vec.Vector[i] * (weightingFunction == null ? 1 : (float)weightingFunction(vec));
             }
         }
+
+        var divisor = weightingFunction == null ? spaceVectors.Count() : spaceVectors.Sum(x => weightingFunction(x));
         for (int i = 0; i < vectorLength; i++)
         {
-            avgVector[i] /= count;
+            avgVector[i] /= (float)divisor;
         }
         
         return new(spaceVectors.First().SpaceId, "Space", avgVector);
@@ -209,53 +269,20 @@ public class BlossomVector : BlossomEntity<string>
             components.Add(new BlossomVector(vectors.First().SpaceId, "Facet", Guid.NewGuid().ToString(), componentArray)
             {
                 Point = mean.Vector,
-                Information = Math.Pow(svd.S[i], 2) / svd.S.Sum(x => x * x)
+                CoherenceWeight = Math.Pow(svd.S[i], 2) / svd.S.Sum(x => x * x)
             });
             
-            if (components.Sum(c => c.Information) >= varianceToExplain)
+            if (components.Sum(c => c.CoherenceWeight) >= varianceToExplain)
                 break;
         }
 
         return components;
     }
 
-    private BlossomVector Normalize()
+    public BlossomVector Normalize()
     {
         var vec = ToMathNetVector();
         var normalized = vec.Normalize(2.0);
-        return new(SpaceId, Type, Id, [.. normalized]);
-    }
-
-    internal double SetAnswer(IEnumerable<BlossomVector> previousVectors)
-    {
-        var prevAnswer = new BlossomVector(previousVectors.Last().Point!);
-        var previousVectorsAndThis = previousVectors.Append(this).ToList();
-        Point = CalculateAnswer(previousVectorsAndThis); // Provisional answer
-        Information = DistanceTo(prevAnswer) ?? 0;
-
-        foreach (var vector in previousVectors)
-            vector.UpdateMaturity(this);
-
-        // Calculate final answer using these weights
-        Point = CalculateAnswer(previousVectorsAndThis);                                                                                   
-
-        return Information;
-    }
-
-    private static float[] CalculateAnswer(List<BlossomVector> previousVectors)
-    {
-        var weightedVectors = previousVectors.Select(v => v.ToMathNetVector().Multiply((float)v.Weight)).ToList();
-
-        var sumOfWeightedVectors = weightedVectors.Aggregate((a, b) => a + b);
-        var totalWeight = previousVectors.Sum(v => v.Weight);
-        var updatedVector = sumOfWeightedVectors.Divide((float)totalWeight);
-        return [..updatedVector];
-    }
-
-    private void UpdateMaturity(BlossomVector currentAnswer)
-    {
-        // Exponential decay based on how far this vector's Point is from the current answer
-        var distance = DistanceTo(currentAnswer);
-        Maturity = distance == null ? 1.0 : Math.Exp(-distance.Value);
+        return ThisWith([.. normalized]);
     }
 }

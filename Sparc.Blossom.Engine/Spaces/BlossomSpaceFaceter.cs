@@ -46,41 +46,41 @@ public class BlossomSpaceFaceter(
     }
 
     public record PostVector(BlossomPost Post, BlossomVector Vector);
-    public async Task<BlossomVector> AnswerAsync(BlossomSpace space, List<BlossomPost> posts)
-    {
-        PostVectors = await vectors.GetAsync(space.SpaceId, "Post", 1M);
+    //public async Task<BlossomVector> AnswerAsync(BlossomSpace space, List<BlossomPost> posts)
+    //{
+    //    PostVectors = await vectors.GetAsync(space.SpaceId, "Post", 1M);
 
-        var postsWithVectors = posts.OrderBy(x => x.Timestamp)
-            .Select(x => new PostVector(x, PostVectors.FirstOrDefault(y => y.Id == x.Id)))
-            .Where(x => x.Vector != null)
-            .ToList();
+    //    var postsWithVectors = posts.OrderBy(x => x.Timestamp)
+    //        .Select(x => new PostVector(x, PostVectors.FirstOrDefault(y => y.Id == x.Id)))
+    //        .Where(x => x.Vector != null)
+    //        .ToList();
         
-        // Set the first post's answer to its own vector
-        var firstPost = postsWithVectors.First();
-        firstPost.Vector.Point = firstPost.Vector.Vector;
+    //    // Set the first post's answer to its own vector
+    //    var firstPost = postsWithVectors.First();
+    //    firstPost.Vector.Point = firstPost.Vector.Vector;
 
-        for (var i = 1; i < postsWithVectors.Count; i++)
-        {
-            var item = postsWithVectors[i];
-            var prev = postsWithVectors[i - 1];
-            if (i == 1)
-                item.Vector.Point = BlossomVector.Average([prev.Vector, item.Vector]).Vector;
-            else
-                item.Vector.SetAnswer(postsWithVectors.Take(i).Select(x => x.Vector));
+    //    for (var i = 1; i < postsWithVectors.Count; i++)
+    //    {
+    //        var item = postsWithVectors[i];
+    //        var prev = postsWithVectors[i - 1];
+    //        if (i == 1)
+    //            item.Vector.Point = BlossomVector.Average([prev.Vector, item.Vector]).Vector;
+    //        else
+    //            item.Vector.SetAnswer(postsWithVectors.Take(i).Select(x => x.Vector));
 
-            item.Post.Information = item.Vector.Information;
-            prev.Post.Maturity = prev.Vector.Maturity;
-        }
+    //        item.Post.Information = item.Vector.Information;
+    //        prev.Post.Maturity = prev.Vector.Maturity;
+    //    }
 
-        Root = new BlossomVector(space.Id, "Space", postsWithVectors.Last().Vector.Point!);
-        await vectors.UpdateAsync(Root);
+    //    Root = new BlossomVector(space.Id, "Space", postsWithVectors.Last().Vector.Point!);
+    //    await vectors.UpdateAsync(Root);
 
-        foreach (var post in postsWithVectors)
-            post.Post.LinkToSpace(space.Id, post.Vector.DistanceTo(new(Root.Vector)), post.Vector.AlignmentWith(new(Root.Vector)));
+    //    foreach (var post in postsWithVectors)
+    //        post.Post.LinkToSpace(space.Id, post.Vector.DistanceTo(new(Root.Vector)), post.Vector.AlignmentWith(new(Root.Vector)));
 
-        await vectors.UpdateAsync(postsWithVectors.Last().Vector);
-        return Root;
-    }
+    //    await vectors.UpdateAsync(postsWithVectors.Last().Vector);
+    //    return Root;
+    //}
 
     public async Task<List<BlossomSpace>> FacetAsync(BlossomSpace space, List<BlossomPost> posts)
     {
@@ -94,7 +94,7 @@ public class BlossomSpaceFaceter(
             var facetSpace = new BlossomSpace(space, "Facet")
             {
                 Id = facet.Id,
-                Weight = facet.Weight
+                Weight = facet.CoherenceWeight
             };
             facetSpaces.Add(facetSpace);
         }
@@ -153,8 +153,8 @@ public class BlossomSpaceFaceter(
         var aiTranslator = translators.OfType<AITranslator>().First();
         if (space.RoomType == "Facet")
         {
-            var leftVectors = await vectors.SearchAsync(space.ParentSpaceId!, space, "Post", 5, true);
-            var rightVectors = await vectors.SearchAsync(space.ParentSpaceId!, space, "Post", 5);
+            var leftVectors = await vectors.SearchAsync(space.ParentSpaceId!, space.Id, "Post", 5, true);
+            var rightVectors = await vectors.SearchAsync(space.ParentSpaceId!, space.Id, "Post", 5);
             var leftPosts = assignedPosts
                 .Where(x => leftVectors.Any(v => v.TargetUrl == x.Id))
                 .ToList();
@@ -166,7 +166,7 @@ public class BlossomSpaceFaceter(
         }
         else
         {
-            var closestVectors = await vectors.SearchAsync(space.ParentSpaceId!, space, "Post", 10);
+            var closestVectors = await vectors.SearchAsync(space.ParentSpaceId!, space.Id, "Post", 10);
 
             var matchingPosts = assignedPosts
                 .Where(x => closestVectors.Any(v => v.TargetUrl == x.Id))

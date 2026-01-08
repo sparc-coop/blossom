@@ -26,17 +26,18 @@ public class BlossomVectors(
     public async Task UpdateAsync(BlossomVector vector) => await vectors.UpdateAsync(vector);
     public async Task UpdateAsync(IEnumerable<BlossomVector> blossomVectors) => await vectors.UpdateAsync(blossomVectors);
 
-    public async Task<List<BlossomVector>> SearchAsync(string parentSpaceId, BlossomSpace space, string type, int count, bool furthestAway = false)
+    public async Task<List<BlossomVector>> SearchAsync(string parentSpaceId, string id, string type, int count, bool furthestAway = false, bool includeVectors = false)
     {
         var spaceVector = await vectors.Query
-            .Where(x => x.SpaceId == parentSpaceId && x.Id == space.Id)
+            .Where(x => x.SpaceId == parentSpaceId && x.Id == id)
             .Select(x => x.Vector)
             .FirstOrDefaultAsync()
             ?? throw new Exception("Space vector not found");
 
         var top = furthestAway ? 10000 : count;
+        var includeVectorClause = includeVectors ? ", c.Vector" : string.Empty;
         var query = $@"
-            SELECT TOP {top} c.id, c.Type, c.Text, c.TargetUrl
+            SELECT TOP {top} c.id, c.Type, c.Text, c.CoherenceWeight, c.TargetUrl{includeVectorClause}
             FROM c
             WHERE c.SpaceId = '{parentSpaceId}' AND c.Type = '{type}'
             ORDER BY VectorDistance(c.Vector, {new BlossomVector(spaceVector)})";
@@ -85,13 +86,46 @@ public class BlossomVectors(
         } while (offset < messages.Count);
     }
 
-    
-
-    internal async Task AddAsync(BlossomPost post)
+    internal async Task AddAsync(BlossomPost post, BlossomSpace userSpace)
     {
         var translator = translators.OfType<OpenAITranslator>().First();
-        var vector = await translator.VectorizeAsync(post);
-        await vectors.AddAsync(vector);
+        var postVector = await translator.VectorizeAsync(post);
+        var spaceVector = await FindAsync(post.SpaceId, post.SpaceId);
+        if (spaceVector == null)
+        {
+            spaceVector = new BlossomVector(post.SpaceId, "Space", post.SpaceId, postVector.Vector);
+            await vectors.AddAsync(spaceVector);
+        }
+
+        var neighbors = await SearchAsync(post.SpaceId, post.SpaceId, "Post", 20, includeVectors: true);
+        postVector.CalculateCoherenceWeight(neighbors);
+        post.CoherenceWeight = postVector.CoherenceWeight;
+        post.UserMovementWeight = post.CoherenceWeight * Math.Max(0, spaceVector.SimilarityTo(postVector) ?? 0);
+        await vectors.AddAsync(postVector);
+
+        // Update the user space
+        var userVector = await FindAsync(post.SpaceId, userSpace.SpaceId);
+        if (userVector == null)
+            userVector = new BlossomVector(post.SpaceId, "User", userSpace.SpaceId, postVector.Vector)
+            {
+                CoherenceWeight = 1
+            };
+        else
+        {
+            var oldCoherenceWeight = userVector.CoherenceWeight;
+            userVector = userVector.Add(postVector.Multiply(0.1 * post.UserMovementWeight)).Normalize();
+            userVector.CoherenceWeight = oldCoherenceWeight + post.CoherenceWeight;
+        }
+        await UpdateAsync(userVector);
+
+        // Update the space vector
+        var userHeadspaces = await vectors.Query.Where(x => x.Type == "User" && x.SpaceId == post.SpaceId)
+            .ToListAsync();
+        spaceVector.Point = BlossomVector.Average(userHeadspaces, x => x.CoherenceWeight).Vector;
+
+        var newNeighbors = await SearchAsync(post.SpaceId, post.SpaceId, "Post", 20, includeVectors: true);
+        spaceVector.Vector = spaceVector.CoherenceAxis(newNeighbors).Vector;
+        await UpdateAsync(spaceVector);
     }
 
     internal async Task ClearAsync(string spaceId)
