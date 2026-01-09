@@ -92,16 +92,10 @@ public class BlossomVector : BlossomEntity<string>
 
     public double? DistanceTo(BlossomVector other)
     {
-        var point1 = Point ?? Vector;
-        var point2 = other.Point ?? other.Vector;
-
-        if (point1 == null || point2 == null)
-            return null;
-
         double sum = 0;
-        for (int i = 0; i < point1.Length; i++)
+        for (int i = 0; i < Vector.Length; i++)
         {
-            double diff = point1[i] - point2[i];
+            double diff = Vector[i] - other.Vector[i];
             sum += diff * diff;
         }
         return Math.Sqrt(sum);

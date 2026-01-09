@@ -94,7 +94,7 @@ public class BlossomVectors(
         } while (offset < messages.Count);
     }
 
-    internal async Task AddAsync(BlossomPost post, BlossomSpace userSpace)
+    internal async Task<BlossomVector> AddAsync(BlossomPost post, BlossomSpace userSpace)
     {
         var translator = translators.OfType<OpenAITranslator>().First();
         var postVector = await translator.VectorizeAsync(post);
@@ -112,6 +112,7 @@ public class BlossomVectors(
         // Update the space vector
         spaceVector.Update(postVector, 0.1);
         await UpdateAsync(spaceVector);
+        return spaceVector;
     }
 
     private async Task UpdateUserSpace(BlossomPost post, BlossomSpace userSpace, BlossomVector postVector, BlossomVector spaceVector)

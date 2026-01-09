@@ -194,10 +194,18 @@ public class BlossomSpaces(
     {
         var space = await GetOrCreate(Domain, post.SpaceId);
         var userSpace = await GetOrCreate(Domain, User.Id());
-        await vectors.AddAsync(post, userSpace);
+        var newSpaceVector = await vectors.AddAsync(post, userSpace);
         await posts.AddAsync(post);
 
-        //await Discover(spaceId);
+        var allPosts = await GetPostsAsync(spaceId, 10000);
+        var allPostVectors = await vectors.GetAsync(spaceId, "Post", 1M);
+        foreach (var existingPost in allPosts)
+        {
+            var postVector = allPostVectors.FirstOrDefault(x => x.Id == existingPost.Id);
+            if (postVector != null)
+                existingPost.LinkToSpace(post.SpaceId, postVector.DistanceTo(newSpaceVector), postVector.SimilarityTo(newSpaceVector));
+        }
+        await posts.UpdateAsync(allPosts);
         return post;
     }
 
