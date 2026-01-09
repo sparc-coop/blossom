@@ -18,6 +18,8 @@ public class BlossomVector : BlossomEntity<string>
         Type = type;
         TargetUrl = id;
         Vector = vector;
+        if (type == "Space")
+            Point = new float[vector.Length];
     }
 
     public BlossomVector(string spaceId, string type, float[] vector) : base(spaceId)
@@ -28,7 +30,7 @@ public class BlossomVector : BlossomEntity<string>
         Model = "text-embedding-3-small";
         Vector = vector;
         if (type == "Space")
-            Vector = Normalize().Vector;
+            Vector = Normalize(vector);
     }
 
     public BlossomVector(float[] vector) : this(Guid.NewGuid().ToString(), "Ephemeral", vector)
@@ -41,6 +43,7 @@ public class BlossomVector : BlossomEntity<string>
     public float[] Vector { get; set; } = [];
     public float[]? Point { get; set; }
     public double CoherenceWeight { get; set; } = 0;
+    public double SimilarityToSpace { get; set; } = 0;
     public string TargetUrl { get; set; } = "";
     public string? Text { get; set; }
 
@@ -124,15 +127,7 @@ public class BlossomVector : BlossomEntity<string>
 
         return (rawPosition - axisMin.Value) / axisLength;
     }
-
-    public double? ClosenessTo(BlossomVector other)
-    {
-        var distance = DistanceTo(other);
-        if (distance == null)
-            return null;
-
-        return Math.Pow(Math.E, -1 * distance.Value);
-    }
+   
     public double? AlignmentWith(BlossomVector other)
     {
         var similarity = SimilarityTo(other);
@@ -145,65 +140,54 @@ public class BlossomVector : BlossomEntity<string>
         return similarity == null ? null : (1.0 - similarity.Value) / 2.0;
     }
 
-    public static double Variance(List<BlossomVector> vectors, BlossomVector centerPoint)
+    public static double DirectionalVariance(List<BlossomVector> vectors, BlossomVector centerPoint)
     {
         double variance = 0;
         foreach (var vec in vectors)
         {
-            var dist = vec.DistanceTo(centerPoint);
+            var dist = 1 - vec.AlignmentWith(centerPoint);
             if (dist != null)
                 variance += dist.Value * dist.Value;
         }
         return variance / vectors.Count;
     }
 
-    public BlossomVector CoherenceAxis(List<BlossomVector> posts)
+    public BlossomVector CoherenceAxis()
     {
-        // the coherence weighted average of all post directions
-        var length = posts.First().Vector.Length;
-        var accum = new float[length];
-        var totalWeight = posts.Sum(x => x.CoherenceWeight);
-        foreach (var p in posts)
-        {
-            var w = (float)p.CoherenceWeight;
-            for (int i = 0; i < length; i++)
-                accum[i] += p.Vector[i] * w;
-        }
-        for (int i = 0; i < length; i++)
-            accum[i] /= (float)totalWeight;
-
-        return new BlossomVector(accum).Normalize();
-    }
-
-    public BlossomVector Add(BlossomVector other)
-    {
-        var sum = Vector.Select((x, i) => x + other.Vector[i]).ToArray();
-        return ThisWith(sum);
-    }
-
-    public BlossomVector Multiply(double scalar)
-    {
-        var result = Vector.Select(x => x * (float)scalar).ToArray();
-        return ThisWith(result);
-    }
-
-    public BlossomVector ThisWith(BlossomVector other) => ThisWith(other.Vector);
-    public BlossomVector ThisWith(float[] other) => new(SpaceId, Type, Id, other);
-
-    public void CalculateCoherenceWeight(List<BlossomVector> neighbors)
-    {
-        if (neighbors.Count == 0)
-        {
-            CoherenceWeight = 1;
-            return;
-        }    
+        if (Point == null)
+            throw new Exception("Cannot compute coherence axis without a defined Point accumulator.");
         
-        var allVectors = neighbors.Append(this).ToList();
-        var centerPoint = Average(neighbors);
-        var varianceBefore = Variance(neighbors, centerPoint);
-        var varianceAfter = Variance(allVectors, centerPoint);
-        var delta = varianceBefore - varianceAfter; 
-        CoherenceWeight = Math.Max(0, delta);
+        return ThisWith(Point).Normalize();
+    }
+
+    public BlossomVector ThisWith(float[] other) => new(SpaceId, Type, Id, other);
+    public double Length => Math.Sqrt(Vector.Sum(x => x * x));
+
+    public void Update(BlossomVector post, double alpha)
+    {
+        if (Point == null)
+        {
+            Point = post.Vector;
+        }
+        else
+        {
+            for (var i = 0; i < Point.Length; i++)
+                Point[i] = (float)(((1.0 - alpha) * Point[i]) + (alpha * post.Vector[i] * post.CoherenceWeight));
+        }
+
+        Vector = Normalize(Point);
+    }
+
+    public BlossomVector InterpolateTowards(BlossomVector target, double alpha)
+    {
+        // linear blend then renormalize. alpha in [0,1]
+        alpha = Math.Clamp(alpha, 0.0, 1.0);
+        var length = Vector.Length;
+        var blended = new float[length];
+        for (int i = 0; i < length; i++)
+            blended[i] = Vector[i] * (float)(1.0 - alpha) + target.Vector[i] * (float)alpha;
+
+        return ThisWith(blended).Normalize();
     }
 
     public override string ToString()
@@ -218,6 +202,21 @@ public class BlossomVector : BlossomEntity<string>
         }
         str.Append(']');
         return str.ToString();
+    }
+
+    public static BlossomVector Sum(IEnumerable<BlossomVector> spaceVectors)
+    {
+        var vectorLength = spaceVectors.First().Vector.Length;
+        var sumVector = new float[vectorLength];
+        foreach (var vec in spaceVectors)
+        {
+            for (int i = 0; i < vectorLength; i++)
+            {
+                sumVector[i] += vec.Vector[i];
+            }
+        }
+        
+        return new(spaceVectors.First().SpaceId, "Ephemeral", sumVector);
     }
 
     public static BlossomVector Average(IEnumerable<BlossomVector> spaceVectors, Func<BlossomVector, double>? weightingFunction = null)
@@ -238,7 +237,7 @@ public class BlossomVector : BlossomEntity<string>
             avgVector[i] /= (float)divisor;
         }
         
-        return new(spaceVectors.First().SpaceId, "Space", avgVector);
+        return new(spaceVectors.First().SpaceId, "Ephemeral", avgVector);
     }
 
     public BlossomVector Center(BlossomVector centerPoint)
@@ -284,5 +283,41 @@ public class BlossomVector : BlossomEntity<string>
         var vec = ToMathNetVector();
         var normalized = vec.Normalize(2.0);
         return ThisWith([.. normalized]);
+    }
+
+    public float[] Normalize(float[] vector)
+    {
+        var vec = Vector<float>.Build.Dense(vector);
+        var normalized = vec.Normalize(2.0);
+        return [.. normalized];
+    }
+
+    internal void CalculateCoherenceWeight(List<BlossomVector> neighbors)
+    {
+        if (neighbors.Count == 0)
+        { 
+            CoherenceWeight = 1;
+            return;
+        }
+
+        var sum = Sum(neighbors);
+        var localSpace = sum.Normalize();
+        var alignment = AlignmentWith(localSpace) ?? 0;
+
+        // local agreement: weighted average of similarity(this, neighbor) using sim itself as the weight
+        // also stabilize by neighbor.CoherenceWeight so strong neighbors contribute more
+        double numer = 0;
+        double denom = 0;
+        foreach (var nb in neighbors)
+        {
+            var sim = nb.SimilarityTo(this) ?? 0.0;    // in [-1,1]
+            var simPos = Math.Max(0.0, Math.Min(1.0, sim)); // clamp to [0,1]
+            var weight = simPos * (1.0 + nb.CoherenceWeight); // neighbor coherence boosts influence
+            numer += simPos * weight;
+            denom += weight;
+        }
+
+        var localAgreement = denom == 0 ? 0 : numer / denom; // in [0,1]
+        CoherenceWeight = alignment * localAgreement;
     }
 }
