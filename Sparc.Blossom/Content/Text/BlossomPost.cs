@@ -30,7 +30,7 @@ public class BlossomPost : TextContent
     public string PostId { get { return Id; } set { Id = value; } }
     public List<LinkedSpace> LinkedSpaces { get; set; } = [];
     public List<SparcEntity> Entities { get; set; } = [];
-    public double UserMovementWeight { get; set; } = 0;
+    public double X { get; set; } = 0;
     public double CoherenceWeight { get; set; } = 0;
 
     public async Task ExtractEntities(ISparcContent tovik, List<SparcEntityType> entityTypes)

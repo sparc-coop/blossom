@@ -103,14 +103,7 @@ public class BlossomVector : BlossomEntity<string>
 
     public double? PositionOnAxis(BlossomVector axis, double? axisMin = null, double? axisMax = null)
     {
-        if (axis.Point == null)
-            return null;
-        
-        // Axis comes in already normalized, but needs to be centered
-        var centered = Center(new(axis.Point));
-
-        // projection of centered onto axis unit vector
-        var rawPosition = centered.DotProduct(axis);
+        var rawPosition = DotProduct(axis);
 
         if (axisMin == null || axisMax == null)
             return rawPosition;
