@@ -16,7 +16,7 @@ public class BlossomVectors(
         => await vectors.FindAsync(spaceId, id);
 
     public async Task<BlossomVector?> FindAsync(BlossomSpace space) =>
-        await FindAsync(space.ParentSpaceId ?? space.Id, space.Id);
+        await FindAsync(space.Domain == BlossomSpaces.Domain ? space.Id : space.Domain, space.Id);
     
     public async Task<List<BlossomPostWithVector>> GetAsync(IEnumerable<BlossomPost> posts)
     {
@@ -123,16 +123,7 @@ public class BlossomVectors(
         } while (offset < messages.Count);
     }
 
-    internal async Task<BlossomVector> AddAsync(BlossomPost post)
-    {
-        var postWithVector = await VectorizeAsync(post);
-        var spaceVector = await UpdateSpaceHeadspace(postWithVector);
-        await UpdateUserHeadspace(postWithVector);
-
-        return spaceVector;
-    }
-
-    private async Task<BlossomPostWithVector> VectorizeAsync(BlossomPost post)
+    internal async Task<BlossomPostWithVector> VectorizeAsync(BlossomPost post)
     {
         var translator = translators.OfType<OpenAITranslator>().First();
         var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post));
@@ -142,10 +133,10 @@ public class BlossomVectors(
         return postWithVector;
     }
 
-    private async Task<BlossomVector> UpdateSpaceHeadspace(BlossomPostWithVector post)
+    internal async Task<BlossomSpaceWithVector> UpdateSpaceHeadspace(BlossomSpace space, BlossomPostWithVector post)
     {
         var spaceId = post.Post.SpaceId;
-        var spaceVector = await FindAsync(spaceId);
+        var spaceVector = await FindAsync(space);
         if (spaceVector == null)
         {
             spaceVector = new BlossomVector(spaceId, "Space", spaceId, post.Vector.Vector);
@@ -155,10 +146,10 @@ public class BlossomVectors(
         spaceVector.Update(post.Vector, 0.1);
         await UpdateAsync(spaceVector);
 
-        return spaceVector;
+        return new(space, spaceVector);
     }
 
-    private async Task<BlossomVector> UpdateUserHeadspace(BlossomPostWithVector post)
+    internal async Task<BlossomVector> UpdateUserHeadspace(BlossomPostWithVector post)
     {
         var userVector = await FindAsync(post.Post.SpaceId, post.Post.User!.Id);
         if (userVector == null)

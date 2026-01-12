@@ -12,7 +12,6 @@ public class BlossomSpace : BlossomEntity<string>
 {
     public string Domain { get; set; }
     public string SpaceId {  get { return Id;  } set { Id = value; } }
-    public string? ParentSpaceId { get; set; }
     public string Name { get; set; } = string.Empty;
     public BlossomSummary Summary { get; set; } = new("", "", "", null, null);
     public string RoomType { get; set; } = "Root";
@@ -30,6 +29,7 @@ public class BlossomSpace : BlossomEntity<string>
     public double? Weight { get; set; }
     public double? Consensus { get; set; }
     public double? Confidence { get; set; }
+    public double? X { get; set; }
     public List<MetricHistory> ConsensusHistory { get; set; } = [];
     public List<MetricHistory> ConfidenceHistory { get; set; } = [];
 
@@ -53,10 +53,9 @@ public class BlossomSpace : BlossomEntity<string>
         RoomType = "Ephemeral";
     }
 
-    public BlossomSpace(BlossomSpace rootSpace, string? roomType = null)
-        : this(rootSpace.Domain)
+    public BlossomSpace(BlossomSpace parentSpace, string? roomType = null)
+        : this(parentSpace.Id)
     {
-        ParentSpaceId = rootSpace.SpaceId;
         RoomType = roomType ?? "Ephemeral";
     }
 

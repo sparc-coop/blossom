@@ -44,14 +44,14 @@ public class BlossomSpaces(
         await PublishAsync(userId, presence);
     }
 
-    private async Task<List<BlossomSpace>> GetSpacesAsync(string domain, string? rootSpaceId = null, int? limit = null)
+    private async Task<List<BlossomSpace>> GetSpacesAsync(string? parentSpaceId = null, int? limit = null)
     {
-        var spaces = rootSpaceId == null
+        var spaces = parentSpaceId == null
             ? await Repository.Query
-            .Where(x => x.Domain == domain && x.RoomType == "Root")
+            .Where(x => x.Domain == Domain && x.RoomType == "Root")
             .ToListAsync()
             : await Repository.Query
-            .Where(x => x.Domain == domain && x.ParentSpaceId == rootSpaceId)
+            .Where(x => x.Domain == parentSpaceId)
             .ToListAsync();
 
         return spaces;
@@ -76,22 +76,37 @@ public class BlossomSpaces(
         return result.Cast<BlossomEvent<T>>().ToList();
     }
 
-    internal async Task<BlossomSpace> GetSpaceAsync(string domain, string spaceId)
+    internal async Task<BlossomSpace> GetSpaceAsync(string spaceId)
     {
-        var space = await Repository.FindAsync(domain, spaceId)
-            ?? throw new InvalidOperationException($"Space '{spaceId}' not found in domain '{domain}'.");
+        var space = await Repository.FindAsync(Domain, spaceId)
+            ?? throw new InvalidOperationException($"Space '{spaceId}' not found in domain '{Domain}'.");
         return space;
     }
 
-    private async Task<BlossomSpace> GetOrCreate(string domain, string? spaceId)
+    private async Task<BlossomSpace> GetOrCreate(BlossomSpace parentSpace, string spaceId, string? roomType = null)
     {
         if (string.IsNullOrWhiteSpace(spaceId))
             spaceId = Guid.NewGuid().ToString();
 
-        var existing = await Repository.FindAsync(domain, spaceId);
+        var existing = await Repository.FindAsync(parentSpace.Id, spaceId);
         if (existing == null)
         {
-            existing = new BlossomSpace(domain, spaceId);
+            existing = new BlossomSpace(parentSpace.Id, spaceId, roomType);
+            await Repository.AddAsync(existing);
+        }
+
+        return existing;
+    }
+
+    private async Task<BlossomSpace> GetOrCreate(string? spaceId, string? roomType = null)
+    {
+        if (string.IsNullOrWhiteSpace(spaceId))
+            spaceId = Guid.NewGuid().ToString();
+
+        var existing = await Repository.FindAsync(Domain, spaceId);
+        if (existing == null)
+        {
+            existing = new BlossomSpace(Domain, spaceId, roomType);
             await Repository.AddAsync(existing);
         }
 
@@ -177,10 +192,10 @@ public class BlossomSpaces(
 
     public async Task<List<BlossomSpace>> Discover(string spaceId)
     {
-        var existing = await Repository.Query.Where(x => x.ParentSpaceId == spaceId).ToListAsync();
+        var existing = await Repository.Query.Where(x => x.Domain == spaceId).ToListAsync();
         await Repository.DeleteAsync(existing);
 
-        var space = await GetOrCreate(Domain, spaceId);
+        var space = await GetOrCreate(spaceId);
         var spacePosts = await GetPostsAsync(spaceId, 10000);
         var facets = await faceter.FacetAsync(space, []);
 
@@ -192,20 +207,30 @@ public class BlossomSpaces(
 
     private async Task<BlossomPost> PostAsync(string spaceId, BlossomPost post)
     {
-        var space = await GetOrCreate(Domain, post.SpaceId);
-        var newSpaceVector = await vectors.AddAsync(post);
+        var space = await GetOrCreate(post.SpaceId);
+        var postWithVector = await vectors.VectorizeAsync(post);
+        var spaceWithVector = await vectors.UpdateSpaceHeadspace(space, postWithVector);
         await posts.AddAsync(post);
 
-        await UpdateSpaceStats(space, newSpaceVector);
+        if (post.User != null)
+        {
+            var userSpace = await GetOrCreate(space, post.User.Id, "User");
+            userSpace.Name = post.User.Username;
+            var userVector = await vectors.UpdateUserHeadspace(postWithVector);
+            userSpace.X = userVector.PositionOnAxis(spaceWithVector.Vector);
+            await Repository.UpdateAsync(userSpace);
+        }
+
+        await UpdateSpaceStats(spaceWithVector);
 
         return post;
     }
 
-    private async Task UpdateSpaceStats(BlossomSpace space, BlossomVector newSpaceVector)
+    private async Task UpdateSpaceStats(BlossomSpaceWithVector space)
     {
-        var allPosts = await GetPostsWithVectorsAsync(space.Id, 10000);
-        allPosts.ForEach(x => x.LinkToSpace(newSpaceVector));
-        await CalculateChallenges(space, allPosts);
+        var allPosts = await GetPostsWithVectorsAsync(space.Space.Id, 10000);
+        allPosts.ForEach(x => x.LinkToSpace(space.Vector));
+        await CalculateChallenges(space.Space, allPosts);
         await posts.UpdateAsync(allPosts.Select(x => x.Post));
     }
 
@@ -214,7 +239,7 @@ public class BlossomSpaces(
         if (posts.Count > 1)
         {
             var existingFacets = await Repository.Query
-                .Where(x => x.Domain == space.Domain && x.ParentSpaceId == space.Id && x.RoomType == "Facet")
+                .Where(x => x.Domain == space.Id && x.RoomType == "Facet")
                 .ToListAsync();
             await Repository.DeleteAsync(existingFacets);
 
