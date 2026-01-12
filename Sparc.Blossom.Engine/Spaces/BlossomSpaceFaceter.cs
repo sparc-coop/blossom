@@ -82,11 +82,11 @@ public class BlossomSpaceFaceter(
     //    return Root;
     //}
 
-    public async Task<List<BlossomSpace>> FacetAsync(BlossomSpace space, List<BlossomPost> posts, List<BlossomVector> postVectors)
+    public async Task<List<BlossomSpace>> FacetAsync(BlossomSpace space, List<BlossomPostWithVector> posts)
     {
         // Factor into principal components
-        posts = posts.Where(x => x.IsLinked(space)).ToList();
-        var facets = BlossomVector.ToPrincipalComponents(postVectors, 0.8).Take(3);
+        posts = posts.Where(x => x.Post.IsLinked(space)).ToList();
+        var facets = BlossomVector.ToPrincipalComponents(posts.Select(x => x.Vector), 0.8).Take(3);
         var facetSpaces = new List<BlossomSpace>();
         foreach (var facet in facets)
         {
@@ -99,24 +99,22 @@ public class BlossomSpaceFaceter(
         }
         await vectors.UpdateAsync(facets);
 
-        posts.ForEach(x => x.ClearLinks("Facet"));
+        posts.ForEach(x => x.Post.ClearLinks("Facet"));
 
         foreach (var facet in facets)
         {
-            var axisPositions = postVectors.Where(x => posts.Any(y => y.Id == x.Id)).Select(x => x.PositionOnAxis(facet));
+            var axisPositions = posts.Select(x => x.Vector.PositionOnAxis(facet));
             var minPosition = axisPositions.Min();
             var maxPosition = axisPositions.Max();
             
             foreach (var post in posts)
             {
-                var postVector = postVectors.FirstOrDefault(x => x.Id == post.Id);
-                if (postVector != null)
-                    post.LinkToSpace(facet.Id, "Facet", postVector.PositionOnAxis(facet, minPosition, maxPosition), postVector.Score(facet));
+                post.Post.LinkToSpace(facet.Id, "Facet", post.Vector.PositionOnAxis(facet, minPosition, maxPosition), post.Vector.Score(facet));
             }
         }
 
         foreach (var childFacetSpace in facetSpaces)
-            await SummarizeAsync(childFacetSpace, posts);
+            await SummarizeAsync(childFacetSpace, posts.Select(x => x.Post));
 
         return facetSpaces;
     }

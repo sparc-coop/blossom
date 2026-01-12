@@ -24,6 +24,39 @@ public class BlossomVectors(
             .ToListAsync();
     }
 
+    public async Task<List<BlossomPostWithVector>> GetAsync(IEnumerable<BlossomPost> posts)
+    {
+        var spaceId = posts.First().SpaceId;
+        var postIds = posts.Select(x => x.Id).ToList();
+
+        var vectorsInPosts = await vectors.Query
+            .Where(x => x.SpaceId == spaceId && postIds.Contains(x.Id))
+            .ToListAsync();
+
+        var result = from post in posts
+                     join vector in vectorsInPosts
+                     on post.Id equals vector.Id
+                     select new BlossomPostWithVector(post, vector);
+
+        return result.ToList();
+    }
+
+    public async Task<List<BlossomSpaceWithVector>> GetAsync(IEnumerable<BlossomSpace> spaces)
+    {
+        var spaceIds = spaces.Select(x => x.SpaceId).ToList();
+
+        var vectorsInSpaces = await vectors.Query
+            .Where(x => x.Type == "Space" && spaceIds.Contains(x.Id))
+            .ToListAsync();
+
+        var result = from space in spaces
+                     join vector in vectorsInSpaces
+                     on space.Id equals vector.Id
+                     select new BlossomSpaceWithVector(space, vector);
+
+        return result.ToList();
+    }
+
     public async Task UpdateAsync(BlossomVector vector) => await vectors.UpdateAsync(vector);
     public async Task UpdateAsync(IEnumerable<BlossomVector> blossomVectors) => await vectors.UpdateAsync(blossomVectors);
 
@@ -97,59 +130,59 @@ public class BlossomVectors(
     internal async Task<BlossomVector> AddAsync(BlossomPost post, BlossomSpace userSpace)
     {
         var translator = translators.OfType<OpenAITranslator>().First();
-        var postVector = await translator.VectorizeAsync(post);
-
-        var spaceVector = await GetOrCreateSpace(post, postVector);
+        var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post));
+        var spaceVector = await GetOrCreateSpace(postWithVector);
 
         var neighbors = await SearchAsync(post.SpaceId, post.SpaceId, "Post", 20, includeVectors: true);
-        postVector.CalculateCoherenceWeight(neighbors);
-        post.CoherenceWeight = postVector.CoherenceWeight;
+        postWithVector.Vector.CalculateCoherenceWeight(neighbors);
+        post.CoherenceWeight = postWithVector.Vector.CoherenceWeight;
         //post.UserMovementWeight = post.CoherenceWeight * Math.Max(0, spaceVector.SimilarityTo(postVector) ?? 0);
-        await vectors.AddAsync(postVector);
+        await vectors.AddAsync(postWithVector.Vector);
 
-        // await UpdateUserSpace(post, userSpace, postVector, spaceVector);
+        await UpdateUserSpace(postWithVector, userSpace, spaceVector);
 
         // Update the space vector
-        spaceVector.Update(postVector, 0.1);
+        spaceVector.Update(postWithVector.Vector, 0.1);
         await UpdateAsync(spaceVector);
         return spaceVector;
     }
 
-    private async Task UpdateUserSpace(BlossomPost post, BlossomSpace userSpace, BlossomVector postVector, BlossomVector spaceVector)
+    private async Task UpdateUserSpace(BlossomPostWithVector post, BlossomSpace userSpace, BlossomVector spaceVector)
     {
-        var userVector = await FindAsync(post.SpaceId, userSpace.SpaceId);
+        var userVector = await FindAsync(post.Post.SpaceId, userSpace.SpaceId);
         if (userVector == null)
-            userVector = new BlossomVector(post.SpaceId, "User", userSpace.SpaceId, postVector.Vector)
+            userVector = new BlossomVector(post.Post.SpaceId, "User", userSpace.SpaceId, post.Vector.Vector)
             {
-                CoherenceWeight = post.CoherenceWeight
+                CoherenceWeight = post.Post.CoherenceWeight
             };
         else
         {
             var oldCoherenceWeight = userVector.CoherenceWeight;
 
             // compute movement strength: product of coherence and alignment with space axis
-            var alignmentWithSpace = Math.Max(0, spaceVector.SimilarityTo(postVector) ?? 0);
-            var movementStrength = post.CoherenceWeight * alignmentWithSpace;
+            var alignmentWithSpace = Math.Max(0, spaceVector.SimilarityTo(post.Vector) ?? 0);
+            var movementStrength = post.Post.CoherenceWeight * alignmentWithSpace;
 
             // alpha controls how far the user headspace moves toward this post (tunable)
             var alpha = Math.Clamp(0.1 * movementStrength, 0.0, 1.0);
 
             // interpolate then normalize
-            userVector = userVector.InterpolateTowards(postVector, alpha);
+            userVector = userVector.InterpolateTowards(post.Vector, alpha);
 
             // update coherence weight (simple accumulation; you can change to a decay/avg if desired)
-            userVector.CoherenceWeight = oldCoherenceWeight + post.CoherenceWeight;
+            userVector.CoherenceWeight = oldCoherenceWeight + post.Post.CoherenceWeight;
 
         }
         await UpdateAsync(userVector);
     }
 
-    private async Task<BlossomVector> GetOrCreateSpace(BlossomPost post, BlossomVector postVector)
+    private async Task<BlossomVector> GetOrCreateSpace(BlossomPostWithVector post)
     {
-        var spaceVector = await FindAsync(post.SpaceId, post.SpaceId);
+        var spaceId = post.Post.SpaceId;
+        var spaceVector = await FindAsync(spaceId, spaceId);
         if (spaceVector == null)
         {
-            spaceVector = new BlossomVector(post.SpaceId, "Space", post.SpaceId, postVector.Vector);
+            spaceVector = new BlossomVector(spaceId, "Space", spaceId, post.Vector.Vector);
             await vectors.AddAsync(spaceVector);
         }
 

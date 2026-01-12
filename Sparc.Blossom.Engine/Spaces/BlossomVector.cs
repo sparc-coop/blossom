@@ -1,8 +1,21 @@
-﻿using System.Text;
+﻿using MathNet.Numerics.LinearAlgebra;
+using Sparc.Blossom.Spaces;
+using System.Text;
 using System.Text.Json.Serialization;
-using MathNet.Numerics.LinearAlgebra;
 
 namespace Sparc.Blossom.Content;
+
+public class BlossomPostWithVector(BlossomPost post, BlossomVector vector)
+{
+    public BlossomPost Post { get; set; } = post;
+    public BlossomVector Vector { get; set; } = vector;
+}
+
+public class BlossomSpaceWithVector(BlossomSpace space, BlossomVector vector)
+{
+    public BlossomSpace Space { get; set; } = space;
+    public BlossomVector Vector { get; set; } = vector;
+}
 
 public class BlossomVector : BlossomEntity<string>
 {
@@ -240,7 +253,7 @@ public class BlossomVector : BlossomEntity<string>
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
         => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
 
-    public static List<BlossomVector> ToPrincipalComponents(List<BlossomVector> vectors, double varianceToExplain)
+    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain)
     {
         var mean = Average(vectors);
         var centeredVectors = vectors.Select(v => v.Center(mean)).ToList();

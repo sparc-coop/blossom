@@ -182,7 +182,7 @@ public class BlossomSpaces(
 
         var space = await GetOrCreate(Domain, spaceId);
         var spacePosts = await GetPostsAsync(spaceId, 10000);
-        var facets = await faceter.FacetAsync(space, spacePosts, []);
+        var facets = await faceter.FacetAsync(space, []);
 
         await posts.UpdateAsync(spacePosts);
         await Repository.UpdateAsync(space);
@@ -197,19 +197,31 @@ public class BlossomSpaces(
         var newSpaceVector = await vectors.AddAsync(post, userSpace);
         await posts.AddAsync(post);
 
-        var allPosts = await GetPostsAsync(spaceId, 10000);
-        var allPostVectors = await vectors.GetAsync(spaceId, "Post", 1M);
-        foreach (var existingPost in allPosts)
-        {
-            var postVector = allPostVectors.FirstOrDefault(x => x.Id == existingPost.Id);
-            if (postVector != null)
-            {
-                existingPost.LinkToSpace(post.SpaceId, "Space", postVector.DistanceTo(newSpaceVector), postVector.SimilarityTo(newSpaceVector));
-                existingPost.X = postVector.PositionOnAxis(newSpaceVector, -1, 1) ?? 0;
-            }
-        }
+        await UpdateSpaceStats(space, newSpaceVector);
 
-        if (allPosts.Count > 1)
+        return post;
+    }
+
+    private async Task UpdateSpaceStats(BlossomSpace space, BlossomVector newSpaceVector)
+    {
+        var allPosts = await GetPostsWithVectorsAsync(space.Id, 10000);
+        PlotPosts(allPosts, newSpaceVector);
+        await CalculateChallenges(space, allPosts);
+        await posts.UpdateAsync(allPosts.Select(x => x.Post));
+    }
+
+    private static void PlotPosts(List<BlossomPostWithVector> allPostVectors, BlossomVector newSpaceVector)
+    {
+        foreach (var existing in allPostVectors.Where(x => x.Vector != null))
+        {
+            existing.Post.LinkToSpace(newSpaceVector.Id, "Space", existing.Vector.DistanceTo(newSpaceVector), existing.Vector.SimilarityTo(newSpaceVector));
+            existing.Post.X = existing.Vector.PositionOnAxis(newSpaceVector, -1, 1) ?? 0;
+        }
+    }
+
+    private async Task CalculateChallenges(BlossomSpace space, List<BlossomPostWithVector> posts)
+    {
+        if (posts.Count > 1)
         {
             var existingFacets = await Repository.Query
                 .Where(x => x.Domain == space.Domain && x.ParentSpaceId == space.Id && x.RoomType == "Facet")
@@ -217,11 +229,9 @@ public class BlossomSpaces(
             await Repository.DeleteAsync(existingFacets);
 
             await vectors.ClearAsync(space.Id, "Facet");
-            var facets = await faceter.FacetAsync(space, allPosts, allPostVectors);
+            var facets = await faceter.FacetAsync(space, posts);
             await Repository.AddAsync(facets);
         }
-        await posts.UpdateAsync(allPosts);
-        return post;
     }
 
     private async Task<List<BlossomPost>> GetPostsAsync(string spaceId, int take = 50)
@@ -229,13 +239,19 @@ public class BlossomSpaces(
         var space = await GetOrCreate(Domain, spaceId);
         var exactPosts = await posts.Query
                 .Where(x => x.Domain == space.Domain &&
-                (x.SpaceId == spaceId || 
+                (x.SpaceId == spaceId ||
                 x.LinkedSpaces.Any(y => y.SpaceId == space.Id)))
                 .OrderByDescending(x => x.Timestamp)
                 .Take(take)
                 .ToListAsync();
 
         return exactPosts;
+    }
+
+    private async Task<List<BlossomPostWithVector>> GetPostsWithVectorsAsync(string spaceId, int take = 50)
+    {
+        var posts = await GetPostsAsync(spaceId, take);
+        return await vectors.GetAsync(posts);
     }
 
     private async Task<string> GetSimplePostsAsync(string spaceId)
