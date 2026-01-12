@@ -99,6 +99,8 @@ public class BlossomSpaceFaceter(
         }
         await vectors.UpdateAsync(facets);
 
+        posts.ForEach(x => x.ClearLinks("Facet"));
+
         foreach (var facet in facets)
         {
             var axisPositions = postVectors.Where(x => posts.Any(y => y.Id == x.Id)).Select(x => x.PositionOnAxis(facet));
@@ -109,9 +111,7 @@ public class BlossomSpaceFaceter(
             {
                 var postVector = postVectors.FirstOrDefault(x => x.Id == post.Id);
                 if (postVector != null)
-                {
-                    post.LinkToSpace(facet.Id, postVector.PositionOnAxis(facet, minPosition, maxPosition), postVector.Score(facet));
-                }
+                    post.LinkToSpace(facet.Id, "Facet", postVector.PositionOnAxis(facet, minPosition, maxPosition), postVector.Score(facet));
             }
         }
 
@@ -139,10 +139,10 @@ public class BlossomSpaceFaceter(
 
             var prediction = Predictor.Predict(postVector);
             post.UnlinkAllSpaces();
-            post.LinkToSpace(Root.SpaceId, postVector.DistanceTo(Root), postVector.AlignmentWith(Root));
+            post.LinkToSpace(Root.SpaceId, "Space", postVector.DistanceTo(Root), postVector.AlignmentWith(Root));
 
             var predictedSpace = spaces[(int)prediction.PredictedLabel - 1];
-            post.LinkToSpace(predictedSpace.Id, postVector.DistanceTo(predictedSpace), postVector.AlignmentWith(predictedSpace));
+            post.LinkToSpace(predictedSpace.Id, "Cluster", postVector.DistanceTo(predictedSpace), postVector.AlignmentWith(predictedSpace));
             Console.WriteLine($"Assigned post {post.Id} to space {predictedSpace.Id}.");
         }
     }
@@ -153,13 +153,19 @@ public class BlossomSpaceFaceter(
         if (space.RoomType == "Facet")
         {
             var leftVectors = await vectors.SearchAsync(space.ParentSpaceId!, space.Id, "Post", 5, true);
+            leftVectors = leftVectors.Where(x => x.SimilarityToSpace < 0).ToList();
+
             var rightVectors = await vectors.SearchAsync(space.ParentSpaceId!, space.Id, "Post", 5);
+            rightVectors = rightVectors.Where(x => x.SimilarityToSpace > 0).ToList();
+
             var leftPosts = assignedPosts
                 .Where(x => leftVectors.Any(v => v.TargetUrl == x.Id))
                 .ToList();
+
             var rightPosts = assignedPosts
                 .Where(x => rightVectors.Any(v => v.TargetUrl == x.Id))
                 .ToList();
+
             var summary = await aiTranslator.SummarizeAsync(leftPosts, rightPosts);
             space.SetSummary(summary);
         }

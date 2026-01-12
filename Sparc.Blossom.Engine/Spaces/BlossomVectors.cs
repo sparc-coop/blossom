@@ -39,7 +39,7 @@ public class BlossomVectors(
         var includeVectorClause = includeVectors ? ", c.Vector" : string.Empty;
 
         var query = $@"
-            SELECT TOP {top} c.id, c.Type, c.Text, c.CoherenceWeight, VectorDistance(c.Vector, {new BlossomVector(spaceVector)}) as DistanceFromSpace, c.TargetUrl{includeVectorClause}
+            SELECT TOP {top} c.id, c.Type, c.Text, c.CoherenceWeight, VectorDistance(c.Vector, {new BlossomVector(spaceVector)}) as SimilarityToSpace, c.TargetUrl{includeVectorClause}
             FROM c
             WHERE c.SpaceId = '{parentSpaceId}' AND c.Type = '{type}'
             ORDER BY VectorDistance(c.Vector, {new BlossomVector(spaceVector)})";

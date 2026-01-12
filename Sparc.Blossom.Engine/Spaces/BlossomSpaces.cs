@@ -204,7 +204,7 @@ public class BlossomSpaces(
             var postVector = allPostVectors.FirstOrDefault(x => x.Id == existingPost.Id);
             if (postVector != null)
             {
-                existingPost.LinkToSpace(post.SpaceId, postVector.DistanceTo(newSpaceVector), postVector.SimilarityTo(newSpaceVector));
+                existingPost.LinkToSpace(post.SpaceId, "Space", postVector.DistanceTo(newSpaceVector), postVector.SimilarityTo(newSpaceVector));
                 existingPost.X = postVector.PositionOnAxis(newSpaceVector, -1, 1) ?? 0;
             }
         }

@@ -4,10 +4,10 @@ using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Content;
 
-public record LinkedSpace(string SpaceId, double? Distance, double? Alignment)
+public record LinkedSpace(string SpaceId, string Type, double? Distance, double? Alignment)
 {
     [JsonConstructor]
-    protected LinkedSpace() : this("", null, null)
+    protected LinkedSpace() : this("", "", null, null)
     { }
 
     public double Closeness => Distance == null ? 0 : 1 - Distance.Value;
@@ -41,9 +41,17 @@ public class BlossomPost : TextContent
     public void UnlinkAllSpaces() => LinkedSpaces.Clear();
     public bool IsLinked(BlossomSpace space) => LinkedSpaces.Any(x => x.SpaceId == space.SpaceId);
     public LinkedSpace? LinkedSpace(string id) => LinkedSpaces.FirstOrDefault(x => x.SpaceId == id);
-    public void LinkToSpace(string spaceId, double? distance, double? alignment)
+    public void LinkToSpace(string spaceId, string type, double? distance, double? alignment)
     {
         LinkedSpaces.RemoveAll(x => x.SpaceId == spaceId);
-        LinkedSpaces.Add(new(spaceId, distance, alignment));
+        LinkedSpaces.Add(new(spaceId, type, distance, alignment));
+    }
+
+    public void LinkToSpace(BlossomSpace space, double? distance, double? alignment)
+        => LinkToSpace(space.Id, space.RoomType, distance, alignment);
+
+    public void ClearLinks(string type)
+    {
+        LinkedSpaces.RemoveAll(x => x.Type == type);
     }
 }
