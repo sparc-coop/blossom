@@ -193,8 +193,7 @@ public class BlossomSpaces(
     private async Task<BlossomPost> PostAsync(string spaceId, BlossomPost post)
     {
         var space = await GetOrCreate(Domain, post.SpaceId);
-        var userSpace = await GetOrCreate(Domain, User.Id());
-        var newSpaceVector = await vectors.AddAsync(post, userSpace);
+        var newSpaceVector = await vectors.AddAsync(post);
         await posts.AddAsync(post);
 
         await UpdateSpaceStats(space, newSpaceVector);

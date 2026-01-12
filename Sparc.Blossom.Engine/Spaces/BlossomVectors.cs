@@ -1,4 +1,5 @@
-﻿using Sparc.Blossom.Content;
+﻿using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
 using System.Globalization;
 
@@ -127,56 +128,26 @@ public class BlossomVectors(
         } while (offset < messages.Count);
     }
 
-    internal async Task<BlossomVector> AddAsync(BlossomPost post, BlossomSpace userSpace)
+    internal async Task<BlossomVector> AddAsync(BlossomPost post)
     {
-        var translator = translators.OfType<OpenAITranslator>().First();
-        var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post));
-        var spaceVector = await GetOrCreateSpace(postWithVector);
+        var postWithVector = await VectorizeAsync(post);
+        var spaceVector = await UpdateSpaceHeadspace(postWithVector);
+        await UpdateUserHeadspace(postWithVector);
 
-        var neighbors = await SearchAsync(post.SpaceId, post.SpaceId, "Post", 20, includeVectors: true);
-        postWithVector.Vector.CalculateCoherenceWeight(neighbors);
-        post.CoherenceWeight = postWithVector.Vector.CoherenceWeight;
-        //post.UserMovementWeight = post.CoherenceWeight * Math.Max(0, spaceVector.SimilarityTo(postVector) ?? 0);
-        await vectors.AddAsync(postWithVector.Vector);
-
-        await UpdateUserSpace(postWithVector, userSpace, spaceVector);
-
-        // Update the space vector
-        spaceVector.Update(postWithVector.Vector, 0.1);
-        await UpdateAsync(spaceVector);
         return spaceVector;
     }
 
-    private async Task UpdateUserSpace(BlossomPostWithVector post, BlossomSpace userSpace, BlossomVector spaceVector)
+    private async Task<BlossomPostWithVector> VectorizeAsync(BlossomPost post)
     {
-        var userVector = await FindAsync(post.Post.SpaceId, userSpace.SpaceId);
-        if (userVector == null)
-            userVector = new BlossomVector(post.Post.SpaceId, "User", userSpace.SpaceId, post.Vector.Vector)
-            {
-                CoherenceWeight = post.Post.CoherenceWeight
-            };
-        else
-        {
-            var oldCoherenceWeight = userVector.CoherenceWeight;
-
-            // compute movement strength: product of coherence and alignment with space axis
-            var alignmentWithSpace = Math.Max(0, spaceVector.SimilarityTo(post.Vector) ?? 0);
-            var movementStrength = post.Post.CoherenceWeight * alignmentWithSpace;
-
-            // alpha controls how far the user headspace moves toward this post (tunable)
-            var alpha = Math.Clamp(0.1 * movementStrength, 0.0, 1.0);
-
-            // interpolate then normalize
-            userVector = userVector.InterpolateTowards(post.Vector, alpha);
-
-            // update coherence weight (simple accumulation; you can change to a decay/avg if desired)
-            userVector.CoherenceWeight = oldCoherenceWeight + post.Post.CoherenceWeight;
-
-        }
-        await UpdateAsync(userVector);
+        var translator = translators.OfType<OpenAITranslator>().First();
+        var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post));
+        var neighbors = await SearchAsync(post.SpaceId, post.SpaceId, "Post", 20, includeVectors: true);
+        postWithVector.UpdateCoherence(neighbors);
+        await vectors.UpdateAsync(postWithVector.Vector);
+        return postWithVector;
     }
 
-    private async Task<BlossomVector> GetOrCreateSpace(BlossomPostWithVector post)
+    private async Task<BlossomVector> UpdateSpaceHeadspace(BlossomPostWithVector post)
     {
         var spaceId = post.Post.SpaceId;
         var spaceVector = await FindAsync(spaceId, spaceId);
@@ -186,7 +157,28 @@ public class BlossomVectors(
             await vectors.AddAsync(spaceVector);
         }
 
+        spaceVector.Update(post.Vector, 0.1);
+        await UpdateAsync(spaceVector);
+
         return spaceVector;
+    }
+
+    private async Task<BlossomVector> UpdateUserHeadspace(BlossomPostWithVector post)
+    {
+        var userVector = await FindAsync(post.Post.SpaceId, post.Post.User!.Id);
+        if (userVector == null)
+        {
+            userVector = new BlossomVector(post.Post.SpaceId, "User", post.Post.User.Id, post.Vector.Vector);
+            await vectors.AddAsync(userVector);
+        }
+        else
+        {
+
+            userVector.Update(post.Vector, 0.1);
+            await UpdateAsync(userVector);
+        }
+
+        return userVector;
     }
 
     internal async Task ClearAsync(string spaceId, string type)
