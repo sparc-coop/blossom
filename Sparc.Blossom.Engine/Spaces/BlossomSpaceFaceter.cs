@@ -122,10 +122,10 @@ public class BlossomSpaceFaceter(
         var aiTranslator = translators.OfType<AITranslator>().First();
         if (space.RoomType == "Facet")
         {
-            var leftVectors = await vectors.SearchAsync(space.ParentSpaceId!, space.Id, "Post", 5, true);
+            var leftVectors = await vectors.SearchAsync(space, "Post", 5, true);
             leftVectors = leftVectors.Where(x => x.SimilarityToSpace < 0).ToList();
 
-            var rightVectors = await vectors.SearchAsync(space.ParentSpaceId!, space.Id, "Post", 5);
+            var rightVectors = await vectors.SearchAsync(space, "Post", 5);
             rightVectors = rightVectors.Where(x => x.SimilarityToSpace > 0).ToList();
 
             var leftPosts = assignedPosts
@@ -141,7 +141,7 @@ public class BlossomSpaceFaceter(
         }
         else
         {
-            var closestVectors = await vectors.SearchAsync(space.ParentSpaceId!, space.Id, "Post", 10);
+            var closestVectors = await vectors.SearchAsync(space, "Post", 10);
 
             var matchingPosts = assignedPosts
                 .Where(x => closestVectors.Any(v => v.TargetUrl == x.Id))

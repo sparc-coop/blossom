@@ -1,7 +1,6 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
-using System.Globalization;
 
 namespace Sparc.Blossom.Spaces;
 
@@ -10,21 +9,15 @@ public class BlossomVectors(
     IRepository<BlossomPost> posts,
     IEnumerable<ITranslator> translators)
 {
+    public async Task<BlossomVector?> FindAsync(string spaceId)
+        => await vectors.FindAsync(spaceId, spaceId);
+    
     public async Task<BlossomVector?> FindAsync(string spaceId, string id)
         => await vectors.FindAsync(spaceId, id);
 
+    public async Task<BlossomVector?> FindAsync(BlossomSpace space) =>
+        await FindAsync(space.ParentSpaceId ?? space.Id, space.Id);
     
-    public async Task<List<BlossomVector>> GetAsync(string spaceId, string type, decimal sampleSize)
-    {
-        var query = vectors.Query.Where(x => x.SpaceId == spaceId && x.Type == "Post");
-        int take = (int)(query.Count() * sampleSize);
-
-        return await query
-            .OrderBy(x => x.Id)
-            .Take(take)
-            .ToListAsync();
-    }
-
     public async Task<List<BlossomPostWithVector>> GetAsync(IEnumerable<BlossomPost> posts)
     {
         var spaceId = posts.First().SpaceId;
@@ -61,25 +54,27 @@ public class BlossomVectors(
     public async Task UpdateAsync(BlossomVector vector) => await vectors.UpdateAsync(vector);
     public async Task UpdateAsync(IEnumerable<BlossomVector> blossomVectors) => await vectors.UpdateAsync(blossomVectors);
 
-    public async Task<List<BlossomVector>> SearchAsync(string parentSpaceId, string id, string type, int count, bool furthestAway = false, bool includeVectors = false, double? similarityThreshold = null)
+    public async Task<List<BlossomVector>> SearchAsync(BlossomSpace space, string type, int count, bool furthestAway = false, bool includeVectors = false, double? similarityThreshold = null)
     {
-        var spaceVector = await vectors.Query
-            .Where(x => x.SpaceId == parentSpaceId && x.Id == id)
-            .Select(x => x.Vector)
-            .FirstOrDefaultAsync()
+        var spaceVector = await FindAsync(space)
             ?? throw new Exception("Space vector not found");
 
+        return await SearchAsync(spaceVector, type, count, furthestAway, includeVectors, similarityThreshold);
+    }
+
+    public async Task<List<BlossomVector>> SearchAsync(BlossomVector vector, string type, int count, bool furthestAway = false, bool includeVectors = false, double? similarityThreshold = null)
+    { 
         var top = furthestAway ? 10000 : count;
         var includeVectorClause = includeVectors ? ", c.Vector" : string.Empty;
 
         var query = $@"
-            SELECT TOP {top} c.id, c.Type, c.Text, c.CoherenceWeight, VectorDistance(c.Vector, {new BlossomVector(spaceVector)}) as SimilarityToSpace, c.TargetUrl{includeVectorClause}
+            SELECT TOP {top} c.id, c.Type, c.Text, c.CoherenceWeight, VectorDistance(c.Vector, {vector}) as SimilarityToSpace, c.TargetUrl{includeVectorClause}
             FROM c
-            WHERE c.SpaceId = '{parentSpaceId}' AND c.Type = '{type}'
-            ORDER BY VectorDistance(c.Vector, {new BlossomVector(spaceVector)})";
+            WHERE c.SpaceId = '{vector.SpaceId}' AND c.Type = '{type}'
+            ORDER BY VectorDistance(c.Vector, {vector})";
 
         var cosmosVectors = vectors as CosmosDbSimpleRepository<BlossomVector>;
-        var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<BlossomVector>(query, parentSpaceId);
+        var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<BlossomVector>(query, vector.SpaceId);
 
         if (furthestAway)
             similarVectorsInSpace = similarVectorsInSpace.TakeLast(count).ToList();
@@ -141,7 +136,7 @@ public class BlossomVectors(
     {
         var translator = translators.OfType<OpenAITranslator>().First();
         var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post));
-        var neighbors = await SearchAsync(post.SpaceId, post.SpaceId, "Post", 20, includeVectors: true);
+        var neighbors = await SearchAsync(postWithVector.Vector, "Post", 20, includeVectors: true);
         postWithVector.UpdateCoherence(neighbors);
         await vectors.UpdateAsync(postWithVector.Vector);
         return postWithVector;
@@ -150,7 +145,7 @@ public class BlossomVectors(
     private async Task<BlossomVector> UpdateSpaceHeadspace(BlossomPostWithVector post)
     {
         var spaceId = post.Post.SpaceId;
-        var spaceVector = await FindAsync(spaceId, spaceId);
+        var spaceVector = await FindAsync(spaceId);
         if (spaceVector == null)
         {
             spaceVector = new BlossomVector(spaceId, "Space", spaceId, post.Vector.Vector);
