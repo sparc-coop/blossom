@@ -27,7 +27,7 @@ public class BlossomSpaceFaceter(
 
     public async Task<List<BlossomSpace>> DivideAsync(BlossomSpace space, List<BlossomPost> posts, decimal sampleSize)
     {
-        await vectors.ClearAsync(space.SpaceId);
+        await vectors.ClearAsync(space.SpaceId, "Cluster");
 
         PostVectors = await vectors.GetAsync(space.SpaceId, "Post", sampleSize);
         Root = BlossomVector.Average(PostVectors);
@@ -82,12 +82,11 @@ public class BlossomSpaceFaceter(
     //    return Root;
     //}
 
-    public async Task<List<BlossomSpace>> FacetAsync(BlossomSpace space, List<BlossomPost> posts)
+    public async Task<List<BlossomSpace>> FacetAsync(BlossomSpace space, List<BlossomPost> posts, List<BlossomVector> postVectors)
     {
         // Factor into principal components
         posts = posts.Where(x => x.IsLinked(space)).ToList();
-        var postVectors = PostVectors!.Where(x => posts.Any(y => y.Id == x.Id)).ToList();
-        var facets = BlossomVector.ToPrincipalComponents(postVectors, 0.8);
+        var facets = BlossomVector.ToPrincipalComponents(postVectors, 0.8).Take(3);
         var facetSpaces = new List<BlossomSpace>();
         foreach (var facet in facets)
         {

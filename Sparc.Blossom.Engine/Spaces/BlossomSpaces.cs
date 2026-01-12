@@ -182,7 +182,7 @@ public class BlossomSpaces(
 
         var space = await GetOrCreate(Domain, spaceId);
         var spacePosts = await GetPostsAsync(spaceId, 10000);
-        var facets = await faceter.FacetAsync(space, spacePosts);
+        var facets = await faceter.FacetAsync(space, spacePosts, []);
 
         await posts.UpdateAsync(spacePosts);
         await Repository.UpdateAsync(space);
@@ -207,6 +207,18 @@ public class BlossomSpaces(
                 existingPost.LinkToSpace(post.SpaceId, postVector.DistanceTo(newSpaceVector), postVector.SimilarityTo(newSpaceVector));
                 existingPost.X = postVector.PositionOnAxis(newSpaceVector, -1, 1) ?? 0;
             }
+        }
+
+        if (allPosts.Count > 1)
+        {
+            var existingFacets = await Repository.Query
+                .Where(x => x.Domain == space.Domain && x.ParentSpaceId == space.Id && x.RoomType == "Facet")
+                .ToListAsync();
+            await Repository.DeleteAsync(existingFacets);
+
+            await vectors.ClearAsync(space.Id, "Facet");
+            var facets = await faceter.FacetAsync(space, allPosts, allPostVectors);
+            await Repository.AddAsync(facets);
         }
         await posts.UpdateAsync(allPosts);
         return post;

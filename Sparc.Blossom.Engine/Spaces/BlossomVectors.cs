@@ -156,9 +156,9 @@ public class BlossomVectors(
         return spaceVector;
     }
 
-    internal async Task ClearAsync(string spaceId)
+    internal async Task ClearAsync(string spaceId, string type)
     {
-        var existing = await vectors.Query.Where(x => x.SpaceId == spaceId && x.Type != "Post").ToListAsync();
+        var existing = await vectors.Query.Where(x => x.SpaceId == spaceId && x.Type == type).ToListAsync();
         if (existing.Count != 0)
             await vectors.DeleteAsync(existing);
     }
