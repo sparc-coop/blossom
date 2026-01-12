@@ -205,18 +205,9 @@ public class BlossomSpaces(
     private async Task UpdateSpaceStats(BlossomSpace space, BlossomVector newSpaceVector)
     {
         var allPosts = await GetPostsWithVectorsAsync(space.Id, 10000);
-        PlotPosts(allPosts, newSpaceVector);
+        allPosts.ForEach(x => x.LinkToSpace(newSpaceVector));
         await CalculateChallenges(space, allPosts);
         await posts.UpdateAsync(allPosts.Select(x => x.Post));
-    }
-
-    private static void PlotPosts(List<BlossomPostWithVector> allPostVectors, BlossomVector newSpaceVector)
-    {
-        foreach (var existing in allPostVectors.Where(x => x.Vector != null))
-        {
-            existing.Post.LinkToSpace(newSpaceVector.Id, "Space", existing.Vector.DistanceTo(newSpaceVector), existing.Vector.SimilarityTo(newSpaceVector));
-            existing.Post.X = existing.Vector.PositionOnAxis(newSpaceVector, -1, 1) ?? 0;
-        }
     }
 
     private async Task CalculateChallenges(BlossomSpace space, List<BlossomPostWithVector> posts)

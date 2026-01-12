@@ -1,10 +1,8 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.ML;
+﻿using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
 using Sparc.Blossom.Content;
 using static Microsoft.ML.Transforms.LpNormNormalizingEstimatorBase;
-using static Sparc.Blossom.Spaces.BlossomSpaceFaceter;
 
 namespace Sparc.Blossom.Spaces;
 
@@ -20,27 +18,21 @@ public class BlossomSpaceFaceter(
     IEnumerable<ITranslator> translators)
 {
     public MLContext Context { get; } = new MLContext(seed: 1);
-    BlossomVector? Root;
-    List<BlossomVector>? PostVectors;
-    List<BlossomVector>? Centroids;
     private PredictionEngine<BlossomVector, ClusteringPrediction>? Predictor;
 
-    public async Task<List<BlossomSpace>> DivideAsync(BlossomSpace space, List<BlossomPost> posts, decimal sampleSize)
+    public async Task<List<BlossomSpaceWithVector>> DivideAsync(BlossomSpace space, List<BlossomPostWithVector> posts)
     {
         await vectors.ClearAsync(space.SpaceId, "Cluster");
+        var root = BlossomVector.Average(posts.Select(x => x.Vector));
+        await vectors.UpdateAsync(root);
 
-        PostVectors = await vectors.GetAsync(space.SpaceId, "Post", sampleSize);
-        Root = BlossomVector.Average(PostVectors);
-        await vectors.UpdateAsync(Root);
-
-        var model = Cluster(PostVectors);
+        var model = Cluster(posts.Select(x => x.Vector).ToList());
         Predictor = Context.Model.CreatePredictionEngine<BlossomVector, ClusteringPrediction>(model, inputSchemaDefinition: BlossomVectorSchema());
-
         var spaces = await CreateSpaces(space, model);
-        await AssignAsync(posts, Centroids!);
+        await AssignAsync(posts, spaces);
 
         foreach (var childSpace in spaces)
-            await SummarizeAsync(childSpace, posts.Where(x => x.IsLinked(childSpace)));
+            await SummarizeAsync(childSpace.Space, posts.Where(x => x.Post.IsLinked(childSpace.Space)).Select(x => x.Post));
 
         return spaces;
     }
@@ -99,19 +91,12 @@ public class BlossomSpaceFaceter(
         }
         await vectors.UpdateAsync(facets);
 
-        posts.ForEach(x => x.Post.ClearLinks("Facet"));
-
-        foreach (var facet in facets)
+        posts.ForEach(x =>
         {
-            var axisPositions = posts.Select(x => x.Vector.PositionOnAxis(facet));
-            var minPosition = axisPositions.Min();
-            var maxPosition = axisPositions.Max();
-            
-            foreach (var post in posts)
-            {
-                post.Post.LinkToSpace(facet.Id, "Facet", post.Vector.PositionOnAxis(facet, minPosition, maxPosition), post.Vector.Score(facet));
-            }
-        }
+            x.Post.ClearLinks("Facet");
+            foreach (var facet in facets)
+                x.LinkToFacet(facet);
+        });
 
         foreach (var childFacetSpace in facetSpaces)
             await SummarizeAsync(childFacetSpace, posts.Select(x => x.Post));
@@ -119,29 +104,16 @@ public class BlossomSpaceFaceter(
         return facetSpaces;
     }
 
-    public async Task AssignAsync(IEnumerable<BlossomPost> posts, List<BlossomVector> spaces)
+    public async Task AssignAsync(IEnumerable<BlossomPostWithVector> posts, List<BlossomSpaceWithVector> spaces)
     {
-        if (Predictor == null || Root == null || PostVectors == null || Centroids == null)
+        if (Predictor == null)
             throw new InvalidOperationException("Model has not been trained. Please run RunAsync first.");
 
-        var postVectors = new List<BlossomVector>();
-        foreach (var post in posts)
+        foreach (var post in posts.Where(x => x.Vector != null))
         {
-            var postVector = await vectors.FindAsync(post.SpaceId, post.Id);
-            if (postVector == null)
-            {
-                Console.WriteLine($"Vector not found for post {post.Id}, skipping.");
-                continue;
-            }
-            postVectors.Add(postVector);
-
-            var prediction = Predictor.Predict(postVector);
-            post.UnlinkAllSpaces();
-            post.LinkToSpace(Root.SpaceId, "Space", postVector.DistanceTo(Root), postVector.AlignmentWith(Root));
-
+            var prediction = Predictor.Predict(post.Vector);
             var predictedSpace = spaces[(int)prediction.PredictedLabel - 1];
-            post.LinkToSpace(predictedSpace.Id, "Cluster", postVector.DistanceTo(predictedSpace), postVector.AlignmentWith(predictedSpace));
-            Console.WriteLine($"Assigned post {post.Id} to space {predictedSpace.Id}.");
+            post.LinkToSubspace(predictedSpace);
         }
     }
 
@@ -189,13 +161,13 @@ public class BlossomSpaceFaceter(
         return kmeans.Fit(data);
     }
 
-    private async Task<List<BlossomSpace>> CreateSpaces(BlossomSpace rootSpace, TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model)
+    private async Task<List<BlossomSpaceWithVector>> CreateSpaces(BlossomSpace rootSpace, TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model)
     {
         var centroids = ExtractCentroids(model);
         var spaces = centroids.Select(x => new BlossomSpace(rootSpace, "Space")).ToList();
-        Centroids = centroids.Select((x, i) => new BlossomVector(rootSpace.Id, "Space", spaces[i].Id, x)).ToList();
-        await vectors.UpdateAsync(Centroids);
-        return spaces;
+        var result = centroids.Select((x, i) => new BlossomSpaceWithVector(spaces[i], x)).ToList();
+        await vectors.UpdateAsync(result.Select(x => x.Vector));
+        return result;
     }
 
     private EstimatorChain<ClusteringPredictionTransformer<KMeansModelParameters>> NormalizedKMeans(IDataView data, int maxSpaces = 100)

@@ -9,10 +9,30 @@ public class BlossomPostWithVector(BlossomPost post, BlossomVector vector)
 {
     public BlossomPost Post { get; set; } = post;
     public BlossomVector Vector { get; set; } = vector;
+
+    public void LinkToSpace(BlossomVector space)
+    {
+        Post.LinkToSpace(space.Id, "Space", Vector.DistanceTo(space), Vector.AlignmentWith(space));
+        Post.X = Vector.PositionOnAxis(space, -1, 1) ?? 0;
+    }
+
+    public void LinkToFacet(BlossomVector facet)
+    {
+        Post.LinkToSpace(facet.Id, "Facet", Vector.PositionOnAxis(facet), Vector.Score(facet));
+    }
+
+    public void LinkToSubspace(BlossomSpaceWithVector space)
+    {
+        Post.LinkToSpace(space.Space.Id, "Subspace", Vector.DistanceTo(space.Vector), Vector.AlignmentWith(space.Vector));
+    }
 }
 
 public class BlossomSpaceWithVector(BlossomSpace space, BlossomVector vector)
 {
+    public BlossomSpaceWithVector(BlossomSpace space, float[] vector)
+        : this(space, new BlossomVector(space.Id, "Space", space.Id, vector))
+    { }
+
     public BlossomSpace Space { get; set; } = space;
     public BlossomVector Vector { get; set; } = vector;
 }
