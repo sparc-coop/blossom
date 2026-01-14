@@ -98,8 +98,8 @@ public class BlossomSpaceFaceter(
                 x.LinkToFacet(facet);
         });
 
-        foreach (var childFacetSpace in facetSpaces)
-            await SummarizeAsync(childFacetSpace, posts.Select(x => x.Post));
+        //foreach (var childFacetSpace in facetSpaces)
+        //    await SummarizeAsync(childFacetSpace, posts.Select(x => x.Post));
 
         return facetSpaces;
     }

@@ -217,7 +217,6 @@ public class BlossomSpaces(
             var userSpace = await GetOrCreate(space, post.User.Id, "User");
             userSpace.Name = post.User.Username;
             var userVector = await vectors.UpdateUserHeadspace(postWithVector);
-            userSpace.X = userVector.PositionOnAxis(spaceWithVector.Vector);
             await Repository.UpdateAsync(userSpace);
         }
 
@@ -230,6 +229,18 @@ public class BlossomSpaces(
     {
         var allPosts = await GetPostsWithVectorsAsync(space.Space.Id, 10000);
         allPosts.ForEach(x => x.LinkToSpace(space.Vector));
+    
+        var subspaces = await GetSpacesAsync(space.Space.Id);
+        foreach (var user in subspaces.Where(x => x.RoomType == "User"))
+        {
+            var userVector = await vectors.FindAsync(space.Space.Id, user.Id);
+            if (userVector != null)
+            {
+                user.X = userVector.PositionOnAxis(space.Vector);
+                await Repository.UpdateAsync(user);
+            }
+        }
+        
         await CalculateChallenges(space.Space, allPosts);
         await posts.UpdateAsync(allPosts.Select(x => x.Post));
     }
