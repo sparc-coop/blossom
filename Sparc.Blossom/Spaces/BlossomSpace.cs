@@ -1,4 +1,5 @@
-﻿using Sparc.Blossom.Content;
+﻿using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Content;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Spaces;
@@ -32,6 +33,7 @@ public class BlossomSpace : BlossomEntity<string>
     public double? X { get; set; }
     public List<MetricHistory> ConsensusHistory { get; set; } = [];
     public List<MetricHistory> ConfidenceHistory { get; set; } = [];
+    public List<BlossomAvatar> Members { get; set; } = [];
 
 
     [JsonConstructor]
@@ -92,6 +94,12 @@ public class BlossomSpace : BlossomEntity<string>
 
         ConsensusHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Consensus.Value));
         ConfidenceHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Confidence.Value));
+    }
+
+    public void AddMember(BlossomAvatar user)
+    {
+        if (!Members.Any(x => x.Id == user.Id))
+            Members.Add(user);
     }
 
     public double ConsensusDelta => ConsensusHistory.Count < 2 ? 0 :
