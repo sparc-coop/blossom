@@ -160,7 +160,7 @@ public class BlossomVectors(
         else
         {
 
-            userVector.Update(post.Vector, 0.1);
+            userVector.Update(post.Vector, 1);
             await UpdateAsync(userVector);
         }
 
