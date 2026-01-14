@@ -76,9 +76,10 @@ public class BlossomSpaces(
         return result.Cast<BlossomEvent<T>>().ToList();
     }
 
-    internal async Task<BlossomSpace> GetSpaceAsync(string spaceId)
+    internal async Task<BlossomSpace> GetSpaceAsync(string spaceId, string? parentSpaceId = null)
     {
-        var space = await Repository.FindAsync(Domain, spaceId)
+        parentSpaceId ??= Domain;
+        var space = await Repository.FindAsync(parentSpaceId, spaceId)
             ?? throw new InvalidOperationException($"Space '{spaceId}' not found in domain '{Domain}'.");
         return space;
     }
@@ -229,20 +230,24 @@ public class BlossomSpaces(
     {
         var allPosts = await GetPostsWithVectorsAsync(space.Space.Id, 10000);
         allPosts.ForEach(x => x.LinkToSpace(space.Vector));
-    
+
+        await CalculateChallenges(space.Space, allPosts);
+        await UpdateSubspaceLocations(space);
+        await posts.UpdateAsync(allPosts.Select(x => x.Post));
+    }
+
+    private async Task UpdateSubspaceLocations(BlossomSpaceWithVector space)
+    {
         var subspaces = await GetSpacesAsync(space.Space.Id);
-        foreach (var user in subspaces.Where(x => x.RoomType == "User"))
+        foreach (var subspace in subspaces)
         {
-            var userVector = await vectors.FindAsync(space.Space.Id, user.Id);
-            if (userVector != null)
+            var subspaceVector = await vectors.FindAsync(space.Space.Id, subspace.Id);
+            if (subspaceVector != null)
             {
-                user.X = userVector.PositionOnAxis(space.Vector);
-                await Repository.UpdateAsync(user);
+                subspace.X = subspaceVector.PositionOnAxis(space.Vector);
+                await Repository.UpdateAsync(subspace);
             }
         }
-        
-        await CalculateChallenges(space.Space, allPosts);
-        await posts.UpdateAsync(allPosts.Select(x => x.Post));
     }
 
     private async Task CalculateChallenges(BlossomSpace space, List<BlossomPostWithVector> posts)
@@ -330,6 +335,7 @@ public class BlossomSpaces(
         spaces.MapGet("", GetSpacesAsync);
         spaces.MapPost("", CreateSpaceAsync);
         spaces.MapGet("{spaceId}", GetSpaceAsync);
+        spaces.MapGet("{parentSpaceId}/subspaces/{spaceId}", GetSpaceAsync);
         spaces.MapPost("{spaceId}/join", JoinSpaceAsync);
         spaces.MapPost("{spaceId}/leave", LeaveSpaceAsync);
         spaces.MapPost("{spaceId}/invite", InviteToSpaceAsync);

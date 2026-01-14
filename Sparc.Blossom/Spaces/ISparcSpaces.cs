@@ -12,6 +12,9 @@ public interface ISparcSpaces
     [Get("/spaces/{spaceId}")]
     Task<BlossomSpace> GetSpaceAsync(string spaceId);
 
+    [Get("/spaces/{parentSpaceId}/subspaces/{spaceId}")]
+    Task<BlossomSpace> GetSpaceAsync(string parentSpaceId, string spaceId);
+
     [Post("/spaces")]
     Task<BlossomSpace> CreateSpaceAsync(CreateSpaceRequest request);
 

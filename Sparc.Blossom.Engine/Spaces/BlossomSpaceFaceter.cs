@@ -98,8 +98,19 @@ public class BlossomSpaceFaceter(
                 x.LinkToFacet(facet);
         });
 
-        //foreach (var childFacetSpace in facetSpaces)
-        //    await SummarizeAsync(childFacetSpace, posts.Select(x => x.Post));
+        await Parallel.ForEachAsync(facetSpaces, async (childFacetSpace, _) => 
+            await SummarizeAsync(childFacetSpace, posts.Select(x => x.Post)));
+
+        // Deduplicate names if necessary
+        var duplicateNames = facetSpaces.GroupBy(x => x.Name)
+            .Where(g => g.Count() > 1)
+            .ToList();
+        foreach (var group in duplicateNames)
+        {
+            var index = 2;
+            foreach (var facet in group.Skip(1))
+                facet.Name = $"{facet.Name} ({index++})";
+        }
 
         return facetSpaces;
     }
