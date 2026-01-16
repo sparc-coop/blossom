@@ -41,7 +41,7 @@ public class BlossomSpaceWithVector(BlossomSpace space, BlossomVector vector)
 
     public void LinkToSpace(BlossomSpaceWithVector space)
     {
-        var x = space.Space.RoomType == "Facet" || space.Space.RoomType == "Quest"
+        var x = Space.RoomType == "Facet" || Space.RoomType == "Quest"
             ? 1 - Math.Abs(Vector.PositionOnAxis(space.Vector, -1, 1) ?? 0)
             : Vector.PositionOnAxis(space.Vector, 0, 1) ?? 0;
 

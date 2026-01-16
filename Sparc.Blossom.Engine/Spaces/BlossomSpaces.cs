@@ -248,7 +248,9 @@ public class BlossomSpaces(
             {
                 quest.Space.RoomType = "Quest";
                 await SummarizeAsync(quest);
+                quest.Space.Domain = userSpace.Space.Id;
                 quest.LinkToSpace(userSpace);
+                await Repository.UpdateAsync(quest.Space);
             }
         }
 
@@ -303,8 +305,6 @@ public class BlossomSpaces(
             var summary = await aiTranslator.SummarizeAsync(matchingPosts);
             space.Space.SetSummary(summary);
         }
-
-        await Repository.UpdateAsync(space.Space);
     }
 
     private async Task<List<BlossomPost>> GetPostsAsync(string spaceId, int take = 50)
