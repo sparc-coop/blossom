@@ -11,6 +11,7 @@ public class BlossomSpaces(
     BlossomAggregateOptions<BlossomSpace> options,
     IRepository<BlossomPost> posts,
     IRepository<BlossomEvent> events,
+    IEnumerable<ITranslator> translators,
     IHttpContextAccessor http,
     BlossomVectors vectors,
     Contents contents,
@@ -246,8 +247,8 @@ public class BlossomSpaces(
             if (quest != null)
             {
                 quest.Space.RoomType = "Quest";
+                await SummarizeAsync(quest);
                 quest.LinkToSpace(userSpace);
-                await Repository.UpdateAsync(quest.Space);
             }
         }
 
@@ -268,13 +269,49 @@ public class BlossomSpaces(
         await Repository.UpdateAsync(subspaces.Select(x => x.Space));
     }
 
+    public async Task SummarizeAsync(BlossomSpaceWithVector space)
+    {
+        var aiTranslator = translators.OfType<AITranslator>().First();
+        if (space.Space.RoomType == "Quest")
+        {
+            var leftVectors = await vectors.SearchAsync(space.Vector, "Post", 5, true);
+            var leftVectorIds = leftVectors.Where(x => x.SimilarityToSpace < 0).Select(x => x.Id).ToList();
+
+            var rightVectors = await vectors.SearchAsync(space.Vector, "Post", 5);
+            var rightVectorIds = rightVectors.Where(x => x.SimilarityToSpace > 0).Select(x => x.Id).ToList();
+
+            var leftPosts = await posts.Query
+                .Where(x => x.Domain == space.Space.Domain && leftVectorIds.Contains(x.Id))
+                .ToListAsync();
+
+            var rightPosts = await posts.Query
+                .Where(x => x.Domain == space.Space.Domain && rightVectorIds.Contains(x.Id))
+                .ToListAsync();
+
+            var summary = await aiTranslator.SummarizeAsync(leftPosts, rightPosts);
+            space.Space.SetSummary(summary);
+        }
+        else
+        {
+            var closestVectors = await vectors.SearchAsync(space.Vector, "Post", 10);
+            var ids = closestVectors.Select(x => x.Id).ToList();
+
+            var matchingPosts = await posts.Query
+                .Where(x => x.Domain == space.Space.Domain && ids.Contains(x.Id))
+                .ToListAsync();
+
+            var summary = await aiTranslator.SummarizeAsync(matchingPosts);
+            space.Space.SetSummary(summary);
+        }
+
+        await Repository.UpdateAsync(space.Space);
+    }
+
     private async Task<List<BlossomPost>> GetPostsAsync(string spaceId, int take = 50)
     {
         var space = await GetOrCreate(Domain, spaceId);
         var exactPosts = await posts.Query
-                .Where(x => x.Domain == space.Space.Domain &&
-                (x.SpaceId == spaceId ||
-                x.LinkedSpaces.Any(y => y.SpaceId == space.Space.Id)))
+                .Where(x => x.Domain == spaceId)
                 .OrderByDescending(x => x.Timestamp)
                 .Take(take)
                 .ToListAsync();

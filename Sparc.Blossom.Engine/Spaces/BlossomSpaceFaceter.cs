@@ -13,9 +13,7 @@ public class ClusteringPrediction
     public float[] Score { get; set; } = [];
 }
 
-public class BlossomSpaceFaceter(
-    BlossomVectors vectors,
-    IEnumerable<ITranslator> translators)
+public class BlossomSpaceFaceter(BlossomVectors vectors)
 {
     public MLContext Context { get; } = new MLContext(seed: 1);
     private PredictionEngine<BlossomVector, ClusteringPrediction>? Predictor;
@@ -31,8 +29,8 @@ public class BlossomSpaceFaceter(
         var spaces = await CreateSpaces(space, model);
         await AssignAsync(posts, spaces);
 
-        foreach (var childSpace in spaces)
-            await SummarizeAsync(childSpace.Space, posts.Where(x => x.Post.IsLinked(childSpace.Space)).Select(x => x.Post));
+        //foreach (var childSpace in spaces)
+        //    await SummarizeAsync(childSpace.Space, posts.Where(x => x.Post.IsLinked(childSpace.Space)).Select(x => x.Post));
 
         return spaces;
     }
@@ -113,42 +111,7 @@ public class BlossomSpaceFaceter(
         }
     }
 
-    public async Task SummarizeAsync(BlossomSpace space, IEnumerable<BlossomPost> assignedPosts)
-    {
-        var aiTranslator = translators.OfType<AITranslator>().First();
-        if (space.RoomType == "Facet")
-        {
-            var leftVectors = await vectors.SearchAsync(space, "Post", 5, true);
-            leftVectors = leftVectors.Where(x => x.SimilarityToSpace < 0).ToList();
-
-            var rightVectors = await vectors.SearchAsync(space, "Post", 5);
-            rightVectors = rightVectors.Where(x => x.SimilarityToSpace > 0).ToList();
-
-            var leftPosts = assignedPosts
-                .Where(x => leftVectors.Any(v => v.Id == x.Id))
-                .ToList();
-
-            var rightPosts = assignedPosts
-                .Where(x => rightVectors.Any(v => v.Id == x.Id))
-                .ToList();
-
-            var summary = await aiTranslator.SummarizeAsync(leftPosts, rightPosts);
-            space.SetSummary(summary);
-        }
-        else
-        {
-            var closestVectors = await vectors.SearchAsync(space, "Post", 10);
-
-            var matchingPosts = assignedPosts
-                .Where(x => closestVectors.Any(v => v.Id == x.Id))
-                .ToList();
-
-            var summary = await aiTranslator.SummarizeAsync(matchingPosts);
-            space.SetSummary(summary);
-        }
-
-        space.SetConsensus(assignedPosts);
-    }
+    
 
     private TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> Cluster(List<BlossomVector> vectors)
     {
