@@ -87,11 +87,11 @@ public class BlossomSpaces(
         return result.Cast<BlossomEvent<T>>().ToList();
     }
 
-    internal async Task<BlossomSpace?> GetSpaceAsync(string spaceId, string? parentSpaceId = null)
+    internal async Task<BlossomSpace?> GetSpaceAsync(ClaimsPrincipal principal, string spaceId, string? parentSpaceId = null)
     {
         parentSpaceId ??= Domain;
         if (spaceId == "User")
-            spaceId = User.Id();
+            spaceId = principal.Id();
 
         return await Repository.FindAsync(parentSpaceId, spaceId);
     }
