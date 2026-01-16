@@ -1,5 +1,4 @@
-﻿using Sparc.Blossom.Authentication;
-using Sparc.Blossom.Content;
+﻿using Sparc.Blossom.Content;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Spaces;
@@ -30,11 +29,9 @@ public class BlossomSpace : BlossomEntity<string>
     public double? Weight { get; set; }
     public double? Consensus { get; set; }
     public double? Confidence { get; set; }
-    public double? X { get; set; }
     public List<MetricHistory> ConsensusHistory { get; set; } = [];
     public List<MetricHistory> ConfidenceHistory { get; set; } = [];
-    public List<BlossomAvatar> Members { get; set; } = [];
-
+    public List<LinkedSpace> LinkedSpaces { get; set; } = [];
 
     [JsonConstructor]
     protected BlossomSpace() : base(Guid.NewGuid().ToString())
@@ -96,16 +93,28 @@ public class BlossomSpace : BlossomEntity<string>
         ConfidenceHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Confidence.Value));
     }
 
-    public void AddMember(BlossomAvatar user)
-    {
-        if (!Members.Any(x => x.Id == user.Id))
-            Members.Add(user);
-    }
-
     public double ConsensusDelta => ConsensusHistory.Count < 2 ? 0 :
         ConsensusHistory[0].Value - ConsensusHistory[1].Value;
 
     public double ConfidenceDelta => ConfidenceHistory.Count < 2 ? 0 :
         ConfidenceHistory[0].Value - ConfidenceHistory[1].Value;
+
+    public bool IsLinked(BlossomSpace space) => LinkedSpaces.Any(x => x.SpaceId == space.SpaceId);
+    public LinkedSpace? LinkedSpace(string id) => LinkedSpaces.FirstOrDefault(x => x.SpaceId == id);
+
+    public void LinkToSpace(BlossomSpace space, double x, double? distance, double? alignment)
+    {
+        LinkedSpaces.RemoveAll(x => x.SpaceId == space.Id);
+        LinkedSpaces.Add(new(space, x, distance, alignment));
+        space.LinkedSpaces.RemoveAll(x => x.SpaceId == Id);
+        space.LinkedSpaces.Add(new(this, x, distance, alignment));
+    }
+
+    public void ClearLinks(string type)
+    {
+        LinkedSpaces.RemoveAll(x => x.Type == type);
+    }
+
+    public double PositionOnAxis(BlossomSpace space) => LinkedSpace(space.Id)?.X ?? 0;
 }
 

@@ -74,43 +74,28 @@ public class BlossomSpaceFaceter(
     //    return Root;
     //}
 
-    public async Task<List<BlossomSpace>> FacetAsync(BlossomSpace space, List<BlossomPostWithVector> posts)
+    public async Task<List<BlossomSpaceWithVector>> FacetAsync(BlossomSpaceWithVector space, List<BlossomPostWithVector> posts)
     {
+        if (posts.Count < 2)
+            return [];
+        
         // Factor into principal components
-        posts = posts.Where(x => x.Post.IsLinked(space)).ToList();
+        posts = posts.Where(x => x.Post.IsLinked(space.Space)).ToList();
         var facets = BlossomVector.ToPrincipalComponents(posts.Select(x => x.Vector), 0.8).Take(3);
-        var facetSpaces = new List<BlossomSpace>();
+        var facetSpaces = new List<BlossomSpaceWithVector>();
         foreach (var facet in facets)
         {
-            var facetSpace = new BlossomSpace(space, "Facet")
+            var facetSpace = new BlossomSpaceWithVector(new(space.Space, "Facet")
             {
                 Id = facet.Id,
                 Weight = facet.CoherenceWeight
-            };
+            }, facet);
+            facetSpace.LinkToSpace(space);
             facetSpaces.Add(facetSpace);
         }
-        await vectors.UpdateAsync(facets);
 
-        posts.ForEach(x =>
-        {
-            x.Post.ClearLinks("Facet");
-            foreach (var facet in facets)
-                x.LinkToFacet(facet);
-        });
-
-        await Parallel.ForEachAsync(facetSpaces, async (childFacetSpace, _) => 
-            await SummarizeAsync(childFacetSpace, posts.Select(x => x.Post)));
-
-        // Deduplicate names if necessary
-        var duplicateNames = facetSpaces.GroupBy(x => x.Name)
-            .Where(g => g.Count() > 1)
-            .ToList();
-        foreach (var group in duplicateNames)
-        {
-            var index = 2;
-            foreach (var facet in group.Skip(1))
-                facet.Name = $"{facet.Name} ({index++})";
-        }
+        //await Parallel.ForEachAsync(facetSpaces, async (childFacetSpace, _) => 
+        //    await SummarizeAsync(childFacetSpace, posts.Select(x => x.Post)));
 
         return facetSpaces;
     }
@@ -124,7 +109,7 @@ public class BlossomSpaceFaceter(
         {
             var prediction = Predictor.Predict(post.Vector);
             var predictedSpace = spaces[(int)prediction.PredictedLabel - 1];
-            post.LinkToSubspace(predictedSpace);
+            post.LinkToSpace(predictedSpace);
         }
     }
 
@@ -140,11 +125,11 @@ public class BlossomSpaceFaceter(
             rightVectors = rightVectors.Where(x => x.SimilarityToSpace > 0).ToList();
 
             var leftPosts = assignedPosts
-                .Where(x => leftVectors.Any(v => v.TargetUrl == x.Id))
+                .Where(x => leftVectors.Any(v => v.Id == x.Id))
                 .ToList();
 
             var rightPosts = assignedPosts
-                .Where(x => rightVectors.Any(v => v.TargetUrl == x.Id))
+                .Where(x => rightVectors.Any(v => v.Id == x.Id))
                 .ToList();
 
             var summary = await aiTranslator.SummarizeAsync(leftPosts, rightPosts);
@@ -155,7 +140,7 @@ public class BlossomSpaceFaceter(
             var closestVectors = await vectors.SearchAsync(space, "Post", 10);
 
             var matchingPosts = assignedPosts
-                .Where(x => closestVectors.Any(v => v.TargetUrl == x.Id))
+                .Where(x => closestVectors.Any(v => v.Id == x.Id))
                 .ToList();
 
             var summary = await aiTranslator.SummarizeAsync(matchingPosts);

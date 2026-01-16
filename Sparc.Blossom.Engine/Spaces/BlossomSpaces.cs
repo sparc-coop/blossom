@@ -58,6 +58,16 @@ public class BlossomSpaces(
         return await spaces.ToListAsync();
     }
 
+    private async Task<List<BlossomSpaceWithVector>> GetSpacesWithVectorsAsync(BlossomSpace parentSpace)
+    {
+        var spaces = await GetSpacesAsync(parentSpace.Id);
+        var spaceVectors = await vectors.GetAllAsync(parentSpace);
+        return spaces
+            .Select(x => new BlossomSpaceWithVector(x, spaceVectors.FirstOrDefault(y => y.Id == x.Id)!))
+            .Where(x => x.Vector != null)
+            .ToList();
+    }
+
     internal async Task<List<BlossomEvent>> GetAllAsync(string spaceId)
     {
         return await events.Query
@@ -77,42 +87,35 @@ public class BlossomSpaces(
         return result.Cast<BlossomEvent<T>>().ToList();
     }
 
-    internal async Task<BlossomSpace> GetSpaceAsync(string spaceId, string? parentSpaceId = null)
+    internal async Task<BlossomSpace?> GetSpaceAsync(string spaceId, string? parentSpaceId = null)
     {
         parentSpaceId ??= Domain;
-        var space = await Repository.FindAsync(parentSpaceId, spaceId)
-            ?? throw new InvalidOperationException($"Space '{spaceId}' not found in domain '{Domain}'.");
-        return space;
+        if (spaceId == "User")
+            spaceId = User.Id();
+
+        return await Repository.FindAsync(parentSpaceId, spaceId);
     }
 
-    private async Task<BlossomSpace> GetOrCreate(BlossomSpace parentSpace, string spaceId, string? roomType = null)
+    private async Task<BlossomSpaceWithVector> GetOrCreate(BlossomSpace parentSpace, string spaceId, string? roomType = null)
+        => await GetOrCreate(spaceId, roomType, parentSpace.Id);
+
+    private async Task<BlossomSpaceWithVector> GetOrCreate(string? spaceId, string? roomType = null, string? parentSpaceId = null)
     {
+        parentSpaceId ??= Domain;
+
         if (string.IsNullOrWhiteSpace(spaceId))
             spaceId = Guid.NewGuid().ToString();
 
-        var existing = await Repository.FindAsync(parentSpace.Id, spaceId);
+        var existing = await Repository.FindAsync(parentSpaceId, spaceId);
         if (existing == null)
         {
-            existing = new BlossomSpace(parentSpace.Id, spaceId, roomType);
+            existing = new BlossomSpace(parentSpaceId, spaceId, roomType);
             await Repository.AddAsync(existing);
         }
 
-        return existing;
-    }
+        var vector = await vectors.FindAsync(existing) ?? new();
 
-    private async Task<BlossomSpace> GetOrCreate(string? spaceId, string? roomType = null)
-    {
-        if (string.IsNullOrWhiteSpace(spaceId))
-            spaceId = Guid.NewGuid().ToString();
-
-        var existing = await Repository.FindAsync(Domain, spaceId);
-        if (existing == null)
-        {
-            existing = new BlossomSpace(Domain, spaceId, roomType);
-            await Repository.AddAsync(existing);
-        }
-
-        return existing;
+        return new(existing, vector);
     }
 
     private async Task<CreateSpaceResponse> CreateSpaceAsync(CreateSpaceRequest request)
@@ -199,94 +202,79 @@ public class BlossomSpaces(
 
         var space = await GetOrCreate(spaceId);
         var spacePosts = await GetPostsAsync(spaceId, 10000);
-        var facets = await faceter.FacetAsync(space, []);
 
         await posts.UpdateAsync(spacePosts);
-        await Repository.UpdateAsync(space);
-        await Repository.AddAsync(facets);
-        return facets;
+        await Repository.UpdateAsync(space.Space);
+        return [];
     }
 
     private async Task<BlossomPost> PostAsync(string spaceId, BlossomPost post)
     {
         var space = await GetOrCreate(post.SpaceId);
+        var allPosts = await GetPostsWithVectorsAsync(spaceId, 10000);
+        var facets = await faceter.FacetAsync(space, allPosts);
+
         var postWithVector = await vectors.VectorizeAsync(post);
-        var spaceWithVector = await vectors.UpdateSpaceHeadspace(space, postWithVector);
+        space = await vectors.UpdateSpaceHeadspace(space.Space, postWithVector);
+        allPosts.Add(postWithVector);
+
+        await UpdateUserHeadspace(postWithVector, space, facets);
+        await UpdateSubspaceLocations(space, allPosts);
+
         await posts.AddAsync(post);
-
-        if (post.User != null)
-        {
-            var userSpace = await GetOrCreate(space, post.User.Id, "User");
-            userSpace.Name = post.User.Username;
-            var userVector = await vectors.UpdateUserHeadspace(postWithVector);
-            userSpace.X = userVector.PositionOnAxis(spaceWithVector.Vector);
-
-            // Check for quest activation
-            var activeFacets = await GetSpacesAsync(space.Id, type: "Facet");
-            var activeQuests = activeFacets.Where(x => userSpace.X >= x.X).OrderBy(x => x.X).ToList();
-            foreach (var quest in activeQuests)
-            {
-                quest.RoomType = "Quest";
-                quest.AddMember(post.User);
-                await Repository.UpdateAsync(quest);
-            }
-
-            await Repository.UpdateAsync(userSpace);
-        }
-
-        await UpdateSpaceStats(spaceWithVector);
-
         return post;
     }
 
-    private async Task UpdateSpaceStats(BlossomSpaceWithVector space)
+    private async Task UpdateUserHeadspace(BlossomPostWithVector post, BlossomSpaceWithVector space, List<BlossomSpaceWithVector> facets)
     {
-        var allPosts = await GetPostsWithVectorsAsync(space.Space.Id, 10000);
-        allPosts.ForEach(x => x.LinkToSpace(space.Vector));
+        if (post.Post.User == null)
+            return;
 
-        await CalculateNewChallenges(space.Space, allPosts);
-        await UpdateSubspaceLocations(space);
-        await posts.UpdateAsync(allPosts.Select(x => x.Post));
-    }
+        var userSpace = await GetOrCreate(space.Space, post.Post.User.Id, "User");
+        userSpace.Space.Name = post.Post.User.Username;
+        userSpace.Vector = await vectors.UpdateUserHeadspace(post);
+        space.LinkToSpace(userSpace);
 
-    private async Task UpdateSubspaceLocations(BlossomSpaceWithVector space)
-    {
-        var subspaces = await GetSpacesAsync(space.Space.Id);
-        foreach (var subspace in subspaces)
+        // Check for quest activation
+        if (!userSpace.Space.LinkedSpaces.Any(x => x.Type == "Quest"))
         {
-            var subspaceVector = await vectors.FindAsync(space.Space.Id, subspace.Id);
-            if (subspaceVector != null)
+            var quest = facets
+                .Where(x => userSpace.Space.PositionOnAxis(space.Space) >= x.Space.PositionOnAxis(space.Space))
+                .OrderBy(x => x.Space.PositionOnAxis(space.Space))
+                .FirstOrDefault();
+            
+            if (quest != null)
             {
-                subspace.X = subspace.RoomType == "Facet"
-                    ? 1 - Math.Abs(subspaceVector.PositionOnAxis(space.Vector) ?? 0)
-                    : subspaceVector.PositionOnAxis(space.Vector);
-                await Repository.UpdateAsync(subspace);
+                quest.Space.RoomType = "Quest";
+                quest.LinkToSpace(userSpace);
+                await Repository.UpdateAsync(quest.Space);
             }
         }
+
+        await Repository.UpdateAsync(userSpace.Space);
+
     }
 
-    private async Task CalculateNewChallenges(BlossomSpace space, List<BlossomPostWithVector> posts)
+    private async Task UpdateSubspaceLocations(BlossomSpaceWithVector space, List<BlossomPostWithVector> allPosts)
     {
-        if (posts.Count > 1)
-        {
-            var existingFacets = await Repository.Query
-                .Where(x => x.Domain == space.Id && x.RoomType == "Facet")
-                .ToListAsync();
-            await Repository.DeleteAsync(existingFacets);
+        allPosts.ForEach(x => x.LinkToSpace(space));
+        await posts.UpdateAsync(allPosts.Select(x => x.Post));
 
-            await vectors.ClearAsync(space.Id, "Facet");
-            var facets = await faceter.FacetAsync(space, posts);
-            await Repository.AddAsync(facets);
-        }
+        var subspaces = await GetSpacesWithVectorsAsync(space.Space);
+        foreach (var subspace in subspaces)
+            subspace.LinkToSpace(space);
+
+        await Repository.UpdateAsync(space.Space);
+        await Repository.UpdateAsync(subspaces.Select(x => x.Space));
     }
 
     private async Task<List<BlossomPost>> GetPostsAsync(string spaceId, int take = 50)
     {
         var space = await GetOrCreate(Domain, spaceId);
         var exactPosts = await posts.Query
-                .Where(x => x.Domain == space.Domain &&
+                .Where(x => x.Domain == space.Space.Domain &&
                 (x.SpaceId == spaceId ||
-                x.LinkedSpaces.Any(y => y.SpaceId == space.Id)))
+                x.LinkedSpaces.Any(y => y.SpaceId == space.Space.Id)))
                 .OrderByDescending(x => x.Timestamp)
                 .Take(take)
                 .ToListAsync();

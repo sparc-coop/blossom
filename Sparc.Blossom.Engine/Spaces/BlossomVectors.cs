@@ -1,5 +1,4 @@
-﻿using Sparc.Blossom.Authentication;
-using Sparc.Blossom.Content;
+﻿using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
@@ -9,17 +8,17 @@ public class BlossomVectors(
     IRepository<BlossomPost> posts,
     IEnumerable<ITranslator> translators)
 {
-    public async Task<BlossomVector?> FindAsync(string spaceId)
-        => await vectors.FindAsync(spaceId, spaceId);
-    
     public async Task<BlossomVector?> FindAsync(string spaceId, string id)
         => await vectors.FindAsync(spaceId, id);
 
     public async Task<BlossomVector?> FindAsync(BlossomSpace space) =>
-        await FindAsync(space.Domain == BlossomSpaces.Domain ? space.Id : space.Domain, space.Id);
+        await FindAsync(space.Domain, space.Id);
     
     public async Task<List<BlossomPostWithVector>> GetAsync(IEnumerable<BlossomPost> posts)
     {
+        if (!posts.Any())
+            return [];
+        
         var spaceId = posts.First().SpaceId;
         var postIds = posts.Select(x => x.Id).ToList();
 
@@ -139,11 +138,11 @@ public class BlossomVectors(
         var spaceVector = await FindAsync(space);
         if (spaceVector == null)
         {
-            spaceVector = new BlossomVector(spaceId, "Space", spaceId, post.Vector.Vector);
+            spaceVector = new BlossomVector(space, post.Vector.Vector);
             await vectors.AddAsync(spaceVector);
         }
 
-        spaceVector.Update(post.Vector, 0.1);
+        spaceVector.Update(post.Vector);
         await UpdateAsync(spaceVector);
 
         return new(space, spaceVector);
@@ -160,7 +159,7 @@ public class BlossomVectors(
         else
         {
 
-            userVector.Update(post.Vector, 1);
+            userVector.Update(post.Vector);
             await UpdateAsync(userVector);
         }
 
@@ -172,5 +171,15 @@ public class BlossomVectors(
         var existing = await vectors.Query.Where(x => x.SpaceId == spaceId && x.Type == type).ToListAsync();
         if (existing.Count != 0)
             await vectors.DeleteAsync(existing);
+    }
+
+    internal async Task<List<BlossomVector>> GetAllAsync(BlossomSpace space)
+    {
+        var spaceIds = space.LinkedSpaces.Select(x => x.SpaceId).ToList();
+        spaceIds.Add(space.Id);
+
+        return await vectors.Query
+            .Where(x => x.SpaceId == space.Id && spaceIds.Contains(x.Id))
+            .ToListAsync();
     }
 }

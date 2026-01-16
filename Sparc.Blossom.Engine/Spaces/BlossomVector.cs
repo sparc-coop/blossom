@@ -17,31 +17,39 @@ public class BlossomPostWithVector(BlossomPost post, BlossomVector vector)
         //post.UserMovementWeight = post.CoherenceWeight * Math.Max(0, spaceVector.SimilarityTo(postVector) ?? 0);
     }
 
-    public void LinkToSpace(BlossomVector space)
+    public void LinkToSpace(BlossomSpaceWithVector space)
     {
-        Post.LinkToSpace(space.Id, "Space", Vector.DistanceTo(space), Vector.AlignmentWith(space));
-        Post.X = Vector.PositionOnAxis(space, -1, 1) ?? 0;
+        var x = space.Space.RoomType == "Facet" || space.Space.RoomType == "Quest"
+            ? 1 - Math.Abs(Vector.PositionOnAxis(space.Vector, -1, 1) ?? 0)
+            : Vector.PositionOnAxis(space.Vector, 0, 1) ?? 0;
+
+        Post.LinkToSpace(space.Space, x, Vector.DistanceTo(space.Vector), Vector.AlignmentWith(space.Vector));
     }
 
-    public void LinkToFacet(BlossomVector facet)
-    {
-        Post.LinkToSpace(facet.Id, "Facet", Vector.PositionOnAxis(facet), Vector.Score(facet));
-    }
-
-    public void LinkToSubspace(BlossomSpaceWithVector space)
-    {
-        Post.LinkToSpace(space.Space.Id, "Subspace", Vector.DistanceTo(space.Vector), Vector.AlignmentWith(space.Vector));
-    }
+    public double PositionOnAxis(BlossomSpaceWithVector space)
+        => Vector.PositionOnAxis(space.Vector) ?? 0;
 }
 
 public class BlossomSpaceWithVector(BlossomSpace space, BlossomVector vector)
 {
     public BlossomSpaceWithVector(BlossomSpace space, float[] vector)
-        : this(space, new BlossomVector(space.Id, "Space", space.Id, vector))
+        : this(space, new BlossomVector(space, vector))
     { }
 
     public BlossomSpace Space { get; set; } = space;
     public BlossomVector Vector { get; set; } = vector;
+
+    public void LinkToSpace(BlossomSpaceWithVector space)
+    {
+        var x = space.Space.RoomType == "Facet" || space.Space.RoomType == "Quest"
+            ? 1 - Math.Abs(Vector.PositionOnAxis(space.Vector, -1, 1) ?? 0)
+            : Vector.PositionOnAxis(space.Vector, 0, 1) ?? 0;
+
+        Space.LinkToSpace(space.Space, x, Vector.DistanceTo(space.Vector), Vector.AlignmentWith(space.Vector));
+    }
+
+    public double PositionOnAxis(BlossomSpaceWithVector space)
+        => Space.PositionOnAxis(space.Space);
 }
 
 public class BlossomVector : BlossomEntity<string>
@@ -51,29 +59,28 @@ public class BlossomVector : BlossomEntity<string>
     {
     }
 
+    public BlossomVector(BlossomSpace space, float[] vector)
+        : this(space.Domain, space.RoomType, space.Id, vector)
+    {
+    }
+
     public BlossomVector(string spaceId, string type, string id, float[] vector) 
         : base(id)
     {
         SpaceId = spaceId;
         Type = type;
-        TargetUrl = id;
+        Model = "text-embedding-3-small";
         Vector = vector;
         if (type == "Space")
             Point = new float[vector.Length];
     }
 
-    public BlossomVector(string spaceId, string type, float[] vector) : base(spaceId)
+    public BlossomVector(string spaceId, float[] vector) 
+        : this(spaceId, "Ephemeral", Guid.NewGuid().ToString(), vector)
     {
-        SpaceId = spaceId;
-        Type = type;
-        TargetUrl = spaceId;
-        Model = "text-embedding-3-small";
-        Vector = vector;
-        if (type == "Space")
-            Vector = Normalize(vector);
     }
 
-    public BlossomVector(float[] vector) : this(Guid.NewGuid().ToString(), "Ephemeral", vector)
+    public BlossomVector(float[] vector) : this(Guid.NewGuid().ToString(), vector)
     {
     }
 
@@ -84,7 +91,6 @@ public class BlossomVector : BlossomEntity<string>
     public float[]? Point { get; set; }
     public double CoherenceWeight { get; set; } = 0;
     public double SimilarityToSpace { get; set; } = 0;
-    public string TargetUrl { get; set; } = "";
     public string? Text { get; set; }
 
     public double DotProduct(BlossomVector other)
@@ -190,7 +196,7 @@ public class BlossomVector : BlossomEntity<string>
     public BlossomVector ThisWith(float[] other) => new(SpaceId, Type, Id, other);
     public double Length => Math.Sqrt(Vector.Sum(x => x * x));
 
-    public void Update(BlossomVector post, double alpha)
+    public void Update(BlossomVector post)
     {
         if (Point == null)
         {
@@ -199,7 +205,7 @@ public class BlossomVector : BlossomEntity<string>
         else
         {
             for (var i = 0; i < Point.Length; i++)
-                Point[i] = (float)(((1.0 - alpha) * Point[i]) + (alpha * post.Vector[i] * post.CoherenceWeight));
+                Point[i] = Point[i] + (post.Vector[i] * (float)post.CoherenceWeight);
         }
 
         Vector = Normalize(Point);
@@ -243,7 +249,7 @@ public class BlossomVector : BlossomEntity<string>
             }
         }
         
-        return new(spaceVectors.First().SpaceId, "Ephemeral", sumVector);
+        return new(spaceVectors.First().SpaceId, sumVector);
     }
 
     public static BlossomVector Average(IEnumerable<BlossomVector> spaceVectors, Func<BlossomVector, double>? weightingFunction = null)
@@ -264,7 +270,7 @@ public class BlossomVector : BlossomEntity<string>
             avgVector[i] /= (float)divisor;
         }
         
-        return new(spaceVectors.First().SpaceId, "Ephemeral", avgVector);
+        return new(spaceVectors.First().SpaceId, avgVector);
     }
 
     public BlossomVector Center(BlossomVector centerPoint)

@@ -10,10 +10,10 @@ public interface ISparcSpaces
     Task<List<BlossomSpace>> GetSpacesAsync(string? parentSpaceId = null, int? limit = null);
 
     [Get("/spaces/{spaceId}")]
-    Task<BlossomSpace> GetSpaceAsync(string spaceId);
+    Task<BlossomSpace?> GetSpaceAsync(string spaceId);
 
     [Get("/spaces/{parentSpaceId}/subspaces/{spaceId}")]
-    Task<BlossomSpace> GetSpaceAsync(string parentSpaceId, string spaceId);
+    Task<BlossomSpace?> GetSpaceAsync(string parentSpaceId, string spaceId);
 
     [Post("/spaces")]
     Task<BlossomSpace> CreateSpaceAsync(CreateSpaceRequest request);
