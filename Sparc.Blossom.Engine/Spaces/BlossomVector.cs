@@ -17,13 +17,23 @@ public class BlossomPostWithVector(BlossomPost post, BlossomVector vector)
         //post.UserMovementWeight = post.CoherenceWeight * Math.Max(0, spaceVector.SimilarityTo(postVector) ?? 0);
     }
 
-    public void LinkToSpace(BlossomSpaceWithVector space, BlossomSpaceWithVector? facet = null)
+    public void LinkToSpace(BlossomSpaceWithVector space, BlossomSpaceWithVector? primaryFacet = null, BlossomSpaceWithVector? secondaryFacet = null)
     {
-        var x = facet == null
-            ? 1
-            : Vector.OrthogonalizedPositionOnAxis(facet.Vector, space.Vector);
+        var vectorFromThePerspectiveOfSpace = Vector.Subtract(space.Vector);
+        var vectorSimilarity = Vector.SimilarityTo(space.Vector);
+        var vectorSimilarity2 = vectorFromThePerspectiveOfSpace.SimilarityTo(space.Vector);
 
-        var y = Vector.PositionOnAxis(space.Vector, 0, 1);
+        var xAxis = primaryFacet == null
+            ? vectorFromThePerspectiveOfSpace.OrthogonalizedAxis(BlossomVector.Basis(1536, 0), space.Vector)
+            : vectorFromThePerspectiveOfSpace.OrthogonalizedAxis(primaryFacet.Vector, space.Vector);
+
+        var yAxis = secondaryFacet == null
+            ? vectorFromThePerspectiveOfSpace.OrthogonalizedAxis(BlossomVector.Basis(1536, 1), space.Vector)
+            .OrthogonalizedAxis(BlossomVector.Basis(1536, 1), xAxis)
+            : vectorFromThePerspectiveOfSpace.OrthogonalizedAxis(secondaryFacet.Vector, space.Vector);
+
+        var x = vectorFromThePerspectiveOfSpace.PositionOnAxis(xAxis, 0, 1);
+        var y = vectorFromThePerspectiveOfSpace.PositionOnAxis(yAxis, 0, 1);
 
         Post.LinkToSpace(space.Space, x, y);
     }
@@ -165,11 +175,11 @@ public class BlossomVector : BlossomEntity<string>
         return (rawPosition - axisMin.Value) / axisLength;
     }
 
-    internal double OrthogonalizedPositionOnAxis(BlossomVector axis, BlossomVector orthogonalAxis)
+    internal BlossomVector OrthogonalizedAxis(BlossomVector axis, BlossomVector orthogonalAxis)
     {
         var dotProduct = axis.DotProduct(orthogonalAxis);
         var newAxis = axis.Subtract(orthogonalAxis.Multiply(dotProduct)).Normalize();
-        return PositionOnAxis(newAxis);
+        return newAxis;
     }
 
     public BlossomVector Subtract(BlossomVector other)
@@ -379,5 +389,12 @@ public class BlossomVector : BlossomEntity<string>
 
         var localAgreement = denom == 0 ? 0 : numer / denom; // in [0,1]
         CoherenceWeight = alignment * localAgreement;
+    }
+
+    internal static BlossomVector Basis(int dimensions, int index)
+    {
+        var vec = new float[dimensions];
+        vec[index] = 1;
+        return new(vec);
     }
 }

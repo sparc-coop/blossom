@@ -219,17 +219,17 @@ public class BlossomSpaces(
         allPosts.Add(postWithVector);
 
         var facets = await faceter.FacetAsync(space, allPosts);
-        await UpdateUserHeadspace(postWithVector, space, facets);
-        await UpdateSubspaceLocations(space, facets.FirstOrDefault(), allPosts);
+        var user = await UpdateUserHeadspace(postWithVector, space, facets);
+        await UpdateSubspaceLocations(user, facets.FirstOrDefault(), facets.Skip(1).FirstOrDefault(), allPosts);
 
         await posts.AddAsync(post);
         return post;
     }
 
-    private async Task UpdateUserHeadspace(BlossomPostWithVector post, BlossomSpaceWithVector space, List<BlossomSpaceWithVector> facets)
+    private async Task<BlossomSpaceWithVector> UpdateUserHeadspace(BlossomPostWithVector post, BlossomSpaceWithVector space, List<BlossomSpaceWithVector> facets)
     {
         if (post.Post.User == null)
-            return;
+            throw new Exception("Post must have a user to update user headspace.");
 
         var userSpace = await GetOrCreate(space.Space, post.Post.User.Id, "User");
         userSpace.Space.Name = post.Post.User.Username;
@@ -255,12 +255,12 @@ public class BlossomSpaces(
         }
 
         await Repository.UpdateAsync(userSpace.Space);
-
+        return userSpace;
     }
 
-    private async Task UpdateSubspaceLocations(BlossomSpaceWithVector space, BlossomSpaceWithVector? primaryFacet, List<BlossomPostWithVector> allPosts)
+    private async Task UpdateSubspaceLocations(BlossomSpaceWithVector space, BlossomSpaceWithVector? primaryFacet, BlossomSpaceWithVector? secondaryFacet, List<BlossomPostWithVector> allPosts)
     {
-        allPosts.ForEach(x => x.LinkToSpace(space, primaryFacet));
+        allPosts.ForEach(x => x.LinkToSpace(space, primaryFacet, secondaryFacet));
         await posts.UpdateAsync(allPosts.Select(x => x.Post));
 
         var subspaces = await GetSpacesWithVectorsAsync(space.Space);
