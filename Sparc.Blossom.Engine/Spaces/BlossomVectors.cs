@@ -134,7 +134,6 @@ public class BlossomVectors(
 
     internal async Task<BlossomSpaceWithVector> UpdateSpaceHeadspace(BlossomSpace space, BlossomPostWithVector post)
     {
-        var spaceId = post.Post.SpaceId;
         var spaceVector = await FindAsync(space);
         if (spaceVector == null)
         {
@@ -145,7 +144,10 @@ public class BlossomVectors(
         spaceVector.Update(post.Vector);
         await UpdateAsync(spaceVector);
 
-        return new(space, spaceVector);
+        var vectorizedSpace = new BlossomSpaceWithVector(space, spaceVector);
+        post.LinkToSpace(vectorizedSpace);
+
+        return vectorizedSpace;
     }
 
     internal async Task<BlossomVector> UpdateUserHeadspace(BlossomPostWithVector post)

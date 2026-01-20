@@ -72,25 +72,25 @@ public class BlossomSpace : BlossomEntity<string>
         if (!messages.Any(x => x.IsLinked(this)))
             return;
 
-        if (RoomType == "Facet")
-        {
-            Consensus = messages.Average(x => x.LinkedSpace(Id)?.Alignment ?? 0);
-            Confidence = 1 / (1 + messages.Average(x => Math.Pow(x.LinkedSpace(Id)?.Alignment ?? 1, 2)));
-        }
-        else
-        {
-            Consensus = messages.Sum(x => x.LinkedSpace(Id)?.Closeness * x.LinkedSpace(Id)?.Alignment ?? 0) / messages.Sum(x => 1 - (x.LinkedSpace(Id)?.Distance ?? 1));
-            // Variance is the average of the squared differences from the Mean
-            Confidence = 1 / (1 + messages.Average(x => Math.Pow(x.LinkedSpace(Id)?.Distance ?? 1, 2)));
-        }
+        //if (RoomType == "Facet")
+        //{
+        //    Consensus = messages.Average(x => x.LinkedSpace(Id)?.Alignment ?? 0);
+        //    Confidence = 1 / (1 + messages.Average(x => Math.Pow(x.LinkedSpace(Id)?.Alignment ?? 1, 2)));
+        //}
+        //else
+        //{
+        //    Consensus = messages.Sum(x => x.LinkedSpace(Id)?.Closeness * x.LinkedSpace(Id)?.Alignment ?? 0) / messages.Sum(x => 1 - (x.LinkedSpace(Id)?.Distance ?? 1));
+        //    // Variance is the average of the squared differences from the Mean
+        //    Confidence = 1 / (1 + messages.Average(x => Math.Pow(x.LinkedSpace(Id)?.Distance ?? 1, 2)));
+        //}
 
-        if (double.IsNaN(Consensus.Value))
-            Consensus = 0;
-        if (double.IsNaN(Confidence.Value))
-            Confidence = 0;
+        //if (double.IsNaN(Consensus.Value))
+        //    Consensus = 0;
+        //if (double.IsNaN(Confidence.Value))
+        //    Confidence = 0;
 
-        ConsensusHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Consensus.Value));
-        ConfidenceHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Confidence.Value));
+        //ConsensusHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Consensus.Value));
+        //ConfidenceHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Confidence.Value));
     }
 
     public double ConsensusDelta => ConsensusHistory.Count < 2 ? 0 :
@@ -102,12 +102,12 @@ public class BlossomSpace : BlossomEntity<string>
     public bool IsLinked(BlossomSpace space) => LinkedSpaces.Any(x => x.SpaceId == space.SpaceId);
     public LinkedSpace? LinkedSpace(string id) => LinkedSpaces.FirstOrDefault(x => x.SpaceId == id);
 
-    public void LinkToSpace(BlossomSpace space, double x, double? distance, double? alignment)
+    public void LinkToSpace(BlossomSpace space, double x, double y)
     {
         LinkedSpaces.RemoveAll(x => x.SpaceId == space.Id);
-        LinkedSpaces.Add(new(space, x, distance, alignment));
+        LinkedSpaces.Add(new(space, x, y));
         space.LinkedSpaces.RemoveAll(x => x.SpaceId == Id);
-        space.LinkedSpaces.Add(new(this, x, distance, alignment));
+        space.LinkedSpaces.Add(new(this, x, y));
     }
 
     public void ClearLinks(string type)

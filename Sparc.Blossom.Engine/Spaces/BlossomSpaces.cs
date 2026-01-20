@@ -220,7 +220,7 @@ public class BlossomSpaces(
 
         var facets = await faceter.FacetAsync(space, allPosts);
         await UpdateUserHeadspace(postWithVector, space, facets);
-        await UpdateSubspaceLocations(space, allPosts);
+        await UpdateSubspaceLocations(space, facets.FirstOrDefault(), allPosts);
 
         await posts.AddAsync(post);
         return post;
@@ -258,9 +258,9 @@ public class BlossomSpaces(
 
     }
 
-    private async Task UpdateSubspaceLocations(BlossomSpaceWithVector space, List<BlossomPostWithVector> allPosts)
+    private async Task UpdateSubspaceLocations(BlossomSpaceWithVector space, BlossomSpaceWithVector? primaryFacet, List<BlossomPostWithVector> allPosts)
     {
-        allPosts.ForEach(x => x.LinkToSpace(space));
+        allPosts.ForEach(x => x.LinkToSpace(space, primaryFacet));
         await posts.UpdateAsync(allPosts.Select(x => x.Post));
 
         var subspaces = await GetSpacesWithVectorsAsync(space.Space);

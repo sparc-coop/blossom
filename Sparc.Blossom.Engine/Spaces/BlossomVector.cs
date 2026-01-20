@@ -17,17 +17,19 @@ public class BlossomPostWithVector(BlossomPost post, BlossomVector vector)
         //post.UserMovementWeight = post.CoherenceWeight * Math.Max(0, spaceVector.SimilarityTo(postVector) ?? 0);
     }
 
-    public void LinkToSpace(BlossomSpaceWithVector space)
+    public void LinkToSpace(BlossomSpaceWithVector space, BlossomSpaceWithVector? facet = null)
     {
-        var x = space.Space.RoomType == "Facet" || space.Space.RoomType == "Quest"
-            ? 1 - Math.Abs(Vector.PositionOnAxis(space.Vector, -1, 1) ?? 0)
-            : Vector.PositionOnAxis(space.Vector, 0, 1) ?? 0;
+        var x = facet == null
+            ? 1
+            : Vector.OrthogonalizedPositionOnAxis(facet.Vector, space.Vector);
 
-        Post.LinkToSpace(space.Space, x, Vector.DistanceTo(space.Vector), Vector.AlignmentWith(space.Vector));
+        var y = Vector.PositionOnAxis(space.Vector, 0, 1);
+
+        Post.LinkToSpace(space.Space, x, y);
     }
 
     public double PositionOnAxis(BlossomSpaceWithVector space)
-        => Vector.PositionOnAxis(space.Vector) ?? 0;
+        => Vector.PositionOnAxis(space.Vector);
 }
 
 public class BlossomSpaceWithVector(BlossomSpace space, BlossomVector vector)
@@ -42,10 +44,12 @@ public class BlossomSpaceWithVector(BlossomSpace space, BlossomVector vector)
     public void LinkToSpace(BlossomSpaceWithVector space)
     {
         var x = Space.RoomType == "Facet" || Space.RoomType == "Quest"
-            ? 1 - Math.Abs(Vector.PositionOnAxis(space.Vector, -1, 1) ?? 0)
-            : Vector.PositionOnAxis(space.Vector, 0, 1) ?? 0;
+            ? 1 - Math.Abs(Vector.PositionOnAxis(space.Vector, 0, 1))
+            : Vector.PositionOnAxis(space.Vector, 0, 1);
 
-        Space.LinkToSpace(space.Space, x, Vector.DistanceTo(space.Vector), Vector.AlignmentWith(space.Vector));
+        var y = 0;
+
+        Space.LinkToSpace(space.Space, x, y);
     }
 
     public double PositionOnAxis(BlossomSpaceWithVector space)
@@ -147,7 +151,7 @@ public class BlossomVector : BlossomEntity<string>
         return Math.Sqrt(sum);
     }
 
-    public double? PositionOnAxis(BlossomVector axis, double? axisMin = null, double? axisMax = null)
+    public double PositionOnAxis(BlossomVector axis, double? axisMin = null, double? axisMax = null)
     {
         var rawPosition = DotProduct(axis);
 
@@ -156,11 +160,34 @@ public class BlossomVector : BlossomEntity<string>
 
         var axisLength = axisMax.Value - axisMin.Value;
         if (axisLength == 0)
-            return null;
+            return 0;
 
         return (rawPosition - axisMin.Value) / axisLength;
     }
-   
+
+    internal double OrthogonalizedPositionOnAxis(BlossomVector axis, BlossomVector orthogonalAxis)
+    {
+        var dotProduct = axis.DotProduct(orthogonalAxis);
+        var newAxis = axis.Subtract(orthogonalAxis.Multiply(dotProduct)).Normalize();
+        return PositionOnAxis(newAxis);
+    }
+
+    public BlossomVector Subtract(BlossomVector other)
+    {
+        var result = new float[Vector.Length];
+        for (int i = 0; i < Vector.Length; i++)
+            result[i] = Vector[i] - other.Vector[i];
+        return ThisWith(result);
+    }
+
+    public BlossomVector Multiply(double scalar)
+    {
+        var result = new float[Vector.Length];
+        for (int i = 0; i < Vector.Length; i++)
+            result[i] = Vector[i] * (float)scalar;
+        return ThisWith(result);
+    }
+
     public double? AlignmentWith(BlossomVector other)
     {
         var similarity = SimilarityTo(other);

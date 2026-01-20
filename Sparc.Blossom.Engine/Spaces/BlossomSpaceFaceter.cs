@@ -107,7 +107,7 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
         {
             var prediction = Predictor.Predict(post.Vector);
             var predictedSpace = spaces[(int)prediction.PredictedLabel - 1];
-            post.LinkToSpace(predictedSpace);
+            post.LinkToSpace(predictedSpace, predictedSpace);
         }
     }
 
