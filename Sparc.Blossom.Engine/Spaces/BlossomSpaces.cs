@@ -220,9 +220,10 @@ public class BlossomSpaces(
 
         var facets = await faceter.FacetAsync(space, allPosts);
         var user = await UpdateUserHeadspace(postWithVector, space, facets);
-        await UpdateSubspaceLocations(user, facets.FirstOrDefault(), facets.Skip(1).FirstOrDefault(), allPosts);
+        await UpdateSubspaceLocations(user, facets, allPosts);
 
         await posts.AddAsync(post);
+        await Repository.UpdateAsync(space.Space);
         return post;
     }
 
@@ -234,7 +235,7 @@ public class BlossomSpaces(
         var userSpace = await GetOrCreate(space.Space, post.Post.User.Id, "User");
         userSpace.Space.Name = post.Post.User.Username;
         userSpace.Vector = await vectors.UpdateUserHeadspace(post);
-        space.LinkToSpace(userSpace);
+        space.LinkToSpace(userSpace, facets);
 
         // Check for quest activation
         if (!userSpace.Space.LinkedSpaces.Any(x => x.Type == "Quest"))
@@ -249,7 +250,7 @@ public class BlossomSpaces(
                 quest.Space.RoomType = "Quest";
                 await SummarizeAsync(quest);
                 quest.Space.Domain = userSpace.Space.Id;
-                quest.LinkToSpace(userSpace);
+                quest.LinkToSpace(userSpace, facets);
                 await Repository.UpdateAsync(quest.Space);
             }
         }
@@ -258,14 +259,14 @@ public class BlossomSpaces(
         return userSpace;
     }
 
-    private async Task UpdateSubspaceLocations(BlossomSpaceWithVector space, BlossomSpaceWithVector? primaryFacet, BlossomSpaceWithVector? secondaryFacet, List<BlossomPostWithVector> allPosts)
+    private async Task UpdateSubspaceLocations(BlossomSpaceWithVector space, List<BlossomSpaceWithVector> facets, List<BlossomPostWithVector> allPosts)
     {
-        allPosts.ForEach(x => x.LinkToSpace(space, primaryFacet, secondaryFacet));
+        allPosts.ForEach(x => x.LinkToSpace(space, facets));
         await posts.UpdateAsync(allPosts.Select(x => x.Post));
 
         var subspaces = await GetSpacesWithVectorsAsync(space.Space);
         foreach (var subspace in subspaces)
-            subspace.LinkToSpace(space);
+            subspace.LinkToSpace(space, facets);
 
         await Repository.UpdateAsync(space.Space);
         await Repository.UpdateAsync(subspaces.Select(x => x.Space));

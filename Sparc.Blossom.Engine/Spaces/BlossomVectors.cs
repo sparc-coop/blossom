@@ -145,8 +145,6 @@ public class BlossomVectors(
         await UpdateAsync(spaceVector);
 
         var vectorizedSpace = new BlossomSpaceWithVector(space, spaceVector);
-        post.LinkToSpace(vectorizedSpace);
-
         return vectorizedSpace;
     }
 
@@ -175,9 +173,13 @@ public class BlossomVectors(
             await vectors.DeleteAsync(existing);
     }
 
-    internal async Task<List<BlossomVector>> GetAllAsync(BlossomSpace space)
+    internal async Task<List<BlossomVector>> GetAllAsync(BlossomSpace space, string? type = null)
     {
-        var spaceIds = space.LinkedSpaces.Select(x => x.SpaceId).ToList();
+        var spaceIds = space.LinkedSpaces
+            .Where(x => type == null || x.Type == type)
+            .Select(x => x.SpaceId)
+            .ToList();
+        
         spaceIds.Add(space.Id);
 
         return await vectors.Query

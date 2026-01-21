@@ -78,18 +78,35 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
             return [];
         
         // Factor into principal components
-        posts = posts.Where(x => x.Post.IsLinked(space.Space)).ToList();
-        var facets = BlossomVector.ToPrincipalComponents(posts.Select(x => x.Vector), 0.8).Take(3);
+        var facets = BlossomVector.ToPrincipalComponents(posts.Select(x => x.Vector), 1, 3);
         var facetSpaces = new List<BlossomSpaceWithVector>();
+
+        // Match to existing facets when possible (for axis permanence)
+        var existingFacets = await vectors.GetAllAsync(space.Space, "Facet");
         foreach (var facet in facets)
         {
+            var bestMatch = existingFacets
+                .OrderByDescending(x => x.AlignmentWith(facet) ?? 0)
+                .FirstOrDefault();
+
+            if (bestMatch != null)
+            {
+                // PCA axis may be flipped, so check direction
+                if (facet.DotProduct(bestMatch) < 0)
+                    facet.Vector = facet.Multiply(-1).Vector;
+                facet.Id = bestMatch.Id;
+                existingFacets.Remove(bestMatch);
+            }
+
+
             var facetSpace = new BlossomSpaceWithVector(new(space.Space, "Facet")
             {
                 Id = facet.Id,
                 Weight = facet.CoherenceWeight
             }, facet);
-            facetSpace.LinkToSpace(space);
+            facetSpace.LinkToSpace(space, []);
             facetSpaces.Add(facetSpace);
+            await vectors.UpdateAsync(facet);
         }
 
         //await Parallel.ForEachAsync(facetSpaces, async (childFacetSpace, _) => 
@@ -107,11 +124,9 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
         {
             var prediction = Predictor.Predict(post.Vector);
             var predictedSpace = spaces[(int)prediction.PredictedLabel - 1];
-            post.LinkToSpace(predictedSpace, predictedSpace);
+            post.LinkToSpace(predictedSpace, [predictedSpace]);
         }
     }
-
-    
 
     private TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> Cluster(List<BlossomVector> vectors)
     {

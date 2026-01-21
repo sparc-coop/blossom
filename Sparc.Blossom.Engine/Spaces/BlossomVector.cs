@@ -1,4 +1,5 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
+using Microsoft.Extensions.Hosting;
 using Sparc.Blossom.Spaces;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -17,22 +18,33 @@ public class BlossomPostWithVector(BlossomPost post, BlossomVector vector)
         //post.UserMovementWeight = post.CoherenceWeight * Math.Max(0, spaceVector.SimilarityTo(postVector) ?? 0);
     }
 
-    public void LinkToSpace(BlossomSpaceWithVector space, BlossomSpaceWithVector? primaryFacet = null, BlossomSpaceWithVector? secondaryFacet = null)
+    public void LinkToSpace(BlossomSpaceWithVector space, List<BlossomSpaceWithVector> axes)
+    {
+        axes = axes.OrderByDescending(x => x.Vector.CoherenceWeight).ToList();
+        var xAxis = axes.FirstOrDefault() ?? new(space.Space, BlossomVector.Basis(1536, 0));
+        var yAxis = axes.Skip(1).FirstOrDefault() ?? new(space.Space, BlossomVector.Basis(1536, 1));
+
+        var x = Vector.PositionOnAxis(xAxis.Vector, 0, 1);
+        var y = Vector.PositionOnAxis(yAxis.Vector, 0, 1);
+
+        Post.LinkToSpace(space.Space, x, y);
+    }
+
+
+    public void LinkToSpaceWithPerspective(BlossomSpaceWithVector space, BlossomSpaceWithVector? primaryFacet = null, BlossomSpaceWithVector? secondaryFacet = null)
     {
         var vectorFromThePerspectiveOfSpace = Vector.Subtract(space.Vector);
-        var vectorSimilarity = Vector.SimilarityTo(space.Vector);
-        var vectorSimilarity2 = vectorFromThePerspectiveOfSpace.SimilarityTo(space.Vector);
 
-        var xAxis = primaryFacet == null
+        var xAxisVector = primaryFacet == null
             ? vectorFromThePerspectiveOfSpace.OrthogonalizedAxis(BlossomVector.Basis(1536, 0), space.Vector)
             : vectorFromThePerspectiveOfSpace.OrthogonalizedAxis(primaryFacet.Vector, space.Vector);
 
         var yAxis = secondaryFacet == null
             ? vectorFromThePerspectiveOfSpace.OrthogonalizedAxis(BlossomVector.Basis(1536, 1), space.Vector)
-            .OrthogonalizedAxis(BlossomVector.Basis(1536, 1), xAxis)
+            .OrthogonalizedAxis(BlossomVector.Basis(1536, 1), xAxisVector)
             : vectorFromThePerspectiveOfSpace.OrthogonalizedAxis(secondaryFacet.Vector, space.Vector);
 
-        var x = vectorFromThePerspectiveOfSpace.PositionOnAxis(xAxis, 0, 1);
+        var x = vectorFromThePerspectiveOfSpace.PositionOnAxis(xAxisVector, 0, 1);
         var y = vectorFromThePerspectiveOfSpace.PositionOnAxis(yAxis, 0, 1);
 
         Post.LinkToSpace(space.Space, x, y);
@@ -51,7 +63,19 @@ public class BlossomSpaceWithVector(BlossomSpace space, BlossomVector vector)
     public BlossomSpace Space { get; set; } = space;
     public BlossomVector Vector { get; set; } = vector;
 
-    public void LinkToSpace(BlossomSpaceWithVector space)
+    public void LinkToSpace(BlossomSpaceWithVector space, List<BlossomSpaceWithVector> axes)
+    {
+        axes = axes.OrderByDescending(x => x.Vector.CoherenceWeight).ToList();
+        var xAxis = axes.FirstOrDefault() ?? new(space.Space, BlossomVector.Basis(1536, 0));
+        var yAxis = axes.Skip(1).FirstOrDefault() ?? new(space.Space, BlossomVector.Basis(1536, 1));
+
+        var x = Vector.PositionOnAxis(xAxis.Vector, 0, 1);
+        var y = Vector.PositionOnAxis(yAxis.Vector, 0, 1);
+
+        Space.LinkToSpace(space.Space, x, y);
+    }
+
+    public void LinkToSpaceWithPerspective(BlossomSpaceWithVector space)
     {
         var x = Space.RoomType == "Facet" || Space.RoomType == "Quest"
             ? 1 - Math.Abs(Vector.PositionOnAxis(space.Vector, 0, 1))
@@ -323,7 +347,7 @@ public class BlossomVector : BlossomEntity<string>
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
         => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
 
-    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain)
+    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain, int maxCount)
     {
         var mean = Average(vectors);
         var centeredVectors = vectors.Select(v => v.Center(mean)).ToList();
@@ -331,7 +355,7 @@ public class BlossomVector : BlossomEntity<string>
 
         var svd = matrix.Svd(true);
         var components = new List<BlossomVector>();
-        for (int i = 0; i < svd.VT.RowCount; i++)
+        for (int i = 0; i < Math.Min(maxCount, Math.Min(svd.S.Count, svd.VT.RowCount)); i++)
         {
             var componentArray = svd.VT.Row(i).ToArray();
             
