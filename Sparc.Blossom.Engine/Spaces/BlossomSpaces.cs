@@ -213,8 +213,12 @@ public class BlossomSpaces(
     {
         var space = await GetOrCreate(post.SpaceId);
         var allPosts = await GetPostsWithVectorsAsync(spaceId, 10000);
+        var lookbackPosts = allPosts.OrderByDescending(x => x.Post.Timestamp)
+            .Select(x => x.Post)
+            .Take(space.Space.Settings.MessageLookback)
+            .ToList();
 
-        var postWithVector = await vectors.VectorizeAsync(post);
+        var postWithVector = await vectors.VectorizeAsync(post, lookbackPosts);
         space = await vectors.UpdateSpaceHeadspace(space.Space, postWithVector);
         allPosts.Add(postWithVector);
 

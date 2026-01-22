@@ -3,12 +3,26 @@
 using OpenAI;
 using OpenAI.Responses;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Sparc.Blossom.Content;
 
 internal class OpenAITranslator(OpenAIClient client) 
     : AITranslator("gpt-4.1-nano", 0.40m / 1_000_000, 0)
 {
+    public override async Task<BlossomVector> VectorizeAsync(TextContent message, IEnumerable<TextContent>? additionalContext = null)
+    {
+        var model = "text-embedding-3-small";
+        var embeddings = client.GetEmbeddingClient(model);
+
+        var messageWithContext = MessagesWithContext(message.Text, additionalContext?.ToList() ?? [], 1000, 1000);
+        var output = await embeddings.GenerateEmbeddingAsync(messageWithContext);
+        return new(message.SpaceId, "Post", message.Id, output.Value.ToFloats().ToArray())
+        {
+            Text = message.Text
+        };
+    }
+
     public override async Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages, int lastX, int lookback)
     {
         var model = "text-embedding-3-small";

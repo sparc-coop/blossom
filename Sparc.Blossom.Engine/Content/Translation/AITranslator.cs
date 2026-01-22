@@ -9,7 +9,7 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
     protected string DefaultModel = defaultModel;
     protected decimal CostPerToken = costPerToken;
 
-    public async Task<BlossomVector> VectorizeAsync(TextContent message) => (await VectorizeAsync([message], 1, 1)).First();
+    public abstract Task<BlossomVector> VectorizeAsync(TextContent message, IEnumerable<TextContent>? additionalContext = null);
     public abstract Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages, int lastX, int lookback);
 
     public async Task<TextContent> TranslateAsync(TextContent message, TranslationOptions options)

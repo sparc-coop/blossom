@@ -122,10 +122,10 @@ public class BlossomVectors(
         } while (offset < messages.Count);
     }
 
-    internal async Task<BlossomPostWithVector> VectorizeAsync(BlossomPost post)
+    internal async Task<BlossomPostWithVector> VectorizeAsync(BlossomPost post, List<BlossomPost> lookbackPosts)
     {
         var translator = translators.OfType<OpenAITranslator>().First();
-        var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post));
+        var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post, lookbackPosts));
         var neighbors = await SearchAsync(postWithVector.Vector, "Post", 20, includeVectors: true);
         postWithVector.UpdateCoherence(neighbors);
         await vectors.UpdateAsync(postWithVector.Vector);

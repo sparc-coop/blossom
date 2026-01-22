@@ -60,6 +60,11 @@ internal class AnthropicTranslator(AnthropicClient client)
         return options;
     }
 
+    public override Task<BlossomVector> VectorizeAsync(TextContent message, IEnumerable<TextContent>? additionalContext = null)
+    {
+        throw new NotImplementedException();
+    }
+
     public override Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages, int lastX, int lookback)
     {
         throw new NotImplementedException();
