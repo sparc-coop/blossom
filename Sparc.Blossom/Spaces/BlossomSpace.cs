@@ -8,6 +8,12 @@ public record MetricHistory(
     double Value
 );
 
+public record BlossomSpaceSettings(
+    double HeadspaceVelocity = 1.0,
+    double SpaceGravity = 1.0,
+    int MessageLookback = 3
+);
+
 public class BlossomSpace : BlossomEntity<string>
 {
     public string Domain { get; set; }
@@ -29,6 +35,7 @@ public class BlossomSpace : BlossomEntity<string>
     public double? Weight { get; set; }
     public double? Consensus { get; set; }
     public double? Confidence { get; set; }
+    public BlossomSpaceSettings Settings { get; set; } = new();
     public List<MetricHistory> ConsensusHistory { get; set; } = [];
     public List<MetricHistory> ConfidenceHistory { get; set; } = [];
     public List<LinkedSpace> LinkedSpaces { get; set; } = [];

@@ -141,14 +141,14 @@ public class BlossomVectors(
             await vectors.AddAsync(spaceVector);
         }
 
-        spaceVector.Update(post.Vector);
+        spaceVector.Update(post.Vector, space.Settings.SpaceGravity);
         await UpdateAsync(spaceVector);
 
         var vectorizedSpace = new BlossomSpaceWithVector(space, spaceVector);
         return vectorizedSpace;
     }
 
-    internal async Task<BlossomVector> UpdateUserHeadspace(BlossomPostWithVector post)
+    internal async Task<BlossomVector> UpdateUserHeadspace(BlossomSpace space, BlossomPostWithVector post)
     {
         var userVector = await FindAsync(post.Post.SpaceId, post.Post.User!.Id);
         if (userVector == null)
@@ -159,7 +159,7 @@ public class BlossomVectors(
         else
         {
 
-            userVector.Update(post.Vector);
+            userVector.Update(post.Vector, space.Settings.HeadspaceVelocity);
             await UpdateAsync(userVector);
         }
 

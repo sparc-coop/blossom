@@ -257,8 +257,10 @@ public class BlossomVector : BlossomEntity<string>
     public BlossomVector ThisWith(float[] other) => new(SpaceId, Type, Id, other);
     public double Length => Math.Sqrt(Vector.Sum(x => x * x));
 
-    public void Update(BlossomVector post)
+    public void Update(BlossomVector post, double velocity = 1.0)
     {
+        velocity *= post.CoherenceWeight;
+        
         if (Point == null)
         {
             Point = post.Vector;
@@ -266,7 +268,7 @@ public class BlossomVector : BlossomEntity<string>
         else
         {
             for (var i = 0; i < Point.Length; i++)
-                Point[i] = Point[i] + (post.Vector[i] * (float)post.CoherenceWeight);
+                Point[i] = Point[i] + (post.Vector[i] * (float)velocity);
         }
 
         Vector = Normalize(Point);

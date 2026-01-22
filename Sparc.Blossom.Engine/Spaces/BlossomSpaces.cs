@@ -234,7 +234,7 @@ public class BlossomSpaces(
 
         var userSpace = await GetOrCreate(space.Space, post.Post.User.Id, "User");
         userSpace.Space.Name = post.Post.User.Username;
-        userSpace.Vector = await vectors.UpdateUserHeadspace(post);
+        userSpace.Vector = await vectors.UpdateUserHeadspace(space.Space, post);
         space.LinkToSpace(userSpace, facets);
 
         // Check for quest activation
