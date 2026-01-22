@@ -45,7 +45,7 @@ public class BlossomPost : TextContent
     public void LinkToSpace(BlossomSpace space, double x, double y, double z)
     {
         LinkedSpaces.RemoveAll(x => x.SpaceId == space.Id);
-        LinkedSpaces.Add(new(space, x, y, z) { Name = Id });
+        LinkedSpaces.Add(new(space, x, y, z) { Name = Text ?? "" });
     }
 
     public void ClearLinks(string type)
