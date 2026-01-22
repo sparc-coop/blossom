@@ -224,10 +224,15 @@ public class BlossomSpaces(
         allPosts.Add(postWithVector);
 
         var facets = await faceter.FacetAsync(space, allPosts);
+        userSpace.LinkToSpace(space, facets);
+
         var user = await UpdateUserHeadspace(postWithVector, space, facets);
         await UpdateSubspaceLocations(user, facets, allPosts);
 
+        userSpace.LinkToSpace(space, facets, true);
+        await Repository.UpdateAsync(space.Space);
         await posts.AddAsync(post);
+
         await Repository.UpdateAsync(space.Space);
         return post;
     }

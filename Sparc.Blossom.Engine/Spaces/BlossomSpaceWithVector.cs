@@ -11,7 +11,7 @@ public class BlossomSpaceWithVector(BlossomSpace space, BlossomVector vector)
     public BlossomSpace Space { get; set; } = space;
     public BlossomVector Vector { get; set; } = vector;
 
-    public void LinkToSpace(BlossomSpaceWithVector space, List<BlossomSpaceWithVector> axes)
+    public void LinkToSpace(BlossomSpaceWithVector space, List<BlossomSpaceWithVector> axes, bool oneWay = false)
     {
         axes = axes.OrderByDescending(x => x.Vector.CoherenceWeight).ToList();
         var xAxis = axes.FirstOrDefault() ?? new(space.Space, BlossomVector.Basis(1536, 0));
@@ -21,7 +21,7 @@ public class BlossomSpaceWithVector(BlossomSpace space, BlossomVector vector)
         var y = Vector.PositionOnAxis(yAxis.Vector, 0, 1);
         var z = space.Space.Weight ?? 1;
 
-        Space.LinkToSpace(space.Space, x, y, z);
+        Space.LinkToSpace(space.Space, x, y, z, oneWay);
     }
 
     public void LinkToSpaceWithPerspective(BlossomSpaceWithVector space)

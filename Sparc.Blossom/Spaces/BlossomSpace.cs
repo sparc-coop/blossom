@@ -112,12 +112,15 @@ public class BlossomSpace : BlossomEntity<string>
     public bool IsLinked(BlossomSpace space) => LinkedSpaces.Any(x => x.SpaceId == space.SpaceId);
     public LinkedSpace? LinkedSpace(string id) => LinkedSpaces.FirstOrDefault(x => x.SpaceId == id);
 
-    public void LinkToSpace(BlossomSpace space, double x, double y, double z)
+    public void LinkToSpace(BlossomSpace space, double x, double y, double z, bool oneWay = false)
     {
         LinkedSpaces.RemoveAll(x => x.SpaceId == space.Id);
         LinkedSpaces.Add(new(space, x, y, z));
-        space.LinkedSpaces.RemoveAll(x => x.SpaceId == Id);
-        space.LinkedSpaces.Add(new(this, x, y, z));
+        if (!oneWay)
+        {
+            space.LinkedSpaces.RemoveAll(x => x.SpaceId == Id);
+            space.LinkedSpaces.Add(new(this, x, y, z));
+        }
     }
 
     public void ClearLinks(string type)
