@@ -232,6 +232,13 @@ public class BlossomSpaces(
         return post;
     }
 
+    private async Task SaveSpaceAsync(string spaceId, BlossomSpace space)
+    {
+        var existing = await GetOrCreate(spaceId);
+        existing.Space.Settings = space.Settings;
+        await Repository.UpdateAsync(existing.Space);
+    }
+
     private async Task<BlossomSpaceWithVector> UpdateUserHeadspace(BlossomPostWithVector post, BlossomSpaceWithVector space, List<BlossomSpaceWithVector> facets)
     {
         if (post.Post.User == null)
@@ -390,6 +397,7 @@ public class BlossomSpaces(
         spaces.MapGet("{spaceId}/index", IndexAsync);
         spaces.MapGet("{spaceId}/discover", Discover);
         spaces.MapPost("{spaceId}", PostAsync);
+        spaces.MapPut("{spaceId}", SaveSpaceAsync);
         spaces.MapPost("graph", async (BlossomSpaces spaces, ExtractGraphRequest request) =>
         {
             var result = await spaces.ExtractGraph(request);

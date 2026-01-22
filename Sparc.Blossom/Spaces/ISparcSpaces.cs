@@ -21,6 +21,9 @@ public interface ISparcSpaces
     [Post("/spaces/{spaceId}")]
     Task<BlossomPost> PostAsync(string spaceId, BlossomPost post);
 
+    [Put("/spaces/{spaceId}")]
+    Task SaveSpaceAsync(string spaceId, BlossomSpace space);
+
     [Delete("/spaces/{spaceId}")]
     Task<BlossomSpace> DeleteSpaceAsync(string spaceId);
 

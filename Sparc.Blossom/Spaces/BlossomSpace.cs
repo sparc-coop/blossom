@@ -8,14 +8,15 @@ public record MetricHistory(
     double Value
 );
 
-public record BlossomSpaceSettings(
-    double HeadspaceVelocity = 1.0,
-    double SpaceGravity = 1.0,
-    int MessageLookback = 5,
-    double UserHeadspaceWeight = 0.02,
-    double MessageLookbackWeight = 0.02
-);
-
+public class BlossomSpaceSettings
+{
+    public double HeadspaceVelocity { get; set; } = 5.0;
+    public double SpaceGravity { get; set; } = 1.0;
+    public int MessageLookback { get; set; } = 5;
+    public double UserHeadspaceWeight { get; set; } = 0.02;
+    public double MessageLookbackWeight { get; set; } = 0.02;
+}
+    
 public class BlossomSpace : BlossomEntity<string>
 {
     public string Domain { get; set; }
