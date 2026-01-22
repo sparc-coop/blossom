@@ -257,18 +257,19 @@ public class BlossomVector : BlossomEntity<string>
     public BlossomVector ThisWith(float[] other) => new(SpaceId, Type, Id, other);
     public double Length => Math.Sqrt(Vector.Sum(x => x * x));
 
-    public void Update(BlossomVector post, double velocity = 1.0)
+    public void Add(BlossomVector vector, double scaleFactor = 1.0)
     {
-        velocity *= post.CoherenceWeight;
+        if (vector.Vector.Length != Vector.Length)
+            return;
         
         if (Point == null)
         {
-            Point = post.Vector;
+            Point = Vector.Length == 0 ? new float[vector.Vector.Length] : Vector;
         }
         else
         {
             for (var i = 0; i < Point.Length; i++)
-                Point[i] = Point[i] + (post.Vector[i] * (float)velocity);
+                Point[i] = Point[i] + (vector.Vector[i] * (float)scaleFactor);
         }
 
         Vector = Normalize(Point);

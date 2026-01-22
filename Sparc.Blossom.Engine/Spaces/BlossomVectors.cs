@@ -122,13 +122,22 @@ public class BlossomVectors(
         } while (offset < messages.Count);
     }
 
-    internal async Task<BlossomPostWithVector> VectorizeAsync(BlossomPost post, List<BlossomPost> lookbackPosts)
+    internal async Task<BlossomPostWithVector> VectorizeAsync(BlossomPost post, 
+        BlossomSpaceWithVector userSpace, double userSpaceWeight,
+        List<BlossomPostWithVector> lookbackPosts, double lookbackWeight)
     {
         var translator = translators.OfType<OpenAITranslator>().First();
-        var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post, lookbackPosts));
+        var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post));
+
+        postWithVector.Vector.Add(userSpace.Vector, userSpaceWeight);
+
+        foreach (var lookbackPost in lookbackPosts)
+            postWithVector.Vector.Add(lookbackPost.Vector, lookbackWeight);
+
         var neighbors = await SearchAsync(postWithVector.Vector, "Post", 20, includeVectors: true);
         postWithVector.UpdateCoherence(neighbors);
         await vectors.UpdateAsync(postWithVector.Vector);
+        
         return postWithVector;
     }
 
@@ -141,7 +150,7 @@ public class BlossomVectors(
             await vectors.AddAsync(spaceVector);
         }
 
-        spaceVector.Update(post.Vector, space.Settings.SpaceGravity);
+        spaceVector.Add(post.Vector, post.Post.CoherenceWeight * space.Settings.SpaceGravity);
         await UpdateAsync(spaceVector);
 
         var vectorizedSpace = new BlossomSpaceWithVector(space, spaceVector);
@@ -159,7 +168,7 @@ public class BlossomVectors(
         else
         {
 
-            userVector.Update(post.Vector, space.Settings.HeadspaceVelocity);
+            userVector.Add(post.Vector, post.Post.CoherenceWeight * space.Settings.HeadspaceVelocity);
             await UpdateAsync(userVector);
         }
 

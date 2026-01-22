@@ -11,7 +11,9 @@ public record MetricHistory(
 public record BlossomSpaceSettings(
     double HeadspaceVelocity = 1.0,
     double SpaceGravity = 1.0,
-    int MessageLookback = 3
+    int MessageLookback = 5,
+    double UserHeadspaceWeight = 0.02,
+    double MessageLookbackWeight = 0.02
 );
 
 public class BlossomSpace : BlossomEntity<string>
