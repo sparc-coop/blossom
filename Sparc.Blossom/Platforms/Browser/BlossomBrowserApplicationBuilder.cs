@@ -21,6 +21,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
         Builder = WebAssemblyHostBuilder.CreateDefault(args);
         Services = Builder.Services;
         Configuration = Builder.Configuration;
+        IsDevelopment = Builder.HostEnvironment.IsDevelopment();
     }
 
     public override IBlossomApplication Build(Assembly? entityAssembly = null)

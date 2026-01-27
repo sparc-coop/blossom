@@ -24,6 +24,7 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
         Builder = WebApplication.CreateBuilder(args);
         Services = Builder.Services;
         Configuration = Builder.Configuration;
+        IsDevelopment = Builder.Environment.IsDevelopment();
     }
 
     public override IBlossomApplication Build(Assembly? entityAssembly = null)

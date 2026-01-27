@@ -16,6 +16,7 @@ public abstract class BlossomApplicationBuilder
     public virtual IServiceCollection Services { get; protected set; } = null!;
     public virtual IConfiguration Configuration { get; protected set; } = null!;
     protected bool isAuthenticationAdded => Services.Any(x => x.ServiceType == typeof(IBlossomAuthenticator));
+    public bool IsDevelopment { get; protected set; }
 
     public abstract void AddAuthentication<TUser>() where TUser : BlossomUser, new();
     public virtual void AddAuthentication<TAuthenticator, TUser>()
