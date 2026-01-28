@@ -38,12 +38,13 @@ public class BlossomVector : BlossomEntity<string>
     }
 
     public string SpaceId { get; init; } = "";
-    public string Type { get; init; } = "Ephemeral";
+    public string Type { get; set; } = "Ephemeral";
     public string Model { get; init; } = "";
     public float[] Vector { get; set; } = [];
     public float[]? Point { get; set; }
     public double CoherenceWeight { get; set; } = 0;
     public double SimilarityToSpace { get; set; } = 0;
+    public BlossomSummary? Summary { get; set; }
     public string? Text { get; set; }
     public bool IsEmpty => Vector.Length == 0 || Vector.All(x => x == 0);
 
@@ -275,11 +276,14 @@ public class BlossomVector : BlossomEntity<string>
 
         return new BlossomCoordinate(
             Id, 
-            Text ?? Id, 
+            Text ?? Id,
             Type,
             PositionOnAxis(xAxis, 0, 1),
             PositionOnAxis(yAxis, 0, 1),
-            PositionOnAxis(zAxis, 0, 1));
+            PositionOnAxis(zAxis, 0, 1))
+        {
+            Summary = Summary
+        };
     }
 
     public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain, int maxCount)

@@ -145,6 +145,44 @@ public class BlossomVectors(
             await vectors.DeleteAsync(existing);
     }
 
+    public async Task SummarizeAsync(BlossomVector vector)
+    {
+        var aiTranslator = translators.OfType<AITranslator>().First();
+        if (vector.Type == "Facet")
+        {
+            var leftVectors = await SearchAsync(vector, "Post", 5, true);
+            var leftVectorIds = leftVectors.Where(x => x.SimilarityToSpace < 0).Select(x => x.Id).ToList();
+
+            var rightVectors = await SearchAsync(vector, "Post", 5);
+            var rightVectorIds = rightVectors.Where(x => x.SimilarityToSpace > 0).Select(x => x.Id).ToList();
+
+            var leftPosts = await posts.Query
+                .Where(x => x.Domain == vector.SpaceId && leftVectorIds.Contains(x.Id))
+                .ToListAsync();
+
+            var rightPosts = await posts.Query
+                .Where(x => x.Domain == vector.SpaceId && rightVectorIds.Contains(x.Id))
+                .ToListAsync();
+
+            var summary = await aiTranslator.SummarizeAsync(leftPosts, rightPosts);
+            vector.Summary = summary;
+        }
+        else
+        {
+            var closestVectors = await SearchAsync(vector, "Post", 10);
+            var ids = closestVectors.Select(x => x.Id).ToList();
+
+            var matchingPosts = await posts.Query
+                .Where(x => x.Domain == vector.SpaceId && ids.Contains(x.Id))
+                .ToListAsync();
+
+            var summary = await aiTranslator.SummarizeAsync(matchingPosts);
+            vector.Summary = summary;
+        }
+
+        await UpdateAsync(vector);
+    }
+
     internal async Task<List<BlossomVector>> GetAllAsync(BlossomSpace space, string? type = null)
     {        
         return await vectors.Query

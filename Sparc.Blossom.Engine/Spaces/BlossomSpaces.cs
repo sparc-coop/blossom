@@ -261,42 +261,6 @@ public class BlossomSpaces(
         //}
     }
 
-    public async Task SummarizeAsync(BlossomSpaceWithVector space)
-    {
-        var aiTranslator = translators.OfType<AITranslator>().First();
-        if (space.Space.RoomType == "Quest")
-        {
-            var leftVectors = await vectors.SearchAsync(space.Vector, "Post", 5, true);
-            var leftVectorIds = leftVectors.Where(x => x.SimilarityToSpace < 0).Select(x => x.Id).ToList();
-
-            var rightVectors = await vectors.SearchAsync(space.Vector, "Post", 5);
-            var rightVectorIds = rightVectors.Where(x => x.SimilarityToSpace > 0).Select(x => x.Id).ToList();
-
-            var leftPosts = await posts.Query
-                .Where(x => x.Domain == space.Space.Domain && leftVectorIds.Contains(x.Id))
-                .ToListAsync();
-
-            var rightPosts = await posts.Query
-                .Where(x => x.Domain == space.Space.Domain && rightVectorIds.Contains(x.Id))
-                .ToListAsync();
-
-            var summary = await aiTranslator.SummarizeAsync(leftPosts, rightPosts);
-            space.Space.SetSummary(summary);
-        }
-        else
-        {
-            var closestVectors = await vectors.SearchAsync(space.Vector, "Post", 10);
-            var ids = closestVectors.Select(x => x.Id).ToList();
-
-            var matchingPosts = await posts.Query
-                .Where(x => x.Domain == space.Space.Domain && ids.Contains(x.Id))
-                .ToListAsync();
-
-            var summary = await aiTranslator.SummarizeAsync(matchingPosts);
-            space.Space.SetSummary(summary);
-        }
-    }
-
     private async Task<List<BlossomPost>> GetPostsAsync(string spaceId, int take = 50)
     {
         var space = await GetOrCreate(Domain, spaceId);
@@ -321,9 +285,11 @@ public class BlossomSpaces(
 
         // Z axis should be mapped to the space vector
         axes.Add(space.Vector);
+        axes.FirstOrDefault()?.Type = "X";
+        axes.Skip(1).FirstOrDefault()?.Type = "Y";
+        axes.Skip(2).FirstOrDefault()?.Type = "Z";
 
-        var objectVectors = allVectors.Except(axes).ToList();
-        return objectVectors.Select(x => x.ToCoordinate(axes)).ToList();
+        return allVectors.Select(x => x.ToCoordinate(axes)).ToList();
     }
 
     private async Task<List<BlossomPostWithVector>> GetPostsWithVectorsAsync(string spaceId, int take = 50)

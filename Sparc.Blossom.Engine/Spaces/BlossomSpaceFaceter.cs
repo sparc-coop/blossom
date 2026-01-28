@@ -103,8 +103,8 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
         // Delete any remaining unused facets
         await vectors.DeleteAsync(existingFacets);
 
-        //await Parallel.ForEachAsync(facetSpaces, async (childFacetSpace, _) => 
-        //    await SummarizeAsync(childFacetSpace, posts.Select(x => x.Post)));
+        await Parallel.ForEachAsync(facets, async (childFacet, _) => 
+            await vectors.SummarizeAsync(childFacet));
 
         return facets;
     }
