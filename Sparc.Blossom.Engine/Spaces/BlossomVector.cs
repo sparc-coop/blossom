@@ -269,18 +269,17 @@ public class BlossomVector : BlossomEntity<string>
 
     public BlossomCoordinate ToCoordinate(List<BlossomVector> axes)
     {
-        var facets = axes.Where(x => x.Type == "Facet").ToList();
-        var xAxis = facets.FirstOrDefault() ?? Basis(1536, 0);
-        var yAxis = facets.Skip(1).FirstOrDefault() ?? Basis(1536, 1);
-        var zAxis = axes.Except(facets).FirstOrDefault() ?? Basis(1536, 2);
+        var xAxis = axes.FirstOrDefault(x => x.Type == "X") ?? Basis(1536, 0);
+        var yAxis = axes.FirstOrDefault(x => x.Type == "Y") ?? Basis(1536, 1);
+        var zAxis = axes.FirstOrDefault(x => x.Type == "Z") ?? Basis(1536, 2);
 
         return new BlossomCoordinate(
             Id, 
             Text ?? Id,
             Type,
-            PositionOnAxis(xAxis, 0, 1),
-            PositionOnAxis(yAxis, 0, 1),
-            PositionOnAxis(zAxis, 0, 1))
+            PositionOnAxis(xAxis),
+            PositionOnAxis(yAxis),
+            PositionOnAxis(zAxis))
         {
             Summary = Summary
         };
