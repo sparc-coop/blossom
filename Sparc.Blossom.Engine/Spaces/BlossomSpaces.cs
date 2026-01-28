@@ -227,10 +227,11 @@ public class BlossomSpaces(
         userSpace.Add(postWithVector);
         await vectors.UpdateAsync(userSpace.Vector);
 
+        await posts.AddAsync(post);
+
         allPosts.Add(postWithVector);
         await faceter.FacetAsync(space, allPosts);
 
-        await posts.AddAsync(post);
         return post;
     }
 

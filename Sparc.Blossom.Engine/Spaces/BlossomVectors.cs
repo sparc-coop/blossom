@@ -53,13 +53,6 @@ public class BlossomVectors(
     public async Task UpdateAsync(BlossomVector vector) => await vectors.UpdateAsync(vector);
     public async Task UpdateAsync(IEnumerable<BlossomVector> blossomVectors) => await vectors.UpdateAsync(blossomVectors);
     public async Task DeleteAsync(IEnumerable<BlossomVector> blossomVectors) => await vectors.DeleteAsync(blossomVectors);
-    public async Task<List<BlossomVector>> SearchAsync(BlossomSpace space, string type, int count, bool furthestAway = false, bool includeVectors = false, double? similarityThreshold = null)
-    {
-        var spaceVector = await FindAsync(space)
-            ?? throw new Exception("Space vector not found");
-
-        return await SearchAsync(spaceVector, type, count, furthestAway, includeVectors, similarityThreshold);
-    }
 
     public async Task<List<BlossomVector>> SearchAsync(BlossomVector vector, string type, int count, bool furthestAway = false, bool includeVectors = false, double? similarityThreshold = null)
     { 
@@ -163,6 +156,12 @@ public class BlossomVectors(
             var rightPosts = await posts.Query
                 .Where(x => x.Domain == vector.SpaceId && rightVectorIds.Contains(x.Id))
                 .ToListAsync();
+
+            // Use the similarity scores to weight the summary by most relevant posts
+            foreach (var post in leftPosts)
+                post.CoherenceWeight = Math.Abs(leftVectors.First(x => x.Id == post.Id).SimilarityToSpace);
+            foreach (var post in rightPosts)
+                post.CoherenceWeight = Math.Abs(rightVectors.First(x => x.Id == post.Id).SimilarityToSpace);
 
             var summary = await aiTranslator.SummarizeAsync(leftPosts, rightPosts);
             vector.Summary = summary;

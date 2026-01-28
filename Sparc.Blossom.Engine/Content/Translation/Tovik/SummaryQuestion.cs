@@ -20,26 +20,27 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
         AddMessages(messages, tokenLimit);
     }
 
-    public SummaryQuestion(IEnumerable<TextContent> leftMessages, IEnumerable<TextContent> rightMessages, int tokenLimit) 
+    public SummaryQuestion(IEnumerable<BlossomPost> leftMessages, IEnumerable<BlossomPost> rightMessages, int tokenLimit) 
         : base(
     "Provide a concise summary of the conflict or tension between the left and right messages, including a name, topic, and description." +
     "The summary should capture the main difference in the themes and key points discussed in the messages, as this represents the most extreme edge of the axis.")
     {
         Instructions = "You are an assistant that summarizes two sets of messages into a new semantic facet that will be used for room facets identification.\r\n" +
                     "Analyze the provided messages and extract the main themes from the messages to create a concise summary of the conflict or tension located within.\r\n\r\n" +
+                    "Use the given weight of each message, which is on a scale of 0 to 1, 1 being highest, to prioritize more relevant messages in the summary.\r\n" +
                     "The summary should include:\r\n" +
                     "- Name: A short, 2 to 3 word descriptive facet title encompassing the conflicting ideas between both sets of messages. This name should be extremely specific to the primary subject matter of the facet.\r\n" +
                     "- Topic: The 10-20 word primary subject matter represented by the conflicting ideas in both sets of messages.\r\n" +
                     "- Description: A 10-20 word set of hints as to this conflict's potential resolution.";
 
-        Instructions += "- LeftTopic: A short, 3 to 5 word descriptive topic for the left set of messages that distinguishes it from the right set of messages and relates it to the overall summary.\r\n";
-        Instructions += "- RightTopic: A short, 3 to 5 word descriptive topic for the right set of messages that distinguishes it from the left set of messages and relates it to the overall summary.";
+        Instructions += "- LeftTopic: A short, 2 to 3 word descriptive topic for the left set of messages that distinguishes it from the right set of messages and relates it to the overall summary.\r\n";
+        Instructions += "- RightTopic: A short, 2 to 3 word descriptive topic for the right set of messages that distinguishes it from the left set of messages and relates it to the overall summary.";
 
         Text += "\r\n\r\nLeft Messages: ";
-        AddMessages(leftMessages, tokenLimit / 2);
+        AddMessagesWithWeight(leftMessages, tokenLimit / 2);
 
         Text += "\r\n\r\nRight Messages: ";
-        AddMessages(rightMessages, tokenLimit / 2);
+        AddMessagesWithWeight(rightMessages, tokenLimit / 2);
     }
 
     private void AddMessages(IEnumerable<TextContent> messages, int tokenLimit)
@@ -54,6 +55,20 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
             Text += "\r\n- " + message.Text!.Replace('\u00A0', ' ');
         }
     }
+
+    private void AddMessagesWithWeight(IEnumerable<BlossomPost> messages, int tokenLimit)
+    {
+        foreach (var message in messages)
+        {
+            if (Text.Length + message.Text!.Length > tokenLimit * 4 * 0.8)
+            {
+                Text += "\r\n- [Truncated additional messages due to token limit]";
+                break;
+            }
+            Text += $"\r\n- (Weight: {message.CoherenceWeight:N2}) " + message.Text!.Replace('\u00A0', ' ');
+        }
+    }
+
 
     public SummaryQuestion(BlossomSpace space, IEnumerable<BlossomSpace> otherSpaces) : base(
     "Given the given descriptions of other rooms in this space, refine this room summary to be as far apart as possible from all the other rooms, so that it is more obvious what this room is about.")

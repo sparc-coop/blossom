@@ -33,7 +33,7 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
         return answer.Value;
     }
 
-    public async Task<BlossomSummary?> SummarizeAsync(IEnumerable<TextContent> leftMessages, IEnumerable<TextContent> rightMessages)
+    public async Task<BlossomSummary?> SummarizeAsync(IEnumerable<BlossomPost> leftMessages, IEnumerable<BlossomPost> rightMessages)
     {
         var question = new SummaryQuestion(leftMessages, rightMessages, 1047576);
         var answer = await AskAsync(question);
