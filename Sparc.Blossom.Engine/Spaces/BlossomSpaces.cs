@@ -286,6 +286,7 @@ public class BlossomSpaces(
 
         // Z axis should be mapped to the space vector
         axes.Add(space.Vector);
+        allVectors.Add(space.Vector);
         axes.FirstOrDefault()?.Type = "X";
         axes.Skip(1).FirstOrDefault()?.Type = "Y";
         axes.Skip(2).FirstOrDefault()?.Type = "Z";
