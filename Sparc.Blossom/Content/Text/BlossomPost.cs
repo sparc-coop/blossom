@@ -1,20 +1,7 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Spaces;
-using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Content;
-
-public record LinkedSpace(string SpaceId, string Name, string Type, double X, double Y, double Z)
-{
-    public LinkedSpace(BlossomSpace space, double x, double y, double z)
-        : this(space.Id, string.IsNullOrWhiteSpace(space.Name) ? space.Id : space.Name, space.RoomType, x, y, z)
-    {
-    }
-
-    [JsonConstructor]
-    protected LinkedSpace() : this("", "", "", 0, 0, 0)
-    { }
-};
 
 public class BlossomPost : TextContent
 {
@@ -30,26 +17,11 @@ public class BlossomPost : TextContent
     }
 
     public string PostId { get { return Id; } set { Id = value; } }
-    public List<LinkedSpace> LinkedSpaces { get; set; } = [];
     public List<SparcEntity> Entities { get; set; } = [];
     public double CoherenceWeight { get; set; } = 0;
 
     public async Task ExtractEntities(ISparcContent tovik, List<SparcEntityType> entityTypes)
     {
         Entities = await tovik.ExtractGraphAsync(new(this, entityTypes));
-    }
-
-    public bool IsLinked(BlossomSpace space) => LinkedSpaces.Any(x => x.SpaceId == space.SpaceId);
-    public LinkedSpace? LinkedSpace(string id) => LinkedSpaces.FirstOrDefault(x => x.SpaceId == id);
-
-    public void LinkToSpace(BlossomSpace space, double x, double y, double z)
-    {
-        LinkedSpaces.RemoveAll(x => x.SpaceId == space.Id);
-        LinkedSpaces.Add(new(space, x, y, z) { Name = Text ?? "" });
-    }
-
-    public void ClearLinks(string type)
-    {
-        LinkedSpaces.RemoveAll(x => x.Type == type);
     }
 }

@@ -72,14 +72,13 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
     //    return Root;
     //}
 
-    public async Task<List<BlossomSpaceWithVector>> FacetAsync(BlossomSpaceWithVector space, List<BlossomPostWithVector> posts)
+    public async Task<List<BlossomVector>> FacetAsync(BlossomSpaceWithVector space, List<BlossomPostWithVector> posts)
     {
         if (posts.Count < 2)
             return [];
         
         // Factor into principal components
         var facets = BlossomVector.ToPrincipalComponents(posts.Select(x => x.Vector), 1, 3);
-        var facetSpaces = new List<BlossomSpaceWithVector>();
 
         // Match to existing facets when possible (for axis permanence)
         var existingFacets = await vectors.GetAllAsync(space.Space, "Facet");
@@ -98,21 +97,16 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
                 existingFacets.Remove(bestMatch);
             }
 
-
-            var facetSpace = new BlossomSpaceWithVector(new(space.Space, "Facet")
-            {
-                Id = facet.Id,
-                Weight = facet.CoherenceWeight
-            }, facet);
-            facetSpace.LinkToSpace(space, []);
-            facetSpaces.Add(facetSpace);
             await vectors.UpdateAsync(facet);
         }
+        
+        // Delete any remaining unused facets
+        await vectors.DeleteAsync(existingFacets);
 
         //await Parallel.ForEachAsync(facetSpaces, async (childFacetSpace, _) => 
         //    await SummarizeAsync(childFacetSpace, posts.Select(x => x.Post)));
 
-        return facetSpaces;
+        return facets;
     }
 
     public async Task AssignAsync(IEnumerable<BlossomPostWithVector> posts, List<BlossomSpaceWithVector> spaces)
@@ -124,7 +118,7 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
         {
             var prediction = Predictor.Predict(post.Vector);
             var predictedSpace = spaces[(int)prediction.PredictedLabel - 1];
-            post.LinkToSpace(predictedSpace, [predictedSpace]);
+            //post.LinkToSpace(predictedSpace, [predictedSpace]);
         }
     }
 

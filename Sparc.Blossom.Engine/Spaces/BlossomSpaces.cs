@@ -114,7 +114,7 @@ public class BlossomSpaces(
             await Repository.AddAsync(existing);
         }
 
-        var vector = await vectors.FindAsync(existing) ?? new();
+        var vector = await vectors.FindAsync(existing) ?? new(existing, []);
 
         return new(existing, vector);
     }
@@ -219,21 +219,18 @@ public class BlossomSpaces(
             .Take(space.Space.Settings.MessageLookback)
             .ToList();
 
-        var postWithVector = await vectors.VectorizeAsync(post, userSpace, space.Space.Settings.UserHeadspaceWeight, lookbackPosts, space.Space.Settings.MessageLookbackWeight);
-        space = await vectors.UpdateSpaceHeadspace(space.Space, postWithVector);
+        var postWithVector = await vectors.VectorizeAsync(post, lookbackPosts, space.Space.Settings.MessageLookbackWeight);
+
+        space.Add(postWithVector);
+        await vectors.UpdateAsync(space.Vector);
+
+        userSpace.Add(postWithVector);
+        await vectors.UpdateAsync(userSpace.Vector);
+
         allPosts.Add(postWithVector);
+        await faceter.FacetAsync(space, allPosts);
 
-        var facets = await faceter.FacetAsync(space, allPosts);
-        userSpace.LinkToSpace(space, facets);
-
-        var user = await UpdateUserHeadspace(postWithVector, space, facets);
-        await UpdateSubspaceLocations(user, facets, allPosts);
-
-        userSpace.LinkToSpace(space, facets, true);
-        await Repository.UpdateAsync(space.Space);
         await posts.AddAsync(post);
-
-        await Repository.UpdateAsync(space.Space);
         return post;
     }
 
@@ -244,49 +241,24 @@ public class BlossomSpaces(
         await Repository.UpdateAsync(existing.Space);
     }
 
-    private async Task<BlossomSpaceWithVector> UpdateUserHeadspace(BlossomPostWithVector post, BlossomSpaceWithVector space, List<BlossomSpaceWithVector> facets)
+    private async Task ActivateQuest()
     {
-        if (post.Post.User == null)
-            throw new Exception("Post must have a user to update user headspace.");
+        //if (!userSpace.Space.LinkedSpaces.Any(x => x.Type == "Quest"))
+        //{
+        //    var quest = facets
+        //        .Where(x => userSpace.Space.PositionOnAxis(space.Space) >= x.Space.PositionOnAxis(space.Space))
+        //        .OrderBy(x => x.Space.PositionOnAxis(space.Space))
+        //        .FirstOrDefault();
 
-        var userSpace = await GetOrCreate(space.Space, post.Post.User.Id, "User");
-        userSpace.Space.Name = post.Post.User.Username;
-        userSpace.Vector = await vectors.UpdateUserHeadspace(space.Space, post);
-        space.LinkToSpace(userSpace, facets);
-
-        // Check for quest activation
-        if (!userSpace.Space.LinkedSpaces.Any(x => x.Type == "Quest"))
-        {
-            var quest = facets
-                .Where(x => userSpace.Space.PositionOnAxis(space.Space) >= x.Space.PositionOnAxis(space.Space))
-                .OrderBy(x => x.Space.PositionOnAxis(space.Space))
-                .FirstOrDefault();
-            
-            if (quest != null)
-            {
-                quest.Space.RoomType = "Quest";
-                await SummarizeAsync(quest);
-                quest.Space.Domain = userSpace.Space.Id;
-                quest.LinkToSpace(userSpace, facets);
-                await Repository.UpdateAsync(quest.Space);
-            }
-        }
-
-        await Repository.UpdateAsync(userSpace.Space);
-        return userSpace;
-    }
-
-    private async Task UpdateSubspaceLocations(BlossomSpaceWithVector space, List<BlossomSpaceWithVector> facets, List<BlossomPostWithVector> allPosts)
-    {
-        allPosts.ForEach(x => x.LinkToSpace(space, facets));
-        await posts.UpdateAsync(allPosts.Select(x => x.Post));
-
-        var subspaces = await GetSpacesWithVectorsAsync(space.Space);
-        foreach (var subspace in subspaces)
-            subspace.LinkToSpace(space, facets);
-
-        await Repository.UpdateAsync(space.Space);
-        await Repository.UpdateAsync(subspaces.Select(x => x.Space));
+        //    if (quest != null)
+        //    {
+        //        quest.Space.RoomType = "Quest";
+        //        await SummarizeAsync(quest);
+        //        quest.Space.Domain = userSpace.Space.Id;
+        //        quest.LinkToSpace(userSpace, facets);
+        //        await Repository.UpdateAsync(quest.Space);
+        //    }
+        //}
     }
 
     public async Task SummarizeAsync(BlossomSpaceWithVector space)
@@ -335,6 +307,23 @@ public class BlossomSpaces(
                 .ToListAsync();
 
         return exactPosts;
+    }
+
+    private async Task<List<BlossomCoordinate>> GetCoordinatesAsync(string spaceId)
+    {
+        var space = await GetOrCreate(spaceId);
+        var allVectors = await vectors.GetAllAsync(space.Space);
+        
+        var axes = allVectors.Where(x => x.Type == "Facet")
+            .OrderByDescending(x => x.CoherenceWeight)
+            .Take(2)
+            .ToList();
+
+        // Z axis should be mapped to the space vector
+        axes.Add(space.Vector);
+
+        var objectVectors = allVectors.Except(axes).ToList();
+        return objectVectors.Select(x => x.ToCoordinate(axes)).ToList();
     }
 
     private async Task<List<BlossomPostWithVector>> GetPostsWithVectorsAsync(string spaceId, int take = 50)
@@ -399,6 +388,7 @@ public class BlossomSpaces(
         spaces.MapPost("{spaceId}/invite", InviteToSpaceAsync);
         spaces.MapGet("{spaceId}/posts", GetPostsAsync);
         spaces.MapGet("{spaceId}/simpleposts", GetSimplePostsAsync);
+        spaces.MapGet("{spaceId}/coordinates", GetCoordinatesAsync);
         spaces.MapGet("{spaceId}/index", IndexAsync);
         spaces.MapGet("{spaceId}/discover", Discover);
         spaces.MapPost("{spaceId}", PostAsync);

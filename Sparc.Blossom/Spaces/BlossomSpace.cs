@@ -12,7 +12,7 @@ public class BlossomSpaceSettings
 {
     public double HeadspaceVelocity { get; set; } = 5.0;
     public double SpaceGravity { get; set; } = 1.0;
-    public int MessageLookback { get; set; } = 5;
+    public int MessageLookback { get; set; } = 0;
     public double UserHeadspaceWeight { get; set; } = 0.02;
     public double MessageLookbackWeight { get; set; } = 0.02;
 }
@@ -41,7 +41,6 @@ public class BlossomSpace : BlossomEntity<string>
     public BlossomSpaceSettings Settings { get; set; } = new();
     public List<MetricHistory> ConsensusHistory { get; set; } = [];
     public List<MetricHistory> ConfidenceHistory { get; set; } = [];
-    public List<LinkedSpace> LinkedSpaces { get; set; } = [];
 
     [JsonConstructor]
     protected BlossomSpace() : base(Guid.NewGuid().ToString())
@@ -79,9 +78,6 @@ public class BlossomSpace : BlossomEntity<string>
 
     public void SetConsensus(IEnumerable<BlossomPost> messages)
     {
-        if (!messages.Any(x => x.IsLinked(this)))
-            return;
-
         //if (RoomType == "Facet")
         //{
         //    Consensus = messages.Average(x => x.LinkedSpace(Id)?.Alignment ?? 0);
@@ -108,26 +104,5 @@ public class BlossomSpace : BlossomEntity<string>
 
     public double ConfidenceDelta => ConfidenceHistory.Count < 2 ? 0 :
         ConfidenceHistory[0].Value - ConfidenceHistory[1].Value;
-
-    public bool IsLinked(BlossomSpace space) => LinkedSpaces.Any(x => x.SpaceId == space.SpaceId);
-    public LinkedSpace? LinkedSpace(string id) => LinkedSpaces.FirstOrDefault(x => x.SpaceId == id);
-
-    public void LinkToSpace(BlossomSpace space, double x, double y, double z, bool oneWay = false)
-    {
-        LinkedSpaces.RemoveAll(x => x.SpaceId == space.Id);
-        LinkedSpaces.Add(new(space, x, y, z));
-        if (!oneWay)
-        {
-            space.LinkedSpaces.RemoveAll(x => x.SpaceId == Id);
-            space.LinkedSpaces.Add(new(this, x, y, z));
-        }
-    }
-
-    public void ClearLinks(string type)
-    {
-        LinkedSpaces.RemoveAll(x => x.Type == type);
-    }
-
-    public double PositionOnAxis(BlossomSpace space) => LinkedSpace(space.Id)?.X ?? 0;
 }
 

@@ -52,7 +52,7 @@ public class BlossomVectors(
 
     public async Task UpdateAsync(BlossomVector vector) => await vectors.UpdateAsync(vector);
     public async Task UpdateAsync(IEnumerable<BlossomVector> blossomVectors) => await vectors.UpdateAsync(blossomVectors);
-
+    public async Task DeleteAsync(IEnumerable<BlossomVector> blossomVectors) => await vectors.DeleteAsync(blossomVectors);
     public async Task<List<BlossomVector>> SearchAsync(BlossomSpace space, string type, int count, bool furthestAway = false, bool includeVectors = false, double? similarityThreshold = null)
     {
         var spaceVector = await FindAsync(space)
@@ -123,13 +123,10 @@ public class BlossomVectors(
     }
 
     internal async Task<BlossomPostWithVector> VectorizeAsync(BlossomPost post, 
-        BlossomSpaceWithVector userSpace, double userSpaceWeight,
         List<BlossomPostWithVector> lookbackPosts, double lookbackWeight)
     {
         var translator = translators.OfType<OpenAITranslator>().First();
         var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post));
-
-        postWithVector.Vector.Add(userSpace.Vector, userSpaceWeight);
 
         foreach (var lookbackPost in lookbackPosts)
             postWithVector.Vector.Add(lookbackPost.Vector, lookbackWeight);
@@ -141,40 +138,6 @@ public class BlossomVectors(
         return postWithVector;
     }
 
-    internal async Task<BlossomSpaceWithVector> UpdateSpaceHeadspace(BlossomSpace space, BlossomPostWithVector post)
-    {
-        var spaceVector = await FindAsync(space);
-        if (spaceVector == null)
-        {
-            spaceVector = new BlossomVector(space, post.Vector.Vector);
-            await vectors.AddAsync(spaceVector);
-        }
-
-        spaceVector.Add(post.Vector, post.Post.CoherenceWeight * space.Settings.SpaceGravity);
-        await UpdateAsync(spaceVector);
-
-        var vectorizedSpace = new BlossomSpaceWithVector(space, spaceVector);
-        return vectorizedSpace;
-    }
-
-    internal async Task<BlossomVector> UpdateUserHeadspace(BlossomSpace space, BlossomPostWithVector post)
-    {
-        var userVector = await FindAsync(post.Post.SpaceId, post.Post.User!.Id);
-        if (userVector == null)
-        {
-            userVector = new BlossomVector(post.Post.SpaceId, "User", post.Post.User.Id, post.Vector.Vector);
-            await vectors.AddAsync(userVector);
-        }
-        else
-        {
-
-            userVector.Add(post.Vector, post.Post.CoherenceWeight * space.Settings.HeadspaceVelocity);
-            await UpdateAsync(userVector);
-        }
-
-        return userVector;
-    }
-
     internal async Task ClearAsync(string spaceId, string type)
     {
         var existing = await vectors.Query.Where(x => x.SpaceId == spaceId && x.Type == type).ToListAsync();
@@ -183,16 +146,9 @@ public class BlossomVectors(
     }
 
     internal async Task<List<BlossomVector>> GetAllAsync(BlossomSpace space, string? type = null)
-    {
-        var spaceIds = space.LinkedSpaces
-            .Where(x => type == null || x.Type == type)
-            .Select(x => x.SpaceId)
-            .ToList();
-        
-        spaceIds.Add(space.Id);
-
+    {        
         return await vectors.Query
-            .Where(x => x.SpaceId == space.Id && spaceIds.Contains(x.Id))
+            .Where(x => x.SpaceId == space.Id && (type == null || x.Type == type))
             .ToListAsync();
     }
 }

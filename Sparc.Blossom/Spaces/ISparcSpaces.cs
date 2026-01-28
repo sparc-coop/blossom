@@ -39,6 +39,9 @@ public interface ISparcSpaces
     [Get("/spaces/{spaceId}/posts")]
     Task<List<BlossomPost>> GetPostsAsync(string spaceId);
 
+    [Get("/spaces/{spaceId}/coordinates")]
+    Task<List<BlossomCoordinate>> GetCoordinatesAsync(string spaceId);
+
     [Post("/spaces/rooms/{spaceId}/send/{eventType}/{txnId}")]
     Task<BlossomEvent> SendMessageAsync(string spaceId, string eventType, string txnId, SendMessageRequest request);
 

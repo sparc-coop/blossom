@@ -45,6 +45,7 @@ public class BlossomVector : BlossomEntity<string>
     public double CoherenceWeight { get; set; } = 0;
     public double SimilarityToSpace { get; set; } = 0;
     public string? Text { get; set; }
+    public bool IsEmpty => Vector.Length == 0 || Vector.All(x => x == 0);
 
     public double DotProduct(BlossomVector other)
     {
@@ -174,12 +175,12 @@ public class BlossomVector : BlossomEntity<string>
 
     public void Add(BlossomVector vector, double scaleFactor = 1.0)
     {
-        if (vector.Vector.Length != Vector.Length)
-            return;
+        if (IsEmpty)
+            Point = new float[vector.Vector.Length];
         
         if (Point == null)
         {
-            Point = Vector.Length == 0 ? new float[vector.Vector.Length] : Vector;
+            Point = Vector;
         }
         else
         {
@@ -264,6 +265,22 @@ public class BlossomVector : BlossomEntity<string>
     private Vector<float> ToMathNetVector() => Vector<float>.Build.Dense(Vector);
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
         => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
+
+    public BlossomCoordinate ToCoordinate(List<BlossomVector> axes)
+    {
+        var facets = axes.Where(x => x.Type == "Facet").ToList();
+        var xAxis = facets.FirstOrDefault() ?? Basis(1536, 0);
+        var yAxis = facets.Skip(1).FirstOrDefault() ?? Basis(1536, 1);
+        var zAxis = axes.Except(facets).FirstOrDefault() ?? Basis(1536, 2);
+
+        return new BlossomCoordinate(
+            Id, 
+            Text ?? Id, 
+            Type,
+            PositionOnAxis(xAxis, 0, 1),
+            PositionOnAxis(yAxis, 0, 1),
+            PositionOnAxis(zAxis, 0, 1));
+    }
 
     public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain, int maxCount)
     {
