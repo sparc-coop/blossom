@@ -18,21 +18,21 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
     public MLContext Context { get; } = new MLContext(seed: 1);
     private PredictionEngine<BlossomVector, ClusteringPrediction>? Predictor;
 
-    public async Task<List<BlossomSpaceWithVector>> DivideAsync(BlossomSpace space, List<BlossomPostWithVector> posts)
+    public async Task<List<BlossomVector>> ClusterAsync(BlossomSpace space, List<BlossomPostWithVector> posts)
     {
-        await vectors.ClearAsync(space.SpaceId, "Cluster");
-        var root = BlossomVector.Average(posts.Select(x => x.Vector));
-        await vectors.UpdateAsync(root);
+        //var root = BlossomVector.Average(posts.Select(x => x.Vector));
+        //await vectors.UpdateAsync(root);
 
-        var model = Cluster(posts.Select(x => x.Vector).ToList());
+        var vectorsList = posts.Select(x => x.Vector).ToList();
+        var model = Cluster(vectorsList);
         Predictor = Context.Model.CreatePredictionEngine<BlossomVector, ClusteringPrediction>(model, inputSchemaDefinition: BlossomVectorSchema());
-        var spaces = await CreateSpaces(space, model);
-        await AssignAsync(posts, spaces);
+        var clusterVectors = await CreateClusterVectors(space, model);
+        await AssignAsync(posts, clusterVectors);
 
-        //foreach (var childSpace in spaces)
-        //    await SummarizeAsync(childSpace.Space, posts.Where(x => x.Post.IsLinked(childSpace.Space)).Select(x => x.Post));
+        foreach (var vec in clusterVectors)
+            await vectors.SummarizeAsync(vec);
 
-        return spaces;
+        return clusterVectors;
     }
 
     public record PostVector(BlossomPost Post, BlossomVector Vector);
@@ -109,7 +109,7 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
         return facets;
     }
 
-    public async Task AssignAsync(IEnumerable<BlossomPostWithVector> posts, List<BlossomSpaceWithVector> spaces)
+    public async Task AssignAsync(IEnumerable<BlossomPostWithVector> posts, List<BlossomVector> clusterVectors)
     {
         if (Predictor == null)
             throw new InvalidOperationException("Model has not been trained. Please run RunAsync first.");
@@ -117,8 +117,8 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
         foreach (var post in posts.Where(x => x.Vector != null))
         {
             var prediction = Predictor.Predict(post.Vector);
-            var predictedSpace = spaces[(int)prediction.PredictedLabel - 1];
-            //post.LinkToSpace(predictedSpace, [predictedSpace]);
+            var predictedCluster = clusterVectors[(int)prediction.PredictedLabel - 1];
+            post.Post.ConstellationId = predictedCluster.Id;
         }
     }
 
@@ -129,12 +129,12 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
         return kmeans.Fit(data);
     }
 
-    private async Task<List<BlossomSpaceWithVector>> CreateSpaces(BlossomSpace rootSpace, TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model)
+    private async Task<List<BlossomVector>> CreateClusterVectors(BlossomSpace rootSpace, TransformerChain<ClusteringPredictionTransformer<KMeansModelParameters>> model)
     {
+        await vectors.ClearAsync(rootSpace.Id, "Constellation");
         var centroids = ExtractCentroids(model);
-        var spaces = centroids.Select(x => new BlossomSpace(rootSpace, "Space")).ToList();
-        var result = centroids.Select((x, i) => new BlossomSpaceWithVector(spaces[i], x)).ToList();
-        await vectors.UpdateAsync(result.Select(x => x.Vector));
+        var result = centroids.Select(x => new BlossomVector(rootSpace.Id, "Constellation", Guid.NewGuid().ToString(), x)).ToList();
+        await vectors.UpdateAsync(result);
         return result;
     }
 
@@ -228,7 +228,7 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
 
     private static SchemaDefinition BlossomVectorSchema()
     {
-        var schema = SchemaDefinition.Create(typeof(BlossomVector), SchemaDefinition.Direction.Write);
+        var schema = SchemaDefinition.Create(typeof(BlossomVectorBase), SchemaDefinition.Direction.Write);
         schema[nameof(BlossomVector.Vector)].ColumnType = new VectorDataViewType(NumberDataViewType.Single, 1536);
         return schema;
     }

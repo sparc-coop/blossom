@@ -164,7 +164,7 @@ public class BlossomVectors(
                 post.CoherenceWeight = Math.Abs(rightVectors.First(x => x.Id == post.Id).SimilarityToSpace);
 
             var summary = await aiTranslator.SummarizeAsync(leftPosts, rightPosts);
-            vector.Summary = summary;
+            vector.SetSummary(summary);
         }
         else
         {
@@ -176,7 +176,8 @@ public class BlossomVectors(
                 .ToListAsync();
 
             var summary = await aiTranslator.SummarizeAsync(matchingPosts);
-            vector.Summary = summary;
+            vector.SetSummary(summary);
+            vector.Text = summary?.Name;
         }
 
         await UpdateAsync(vector);

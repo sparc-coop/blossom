@@ -5,7 +5,20 @@ using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Content;
 
-public class BlossomVector : BlossomEntity<string>
+// For schematization purposes for clustering model
+public class BlossomVectorBase : BlossomEntity<string>
+{
+    public string SpaceId { get; init; } = "";
+    public string Type { get; set; } = "Ephemeral";
+    public string Model { get; init; } = "";
+    public float[] Vector { get; set; } = [];
+    public float[]? Point { get; set; }
+    public double CoherenceWeight { get; set; } = 0;
+    public double SimilarityToSpace { get; set; } = 0;
+
+}
+
+public class BlossomVector : BlossomVectorBase
 {
     [JsonConstructor]
     public BlossomVector()
@@ -18,8 +31,8 @@ public class BlossomVector : BlossomEntity<string>
     }
 
     public BlossomVector(string spaceId, string type, string id, float[] vector) 
-        : base(id)
     {
+        Id = id;
         SpaceId = spaceId;
         Type = type;
         Model = "text-embedding-3-small";
@@ -37,16 +50,14 @@ public class BlossomVector : BlossomEntity<string>
     {
     }
 
-    public string SpaceId { get; init; } = "";
-    public string Type { get; set; } = "Ephemeral";
-    public string Model { get; init; } = "";
-    public float[] Vector { get; set; } = [];
-    public float[]? Point { get; set; }
-    public double CoherenceWeight { get; set; } = 0;
-    public double SimilarityToSpace { get; set; } = 0;
     public BlossomSummary? Summary { get; set; }
     public string? Text { get; set; }
     public bool IsEmpty => Vector.Length == 0 || Vector.All(x => x == 0);
+
+    public void SetSummary(BlossomSummary summary)
+    {
+        Summary = summary;
+    }
 
     public double DotProduct(BlossomVector other)
     {

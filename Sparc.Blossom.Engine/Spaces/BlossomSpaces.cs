@@ -231,6 +231,9 @@ public class BlossomSpaces(
 
         allPosts.Add(postWithVector);
         await faceter.FacetAsync(space, allPosts);
+        
+        var constellations = await faceter.ClusterAsync(space.Space, allPosts);
+        await posts.UpdateAsync(allPosts.Select(x => x.Post));
 
         return post;
     }

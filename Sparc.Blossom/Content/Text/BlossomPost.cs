@@ -19,6 +19,7 @@ public class BlossomPost : TextContent
     public string PostId { get { return Id; } set { Id = value; } }
     public List<SparcEntity> Entities { get; set; } = [];
     public double CoherenceWeight { get; set; } = 0;
+    public string? ConstellationId { get; set; }
 
     public async Task ExtractEntities(ISparcContent tovik, List<SparcEntityType> entityTypes)
     {
