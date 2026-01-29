@@ -18,16 +18,16 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
     public MLContext Context { get; } = new MLContext(seed: 1);
     private PredictionEngine<BlossomVector, ClusteringPrediction>? Predictor;
 
-    public async Task<List<BlossomVector>> ClusterAsync(BlossomSpace space, List<BlossomPostWithVector> posts)
+    public async Task<List<BlossomVector>> ClusterAsync(BlossomSpace space, List<BlossomPostWithVector> posts, List<BlossomVector> axes)
     {
         //var root = BlossomVector.Average(posts.Select(x => x.Vector));
         //await vectors.UpdateAsync(root);
 
-        var vectorsList = posts.Select(x => x.Vector).ToList();
-        var model = Cluster(vectorsList);
+        var coordinates = posts.Select(x => x.Vector.ProjectOntoAxes(axes)).ToList();
+        var model = Cluster(coordinates);
         Predictor = Context.Model.CreatePredictionEngine<BlossomVector, ClusteringPrediction>(model, inputSchemaDefinition: BlossomVectorSchema());
         var clusterVectors = await CreateClusterVectors(space, model);
-        await AssignAsync(posts, clusterVectors);
+        await AssignAsync(posts, clusterVectors, axes);
 
         foreach (var vec in clusterVectors)
             await vectors.SummarizeAsync(vec);
@@ -109,14 +109,14 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
         return facets;
     }
 
-    public async Task AssignAsync(IEnumerable<BlossomPostWithVector> posts, List<BlossomVector> clusterVectors)
+    public async Task AssignAsync(IEnumerable<BlossomPostWithVector> posts, List<BlossomVector> clusterVectors, List<BlossomVector> axes)
     {
         if (Predictor == null)
             throw new InvalidOperationException("Model has not been trained. Please run RunAsync first.");
 
         foreach (var post in posts.Where(x => x.Vector != null))
         {
-            var prediction = Predictor.Predict(post.Vector);
+            var prediction = Predictor.Predict(post.Vector.ProjectOntoAxes(axes));
             var predictedCluster = clusterVectors[(int)prediction.PredictedLabel - 1];
             post.Post.ConstellationId = predictedCluster.Id;
         }
@@ -229,7 +229,7 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
     private static SchemaDefinition BlossomVectorSchema()
     {
         var schema = SchemaDefinition.Create(typeof(BlossomVectorBase), SchemaDefinition.Direction.Write);
-        schema[nameof(BlossomVector.Vector)].ColumnType = new VectorDataViewType(NumberDataViewType.Single, 1536);
+        schema[nameof(BlossomVector.Vector)].ColumnType = new VectorDataViewType(NumberDataViewType.Single, 2);
         return schema;
     }
 

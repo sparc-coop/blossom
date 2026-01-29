@@ -280,6 +280,18 @@ public class BlossomVector : BlossomVectorBase
 
     public BlossomCoordinate ToCoordinate(List<BlossomVector> axes)
     {
+        if (Vector.Length <= 3)
+            return new BlossomCoordinate(
+                Id, 
+                Text ?? Id,
+                Type,
+                Vector.Length > 0 ? Vector[0] : 0,
+                Vector.Length > 1 ? Vector[1] : 0,
+                Vector.Length > 2 ? Vector[2] : 1)
+            {
+                Summary = Summary
+            };
+
         var xAxis = axes.FirstOrDefault(x => x.Type == "X") ?? Basis(1536, 0);
         var yAxis = axes.FirstOrDefault(x => x.Type == "Y") ?? Basis(1536, 1);
         var zAxis = axes.FirstOrDefault(x => x.Type == "Z") ?? Basis(1536, 2);
@@ -369,5 +381,11 @@ public class BlossomVector : BlossomVectorBase
         var vec = new float[dimensions];
         vec[index] = 1;
         return new(vec);
+    }
+
+    internal BlossomVector ProjectOntoAxes(List<BlossomVector> axes)
+    {
+        var coordinate = ToCoordinate(axes);
+        return ThisWith([(float)coordinate.X, (float)coordinate.Y]);
     }
 }

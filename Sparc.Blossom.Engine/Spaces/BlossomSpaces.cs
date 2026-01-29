@@ -11,7 +11,6 @@ public class BlossomSpaces(
     BlossomAggregateOptions<BlossomSpace> options,
     IRepository<BlossomPost> posts,
     IRepository<BlossomEvent> events,
-    IEnumerable<ITranslator> translators,
     IHttpContextAccessor http,
     BlossomVectors vectors,
     Contents contents,
@@ -230,9 +229,9 @@ public class BlossomSpaces(
         await posts.AddAsync(post);
 
         allPosts.Add(postWithVector);
-        await faceter.FacetAsync(space, allPosts);
+        var facets = await faceter.FacetAsync(space, allPosts);
         
-        var constellations = await faceter.ClusterAsync(space.Space, allPosts);
+        var constellations = await faceter.ClusterAsync(space.Space, allPosts, facets);
         await posts.UpdateAsync(allPosts.Select(x => x.Post));
 
         return post;
