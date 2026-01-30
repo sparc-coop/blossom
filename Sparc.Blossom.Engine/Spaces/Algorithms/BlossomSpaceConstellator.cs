@@ -5,16 +5,15 @@ namespace Sparc.Blossom.Spaces;
 
 public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<BlossomPost> postRepository)
 {
-    public async Task<List<BlossomVector>> ConstellateAsync(BlossomSpace rootSpace, List<BlossomPostWithVector> posts, List<BlossomVector> axes, int k = 5)
+    public async Task<List<BlossomVector>> ConstellateAsync(BlossomSpace rootSpace, List<BlossomPostWithVector> posts, List<BlossomVector> axes)
     {
         if (posts.Count < 3)
             return [];
 
         var coords = posts.Select(p => p.Vector.ProjectOntoAxes(axes)).ToList();
-        k = Math.Max(1, Math.Min(k, coords.Count - 1));
 
-        var edges = ComputeKnnEdges(coords, k);
-        var constellations = Kruskal(coords, edges);
+        var edges = ComputeKnnEdges(coords, rootSpace.Settings.ConstellationStrength);
+        var constellations = Kruskal(coords, edges, rootSpace.Settings.ConstellationThreshold);
         var constellationVectors = await CreateConstellations(rootSpace, posts, constellations);
 
         await vectors.UpdateAsync(posts.Select(p => p.Vector));
@@ -74,6 +73,7 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
                 distances.Add((j, distance));
             }
 
+            k = Math.Max(1, Math.Min(k, coords.Count - 1));
             foreach (var (idx, distance) in distances.OrderBy(x => x.distance).Take(k))
             {
                 var coordinate1 = coords[Math.Min(i, idx)];
@@ -86,7 +86,7 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
         return edges.OrderBy(e => e.Distance).ToList();
     }
 
-    static Dictionary<BlossomVector, List<BlossomVector>> Kruskal(List<BlossomVector> coords, List<KnnEdge> edges)
+    static Dictionary<BlossomVector, List<BlossomVector>> Kruskal(List<BlossomVector> coords, List<KnnEdge> edges, double threshold)
     {
         var n = coords.Count;
         var parent = new int[n];
@@ -117,7 +117,6 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
         // Determine cut threshold by finding the largest gap in MST edge weights
         //double threshold = mstEdges.Select(x => x.dist).Median() * 2;
         //double threshold = FindMstCutThreshold(mstEdges);
-        double threshold = 0.2;
 
         // Rebuild unions only for MST edges that are <= threshold (keeps small edges)
         for (int i = 0; i < n; i++) parent[i] = i;

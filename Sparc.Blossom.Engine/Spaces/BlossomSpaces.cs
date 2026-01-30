@@ -229,12 +229,7 @@ public class BlossomSpaces(
 
         await posts.AddAsync(post);
 
-        allPosts.Add(postWithVector);
-        var facets = await faceter.FacetAsync(space, allPosts);
-        
-        var axes = BlossomVector.ToAxes(space.Vector, facets);
-        var constellations = await constellator.ConstellateAsync(space.Space, allPosts, axes);
-
+        await SaveSpaceAsync(spaceId, space.Space);
         return post;
     }
 
@@ -243,6 +238,12 @@ public class BlossomSpaces(
         var existing = await GetOrCreate(spaceId);
         existing.Space.Settings = space.Settings;
         await Repository.UpdateAsync(existing.Space);
+
+        var allPosts = await GetPostsWithVectorsAsync(spaceId, 10000);
+        var facets = await faceter.FacetAsync(existing, allPosts);
+        
+        var axes = BlossomVector.ToAxes(existing.Vector, facets);
+        await constellator.ConstellateAsync(existing.Space, allPosts, axes);
     }
 
     private async Task ActivateQuest()

@@ -15,6 +15,8 @@ public class BlossomSpaceSettings
     public int MessageLookback { get; set; } = 0;
     public double UserHeadspaceWeight { get; set; } = 0.02;
     public double MessageLookbackWeight { get; set; } = 0.02;
+    public int ConstellationStrength { get; set; } = 5;
+    public double ConstellationThreshold { get; set; } = 0.2;
 }
     
 public class BlossomSpace : BlossomEntity<string>
