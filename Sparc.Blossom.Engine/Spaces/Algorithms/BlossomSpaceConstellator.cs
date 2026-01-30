@@ -1,5 +1,4 @@
-﻿using MathNet.Numerics.Statistics;
-using Sparc.Blossom.Content;
+﻿using Sparc.Blossom.Content;
 
 namespace Sparc.Blossom.Spaces;
 
@@ -19,8 +18,8 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
         await vectors.UpdateAsync(posts.Select(p => p.Vector));
         await postRepository.UpdateAsync(posts.Select(p => p.Post));
 
-        foreach (var vec in constellationVectors)
-            await vectors.SummarizeAsync(vec);
+        await Parallel.ForEachAsync(constellationVectors, async (vec, _) =>
+            await vectors.SummarizeAsync(vec));
 
         return constellationVectors;
     }
