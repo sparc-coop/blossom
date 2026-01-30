@@ -15,6 +15,7 @@ public class BlossomSpaces(
     BlossomVectors vectors,
     Contents contents,
     BlossomSpaceFaceter faceter,
+    BlossomSpaceConstellator constellator,
     SparcAuthenticator<BlossomUser> auth)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
@@ -231,7 +232,7 @@ public class BlossomSpaces(
         allPosts.Add(postWithVector);
         var facets = await faceter.FacetAsync(space, allPosts);
         
-        var constellations = await faceter.ConstellateAsync(space.Space, allPosts, facets);
+        var constellations = await constellator.ConstellateAsync(space.Space, allPosts, facets);
         await posts.UpdateAsync(allPosts.Select(x => x.Post));
 
         return post;
