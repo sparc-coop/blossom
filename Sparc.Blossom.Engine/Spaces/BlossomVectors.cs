@@ -166,6 +166,15 @@ public class BlossomVectors(
             var summary = await aiTranslator.SummarizeAsync(leftPosts, rightPosts);
             vector.SetSummary(summary);
         }
+        else if (vector.Type == "Constellation")
+        {
+            var matchingPosts = await posts.Query
+                .Where(x => x.Domain == vector.SpaceId && x.ConstellationId == vector.Id)
+                .ToListAsync();
+
+            var summary = await aiTranslator.SummarizeAsync(matchingPosts);
+            vector.SetSummary(summary);
+        }
         else
         {
             var closestVectors = await SearchAsync(vector, "Post", 10);
@@ -177,11 +186,12 @@ public class BlossomVectors(
 
             var summary = await aiTranslator.SummarizeAsync(matchingPosts);
             vector.SetSummary(summary);
-            vector.Text = summary?.Name;
         }
 
         await UpdateAsync(vector);
     }
+
+    
 
     internal async Task<List<BlossomVector>> GetAllAsync(BlossomSpace space, string? type = null)
     {        

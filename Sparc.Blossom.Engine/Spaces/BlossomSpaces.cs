@@ -232,8 +232,8 @@ public class BlossomSpaces(
         allPosts.Add(postWithVector);
         var facets = await faceter.FacetAsync(space, allPosts);
         
-        var constellations = await constellator.ConstellateAsync(space.Space, allPosts, facets);
-        await posts.UpdateAsync(allPosts.Select(x => x.Post));
+        var axes = BlossomVector.ToAxes(space.Vector, facets);
+        var constellations = await constellator.ConstellateAsync(space.Space, allPosts, axes);
 
         return post;
     }
@@ -281,18 +281,9 @@ public class BlossomSpaces(
     {
         var space = await GetOrCreate(spaceId);
         var allVectors = await vectors.GetAllAsync(space.Space);
-        
-        var axes = allVectors.Where(x => x.Type == "Facet")
-            .OrderByDescending(x => x.CoherenceWeight)
-            .Take(2)
-            .ToList();
 
-        // Z axis should be mapped to the space vector
-        axes.Add(space.Vector);
-        allVectors.Add(space.Vector);
-        axes.FirstOrDefault()?.Type = "X";
-        axes.Skip(1).FirstOrDefault()?.Type = "Y";
-        axes.Skip(2).FirstOrDefault()?.Type = "Z";
+        var facets = allVectors.Where(x => x.Type == "Facet").ToList();
+        var axes = BlossomVector.ToAxes(space.Vector, facets);
 
         return allVectors.Select(x => x.ToCoordinate(axes)).ToList();
     }

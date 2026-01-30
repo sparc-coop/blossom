@@ -54,9 +54,11 @@ public class BlossomVector : BlossomVectorBase
     public string? Text { get; set; }
     public bool IsEmpty => Vector.Length == 0 || Vector.All(x => x == 0);
 
-    public void SetSummary(BlossomSummary summary)
+    public void SetSummary(BlossomSummary? summary)
     {
         Summary = summary;
+        if (Type == "Constellation")
+            Text = summary?.Name;
     }
 
     public double DotProduct(BlossomVector other)
@@ -272,6 +274,22 @@ public class BlossomVector : BlossomVectorBase
             centeredVector[i] = Vector[i] - centerPoint.Vector[i];
 
         return new BlossomVector(centeredVector);
+    }
+
+    public static List<BlossomVector> ToAxes(BlossomVector answerVector, IEnumerable<BlossomVector> facets)
+    {
+        var axes = facets.Where(x => x.Type == "Facet")
+            .OrderByDescending(x => x.CoherenceWeight)
+            .Take(2)
+            .ToList();
+
+        // Z axis should be mapped to the space vector
+        axes.Add(answerVector);
+        axes.FirstOrDefault()?.Type = "X";
+        axes.Skip(1).FirstOrDefault()?.Type = "Y";
+        axes.Skip(2).FirstOrDefault()?.Type = "Z";
+
+        return axes;
     }
 
     private Vector<float> ToMathNetVector() => Vector<float>.Build.Dense(Vector);
