@@ -15,7 +15,9 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
         var edges = ComputeKnnEdges(coords, k);
         var constellations = Kruskal(coords, edges);
         var constellationVectors = await CreateConstellations(rootSpace, posts, constellations);
-        await postRepository.UpdateAsync(posts.Select(p => p.Post).ToList());
+
+        await vectors.UpdateAsync(posts.Select(p => p.Vector));
+        await postRepository.UpdateAsync(posts.Select(p => p.Post));
 
         foreach (var vec in constellationVectors)
             await vectors.SummarizeAsync(vec);
@@ -34,11 +36,15 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
             var centroid = BlossomVector.Average(constellation);
             var constellationVector = new BlossomVector(rootSpace.Id, "Constellation", Guid.NewGuid().ToString(), centroid.Vector);
             result.Add(constellationVector);
-            constellation.ForEach(x =>
+
+            for (var i = 0; i < constellation.Count; i++)
             {
-                var post = posts.First(y => y.Post.Id == x.Id);
+                var post = posts.First(y => y.Post.Id == constellation[i].Id);
+                post.Vector.ConstellationId = constellationVector.Id;
                 post.Post.ConstellationId = constellationVector.Id;
-            });
+                if (i < constellation.Count - 1)
+                    post.Vector.ConstellationConnectorId = constellation[i + 1].Id;
+            }
         }
 
         await vectors.UpdateAsync(result);

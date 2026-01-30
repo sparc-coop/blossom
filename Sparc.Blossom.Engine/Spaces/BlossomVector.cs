@@ -15,7 +15,8 @@ public class BlossomVectorBase : BlossomEntity<string>
     public float[]? Point { get; set; }
     public double CoherenceWeight { get; set; } = 0;
     public double SimilarityToSpace { get; set; } = 0;
-
+    public string? ConstellationId { get; set; }
+    public string? ConstellationConnectorId { get; set; }
 }
 
 public class BlossomVector : BlossomVectorBase
@@ -322,7 +323,8 @@ public class BlossomVector : BlossomVectorBase
             PositionOnAxis(yAxis),
             PositionOnAxis(zAxis))
         {
-            Summary = Summary
+            Summary = Summary,
+            ConnectTo = ConstellationConnectorId
         };
     }
 
