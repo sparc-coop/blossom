@@ -1,4 +1,5 @@
-﻿using Sparc.Blossom.Content;
+﻿using MathNet.Numerics.Statistics;
+using Sparc.Blossom.Content;
 
 namespace Sparc.Blossom.Spaces;
 
@@ -29,6 +30,12 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
     {
         // Create constellation vectors as simple average of coordinates per component
         await vectors.ClearAsync(rootSpace.Id, "Constellation");
+        posts.ForEach(x =>
+        {
+            x.Vector.ConstellationId = null;
+            x.Vector.ConstellationConnectorId = null;
+        });
+
         var result = new List<BlossomVector>();
         foreach (var root in constellations.Keys)
         {
@@ -108,7 +115,9 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
             return [];
 
         // Determine cut threshold by finding the largest gap in MST edge weights
-        double threshold = FindMstCutThreshold(mstEdges);
+        //double threshold = mstEdges.Select(x => x.dist).Median() * 2;
+        //double threshold = FindMstCutThreshold(mstEdges);
+        double threshold = 0.2;
 
         // Rebuild unions only for MST edges that are <= threshold (keeps small edges)
         for (int i = 0; i < n; i++) parent[i] = i;
@@ -137,18 +146,54 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
         return constellations;
     }
 
+    // Improved MST cut threshold:
+    // - Looks for the largest gap in sorted MST edge weights but requires the gap to be
+    //   significant either in absolute terms or as a ratio (relative jump). If the gap
+    //   is significant, use the midpoint between the two weights as the cut.
+    // - If no significant gap is found, fall back to a conservative percentile (75th)
+    //   to avoid connecting well-separated clusters via a few long edges.
     static double FindMstCutThreshold(List<(int a, int b, double dist)> mstEdges)
     {
         var weights = mstEdges.Select(e => e.dist).OrderBy(d => d).ToList();
-        double threshold = double.MaxValue;
-        double maxDiff = 0; int maxIdx = 0;
+        if (weights.Count == 0) return double.MaxValue;
+        if (weights.Count == 1) return weights[0];
+
+        double maxDiff = 0;
+        int maxIdx = 0;
+        double maxRatio = 0;
+
         for (int i = 1; i < weights.Count; i++)
         {
-            var diff = weights[i] - weights[i - 1];
-            if (diff > maxDiff) { maxDiff = diff; maxIdx = i; }
+            var prev = weights[i - 1];
+            var curr = weights[i];
+            var diff = curr - prev;
+            var ratio = prev > 0 ? curr / prev : double.PositiveInfinity;
+
+            if (diff > maxDiff)
+            {
+                maxDiff = diff;
+                maxIdx = i;
+            }
+            if (ratio > maxRatio)
+            {
+                maxRatio = ratio;
+            }
         }
-        if (maxDiff > 0)
-            threshold = weights[maxIdx - 1];
-        return threshold;
+
+        // Heuristics thresholds:
+        const double MinRatioForCut = 1.5; // relative jump required
+        double meanWeight = weights.Average();
+        double MinAbsDiffForCut = meanWeight * 0.5; // absolute gap required
+
+        if (maxRatio >= MinRatioForCut || maxDiff >= MinAbsDiffForCut)
+        {
+            // Choose the midpoint between the two weights that define the largest gap.
+            // This ensures edges strictly larger than the gap are cut.
+            return (weights[maxIdx - 1] + weights[maxIdx]) / 2.0;
+        }
+
+        // Fallback: conservative percentile (keeps smaller edges and prevents global linking)
+        int idx = Math.Max(0, (int)Math.Floor(weights.Count * 0.75));
+        return weights[idx];
     }
 }
