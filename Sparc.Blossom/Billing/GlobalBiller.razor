@@ -21,13 +21,13 @@
         @if (Intent != null)
         {
             <label>
-                <span>Would you like an email receipt? Enter your email here (optional)</span>
-                <input @bind="Order.Email" placeholder="Email" />
+                <span>Enter the domain name where you will be installing Tovik:</span>
+                <input @bind="Order.Domain" placeholder="example.com" required />
             </label>
 
             <label>
-                <span>Enter the domain name where you will be installing Tovik:</span>
-                <input @bind="Order.Domain" placeholder="example.com" required />
+                <span>Would you like an email receipt? Enter your email here (optional)</span>
+                <input @bind="Order.Email" placeholder="Email" />
             </label>
 
             <div id="error-message">@ErrorMessage</div>
