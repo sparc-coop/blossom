@@ -13,10 +13,15 @@ public class BlossomSpaceWithVector(BlossomSpace space, BlossomVector vector)
 
     public void Add(BlossomPostWithVector post)
     {
-        var weight = Vector.IsEmpty 
-            ? 1 
-            : post.Post.CoherenceWeight * 
-                (Vector.Type == "User" ? Space.Settings.HeadspaceVelocity : Space.Settings.SpaceGravity);
-        Vector.Add(post.Vector, weight);
+        if (Vector.IsEmpty)
+            Vector.Update(post.Vector, 1.0);
+        else
+        {
+            var projectionOntoAxis = post.Vector.DotProduct(Vector);
+            var projectionOntoOrthogonalSubspace = post.Vector.Subtract(Vector.Multiply(projectionOntoAxis)).Magnitude();
+            var weight = Math.Abs(projectionOntoAxis) / (Math.Abs(projectionOntoAxis) + projectionOntoOrthogonalSubspace);
+
+            Vector.Update(post.Vector, weight);
+        }
     }
 }

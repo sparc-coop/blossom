@@ -122,7 +122,7 @@ public class BlossomVectors(
         var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post));
 
         foreach (var lookbackPost in lookbackPosts)
-            postWithVector.Vector.Add(lookbackPost.Vector, lookbackWeight);
+            postWithVector.Vector.Update(lookbackPost.Vector, lookbackWeight);
 
         var neighbors = await SearchAsync(postWithVector.Vector, "Post", 20, includeVectors: true);
         postWithVector.UpdateCoherence(neighbors);

@@ -137,6 +137,18 @@ public class BlossomVector : BlossomVectorBase
         return newAxis;
     }
 
+    public BlossomVector Add(BlossomVector other)
+    {
+        if (IsEmpty)
+            return ThisWith(other.Vector);
+        
+        var result = new float[Vector.Length];
+        for (int i = 0; i < Vector.Length; i++)
+            result[i] = Vector[i] + other.Vector[i];
+
+        return ThisWith(result);
+    }
+
     public BlossomVector Subtract(BlossomVector other)
     {
         var result = new float[Vector.Length];
@@ -188,22 +200,19 @@ public class BlossomVector : BlossomVectorBase
     public BlossomVector ThisWith(float[] other) => new(SpaceId, Type, Id, other);
     public double Length => Math.Sqrt(Vector.Sum(x => x * x));
 
-    public void Add(BlossomVector vector, double scaleFactor = 1.0)
+    public void Update(BlossomVector vector, double scaleFactor = 1.0)
     {
         if (IsEmpty)
-            Point = new float[vector.Vector.Length];
-        
-        if (Point == null)
         {
-            Point = Vector;
+            Point = vector.Vector;
+            Vector = Normalize(Point);
         }
         else
         {
-            for (var i = 0; i < Point.Length; i++)
-                Point[i] = Point[i] + (vector.Vector[i] * (float)scaleFactor);
+            Point = Multiply(1.0 - scaleFactor).Add(vector.Multiply(scaleFactor)).Vector;
+            Vector = Normalize(Point);
         }
-
-        Vector = Normalize(Point);
+            
     }
 
     public BlossomVector InterpolateTowards(BlossomVector target, double alpha)
