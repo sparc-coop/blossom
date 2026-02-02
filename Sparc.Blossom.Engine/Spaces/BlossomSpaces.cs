@@ -282,6 +282,7 @@ public class BlossomSpaces(
     {
         var space = await GetOrCreate(spaceId);
         var allVectors = await vectors.GetAllAsync(space.Space);
+        allVectors.Add(space.Vector);
 
         var facets = allVectors.Where(x => x.Type == "Facet").ToList();
         var axes = BlossomVector.ToAxes(space.Vector, facets);
