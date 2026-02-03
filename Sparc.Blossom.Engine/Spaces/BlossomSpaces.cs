@@ -211,8 +211,9 @@ public class BlossomSpaces(
 
     private async Task<BlossomPost> PostAsync(string spaceId, BlossomPost post)
     {
-        var space = await GetOrCreate(post.SpaceId);
+        var space = await GetOrCreate(post.SpaceId, "Question");
         var userSpace = await GetOrCreate(space.Space, post.User!.Id, "User");
+        var isFirstPost = space.Vector.IsEmpty;
 
         var allPosts = await GetPostsWithVectorsAsync(spaceId, 10000);
         var lookbackPosts = allPosts.OrderByDescending(x => x.Post.Timestamp)
@@ -221,15 +222,26 @@ public class BlossomSpaces(
 
         var postWithVector = await vectors.VectorizeAsync(post, lookbackPosts, space.Space.Settings.MessageLookbackWeight);
 
-        space.Add(postWithVector);
-        await vectors.UpdateAsync(space.Vector);
+        if (!isFirstPost && space.Space.RoomType != "Question")
+        {
+            space.Add(postWithVector);
+            await vectors.UpdateAsync(space.Vector);
+        }
 
         userSpace.Add(postWithVector);
         await vectors.UpdateAsync(userSpace.Vector);
 
-        await posts.AddAsync(post);
+        if (isFirstPost)
+        {
+            // First post in the space, generate exploratory axes based on the initial question
+            await vectors.InitializeSpaceAsync(space, postWithVector);
+        }
+        else
+        {
+            await posts.AddAsync(post);
+            await SaveSpaceAsync(spaceId, space.Space);
+        }
 
-        await SaveSpaceAsync(spaceId, space.Space);
         return post;
     }
 
@@ -242,7 +254,7 @@ public class BlossomSpaces(
         var allPosts = await GetPostsWithVectorsAsync(spaceId, 10000);
         var facets = await faceter.FacetAsync(existing, allPosts);
         
-        var axes = BlossomVector.ToAxes(existing.Vector, facets);
+        var axes = await vectors.GetAxesAsync(existing);
         await constellator.ConstellateAsync(existing.Space, allPosts, axes);
     }
 
@@ -284,10 +296,8 @@ public class BlossomSpaces(
         var allVectors = await vectors.GetAllAsync(space.Space);
         allVectors.Add(space.Vector);
 
-        var facets = allVectors.Where(x => x.Type == "Facet").ToList();
-        var axes = BlossomVector.ToAxes(space.Vector, facets);
-
-        return allVectors.Select(x => x.ToCoordinate(axes)).ToList();
+        var axes = await vectors.GetAxesAsync(space, allVectors);
+        return allVectors.Select(x => x.ToCoordinate(axes, allVectors.First(x => x.Type == "Post"))).ToList();
     }
 
     private async Task<List<BlossomPostWithVector>> GetPostsWithVectorsAsync(string spaceId, int take = 50)

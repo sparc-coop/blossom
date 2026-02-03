@@ -54,6 +54,7 @@ public class BlossomVector : BlossomVectorBase
     public BlossomSummary? Summary { get; set; }
     public string? Text { get; set; }
     public bool IsEmpty => Vector.Length == 0 || Vector.All(x => x == 0);
+    bool IsAxisType => Type == "X" || Type == "Y" || Type == "Z" || Type == "Facet";
 
     public void SetSummary(BlossomSummary? summary)
     {
@@ -130,10 +131,10 @@ public class BlossomVector : BlossomVectorBase
         return (rawPosition - axisMin.Value) / axisLength;
     }
 
-    internal BlossomVector OrthogonalizedAxis(BlossomVector axis, BlossomVector orthogonalAxis)
+    internal BlossomVector Orthogonalize(BlossomVector axis)
     {
-        var dotProduct = axis.DotProduct(orthogonalAxis);
-        var newAxis = axis.Subtract(orthogonalAxis.Multiply(dotProduct)).Normalize();
+        var dotProduct = DotProduct(axis);
+        var newAxis = Subtract(axis.Multiply(dotProduct)).Normalize();
         return newAxis;
     }
 
@@ -197,7 +198,7 @@ public class BlossomVector : BlossomVectorBase
         return ThisWith(Point).Normalize();
     }
 
-    public BlossomVector ThisWith(float[] other) => new(SpaceId, Type, Id, other);
+    public BlossomVector ThisWith(float[] other) => new(SpaceId, Type, Id, other) {  Text = Text };
     public double Length => Math.Sqrt(Vector.Sum(x => x * x));
 
     public void Update(BlossomVector vector, double scaleFactor = 1.0)
@@ -283,30 +284,32 @@ public class BlossomVector : BlossomVectorBase
         for (int i = 0; i < Vector.Length; i++)
             centeredVector[i] = Vector[i] - centerPoint.Vector[i];
 
-        return new BlossomVector(centeredVector);
+        return ThisWith(centeredVector);
     }
 
-    public static List<BlossomVector> ToAxes(BlossomVector answerVector, IEnumerable<BlossomVector> facets)
+    public static List<BlossomVector> ToAxes(BlossomVector answerVector, IEnumerable<BlossomVector> candidates)
     {
-        var axes = facets.Where(x => x.Type == "Facet")
+        var facets = candidates.Where(x => x.Type == "Facet")
             .OrderByDescending(x => x.CoherenceWeight)
             .Take(2)
             .ToList();
 
-        // Z axis should be mapped to the space vector
-        axes.Add(answerVector);
-        axes.FirstOrDefault()?.Type = "X";
-        axes.Skip(1).FirstOrDefault()?.Type = "Y";
-        axes.Skip(2).FirstOrDefault()?.Type = "Z";
+        var x = candidates.FirstOrDefault(x => x.Type == "X") ?? facets.FirstOrDefault() ?? Basis(1536, 0);
+        var y = candidates.FirstOrDefault(x => x.Type == "Y") ?? answerVector;
+        var z = candidates.FirstOrDefault(x => x.Type == "Z");
 
-        return axes;
+        x.Type = "X";
+        y.Type = "Y";
+        z?.Type = "Z";
+
+        return z == null ? [x, y] : [x, y, z];
     }
 
     private Vector<float> ToMathNetVector() => Vector<float>.Build.Dense(Vector);
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
         => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
 
-    public BlossomCoordinate ToCoordinate(List<BlossomVector> axes)
+    public BlossomCoordinate ToCoordinate(List<BlossomVector> axes, BlossomVector? origin = null)
     {
         if (Vector.Length <= 3)
             return new BlossomCoordinate(
@@ -320,21 +323,33 @@ public class BlossomVector : BlossomVectorBase
                 Summary = Summary
             };
 
-        var xAxis = axes.FirstOrDefault(x => x.Type == "X") ?? Basis(1536, 0);
-        var yAxis = axes.FirstOrDefault(x => x.Type == "Y") ?? Basis(1536, 1);
-        var zAxis = axes.FirstOrDefault(x => x.Type == "Z") ?? Basis(1536, 2);
+        var xAxis = axes.First(x => x.Type == "X");
+        var yAxis = axes.First(x => x.Type == "Y");
+        var zAxis = axes.FirstOrDefault(x => x.Type == "Z");
 
-        return new BlossomCoordinate(
-            Id, 
-            Text ?? Id,
-            Type,
-            PositionOnAxis(xAxis),
-            PositionOnAxis(yAxis),
-            PositionOnAxis(zAxis))
+        var centered = origin == null || IsAxisType ? this : Center(origin);
+
+        var x = centered.PositionOnAxis(xAxis);
+        var y = centered.PositionOnAxis(yAxis);
+        var z = zAxis == null ? 1 - centered.DistanceFromPlane(xAxis, yAxis) : centered.PositionOnAxis(zAxis);
+
+        return new BlossomCoordinate(Id, Text ?? Id, Type, x, y, z)
         {
             Summary = Summary,
             ConnectTo = ConstellationConnectorId
         };
+    }
+
+    private BlossomVector Plane(BlossomVector xAxis, BlossomVector yAxis)
+    {
+        var plane = xAxis.Multiply(PositionOnAxis(xAxis)).Add(yAxis.Multiply(PositionOnAxis(yAxis)));
+        return plane;
+    }
+
+    private double DistanceFromPlane(BlossomVector xAxis, BlossomVector yAxis)
+    {
+        var diff = Subtract(Plane(xAxis, yAxis)).Magnitude();
+        return diff;
     }
 
     public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain, int maxCount)

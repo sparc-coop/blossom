@@ -116,13 +116,14 @@ public class BlossomVectors(
     }
 
     internal async Task<BlossomPostWithVector> VectorizeAsync(BlossomPost post, 
-        List<BlossomPostWithVector> lookbackPosts, double lookbackWeight)
+        List<BlossomPostWithVector>? lookbackPosts = null, double lookbackWeight = 0)
     {
         var translator = translators.OfType<OpenAITranslator>().First();
         var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post));
 
-        foreach (var lookbackPost in lookbackPosts)
-            postWithVector.Vector.Update(lookbackPost.Vector, lookbackWeight);
+        if (lookbackPosts != null)
+            foreach (var lookbackPost in lookbackPosts)
+                postWithVector.Vector.Update(lookbackPost.Vector, lookbackWeight);
 
         var neighbors = await SearchAsync(postWithVector.Vector, "Post", 20, includeVectors: true);
         postWithVector.UpdateCoherence(neighbors);
@@ -191,12 +192,48 @@ public class BlossomVectors(
         await UpdateAsync(vector);
     }
 
-    
+    public async Task<List<BlossomVector>> InitializeSpaceAsync(BlossomSpaceWithVector space, BlossomPostWithVector question)
+    {
+        var aiTranslator = translators.OfType<AITranslator>().First();
+        var discovery = new AxisDiscoveryQuestion(question.Post);
+        var summary = await aiTranslator.AskAsync(discovery);
+
+        var chiefTension = new TextContent(question.Post.Domain, question.Post.SpaceId, question.Post.Language, summary.Value!.ChiefTension);
+        var answer = new TextContent(question.Post.Domain, question.Post.SpaceId, question.Post.Language, summary.Value!.Answer);
+
+        var axes = await aiTranslator.VectorizeAsync([chiefTension, answer]);
+        var x = axes.First();
+        var answerVector = axes.Last();
+        var y = answerVector.Subtract(question.Vector);
+        x = x.Orthogonalize(y);
+
+        x.Type = "Facet";
+        space.Vector = space.Vector.ThisWith(y.Vector);
+
+        await UpdateAsync([x, space.Vector]);
+
+        return [x, space.Vector];
+    }
 
     internal async Task<List<BlossomVector>> GetAllAsync(BlossomSpace space, string? type = null)
     {        
+        if (type == "Axis")
+        {
+            List<string> axisTypes = ["X", "Y", "Z", "Facet"];
+            return await vectors.Query
+                .Where(x => x.SpaceId == space.Id && axisTypes.Contains(x.Type))
+                .ToListAsync();
+        }
+        
         return await vectors.Query
             .Where(x => x.SpaceId == space.Id && (type == null || x.Type == type))
             .ToListAsync();
+    }
+
+    internal async Task<List<BlossomVector>> GetAxesAsync(BlossomSpaceWithVector space, List<BlossomVector>? axisCandidates = null)
+    {
+        axisCandidates ??= await GetAllAsync(space.Space, "Axis");
+
+        return BlossomVector.ToAxes(space.Vector, axisCandidates);
     }
 }

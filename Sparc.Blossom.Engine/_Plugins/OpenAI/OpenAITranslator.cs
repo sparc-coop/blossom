@@ -3,7 +3,6 @@
 using OpenAI;
 using OpenAI.Responses;
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Sparc.Blossom.Content;
 
@@ -23,10 +22,19 @@ internal class OpenAITranslator(OpenAIClient client)
         };
     }
 
-    public override async Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages, int lastX, int lookback)
+    public override async Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages, int? lastX = null, int? lookback = null)
     {
         var model = "text-embedding-3-small";
         var embeddings = client.GetEmbeddingClient(model);
+
+        if (!lastX.HasValue)
+        {
+            var output = await embeddings.GenerateEmbeddingsAsync(messages.Select(x => x.Text));
+            return output.Value.Select((output, index) => new BlossomVector(messages.ElementAt(index).SpaceId, "Post", messages.ElementAt(index).Id, output.ToFloats().ToArray())
+            {
+                Text = messages.ElementAt(index).Text
+            });
+        }
 
         var batchSize = 1000;
         var offset = 0;
@@ -41,8 +49,8 @@ internal class OpenAITranslator(OpenAIClient client)
                 .Take(batchSize)
                 .ToList();
 
-            var inputs = batch.Select((x, i) => MessagesWithContext(x.Text, batch, lookback, i))
-                .TakeLast(lastX)
+            var inputs = batch.Select((x, i) => MessagesWithContext(x.Text, batch, lookback ?? 0, i))
+                .TakeLast(lastX ?? 0)
                 .ToList();
 
             if (!inputs.Any())
