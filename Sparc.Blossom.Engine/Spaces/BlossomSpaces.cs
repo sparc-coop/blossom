@@ -222,12 +222,6 @@ public class BlossomSpaces(
 
         var postWithVector = await vectors.VectorizeAsync(post, lookbackPosts, space.Space.Settings.MessageLookbackWeight);
 
-        if (!isFirstPost && space.Space.RoomType != "Question")
-        {
-            space.Add(postWithVector);
-            await vectors.UpdateAsync(space.Vector);
-        }
-
         userSpace.Add(postWithVector);
         await vectors.UpdateAsync(userSpace.Vector);
 
@@ -238,6 +232,9 @@ public class BlossomSpaces(
         }
         else
         {
+            space.Add(postWithVector);
+            await vectors.UpdateAsync(space.Vector);
+
             await posts.AddAsync(post);
             await SaveSpaceAsync(spaceId, space.Space);
         }

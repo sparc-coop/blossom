@@ -192,27 +192,25 @@ public class BlossomVectors(
         await UpdateAsync(vector);
     }
 
-    public async Task<List<BlossomVector>> InitializeSpaceAsync(BlossomSpaceWithVector space, BlossomPostWithVector question)
+    public async Task InitializeSpaceAsync(BlossomSpaceWithVector space, BlossomPostWithVector question)
     {
         var aiTranslator = translators.OfType<AITranslator>().First();
         var discovery = new AxisDiscoveryQuestion(question.Post);
-        var summary = await aiTranslator.AskAsync(discovery);
+        var statements = await aiTranslator.AskAsync(discovery);
 
-        var chiefTension = new TextContent(question.Post.Domain, question.Post.SpaceId, question.Post.Language, summary.Value!.ChiefTension);
-        var answer = new TextContent(question.Post.Domain, question.Post.SpaceId, question.Post.Language, summary.Value!.Answer);
+        var text = statements.Value!.SocraticStatements.Select(x => new TextContent(
+            question.Post.Domain, 
+            question.Post.SpaceId, 
+            question.Post.Language, 
+            x)).ToList();
 
-        var axes = await aiTranslator.VectorizeAsync([chiefTension, answer]);
-        var x = axes.First();
-        var answerVector = axes.Last();
-        var y = answerVector.Subtract(question.Vector);
-        x = x.Orthogonalize(y);
+        var vectors = await aiTranslator.VectorizeAsync(text);
+        var principalComponents = BlossomVector.ToPrincipalComponents(vectors);
+        await UpdateAsync(principalComponents);
 
-        x.Type = "Facet";
-        space.Vector = space.Vector.ThisWith(y.Vector);
-
-        await UpdateAsync([x, space.Vector]);
-
-        return [x, space.Vector];
+        var answerVector = BlossomVector.Average(vectors, v => v.AlignmentWith(question.Vector));
+        space.Vector = space.Vector.ThisWith(answerVector.Vector);
+        await UpdateAsync(space.Vector);
     }
 
     internal async Task<List<BlossomVector>> GetAllAsync(BlossomSpace space, string? type = null)

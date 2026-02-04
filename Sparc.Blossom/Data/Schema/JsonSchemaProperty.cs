@@ -27,7 +27,13 @@ public record JsonSchemaProperty
             Properties = new JsonSchema(type);
 
         if (type.IsGenericType && type.GenericTypeArguments[0] != null)
-            Items = new JsonSchema(type.GenericTypeArguments[0]);
+        {
+            var subType = JsonType(type.GenericTypeArguments[0]);
+            if (subType == "object" || subType == "array")
+                Items = new JsonSchema(type.GenericTypeArguments[0]);
+            else
+                Items = new JsonSchema(subType);
+        }
 
         if (type == typeof(DateTime) || type == typeof(DateTime?))
             Description = " Format in ISO 8601.";

@@ -166,10 +166,10 @@ public class BlossomVector : BlossomVectorBase
         return ThisWith(result);
     }
 
-    public double? AlignmentWith(BlossomVector other)
+    public double AlignmentWith(BlossomVector other)
     {
         var similarity = SimilarityTo(other);
-        return similarity == null ? null : Math.Abs(similarity.Value);
+        return similarity == null ? 0 : Math.Abs(similarity.Value);
     }
 
     public double? DissentFrom(BlossomVector other)
@@ -184,8 +184,7 @@ public class BlossomVector : BlossomVectorBase
         foreach (var vec in vectors)
         {
             var dist = 1 - vec.AlignmentWith(centerPoint);
-            if (dist != null)
-                variance += dist.Value * dist.Value;
+            variance += dist * dist;
         }
         return variance / vectors.Count;
     }
@@ -295,8 +294,8 @@ public class BlossomVector : BlossomVectorBase
             .ToList();
 
         var x = candidates.FirstOrDefault(x => x.Type == "X") ?? facets.FirstOrDefault() ?? Basis(1536, 0);
-        var y = candidates.FirstOrDefault(x => x.Type == "Y") ?? answerVector;
-        var z = candidates.FirstOrDefault(x => x.Type == "Z");
+        var y = candidates.FirstOrDefault(x => x.Type == "Y") ?? facets.Skip(1).FirstOrDefault() ?? Basis(1536, 1);
+        var z = candidates.FirstOrDefault(x => x.Type == "Z") ?? answerVector;
 
         x.Type = "X";
         y.Type = "Y";
@@ -352,7 +351,7 @@ public class BlossomVector : BlossomVectorBase
         return diff;
     }
 
-    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain, int maxCount)
+    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain = 1, int maxCount = 3)
     {
         var mean = Average(vectors);
         var centeredVectors = vectors.Select(v => v.Center(mean)).ToList();
@@ -401,7 +400,7 @@ public class BlossomVector : BlossomVectorBase
 
         var sum = Sum(neighbors);
         var localSpace = sum.Normalize();
-        var alignment = AlignmentWith(localSpace) ?? 0;
+        var alignment = AlignmentWith(localSpace);
 
         // local agreement: weighted average of similarity(this, neighbor) using sim itself as the weight
         // also stabilize by neighbor.CoherenceWeight so strong neighbors contribute more

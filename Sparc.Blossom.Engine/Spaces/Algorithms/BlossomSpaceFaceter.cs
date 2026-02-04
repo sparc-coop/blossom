@@ -17,7 +17,7 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
         foreach (var facet in facets)
         {
             var bestMatch = existingFacets
-                .OrderByDescending(x => x.AlignmentWith(facet) ?? 0)
+                .OrderByDescending(x => x.AlignmentWith(facet))
                 .FirstOrDefault();
 
             if (bestMatch != null)
