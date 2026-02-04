@@ -308,7 +308,7 @@ public class BlossomVector : BlossomVectorBase
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
         => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
 
-    public BlossomCoordinate ToCoordinate(List<BlossomVector> axes, BlossomVector? origin = null)
+    public BlossomCoordinate ToCoordinate(List<BlossomVector> axes)
     {
         if (Vector.Length <= 3)
             return new BlossomCoordinate(
@@ -326,11 +326,9 @@ public class BlossomVector : BlossomVectorBase
         var yAxis = axes.First(x => x.Type == "Y");
         var zAxis = axes.FirstOrDefault(x => x.Type == "Z");
 
-        var centered = origin == null || IsAxisType ? this : Center(origin);
-
-        var x = centered.PositionOnAxis(xAxis);
-        var y = centered.PositionOnAxis(yAxis);
-        var z = zAxis == null ? 1 - centered.DistanceFromPlane(xAxis, yAxis) : centered.PositionOnAxis(zAxis);
+        var x = PositionOnAxis(xAxis);
+        var y = PositionOnAxis(yAxis);
+        var z = zAxis == null ? 1 - DistanceFromPlane(xAxis, yAxis) : PositionOnAxis(zAxis);
 
         return new BlossomCoordinate(Id, Text ?? Id, Type, x, y, z)
         {

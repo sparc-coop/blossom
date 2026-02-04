@@ -294,7 +294,7 @@ public class BlossomSpaces(
         allVectors.Add(space.Vector);
 
         var axes = await vectors.GetAxesAsync(space, allVectors);
-        return allVectors.Select(x => x.ToCoordinate(axes, allVectors.First(x => x.Type == "Post"))).ToList();
+        return allVectors.Select(x => x.ToCoordinate(axes)).ToList();
     }
 
     private async Task<List<BlossomPostWithVector>> GetPostsWithVectorsAsync(string spaceId, int take = 50)
