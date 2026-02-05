@@ -58,15 +58,17 @@ public class BlossomVectors(
     { 
         var top = furthestAway ? 10000 : count;
         var includeVectorClause = includeVectors ? ", c.Vector" : string.Empty;
+        var spaceToSearch = vector.Type == "Post" ? vector.SpaceId : vector.Id;
+
 
         var query = $@"
             SELECT TOP {top} c.id, c.Type, c.Text, c.CoherenceWeight, VectorDistance(c.Vector, {vector}) as SimilarityToSpace, c.TargetUrl{includeVectorClause}
             FROM c
-            WHERE c.SpaceId = '{vector.SpaceId}' AND c.Type = '{type}'
+            WHERE c.SpaceId = '{spaceToSearch}' AND c.Type = '{type}'
             ORDER BY VectorDistance(c.Vector, {vector})";
 
         var cosmosVectors = vectors as CosmosDbSimpleRepository<BlossomVector>;
-        var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<BlossomVector>(query, vector.SpaceId);
+        var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<BlossomVector>(query, spaceToSearch);
 
         if (furthestAway)
             similarVectorsInSpace = similarVectorsInSpace.TakeLast(count).ToList();
@@ -182,7 +184,7 @@ public class BlossomVectors(
             var ids = closestVectors.Select(x => x.Id).ToList();
 
             var matchingPosts = await posts.Query
-                .Where(x => x.Domain == vector.SpaceId && ids.Contains(x.Id))
+                .Where(x => x.Domain == vector.Id && ids.Contains(x.Id))
                 .ToListAsync();
 
             var summary = await aiTranslator.SummarizeAsync(matchingPosts);
