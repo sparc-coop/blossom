@@ -253,6 +253,8 @@ public class BlossomSpaces(
         
         var axes = await vectors.GetAxesAsync(existing);
         await constellator.ConstellateAsync(existing.Space, allPosts, axes);
+
+        //await vectors.CalculateHintAsync(existing, allPosts);
     }
 
     private async Task ActivateQuest()

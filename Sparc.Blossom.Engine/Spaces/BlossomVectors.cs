@@ -234,4 +234,23 @@ public class BlossomVectors(
 
         return BlossomVector.ToAxes(space.Vector, axisCandidates);
     }
+
+    //internal async Task CalculateHintAsync(BlossomSpaceWithVector space, BlossomSpaceWithVector userSpace, List<BlossomPostWithVector> allPosts)
+    //{
+    //    var answer = space.Vector;
+    //    var journey = space.Vector.Subtract(userSpace.Vector);
+    //    var alignedPosts = allPosts
+    //        .Select(p => new
+    //        {
+    //            Post = p,
+    //            Alignment = p.Vector.AlignmentWith(journey)
+    //        })
+    //        .Where(x => x.Alignment > 0)
+    //        .OrderByDescending(x => x.Alignment)
+    //        .Take(5)
+    //        .ToList();
+
+    //    var aiTranslator = translators.OfType<AITranslator>().First();
+    //    var question = new AxisHintQuestion(space.Space, userSpace.Space, alignedPosts.Select(x => x.Post.Post).ToList());
+    //}
 }
