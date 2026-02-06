@@ -1,4 +1,5 @@
-﻿using Sparc.Blossom.Content;
+﻿using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
@@ -6,7 +7,8 @@ namespace Sparc.Blossom.Spaces;
 public class BlossomVectors(
     IRepository<BlossomVector> vectors, 
     IRepository<BlossomPost> posts,
-    IEnumerable<ITranslator> translators)
+    IEnumerable<ITranslator> translators,
+    FriendlyId friendlyId)
 {
     public async Task<BlossomVector?> FindAsync(string spaceId, string id)
         => await vectors.FindAsync(spaceId, id);
@@ -210,8 +212,15 @@ public class BlossomVectors(
         var principalComponents = BlossomVector.ToPrincipalComponents(vectors);
         await UpdateAsync(principalComponents);
 
-        var answerVector = BlossomVector.Average(vectors, v => v.AlignmentWith(question.Vector));
+        var guides = vectors.ToList();
+        foreach (var vector in guides)
+            vector.Type = "Guide";
+        await UpdateAsync(guides);
+
+        var answerVector = BlossomVector.Average(vectors, v => v.AlignmentWith(question.Vector)).Normalize();
         space.Vector = space.Vector.ThisWith(answerVector.Vector);
+        space.Vector.SetSummary(new(friendlyId.Create(), question.Post.Text ?? "", "", null, null));
+        space.Space.SetSummary(space.Vector.Summary);
         await UpdateAsync(space.Vector);
     }
 

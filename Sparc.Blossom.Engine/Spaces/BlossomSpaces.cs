@@ -229,6 +229,7 @@ public class BlossomSpaces(
         {
             // First post in the space, generate exploratory axes based on the initial question
             await vectors.InitializeSpaceAsync(space, postWithVector);
+            await Repository.UpdateAsync(space.Space);
         }
         else
         {
