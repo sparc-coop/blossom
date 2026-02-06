@@ -202,7 +202,7 @@ public class BlossomSpaces(
         await Repository.DeleteAsync(existing);
 
         var space = await GetOrCreate(spaceId);
-        var spacePosts = await GetPostsAsync(spaceId, 10000);
+        var spacePosts = await GetPostsAsync(spaceId, take: 10000);
 
         await posts.UpdateAsync(spacePosts);
         await Repository.UpdateAsync(space.Space);
@@ -240,7 +240,11 @@ public class BlossomSpaces(
             await SaveSpaceAsync(spaceId, space.Space);
         }
 
-        return post;
+        var hintVectors = await vectors.GetAllAsync(space.Space, "Hint");
+        var hint = await vectors.CalculateHintAsync(userSpace, post, space);
+        await posts.AddAsync(hint);
+
+        return hint;
     }
 
     private async Task SaveSpaceAsync(string spaceId, BlossomSpace space)
@@ -254,12 +258,9 @@ public class BlossomSpaces(
         
         var axes = await vectors.GetAxesAsync(existing);
         await constellator.ConstellateAsync(existing.Space, allPosts, axes);
-
-        await vectors.SummarizeAsync(existing.Vector);
-        existing.Space.SetSummary(existing.Vector.Summary);
-        await Repository.UpdateAsync(existing.Space);
-
-        //await vectors.CalculateHintAsync(existing, allPosts);
+        //await vectors.SummarizeAsync(existing.Vector);
+        //existing.Space.SetSummary(existing.Vector.Summary);
+        //await Repository.UpdateAsync(existing.Space);
     }
 
     private async Task ActivateQuest()
@@ -282,11 +283,11 @@ public class BlossomSpaces(
         //}
     }
 
-    private async Task<List<BlossomPost>> GetPostsAsync(string spaceId, int take = 50)
+    private async Task<List<BlossomPost>> GetPostsAsync(string spaceId, string type = "Post", int take = 50)
     {
         var space = await GetOrCreate(Domain, spaceId);
         var exactPosts = await posts.Query
-                .Where(x => x.Domain == spaceId)
+                .Where(x => x.Domain == spaceId && x.ContentType == type)
                 .OrderByDescending(x => x.Timestamp)
                 .Take(take)
                 .ToListAsync();
@@ -306,7 +307,7 @@ public class BlossomSpaces(
 
     private async Task<List<BlossomPostWithVector>> GetPostsWithVectorsAsync(string spaceId, int take = 50)
     {
-        var posts = await GetPostsAsync(spaceId, take);
+        var posts = await GetPostsAsync(spaceId, take: take);
         return await vectors.GetAsync(posts);
     }
 

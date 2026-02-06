@@ -93,10 +93,10 @@ public class BlossomVector : BlossomVectorBase
         return centered.SimilarityTo(axis);
     }
 
-    public double? SimilarityTo(BlossomVector other)
+    public double SimilarityTo(BlossomVector other)
     {
         if (Vector.Length != other.Vector.Length)
-            return null;
+            return 0;
         
         var dot = DotProduct(other);
         var magA = Magnitude();
@@ -169,13 +169,13 @@ public class BlossomVector : BlossomVectorBase
     public double AlignmentWith(BlossomVector other)
     {
         var similarity = SimilarityTo(other);
-        return similarity == null ? 0 : Math.Abs(similarity.Value);
+        return Math.Abs(similarity);
     }
 
     public double? DissentFrom(BlossomVector other)
     {
         var similarity = SimilarityTo(other);
-        return similarity == null ? null : (1.0 - similarity.Value) / 2.0;
+        return (1.0 - similarity) / 2.0;
     }
 
     public static double DirectionalVariance(List<BlossomVector> vectors, BlossomVector centerPoint)
@@ -406,7 +406,7 @@ public class BlossomVector : BlossomVectorBase
         double denom = 0;
         foreach (var nb in neighbors)
         {
-            var sim = nb.SimilarityTo(this) ?? 0.0;    // in [-1,1]
+            var sim = nb.SimilarityTo(this);    // in [-1,1]
             var simPos = Math.Max(0.0, Math.Min(1.0, sim)); // clamp to [0,1]
             var weight = simPos * (1.0 + nb.CoherenceWeight); // neighbor coherence boosts influence
             numer += simPos * weight;

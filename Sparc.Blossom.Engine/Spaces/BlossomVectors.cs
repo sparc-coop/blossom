@@ -233,6 +233,14 @@ public class BlossomVectors(
                 .Where(x => x.SpaceId == space.Id && axisTypes.Contains(x.Type))
                 .ToListAsync();
         }
+
+        if (type == "Hint")
+        {
+            List<string> hintTypes = ["Hint", "Post"];
+            return await vectors.Query
+                .Where(x => x.SpaceId == space.Id && hintTypes.Contains(x.Type))
+                .ToListAsync();
+        }
         
         return await vectors.Query
             .Where(x => x.SpaceId == space.Id && (type == null || x.Type == type))
@@ -246,22 +254,27 @@ public class BlossomVectors(
         return BlossomVector.ToAxes(space.Vector, axisCandidates);
     }
 
-    //internal async Task CalculateHintAsync(BlossomSpaceWithVector space, BlossomSpaceWithVector userSpace, List<BlossomPostWithVector> allPosts)
-    //{
-    //    var answer = space.Vector;
-    //    var journey = space.Vector.Subtract(userSpace.Vector);
-    //    var alignedPosts = allPosts
-    //        .Select(p => new
-    //        {
-    //            Post = p,
-    //            Alignment = p.Vector.AlignmentWith(journey)
-    //        })
-    //        .Where(x => x.Alignment > 0)
-    //        .OrderByDescending(x => x.Alignment)
-    //        .Take(5)
-    //        .ToList();
+    internal async Task<BlossomPost> CalculateHintAsync(BlossomSpaceWithVector currentLocation, BlossomPost lastPost, BlossomSpaceWithVector destination)
+    {
+        var answer = destination.Vector;
+        var journey = destination.Vector.Subtract(currentLocation.Vector);
 
-    //    var aiTranslator = translators.OfType<AITranslator>().First();
-    //    var question = new AxisHintQuestion(space.Space, userSpace.Space, alignedPosts.Select(x => x.Post.Post).ToList());
-    //}
+        var clues = await GetAllAsync(destination.Space, "Hint");
+        var alignedPosts = clues
+            .Select(p => new AnswerHintInput(p.Text!, p.SimilarityTo(journey)))
+            .Where(x => x.Score > 0)
+            .OrderByDescending(x => x.Score)
+            .Take(5)
+            .ToList();
+
+        var aiTranslator = translators.OfType<AITranslator>().First();
+        var question = new AnswerHintQuestion(destination.Space, lastPost, alignedPosts);
+        var hint = await aiTranslator.AskAsync(question);
+        var hintPost = new BlossomPost(destination.Space, "Hint", hint.Value!.Text);
+
+        var hintVector = await aiTranslator.VectorizeAsync(hintPost);
+        await UpdateAsync(hintVector);
+
+        return hintPost;
+    }
 }

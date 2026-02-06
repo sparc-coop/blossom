@@ -222,10 +222,15 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         return identity;
     }
 
-
     public BlossomIdentity UpsertIdentity(string authenticationType, string externalId)
     {
         Identities.RemoveAll(x => x.Type == authenticationType);
         return AddIdentity(authenticationType, externalId);
     }
+
+    public static BlossomUser System => new()
+    {
+        Id = "system",
+        Avatar = new("system", "System")
+    };
 }

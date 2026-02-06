@@ -16,7 +16,7 @@ internal class OpenAITranslator(OpenAIClient client)
 
         var messageWithContext = MessagesWithContext(message.Text, additionalContext?.ToList() ?? [], 1000, 1000);
         var output = await embeddings.GenerateEmbeddingAsync(messageWithContext);
-        return new(message.SpaceId, "Post", message.Id, output.Value.ToFloats().ToArray())
+        return new(message.SpaceId, message.ContentType, message.Id, output.Value.ToFloats().ToArray())
         {
             Text = message.Text
         };
@@ -61,7 +61,7 @@ internal class OpenAITranslator(OpenAIClient client)
             foreach (var output in outputs.Value)
             {
                 var text = batch.ElementAt(output.Index);
-                vectors.Add(new(text.SpaceId, "Post", text.Id, output.ToFloats().ToArray())
+                vectors.Add(new(text.SpaceId, text.ContentType, text.Id, output.ToFloats().ToArray())
                 {
                     Text = text.Text
                 });

@@ -37,7 +37,7 @@ public interface ISparcSpaces
     Task<BlossomSpace> InviteToSpaceAsync(string spaceId, InviteToSpaceRequest request);
 
     [Get("/spaces/{spaceId}/posts")]
-    Task<List<BlossomPost>> GetPostsAsync(string spaceId);
+    Task<List<BlossomPost>> GetPostsAsync(string spaceId, string type = "Post");
 
     [Get("/spaces/{spaceId}/coordinates")]
     Task<List<BlossomCoordinate>> GetCoordinatesAsync(string spaceId);

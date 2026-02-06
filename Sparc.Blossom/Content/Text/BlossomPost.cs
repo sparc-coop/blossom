@@ -16,6 +16,12 @@ public class BlossomPost : TextContent
         ContentType = "Post";
     }
 
+    public BlossomPost(BlossomSpace space, string contentType, string text)
+        : base(space.SpaceId, space.Id, Language.Find("en")!, text, BlossomUser.System)
+    {
+        ContentType = contentType;
+    }
+
     public string PostId { get { return Id; } set { Id = value; } }
     public List<SparcEntity> Entities { get; set; } = [];
     public double CoherenceWeight { get; set; } = 0;
