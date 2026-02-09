@@ -193,7 +193,7 @@ public class BlossomVectors(
             x)).ToList();
 
         var vectors = await aiTranslator.VectorizeAsync(text);
-        var principalComponents = BlossomVector.ToPrincipalComponents(vectors);
+        var principalComponents = BlossomSpaceFaceter.ToPrincipalComponents(vectors);
         await UpdateAsync(principalComponents);
 
         var guides = vectors.ToList();
@@ -208,13 +208,13 @@ public class BlossomVectors(
         await UpdateAsync(space.Vector);
     }
 
-    internal async Task<List<BlossomVector>> GetAllAsync(BlossomSpace space, string? type = null)
+    internal async Task<List<BlossomVector>> GetAllAsync(string spaceId, string? type = null)
     {        
         if (type == "Axis")
         {
             List<string> axisTypes = ["X", "Y", "Z", "Facet"];
             return await vectors.Query
-                .Where(x => x.SpaceId == space.Id && axisTypes.Contains(x.Type))
+                .Where(x => x.SpaceId == spaceId && axisTypes.Contains(x.Type))
                 .ToListAsync();
         }
 
@@ -222,18 +222,18 @@ public class BlossomVectors(
         {
             List<string> hintTypes = ["Hint", "Post"];
             return await vectors.Query
-                .Where(x => x.SpaceId == space.Id && hintTypes.Contains(x.Type))
+                .Where(x => x.SpaceId == spaceId && hintTypes.Contains(x.Type))
                 .ToListAsync();
         }
         
         return await vectors.Query
-            .Where(x => x.SpaceId == space.Id && (type == null || x.Type == type))
+            .Where(x => x.SpaceId == spaceId && (type == null || x.Type == type))
             .ToListAsync();
     }
 
     internal async Task<List<BlossomVector>> GetAxesAsync(BlossomSpaceWithVector space, List<BlossomVector>? axisCandidates = null)
     {
-        axisCandidates ??= await GetAllAsync(space.Space, "Axis");
+        axisCandidates ??= await GetAllAsync(space.Space.Id, "Axis");
 
         return BlossomVector.ToAxes(space.Vector, axisCandidates);
     }
@@ -243,7 +243,7 @@ public class BlossomVectors(
         var answer = destination.Vector;
         var journey = destination.Vector.Subtract(currentLocation.Vector);
 
-        var clues = await GetAllAsync(destination.Space, "Hint");
+        var clues = await GetAllAsync(destination.Space.Id, "Hint");
         var alignedPosts = clues
             .Select(p => new AnswerHintInput(p.Text!, p.SimilarityTo(journey)))
             .Where(x => x.Score > 0)

@@ -203,7 +203,7 @@ public class BlossomSpaces(
             await SaveSpaceAsync(spaceId, space.Space);
         }
 
-        var hintVectors = await vectors.GetAllAsync(space.Space, "Hint");
+        var hintVectors = await vectors.GetAllAsync(space.Space.Id, "Hint");
         var hint = await vectors.CalculateHintAsync(userSpace, post, space);
         await posts.AddAsync(hint);
 
@@ -217,7 +217,7 @@ public class BlossomSpaces(
         await Repository.UpdateAsync(existing.Space);
 
         var allPosts = await GetPostsWithVectorsAsync(spaceId, 10000);
-        var facets = await faceter.FacetAsync(existing, allPosts);
+        var facets = await faceter.FacetAsync(allPosts.Select(x => x.Vector));
         
         var axes = await vectors.GetAxesAsync(existing);
         await constellator.ConstellateAsync(existing.Space, allPosts, axes);
@@ -261,7 +261,7 @@ public class BlossomSpaces(
     private async Task<List<BlossomCoordinate>> GetCoordinatesAsync(string spaceId)
     {
         var space = await GetOrCreate(spaceId);
-        var allVectors = await vectors.GetAllAsync(space.Space);
+        var allVectors = await vectors.GetAllAsync(spaceId);
         allVectors.Add(space.Vector);
 
         var axes = await vectors.GetAxesAsync(space, allVectors);

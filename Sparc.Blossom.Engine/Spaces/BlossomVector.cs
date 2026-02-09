@@ -54,7 +54,6 @@ public class BlossomVector : BlossomVectorBase
     public BlossomSummary? Summary { get; set; }
     public string? Text { get; set; }
     public bool IsEmpty => Vector.Length == 0 || Vector.All(x => x == 0);
-    bool IsAxisType => Type == "X" || Type == "Y" || Type == "Z" || Type == "Facet";
 
     public void SetSummary(BlossomSummary? summary)
     {
@@ -80,17 +79,6 @@ public class BlossomVector : BlossomVectorBase
             sumSquares += Vector[i] * Vector[i];
 
         return Math.Sqrt(sumSquares);
-    }
-
-    public double? Score(BlossomVector axis)
-    {
-        if (axis.Point == null)
-            return null;
-
-        // Center the vector according to the axis point
-        var centered = Center(new(axis.Point));
-
-        return centered.SimilarityTo(axis);
     }
 
     public double SimilarityTo(BlossomVector other)
@@ -131,13 +119,6 @@ public class BlossomVector : BlossomVectorBase
         return (rawPosition - axisMin.Value) / axisLength;
     }
 
-    internal BlossomVector Orthogonalize(BlossomVector axis)
-    {
-        var dotProduct = DotProduct(axis);
-        var newAxis = Subtract(axis.Multiply(dotProduct)).Normalize();
-        return newAxis;
-    }
-
     public BlossomVector Add(BlossomVector other)
     {
         if (IsEmpty)
@@ -172,31 +153,6 @@ public class BlossomVector : BlossomVectorBase
         return Math.Abs(similarity);
     }
 
-    public double? DissentFrom(BlossomVector other)
-    {
-        var similarity = SimilarityTo(other);
-        return (1.0 - similarity) / 2.0;
-    }
-
-    public static double DirectionalVariance(List<BlossomVector> vectors, BlossomVector centerPoint)
-    {
-        double variance = 0;
-        foreach (var vec in vectors)
-        {
-            var dist = 1 - vec.AlignmentWith(centerPoint);
-            variance += dist * dist;
-        }
-        return variance / vectors.Count;
-    }
-
-    public BlossomVector CoherenceAxis()
-    {
-        if (Point == null)
-            throw new Exception("Cannot compute coherence axis without a defined Point accumulator.");
-        
-        return ThisWith(Point).Normalize();
-    }
-
     public BlossomVector ThisWith(float[] other) => new(SpaceId, Type, Id, other) {  Text = Text };
     public double Length => Math.Sqrt(Vector.Sum(x => x * x));
 
@@ -213,18 +169,6 @@ public class BlossomVector : BlossomVectorBase
             Vector = Normalize(Point);
         }
             
-    }
-
-    public BlossomVector InterpolateTowards(BlossomVector target, double alpha)
-    {
-        // linear blend then renormalize. alpha in [0,1]
-        alpha = Math.Clamp(alpha, 0.0, 1.0);
-        var length = Vector.Length;
-        var blended = new float[length];
-        for (int i = 0; i < length; i++)
-            blended[i] = Vector[i] * (float)(1.0 - alpha) + target.Vector[i] * (float)alpha;
-
-        return ThisWith(blended).Normalize();
     }
 
     public override string ToString()
@@ -347,31 +291,6 @@ public class BlossomVector : BlossomVectorBase
     {
         var diff = Subtract(Plane(xAxis, yAxis)).Magnitude();
         return diff;
-    }
-
-    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain = 1, int maxCount = 3)
-    {
-        var mean = Average(vectors);
-        var centeredVectors = vectors.Select(v => v.Center(mean)).ToList();
-        var matrix = ToMatrix(centeredVectors);
-
-        var svd = matrix.Svd(true);
-        var components = new List<BlossomVector>();
-        for (int i = 0; i < Math.Min(maxCount, Math.Min(svd.S.Count, svd.VT.RowCount)); i++)
-        {
-            var componentArray = svd.VT.Row(i).ToArray();
-            
-            components.Add(new BlossomVector(vectors.First().SpaceId, "Facet", Guid.NewGuid().ToString(), componentArray)
-            {
-                Point = mean.Vector,
-                CoherenceWeight = Math.Pow(svd.S[i], 2) / svd.S.Sum(x => x * x)
-            });
-            
-            if (components.Sum(c => c.CoherenceWeight) >= varianceToExplain)
-                break;
-        }
-
-        return components;
     }
 
     public BlossomVector Normalize()
