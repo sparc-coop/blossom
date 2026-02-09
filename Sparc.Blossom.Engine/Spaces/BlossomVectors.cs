@@ -212,9 +212,8 @@ public class BlossomVectors(
     {        
         if (type == "Axis")
         {
-            List<string> axisTypes = ["X", "Y", "Z", "Facet"];
             return await vectors.Query
-                .Where(x => x.SpaceId == spaceId && axisTypes.Contains(x.Type))
+                .Where(x => x.SpaceId == spaceId && x.Type == "Facet")
                 .ToListAsync();
         }
 

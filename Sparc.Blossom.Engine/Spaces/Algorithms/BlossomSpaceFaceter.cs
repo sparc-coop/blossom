@@ -10,7 +10,7 @@ public class BlossomSpaceFaceter(BlossomVectors vectors)
             return [];
         
         // Factor into principal components
-        var facets = ToPrincipalComponents(vectorsToFacet, 1, 3);
+        var facets = ToPrincipalComponents(vectorsToFacet, 0.8, 10);
 
         // Match to existing facets when possible (for axis permanence)
         var existingFacets = await vectors.GetAllAsync(vectorsToFacet.First().SpaceId, "Facet");

@@ -60,10 +60,7 @@ public class BlossomSpaces(
         return await Repository.FindAsync(parentSpaceId, spaceId);
     }
 
-    private async Task<BlossomSpaceWithVector> GetOrCreate(BlossomSpace parentSpace, string spaceId, string? roomType = null)
-        => await GetOrCreate(spaceId, roomType, parentSpace.Id);
-
-    private async Task<BlossomSpaceWithVector> GetOrCreate(string? spaceId, string? roomType = null, string? parentSpaceId = null)
+    private async Task<BlossomSpaceWithVector> GetOrCreate(string? spaceId, string roomType = "Space", string? parentSpaceId = null)
     {
         parentSpaceId ??= Domain;
 
@@ -174,8 +171,8 @@ public class BlossomSpaces(
 
     private async Task<BlossomPost> PostAsync(string spaceId, BlossomPost post)
     {
-        var space = await GetOrCreate(post.SpaceId, "Question");
-        var userSpace = await GetOrCreate(space.Space, post.User!.Id, "User");
+        var space = await GetOrCreate(post.SpaceId);
+        var userSpace = await GetOrCreate(post.User!.Id, "User", space.Space.Id);
         var isFirstPost = space.Vector.IsEmpty;
 
         var allPosts = await GetPostsWithVectorsAsync(spaceId, 10000);

@@ -237,13 +237,13 @@ public class BlossomVector : BlossomVectorBase
             .Take(2)
             .ToList();
 
-        var x = candidates.FirstOrDefault(x => x.Type == "X") ?? facets.FirstOrDefault() ?? Basis(1536, 0);
-        var y = candidates.FirstOrDefault(x => x.Type == "Y") ?? facets.Skip(1).FirstOrDefault() ?? Basis(1536, 1);
-        var z = candidates.FirstOrDefault(x => x.Type == "Z") ?? answerVector;
+        var x = facets.FirstOrDefault() ?? Basis(1536, 0);
+        var y = facets.Skip(1).FirstOrDefault() ?? Basis(1536, 1);
+        var z = answerVector;
 
-        x.Type = "X";
-        y.Type = "Y";
-        z?.Type = "Z";
+        x.Text = "X";
+        y.Text = "Y";
+        z?.Text = "Z";
 
         return z == null ? [x, y] : [x, y, z];
     }
@@ -266,12 +266,12 @@ public class BlossomVector : BlossomVectorBase
                 Summary = Summary
             };
 
-        var xAxis = axes.First(x => x.Type == "X");
-        var yAxis = axes.First(x => x.Type == "Y");
-        var zAxis = axes.FirstOrDefault(x => x.Type == "Z");
+        var xAxis = axes.First();
+        var yAxis = axes.Skip(1).FirstOrDefault();
+        var zAxis = axes.Skip(2).FirstOrDefault();
 
         var x = PositionOnAxis(xAxis);
-        var y = PositionOnAxis(yAxis);
+        var y = yAxis == null ? 0 : PositionOnAxis(yAxis);
         var z = zAxis == null ? 1 - DistanceFromPlane(xAxis, yAxis) : PositionOnAxis(zAxis);
 
         return new BlossomCoordinate(Id, Text ?? Id, Type, x, y, z)
