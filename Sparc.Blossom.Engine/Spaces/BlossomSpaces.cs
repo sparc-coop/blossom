@@ -22,14 +22,6 @@ public class BlossomSpaces(
     public const string Domain = "sparc.coop";
     public string? MatrixSenderId;
 
-    internal IQueryable<BlossomEvent> Query<T>()
-    {
-        var type = typeof(T).Name;
-        return events.Query
-            .Where(e => e.Type == type)
-            .OrderBy(x => x.Depth);
-    }
-
     private async Task<BlossomPresence> GetPresenceAsync(ClaimsPrincipal principal, string userId)
     {
         var user = await auth.GetAsync(principal);
@@ -57,35 +49,6 @@ public class BlossomSpaces(
             spaces = spaces.Where(x => x.RoomType == type);
 
         return await spaces.ToListAsync();
-    }
-
-    private async Task<List<BlossomSpaceWithVector>> GetSpacesWithVectorsAsync(BlossomSpace parentSpace)
-    {
-        var spaces = await GetSpacesAsync(parentSpace.Id);
-        var spaceVectors = await vectors.GetAllAsync(parentSpace);
-        return spaces
-            .Select(x => new BlossomSpaceWithVector(x, spaceVectors.FirstOrDefault(y => y.Id == x.Id)!))
-            .Where(x => x.Vector != null)
-            .ToList();
-    }
-
-    internal async Task<List<BlossomEvent>> GetAllAsync(string spaceId)
-    {
-        return await events.Query
-            .Where(x => x.SpaceId == spaceId)
-            .OrderBy(x => x.Depth)
-            .ToListAsync();
-    }
-
-    internal async Task<List<BlossomEvent<T>>> GetAllAsync<T>(string spaceId)
-    {
-        var type = typeof(T).Name;
-        var result = await events.Query
-            .Where(e => e.SpaceId == spaceId && e.Type == type)
-            .OrderBy(x => x.Depth)
-            .ToListAsync();
-
-        return result.Cast<BlossomEvent<T>>().ToList();
     }
 
     internal async Task<BlossomSpace?> GetSpaceAsync(ClaimsPrincipal principal, string spaceId, string? parentSpaceId = null)

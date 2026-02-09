@@ -36,22 +36,6 @@ public class BlossomVectors(
         return result.ToList();
     }
 
-    public async Task<List<BlossomSpaceWithVector>> GetAsync(IEnumerable<BlossomSpace> spaces)
-    {
-        var spaceIds = spaces.Select(x => x.SpaceId).ToList();
-
-        var vectorsInSpaces = await vectors.Query
-            .Where(x => x.Type == "Space" && spaceIds.Contains(x.Id))
-            .ToListAsync();
-
-        var result = from space in spaces
-                     join vector in vectorsInSpaces
-                     on space.Id equals vector.Id
-                     select new BlossomSpaceWithVector(space, vector);
-
-        return result.ToList();
-    }
-
     public async Task UpdateAsync(BlossomVector vector) => await vectors.UpdateAsync(vector);
     public async Task UpdateAsync(IEnumerable<BlossomVector> blossomVectors) => await vectors.UpdateAsync(blossomVectors);
     public async Task DeleteAsync(IEnumerable<BlossomVector> blossomVectors) => await vectors.DeleteAsync(blossomVectors);
