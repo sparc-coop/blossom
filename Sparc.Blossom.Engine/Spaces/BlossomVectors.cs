@@ -182,14 +182,25 @@ public class BlossomVectors(
 
     public async Task InitializeSpaceAsync(BlossomSpaceWithVector space, BlossomPostWithVector question)
     {
+        var socrates = await GenerateSocraticStatementsAsync(question);
+
+        var answerVector = BlossomVector.Average(socrates, v => v.AlignmentWith(question.Vector)).Normalize();
+        space.Vector = space.Vector.ThisWith(answerVector.Vector);
+        space.Vector.SetSummary(new(friendlyId.Create(), question.Post.Text ?? "", "", null, null));
+        space.Space.SetSummary(space.Vector.Summary);
+        await UpdateAsync(space.Vector);
+    }
+
+    private async Task<IEnumerable<BlossomVector>> GenerateSocraticStatementsAsync(BlossomPostWithVector question)
+    {
         var aiTranslator = translators.OfType<AITranslator>().First();
         var discovery = new AxisDiscoveryQuestion(question.Post);
         var statements = await aiTranslator.AskAsync(discovery);
 
         var text = statements.Value!.SocraticStatements.Select(x => new TextContent(
-            question.Post.Domain, 
-            question.Post.SpaceId, 
-            question.Post.Language, 
+            question.Post.Domain,
+            question.Post.SpaceId,
+            question.Post.Language,
             x)).ToList();
 
         var vectors = await aiTranslator.VectorizeAsync(text);
@@ -200,12 +211,7 @@ public class BlossomVectors(
         foreach (var vector in guides)
             vector.Type = "Guide";
         await UpdateAsync(guides);
-
-        var answerVector = BlossomVector.Average(vectors, v => v.AlignmentWith(question.Vector)).Normalize();
-        space.Vector = space.Vector.ThisWith(answerVector.Vector);
-        space.Vector.SetSummary(new(friendlyId.Create(), question.Post.Text ?? "", "", null, null));
-        space.Space.SetSummary(space.Vector.Summary);
-        await UpdateAsync(space.Vector);
+        return vectors;
     }
 
     internal async Task<List<BlossomVector>> GetAllAsync(string spaceId, string? type = null)

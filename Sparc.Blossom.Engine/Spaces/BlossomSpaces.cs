@@ -185,9 +185,14 @@ public class BlossomSpaces(
         userSpace.Add(postWithVector);
         await vectors.UpdateAsync(userSpace.Vector);
 
+        var userTrail = new BlossomVector(space.Space.Id, "UserTrail", Guid.NewGuid().ToString(), userSpace.Vector.Vector);
+        await vectors.UpdateAsync(userTrail);
+
+        await posts.AddAsync(post);
+
         if (isFirstPost)
         {
-            // First post in the space, generate exploratory axes based on the initial question
+            // Generate exploratory axes based on the initial question
             await vectors.InitializeSpaceAsync(space, postWithVector);
             await Repository.UpdateAsync(space.Space);
         }
@@ -196,15 +201,14 @@ public class BlossomSpaces(
             space.Add(postWithVector);
             await vectors.UpdateAsync(space.Vector);
 
-            await posts.AddAsync(post);
             await SaveSpaceAsync(spaceId, space.Space);
         }
 
-        var hintVectors = await vectors.GetAllAsync(space.Space.Id, "Hint");
-        var hint = await vectors.CalculateHintAsync(userSpace, post, space);
-        await posts.AddAsync(hint);
+        //var hintVectors = await vectors.GetAllAsync(space.Space.Id, "Hint");
+        //var hint = await vectors.CalculateHintAsync(userSpace, post, space);
+        //await posts.AddAsync(hint);
 
-        return hint;
+        return post;
     }
 
     private async Task SaveSpaceAsync(string spaceId, BlossomSpace space)

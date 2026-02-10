@@ -53,6 +53,7 @@ public class BlossomVector : BlossomVectorBase
 
     public BlossomSummary? Summary { get; set; }
     public string? Text { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public bool IsEmpty => Vector.Length == 0 || Vector.All(x => x == 0);
 
     public void SetSummary(BlossomSummary? summary)
