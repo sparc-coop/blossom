@@ -44,7 +44,7 @@ public class BlossomVectors(
     { 
         var top = furthestAway ? 10000 : count;
         var includeVectorClause = includeVectors ? ", c.Vector" : string.Empty;
-        var spaceToSearch = vector.Type == "Post" ? vector.SpaceId : vector.Id;
+        var spaceToSearch = vector.Type == "Post" || vector.Type == "Facet" ? vector.SpaceId : vector.Id;
 
 
         var query = $@"

@@ -259,11 +259,17 @@ public class BlossomSpaces(
         return exactPosts;
     }
 
-    private async Task<List<BlossomCoordinate>> GetCoordinatesAsync(string spaceId)
+    private async Task<List<BlossomCoordinate>> GetCoordinatesAsync(string spaceId, string? questId = null)
     {
         var space = await GetOrCreate(spaceId);
         var allVectors = await vectors.GetAllAsync(spaceId);
         allVectors.Add(space.Vector);
+
+        if (questId != null)
+        {
+            var questVector = allVectors.First(x => x.Id == questId);
+            return allVectors.Select(x => x.ToCoordinate([questVector])).ToList();
+        }
 
         var axes = await vectors.GetAxesAsync(space, allVectors);
         return allVectors.Select(x => x.ToCoordinate(axes)).ToList();

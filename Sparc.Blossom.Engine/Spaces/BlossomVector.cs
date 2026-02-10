@@ -273,7 +273,11 @@ public class BlossomVector : BlossomVectorBase
 
         var x = PositionOnAxis(xAxis);
         var y = yAxis == null ? 0 : PositionOnAxis(yAxis);
-        var z = zAxis == null ? 1 - DistanceFromPlane(xAxis, yAxis) : PositionOnAxis(zAxis);
+        var z = zAxis == null 
+            ? yAxis == null 
+                ? AlignmentWith(xAxis) 
+                : 1 - DistanceFromPlane(xAxis, yAxis) 
+            : PositionOnAxis(zAxis);
 
         return new BlossomCoordinate(Id, Text ?? Id, Type, x, y, z)
         {
