@@ -40,7 +40,7 @@ public interface ISparcSpaces
     Task<List<BlossomPost>> GetPostsAsync(string spaceId, string type = "Post");
 
     [Get("/spaces/{spaceId}/coordinates")]
-    Task<List<BlossomCoordinate>> GetCoordinatesAsync(string spaceId, string? questId = null);
+    Task<GameState> GetCoordinatesAsync(string spaceId, string? questId = null);
 
     [Post("/spaces/rooms/{spaceId}/send/{eventType}/{txnId}")]
     Task<BlossomEvent> SendMessageAsync(string spaceId, string eventType, string txnId, SendMessageRequest request);
@@ -51,6 +51,8 @@ public interface ISparcSpaces
     [Put("/spaces/presence/{userId}/status")]
     Task SetPresenceAsync(string userId, BlossomPresence presence);
 }
+
+public record GameState(List<BlossomCoordinate> Coordinates, double DistanceToAnswer);
 
 public record InviteToSpaceRequest(string UserId);
 public record CreateSpaceRequest(

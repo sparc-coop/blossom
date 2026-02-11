@@ -68,7 +68,7 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
             for (int j = 0; j < count; j++)
             {
                 if (i == j) continue;
-                var distance = coords[i].DistanceTo(coords[j]) ?? double.MaxValue;
+                var distance = coords[i].DistanceTo(coords[j]);
                 distances.Add((j, distance));
             }
 

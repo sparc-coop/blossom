@@ -55,7 +55,6 @@ public class BlossomVector : BlossomVectorBase
     public string? Text { get; set; }
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public bool IsEmpty => Vector.Length == 0 || Vector.All(x => x == 0);
-    public double? UserLength { get; set; }
 
     public void SetSummary(BlossomSummary? summary)
     {
@@ -96,7 +95,7 @@ public class BlossomVector : BlossomVectorBase
         return dot / (magA * magB);
     }
 
-    public double? DistanceTo(BlossomVector other)
+    public double DistanceTo(BlossomVector other)
     {
         double sum = 0;
         for (int i = 0; i < Vector.Length; i++)
@@ -241,7 +240,7 @@ public class BlossomVector : BlossomVectorBase
 
         var x = facets.FirstOrDefault() ?? Basis(1536, 0);
         var y = facets.Skip(1).FirstOrDefault() ?? Basis(1536, 1);
-        var z = answerVector;
+        BlossomVector? z = null;
 
         x.Text = "X";
         y.Text = "Y";
@@ -254,16 +253,22 @@ public class BlossomVector : BlossomVectorBase
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
         => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
 
-    public void ConvertToQuest(BlossomVector space, BlossomVector user)
+    public void CheckForQuest(BlossomVector space, BlossomVector user, BlossomVector lastMovement, double distanceToAnswer)
     {
         var quest = DotProduct(space) >= 0 ? ThisWith(Vector) : Multiply(-1);
         var userProjection = quest.DotProduct(user);
         var answerProjection = quest.DotProduct(space);
         var userQuest = quest.Multiply(answerProjection - userProjection);
 
+        var lengthThreshold = Math.Min(0.1, distanceToAnswer / 2);
+        var similarityThreshold = 0.8;
+        var similarity = lastMovement.SimilarityTo(quest);
+
+        if (userQuest.Length < lengthThreshold)
+            return;
+
         Type = "Quest";
         Vector = userQuest.Vector;
-        UserLength = userQuest.Length;
     }
 
     public BlossomCoordinate ToCoordinate(List<BlossomVector> axes)

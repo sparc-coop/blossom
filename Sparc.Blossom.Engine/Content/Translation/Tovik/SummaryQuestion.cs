@@ -22,16 +22,16 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
 
     public SummaryQuestion(IEnumerable<BlossomPost> leftMessages, IEnumerable<BlossomPost> rightMessages, int tokenLimit) 
         : base(
-    "Provide a concise summary of the conflict or tension between the left and right messages, including a name, topic, and description." +
-    "The summary should capture the main difference in the themes and key points discussed in the messages, as this represents the most extreme edge of the axis. This will be used for a game quest description, so phrase accordingly.")
+    "Extract the main themes from the messages to guide the user from the left side to the right side of the quest, via the conflict or tension located within." +
+    " This will be used for a game quest description, so phrase accordingly.")
     {
-        Instructions = "You are an assistant that summarizes two sets of messages into a new semantic facet that will be used for room facets identification.\r\n" +
-                    "Analyze the provided messages and extract the main themes from the messages to create a concise summary of the conflict or tension located within.\r\n\r\n" +
+        Instructions = "You are an assistant that summarizes two sets of messages into a new semantic facet that will be used for a game quest.\r\n" +
+                    "Analyze the provided messages and extract the main themes from the messages to guide the user from the left side to the right side of the quest, via the conflict or tension located within.\r\n\r\n" +
                     "Use the given weight of each message, which is on a scale of 0 to 1, 1 being highest, to prioritize more relevant messages in the summary.\r\n" +
                     "The summary should include:\r\n" +
-                    "- Name: A short, 2 to 3 word descriptive facet title encompassing the conflicting ideas between both sets of messages. This name should be extremely specific to the primary subject matter of the facet.\r\n" +
-                    "- Topic: The 10-20 word primary subject matter represented by the conflicting ideas in both sets of messages. This should be phrased as a game quest description.\r\n" +
-                    "- Description: A 10-20 word set of hints as to this conflict's potential resolution.";
+                    "- Name: A short, 2 to 3 word descriptive quest title encompassing the journey to take to reach the right side. This name should be extremely specific to the primary subject matter of the quest.\r\n" +
+                    "- Topic: The 10-20 word primary subject matter represented by the journey from the left side to the right side. This should be phrased as a game quest description.\r\n" +
+                    "- Description: A 10-20 word set of hints as to how to navigate this journey.";
 
         Instructions += "- LeftTopic: A short, 2 to 3 word descriptive topic for the left set of messages that distinguishes it from the right set of messages and relates it to the overall summary.\r\n";
         Instructions += "- RightTopic: A short, 2 to 3 word descriptive topic for the right set of messages that distinguishes it from the left set of messages and relates it to the overall summary.";
@@ -58,7 +58,7 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
 
     private void AddMessagesWithWeight(IEnumerable<BlossomPost> messages, int tokenLimit)
     {
-        foreach (var message in messages)
+        foreach (var message in messages.OrderByDescending(x => x.CoherenceWeight))
         {
             if (Text.Length + message.Text!.Length > tokenLimit * 4 * 0.8)
             {

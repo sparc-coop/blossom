@@ -259,28 +259,33 @@ public class BlossomSpaces(
         return exactPosts;
     }
 
-    private async Task<List<BlossomCoordinate>> GetCoordinatesAsync(string spaceId, string? questId = null)
+    private async Task<GameState> GetCoordinatesAsync(string spaceId, string? questId = null)
     {
         var space = await GetOrCreate(spaceId);
         var allVectors = await vectors.GetAllAsync(spaceId);
         var user = allVectors.First(x => x.Type == "User");
+        var lastUserMovement = allVectors.OrderByDescending(x => x.Timestamp).First(x => x.Type == "UserTrail");
 
         allVectors.Add(space.Vector);
         var answer = space.Vector.ThisWith(space.Vector.Vector, "Answer");
         answer.Id = Guid.NewGuid().ToString();
         allVectors.Add(answer);
 
+        var distanceToAnswer = user.DistanceTo(answer);
+
         foreach (var availableQuest in allVectors.Where(x => x.Type == "Facet"))
-            availableQuest.ConvertToQuest(space.Vector, user);
+            availableQuest.CheckForQuest(space.Vector, user, lastUserMovement, distanceToAnswer);
 
         if (questId != null)
         {
             var selectedQuest = allVectors.First(x => x.Id == questId);
-            return allVectors.Select(x => x.ToCoordinate([selectedQuest])).ToList();
+            var coords = allVectors.Select(x => x.ToCoordinate([selectedQuest])).ToList();
+            return new(coords, distanceToAnswer);
         }
 
         var axes = await vectors.GetAxesAsync(space, allVectors);
-        return allVectors.Select(x => x.ToCoordinate(axes)).ToList();
+        var coordinates = allVectors.Select(x => x.ToCoordinate(axes)).ToList();
+        return new(coordinates, distanceToAnswer);
     }
 
     private async Task<List<BlossomPostWithVector>> GetPostsWithVectorsAsync(string spaceId, int take = 50)
