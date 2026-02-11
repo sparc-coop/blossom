@@ -365,6 +365,6 @@ public class BlossomVector : BlossomVectorBase
     internal BlossomVector ProjectOntoAxes(List<BlossomVector> axes)
     {
         var coordinate = ToCoordinate(axes);
-        return ThisWith([(float)coordinate.X, (float)coordinate.Y]);
+        return ThisWith([-1 * (float)coordinate.X, -1 * (float)coordinate.Y]);
     }
 }

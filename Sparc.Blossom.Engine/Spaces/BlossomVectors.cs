@@ -229,7 +229,7 @@ public class BlossomVectors(
         if (type == "Axis")
         {
             return await vectors.Query
-                .Where(x => x.SpaceId == spaceId && x.Type == "Facet")
+                .Where(x => x.SpaceId == spaceId && (x.Type == "Facet" || x.Type == "Quest"))
                 .ToListAsync();
         }
 
