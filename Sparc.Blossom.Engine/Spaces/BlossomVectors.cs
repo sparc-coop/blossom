@@ -186,7 +186,7 @@ public class BlossomVectors(
 
         var answerVector = await AnswerAsync(question);
         space.Vector = space.Vector.ThisWith(answerVector.Vector);
-        space.Vector.SetSummary(new(friendlyId.Create(), question.Post.Text ?? "", "", null, null));
+        space.Vector.SetSummary(new(friendlyId.Create(), question.Post.Text ?? "", ""));
         space.Space.SetSummary(space.Vector.Summary);
         await UpdateAsync(space.Vector);
     }

@@ -55,6 +55,7 @@ public class BlossomVector : BlossomVectorBase
     public string? Text { get; set; }
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public bool IsEmpty => Vector.Length == 0 || Vector.All(x => x == 0);
+    public double? UserLength { get; set; }
 
     public void SetSummary(BlossomSummary? summary)
     {
@@ -154,7 +155,7 @@ public class BlossomVector : BlossomVectorBase
         return Math.Abs(similarity);
     }
 
-    public BlossomVector ThisWith(float[] other) => new(SpaceId, Type, Id, other) {  Text = Text };
+    public BlossomVector ThisWith(float[] other, string? type = null) => new(SpaceId, type ?? Type, Id, other) {  Text = Text };
     public double Length => Math.Sqrt(Vector.Sum(x => x * x));
 
     public void Update(BlossomVector vector, double scaleFactor = 1.0)
@@ -233,7 +234,7 @@ public class BlossomVector : BlossomVectorBase
 
     public static List<BlossomVector> ToAxes(BlossomVector answerVector, IEnumerable<BlossomVector> candidates)
     {
-        var facets = candidates.Where(x => x.Type == "Facet")
+        var facets = candidates.Where(x => x.Type == "Facet" || x.Type == "Quest")
             .OrderByDescending(x => x.CoherenceWeight)
             .Take(2)
             .ToList();
@@ -253,6 +254,18 @@ public class BlossomVector : BlossomVectorBase
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
         => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
 
+    public void ConvertToQuest(BlossomVector space, BlossomVector user)
+    {
+        var quest = DotProduct(space) >= 0 ? ThisWith(Vector) : Multiply(-1);
+        var userProjection = quest.DotProduct(user);
+        var answerProjection = quest.DotProduct(space);
+        var userQuest = quest.Multiply(answerProjection - userProjection);
+
+        Type = "Quest";
+        Vector = userQuest.Vector;
+        UserLength = userQuest.Length;
+    }
+
     public BlossomCoordinate ToCoordinate(List<BlossomVector> axes)
     {
         if (Vector.Length <= 3)
@@ -267,9 +280,9 @@ public class BlossomVector : BlossomVectorBase
                 Summary = Summary
             };
 
-        var xAxis = axes.First();
-        var yAxis = axes.Skip(1).FirstOrDefault();
-        var zAxis = axes.Skip(2).FirstOrDefault();
+        var xAxis = axes.First().Normalize();
+        var yAxis = axes.Skip(1).FirstOrDefault()?.Normalize();
+        var zAxis = axes.Skip(2).FirstOrDefault()?.Normalize();
 
         var x = PositionOnAxis(xAxis);
         var y = yAxis == null ? 0 : PositionOnAxis(yAxis);
@@ -282,7 +295,8 @@ public class BlossomVector : BlossomVectorBase
         return new BlossomCoordinate(Id, Text ?? Id, Type, x, y, z)
         {
             Summary = Summary,
-            ConnectTo = ConstellationConnectorId
+            ConnectTo = ConstellationConnectorId,
+            Length = Length
         };
     }
 

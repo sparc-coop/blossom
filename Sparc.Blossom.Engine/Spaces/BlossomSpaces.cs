@@ -263,28 +263,20 @@ public class BlossomSpaces(
     {
         var space = await GetOrCreate(spaceId);
         var allVectors = await vectors.GetAllAsync(spaceId);
-        allVectors.Add(space.Vector);
-
         var user = allVectors.First(x => x.Type == "User");
+
+        allVectors.Add(space.Vector);
+        var answer = space.Vector.ThisWith(space.Vector.Vector, "Answer");
+        answer.Id = Guid.NewGuid().ToString();
+        allVectors.Add(answer);
+
+        foreach (var availableQuest in allVectors.Where(x => x.Type == "Facet"))
+            availableQuest.ConvertToQuest(space.Vector, user);
 
         if (questId != null)
         {
-            var facet = allVectors.First(x => x.Id == questId);
-            var quest = facet.DotProduct(space.Vector) >= 0 ? facet.ThisWith(facet.Vector) : facet.Multiply(-1);
-            var userProjection = quest.DotProduct(user);
-            var answerProjection = quest.DotProduct(space.Vector);
-            var questVector = quest.Multiply(answerProjection - userProjection);
-            
-            quest.Type = "Axis";
-            quest.Id = Guid.NewGuid().ToString();
-            allVectors.Add(quest);
-
-            var answer = space.Vector.ThisWith(space.Vector.Vector);
-            answer.Id = Guid.NewGuid().ToString();
-            answer.Type = "Answer";
-            allVectors.Add(answer);
-
-            return allVectors.Select(x => x.ToCoordinate([questVector])).ToList();
+            var selectedQuest = allVectors.First(x => x.Id == questId);
+            return allVectors.Select(x => x.ToCoordinate([selectedQuest])).ToList();
         }
 
         var axes = await vectors.GetAxesAsync(space, allVectors);
