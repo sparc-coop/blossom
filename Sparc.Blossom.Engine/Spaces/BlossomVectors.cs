@@ -182,13 +182,23 @@ public class BlossomVectors(
 
     public async Task InitializeSpaceAsync(BlossomSpaceWithVector space, BlossomPostWithVector question)
     {
-        var socrates = await GenerateSocraticStatementsAsync(question);
+        //var socrates = await GenerateSocraticStatementsAsync(question);
 
-        var answerVector = BlossomVector.Average(socrates, v => v.AlignmentWith(question.Vector)).Normalize();
+        var answerVector = await AnswerAsync(question);
         space.Vector = space.Vector.ThisWith(answerVector.Vector);
         space.Vector.SetSummary(new(friendlyId.Create(), question.Post.Text ?? "", "", null, null));
         space.Space.SetSummary(space.Vector.Summary);
         await UpdateAsync(space.Vector);
+    }
+
+    private async Task<BlossomVector> AnswerAsync(BlossomPostWithVector question)
+    {
+        var aiTranslator = translators.OfType<AITranslator>().First();
+        var answer = new BestGuessAnswer(question.Post);
+        var result = await aiTranslator.AskAsync(answer);
+        var text = new TextContent(question.Post.Domain, question.Post.SpaceId, question.Post.Language, result.Value!.Text);
+
+        return await aiTranslator.VectorizeAsync(text);
     }
 
     private async Task<IEnumerable<BlossomVector>> GenerateSocraticStatementsAsync(BlossomPostWithVector question)

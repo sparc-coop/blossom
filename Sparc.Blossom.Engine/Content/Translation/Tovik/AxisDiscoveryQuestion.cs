@@ -15,9 +15,21 @@ internal class AxisDiscoveryQuestion : BlossomQuestion<AxisDiscoveryResponse>
     }
 }
 
+internal class BestGuessAnswer : BlossomQuestion<BasicResponse>
+{
+    public BestGuessAnswer(TextContent question) : base("Given the following question, formulate an initial answer:")
+    {
+        Instructions = "You are an assistant for an epistemic knowledge tool.\r\n" +
+            "You will receive a question, and your task is to formulate an initial answer based on the information provided." +
+            "This answer will be used as a Bayesian prior to set an initial target in an epistemic space.";
+
+        Text += "\r\n\r\nQuestion: " + question.Text;
+    }
+}
+
 public record AnswerHintInput(string Text, double Score);
-public record AnswerHintResponse(string Text);
-internal class AnswerHintQuestion : BlossomQuestion<AnswerHintResponse>
+public record BasicResponse(string Text);
+internal class AnswerHintQuestion : BlossomQuestion<BasicResponse>
 {
 
     public AnswerHintQuestion(BlossomSpace destination, BlossomPost lastPost, List<AnswerHintInput> clues) : base("Given the following question, last post from the user, and clues, suggest the next step for the user to take to uncover the answer:")

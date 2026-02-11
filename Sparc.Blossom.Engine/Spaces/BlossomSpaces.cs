@@ -265,9 +265,25 @@ public class BlossomSpaces(
         var allVectors = await vectors.GetAllAsync(spaceId);
         allVectors.Add(space.Vector);
 
+        var user = allVectors.First(x => x.Type == "User");
+
         if (questId != null)
         {
-            var questVector = allVectors.First(x => x.Id == questId);
+            var facet = allVectors.First(x => x.Id == questId);
+            var quest = facet.DotProduct(space.Vector) >= 0 ? facet.ThisWith(facet.Vector) : facet.Multiply(-1);
+            var userProjection = quest.DotProduct(user);
+            var answerProjection = quest.DotProduct(space.Vector);
+            var questVector = quest.Multiply(answerProjection - userProjection);
+            
+            quest.Type = "Axis";
+            quest.Id = Guid.NewGuid().ToString();
+            allVectors.Add(quest);
+
+            var answer = space.Vector.ThisWith(space.Vector.Vector);
+            answer.Id = Guid.NewGuid().ToString();
+            answer.Type = "Answer";
+            allVectors.Add(answer);
+
             return allVectors.Select(x => x.ToCoordinate([questVector])).ToList();
         }
 
