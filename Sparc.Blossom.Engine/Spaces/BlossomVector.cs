@@ -238,8 +238,8 @@ public class BlossomVector : BlossomVectorBase
             .Take(2)
             .ToList();
 
-        var x = facets.FirstOrDefault() ?? Basis(1536, 0);
-        var y = facets.Skip(1).FirstOrDefault() ?? Basis(1536, 1);
+        var x = facets.FirstOrDefault() ?? Basis(answerVector.Vector.Length, 0);
+        var y = facets.Skip(1).FirstOrDefault() ?? Basis(answerVector.Vector.Length, 1);
         BlossomVector? z = null;
 
         x.Text = "X";

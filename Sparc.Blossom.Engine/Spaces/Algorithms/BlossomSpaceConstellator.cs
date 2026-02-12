@@ -2,21 +2,20 @@
 
 namespace Sparc.Blossom.Spaces;
 
-public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<BlossomPost> postRepository)
+internal class BlossomSpaceConstellator(BlossomVectors vectors)
 {
-    public async Task<List<BlossomVector>> ConstellateAsync(BlossomSpace rootSpace, List<BlossomPostWithVector> posts, List<BlossomVector> axes)
+    public async Task<List<BlossomVector>> ConstellateAsync(BlossomSpace rootSpace, List<BlossomVector> posts, List<BlossomVector> axes)
     {
         if (posts.Count < 3)
             return [];
 
-        var coords = posts.Select(p => p.Vector.ProjectOntoAxes(axes)).ToList();
+        var coords = posts.Select(p => p.ProjectOntoAxes(axes)).ToList();
 
         var edges = ComputeKnnEdges(coords, rootSpace.Settings.ConstellationStrength);
         var constellations = Kruskal(coords, edges, rootSpace.Settings.ConstellationThreshold);
         var constellationVectors = await CreateConstellations(rootSpace, posts, constellations);
 
-        await vectors.UpdateAsync(posts.Select(p => p.Vector));
-        await postRepository.UpdateAsync(posts.Select(p => p.Post));
+        await vectors.UpdateAsync(posts);
 
         await Parallel.ForEachAsync(constellationVectors, async (vec, _) =>
             await vectors.SummarizeAsync(vec));
@@ -24,14 +23,14 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
         return constellationVectors;
     }
 
-    private async Task<List<BlossomVector>> CreateConstellations(BlossomSpace rootSpace, List<BlossomPostWithVector> posts, Dictionary<BlossomVector, List<BlossomVector>> constellations)
+    private async Task<List<BlossomVector>> CreateConstellations(BlossomSpace rootSpace, List<BlossomVector> posts, Dictionary<BlossomVector, List<BlossomVector>> constellations)
     {
         // Create constellation vectors as simple average of coordinates per component
         await vectors.ClearAsync(rootSpace.Id, "Constellation");
         posts.ForEach(x =>
         {
-            x.Vector.ConstellationId = null;
-            x.Vector.ConstellationConnectorId = null;
+            x.ConstellationId = null;
+            x.ConstellationConnectorId = null;
         });
 
         var result = new List<BlossomVector>();
@@ -44,11 +43,10 @@ public class BlossomSpaceConstellator(BlossomVectors vectors, IRepository<Blosso
 
             for (var i = 0; i < constellation.Count; i++)
             {
-                var post = posts.First(y => y.Post.Id == constellation[i].Id);
-                post.Vector.ConstellationId = constellationVector.Id;
-                post.Post.ConstellationId = constellationVector.Id;
+                var post = posts.First(y => y.Id == constellation[i].Id);
+                post.ConstellationId = constellationVector.Id;
                 if (i < constellation.Count - 1)
-                    post.Vector.ConstellationConnectorId = constellation[i + 1].Id;
+                    post.ConstellationConnectorId = constellation[i + 1].Id;
             }
         }
 

@@ -4,9 +4,10 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
 
-public class BlossomVectors(
+internal class BlossomVectors(
     IRepository<BlossomVector> vectors, 
     IRepository<BlossomPost> posts,
+    VoyageTranslator translator,
     IEnumerable<ITranslator> translators,
     FriendlyId friendlyId)
 {
@@ -95,7 +96,6 @@ public class BlossomVectors(
             //batch = batch.Where(x => !existing.Contains(x.Id)).ToList();
             if (batch.Count > 0)
             {
-                var translator = translators.OfType<OpenAITranslator>().First();
                 var newVectors = await translator.VectorizeAsync(batch, lastX, lookback);
                 await vectors.AddAsync(newVectors);
             }
@@ -106,7 +106,6 @@ public class BlossomVectors(
     internal async Task<BlossomPostWithVector> VectorizeAsync(BlossomPost post, 
         List<BlossomPostWithVector>? lookbackPosts = null, double lookbackWeight = 0)
     {
-        var translator = translators.OfType<OpenAITranslator>().First();
         var postWithVector = new BlossomPostWithVector(post, await translator.VectorizeAsync(post));
 
         if (lookbackPosts != null)
@@ -130,6 +129,7 @@ public class BlossomVectors(
     public async Task SummarizeAsync(BlossomVector vector)
     {
         var aiTranslator = translators.OfType<AITranslator>().First();
+
         if (vector.Type == "Facet")
         {
             var leftVectors = await SearchAsync(vector, "Post", 5, true);
@@ -186,6 +186,9 @@ public class BlossomVectors(
         foreach (var seed in seeds)
             space.Add(seed);
 
+        var seedPosts = seeds.Select(x => new BlossomPost(space.Space, "Post", x.Text!));
+        await posts.UpdateAsync(seedPosts);
+
         space.Vector.SetSummary(new(friendlyId.Create(), question.Post.Text ?? "", ""));
         space.Space.SetSummary(space.Vector.Summary);
         await UpdateAsync(space.Vector);
@@ -198,7 +201,7 @@ public class BlossomVectors(
         var result = await aiTranslator.AskAsync(answer);
         var text = new TextContent(question.Post.Domain, question.Post.SpaceId, question.Post.Language, result.Value!.Text);
 
-        return await aiTranslator.VectorizeAsync(text);
+        return await translator.VectorizeAsync(text);
     }
 
     private async Task<IEnumerable<BlossomVector>> SeedAsync(BlossomPostWithVector question)
@@ -215,7 +218,7 @@ public class BlossomVectors(
             BlossomUser.System
             )).ToList();
 
-        var vectors = await aiTranslator.VectorizeAsync(text);
+        var vectors = await translator.VectorizeAsync(text);
         var principalComponents = BlossomSpaceFaceter.ToPrincipalComponents(vectors);
         await UpdateAsync(principalComponents);
         await UpdateAsync(vectors);
@@ -269,7 +272,7 @@ public class BlossomVectors(
         var hint = await aiTranslator.AskAsync(question);
         var hintPost = new BlossomPost(destination.Space, "Hint", hint.Value!.Text);
 
-        var hintVector = await aiTranslator.VectorizeAsync(hintPost);
+        var hintVector = await translator.VectorizeAsync(hintPost);
         await UpdateAsync(hintVector);
 
         return hintPost;

@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Spaces;
 
-public class BlossomSpaces(
+internal class BlossomSpaces(
     BlossomAggregateOptions<BlossomSpace> options,
     IRepository<BlossomPost> posts,
     IRepository<BlossomEvent> events,
@@ -211,11 +211,11 @@ public class BlossomSpaces(
         existing.Space.Settings = space.Settings;
         await Repository.UpdateAsync(existing.Space);
 
-        var allPosts = await GetPostsWithVectorsAsync(spaceId, 10000);
-        var facets = await faceter.FacetAsync(allPosts.Select(x => x.Vector));
+        var postVectors = await vectors.GetAllAsync(spaceId, "Post");
+        var facets = await faceter.FacetAsync(postVectors);
         
         var axes = await vectors.GetAxesAsync(existing);
-        await constellator.ConstellateAsync(existing.Space, allPosts, axes);
+        await constellator.ConstellateAsync(existing.Space, postVectors, axes);
         //await vectors.SummarizeAsync(existing.Vector);
         //existing.Space.SetSummary(existing.Vector.Summary);
         //await Repository.UpdateAsync(existing.Space);

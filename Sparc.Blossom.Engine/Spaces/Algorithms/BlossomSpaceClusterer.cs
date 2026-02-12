@@ -13,7 +13,7 @@ public class ClusteringPrediction
     public float[] Score { get; set; } = [];
 }
 
-public class BlossomSpaceClusterer(BlossomVectors vectors)
+internal class BlossomSpaceClusterer(BlossomVectors vectors)
 {
     public MLContext Context { get; } = new MLContext(seed: 1);
     private PredictionEngine<BlossomVector, ClusteringPrediction>? Predictor;

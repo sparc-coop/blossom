@@ -2,7 +2,7 @@
 
 namespace Sparc.Blossom.Spaces;
 
-public class BlossomSpaceFaceter(BlossomVectors vectors)
+internal class BlossomSpaceFaceter(BlossomVectors vectors)
 {
     public async Task<List<BlossomVector>> FacetAsync(IEnumerable<BlossomVector> vectorsToFacet)
     {
