@@ -2,14 +2,14 @@
 
 namespace Sparc.Blossom.Content;
 
-public record AxisDiscoveryResponse(List<string> SocraticStatements);
+public record AxisDiscoveryResponse(List<string> Statements);
 internal class AxisDiscoveryQuestion : BlossomQuestion<AxisDiscoveryResponse>
 {
 
-    public AxisDiscoveryQuestion(TextContent question) : base("Provide 5 initial progressive Socratic statements to begin exploring the following question.")
+    public AxisDiscoveryQuestion(TextContent question) : base("Provide up to 50 initial statements to begin exploring the following question.")
     {
-        Instructions = "You are an assistant that transforms a question into an initial exploratory set of Socratic questions and/or statements.\r\n" +
-            "Analyze the provided question and extract 5 progressive Socratic statements that encourage deep thinking and exploration of the topic.";
+        Instructions = "You are an assistant that transforms a question into an initial exploratory set of Socratic statements.\r\n" +
+            "Analyze the provided question and extract 50 diverse statements that encourage deep thinking and exploration of the topic from many different angles.";
 
         Text += "\r\n\r\nQuestion: " + question.Text;
     }

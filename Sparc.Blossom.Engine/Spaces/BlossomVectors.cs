@@ -182,10 +182,10 @@ public class BlossomVectors(
 
     public async Task InitializeSpaceAsync(BlossomSpaceWithVector space, BlossomPostWithVector question)
     {
-        //var socrates = await GenerateSocraticStatementsAsync(question);
+        var seeds = await SeedAsync(question);
+        foreach (var seed in seeds)
+            space.Add(seed);
 
-        var answerVector = await AnswerAsync(question);
-        space.Vector = space.Vector.ThisWith(answerVector.Vector);
         space.Vector.SetSummary(new(friendlyId.Create(), question.Post.Text ?? "", ""));
         space.Space.SetSummary(space.Vector.Summary);
         await UpdateAsync(space.Vector);
@@ -201,26 +201,24 @@ public class BlossomVectors(
         return await aiTranslator.VectorizeAsync(text);
     }
 
-    private async Task<IEnumerable<BlossomVector>> GenerateSocraticStatementsAsync(BlossomPostWithVector question)
+    private async Task<IEnumerable<BlossomVector>> SeedAsync(BlossomPostWithVector question)
     {
         var aiTranslator = translators.OfType<AITranslator>().First();
         var discovery = new AxisDiscoveryQuestion(question.Post);
         var statements = await aiTranslator.AskAsync(discovery);
 
-        var text = statements.Value!.SocraticStatements.Select(x => new TextContent(
+        var text = statements.Value!.Statements.Select(x => new BlossomPost(
             question.Post.Domain,
             question.Post.SpaceId,
             question.Post.Language,
-            x)).ToList();
+            x,
+            BlossomUser.System
+            )).ToList();
 
         var vectors = await aiTranslator.VectorizeAsync(text);
         var principalComponents = BlossomSpaceFaceter.ToPrincipalComponents(vectors);
         await UpdateAsync(principalComponents);
-
-        var guides = vectors.ToList();
-        foreach (var vector in guides)
-            vector.Type = "Guide";
-        await UpdateAsync(guides);
+        await UpdateAsync(vectors);
         return vectors;
     }
 

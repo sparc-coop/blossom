@@ -189,20 +189,14 @@ public class BlossomSpaces(
         await vectors.UpdateAsync(userTrail);
 
         await posts.AddAsync(post);
+        space.Add(postWithVector);
+        await vectors.UpdateAsync(space.Vector);
 
         if (isFirstPost)
-        {
             // Generate exploratory axes based on the initial question
             await vectors.InitializeSpaceAsync(space, postWithVector);
-            await Repository.UpdateAsync(space.Space);
-        }
-        else
-        {
-            space.Add(postWithVector);
-            await vectors.UpdateAsync(space.Vector);
 
-            await SaveSpaceAsync(spaceId, space.Space);
-        }
+        await SaveSpaceAsync(spaceId, space.Space);
 
         //var hintVectors = await vectors.GetAllAsync(space.Space.Id, "Hint");
         //var hint = await vectors.CalculateHintAsync(userSpace, post, space);
