@@ -270,14 +270,18 @@ internal class BlossomSpaces(
         foreach (var availableQuest in allVectors.Where(x => x.Type == "Facet"))
             availableQuest.CheckForQuest(space.Vector, user, lastUserMovement, distanceToAnswer);
 
+        var axes = await vectors.GetAxesAsync(space, allVectors);
+
         if (questId != null)
         {
             var selectedQuest = allVectors.First(x => x.Id == questId);
-            var coords = allVectors.Select(x => x.ToCoordinate([selectedQuest])).ToList();
+            var xAxis = selectedQuest.ProjectOntoPlane(axes[0], axes[1]);
+            var yAxis = xAxis.Perpendicular(axes[0], axes[1]);
+            var zAxis = BlossomVector.Basis(xAxis.Vector.Length, 2).Orthogonal(xAxis, yAxis);
+            var coords = allVectors.Select(x => x.ToCoordinate([xAxis, yAxis, zAxis])).ToList();
             return new(coords, distanceToAnswer);
         }
 
-        var axes = await vectors.GetAxesAsync(space, allVectors);
         var coordinates = allVectors.Select(x => x.ToCoordinate(axes)).ToList();
         return new(coordinates, distanceToAnswer);
     }

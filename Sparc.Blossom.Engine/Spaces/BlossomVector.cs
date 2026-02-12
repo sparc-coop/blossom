@@ -331,6 +331,19 @@ public class BlossomVector : BlossomVectorBase
         return [.. normalized];
     }
 
+    public BlossomVector Orthogonal()
+    {
+        var reference = Basis(Vector.Length, 0);
+        var orthogonal = reference.Subtract(Multiply(DotProduct(reference))).Normalize();
+        return orthogonal;
+    }
+
+    public BlossomVector Orthogonal(BlossomVector xAxis, BlossomVector yAxis)
+    {
+        var orthogonal = Subtract(xAxis.Multiply(DotProduct(xAxis))).Subtract(yAxis.Multiply(DotProduct(yAxis))).Normalize();
+        return orthogonal;
+    }
+
     internal void CalculateCoherenceWeight(List<BlossomVector> neighbors)
     {
         if (neighbors.Count == 0)
@@ -371,5 +384,20 @@ public class BlossomVector : BlossomVectorBase
     {
         var coordinate = ToCoordinate(axes);
         return ThisWith([-1 * (float)coordinate.X, -1 * (float)coordinate.Y]);
+    }
+
+    internal BlossomVector ProjectOntoPlane(BlossomVector xAxis, BlossomVector yAxis)
+    {
+        var plane = Plane(xAxis, yAxis);
+        return plane.Normalize();
+    }
+
+    internal BlossomVector Perpendicular(BlossomVector xAxis, BlossomVector yAxis)
+    {
+        var coordinate = ToCoordinate([xAxis, yAxis]);
+        var perpendicularCoordinate = coordinate with { X = coordinate.Y * -1, Y = coordinate.X };
+
+        var result = xAxis.Multiply((float)perpendicularCoordinate.X).Add(yAxis.Multiply((float)perpendicularCoordinate.Y));
+        return result.Normalize();
     }
 }

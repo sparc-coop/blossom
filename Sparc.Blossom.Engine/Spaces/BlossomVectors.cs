@@ -186,7 +186,7 @@ internal class BlossomVectors(
         foreach (var seed in seeds)
             space.Add(seed);
 
-        var seedPosts = seeds.Select(x => new BlossomPost(space.Space, "Post", x.Text!));
+        var seedPosts = seeds.Select(x => new BlossomPost(space.Space, "Post", x.Text!) { Id = x.Id });
         await posts.UpdateAsync(seedPosts);
 
         space.Vector.SetSummary(new(friendlyId.Create(), question.Post.Text ?? "", ""));
