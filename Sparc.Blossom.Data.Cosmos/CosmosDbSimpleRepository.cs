@@ -9,7 +9,12 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
     : RepositoryBase<T>(simpleClient.Context), IRepository<T>
     where T : BlossomEntity<string>
 {
-    public IQueryable<T> Query { get; } = simpleClient.Container.GetItemLinqQueryable<T>();
+    static string TypeName = typeof(T).Name;
+    public IQueryable<T> Query { get; } = 
+        simpleClient.IsPolymorphicType
+        ? simpleClient.Container.GetItemLinqQueryable<T>().Where(x => x.EntityType == TypeName)
+        : simpleClient.Container.GetItemLinqQueryable<T>();
+
     public CosmosDbSimpleClient<T> Client { get; } = simpleClient;
     public IMediator Mediator { get; } = mediator;
 

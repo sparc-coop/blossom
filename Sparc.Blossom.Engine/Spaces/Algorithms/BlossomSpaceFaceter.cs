@@ -1,6 +1,6 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
-using Microsoft.EntityFrameworkCore;
 using Sparc.Blossom.Content;
+using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
 

@@ -2,6 +2,8 @@
 
 public class Constellation : BlossomSpaceObject
 {
+    public Constellation() { }
+
     public Constellation(string spaceId) : base(spaceId)
     { }
 

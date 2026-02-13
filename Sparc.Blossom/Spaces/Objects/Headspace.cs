@@ -2,6 +2,9 @@
 
 public class Headspace : BlossomSpaceObject
 {
+    public Headspace()
+    { }
+    
     public Headspace(string spaceId) : base(spaceId)
     {
     }

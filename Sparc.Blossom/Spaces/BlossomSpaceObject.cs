@@ -5,6 +5,9 @@ namespace Sparc.Blossom.Spaces;
 
 public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.NewGuid().ToString()), IVectorizable
 {
+    public BlossomSpaceObject() : this("")
+    { }
+    
     public BlossomSpaceObject(BlossomSpace space, BlossomVector? vector = null)
         : this(space.Id)
     {

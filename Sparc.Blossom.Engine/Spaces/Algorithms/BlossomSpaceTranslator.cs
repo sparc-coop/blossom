@@ -6,6 +6,7 @@ namespace Sparc.Blossom.Spaces;
 internal class BlossomSpaceTranslator
     (IEnumerable<ITranslator> translators,
     BlossomPosts posts,
+    VoyageTranslator vectorizer,
     FriendlyId friendlyId)
 {
     readonly AITranslator translator = translators.OfType<AITranslator>().First();
@@ -15,8 +16,8 @@ internal class BlossomSpaceTranslator
         var discovery = new AxisDiscoveryQuestion(question);
         var statements = await translator.AskAsync(discovery);
 
-        var guides = statements.Value!.Statements.Select(x => new Post(space, BlossomUser.System.Avatar, x));
-        await translator.VectorizeAsync(guides);
+        var guides = statements.Value!.Statements.Select(x => new Post(space, BlossomUser.System.Avatar, x)).ToList();
+        await vectorizer.VectorizeAsync(guides);
         await posts.UpdateAsync(guides);
 
         foreach (var guide in guides)
@@ -34,7 +35,7 @@ internal class BlossomSpaceTranslator
         var hint = await translator.AskAsync(question);
         var hintPost = new Post(destination, BlossomUser.System.Avatar, hint.Value!.Text);
 
-        await translator.VectorizeAsync(hintPost);
+        await vectorizer.VectorizeAsync(hintPost);
         await posts.UpdateAsync([hintPost]);
 
         return hintPost;

@@ -4,6 +4,9 @@ namespace Sparc.Blossom.Spaces;
 
 public class Quest : BlossomSpaceObject
 {
+    public Quest()
+    { }
+    
     public Quest(string spaceId) : base(spaceId)
     { }
     

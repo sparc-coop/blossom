@@ -2,6 +2,8 @@
 
 public class Facet : BlossomSpaceObject
 {
+    public Facet() { }
+    
     public Facet(string spaceId) : base(spaceId)
     { }
     

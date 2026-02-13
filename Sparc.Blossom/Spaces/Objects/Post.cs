@@ -16,6 +16,7 @@ public class Post : BlossomSpaceObject
         SpaceId = space.Id;
         User = user;
         Text = text;
+        Vector = new(text);
     }
 
     public string? Text { get; set; }

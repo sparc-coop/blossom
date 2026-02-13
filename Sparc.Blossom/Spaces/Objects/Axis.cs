@@ -2,6 +2,8 @@
 
 public class Axis : Facet
 {
+    public Axis() { }
+    
     public Axis(string spaceId) : base(spaceId)
     { }
     
