@@ -5,7 +5,7 @@ namespace Sparc.Blossom.Content;
 internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
 {
 
-    public SummaryQuestion(IEnumerable<TextContent> messages, int tokenLimit) : base(
+    public SummaryQuestion(IEnumerable<Post> messages, int tokenLimit) : base(
     "Provide a concise summary of the following messages, including a name, topic, and description. " +
     "The summary should capture the main themes and key points discussed in the messages.")
     {
@@ -20,7 +20,7 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
         AddMessages(messages, tokenLimit);
     }
 
-    public SummaryQuestion(IEnumerable<BlossomPost> leftMessages, IEnumerable<BlossomPost> rightMessages, int tokenLimit) 
+    public SummaryQuestion(IEnumerable<VectorSearchResult<Post>> leftMessages, IEnumerable<VectorSearchResult<Post>> rightMessages, int tokenLimit) 
         : base(
     "Extract the main themes from the messages to guide the user from the left side to the right side of the quest, via the conflict or tension located within." +
     " This will be used for a game quest description, so phrase accordingly.")
@@ -43,7 +43,7 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
         AddMessagesWithWeight(rightMessages, tokenLimit / 2);
     }
 
-    private void AddMessages(IEnumerable<TextContent> messages, int tokenLimit)
+    private void AddMessages(IEnumerable<Post> messages, int tokenLimit)
     {
         foreach (var message in messages)
         {
@@ -56,16 +56,16 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
         }
     }
 
-    private void AddMessagesWithWeight(IEnumerable<BlossomPost> messages, int tokenLimit)
+    private void AddMessagesWithWeight(IEnumerable<VectorSearchResult<Post>> messages, int tokenLimit)
     {
-        foreach (var message in messages.OrderByDescending(x => x.CoherenceWeight))
+        foreach (var message in messages.OrderByDescending(x => x.Score))
         {
-            if (Text.Length + message.Text!.Length > tokenLimit * 4 * 0.8)
+            if (Text.Length + message.Item.Text!.Length > tokenLimit * 4 * 0.8)
             {
                 Text += "\r\n- [Truncated additional messages due to token limit]";
                 break;
             }
-            Text += $"\r\n- (Weight: {message.CoherenceWeight:N2}) " + message.Text!.Replace('\u00A0', ' ');
+            Text += $"\r\n- (Weight: {message.Score:N2}) " + message.Item.Text!.Replace('\u00A0', ' ');
         }
     }
 
@@ -82,9 +82,9 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
 
         Text += "The following are descriptions of other rooms in this space:\r\n";
         foreach (var otherSpace in otherSpaces)
-            Text += "\r\n- " + otherSpace.Summary.Description!.Replace('\u00A0', ' ');
+            Text += "\r\n- " + otherSpace.Summary?.Description.Replace('\u00A0', ' ');
 
         Text += "\r\n\r\nThis Room: ";
-        Text += "\r\n- " + space.Summary.Description!.Replace('\u00A0', ' ');
+        Text += "\r\n- " + space.Summary?.Description.Replace('\u00A0', ' ');
     }
 }

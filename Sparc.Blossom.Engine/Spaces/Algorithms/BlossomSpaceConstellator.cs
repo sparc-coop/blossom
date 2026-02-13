@@ -1,64 +1,71 @@
-﻿using Sparc.Blossom.Content;
+﻿using Microsoft.EntityFrameworkCore;
+using Sparc.Blossom.Content;
 
 namespace Sparc.Blossom.Spaces;
 
-internal class BlossomSpaceConstellator(BlossomVectors vectors)
+internal class BlossomSpaceConstellator(
+    IRepository<Constellation> constellations,
+    BlossomPosts postRepository,
+    IEnumerable<ITranslator> translators)
 {
-    public async Task<List<BlossomVector>> ConstellateAsync(BlossomSpace rootSpace, List<BlossomVector> posts, List<BlossomVector> axes)
+    public async Task<List<Constellation>> ConstellateAsync(BlossomSpace space, List<Axis> axes)
     {
-        if (posts.Count < 3)
+        var posts = await postRepository.GetAllAsync(space, 10000);
+
+        if (posts.Count() < 3)
             return [];
 
-        var coords = posts.Select(p => p.ProjectOntoAxes(axes)).ToList();
+        posts.ForEach(p => p.MaterializeCoordinates(axes));
+        var edges = ComputeKnnEdges(posts, space.Settings.ConstellationStrength);
+        var result = Kruskal(posts, edges, space.Settings.ConstellationThreshold);
+        var newConstellations = await CreateConstellations(space, result);
 
-        var edges = ComputeKnnEdges(coords, rootSpace.Settings.ConstellationStrength);
-        var constellations = Kruskal(coords, edges, rootSpace.Settings.ConstellationThreshold);
-        var constellationVectors = await CreateConstellations(rootSpace, posts, constellations);
+        await postRepository.UpdateAsync(posts);
 
-        await vectors.UpdateAsync(posts);
-
-        await Parallel.ForEachAsync(constellationVectors, async (vec, _) =>
-            await vectors.SummarizeAsync(vec));
-
-        return constellationVectors;
-    }
-
-    private async Task<List<BlossomVector>> CreateConstellations(BlossomSpace rootSpace, List<BlossomVector> posts, Dictionary<BlossomVector, List<BlossomVector>> constellations)
-    {
-        // Create constellation vectors as simple average of coordinates per component
-        await vectors.ClearAsync(rootSpace.Id, "Constellation");
-        posts.ForEach(x =>
+        var translator = translators.OfType<AITranslator>().First();
+        await Parallel.ForEachAsync(newConstellations, async (constellation, _) =>
         {
-            x.ConstellationId = null;
-            x.ConstellationConnectorId = null;
+            var postsInConstellation = posts.Where(p => p.ConstellationId == constellation.Id).ToList();
+            constellation.SetSummary(await translator.SummarizeAsync(postsInConstellation));
         });
 
-        var result = new List<BlossomVector>();
-        foreach (var root in constellations.Keys)
-        {
-            var constellation = constellations[root];
-            var centroid = BlossomVector.Average(constellation);
-            var constellationVector = new BlossomVector(rootSpace.Id, "Constellation", Guid.NewGuid().ToString(), centroid.Vector);
-            result.Add(constellationVector);
+        return newConstellations;
+    }
 
-            for (var i = 0; i < constellation.Count; i++)
+    private async Task<List<Constellation>> CreateConstellations(BlossomSpace space, Dictionary<Post, List<Post>> vectors)
+    {
+        // Create constellation vectors as simple average of coordinates per component
+        var existing = await constellations.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
+        await constellations.DeleteAsync(existing);
+
+        foreach (var posts in vectors.Values)
+            posts.ForEach(x => x.SetConstellation(null, null));
+
+        var result = new List<Constellation>();
+        foreach (var root in vectors.Keys)
+        {
+            var constellationVectors = vectors[root].Select(x => x.Vector);
+            var centroid = BlossomVector.Average(constellationVectors);
+            var constellation = new Constellation(space, centroid);
+            result.Add(constellation);
+
+            for (var i = 0; i < vectors[root].Count; i++)
             {
-                var post = posts.First(y => y.Id == constellation[i].Id);
-                post.ConstellationId = constellationVector.Id;
-                if (i < constellation.Count - 1)
-                    post.ConstellationConnectorId = constellation[i + 1].Id;
+                var post = vectors[root][i];
+                var prev = i > 0 ? vectors[root][i - 1] : null;
+                post.SetConstellation(constellation, prev);
             }
         }
 
-        await vectors.UpdateAsync(result);
+        await constellations.UpdateAsync(result);
         return result;
     }
 
-    record KnnEdge(BlossomVector Coordinate1, BlossomVector Coordinate2, double Distance);
-    static List<KnnEdge> ComputeKnnEdges(List<BlossomVector> coords, int k)
+    record KnnEdge(Post From, Post To, double Distance);
+    static List<KnnEdge> ComputeKnnEdges(List<Post> posts, int k)
     {
         var edges = new List<KnnEdge>();
-        var count = coords.Count;
+        var count = posts.Count;
         
         for (int i = 0; i < count; i++)
         {
@@ -66,26 +73,26 @@ internal class BlossomSpaceConstellator(BlossomVectors vectors)
             for (int j = 0; j < count; j++)
             {
                 if (i == j) continue;
-                var distance = coords[i].DistanceTo(coords[j]);
+                var distance = posts[i].Coordinates!.DistanceTo(posts[j].Coordinates!);
                 distances.Add((j, distance));
             }
 
-            k = Math.Max(1, Math.Min(k, coords.Count - 1));
+            k = Math.Max(1, Math.Min(k, posts.Count - 1));
             foreach (var (idx, distance) in distances.OrderBy(x => x.distance).Take(k))
             {
-                var coordinate1 = coords[Math.Min(i, idx)];
-                var coordinate2 = coords[Math.Max(i, idx)];
-                if (!edges.Any(e => e.Coordinate1 == coordinate1 && e.Coordinate2 == coordinate2))
-                    edges.Add(new(coordinate1, coordinate2, distance));
+                var post1 = posts[Math.Min(i, idx)];
+                var post2 = posts[Math.Max(i, idx)];
+                if (!edges.Any(e => e.From == post1 && e.To == post2))
+                    edges.Add(new(post1!, post2!, distance));
             }
         }
 
         return edges.OrderBy(e => e.Distance).ToList();
     }
 
-    static Dictionary<BlossomVector, List<BlossomVector>> Kruskal(List<BlossomVector> coords, List<KnnEdge> edges, double threshold)
+    static Dictionary<Post, List<Post>> Kruskal(List<Post> posts, List<KnnEdge> edges, double threshold)
     {
-        var n = coords.Count;
+        var n = posts.Count;
         var parent = new int[n];
         for (int i = 0; i < n; i++) parent[i] = i;
 
@@ -96,8 +103,8 @@ internal class BlossomSpaceConstellator(BlossomVectors vectors)
         var mstEdges = new List<(int a, int b, double dist)>();
         foreach (var e in edges.OrderBy(e => e.Distance))
         {
-            int a = coords.IndexOf(e.Coordinate1);
-            int b = coords.IndexOf(e.Coordinate2);
+            int a = posts.IndexOf(e.From);
+            int b = posts.IndexOf(e.To);
             if (a < 0 || b < 0) continue;
             if (Find(a) != Find(b))
             {
@@ -124,12 +131,12 @@ internal class BlossomSpaceConstellator(BlossomVectors vectors)
         }
 
         // Collect components mapped by root index
-        var constellations = new Dictionary<BlossomVector, List<BlossomVector>>();
+        var constellations = new Dictionary<Post, List<Post>>();
         for (int i = 0; i < n; i++)
         {
             int r = Find(i);
-            if (!constellations.ContainsKey(coords[r])) constellations[coords[r]] = [];
-            constellations[coords[r]].Add(coords[i]);
+            if (!constellations.ContainsKey(posts[r])) constellations[posts[r]] = [];
+            constellations[posts[r]].Add(posts[i]);
         }
 
         // Throw out constellations with less than 3 nodes

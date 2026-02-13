@@ -10,21 +10,18 @@ public record MetricHistory(
 
 public class BlossomSpaceSettings
 {
-    public double HeadspaceVelocity { get; set; } = 5.0;
-    public double SpaceGravity { get; set; } = 1.0;
+    public float HeadspaceVelocity { get; set; } = 5.0f;
+    public float SpaceGravity { get; set; } = 1.0f;
     public int MessageLookback { get; set; } = 0;
-    public double UserHeadspaceWeight { get; set; } = 0.02;
-    public double MessageLookbackWeight { get; set; } = 0.02;
+    public float UserHeadspaceWeight { get; set; } = 0.02f;
+    public float MessageLookbackWeight { get; set; } = 0.02f;
     public int ConstellationStrength { get; set; } = 5;
-    public double ConstellationThreshold { get; set; } = 0.2;
+    public float ConstellationThreshold { get; set; } = 0.2f;
 }
     
-public class BlossomSpace : BlossomEntity<string>
+public class BlossomSpace : BlossomSpaceObject
 {
-    public string Domain { get; set; }
-    public string SpaceId {  get { return Id;  } set { Id = value; } }
     public string Name { get; set; } = string.Empty;
-    public BlossomSummary Summary { get; set; } = new("", "", "", null, null);
     public string RoomType { get; set; } = "Root";
     public int NumJoinedMembers { get; set; }
     public bool GuestCanJoin { get; set; }
@@ -47,64 +44,67 @@ public class BlossomSpace : BlossomEntity<string>
     [JsonConstructor]
     protected BlossomSpace() : base(Guid.NewGuid().ToString())
     {
-        Domain = string.Empty;
+        Id = SpaceId;
     }
 
-    public BlossomSpace(string domain, string spaceId, string? roomType = null) : base(spaceId)
+    public BlossomSpace(string id, string? roomType = null) : base(id)
     {
-        Domain = domain;
-        SpaceId = spaceId;
+        Id = id;
         RoomType = roomType ?? "Ephemeral";
-    }
-
-    public BlossomSpace(string domain) : base(Guid.NewGuid().ToString())
-    {
-        Domain = domain;
-        RoomType = "Ephemeral";
     }
 
     public BlossomSpace(BlossomSpace parentSpace, string? roomType = null)
-        : this(parentSpace.Id)
+        : this()
     {
+        SpaceId = parentSpace.Id;
         RoomType = roomType ?? "Ephemeral";
     }
 
-    public void SetSummary(BlossomSummary? summary)
+    public override void SetSummary(BlossomSummary? summary)
     {
-        if (summary == null)
-            return;
+        base.SetSummary(summary);
 
-        Name = summary.Name;
-        Summary = summary;
+        if (summary != null)
+            Name = summary.Name;
     }
 
-    public void SetConsensus(IEnumerable<BlossomPost> messages)
+    public void Add(Post post)
     {
-        //if (RoomType == "Facet")
-        //{
-        //    Consensus = messages.Average(x => x.LinkedSpace(Id)?.Alignment ?? 0);
-        //    Confidence = 1 / (1 + messages.Average(x => Math.Pow(x.LinkedSpace(Id)?.Alignment ?? 1, 2)));
-        //}
-        //else
-        //{
-        //    Consensus = messages.Sum(x => x.LinkedSpace(Id)?.Closeness * x.LinkedSpace(Id)?.Alignment ?? 0) / messages.Sum(x => 1 - (x.LinkedSpace(Id)?.Distance ?? 1));
-        //    // Variance is the average of the squared differences from the Mean
-        //    Confidence = 1 / (1 + messages.Average(x => Math.Pow(x.LinkedSpace(Id)?.Distance ?? 1, 2)));
-        //}
-
-        //if (double.IsNaN(Consensus.Value))
-        //    Consensus = 0;
-        //if (double.IsNaN(Confidence.Value))
-        //    Confidence = 0;
-
-        //ConsensusHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Consensus.Value));
-        //ConfidenceHistory.Insert(0, new MetricHistory(DateTime.UtcNow, Confidence.Value));
+        post.SpaceId = Id;
+        Add(post.Vector);
     }
 
-    public double ConsensusDelta => ConsensusHistory.Count < 2 ? 0 :
-        ConsensusHistory[0].Value - ConsensusHistory[1].Value;
+    public void Add(BlossomVector vector)
+    {
+        if (Vector.IsEmpty)
+            Vector.Update(vector, 1.0f);
+        else
+        {
+            var projectionOntoAxis = vector.DotProduct(Vector);
+            var projectionOntoOrthogonalSubspace = vector.Subtract(Vector.Multiply(projectionOntoAxis)).Magnitude();
+            var weight = Math.Abs(projectionOntoAxis) / (Math.Abs(projectionOntoAxis) + projectionOntoOrthogonalSubspace);
 
-    public double ConfidenceDelta => ConfidenceHistory.Count < 2 ? 0 :
-        ConfidenceHistory[0].Value - ConfidenceHistory[1].Value;
+            Vector.Update(vector, weight);
+        }
+    }
+
+    public List<Axis> MaterializeAxes(IEnumerable<Facet> candidates)
+    {
+        var facets = candidates
+            .OrderByDescending(x => x.Vector.CoherenceWeight)
+            .Take(2)
+            .ToList();
+
+        var x = facets.FirstOrDefault() ?? new(this, BlossomVector.Basis(Vector.Vector.Length, 0));
+        var y = facets.Skip(1).FirstOrDefault() ?? new(this, BlossomVector.Basis(Vector.Vector.Length, 1));
+        Facet? z = null;
+
+        var xAxis = new Axis(this, x, "X");
+        var yAxis = new Axis(this, y, "Y");
+        var zAxis = z == null ? null : new Axis(this, z, "Z");
+
+        return zAxis == null ? [xAxis, yAxis] : [xAxis, yAxis, zAxis];
+    }
 }
+
 

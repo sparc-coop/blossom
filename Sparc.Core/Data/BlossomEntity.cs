@@ -88,10 +88,15 @@ public class BlossomEntity<T> : BlossomEntity where T : notnull
     public BlossomEntity()
     {
         Id = default!;
+        EntityType = GetType().Name;
     }
 
-    public BlossomEntity(T id) => Id = id;
+    public BlossomEntity(T id) : this() => Id = id;
     public override object GenericId => Id;
+
+    [JsonProperty("_type")]
+    [JsonPropertyName("_type")]
+    public string EntityType { get; set; }
 
     [JsonProperty("id")]
     [JsonPropertyName("id")]

@@ -47,5 +47,5 @@ public interface ISparcContent
 public record PostSingleContentRequest(TextContent Content, TranslationOptions? Options = null);
 public record PostContentRequest(List<TextContent> Content, TranslationOptions? Options = null); 
 public record CrawlRequest(string Domain, List<string> ToLanguages, string FromLanguage = "en");
-public record ExtractGraphRequest(TextContent Content, List<SparcEntityType> EntityTypes);
+public record ExtractGraphRequest(IVectorizable Content, List<SparcEntityType> EntityTypes);
 public record Visit(string Domain, string Path);

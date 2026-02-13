@@ -19,7 +19,7 @@ public interface ISparcSpaces
     Task<BlossomSpace> CreateSpaceAsync(CreateSpaceRequest request);
 
     [Post("/spaces/{spaceId}")]
-    Task<BlossomPost> PostAsync(string spaceId, BlossomPost post);
+    Task<Post> PostAsync(string spaceId, Post post);
 
     [Put("/spaces/{spaceId}")]
     Task SaveSpaceAsync(string spaceId, BlossomSpace space);
@@ -37,7 +37,7 @@ public interface ISparcSpaces
     Task<BlossomSpace> InviteToSpaceAsync(string spaceId, InviteToSpaceRequest request);
 
     [Get("/spaces/{spaceId}/posts")]
-    Task<List<BlossomPost>> GetPostsAsync(string spaceId, string type = "Post");
+    Task<List<Post>> GetPostsAsync(string spaceId, string type = "Post");
 
     [Get("/spaces/{spaceId}/coordinates")]
     Task<GameState> GetCoordinatesAsync(string spaceId, string? questId = null);
@@ -52,7 +52,7 @@ public interface ISparcSpaces
     Task SetPresenceAsync(string userId, BlossomPresence presence);
 }
 
-public record GameState(List<BlossomCoordinate> Coordinates, double DistanceToAnswer);
+public record GameState(List<BlossomSpaceObject> Objects, double DistanceToAnswer);
 
 public record InviteToSpaceRequest(string UserId);
 public record CreateSpaceRequest(

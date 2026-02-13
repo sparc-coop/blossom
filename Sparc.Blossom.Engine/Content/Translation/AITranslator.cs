@@ -9,8 +9,8 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
     protected string DefaultModel = defaultModel;
     protected decimal CostPerToken = costPerToken;
 
-    public abstract Task<BlossomVector> VectorizeAsync(TextContent message, IEnumerable<TextContent>? additionalContext = null);
-    public abstract Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages, int? lastX = null, int? lookback = null);
+    public abstract Task VectorizeAsync(IVectorizable item, IEnumerable<IVectorizable>? additionalContext = null);
+    public abstract Task VectorizeAsync(IEnumerable<IVectorizable> items, int? lastX = null, int? lookback = null);
 
     public async Task<TextContent> TranslateAsync(TextContent message, TranslationOptions options)
     {
@@ -26,14 +26,14 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
         return result;
     }
 
-    public async Task<BlossomSummary?> SummarizeAsync(IEnumerable<TextContent> messages)
+    public async Task<BlossomSummary?> SummarizeAsync(IEnumerable<Post> messages)
     {
         var question = new SummaryQuestion(messages, 1047576);
         var answer = await AskAsync(question);
         return answer.Value;
     }
 
-    public async Task<BlossomSummary?> SummarizeAsync(IEnumerable<BlossomPost> leftMessages, IEnumerable<BlossomPost> rightMessages)
+    public async Task<BlossomSummary?> SummarizeAsync(IEnumerable<VectorSearchResult<Post>> leftMessages, IEnumerable<VectorSearchResult<Post>> rightMessages)
     {
         var question = new SummaryQuestion(leftMessages, rightMessages, 1047576);
         var answer = await AskAsync(question);

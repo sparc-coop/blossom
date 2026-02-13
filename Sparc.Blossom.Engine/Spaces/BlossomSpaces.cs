@@ -2,48 +2,28 @@
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Content.Tovik;
 using Sparc.Blossom.Data;
-using Sparc.Blossom.Realtime;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Spaces;
 
 internal class BlossomSpaces(
     BlossomAggregateOptions<BlossomSpace> options,
-    IRepository<BlossomPost> posts,
-    IRepository<BlossomEvent> events,
-    IHttpContextAccessor http,
-    BlossomVectors vectors,
-    Contents contents,
+    BlossomPosts posts,
+    IRepository<BlossomSpaceObject> allObjects,
+    IRepository<Quest> quests,
     BlossomSpaceFaceter faceter,
     BlossomSpaceConstellator constellator,
-    SparcAuthenticator<BlossomUser> auth)
+    BlossomSpaceTranslator translator)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
     public const string Domain = "sparc.coop";
-    public string? MatrixSenderId;
-
-    private async Task<BlossomPresence> GetPresenceAsync(ClaimsPrincipal principal, string userId)
-    {
-        var user = await auth.GetAsync(principal);
-        return new BlossomPresence(user.Avatar);
-    }
-
-    private async Task SetPresenceAsync(ClaimsPrincipal principal, string userId, BlossomPresence presence)
-    {
-        var user = await auth.GetAsync(principal);
-        presence.ApplyToAvatar(user.Avatar);
-        user.UpdateAvatar(user.Avatar);
-        await auth.UpdateAsync(user);
-        await PublishAsync(userId, presence);
-    }
 
     private async Task<List<BlossomSpace>> GetSpacesAsync(string? parentSpaceId = null, int? limit = null, string? type = null)
     {
-        var spaces = parentSpaceId == null
-            ? Repository.Query
-            .Where(x => x.Domain == Domain && x.RoomType == "Root")
-            : Repository.Query
-            .Where(x => x.Domain == parentSpaceId);
+        parentSpaceId ??= Domain;
+
+        var spaces = Repository.Query
+            .Where(x => x.SpaceId == parentSpaceId);
 
         if (type != null)
             spaces = spaces.Where(x => x.RoomType == type);
@@ -60,7 +40,7 @@ internal class BlossomSpaces(
         return await Repository.FindAsync(parentSpaceId, spaceId);
     }
 
-    private async Task<BlossomSpaceWithVector> GetOrCreate(string? spaceId, string roomType = "Space", string? parentSpaceId = null)
+    private async Task<BlossomSpace> GetOrCreate(string? spaceId, string roomType = "Space", string? parentSpaceId = null, BlossomAvatar? user = null)
     {
         parentSpaceId ??= Domain;
 
@@ -70,73 +50,11 @@ internal class BlossomSpaces(
         var existing = await Repository.FindAsync(parentSpaceId, spaceId);
         if (existing == null)
         {
-            existing = new BlossomSpace(parentSpaceId, spaceId, roomType);
+            existing = new BlossomSpace(spaceId, roomType) { SpaceId = parentSpaceId, User = user ?? BlossomUser.System.Avatar };
             await Repository.AddAsync(existing);
         }
 
-        var vector = await vectors.FindAsync(existing) ?? new(existing, []);
-
-        return new(existing, vector);
-    }
-
-    private async Task<CreateSpaceResponse> CreateSpaceAsync(CreateSpaceRequest request)
-    {
-        var spaceId = "!" + BlossomEvent.OpaqueId() + ":" + Domain;
-        await PublishAsync(spaceId, new CreateSpace());
-        await PublishAsync(spaceId, new ChangeMembershipState("join", MatrixSenderId!));
-        await PublishAsync(spaceId, new AdjustPowerLevels());
-
-        if (!string.IsNullOrWhiteSpace(request.RoomAliasName))
-            await PublishAsync(spaceId, new CanonicalAlias(request.RoomAliasName));
-
-        if (!string.IsNullOrWhiteSpace(request.Preset))
-        {
-            switch (request.Preset)
-            {
-                case "public_chat":
-                    await PublishAsync(spaceId, new JoinRules("public"));
-                    await PublishAsync(spaceId, HistoryVisibility.Shared);
-                    await PublishAsync(spaceId, GuestAccess.Forbidden);
-                    break;
-                case "private_chat":
-                case "trusted_private_chat":
-                    await PublishAsync(spaceId, new JoinRules("invite"));
-                    await PublishAsync(spaceId, HistoryVisibility.Shared);
-                    await PublishAsync(spaceId, GuestAccess.CanJoin);
-                    break;
-                default:
-                    throw new NotSupportedException($"Preset '{request.Preset}' is not supported.");
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.Name))
-            await PublishAsync(spaceId, new RoomName(request.Name));
-
-        if (!string.IsNullOrWhiteSpace(request.Topic))
-            await PublishAsync(spaceId, new RoomTopic(request.Topic));
-
-        if (request.Invite?.Count > 0)
-        {
-            foreach (var userId in request.Invite)
-                await PublishAsync(spaceId, new ChangeMembershipState("invite", userId));
-        }
-
-        return new(spaceId);
-    }
-
-    private async Task JoinSpaceAsync(string spaceId)
-    {
-        await PublishAsync(spaceId, new ChangeMembershipState("join", MatrixSenderId!));
-    }
-
-    private async Task LeaveSpaceAsync(string spaceId)
-    {
-        await PublishAsync(spaceId, new ChangeMembershipState("leave", MatrixSenderId!));
-    }
-
-    private async Task InviteToSpaceAsync(string spaceId, InviteToSpaceRequest request)
-    {
-        await PublishAsync(spaceId, new ChangeMembershipState("invite", request.UserId));
+        return existing;
     }
 
     public record GraphExtractionResult(List<SparcEntityBase> Entities, List<SparcRelationship> Relationships);
@@ -148,55 +66,27 @@ internal class BlossomSpaces(
             Schema = new BlossomSchema(typeof(GraphExtractionResult))
         };
 
-        var graph = await contents.TranslateAsync<GraphExtractionResult>(request.Content, options);
-        if (graph?.Entities == null)
-            return [];
-
-        var entities = graph.Entities.Select(x => new SparcEntity(x, graph.Relationships));
-        return entities.ToList();
-    }
-
-    public async Task<List<BlossomSpace>> Discover(string spaceId)
-    {
-        var existing = await Repository.Query.Where(x => x.Domain == spaceId).ToListAsync();
-        await Repository.DeleteAsync(existing);
-
-        var space = await GetOrCreate(spaceId);
-        var spacePosts = await GetPostsAsync(spaceId, take: 10000);
-
-        await posts.UpdateAsync(spacePosts);
-        await Repository.UpdateAsync(space.Space);
+        //var graph = await contents.TranslateAsync<GraphExtractionResult>(request.Content, options);
+        //if (graph?.Entities == null)
         return [];
+
+        //var entities = graph.Entities.Select(x => new SparcEntity(x, graph.Relationships));
+        //return entities.ToList();
     }
 
-    private async Task<BlossomPost> PostAsync(string spaceId, BlossomPost post)
+    private async Task<Post> PostAsync(string spaceId, Post post)
     {
-        var space = await GetOrCreate(post.SpaceId);
-        var userSpace = await GetOrCreate(post.User!.Id, "User", space.Space.Id);
+        var space = await GetOrCreate(post.SpaceId, user: post.User);
         var isFirstPost = space.Vector.IsEmpty;
 
-        var allPosts = await GetPostsWithVectorsAsync(spaceId, 10000);
-        var lookbackPosts = allPosts.OrderByDescending(x => x.Post.Timestamp)
-            .Take(space.Space.Settings.MessageLookback)
-            .ToList();
+        post = await posts.AddAsync(post, space);
 
-        var postWithVector = await vectors.VectorizeAsync(post, lookbackPosts, space.Space.Settings.MessageLookbackWeight);
-
-        userSpace.Add(postWithVector);
-        await vectors.UpdateAsync(userSpace.Vector);
-
-        var userTrail = new BlossomVector(space.Space.Id, "UserTrail", Guid.NewGuid().ToString(), userSpace.Vector.Vector);
-        await vectors.UpdateAsync(userTrail);
-
-        await posts.AddAsync(post);
-        space.Add(postWithVector);
-        await vectors.UpdateAsync(space.Vector);
+        await Repository.ExecuteAsync(space, x => x.Add(post));
 
         if (isFirstPost)
-            // Generate exploratory axes based on the initial question
-            await vectors.InitializeSpaceAsync(space, postWithVector);
+            await translator.SeedAsync(space, post);
 
-        await SaveSpaceAsync(spaceId, space.Space);
+        await SaveAsync(spaceId, space);
 
         //var hintVectors = await vectors.GetAllAsync(space.Space.Id, "Hint");
         //var hint = await vectors.CalculateHintAsync(userSpace, post, space);
@@ -205,91 +95,64 @@ internal class BlossomSpaces(
         return post;
     }
 
-    private async Task SaveSpaceAsync(string spaceId, BlossomSpace space)
+    private async Task SaveAsync(string spaceId, BlossomSpace space)
     {
         var existing = await GetOrCreate(spaceId);
-        existing.Space.Settings = space.Settings;
-        await Repository.UpdateAsync(existing.Space);
+        existing.Settings = space.Settings;
+        await Repository.UpdateAsync(existing);
 
-        var postVectors = await vectors.GetAllAsync(spaceId, "Post");
-        var facets = await faceter.FacetAsync(postVectors);
-        
-        var axes = await vectors.GetAxesAsync(existing);
-        await constellator.ConstellateAsync(existing.Space, postVectors, axes);
+        var facets = await faceter.FacetAsync(space);
+        var axes = space.MaterializeAxes(facets);
+        await constellator.ConstellateAsync(existing, axes);
         //await vectors.SummarizeAsync(existing.Vector);
         //existing.Space.SetSummary(existing.Vector.Summary);
         //await Repository.UpdateAsync(existing.Space);
     }
 
-    private async Task ActivateQuest()
-    {
-        //if (!userSpace.Space.LinkedSpaces.Any(x => x.Type == "Quest"))
-        //{
-        //    var quest = facets
-        //        .Where(x => userSpace.Space.PositionOnAxis(space.Space) >= x.Space.PositionOnAxis(space.Space))
-        //        .OrderBy(x => x.Space.PositionOnAxis(space.Space))
-        //        .FirstOrDefault();
-
-        //    if (quest != null)
-        //    {
-        //        quest.Space.RoomType = "Quest";
-        //        await SummarizeAsync(quest);
-        //        quest.Space.Domain = userSpace.Space.Id;
-        //        quest.LinkToSpace(userSpace, facets);
-        //        await Repository.UpdateAsync(quest.Space);
-        //    }
-        //}
-    }
-
-    private async Task<List<BlossomPost>> GetPostsAsync(string spaceId, string type = "Post", int take = 50)
+    private async Task<List<Post>> GetPostsAsync(string spaceId, string type = "Post", int take = 50)
     {
         var space = await GetOrCreate(Domain, spaceId);
-        var exactPosts = await posts.Query
-                .Where(x => x.Domain == spaceId && x.ContentType == type)
-                .OrderByDescending(x => x.Timestamp)
-                .Take(take)
-                .ToListAsync();
-
-        return exactPosts;
+        return await posts.GetAllAsync(space, take);
     }
 
-    private async Task<GameState> GetCoordinatesAsync(string spaceId, string? questId = null)
+    private async Task<GameState> GetCoordinatesAsync(ClaimsPrincipal principal, string spaceId, string? questId = null)
     {
         var space = await GetOrCreate(spaceId);
-        var allVectors = await vectors.GetAllAsync(spaceId);
-        var user = allVectors.First(x => x.Type == "User");
-        var lastUserMovement = allVectors.OrderByDescending(x => x.Timestamp).First(x => x.Type == "UserTrail");
+        var userId = principal.Id();
+        var gameObjects = await allObjects.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
 
-        allVectors.Add(space.Vector);
-        var answer = space.Vector.ThisWith(space.Vector.Vector, "Answer");
-        answer.Id = Guid.NewGuid().ToString();
-        allVectors.Add(answer);
+        var headspace = gameObjects
+            .OfType<Headspace>()
+            .Where(x => x.User.Id == userId)
+            .OrderByDescending(x => x.Timestamp)
+            .FirstOrDefault();
 
-        var distanceToAnswer = user.DistanceTo(answer);
+        var distanceToAnswer = headspace?.Vector.DistanceTo(space.Vector) ?? 0;
 
-        foreach (var availableQuest in allVectors.Where(x => x.Type == "Facet"))
-            availableQuest.CheckForQuest(space.Vector, user, lastUserMovement, distanceToAnswer);
+        var facets = gameObjects.OfType<Facet>();
+        if (headspace != null)
+        {
+            foreach (var availableQuest in gameObjects.OfType<Facet>())
+                availableQuest.CheckForQuest(space, headspace, distanceToAnswer);
+        }
 
-        var axes = await vectors.GetAxesAsync(space, allVectors);
+        var axes = space.MaterializeAxes(facets);
 
         if (questId != null)
         {
-            var selectedQuest = allVectors.First(x => x.Id == questId);
-            var xAxis = selectedQuest.ProjectOntoPlane(axes[0], axes[1]);
-            var yAxis = xAxis.Perpendicular(axes[0], axes[1]);
-            var zAxis = BlossomVector.Basis(xAxis.Vector.Length, 2).Orthogonal(xAxis, yAxis);
-            var coords = allVectors.Select(x => x.ToCoordinate([xAxis, yAxis, zAxis])).ToList();
-            return new(coords, distanceToAnswer);
+            var selectedQuest = gameObjects.OfType<Quest>().FirstOrDefault(x => x.Id == questId);
+            if (selectedQuest == null)
+            {
+                var selectedFacet = gameObjects.OfType<Facet>().First(x => x.Id == questId);
+                selectedQuest = new Quest(space, selectedFacet, headspace!.User);
+                await quests.AddAsync(selectedQuest);
+            }
+
+            axes = selectedQuest.MaterializeAxes(space, gameObjects, axes);
         }
 
-        var coordinates = allVectors.Select(x => x.ToCoordinate(axes)).ToList();
-        return new(coordinates, distanceToAnswer);
-    }
-
-    private async Task<List<BlossomPostWithVector>> GetPostsWithVectorsAsync(string spaceId, int take = 50)
-    {
-        var posts = await GetPostsAsync(spaceId, take: take);
-        return await vectors.GetAsync(posts);
+        gameObjects.ForEach(x => x.MaterializeCoordinates(axes));
+        return new(gameObjects, distanceToAnswer);
     }
 
     private async Task<string> GetSimplePostsAsync(string spaceId)
@@ -298,76 +161,23 @@ internal class BlossomSpaces(
         return string.Join("\r\n\r\n----------------------------------------------------------------\r\n\r\n", posts.Select(x => $"({x.Timestamp}) {x.User?.Username}: {x.Text}"));
     }
 
-    private async Task<BlossomEvent> PublishAsync<T>(string spaceId, T content)
-    {
-        var sender = await GetMatrixSenderIdAsync();
-
-        var ev = BlossomEvent.Create(spaceId, sender, content);
-        await events.AddAsync(ev);
-        return ev;
-    }
-
-    private async Task<string> GetMatrixSenderIdAsync()
-    {
-        if (MatrixSenderId != null)
-            return MatrixSenderId;
-
-        var principal = http.HttpContext?.User
-            ?? throw new InvalidOperationException("User not authenticated");
-
-        var user = await auth.GetAsync(principal);
-
-        // Ensure the user has a Matrix identity
-        var username = user.Avatar.Username.ToLowerInvariant();
-        var matrixId = $"@{username}:{Domain}";
-
-        if (!user.HasIdentity("Matrix"))
-        {
-            user.AddIdentity("Matrix", matrixId);
-            await auth.UpdateAsync(user);
-        }
-
-        return user.Identity("Matrix")!;
-    }
-
-    private async Task IndexAsync(string spaceId)
-    {
-        await vectors.IndexAsync(spaceId, 10000, 5);
-    }
-
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var spaces = endpoints.MapGroup("/spaces");
 
         spaces.MapGet("", GetSpacesAsync);
-        spaces.MapPost("", CreateSpaceAsync);
         spaces.MapGet("{spaceId}", GetSpaceAsync);
         spaces.MapGet("{parentSpaceId}/subspaces/{spaceId}", GetSpaceAsync);
-        spaces.MapPost("{spaceId}/join", JoinSpaceAsync);
-        spaces.MapPost("{spaceId}/leave", LeaveSpaceAsync);
-        spaces.MapPost("{spaceId}/invite", InviteToSpaceAsync);
         spaces.MapGet("{spaceId}/posts", GetPostsAsync);
         spaces.MapGet("{spaceId}/simpleposts", GetSimplePostsAsync);
-        spaces.MapGet("{spaceId}/coordinates", GetCoordinatesAsync);
-        spaces.MapGet("{spaceId}/index", IndexAsync);
-        spaces.MapGet("{spaceId}/discover", Discover);
+        spaces.MapGet("{spaceId}/coordinates", async (ClaimsPrincipal principal, string spaceId, string? questId = null)
+            => await GetCoordinatesAsync(principal, spaceId, questId));
         spaces.MapPost("{spaceId}", PostAsync);
-        spaces.MapPut("{spaceId}", SaveSpaceAsync);
+        spaces.MapPut("{spaceId}", SaveAsync);
         spaces.MapPost("graph", async (BlossomSpaces spaces, ExtractGraphRequest request) =>
         {
             var result = await spaces.ExtractGraph(request);
             return Results.Ok(result);
-        });
-
-        // Map the presence endpoint
-        endpoints.MapGet("/presence/{userId}/status", async (ClaimsPrincipal principal, string userId) =>
-        {
-            return await GetPresenceAsync(principal, userId);
-        });
-        endpoints.MapPut("/presence/{userId}/status", async (ClaimsPrincipal principal, string userId, BlossomPresence presence) =>
-        {
-            await SetPresenceAsync(principal, userId, presence);
-            return Results.Ok();
         });
     }
 }

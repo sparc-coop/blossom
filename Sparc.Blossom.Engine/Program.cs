@@ -72,7 +72,7 @@ app.UseCors();
 app.MapGet("/aura/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 app.MapGet("/hi", () => "Hi from Sparc!");
 
-app.MapGet("/slack/import", async (SlackIntegrationService slack, IRepository<BlossomPost> repo) =>
+app.MapGet("/slack/import", async (SlackIntegrationService slack, IRepository<Post> repo) =>
 {
     var existingMessages = await repo.Query.Where(x => x.SpaceId == "conseris").ToListAsync();
     if (existingMessages.Any())
@@ -88,16 +88,16 @@ app.MapGet("/slack/import", async (SlackIntegrationService slack, IRepository<Bl
 
         await foreach (var messageBatch in slack.GetMessagesAsync([conserisChannel.Id], 10000))
         {
-            var posts = messageBatch.Select(x => new BlossomPost("kuviocreative.com", "conseris", english!, x.Text, new() { Avatar = new(x.User, x.User) })
-            {
-                Timestamp = x.Timestamp
-            });
-            await repo.AddAsync(posts);
+            //var posts = messageBatch.Select(x => new Post("kuviocreative.com", "conseris", english!, x.Text, new(x.User, x.User))
+            //{
+            //    Timestamp = x.Timestamp
+            //});
+            //await repo.AddAsync(posts);
         }
     }
 });
 
-app.MapGet("/slack/vectorize", async (IRepository<BlossomPost> repo, IEnumerable<ITranslator> translators, IRepository<BlossomVector> vectorRepo) =>
+app.MapGet("/slack/vectorize", async (IRepository<Post> repo, IEnumerable<ITranslator> translators, IRepository<BlossomVector> vectorRepo) =>
 {
     
 });

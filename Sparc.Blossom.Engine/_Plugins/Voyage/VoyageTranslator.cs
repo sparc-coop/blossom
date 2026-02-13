@@ -1,4 +1,6 @@
 ﻿
+using Sparc.Blossom.Spaces;
+
 namespace Sparc.Blossom.Content;
 
 internal class VoyageTranslator : AITranslator
@@ -16,29 +18,31 @@ internal class VoyageTranslator : AITranslator
         throw new NotImplementedException();
     }
 
-    record EmbeddingRequest(List<string> input, string model, string? input_type = null, int? output_dimension = null);
+    record EmbeddingRequest(IEnumerable<string> input, string model, string? input_type = null, int? output_dimension = null);
     record EmbeddingResponse(List<Embedding> data, string model, EmbeddingUsage usage);
     record Embedding(List<float> embedding, int index);
     record EmbeddingUsage(int total_tokens);
-    public override async Task<BlossomVector> VectorizeAsync(TextContent message, IEnumerable<TextContent>? additionalContext = null)
+    public override async Task VectorizeAsync(IVectorizable item, IEnumerable<IVectorizable>? additionalContext = null)
     {
-        var result = await VectorizeAsync([message]);
-        return result.First();
+        await VectorizeAsync([item]);
     }
 
-    public override async Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages, int? lastX = null, int? lookback = null)
+    public override async Task VectorizeAsync(IEnumerable<IVectorizable> items, int? lastX = null, int? lookback = null)
     {
-        var text = messages.Select(m => m.Text).ToList();
+        var itemsToProcess = items.Where(x => !string.IsNullOrWhiteSpace(x.Vector.Text)).ToList();
 
-        var data = new EmbeddingRequest(text, DefaultModel, null, 1024);
+        var data = new EmbeddingRequest(itemsToProcess.Select(x => x.Vector.Text!), DefaultModel, null, 1024);
         var output = await Client.PostAsJsonAsync("embeddings", data);
         output.EnsureSuccessStatusCode();
 
-        var response = await output.Content.ReadFromJsonAsync<EmbeddingResponse>();
-        return response!.data.Select((output, index) => 
-            new BlossomVector(messages.ElementAt(index).SpaceId, messages.ElementAt(index).ContentType, messages.ElementAt(index).Id, output.embedding.ToArray())
+        var response = await output.Content.ReadFromJsonAsync<EmbeddingResponse>() 
+            ?? throw new Exception("Failed to parse embedding response from Voyage API.");
+        
+        var index = 0;
+        foreach (var embedding in response.data)
         {
-            Text = messages.ElementAt(index).Text
-        });
+            var item = itemsToProcess.ElementAt(index++);
+            item.Vector.Vector = embedding.embedding.ToArray();
+        }
     }
 }

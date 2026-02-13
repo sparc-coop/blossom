@@ -2,6 +2,7 @@
 
 using OpenAI;
 using OpenAI.Responses;
+using Sparc.Blossom.Spaces;
 using System.Text;
 
 namespace Sparc.Blossom.Content;
@@ -9,31 +10,30 @@ namespace Sparc.Blossom.Content;
 internal class OpenAITranslator(OpenAIClient client) 
     : AITranslator("gpt-4.1-nano", 0.40m / 1_000_000, 0)
 {
-    public override async Task<BlossomVector> VectorizeAsync(TextContent message, IEnumerable<TextContent>? additionalContext = null)
+    public override async Task VectorizeAsync(IVectorizable message, IEnumerable<IVectorizable>? additionalContext = null)
     {
         var model = "text-embedding-3-small";
         var embeddings = client.GetEmbeddingClient(model);
 
-        var messageWithContext = MessagesWithContext(message.Text, additionalContext?.ToList() ?? [], 1000, 1000);
+        var messageWithContext = MessagesWithContext(message.Vector.Text, additionalContext?.ToList() ?? [], 1000, 1000);
         var output = await embeddings.GenerateEmbeddingAsync(messageWithContext);
-        return new(message.SpaceId, message.ContentType, message.Id, output.Value.ToFloats().ToArray())
-        {
-            Text = message.Text
-        };
+        message.Vector.Vector = output.Value.ToFloats().ToArray();
     }
 
-    public override async Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages, int? lastX = null, int? lookback = null)
+    public override async Task VectorizeAsync(IEnumerable<IVectorizable> messages, int? lastX = null, int? lookback = null)
     {
         var model = "text-embedding-3-small";
         var embeddings = client.GetEmbeddingClient(model);
 
         if (!lastX.HasValue)
         {
-            var output = await embeddings.GenerateEmbeddingsAsync(messages.Select(x => x.Text));
-            return output.Value.Select((output, index) => new BlossomVector(messages.ElementAt(index).SpaceId, "Post", messages.ElementAt(index).Id, output.ToFloats().ToArray())
+            var output = await embeddings.GenerateEmbeddingsAsync(messages.Select(x => x.Vector.Text));
+            var index = 0;
+            foreach (var embedding in output.Value)
             {
-                Text = messages.ElementAt(index).Text
-            });
+                var item = messages.ElementAt(index);
+                item.Vector.Vector = embedding.ToFloats().ToArray();
+            }
         }
 
         var batchSize = 1000;
@@ -42,40 +42,34 @@ internal class OpenAITranslator(OpenAIClient client)
         do
         {
             var batch = messages
-                .Where(x => !string.IsNullOrWhiteSpace(x.Text))
+                .Where(x => !string.IsNullOrWhiteSpace(x.Vector.Text))
                 //.OrderBy(x => x.Sequence)
                 .Skip(offset)
-                .OrderBy(x => x.Timestamp)
                 .Take(batchSize)
                 .ToList();
 
-            var inputs = batch.Select((x, i) => MessagesWithContext(x.Text, batch, lookback ?? 0, i))
+            var inputs = batch.Select((x, i) => MessagesWithContext(x.Vector.Text, batch, lookback ?? 0, i))
                 .TakeLast(lastX ?? 0)
                 .ToList();
 
             if (!inputs.Any())
-                return [];
+                return;
 
             var outputs = await embeddings.GenerateEmbeddingsAsync(inputs);
 
             foreach (var output in outputs.Value)
             {
-                var text = batch.ElementAt(output.Index);
-                vectors.Add(new(text.SpaceId, text.ContentType, text.Id, output.ToFloats().ToArray())
-                {
-                    Text = text.Text
-                });
+                var vec = batch.ElementAt(output.Index);
+                vec.Vector.Vector = output.ToFloats().ToArray();
             }
 
             offset += batchSize;
         } while (offset < messages.Count());
-
-        return vectors;
     }
 
-    private static string MessagesWithContext(string? text, List<TextContent> batch, int lookback, int i)
+    private static string MessagesWithContext(string? text, List<IVectorizable> batch, int lookback, int i)
     {
-        var previousMessages = batch.Index().Where(x => x.Index < i).Select(x => x.Item.Text).TakeLast(lookback);
+        var previousMessages = batch.Index().Where(x => x.Index < i).Select(x => x.Item.Vector.Text).TakeLast(lookback);
         var context = previousMessages.Any() ? "<PreviousMessages>" + string.Join("\n", previousMessages) + "</PreviousMessages>\n\n" : "";
         return context + text;
     }

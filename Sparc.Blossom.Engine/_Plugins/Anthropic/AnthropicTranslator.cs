@@ -2,6 +2,7 @@
 using Anthropic.SDK.Common;
 using Anthropic.SDK.Constants;
 using Anthropic.SDK.Messaging;
+using Sparc.Blossom.Spaces;
 
 namespace Sparc.Blossom.Content;
 
@@ -60,12 +61,12 @@ internal class AnthropicTranslator(AnthropicClient client)
         return options;
     }
 
-    public override Task<BlossomVector> VectorizeAsync(TextContent message, IEnumerable<TextContent>? additionalContext = null)
+    public override Task VectorizeAsync(IVectorizable message, IEnumerable<IVectorizable>? additionalContext = null)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<IEnumerable<BlossomVector>> VectorizeAsync(IEnumerable<TextContent> messages, int? lastX = null, int? lookback = null)
+    public override Task VectorizeAsync(IEnumerable<IVectorizable> messages, int? lastX = null, int? lookback = null)
     {
         throw new NotImplementedException();
     }

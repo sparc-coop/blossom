@@ -1,0 +1,42 @@
+﻿using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Content;
+
+namespace Sparc.Blossom.Spaces;
+
+internal class BlossomSpaceTranslator
+    (IEnumerable<ITranslator> translators,
+    BlossomPosts posts,
+    FriendlyId friendlyId)
+{
+    readonly AITranslator translator = translators.OfType<AITranslator>().First();
+
+    public async Task SeedAsync(BlossomSpace space, Post question)
+    {
+        var discovery = new AxisDiscoveryQuestion(question);
+        var statements = await translator.AskAsync(discovery);
+
+        var guides = statements.Value!.Statements.Select(x => new Post(space, BlossomUser.System.Avatar, x));
+        await translator.VectorizeAsync(guides);
+        await posts.UpdateAsync(guides);
+
+        foreach (var guide in guides)
+            space.Add(guide);
+
+        space.SetSummary(new(friendlyId.Create(), question.Text ?? "", ""));
+    }
+
+    internal async Task<Post> CalculateHintAsync(BlossomSpace currentLocation, Post lastPost, BlossomSpace destination)
+    {
+        var journey = destination.Vector.Subtract(currentLocation.Vector);
+
+        var clues = await posts.SearchAsync(destination.Id, journey, 5);
+        var question = new AnswerHintQuestion(destination, lastPost, clues);
+        var hint = await translator.AskAsync(question);
+        var hintPost = new Post(destination, BlossomUser.System.Avatar, hint.Value!.Text);
+
+        await translator.VectorizeAsync(hintPost);
+        await posts.UpdateAsync([hintPost]);
+
+        return hintPost;
+    }
+}

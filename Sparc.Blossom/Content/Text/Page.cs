@@ -10,12 +10,13 @@ public class Page : BlossomSpace
     public Dictionary<string, int> TovikUsage { get; set; } = [];
     public Dictionary<string, int> Visits { get; set; } = [];
     public AudioContent? Audio { get; set; }
+    public string Domain => SpaceId;
     
     [JsonConstructor]
     private Page() : base()
     { 
         Id = string.Empty;
-        Domain = string.Empty;
+        SpaceId = string.Empty;
         Path = string.Empty;
         Name = string.Empty;
     }
@@ -23,7 +24,7 @@ public class Page : BlossomSpace
     private Page(string domain, string path) : base(domain, path)
     {
         Id = BlossomHash.SHA256($"{domain}:{path}");
-        Domain = domain;
+        SpaceId = domain;
         Path = path;
         Name = Id;
     }
@@ -57,7 +58,7 @@ public class Page : BlossomSpace
             Visits[language.Id] = 1;
     }
 
-    public string AbsolutePath(string? language = null) => $"https://{Domain}{Path}" + (language == null ? "" : $"?lang={language}");
+    public string AbsolutePath(string? language = null) => $"https://{SpaceId}{Path}" + (language == null ? "" : $"?lang={language}");
 
     internal async Task SpeakAsync(ISpeaker speaker, List<TextContent> contents)
     {

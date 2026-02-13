@@ -1,51 +1,73 @@
-﻿using Sparc.Blossom.Content;
+﻿using MathNet.Numerics.LinearAlgebra;
+using Microsoft.EntityFrameworkCore;
+using Sparc.Blossom.Content;
 
 namespace Sparc.Blossom.Spaces;
 
-internal class BlossomSpaceFaceter(BlossomVectors vectors)
+internal class BlossomSpaceFaceter(
+    IRepository<Facet> facets, 
+    BlossomPosts posts,
+    IEnumerable<ITranslator> translators)
 {
-    public async Task<List<BlossomVector>> FacetAsync(IEnumerable<BlossomVector> vectorsToFacet)
+    public async Task<List<Facet>> FacetAsync(BlossomSpace space)
     {
-        if (vectorsToFacet.Count() < 2)
+        var postsToFacet = await posts.GetAllAsync(space);
+        
+        if (postsToFacet.Count() < 2)
             return [];
         
         // Factor into principal components
-        var facets = ToPrincipalComponents(vectorsToFacet, 0.8, 10);
+        var components = ToPrincipalComponents(postsToFacet, 0.8, 10);
 
         // Match to existing facets when possible (for axis permanence)
-        var existingFacets = await vectors.GetAllAsync(vectorsToFacet.First().SpaceId, "Facet");
-        foreach (var facet in facets)
+        var existingFacets = await facets.Query
+            .Where(x => x.SpaceId == space.Id)
+            .ToListAsync();
+
+        var newFacets = new List<Facet>();
+
+        foreach (var component in components)
         {
             var bestMatch = existingFacets
-                .OrderByDescending(x => x.AlignmentWith(facet))
+                .OrderByDescending(x => x.Vector.AlignmentWith(component))
                 .FirstOrDefault();
 
             if (bestMatch != null)
             {
                 // PCA axis may be flipped, so check direction
-                if (facet.DotProduct(bestMatch) < 0)
-                    facet.Vector = facet.Multiply(-1).Vector;
-                facet.Id = bestMatch.Id;
+                if (component.DotProduct(bestMatch.Vector) < 0)
+                    component.Vector = component.Multiply(-1).Vector;
+                
+                bestMatch.Vector = component;
+                await facets.UpdateAsync(bestMatch);
+
+                newFacets.Add(bestMatch);
                 existingFacets.Remove(bestMatch);
             }
-
-            await vectors.UpdateAsync(facet);
+            else
+            {
+                var newFacet = new Facet(space, component);
+                await facets.AddAsync(newFacet);
+                newFacets.Add(newFacet);
+            }
         }
         
         // Delete any remaining unused facets
-        await vectors.DeleteAsync(existingFacets);
+        await facets.DeleteAsync(existingFacets);
 
-        await Parallel.ForEachAsync(facets, async (childFacet, _) => 
-            await vectors.SummarizeAsync(childFacet));
+        await Parallel.ForEachAsync(newFacets, async (childFacet, _) => 
+            await SummarizeAsync(childFacet));
 
-        return facets;
+        return newFacets;
     }
 
-    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain = 1, int maxCount = 3)
+    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<Post> postsToFacet, double varianceToExplain = 1, int maxCount = 3)
     {
+        var vectors = postsToFacet.Select(p => p.Vector).ToList();
+
         var mean = BlossomVector.Average(vectors);
         var centeredVectors = vectors.Select(v => v.Center(mean)).ToList();
-        var matrix = BlossomVector.ToMatrix(centeredVectors);
+        var matrix = ToMatrix(centeredVectors);
 
         var svd = matrix.Svd(true);
         var components = new List<BlossomVector>();
@@ -53,10 +75,10 @@ internal class BlossomSpaceFaceter(BlossomVectors vectors)
         {
             var componentArray = svd.VT.Row(i).ToArray();
 
-            components.Add(new BlossomVector(vectors.First().SpaceId, "Facet", Guid.NewGuid().ToString(), componentArray)
+            components.Add(new BlossomVector(componentArray)
             {
                 Point = mean.Vector,
-                CoherenceWeight = Math.Pow(svd.S[i], 2) / svd.S.Sum(x => x * x)
+                CoherenceWeight = (float)(Math.Pow(svd.S[i], 2) / svd.S.Sum(x => x * x))
             });
 
             if (components.Sum(c => c.CoherenceWeight) >= varianceToExplain)
@@ -65,4 +87,19 @@ internal class BlossomSpaceFaceter(BlossomVectors vectors)
 
         return components;
     }
+
+    async Task SummarizeAsync(Facet facet)
+    {
+        var translator = translators.OfType<AITranslator>().First();
+
+        var leftPosts = await posts.SearchAsync(facet.SpaceId, facet.Vector, 5, -0.0001);
+
+        var rightPosts = await posts.SearchAsync(facet.SpaceId, facet.Vector, 5);
+
+        var summary = await translator.SummarizeAsync(leftPosts, rightPosts);
+    }
+
+    public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
+        => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
+
 }
