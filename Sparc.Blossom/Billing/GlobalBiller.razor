@@ -68,6 +68,7 @@ else if (Order?.PaymentIntentId != null)
 @inject NavigationManager Nav
 @code {
     [Parameter] public required string ProductId { get; set; } = default!;
+    [Parameter] public required string TierId { get; set; }
     [Parameter] public required string StripeProductId { get; set; } = default!;
     [Parameter] public required BlossomAvatar Avatar { get; set; } = default!;
     [Parameter] public StripeAppearance? Appearance { get; set; }
@@ -87,6 +88,7 @@ else if (Order?.PaymentIntentId != null)
         Auth = Js.Import("./Blossom/Billing/GlobalBiller.razor.js");
         Order.Currency = Avatar.Currency?.Id;
         Order.ProductId = ProductId;
+        Order.TierId = TierId;
         Order.StripeProductId = StripeProductId;
 
         Events.CurrencyChanged += OnCurrencyChanged;
@@ -115,7 +117,7 @@ else if (Order?.PaymentIntentId != null)
             ErrorMessage = null;
             Intent = await Billing.StartCheckoutAsync(Order);
             Order.PaymentIntentId = Intent.PaymentIntentId;
-
+            Order.BasePrice = Intent.BasePrice;
             StateHasChanged();
 
             var stripe = await Auth.Value;

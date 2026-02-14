@@ -7,18 +7,18 @@ public class SparcProduct(string productId)
     }
 
     public string ProductId { get; set; } = productId;
+    public string TierId { get; set; } = "Free";
     public List<string> OrderIds { get; set; } = []; 
     public int MaxUsage { get; set; } = 0;
 }
 
 public record SparcProductActivationOptions(int MaxUsage);
 
+public record ProductTier(string Name, decimal Price, string FormattedPrice);
 public record GetProductResponse
 (
     string Id,
     string Name,
-    decimal Price,
     string Currency,
-    string FormattedPrice,
-    string FormattedZeroPrice
+    List<ProductTier> Tiers
 );

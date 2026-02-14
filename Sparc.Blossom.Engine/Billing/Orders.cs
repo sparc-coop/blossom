@@ -47,6 +47,7 @@ public class Orders(
             ClientSecret = intent.ClientSecret,
             PublishableKey = Config["Stripe:PublishableKey"]!,
             PaymentIntentId = intent.Id,
+            BasePrice = intent.Amount,
             Amount = stripe.FromStripePrice(intent.Amount, order.Currency),
             Currency = order.Currency,
             FormattedAmount = SparcCurrency.From(order.Currency).ToString(stripe.FromStripePrice(intent.Amount, order.Currency))
@@ -92,15 +93,15 @@ public class Orders(
     {
         var sparcCurrency = SparcCurrency.From(currency ?? User.Get("currency") ?? request.Headers.AcceptLanguage);
 
-        //var product = await stripe.GetProductAsync(productId);
-        var price = await stripe.GetPriceAsync(productId, sparcCurrency.Id);
+        var tiers = new List<ProductTier>();
+        tiers.Add(await stripe.GetPricingAsync("Free", 0, sparcCurrency));
+        tiers.Add(await stripe.GetPricingAsync("Indie", 10, sparcCurrency));
+        tiers.Add(await stripe.GetPricingAsync("Premium", 49, sparcCurrency));
 
         return new GetProductResponse(productId,
             "Tovik",
-            price ?? 0,
             sparcCurrency.Id,
-            sparcCurrency.ToString(price ?? 0),
-            sparcCurrency.ToString(0));
+            tiers);
     }
 
     public async Task<SparcCurrency> SetCurrencyAsync(SparcCurrency currency)

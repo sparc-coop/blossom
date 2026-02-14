@@ -4,10 +4,12 @@ public class SparcOrder() : BlossomEntity<string>(RandomSerialNumber(4, 3))
 {
     public string OrderId {  get { return Id; } set { Id = value;  } } // Partition key
     public string ProductId { get; set; } = "";
+    public string TierId { get; set; } = "";
     public string UserId { get; set; } = "";
     public string Domain { get; set; } = "";
     public string StripeProductId { get; set; } = "";
-    public string PaymentIntentId { get; set; } = "";   
+    public string PaymentIntentId { get; set; } = "";
+    public long BasePrice { get; set; }
     public string? Currency { get; set; }
     public string? Email { get; set; }
     public DateTime PurchaseDate { get; set; } = DateTime.UtcNow;
@@ -18,7 +20,7 @@ public class SparcOrder() : BlossomEntity<string>(RandomSerialNumber(4, 3))
         FulfilledDate = DateTime.UtcNow;
         return new SparcProduct(ProductId)
         {
-            MaxUsage = 500,
+            MaxUsage = TierId == "Premium" ? 1000 : TierId == "Indie" ? 100 : 10,
             OrderIds = [ Id ]
         };
     }

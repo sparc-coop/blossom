@@ -16,6 +16,9 @@ public class ExchangeRates(IConfiguration config, AzureBlobRepository blobs)
         from = from.ToUpper();
         to = to.ToUpper();
 
+        if (amount == 0)
+            return amount;
+
         if (Rates == null || Rates.Date < DateTime.UtcNow.AddDays(-1))
             Rates = await RefreshAsync();
 
