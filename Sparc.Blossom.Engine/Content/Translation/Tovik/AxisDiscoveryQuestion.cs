@@ -6,7 +6,7 @@ public record AxisDiscoveryResponse(List<string> Statements);
 internal class AxisDiscoveryQuestion : BlossomQuestion<AxisDiscoveryResponse>
 {
 
-    public AxisDiscoveryQuestion(Post question) : base("Provide up to 50 initial statements to begin exploring the following question.")
+    public AxisDiscoveryQuestion(Post question) : base("Provide up to 10 initial statements to begin exploring the following question.")
     {
         Instructions = "You are an assistant that transforms a question into an initial exploratory set of Socratic statements.\r\n" +
             "Analyze the provided question and extract 50 diverse statements that encourage deep thinking and exploration of the topic from many different angles.";

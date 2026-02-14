@@ -48,11 +48,6 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
           .HasPartitionKey(e => e.SpaceId)
           .HasKey(x => x.Id);
 
-        model.Entity<BlossomSpace>()
-            .ToContainer("Spaces")
-            .HasPartitionKey(s => s.SpaceId)
-            .HasKey(x => x.Id);
-
         model.Entity<BlossomSpaceObject>()
             .ToContainer("Vectors1024")
             .HasPartitionKey(v => v.SpaceId)
@@ -64,5 +59,6 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
         model.Entity<Axis>();
         model.Entity<Quest>();
         model.Entity<Headspace>();
+        model.Entity<BlossomSpace>();
     }
 }

@@ -87,7 +87,10 @@ internal class BlossomSpaces(
         await Repository.ExecuteAsync(space, x => x.Add(post));
 
         if (isFirstPost)
+        {
             await translator.SeedAsync(space, post);
+            await Repository.UpdateAsync(space);
+        }
 
         await SaveAsync(spaceId, space);
 
