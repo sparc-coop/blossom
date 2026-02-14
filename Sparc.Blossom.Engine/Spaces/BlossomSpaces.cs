@@ -9,8 +9,11 @@ namespace Sparc.Blossom.Spaces;
 internal class BlossomSpaces(
     BlossomAggregateOptions<BlossomSpace> options,
     BlossomPosts posts,
-    IRepository<BlossomSpaceObject> allObjects,
-    IRepository<Quest> quests,
+    IRepository<Quest> questRepo,
+    IRepository<Facet> facetRepo,
+    IRepository<Axis> axisRepo,
+    IRepository<Constellation> constellationRepo,
+    IRepository<Headspace> headspaceRepo,
     BlossomSpaceFaceter faceter,
     BlossomSpaceConstellator constellator,
     BlossomSpaceTranslator translator)
@@ -119,40 +122,50 @@ internal class BlossomSpaces(
     {
         var space = await GetOrCreate(spaceId);
         var userId = principal.Id();
-        var gameObjects = await allObjects.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
 
-        var headspace = gameObjects
-            .OfType<Headspace>()
+        var spacePosts = await posts.GetAllAsync(space);
+        var spaceFacets = await facetRepo.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
+        var spaceAxes = await axisRepo.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
+        var spaceConstellations = await constellationRepo.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
+        var headspaces = await headspaceRepo.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
+        var quests = await questRepo.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
+
+        var headspace = headspaces
             .Where(x => x.User.Id == userId)
             .OrderByDescending(x => x.Timestamp)
             .FirstOrDefault();
 
         var distanceToAnswer = headspace?.Vector.DistanceTo(space.Vector) ?? 0;
 
-        var facets = gameObjects.OfType<Facet>();
         if (headspace != null)
         {
-            foreach (var availableQuest in gameObjects.OfType<Facet>())
+            foreach (var availableQuest in spaceFacets)
                 availableQuest.CheckForQuest(space, headspace, distanceToAnswer);
         }
 
-        var axes = space.MaterializeAxes(facets);
+        var axes = space.MaterializeAxes(spaceFacets);
 
         if (questId != null)
         {
-            var selectedQuest = gameObjects.OfType<Quest>().FirstOrDefault(x => x.Id == questId);
+            var selectedQuest = quests.FirstOrDefault(x => x.Id == questId);
             if (selectedQuest == null)
             {
-                var selectedFacet = gameObjects.OfType<Facet>().First(x => x.Id == questId);
+                var selectedFacet = spaceFacets.First(x => x.Id == questId);
                 selectedQuest = new Quest(space, selectedFacet, headspace!.User);
-                await quests.AddAsync(selectedQuest);
+                await questRepo.AddAsync(selectedQuest);
             }
 
-            axes = selectedQuest.MaterializeAxes(space, gameObjects, axes);
+            axes = selectedQuest.MaterializeAxes(space, axes);
         }
 
-        gameObjects.ForEach(x => x.MaterializeCoordinates(axes));
-        return new(gameObjects, distanceToAnswer);
+        spacePosts.ForEach(x => x.MaterializeCoordinates(axes));
+        spaceFacets.ForEach(x => x.MaterializeCoordinates(axes));
+        spaceAxes.ForEach(x => x.MaterializeCoordinates(axes));
+        spaceConstellations.ForEach(x => x.MaterializeCoordinates(axes));
+        headspaces.ForEach(x => x.MaterializeCoordinates(axes));
+        quests.ForEach(x => x.MaterializeCoordinates(axes));
+
+        return new(space, headspace, spacePosts, headspaces, spaceAxes, spaceFacets, quests, spaceConstellations, distanceToAnswer);
     }
 
     private async Task<string> GetSimplePostsAsync(string spaceId)

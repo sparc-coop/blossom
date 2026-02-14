@@ -20,7 +20,7 @@ public class Quest : BlossomSpaceObject
 
     public string Name { get; set; } = "";
 
-    public List<Axis> MaterializeAxes(BlossomSpace space, List<BlossomSpaceObject> gameObjects, List<Axis> axes)
+    public List<Axis> MaterializeAxes(BlossomSpace space, List<Axis> axes)
     {
         var xAxis = Vector.ProjectOntoPlane(axes[0].Vector, axes[1].Vector);
         var yAxis = xAxis.Perpendicular(axes[0], axes[1]);

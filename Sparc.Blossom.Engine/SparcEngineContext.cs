@@ -57,5 +57,12 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
             .ToContainer("Vectors1024")
             .HasPartitionKey(v => v.SpaceId)
             .HasKey(x => x.Id);
+
+        model.Entity<Post>();
+        model.Entity<Facet>();
+        model.Entity<Constellation>();
+        model.Entity<Axis>();
+        model.Entity<Quest>();
+        model.Entity<Headspace>();
     }
 }

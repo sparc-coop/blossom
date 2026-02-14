@@ -16,9 +16,8 @@ public class CosmosDbSimpleClient<T>(DbContext context, CosmosClient client)
     public DbContext Context { get; } = context;
     IReadOnlyList<IProperty>? PartitionKeyProperties { get; } = context.Model.FindEntityType(typeof(T))?.GetPartitionKeyProperties();
 
-    internal bool IsPolymorphicType = typeof(T).BaseType?.IsAssignableTo(typeof(BlossomEntity)) == true 
-        && context.Model.FindEntityType(typeof(T).BaseType!) != null
-        && context.Model.FindEntityType(typeof(T)) == null;
+    internal bool IsPolymorphicType = typeof(T).BaseType?.IsAssignableTo(typeof(BlossomEntity)) == true
+        && context.Model.FindEntityType(typeof(T).BaseType!) != null;
 
     public static CosmosClient CreateClient(IConfiguration config)
     {
@@ -27,7 +26,7 @@ public class CosmosDbSimpleClient<T>(DbContext context, CosmosClient client)
             UseSystemTextJsonSerializerWithOptions = new()
             {
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                TypeInfoResolver = new BlossomPolymorphicTypeResolver<T>()
+                TypeInfoResolver = new BlossomPolymorphicTypeResolver()
             },
             ConnectionMode = ConnectionMode.Direct
         };

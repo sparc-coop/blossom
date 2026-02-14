@@ -4,10 +4,10 @@ using System.Text.Json.Serialization.Metadata;
 
 namespace Sparc.Blossom.Data;
 
-public class BlossomPolymorphicTypeResolver<T> : DefaultJsonTypeInfoResolver
+public class BlossomPolymorphicTypeResolver : DefaultJsonTypeInfoResolver
 {
-    static readonly Type BaseType = typeof(T);
-    static readonly List<JsonDerivedType>? DerivedTypes;
+    static Dictionary<Type, List<JsonDerivedType>>? DerivedTypes;
+    static Dictionary<Type, JsonTypeInfo> TypeInfoCache = [];
 
     static BlossomPolymorphicTypeResolver()
     {
@@ -15,16 +15,23 @@ public class BlossomPolymorphicTypeResolver<T> : DefaultJsonTypeInfoResolver
         {
             DerivedTypes = [];
             // Search all assemblies for derived types
-            var derivedTypes = AppDomain.CurrentDomain.GetDerivedTypes(BaseType);
-            foreach (var derivedType in derivedTypes.Where(x => !x.IsAbstract))
-                DerivedTypes.Add(new JsonDerivedType(derivedType, derivedType.Name));
+            var entities = AppDomain.CurrentDomain.GetDerivedTypes(typeof(BlossomEntity<string>));
+            foreach (var entity in entities)
+            {
+                var derivedTypes = AppDomain.CurrentDomain.GetDerivedTypes(entity);
+                if (derivedTypes.Any())
+                    DerivedTypes.Add(entity, derivedTypes.Where(x => !x.IsAbstract).Select(x => new JsonDerivedType(x, x.Name)).ToList());
+            }
         }
     }
     
     public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
     {
+        if (TypeInfoCache.ContainsKey(type))
+            return TypeInfoCache[type];
+        
         JsonTypeInfo jsonTypeInfo = base.GetTypeInfo(type, options);
-        if (DerivedTypes?.Any() == true && jsonTypeInfo.Type == BaseType)
+        if (DerivedTypes?.Any() == true && DerivedTypes.ContainsKey(jsonTypeInfo.Type))
         {
             jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
             {
@@ -32,9 +39,12 @@ public class BlossomPolymorphicTypeResolver<T> : DefaultJsonTypeInfoResolver
                 UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType,
             };
 
-            foreach (var derivedType in DerivedTypes)
+            foreach (var derivedType in DerivedTypes[jsonTypeInfo.Type])
                 jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(derivedType);
+
         }
+
+        TypeInfoCache.TryAdd(type, jsonTypeInfo);
 
         return jsonTypeInfo;
     }
