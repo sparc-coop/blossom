@@ -78,7 +78,7 @@ public class StripePaymentService
         long newPrice = ToStripePrice(converted, currencyId);
         decimal finalPrice = stripeFormat ? newPrice : FromStripePrice(newPrice, currencyId);
         
-        return new(tier.Name, finalPrice, tier.ItemQuantity, currency.ToString(finalPrice));
+        return new(tier.Name, finalPrice, tier.ItemQuantity, currency.ToString(finalPrice), tier.Description);
     }
 
     public async Task<string?> GetOrCreateCustomerAsync(SparcOrder order)

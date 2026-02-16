@@ -22,7 +22,4 @@ public class SparcLicense(string productId)
     public int MaxUsage { get; set; } = 0;
 }
 
-public record ProductTier(string Name, decimal Price, int ItemQuantity, string? FormattedPrice = null)
-{
-    public string? Description { get; set; }
-};
+public record ProductTier(string Name, decimal Price, int ItemQuantity, string? FormattedPrice = null, string? Description = null);
