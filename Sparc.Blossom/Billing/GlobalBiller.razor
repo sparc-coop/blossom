@@ -10,9 +10,10 @@
     <script src="https://js.stripe.com/v3"></script>
 </HeadContent>
 
-@if (PaymentIntentId == null)
+@if (string.IsNullOrWhiteSpace(PaymentIntentId))
 {
     <form id="payment-form" @onsubmit="Pay" @onsubmit:preventDefault="true">
+        <header><h4>Currency</h4></header>
         <CurrencySelector Avatar="Avatar" />
         <div id="@Id" @ref=PaymentForm>
             <p style="font-size: 16px">Loading payment form...</p>
@@ -33,7 +34,7 @@
         }
     </form>
 }
-else if (PaymentIntentId != null)
+else
 {
     if (Order != null)
     {
@@ -46,7 +47,7 @@ else if (PaymentIntentId != null)
             <p>Tovik has been enabled on your account, and you can start configuring your domains right away!</p>
             <p>If you provided an email address, a receipt has been emailed to you.</p>
             <p>Thank you so much for supporting Tovik!</p>
-            <a class="button primary-btn" href="/sites">Go To Tovik Dashboard</a>
+            <a class="button primary-btn" href="/Install?domain=@Domain">Proceed to Installation</a>
         </div>
     }
     else
@@ -91,7 +92,7 @@ else if (PaymentIntentId != null)
         Product = await Billing.GetProductAsync(ProductId);
 
         Events.CurrencyChanged += OnCurrencyChanged;
-        if (PaymentIntentId == null)
+        if (string.IsNullOrWhiteSpace(PaymentIntentId))
             await InitiateStripePayment();
         else
             await CheckOnStripePayment();

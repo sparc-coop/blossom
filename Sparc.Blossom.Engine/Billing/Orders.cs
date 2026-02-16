@@ -38,7 +38,7 @@ public class Orders(
     public async Task<SparcPaymentIntent> StartCheckoutAsync(StartCheckoutRequest request)
     {
         var product = await products.FindAsync(request.ProductId);
-        var tier = product?.Tiers.First(x => x.Name == request.TierId);
+        var tier = product?.Tiers.FirstOrDefault(x => x.Name == request.TierId);
         var currency = SparcCurrency.From(request.Currency ?? User.Get("currency") ?? "USD");
 
         if (product == null || tier == null)
