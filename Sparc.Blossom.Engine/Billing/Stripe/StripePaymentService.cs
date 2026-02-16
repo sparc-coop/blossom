@@ -23,7 +23,7 @@ public class StripePaymentService
         {
             var createOptions = new PaymentIntentCreateOptions
             {
-                Amount = order.BasePrice,
+                Amount = order.Amount,
                 Currency = currencyId,
                 Customer = customerId,
                 ReceiptEmail = order.Email,
@@ -51,7 +51,7 @@ public class StripePaymentService
             var service = new PaymentIntentService();
             var options = new PaymentIntentUpdateOptions
             {
-                Amount = order.BasePrice,
+                Amount = order.Amount,
                 Currency = currencyId,
                 Customer = customerId,
                 ReceiptEmail = order.Email
@@ -70,16 +70,15 @@ public class StripePaymentService
         return product;
     }
 
-    public async Task<ProductTier> GetPricingAsync(string name, decimal amount, SparcCurrency currency, bool stripeFormat = false)
+    public async Task<ProductTier> ConvertPriceAsync(ProductTier tier, SparcCurrency currency, bool stripeFormat = false)
     {
         var currencyId = currency.Id.ToLower();
 
-        var stripeAmount = (long)(amount * 100);
-        var converted = await _rates.ConvertAsync(FromStripePrice(stripeAmount, "USD"), "USD", currencyId, true);
-
+        var converted = await _rates.ConvertAsync(tier.Price, "USD", currencyId, true);
         long newPrice = ToStripePrice(converted, currencyId);
         decimal finalPrice = stripeFormat ? newPrice : FromStripePrice(newPrice, currencyId);
-        return new(name, finalPrice, currency.ToString(finalPrice));
+        
+        return new(tier.Name, finalPrice, tier.ItemQuantity, currency.ToString(finalPrice));
     }
 
     public async Task<string?> GetOrCreateCustomerAsync(SparcOrder order)

@@ -7,22 +7,16 @@ public class SparcOrder() : BlossomEntity<string>(RandomSerialNumber(4, 3))
     public string TierId { get; set; } = "";
     public string UserId { get; set; } = "";
     public string Domain { get; set; } = "";
-    public string StripeProductId { get; set; } = "";
-    public string PaymentIntentId { get; set; } = "";
-    public long BasePrice { get; set; }
+    public string? PaymentIntentId { get; set; }
+    public long Amount { get; set; }
     public string? Currency { get; set; }
     public string? Email { get; set; }
     public DateTime PurchaseDate { get; set; } = DateTime.UtcNow;
     public DateTime? FulfilledDate { get; set; }
 
-    public SparcProduct Fulfill()
+    public void Fulfill()
     {
         FulfilledDate = DateTime.UtcNow;
-        return new SparcProduct(ProductId)
-        {
-            MaxUsage = TierId == "Premium" ? 1000 : TierId == "Indie" ? 100 : 10,
-            OrderIds = [ Id ]
-        };
     }
 
     private static string RandomSerialNumber(int numSections, int charsPerSection)
