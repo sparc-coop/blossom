@@ -10,7 +10,6 @@ public class Axis : Facet
     public Axis(BlossomSpace space, Facet facet, string name)
         : base(space, facet.Vector)
     {
-        IsQuestable = facet.IsQuestable;
         Name = name;
     }
 

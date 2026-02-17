@@ -8,14 +8,14 @@ internal class BlossomSpaceConstellator(
     BlossomPosts postRepository,
     IEnumerable<ITranslator> translators)
 {
-    public async Task<List<Constellation>> ConstellateAsync(BlossomSpace space, List<Axis> axes)
+    public async Task<List<Constellation>> ConstellateAsync(BlossomSpace space)
     {
         var posts = await postRepository.GetAllAsync(space, 10000);
 
         if (posts.Count() < 3)
             return [];
 
-        posts.ForEach(p => p.MaterializeCoordinates(axes));
+        posts.ForEach(p => p.MaterializeCoordinates(space.Axes));
         var edges = ComputeKnnEdges(posts, space.Settings.ConstellationStrength);
         var result = Kruskal(posts, edges, space.Settings.ConstellationThreshold);
         var newConstellations = await CreateConstellations(space, result);

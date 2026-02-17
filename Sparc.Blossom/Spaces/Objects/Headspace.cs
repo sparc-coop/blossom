@@ -21,4 +21,7 @@ public class Headspace : BlossomSpaceObject
     }
 
     public string? ActiveQuestId { get; set; }
+
+    public List<Axis>? Axes { get; set; }
+    public Quest? ActiveQuest { get; set; }
 }

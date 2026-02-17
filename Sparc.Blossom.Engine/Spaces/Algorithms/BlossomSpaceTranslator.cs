@@ -13,7 +13,7 @@ internal class BlossomSpaceTranslator
 
     public async Task SeedAsync(BlossomSpace space, Post question)
     {
-        var discovery = new AxisDiscoveryQuestion(question);
+        var discovery = new SpaceDiscoveryQuestion(question);
         var statements = await translator.AskAsync(discovery);
 
         var guides = statements.Value!.Statements.Select(x => new Post(space, BlossomUser.System.Avatar, x)).ToList();

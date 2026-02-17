@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Numerics;
+using System.Text;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Spaces;
@@ -132,22 +133,30 @@ public class BlossomVector : BlossomVectorBase
         return Math.Abs(similarity);
     }
 
+    public float Signal(BlossomVector direction)
+    {
+        if (IsEmpty)
+            return 1;
+        
+        var projectionOntoAxis = DotProduct(direction);
+        var projectionOntoOrthogonalSubspace = direction.Subtract(Multiply(projectionOntoAxis)).Magnitude();
+        var weight = Math.Abs(projectionOntoAxis) / (Math.Abs(projectionOntoAxis) + projectionOntoOrthogonalSubspace);
+        return weight;
+    }
+
     public BlossomVector ThisWith(float[] other, string? type = null) => new(other) {  Text = Text };
     public float Length => (float)Math.Sqrt(Vector.Sum(x => x * x));
 
-    public void Update(BlossomVector vector, float scaleFactor = 1.0f)
+    public void Update(BlossomVector vector, float? scaleFactor = null)
     {
+        scaleFactor ??= Signal(vector);
+        
         if (IsEmpty)
-        {
             Point = vector.Vector;
-            Vector = new BlossomVector(Point).Normalize().Vector;
-        }
         else
-        {
-            Point = Multiply(1.0f - scaleFactor).Add(vector.Multiply(scaleFactor)).Vector;
-            Vector = new BlossomVector(Point).Normalize().Vector;
-        }
-            
+            Point = Multiply(1.0f - scaleFactor.Value).Add(vector.Multiply(scaleFactor.Value)).Vector;
+
+        Vector = new BlossomVector(Point).Normalize().Vector;
     }
 
     public override string ToString()

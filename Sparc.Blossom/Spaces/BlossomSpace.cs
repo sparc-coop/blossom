@@ -40,6 +40,7 @@ public class BlossomSpace : BlossomSpaceObject
     public BlossomSpaceSettings Settings { get; set; } = new();
     public List<MetricHistory> ConsensusHistory { get; set; } = [];
     public List<MetricHistory> ConfidenceHistory { get; set; } = [];
+    public List<Axis> Axes { get; set; } = [];
 
     [JsonConstructor]
     protected BlossomSpace() : base(Guid.NewGuid().ToString())
@@ -71,25 +72,14 @@ public class BlossomSpace : BlossomSpaceObject
     public void Add(Post post)
     {
         post.SpaceId = Id;
-        Add(post.Vector);
-    }
-
-    public void Add(BlossomVector vector)
-    {
-        if (Vector.IsEmpty)
-            Vector.Update(vector, 1.0f);
-        else
-        {
-            var projectionOntoAxis = vector.DotProduct(Vector);
-            var projectionOntoOrthogonalSubspace = vector.Subtract(Vector.Multiply(projectionOntoAxis)).Magnitude();
-            var weight = Math.Abs(projectionOntoAxis) / (Math.Abs(projectionOntoAxis) + projectionOntoOrthogonalSubspace);
-
-            Vector.Update(vector, weight);
-        }
+        Vector.Update(post.Vector);
     }
 
     public List<Axis> MaterializeAxes(IEnumerable<Facet> candidates)
     {
+        if (Axes.Count > 0)
+            return Axes;
+        
         var facets = candidates
             .OrderByDescending(x => x.Vector.CoherenceWeight)
             .Take(2)
@@ -103,7 +93,8 @@ public class BlossomSpace : BlossomSpaceObject
         var yAxis = new Axis(this, y, "Y");
         var zAxis = z == null ? null : new Axis(this, z, "Z");
 
-        return zAxis == null ? [xAxis, yAxis] : [xAxis, yAxis, zAxis];
+        Axes = zAxis == null ? [xAxis, yAxis] : [xAxis, yAxis, zAxis];
+        return Axes;
     }
 }
 

@@ -58,6 +58,8 @@ internal class BlossomSpaceFaceter(
         await Parallel.ForEachAsync(newFacets, async (childFacet, _) => 
             await SummarizeAsync(childFacet));
 
+        space.MaterializeAxes(newFacets);
+
         return newFacets;
     }
 

@@ -12,9 +12,7 @@ public class Facet : BlossomSpaceObject
     {
     }
 
-    public bool IsQuestable { get; set; }
-
-    public void CheckForQuest(BlossomSpace space, Headspace user, double distanceToAnswer)
+    public bool IsQuestable(BlossomSpace space, Headspace user, double distanceToAnswer)
     {
         var quest = Vector.DotProduct(space.Vector) >= 0 ? Vector : Vector.Multiply(-1);
         var userProjection = quest.DotProduct(user.Vector);
@@ -25,6 +23,6 @@ public class Facet : BlossomSpaceObject
         //var similarityThreshold = 0.8;
         //var similarity = lastMovement.SimilarityTo(quest);
 
-        IsQuestable = userQuest.Length >= lengthThreshold;
+        return userQuest.Length >= lengthThreshold;
     }
 }

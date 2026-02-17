@@ -52,7 +52,7 @@ public interface ISparcSpaces
     Task SetPresenceAsync(string userId, BlossomPresence presence);
 }
 
-public record GameState(BlossomSpace Space, Headspace? Headspace, List<Post> Posts, List<Headspace> Headspaces, List<Axis> Axes, List<Facet> Facets, List<Quest> Quests, List<Constellation> Constellations, double DistanceToAnswer);
+public record GameState(BlossomSpace Space, Headspace? Headspace, List<Post> Posts, List<Headspace> Headspaces, List<Facet> Facets, List<Constellation> Constellations, double DistanceToAnswer);
 
 public record InviteToSpaceRequest(string UserId);
 public record CreateSpaceRequest(
