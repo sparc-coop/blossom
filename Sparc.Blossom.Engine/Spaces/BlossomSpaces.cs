@@ -87,6 +87,8 @@ internal class BlossomSpaces(
         await Repository.UpdateAsync(existing);
 
         await faceter.FacetAsync(existing);
+        await Repository.UpdateAsync(existing);
+
         await constellator.ConstellateAsync(existing);
         //await vectors.SummarizeAsync(existing.Vector);
         //existing.Space.SetSummary(existing.Vector.Summary);

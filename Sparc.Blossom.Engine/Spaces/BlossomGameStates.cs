@@ -28,13 +28,15 @@ internal class BlossomGameStates(
         var spacePosts = await posts.GetAllAsync(space);
         var spaceFacets = await facetRepo.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
         var spaceConstellations = await constellationRepo.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
-        var headspaces = await headspaceRepo.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
+        var headspaces = await headspaceRepo.Query.Where(x => x.SpaceId == space.Id).OrderBy(x => x.Timestamp).ToListAsync();
         var quests = await questRepo.Query.Where(x => x.SpaceId == space.Id && x.User.Id == userId).ToListAsync();
 
         var headspace = headspaces
             .Where(x => x.User.Id == userId)
             .OrderByDescending(x => x.Timestamp)
             .FirstOrDefault();
+
+        headspace?.EntityType = "Self";
 
         var distanceToAnswer = headspace?.Vector.DistanceTo(space.Vector) ?? 0;
         var axes = headspace?.Axes ?? space.Axes;
@@ -44,7 +46,6 @@ internal class BlossomGameStates(
             spaceFacets = spaceFacets.Where(x => x.IsQuestable(space, headspace, distanceToAnswer)).ToList();
             headspace.ActiveQuest?.MaterializeCoordinates(axes);
         }
-
 
         spacePosts.ForEach(x => x.MaterializeCoordinates(axes));
         spaceFacets.ForEach(x => x.MaterializeCoordinates(axes));
