@@ -34,6 +34,7 @@ internal class BlossomGameStates(
         spaceFacets = spaceFacets.Where(x => x.IsQuestable(space, userSpace, distanceToAnswer)).ToList();
         userSpace.MaterializeCoordinates(axes);
         userSpace.ActiveQuest?.MaterializeCoordinates(axes);
+        space.MaterializeCoordinates(axes);
 
         spacePosts.ForEach(x => x.MaterializeCoordinates(axes));
         spaceFacets.ForEach(x => x.MaterializeCoordinates(axes));
