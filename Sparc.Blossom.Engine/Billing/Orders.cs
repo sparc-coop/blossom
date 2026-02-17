@@ -9,6 +9,7 @@ public class Orders(
     StripePaymentService stripe, 
     SparcAuthenticator<BlossomUser> auth,
     IRepository<SparcDomain> domains,
+    IRepository<SparcProduct> products,
     IConfiguration config) 
     : BlossomAggregate<SparcOrder>(options), IBlossomEndpoints
 {
@@ -34,23 +35,44 @@ public class Orders(
         return order;
     }
 
-    public async Task<SparcPaymentIntent> StartCheckoutAsync(SparcOrder order)
+    public async Task<SparcPaymentIntent> StartCheckoutAsync(StartCheckoutRequest request)
     {
-        order.Currency ??= User.Get("currency") ?? "USD";
-        order.UserId = User.Id();
+        var product = await products.FindAsync(request.ProductId);
+        var tier = product?.Tiers.FirstOrDefault(x => x.Name == request.TierId);
+        var currency = SparcCurrency.From(request.Currency ?? User.Get("currency") ?? "USD");
+
+        if (product == null || tier == null)
+            throw new InvalidOperationException("Product or tier not found.");
+
+        var order = new SparcOrder
+        {
+            UserId = User.Id(),
+            ProductId = request.ProductId,
+            TierId = request.TierId,
+            Domain = request.Domain,
+            Currency = currency.Id,
+            Email = request.Email,
+            PaymentIntentId = request.PaymentIntentId,
+            Amount = (long)(await stripe.ConvertPriceAsync(tier, currency, true)).Price
+        };
 
         var intent = await stripe.CreateOrUpdatePaymentIntentAsync(order);
-        await Repository.UpdateAsync(order);
+        var amount = stripe.FromStripePrice(intent.Amount, order.Currency);
 
-        return new SparcPaymentIntent
+        var sparcIntent = new SparcPaymentIntent
         {
             ClientSecret = intent.ClientSecret,
             PublishableKey = Config["Stripe:PublishableKey"]!,
             PaymentIntentId = intent.Id,
-            Amount = stripe.FromStripePrice(intent.Amount, order.Currency),
+            Amount = intent.Amount,
             Currency = order.Currency,
-            FormattedAmount = SparcCurrency.From(order.Currency).ToString(stripe.FromStripePrice(intent.Amount, order.Currency))
+            FormattedAmount = SparcCurrency.From(order.Currency).ToString(amount)
         };
+
+        order.PaymentIntentId = intent.Id;
+        await Repository.UpdateAsync(order);
+
+        return sparcIntent;
     }
 
     public async Task<IResult> Fulfill(HttpRequest request)
@@ -77,30 +99,33 @@ public class Orders(
 
     private async Task<SparcOrder> Fulfill(SparcOrder order)
     {
-        var product = order.Fulfill();
-        await Repository.UpdateAsync(order);
+        var product = await products.FindAsync(order.ProductId) 
+            ?? throw new InvalidOperationException($"Product with ID {order.ProductId} not found.");
+
+        await Repository.ExecuteAsync(order, o => o.Fulfill());
 
         var sparcDomain = new SparcDomain(order.Domain);
         var domain = await domains.Query.Where(x => x.Domain == sparcDomain.Domain).FirstOrDefaultAsync() ?? sparcDomain;
-        domain.Fulfill(product, order.UserId);
+        domain.Fulfill(product, order.Id, order.TierId, order.UserId);
         await domains.UpdateAsync(domain!);
         
         return order;
     }
 
-    public async Task<GetProductResponse> GetProduct(HttpRequest request, string productId, string? currency = null)
+    public async Task<SparcProduct> GetProduct(HttpRequest request, string productId, string? currency = null)
     {
         var sparcCurrency = SparcCurrency.From(currency ?? User.Get("currency") ?? request.Headers.AcceptLanguage);
+        var product = await products.FindAsync(productId)
+            ?? throw new InvalidOperationException($"Product with ID {productId} not found.");
 
-        //var product = await stripe.GetProductAsync(productId);
-        var price = await stripe.GetPriceAsync(productId, sparcCurrency.Id);
+        var tiers = product.Tiers.ToList();
+        var tiersInCurrency = new List<ProductTier>();
+        foreach (var tier in tiers)
+            tiersInCurrency.Add(await stripe.ConvertPriceAsync(tier, sparcCurrency));
 
-        return new GetProductResponse(productId,
-            "Tovik",
-            price ?? 0,
-            sparcCurrency.Id,
-            sparcCurrency.ToString(price ?? 0),
-            sparcCurrency.ToString(0));
+        product.Tiers = tiersInCurrency;
+
+        return product;
     }
 
     public async Task<SparcCurrency> SetCurrencyAsync(SparcCurrency currency)
@@ -121,7 +146,7 @@ public class Orders(
         var billingGroup = endpoints.MapGroup("/billing");
 
         billingGroup.MapGet("/orders/{id}", async (Orders svc, string id) => await svc.GetAsync(id));
-        billingGroup.MapPost("/payments", async (Orders svc, SparcOrder order) => await svc.StartCheckoutAsync(order));
+        billingGroup.MapPost("/payments", async (Orders svc, StartCheckoutRequest request) => await svc.StartCheckoutAsync(request));
         billingGroup.MapPost("/fulfill", async (Orders svc, HttpRequest request) => await svc.Fulfill(request));
         billingGroup.MapGet("/fulfill/{key}", async (Orders svc, string key) => await svc.Fulfill(key));
 

@@ -13,7 +13,7 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.SHA2
     public Dictionary<string, int> PagesPerLanguage { get; set; } = [];
     public int TovikUsage { get; set; }
     public string? TovikUserId { get; set; }
-    public List<SparcProduct> Products { get; set; } = [];
+    public List<SparcLicense> Products { get; set; } = [];
     public bool IsBlocked { get; set; }
 
     public string ToAbsoluteUrl(string? relativeUrl = null) => $"https://{Domain.TrimEnd('/')}/{relativeUrl?.TrimStart('/')}";
@@ -77,15 +77,15 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.SHA2
         }
     }
 
-    public SparcProduct? Product(string productId) => Products.FirstOrDefault(x => x.ProductId == productId);
+    public SparcLicense? Product(string productId) => Products.FirstOrDefault(x => x.ProductId == productId);
 
-    public SparcProduct AddProduct(string productId)
+    public SparcLicense AddProduct(string productId)
     {
         var existing = Products.FirstOrDefault(x => x.ProductId == productId);
         if (existing != null)
             return existing;
 
-        var product = new SparcProduct(productId);
+        var product = new SparcLicense(productId);
         Products.Add(product);
 
         return product;
@@ -96,16 +96,29 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.SHA2
         return Products.Any(x => x.ProductId.Equals(productName, StringComparison.OrdinalIgnoreCase));
     }
 
-    public void Fulfill(SparcProduct product, string userId)
+    public void Fulfill(SparcProduct product, string orderId, string tierId, string userId)
     {
+        var tier = product.Tiers.FirstOrDefault(x => x.Name.Equals(tierId, StringComparison.OrdinalIgnoreCase))
+                   ?? throw new InvalidOperationException($"Tier with ID {tierId} not found for product {product.ProductId}.");
+
         var existing = Product(product.ProductId);
         if (existing != null)
         {
-            existing.MaxUsage += product.MaxUsage;
-            existing.OrderIds.AddRange(product.OrderIds);
+            existing.TierId = tierId;
+            existing.MaxUsage += tier.ItemQuantity;
+            existing.OrderIds.Add(orderId);
         }
         else
-            Products.Add(product);
+        {
+            var fulfillment = new SparcLicense(product.ProductId)
+            {
+                TierId = tierId,
+                MaxUsage = tier.ItemQuantity,
+                OrderIds = [orderId]
+            };
+
+            Products.Add(fulfillment);
+        }
 
         TovikUserId = userId;
     }

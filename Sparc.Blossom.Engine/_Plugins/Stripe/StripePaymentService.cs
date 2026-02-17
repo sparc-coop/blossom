@@ -17,15 +17,13 @@ public class StripePaymentService
     {
         var customerId = await GetOrCreateCustomerAsync(order);
         var currencyId = order.Currency!.ToLower();
-
-        var basePrice = await GetPriceAsync(order.StripeProductId, currencyId, true)
-            ?? throw new InvalidOperationException($"Product {order.StripeProductId} does not have a price in currency {currencyId}.");
+        var currency = SparcCurrency.From(order.Currency);
 
         if (string.IsNullOrWhiteSpace(order.PaymentIntentId))
         {
             var createOptions = new PaymentIntentCreateOptions
             {
-                Amount = (long)basePrice,
+                Amount = order.Amount,
                 Currency = currencyId,
                 Customer = customerId,
                 ReceiptEmail = order.Email,
@@ -53,7 +51,7 @@ public class StripePaymentService
             var service = new PaymentIntentService();
             var options = new PaymentIntentUpdateOptions
             {
-                Amount = (long)basePrice,
+                Amount = order.Amount,
                 Currency = currencyId,
                 Customer = customerId,
                 ReceiptEmail = order.Email
@@ -72,12 +70,15 @@ public class StripePaymentService
         return product;
     }
 
-    public async Task<decimal?> GetPriceAsync(string productId, string currencyId, bool stripeFormat = false)
+    public async Task<ProductTier> ConvertPriceAsync(ProductTier tier, SparcCurrency currency, bool stripeFormat = false)
     {
-        currencyId = currencyId.ToLower();
+        var currencyId = currency.Id.ToLower();
 
-        var newPrice = ToStripePrice(await _rates.ConvertAsync(FromStripePrice(3900, "USD"), "USD", currencyId, true), currencyId);
-        return stripeFormat ? newPrice : FromStripePrice(newPrice, currencyId);
+        var converted = await _rates.ConvertAsync(tier.Price, "USD", currencyId, true);
+        long newPrice = ToStripePrice(converted, currencyId);
+        decimal finalPrice = stripeFormat ? newPrice : FromStripePrice(newPrice, currencyId);
+        
+        return new(tier.Name, finalPrice, tier.ItemQuantity, currency.ToString(finalPrice), tier.Description);
     }
 
     public async Task<string?> GetOrCreateCustomerAsync(SparcOrder order)

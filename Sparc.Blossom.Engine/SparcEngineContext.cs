@@ -24,6 +24,10 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
             .HasPartitionKey(x => x.Domain)
             .HasKey(x => x.Id);
 
+        model.Entity<SparcProduct>().ToContainer("Products")
+            .HasPartitionKey(x => x.ProductId)
+            .HasKey(x => x.Id);
+
         model.Entity<SparcDomain>().ToContainer("Domains")
             .HasPartitionKey(x => x.Domain)
             .HasKey(x => x.Id);
