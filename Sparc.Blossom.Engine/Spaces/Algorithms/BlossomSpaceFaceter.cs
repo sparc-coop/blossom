@@ -47,7 +47,6 @@ internal class BlossomSpaceFaceter(
             else
             {
                 var newFacet = new Facet(space, component);
-                await facets.AddAsync(newFacet);
                 newFacets.Add(newFacet);
             }
         }
@@ -59,6 +58,8 @@ internal class BlossomSpaceFaceter(
             await SummarizeAsync(childFacet));
 
         space.MaterializeAxes(newFacets);
+
+        await facets.UpdateAsync(newFacets);
 
         return newFacets;
     }
@@ -99,6 +100,7 @@ internal class BlossomSpaceFaceter(
         var rightPosts = await posts.SearchAsync(facet.SpaceId, facet.Vector, 5);
 
         var summary = await translator.SummarizeAsync(leftPosts, rightPosts);
+        facet.SetSummary(summary);
     }
 
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)

@@ -18,18 +18,19 @@ public static class BlossomVectorExtensions
              : string.Empty;
 
         var query = $@"
-            SELECT TOP {top} c as Item, VectorDistance(c.Vector, {vector}) as Score
+            SELECT TOP {top} *
             FROM c
-            WHERE c.SpaceId = '{spaceId}' AND c.EntityType = '{typeof(T).Name}'
+            WHERE c.SpaceId = '{spaceId}' AND c._type = '{typeof(T).Name}'
             {similarityThresholdStatement}
             ORDER BY VectorDistance(c.Vector, {vector})";
 
         var cosmosVectors = repository as CosmosDbSimpleRepository<T>;
-        var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<VectorSearchResult<T>>(query, spaceId);
+        var similarVectorsInSpace = await cosmosVectors!.FromSqlAsync<T>(query, spaceId);
 
         if (similarityThreshold < 0)
             similarVectorsInSpace = similarVectorsInSpace.TakeLast(count).ToList();
 
-        return similarVectorsInSpace;
+        var result = similarVectorsInSpace.Select(item => new VectorSearchResult<T>(item, item.Vector.SimilarityTo(vector))).ToList();
+        return result;
     }
 }

@@ -58,14 +58,14 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
 
     private void AddMessagesWithWeight(IEnumerable<VectorSearchResult<Post>> messages, int tokenLimit)
     {
-        foreach (var message in messages.OrderByDescending(x => x.Score))
+        foreach (var message in messages.OrderByDescending(x => Math.Abs(x.Score)))
         {
             if (Text.Length + message.Item.Text!.Length > tokenLimit * 4 * 0.8)
             {
                 Text += "\r\n- [Truncated additional messages due to token limit]";
                 break;
             }
-            Text += $"\r\n- (Weight: {message.Score:N2}) " + message.Item.Text!.Replace('\u00A0', ' ');
+            Text += $"\r\n- (Weight: {Math.Abs(message.Score):N2}) " + message.Item.Text!.Replace('\u00A0', ' ');
         }
     }
 

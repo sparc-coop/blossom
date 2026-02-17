@@ -32,12 +32,14 @@ internal class BlossomPosts(IRepository<Post> posts,
         return post;
     }
 
-    internal async Task<List<Post>> GetAllAsync(BlossomSpace space, int take = 50)
+    internal async Task<List<Post>> GetAllAsync(BlossomSpace space, int take = 50) => await GetAllAsync(space.Id, take);
+
+    internal async Task<List<Post>> GetAllAsync(string spaceId, int take = 50)
     {
         if (take == 0)
             return [];
-        
-        return await posts.Query.Where(x => x.SpaceId == space.Id)
+
+        return await posts.Query.Where(x => x.SpaceId == spaceId)
             .OrderByDescending(x => x.Timestamp)
             .Take(take)
             .ToListAsync();
@@ -45,7 +47,13 @@ internal class BlossomPosts(IRepository<Post> posts,
 
     internal async Task<List<VectorSearchResult<Post>>> SearchAsync(string spaceId, BlossomVector vector, int count, double? similarityThreshold = null)
     {
-        return await posts.SearchAsync(spaceId, vector, count, similarityThreshold);
+        var allPosts = await GetAllAsync(spaceId, 10000);
+        var result = allPosts.Select(p => new VectorSearchResult<Post>(p, p.Vector.SimilarityTo(vector)));
+
+        if (similarityThreshold == null)
+            return result.OrderByDescending(x => x.Score).Take(count).ToList();
+
+        return result.OrderBy(x => x.Score).Take(count).ToList();
     }
 
     internal async Task UpdateAsync(IEnumerable<Post> postsToUpdate) => await posts.UpdateAsync(postsToUpdate);
