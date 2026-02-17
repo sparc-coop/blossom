@@ -115,6 +115,9 @@ public record Language
         .ThenBy(x => x.DialectId == null ? 1 : 0)
         .ToList();
 
+    public static int Count => All.Count;
+    public static int LanguageCount => All.Select(x => x.LanguageId).Distinct().Count();
+
     private static List<string> GoodRandomLanguages = [
         "es-ES", "fr-FR", "de-DE", "it-IT", "ja-JP", "pt-BR", 
         "ko-KR", "nl-NL", "sv-SE", "fi-FI", "no-NO", "da-DK",
