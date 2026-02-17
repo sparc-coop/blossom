@@ -1,11 +1,9 @@
-﻿using Sparc.Blossom.Authentication;
-using Sparc.Blossom.Content;
+﻿using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
 
-internal class BlossomPosts(IRepository<Post> posts,
-        IRepository<Headspace> headspaces,
+internal class BlossomPosts(IRepository<Post> posts,       
     VoyageTranslator translator)
 {
     internal async Task<Post> VectorizeAsync(Post post, BlossomSpace space)
@@ -26,12 +24,9 @@ internal class BlossomPosts(IRepository<Post> posts,
 
     internal async Task<Post> AddAsync(Post post, BlossomSpace space)
     {
-        var headspace = await GetCurrentHeadspace(space, post.User);
+        post.SpaceId = space.Id;
 
         await VectorizeAsync(post, space);
-        headspace = new(space, post, headspace);
-        await headspaces.AddAsync(headspace);
-
         await posts.AddAsync(post);
 
         return post;
@@ -46,16 +41,6 @@ internal class BlossomPosts(IRepository<Post> posts,
             .OrderByDescending(x => x.Timestamp)
             .Take(take)
             .ToListAsync();
-    }
-
-    private async Task<Headspace?> GetCurrentHeadspace(BlossomSpace space, BlossomAvatar user)
-    {
-        var headspace = await headspaces.Query
-            .Where(x => x.SpaceId == space.Id && x.User.Id == user.Id)
-            .OrderByDescending(x => x.Timestamp)
-            .FirstOrDefaultAsync();
-
-        return headspace;
     }
 
     internal async Task<List<VectorSearchResult<Post>>> SearchAsync(string spaceId, BlossomVector vector, int count, double? similarityThreshold = null)

@@ -1,6 +1,4 @@
 ﻿using Sparc.Blossom.Authentication;
-using Sparc.Blossom.Content;
-using Sparc.Blossom.Content.Tovik;
 using Sparc.Blossom.Data;
 using System.Security.Claims;
 
@@ -12,6 +10,7 @@ internal class BlossomSpaces(
     BlossomSpaceFaceter faceter,
     BlossomSpaceConstellator constellator,
     BlossomSpaceTranslator translator,
+    IRepository<BlossomUserTrail> headspaces,
     BlossomGameStates gameStates)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
@@ -56,14 +55,26 @@ internal class BlossomSpaces(
         return existing;
     }
 
+    private async Task<BlossomSpace> GetOrCreateUserSpace(BlossomSpace space, BlossomAvatar user)
+    {
+        return await GetOrCreate(user.Id, "User", space.Id, user);
+    }
+
+
     private async Task<Post> PostAsync(string spaceId, Post post)
     {
         var space = await GetOrCreate(post.SpaceId, user: post.User);
+        var userSpace = await GetOrCreateUserSpace(space, post.User);
         var isFirstPost = space.Vector.IsEmpty;
 
         post = await posts.AddAsync(post, space);
 
         await Repository.ExecuteAsync(space, x => x.Add(post));
+
+        await Repository.ExecuteAsync(userSpace, x => x.Add(post));
+
+        var headspace = new BlossomUserTrail(space, userSpace);
+        await headspaces.AddAsync(headspace);
 
         if (isFirstPost)
         {
@@ -104,9 +115,9 @@ internal class BlossomSpaces(
     private async Task<GameState> GetCoordinatesAsync(ClaimsPrincipal principal, string spaceId, string? questId = null)
     {
         var space = await GetOrCreate(spaceId);
-        var userId = principal.Id();
+        var userSpace = await GetOrCreate(principal.Id(), "User", spaceId);
 
-        var state = await gameStates.GetCoordinatesAsync(space, userId);
+        var state = await gameStates.GetCoordinatesAsync(space, userSpace);
         return state;
     }
 

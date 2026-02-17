@@ -41,6 +41,7 @@ public class BlossomSpace : BlossomSpaceObject
     public List<MetricHistory> ConsensusHistory { get; set; } = [];
     public List<MetricHistory> ConfidenceHistory { get; set; } = [];
     public List<Axis> Axes { get; set; } = [];
+    public Quest? ActiveQuest { get; set; }
 
     [JsonConstructor]
     protected BlossomSpace() : base(Guid.NewGuid().ToString())
@@ -71,7 +72,6 @@ public class BlossomSpace : BlossomSpaceObject
 
     public void Add(Post post)
     {
-        post.SpaceId = Id;
         Vector.Update(post.Vector);
     }
 

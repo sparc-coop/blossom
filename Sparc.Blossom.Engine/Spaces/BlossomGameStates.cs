@@ -9,50 +9,38 @@ internal class BlossomGameStates(
     IRepository<Quest> questRepo,
     IRepository<Facet> facetRepo,
     IRepository<Constellation> constellationRepo,
-    IRepository<Headspace> headspaceRepo)
+    IRepository<BlossomUserTrail> headspaceRepo)
 {
-    public async Task ActivateQuestAsync(BlossomSpace space, string facetId, string userId)
+    public async Task ActivateQuestAsync(BlossomSpace space, string facetId)
     {
         var facet = await facetRepo.FindAsync(space.Id, facetId);
-        var headspace = await headspaceRepo.FindAsync(space.Id, userId);
 
-        if (facet == null || headspace == null)
+        if (facet == null)
             return;
 
-        headspace.ActiveQuest = new Quest(space, facet!, headspace!.User);
-        await headspaceRepo.UpdateAsync(headspace);
+        space.ActiveQuest = new Quest(space, facet);
     }
     
-    public async Task<GameState> GetCoordinatesAsync(BlossomSpace space, string userId)
+    public async Task<GameState> GetCoordinatesAsync(BlossomSpace space, BlossomSpace userSpace)
     {
         var spacePosts = await posts.GetAllAsync(space);
         var spaceFacets = await facetRepo.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
         var spaceConstellations = await constellationRepo.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
         var headspaces = await headspaceRepo.Query.Where(x => x.SpaceId == space.Id).OrderBy(x => x.Timestamp).ToListAsync();
-        var quests = await questRepo.Query.Where(x => x.SpaceId == space.Id && x.User.Id == userId).ToListAsync();
+        var quests = await questRepo.Query.Where(x => x.SpaceId == space.Id && x.User.Id == userSpace.Id).ToListAsync();
 
-        var headspace = headspaces
-            .Where(x => x.User.Id == userId)
-            .OrderByDescending(x => x.Timestamp)
-            .FirstOrDefault();
-
-        headspace?.EntityType = "Self";
-
-        var distanceToAnswer = headspace?.Vector.DistanceTo(space.Vector) ?? 0;
-        var axes = headspace?.Axes ?? space.Axes;
-
-        if (headspace != null)
-        {
-            spaceFacets = spaceFacets.Where(x => x.IsQuestable(space, headspace, distanceToAnswer)).ToList();
-            headspace.ActiveQuest?.MaterializeCoordinates(axes);
-        }
+        var distanceToAnswer = userSpace.Vector.DistanceTo(space.Vector);
+        var axes = userSpace.Axes.Count > 0 ? userSpace.Axes : space.Axes;
+        spaceFacets = spaceFacets.Where(x => x.IsQuestable(space, userSpace, distanceToAnswer)).ToList();
+        userSpace.MaterializeCoordinates(axes);
+        userSpace.ActiveQuest?.MaterializeCoordinates(axes);
 
         spacePosts.ForEach(x => x.MaterializeCoordinates(axes));
         spaceFacets.ForEach(x => x.MaterializeCoordinates(axes));
         spaceConstellations.ForEach(x => x.MaterializeCoordinates(axes));
         headspaces.ForEach(x => x.MaterializeCoordinates(axes));
 
-        return new(space, headspace, spacePosts, headspaces, spaceFacets, spaceConstellations, distanceToAnswer);
+        return new(space, userSpace, spacePosts, headspaces, spaceFacets, spaceConstellations, distanceToAnswer);
     }
 
     public record GraphExtractionResult(List<SparcEntityBase> Entities, List<SparcRelationship> Relationships);

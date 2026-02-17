@@ -10,10 +10,10 @@ public class Quest : BlossomSpaceObject
     public Quest(string spaceId) : base(spaceId)
     { }
     
-    public Quest(BlossomSpace space, Facet facet, BlossomAvatar avatar)
+    public Quest(BlossomSpace space, Facet facet)
         : base(space, facet.Vector)
     {
-        User = avatar;
+        User = space.User;
         Name = facet.Summary?.RightTopic ?? facet.Summary?.Name ?? Name;
         Summary = facet.Summary;
     }

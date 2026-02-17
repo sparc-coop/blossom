@@ -12,10 +12,10 @@ public class Facet : BlossomSpaceObject
     {
     }
 
-    public bool IsQuestable(BlossomSpace space, Headspace user, double distanceToAnswer)
+    public bool IsQuestable(BlossomSpace space, BlossomSpace userSpace, double distanceToAnswer)
     {
         var quest = Vector.DotProduct(space.Vector) >= 0 ? Vector : Vector.Multiply(-1);
-        var userProjection = quest.DotProduct(user.Vector);
+        var userProjection = quest.DotProduct(userSpace.Vector);
         var answerProjection = quest.DotProduct(space.Vector);
         var userQuest = quest.Multiply(answerProjection - userProjection);
 
