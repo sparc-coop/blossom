@@ -29,7 +29,7 @@ internal class BlossomGameStates(
             ? [activeQuest]
             : spaceFacets
             .Select(x => new Quest(space, userSpace, x))
-            .Where(x => x.Vector.Length > questThreshold)
+            .OrderByDescending(x => x.Importance)
             .ToList();
 
         userSpace.MaterializeCoordinates(axes);

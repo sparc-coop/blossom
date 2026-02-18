@@ -3,6 +3,8 @@
 public class Quest : BlossomSpace
 {
     public string FacetId { get; set; } = "";
+    public double Length { get; set; }
+    public double Importance { get; set; }
     
     public Quest()
     { }
@@ -14,7 +16,7 @@ public class Quest : BlossomSpace
     {
         User = userSpace.User;
         Vector = facet.Vector;
-        Name = facet.Summary?.RightTopic ?? facet.Summary?.Name ?? Name;
+        Name = facet.Summary?.Name ?? Name;
         Summary = facet.Summary;
         FacetId = facet.Id;
 
@@ -22,6 +24,9 @@ public class Quest : BlossomSpace
         var userProjection = quest.DotProduct(userSpace.Vector);
         var answerProjection = quest.DotProduct(space.Vector);
         Vector = quest.Multiply(answerProjection - userProjection);
+
+        Length = Vector.Length;
+        Importance = facet.Vector.CoherenceWeight * 10;
 
         MaterializeAxes([facet]);
     }
