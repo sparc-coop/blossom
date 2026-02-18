@@ -102,6 +102,12 @@ public class BlossomSpace : BlossomSpaceObject
         Axes = quest.Axes;
         ActiveQuestId = quest.Id;
     }
+
+    public void DeactivateQuest()
+    {
+        Axes = [];
+        ActiveQuestId = null;
+    }
 }
 
 

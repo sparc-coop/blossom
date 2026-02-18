@@ -109,7 +109,7 @@ internal class BlossomSpaceFaceter(
         var facet = await facets.FindAsync(space.Id, facetId)
             ?? throw new Exception($"Facet with ID {facetId} not found in space {space.Id}");
 
-        var quest = new Quest(userSpace, facet);
+        var quest = new Quest(space, userSpace, facet);
         await quests.AddAsync(quest);
         userSpace.ActivateQuest(quest);
 

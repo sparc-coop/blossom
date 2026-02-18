@@ -121,15 +121,21 @@ internal class BlossomSpaces(
         return state;
     }
 
-    private async Task<Quest> ActivateQuestAsync(ClaimsPrincipal principal, string spaceId, string facetId)
+    private async Task ActivateQuestAsync(ClaimsPrincipal principal, string spaceId, string facetId)
     {
         var space = await GetOrCreate(spaceId);
         var userSpace = await GetOrCreate(principal.Id(), "User", spaceId);
 
-        var quest = await faceter.ActivateQuestAsync(space, userSpace, facetId);
-        await Repository.UpdateAsync(userSpace);
+        if (userSpace.ActiveQuestId != null)
+        {
+            userSpace.DeactivateQuest();
+        }
+        else
+        {
+            var quest = await faceter.ActivateQuestAsync(space, userSpace, facetId);
+        }
 
-        return quest;
+        await Repository.UpdateAsync(userSpace);
     }
 
     private async Task<string> GetSimplePostsAsync(string spaceId)
@@ -150,7 +156,7 @@ internal class BlossomSpaces(
         spaces.MapGet("{spaceId}/coordinates", async (ClaimsPrincipal principal, string spaceId)
             => await GetCoordinatesAsync(principal, spaceId));
         spaces.MapPost("{spaceId}", PostAsync);
-        spaces.MapPost("{spaceId}/quests/{facetId}", async (ClaimsPrincipal principal, string spaceId, string facetId) 
+        spaces.MapPost("{spaceId}/quests/{facetId}", async (ClaimsPrincipal principal, string spaceId, string facetId)
             => await ActivateQuestAsync(principal, spaceId, facetId));
         spaces.MapPut("{spaceId}", SaveAsync);
     }

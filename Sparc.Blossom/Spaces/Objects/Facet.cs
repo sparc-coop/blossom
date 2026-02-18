@@ -14,16 +14,13 @@ public class Facet : BlossomSpaceObject
 
     public bool IsQuestable(BlossomSpace space, BlossomSpace userSpace, double distanceToAnswer)
     {
-        var quest = Vector.DotProduct(space.Vector) >= 0 ? Vector : Vector.Multiply(-1);
-        var userProjection = quest.DotProduct(userSpace.Vector);
-        var answerProjection = quest.DotProduct(space.Vector);
-        var userQuest = quest.Multiply(answerProjection - userProjection);
+        var quest = new Quest(space, userSpace, this);
 
         var lengthThreshold = Math.Min(0.1, distanceToAnswer / 2);
         //var similarityThreshold = 0.8;
         //var similarity = lastMovement.SimilarityTo(quest);
 
-        return userQuest.Length >= lengthThreshold;
+        return quest.Vector.Length >= lengthThreshold;
     }
 
     internal Facet Orthogonal()

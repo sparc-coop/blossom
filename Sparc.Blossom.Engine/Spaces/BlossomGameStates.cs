@@ -7,6 +7,7 @@ namespace Sparc.Blossom.Spaces;
 internal class BlossomGameStates(
     BlossomPosts posts,
     IRepository<Facet> facetRepo,
+    IRepository<Quest> questRepo,
     IRepository<Constellation> constellationRepo,
     IRepository<BlossomUserTrail> headspaceRepo)
 {
@@ -16,21 +17,30 @@ internal class BlossomGameStates(
         var spaceFacets = await facetRepo.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
         var spaceConstellations = await constellationRepo.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
         var headspaces = await headspaceRepo.Query.Where(x => x.SpaceId == space.Id).OrderBy(x => x.Timestamp).ToListAsync();
+        var activeQuest = userSpace.ActiveQuestId == null
+            ? null
+            : await questRepo.FindAsync(space.Id, userSpace.ActiveQuestId);
 
         var distanceToAnswer = userSpace.Vector.DistanceTo(space.Vector);
         var axes = userSpace.Axes.Count > 0 ? userSpace.Axes : space.Axes;
 
-        spaceFacets = spaceFacets.Where(x => x.IsQuestable(space, userSpace, distanceToAnswer)).ToList();
+        var questThreshold = Math.Min(0.1, distanceToAnswer / 2);
+        var availableQuests = activeQuest != null 
+            ? [activeQuest]
+            : spaceFacets
+            .Select(x => new Quest(space, userSpace, x))
+            .Where(x => x.Vector.Length > questThreshold)
+            .ToList();
 
         userSpace.MaterializeCoordinates(axes);
         space.MaterializeCoordinates(axes);
 
         spacePosts.ForEach(x => x.MaterializeCoordinates(axes));
-        spaceFacets.ForEach(x => x.MaterializeCoordinates(axes));
+        availableQuests.ForEach(x => x.MaterializeCoordinates(axes));
         spaceConstellations.ForEach(x => x.MaterializeCoordinates(axes));
         headspaces.ForEach(x => x.MaterializeCoordinates(axes));
 
-        return new(space, userSpace, spacePosts, headspaces, spaceFacets, spaceConstellations, distanceToAnswer);
+        return new(activeQuest ?? space, userSpace, spacePosts, headspaces, availableQuests, spaceConstellations, distanceToAnswer);
     }
 
     public record GraphExtractionResult(List<SparcEntityBase> Entities, List<SparcRelationship> Relationships);

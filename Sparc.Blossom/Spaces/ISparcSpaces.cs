@@ -1,5 +1,4 @@
 ﻿using Refit;
-using Sparc.Blossom.Content;
 using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Spaces;
@@ -43,7 +42,7 @@ public interface ISparcSpaces
     Task<GameState> GetCoordinatesAsync(string spaceId);
 
     [Post("/spaces/{spaceId}/quests/{facetId}")]
-    Task<Quest> ActivateQuestAsync(string spaceId, string facetId);
+    Task ActivateQuestAsync(string spaceId, string facetId);
 
     [Post("/spaces/rooms/{spaceId}/send/{eventType}/{txnId}")]
     Task<BlossomEvent> SendMessageAsync(string spaceId, string eventType, string txnId, SendMessageRequest request);
@@ -55,7 +54,7 @@ public interface ISparcSpaces
     Task SetPresenceAsync(string userId, BlossomPresence presence);
 }
 
-public record GameState(BlossomSpace Space, BlossomSpace? Self, List<Post> Posts, List<BlossomUserTrail> UserTrails, List<Facet> Facets, List<Constellation> Constellations, double DistanceToAnswer);
+public record GameState(BlossomSpace Space, BlossomSpace? Self, List<Post> Posts, List<BlossomUserTrail> UserTrails, List<Quest> AvailableQuests, List<Constellation> Constellations, double DistanceToAnswer);
 
 public record InviteToSpaceRequest(string UserId);
 public record CreateSpaceRequest(
