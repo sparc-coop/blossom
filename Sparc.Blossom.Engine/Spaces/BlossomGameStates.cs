@@ -40,7 +40,7 @@ internal class BlossomGameStates(
         spaceConstellations.ForEach(x => x.MaterializeCoordinates(axes));
         headspaces.ForEach(x => x.MaterializeCoordinates(axes));
 
-        return new(activeQuest ?? space, userSpace, spacePosts, headspaces, availableQuests, spaceConstellations, distanceToAnswer);
+        return new(activeQuest ?? space, userSpace, space, spacePosts, headspaces, availableQuests, spaceConstellations, distanceToAnswer);
     }
 
     public record GraphExtractionResult(List<SparcEntityBase> Entities, List<SparcRelationship> Relationships);
