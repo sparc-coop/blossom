@@ -10,51 +10,33 @@ internal class BlossomSpaceFaceter(
     BlossomPosts posts,
     IEnumerable<ITranslator> translators)
 {
+    public async Task SeedAsync(BlossomSpace space, IEnumerable<Guide> guides)
+    {
+        var components = ToPrincipalComponents(guides.Select(g => g.Vector), 0.8, 10);
+        var facets = components.Select(c => new Facet(space, c)).ToList();
+        space.MaterializeAxes(facets);
+    }
+    
     public async Task<List<Facet>> FacetAsync(BlossomSpace space)
     {
         var postsToFacet = await posts.GetAllAsync(space);
-        
-        if (postsToFacet.Count() < 2)
+
+        // Start using the posts from non-system users once there is enough
+        if (postsToFacet.Count < 2)
             return [];
-        
+
         // Factor into principal components
-        var components = ToPrincipalComponents(postsToFacet, 0.8, 10);
+        var components = ToPrincipalComponents(postsToFacet.Select(p => p.Vector), 0.8, 10);
 
         // Match to existing facets when possible (for axis permanence)
         var existingFacets = await facets.Query
             .Where(x => x.SpaceId == space.Id)
             .ToListAsync();
 
-        var newFacets = new List<Facet>();
-
-        foreach (var component in components)
-        {
-            var bestMatch = existingFacets
-                .OrderByDescending(x => x.Vector.AlignmentWith(component))
-                .FirstOrDefault();
-
-            if (bestMatch != null)
-            {
-                // PCA axis may be flipped, so check direction
-                if (component.DotProduct(bestMatch.Vector) < 0)
-                    component.Vector = component.Multiply(-1).Vector;
-                
-                bestMatch.Vector = component;
-                await facets.UpdateAsync(bestMatch);
-
-                newFacets.Add(bestMatch);
-                existingFacets.Remove(bestMatch);
-            }
-            else
-            {
-                var newFacet = new Facet(space, component);
-                newFacets.Add(newFacet);
-            }
-        }
-        
-        // Delete any remaining unused facets
         await facets.DeleteAsync(existingFacets);
-
+        
+        var newFacets = components.Select(x => new Facet(space, x)).ToList();
+        
         await Parallel.ForEachAsync(newFacets, async (childFacet, _) => 
             await SummarizeAsync(childFacet));
 
@@ -65,10 +47,8 @@ internal class BlossomSpaceFaceter(
         return newFacets;
     }
 
-    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<Post> postsToFacet, double varianceToExplain = 1, int maxCount = 3)
+    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain = 1, int maxCount = 3)
     {
-        var vectors = postsToFacet.Select(p => p.Vector).ToList();
-
         var mean = BlossomVector.Average(vectors);
         var centeredVectors = vectors.Select(v => v.Center(mean)).ToList();
         var matrix = ToMatrix(centeredVectors);
@@ -96,9 +76,9 @@ internal class BlossomSpaceFaceter(
     {
         var translator = translators.OfType<AITranslator>().First();
 
-        var leftPosts = await posts.SearchAsync(facet.SpaceId, facet.Vector, 5, -0.0001);
+        var leftPosts = await posts.SearchAsync(facet.SpaceId, facet.Vector, 5, -1);
 
-        var rightPosts = await posts.SearchAsync(facet.SpaceId, facet.Vector, 5);
+        var rightPosts = await posts.SearchAsync(facet.SpaceId, facet.Vector, 5, 1);
 
         var summary = await translator.SummarizeAsync(leftPosts, rightPosts);
         facet.SetSummary(summary);

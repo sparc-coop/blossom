@@ -11,12 +11,12 @@ internal class BlossomSpaceTranslator
 {
     readonly AITranslator translator = translators.OfType<AITranslator>().First();
 
-    public async Task SeedAsync(BlossomSpace space, Post question)
+    public async Task<List<Guide>> SeedAsync(BlossomSpace space, Post question)
     {
         var discovery = new SpaceDiscoveryQuestion(question);
         var statements = await translator.AskAsync(discovery);
 
-        var guides = statements.Value!.Statements.Select(x => new Post(space, BlossomUser.System.Avatar, x)).ToList();
+        var guides = statements.Value!.Statements.Select(x => new Guide(space, x)).ToList();
         await vectorizer.VectorizeAsync(guides);
         await posts.UpdateAsync(guides);
 
@@ -24,6 +24,8 @@ internal class BlossomSpaceTranslator
             space.Add(guide);
 
         space.SetSummary(new(friendlyId.Create(), question.Text ?? "", ""));
+
+        return guides;
     }
 
     internal async Task<Post> CalculateHintAsync(BlossomSpace currentLocation, Post lastPost, BlossomSpace destination)

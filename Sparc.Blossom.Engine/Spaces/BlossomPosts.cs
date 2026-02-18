@@ -53,7 +53,10 @@ internal class BlossomPosts(IRepository<Post> posts,
         if (similarityThreshold == null)
             return result.OrderByDescending(x => x.Score).Take(count).ToList();
 
-        return result.OrderBy(x => x.Score).Take(count).ToList();
+        if (similarityThreshold < 0)
+            return result.Where(x => x.Score < 0).OrderBy(x => x.Score).Take(count).ToList();
+        else
+            return result.Where(x => x.Score > 0).OrderBy(x => x.Score).Take(count).ToList();
     }
 
     internal async Task UpdateAsync(IEnumerable<Post> postsToUpdate) => await posts.UpdateAsync(postsToUpdate);

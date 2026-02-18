@@ -78,11 +78,14 @@ internal class BlossomSpaces(
 
         if (isFirstPost)
         {
-            await translator.SeedAsync(space, post);
+            var guides = await translator.SeedAsync(space, post);
+            await faceter.SeedAsync(space, guides);
             await Repository.UpdateAsync(space);
         }
-
-        await SaveAsync(spaceId, space);
+        else
+        {
+            await SaveAsync(spaceId, space);
+        }
 
         //var hintVectors = await vectors.GetAllAsync(space.Space.Id, "Hint");
         //var hint = await vectors.CalculateHintAsync(userSpace, post, space);
