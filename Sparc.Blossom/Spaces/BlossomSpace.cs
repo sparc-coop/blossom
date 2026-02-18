@@ -41,7 +41,7 @@ public class BlossomSpace : BlossomSpaceObject
     public List<MetricHistory> ConsensusHistory { get; set; } = [];
     public List<MetricHistory> ConfidenceHistory { get; set; } = [];
     public List<Axis> Axes { get; set; } = [];
-    public Quest? ActiveQuest { get; set; }
+    public string? ActiveQuestId { get; set; }
 
     [JsonConstructor]
     protected BlossomSpace() : base(Guid.NewGuid().ToString())
@@ -86,7 +86,7 @@ public class BlossomSpace : BlossomSpaceObject
             .ToList();
 
         var x = facets.FirstOrDefault() ?? new(this, BlossomVector.Basis(Vector.Vector.Length, 0));
-        var y = facets.Skip(1).FirstOrDefault() ?? new(this, BlossomVector.Basis(Vector.Vector.Length, 1));
+        var y = facets.Skip(1).FirstOrDefault() ?? x.Orthogonal();
         Facet? z = null;
 
         var xAxis = new Axis(this, x, "X");
@@ -95,6 +95,12 @@ public class BlossomSpace : BlossomSpaceObject
 
         Axes = zAxis == null ? [xAxis, yAxis] : [xAxis, yAxis, zAxis];
         return Axes;
+    }
+
+    public void ActivateQuest(Quest quest)
+    {
+        Axes = quest.Axes;
+        ActiveQuestId = quest.Id;
     }
 }
 

@@ -6,34 +6,23 @@ namespace Sparc.Blossom.Spaces;
 
 internal class BlossomGameStates(
     BlossomPosts posts,
-    IRepository<Quest> questRepo,
     IRepository<Facet> facetRepo,
     IRepository<Constellation> constellationRepo,
     IRepository<BlossomUserTrail> headspaceRepo)
 {
-    public async Task ActivateQuestAsync(BlossomSpace space, string facetId)
-    {
-        var facet = await facetRepo.FindAsync(space.Id, facetId);
-
-        if (facet == null)
-            return;
-
-        space.ActiveQuest = new Quest(space, facet);
-    }
-    
     public async Task<GameState> GetCoordinatesAsync(BlossomSpace space, BlossomSpace userSpace)
     {
         var spacePosts = await posts.GetAllAsync(space);
         var spaceFacets = await facetRepo.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
         var spaceConstellations = await constellationRepo.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
         var headspaces = await headspaceRepo.Query.Where(x => x.SpaceId == space.Id).OrderBy(x => x.Timestamp).ToListAsync();
-        var quests = await questRepo.Query.Where(x => x.SpaceId == space.Id && x.User.Id == userSpace.Id).ToListAsync();
 
         var distanceToAnswer = userSpace.Vector.DistanceTo(space.Vector);
         var axes = userSpace.Axes.Count > 0 ? userSpace.Axes : space.Axes;
+
         spaceFacets = spaceFacets.Where(x => x.IsQuestable(space, userSpace, distanceToAnswer)).ToList();
+
         userSpace.MaterializeCoordinates(axes);
-        userSpace.ActiveQuest?.MaterializeCoordinates(axes);
         space.MaterializeCoordinates(axes);
 
         spacePosts.ForEach(x => x.MaterializeCoordinates(axes));

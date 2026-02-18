@@ -40,7 +40,10 @@ public interface ISparcSpaces
     Task<List<Post>> GetPostsAsync(string spaceId, string type = "Post");
 
     [Get("/spaces/{spaceId}/coordinates")]
-    Task<GameState> GetCoordinatesAsync(string spaceId, string? questId = null);
+    Task<GameState> GetCoordinatesAsync(string spaceId);
+
+    [Post("/spaces/{spaceId}/quests/{facetId}")]
+    Task<Quest> ActivateQuestAsync(string spaceId, string facetId);
 
     [Post("/spaces/rooms/{spaceId}/send/{eventType}/{txnId}")]
     Task<BlossomEvent> SendMessageAsync(string spaceId, string eventType, string txnId, SendMessageRequest request);

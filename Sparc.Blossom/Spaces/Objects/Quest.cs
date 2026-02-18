@@ -1,8 +1,6 @@
-﻿using Sparc.Blossom.Authentication;
+﻿namespace Sparc.Blossom.Spaces;
 
-namespace Sparc.Blossom.Spaces;
-
-public class Quest : BlossomSpaceObject
+public class Quest : BlossomSpace
 {
     public Quest()
     { }
@@ -10,17 +8,16 @@ public class Quest : BlossomSpaceObject
     public Quest(string spaceId) : base(spaceId)
     { }
     
-    public Quest(BlossomSpace space, Facet facet)
-        : base(space, facet.Vector)
+    public Quest(BlossomSpace space, Facet facet) : base(space, "Quest")
     {
         User = space.User;
+        Vector = facet.Vector;
         Name = facet.Summary?.RightTopic ?? facet.Summary?.Name ?? Name;
         Summary = facet.Summary;
+        MaterializeAxes([facet]);
     }
 
-    public string Name { get; set; } = "";
-
-    public List<Axis> MaterializeAxes(BlossomSpace space, List<Axis> axes)
+    public List<Axis> MaterializeQuestAxes(BlossomSpace space, List<Axis> axes)
     {
         var xAxis = Vector.ProjectOntoPlane(axes[0].Vector, axes[1].Vector);
         var yAxis = xAxis.Perpendicular(axes[0], axes[1]);

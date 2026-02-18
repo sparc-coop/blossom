@@ -112,13 +112,24 @@ internal class BlossomSpaces(
         return await posts.GetAllAsync(space, take);
     }
 
-    private async Task<GameState> GetCoordinatesAsync(ClaimsPrincipal principal, string spaceId, string? questId = null)
+    private async Task<GameState> GetCoordinatesAsync(ClaimsPrincipal principal, string spaceId)
     {
         var space = await GetOrCreate(spaceId);
         var userSpace = await GetOrCreate(principal.Id(), "User", spaceId);
 
         var state = await gameStates.GetCoordinatesAsync(space, userSpace);
         return state;
+    }
+
+    private async Task<Quest> ActivateQuestAsync(ClaimsPrincipal principal, string spaceId, string facetId)
+    {
+        var space = await GetOrCreate(spaceId);
+        var userSpace = await GetOrCreate(principal.Id(), "User", spaceId);
+
+        var quest = await faceter.ActivateQuestAsync(space, userSpace, facetId);
+        await Repository.UpdateAsync(userSpace);
+
+        return quest;
     }
 
     private async Task<string> GetSimplePostsAsync(string spaceId)
@@ -136,9 +147,11 @@ internal class BlossomSpaces(
         spaces.MapGet("{parentSpaceId}/subspaces/{spaceId}", GetSpaceAsync);
         spaces.MapGet("{spaceId}/posts", GetPostsAsync);
         spaces.MapGet("{spaceId}/simpleposts", GetSimplePostsAsync);
-        spaces.MapGet("{spaceId}/coordinates", async (ClaimsPrincipal principal, string spaceId, string? questId = null)
-            => await GetCoordinatesAsync(principal, spaceId, questId));
+        spaces.MapGet("{spaceId}/coordinates", async (ClaimsPrincipal principal, string spaceId)
+            => await GetCoordinatesAsync(principal, spaceId));
         spaces.MapPost("{spaceId}", PostAsync);
+        spaces.MapPost("{spaceId}/quests/{facetId}", async (ClaimsPrincipal principal, string spaceId, string facetId) 
+            => await ActivateQuestAsync(principal, spaceId, facetId));
         spaces.MapPut("{spaceId}", SaveAsync);
     }
 }

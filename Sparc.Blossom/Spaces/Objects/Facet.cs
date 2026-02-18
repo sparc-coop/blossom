@@ -25,4 +25,10 @@ public class Facet : BlossomSpaceObject
 
         return userQuest.Length >= lengthThreshold;
     }
+
+    internal Facet Orthogonal()
+    {
+        var orthogonalVector = Vector.Orthogonal();
+        return new Facet(SpaceId) { Vector = orthogonalVector };
+    }
 }

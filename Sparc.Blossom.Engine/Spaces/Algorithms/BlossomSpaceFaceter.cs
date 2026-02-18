@@ -5,7 +5,8 @@ using Sparc.Blossom.Data;
 namespace Sparc.Blossom.Spaces;
 
 internal class BlossomSpaceFaceter(
-    IRepository<Facet> facets, 
+    IRepository<Facet> facets,
+    IRepository<Quest> quests,
     BlossomPosts posts,
     IEnumerable<ITranslator> translators)
 {
@@ -101,6 +102,18 @@ internal class BlossomSpaceFaceter(
 
         var summary = await translator.SummarizeAsync(leftPosts, rightPosts);
         facet.SetSummary(summary);
+    }
+
+    public async Task<Quest> ActivateQuestAsync(BlossomSpace space, BlossomSpace userSpace, string facetId)
+    {
+        var facet = await facets.FindAsync(space.Id, facetId)
+            ?? throw new Exception($"Facet with ID {facetId} not found in space {space.Id}");
+
+        var quest = new Quest(userSpace, facet);
+        await quests.AddAsync(quest);
+        userSpace.ActivateQuest(quest);
+
+        return quest;
     }
 
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
