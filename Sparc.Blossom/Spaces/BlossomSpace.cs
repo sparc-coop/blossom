@@ -1,4 +1,5 @@
-﻿using Sparc.Blossom.Content;
+﻿using Microsoft.Extensions.Hosting;
+using Sparc.Blossom.Content;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Spaces;
@@ -35,12 +36,12 @@ public class BlossomSpace : BlossomSpaceObject
     public string? ModelUrl { get; set; }
     public List<SparcEntityType> EntityTypes { get; set; } = [];
     public double? Weight { get; set; }
-    public double? Consensus { get; set; }
-    public double? Confidence { get; set; }
+    public float Coherence { get; set; }
     public BlossomSpaceSettings Settings { get; set; } = new();
-    public List<MetricHistory> ConsensusHistory { get; set; } = [];
-    public List<MetricHistory> ConfidenceHistory { get; set; } = [];
     public List<Axis> Axes { get; set; } = [];
+    public BlossomVector DescriptiveField { get; set; } = new();
+    public BlossomVector EpistemicField { get; set; } = new();
+
     public string? ActiveQuestId { get; set; }
 
     [JsonConstructor]
@@ -70,20 +71,35 @@ public class BlossomSpace : BlossomSpaceObject
             Name = summary.Name;
     }
 
-    public void Add(Post post)
+    public void Add(Post post, IEnumerable<Post>? previousPosts = null)
     {
-        Vector.Update(post.Vector);
+        DescriptiveField.Update(post.Vector);
+        Vector = DescriptiveField;
+    }
+
+    public void CalculateCoherence(Facet coherenceAxis, IEnumerable<Post> allPosts)
+    {
+        var previousCoherence = Coherence;
+
+        var postVectors = allPosts.Select(p => p.Vector).ToList();
+        Coherence = coherenceAxis.Vector.CalculateGlobalCoherence(postVectors);
+        var coherenceChange = Coherence - previousCoherence;
+
+        var lastPost = allPosts.OrderByDescending(x => x.Timestamp).First();
+        EpistemicField.Update(lastPost.Vector, coherenceChange);
+
+        Vector = DescriptiveField.Multiply(0.2f).Add(EpistemicField.Multiply(0.8f));
     }
 
     public List<Axis> MaterializeAxes(IEnumerable<Facet> candidates)
     {
-        if (Axes.Count > 0)
-            return Axes;
-        
         var facets = candidates
             .OrderByDescending(x => x.Vector.CoherenceWeight)
             .Take(2)
             .ToList();
+
+        if (Axes.Count > 0)
+            return Axes;
 
         var x = facets.FirstOrDefault() ?? new(this, BlossomVector.Basis(Vector.Vector.Length, 0));
         var y = facets.Skip(1).FirstOrDefault() ?? x.Orthogonal();

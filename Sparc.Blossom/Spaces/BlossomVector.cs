@@ -154,7 +154,7 @@ public class BlossomVector : BlossomVectorBase
         if (IsEmpty)
             Point = vector.Vector;
         else
-            Point = Multiply(1.0f - scaleFactor.Value).Add(vector.Multiply(scaleFactor.Value)).Vector;
+            Point = new BlossomVector(Point).Add(vector.Multiply(scaleFactor.Value)).Vector;
 
         Vector = new BlossomVector(Point).Normalize().Vector;
     }
@@ -248,13 +248,31 @@ public class BlossomVector : BlossomVectorBase
         return orthogonal;
     }
 
+    public BlossomVector OrthogonalResidual(BlossomVector axis)
+    {
+        return axis.Subtract(Multiply(DotProduct(axis)));
+    }
+
     public BlossomVector Orthogonal(BlossomVector xAxis, BlossomVector yAxis)
     {
         var orthogonal = Subtract(xAxis.Multiply(DotProduct(xAxis))).Subtract(yAxis.Multiply(DotProduct(yAxis))).Normalize();
         return orthogonal;
     }
 
-    public void CalculateCoherenceWeight(List<BlossomVector> neighbors)
+    public float CalculateGlobalCoherence(List<BlossomVector> children)
+    {
+        var weightedOrthogonalChildren = children.Select(child => child.Orthogonal().Multiply(child.CoherenceWeight)).ToList();
+
+        var numerator = children.Sum(c => Math.Abs(DotProduct(c)) * c.CoherenceWeight);
+        var denominator = numerator + children.Sum(c => OrthogonalResidual(c).Magnitude() * c.CoherenceWeight);
+
+        if (denominator == 0)
+            return 1;
+        else
+            return numerator / denominator;
+    }
+
+    public void CalculateLocalCoherence(List<BlossomVector> neighbors)
     {
         if (neighbors.Count == 0)
         { 

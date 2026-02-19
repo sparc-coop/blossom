@@ -16,7 +16,7 @@ internal class BlossomPosts(IRepository<Post> posts,
                 post.Vector.Update(lookbackPost.Vector, space.Settings.MessageLookbackWeight);
 
         var neighbors = await posts.SearchAsync(post.SpaceId, post.Vector, 20);
-        post.Vector.CalculateCoherenceWeight(neighbors.Select(x => x.Item.Vector).ToList());
+        post.Vector.CalculateLocalCoherence(neighbors.Select(x => x.Item.Vector).ToList());
         await posts.UpdateAsync(post);
 
         return post;

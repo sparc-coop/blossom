@@ -21,10 +21,12 @@ internal class BlossomGameStates(
             ? null
             : await questRepo.FindAsync(space.Id, userSpace.ActiveQuestId);
 
-        var distanceToAnswer = userSpace.Vector.DistanceTo(space.Vector);
+        var distanceToAnswer = activeQuest == null
+            ? userSpace.Vector.DistanceTo(space.Vector)
+            : userSpace.Vector.DistanceTo(activeQuest.Vector);
+
         var axes = userSpace.Axes.Count > 0 ? userSpace.Axes : space.Axes;
 
-        var questThreshold = Math.Min(0.1, distanceToAnswer / 2);
         var availableQuests = activeQuest != null 
             ? [activeQuest]
             : spaceFacets

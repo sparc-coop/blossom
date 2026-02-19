@@ -40,6 +40,10 @@ internal class BlossomSpaceFaceter(
         await Parallel.ForEachAsync(newFacets, async (childFacet, _) => 
             await SummarizeAsync(childFacet));
 
+        var primaryFacet = newFacets.OrderByDescending(x => x.Vector.CoherenceWeight).FirstOrDefault();
+        if (primaryFacet != null)
+            space.CalculateCoherence(primaryFacet, postsToFacet);
+        
         space.MaterializeAxes(newFacets);
 
         await facets.UpdateAsync(newFacets);

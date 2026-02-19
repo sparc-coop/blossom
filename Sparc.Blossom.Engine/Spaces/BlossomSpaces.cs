@@ -67,11 +67,13 @@ internal class BlossomSpaces(
         var userSpace = await GetOrCreateUserSpace(space, post.User);
         var isFirstPost = space.Vector.IsEmpty;
 
+        var previousPosts = await posts.GetAllAsync(space, 1000);
+
         post = await posts.AddAsync(post, space);
 
-        await Repository.ExecuteAsync(space, x => x.Add(post));
+        await Repository.ExecuteAsync(space, x => x.Add(post, previousPosts));
 
-        await Repository.ExecuteAsync(userSpace, x => x.Add(post));
+        await Repository.ExecuteAsync(userSpace, x => x.Add(post, previousPosts));
 
         var headspace = new BlossomUserTrail(space, userSpace);
         await headspaces.AddAsync(headspace);
