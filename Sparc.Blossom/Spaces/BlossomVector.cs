@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 
 namespace Sparc.Blossom.Spaces;
 
@@ -239,22 +240,16 @@ public class BlossomVector : BlossomVectorBase
         return Multiply(1.0f / magnitude);
     }
 
-    public BlossomVector Orthogonal()
+    public BlossomVector Orthogonal(params BlossomVector[]? alsoOrthogonalTo)
     {
-        var reference = Basis(Vector.Length, 0);
-        var orthogonal = reference.Subtract(Multiply(DotProduct(reference))).Normalize();
-        return orthogonal;
-    }
+        var axes = alsoOrthogonalTo?.ToList() ?? [];
+        axes.Add(this);
 
-    public BlossomVector OrthogonalResidual(BlossomVector axis)
-    {
-        return axis.Subtract(Multiply(DotProduct(axis)));
-    }
+        var candidate = LeastAlignedBasis();
+        foreach (var axis in axes)
+            candidate = candidate.Subtract(axis.Multiply(candidate.SimilarityTo(axis)));
 
-    public BlossomVector Orthogonal(BlossomVector xAxis, BlossomVector yAxis)
-    {
-        var orthogonal = Subtract(xAxis.Multiply(DotProduct(xAxis))).Subtract(yAxis.Multiply(DotProduct(yAxis))).Normalize();
-        return orthogonal;
+        return candidate.Normalize();        
     }
 
     public float CalculateGlobalCoherence(List<BlossomVector> children)
@@ -312,6 +307,23 @@ public class BlossomVector : BlossomVectorBase
         var vec = new float[dimensions];
         vec[index] = 1;
         return new(vec);
+    }
+
+    public BlossomVector LeastAlignedBasis()
+    {
+        var leastAlignedIndex = 0;
+        var leastAlignment = float.MaxValue;
+        for (int i = 0; i < Vector.Length; i++)
+        {
+            var basisVector = Basis(Vector.Length, i);
+            var alignment = AlignmentWith(basisVector);
+            if (alignment < leastAlignment)
+            {
+                leastAlignment = alignment;
+                leastAlignedIndex = i;
+            }
+        }
+        return Basis(Vector.Length, leastAlignedIndex);
     }
 
     public BlossomVector ToCoordinates(List<Axis> axes)

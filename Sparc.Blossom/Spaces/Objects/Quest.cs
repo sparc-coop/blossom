@@ -35,7 +35,7 @@ public class Quest : BlossomSpace
     {
         var xAxis = Vector.ProjectOntoPlane(axes[0].Vector, axes[1].Vector);
         var yAxis = xAxis.Perpendicular(axes[0], axes[1]);
-        var zAxis = BlossomVector.Basis(xAxis.Vector.Length, 2).Orthogonal(xAxis, yAxis);
+        var zAxis = xAxis.Orthogonal(yAxis);
         
         return
         [
