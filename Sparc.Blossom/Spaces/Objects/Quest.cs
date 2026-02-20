@@ -5,6 +5,7 @@ public class Quest : BlossomSpace
     public string FacetId { get; set; } = "";
     public double Length { get; set; }
     public double Importance { get; set; }
+    public BlossomVector NextTurn { get; set; } = new();
     
     public Quest()
     { }
@@ -20,15 +21,17 @@ public class Quest : BlossomSpace
         Summary = facet.Summary;
         FacetId = facet.Id;
 
-        var quest = Vector.DotProduct(space.Vector) >= 0 ? Vector : Vector.Multiply(-1);
-        var userProjection = quest.DotProduct(userSpace.Vector);
-        var answerProjection = quest.DotProduct(space.Vector);
-        Vector = quest.Multiply(answerProjection - userProjection);
+        NextTurn = facet.Vector.Scale(userSpace.Vector, space.Vector);
 
-        Length = Vector.Length;
+        Length = NextTurn.Length;
         Importance = facet.Vector.CoherenceWeight * 10;
 
         MaterializeAxes([facet]);
+    }
+
+    public override void MaterializeCoordinates(List<Axis> axes)
+    {
+        base.MaterializeCoordinates(axes);
     }
 
     public List<Axis> MaterializeQuestAxes(BlossomSpace space, List<Axis> axes)

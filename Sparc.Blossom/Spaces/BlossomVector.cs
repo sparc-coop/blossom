@@ -87,6 +87,7 @@ public class BlossomVector : BlossomVectorBase
     public float PositionOnAxis(BlossomVector axis, float? axisMin = null, float? axisMax = null)
     {
         var rawPosition = DotProduct(axis);
+        var normalizedRawPosition = Normalize().DotProduct(axis);
 
         if (axisMin == null || axisMax == null)
             return rawPosition;
@@ -229,6 +230,18 @@ public class BlossomVector : BlossomVectorBase
     {
         var diff = Subtract(Plane(xAxis, yAxis)).Magnitude();
         return diff;
+    }
+
+    public BlossomVector AlignWith(BlossomVector other)
+    {
+        return DotProduct(other) >= 0 ? this : Multiply(-1);
+    }
+
+    public BlossomVector Scale(BlossomVector from, BlossomVector to)
+    {
+        var fromScalar = DotProduct(from);
+        var toScalar = DotProduct(to);
+        return Multiply(toScalar - fromScalar);
     }
 
     public BlossomVector Normalize()
