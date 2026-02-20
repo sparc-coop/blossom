@@ -1,5 +1,6 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
+using System.Diagnostics;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Spaces;
@@ -119,11 +120,20 @@ internal class BlossomSpaces(
 
     private async Task<GameState> GetCoordinatesAsync(ClaimsPrincipal principal, string spaceId)
     {
-        var space = await GetOrCreate(spaceId);
-        var userSpace = await GetOrCreate(principal.Id(), "User", spaceId);
+        try
+        {
+            var space = await GetOrCreate(spaceId);
+            var userSpace = await GetOrCreate(principal.Id(), "User", spaceId);
 
-        var state = await gameStates.GetCoordinatesAsync(space, userSpace);
-        return state;
+            var state = await gameStates.GetCoordinatesAsync(space, userSpace);
+            return state;
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine(e.Message + e.InnerException?.Message);
+            Console.WriteLine(e.Message + e.InnerException?.Message);
+            return new(new BlossomSpace(e.Message + e.InnerException?.Message + e.StackTrace), null, null, null, null, null, null, 0);
+        }
     }
 
     private async Task ActivateQuestAsync(ClaimsPrincipal principal, string spaceId, string facetId)
