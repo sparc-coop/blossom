@@ -13,7 +13,7 @@ internal class BlossomSpaceFaceter(
     public async Task SeedAsync(BlossomSpace space, IEnumerable<Guide> guides)
     {
         var components = ToPrincipalComponents(guides.Select(g => g.Vector), space.Vector, 0.8, 10);
-        var facets = components.Select(c => new Facet(space, c)).ToList();
+        var facets = components.Select(c => new Facet(space, c, guides)).ToList();
         space.MaterializeAxes(facets);
     }
     
@@ -34,7 +34,7 @@ internal class BlossomSpaceFaceter(
 
         await facets.DeleteAsync(existingFacets);
         
-        var newFacets = components.Select(x => new Facet(space, x))
+        var newFacets = components.Select(x => new Facet(space, x, postsToFacet))
             .OrderByDescending(x => x.Vector.CoherenceWeight)
             .ToList();
 
@@ -43,12 +43,12 @@ internal class BlossomSpaceFaceter(
             space.CalculateAnswer(primaryFacet, postsToFacet);
 
         // Make sure the facets are aligned with the newly calculated answer
-        newFacets.ForEach(x => x.Vector = x.Vector.AlignWith(space.Vector));
+        newFacets.ForEach(x => x.AlignWith(space));
 
         space.MaterializeAxes(newFacets);
 
         await Parallel.ForEachAsync(newFacets, async (childFacet, _) =>
-            await SummarizeAsync(childFacet));
+            await SummarizeAsync(childFacet, space));
 
         await facets.UpdateAsync(newFacets);
 
@@ -80,16 +80,15 @@ internal class BlossomSpaceFaceter(
         return components;
     }
 
-    async Task SummarizeAsync(Facet facet)
+    async Task SummarizeAsync(Facet facet, BlossomSpace space)
     {
+        if (space.Vector.PositionOnAxis(facet.Vector) < 0)
+            throw new Exception("Facet vector is in the opposite direction of the space vector, cannot summarize.");
+
         var translator = translators.OfType<AITranslator>().First();
-
-        var leftPosts = await posts.SearchAsync(facet.SpaceId, facet.Vector, 5, -1);
-
-        var rightPosts = await posts.SearchAsync(facet.SpaceId, facet.Vector, 5, 1);
-
-        var summary = await translator.SummarizeAsync(leftPosts, rightPosts);
-        facet.SetSummary(summary);
+        var question = new SummaryQuestion(facet, space.Vector);
+        var summary = await translator.AskAsync(question);
+        facet.SetSummary(summary.Value);
     }
 
     public async Task<Quest> ActivateQuestAsync(BlossomSpace space, BlossomSpace userSpace, string facetId)

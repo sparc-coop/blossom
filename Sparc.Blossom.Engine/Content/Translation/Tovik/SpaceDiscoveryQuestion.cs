@@ -32,7 +32,7 @@ public record BasicResponse(string Text);
 internal class AnswerHintQuestion : BlossomQuestion<BasicResponse>
 {
 
-    public AnswerHintQuestion(BlossomSpace destination, Post lastPost, List<VectorSearchResult<Post>> clues) : base("Given the following question, last post from the user, and clues, suggest the next step for the user to take to uncover the answer:")
+    public AnswerHintQuestion(BlossomSpace destination, Post lastPost, List<BlossomScoredVector<Post>> clues) : base("Given the following question, last post from the user, and clues, suggest the next step for the user to take to uncover the answer:")
     {
         Instructions = "You are a dungeon master that is attempting to guide the user through a dimensional space to uncover a hidden truth.\r\n" +
             "You will receive clues and a weighted score from 0 to 1 representing the strength of the clue and its alignment to the hidden truth. " +

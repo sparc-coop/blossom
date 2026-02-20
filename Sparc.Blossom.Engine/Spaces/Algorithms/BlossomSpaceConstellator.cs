@@ -26,7 +26,9 @@ internal class BlossomSpaceConstellator(
         await Parallel.ForEachAsync(newConstellations, async (constellation, _) =>
         {
             var postsInConstellation = posts.Where(p => p.ConstellationId == constellation.Id).ToList();
-            constellation.SetSummary(await translator.SummarizeAsync(postsInConstellation));
+            var question = new SummaryQuestion(postsInConstellation, 1047576);
+            var answer = await translator.AskAsync(question);
+            constellation.SetSummary(answer.Value);
         });
 
         return newConstellations;

@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.RateLimiting;
 
 namespace Sparc.Blossom.Spaces;
 
@@ -15,6 +14,7 @@ public class BlossomVectorBase
     public string? ConstellationConnectorId { get; set; }
 }
 
+public record BlossomScoredVector<T>(T Item, double Score);
 public class BlossomVector : BlossomVectorBase
 {
     [JsonConstructor]

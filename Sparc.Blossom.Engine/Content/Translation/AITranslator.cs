@@ -26,20 +26,6 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
         return result;
     }
 
-    public async Task<BlossomSummary?> SummarizeAsync(IEnumerable<Post> messages)
-    {
-        var question = new SummaryQuestion(messages, 1047576);
-        var answer = await AskAsync(question);
-        return answer.Value;
-    }
-
-    public async Task<BlossomSummary?> SummarizeAsync(IEnumerable<VectorSearchResult<Post>> leftMessages, IEnumerable<VectorSearchResult<Post>> rightMessages)
-    {
-        var question = new SummaryQuestion(leftMessages, rightMessages, 1047576);
-        var answer = await AskAsync(question);
-        return answer.Value;
-    }
-
     internal async Task IntersectAsync(List<BlossomSpace> spaces)
     {
         foreach (var space in spaces)

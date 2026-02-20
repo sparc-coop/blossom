@@ -1,13 +1,10 @@
-﻿using Sparc.Blossom.Authentication;
-using Sparc.Blossom.Content;
-using Sparc.Blossom.Data;
+﻿using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
 
-public record VectorSearchResult<T>(T Item, double Score);
 public static class BlossomVectorExtensions
 {
-    public static async Task<List<VectorSearchResult<T>>> SearchAsync<T>(this IRepository<T> repository, string spaceId, BlossomVector vector, int count, double? similarityThreshold = null)
+    public static async Task<List<BlossomScoredVector<T>>> SearchAsync<T>(this IRepository<T> repository, string spaceId, BlossomVector vector, int count, double? similarityThreshold = null)
         where T : BlossomEntity<string>, IVectorizable
     {
         var top = similarityThreshold < 0 ? 10000 : count;
@@ -30,7 +27,7 @@ public static class BlossomVectorExtensions
         if (similarityThreshold < 0)
             similarVectorsInSpace = similarVectorsInSpace.TakeLast(count).ToList();
 
-        var result = similarVectorsInSpace.Select(item => new VectorSearchResult<T>(item, item.Vector.SimilarityTo(vector))).ToList();
+        var result = similarVectorsInSpace.Select(item => new BlossomScoredVector<T>(item, item.Vector.SimilarityTo(vector))).ToList();
         return result;
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Sparc.Blossom.Content;
+﻿using Sparc.Blossom.Spaces;
+
+namespace Sparc.Blossom.Content;
 
 internal class BlossomQuestion(string text)
 {
@@ -24,4 +26,7 @@ internal class BlossomQuestion<T> : BlossomQuestion
     {
         Schema = new(typeof(T));
     }
+
+    protected static string SafeText(Post message) => SafeText(message.Text);
+    protected static string SafeText(string? message) => message != null ? message.Replace('\u00A0', ' ') : "";
 }

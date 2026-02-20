@@ -45,10 +45,10 @@ internal class BlossomPosts(IRepository<Post> posts,
             .ToListAsync();
     }
 
-    internal async Task<List<VectorSearchResult<Post>>> SearchAsync(string spaceId, BlossomVector vector, int count, double? similarityThreshold = null)
+    internal async Task<List<BlossomScoredVector<Post>>> SearchAsync(string spaceId, BlossomVector vector, int count, double? similarityThreshold = null)
     {
         var allPosts = await GetAllAsync(spaceId, 10000);
-        var result = allPosts.Select(p => new VectorSearchResult<Post>(p, p.Vector.SimilarityTo(vector)));
+        var result = allPosts.Select(p => new BlossomScoredVector<Post>(p, p.Vector.SimilarityTo(vector)));
 
         if (similarityThreshold == null)
             return result.OrderByDescending(x => x.Score).Take(count).ToList();
