@@ -12,7 +12,7 @@ internal class BlossomSpaceFaceter(
 {
     public async Task SeedAsync(BlossomSpace space, IEnumerable<Guide> guides)
     {
-        var components = ToPrincipalComponents(guides.Select(g => g.Vector), 0.8, 10);
+        var components = ToPrincipalComponents(guides.Select(g => g.Vector), space.Vector, 0.8, 10);
         var facets = components.Select(c => new Facet(space, c)).ToList();
         space.MaterializeAxes(facets);
     }
@@ -26,32 +26,36 @@ internal class BlossomSpaceFaceter(
             return [];
 
         // Factor into principal components
-        var components = ToPrincipalComponents(postsToFacet.Select(p => p.Vector), 0.8, 10);
+        var components = ToPrincipalComponents(postsToFacet.Select(p => p.Vector), space.Vector, 0.8, 10);
 
-        // Match to existing facets when possible (for axis permanence)
         var existingFacets = await facets.Query
             .Where(x => x.SpaceId == space.Id)
             .ToListAsync();
 
         await facets.DeleteAsync(existingFacets);
         
-        var newFacets = components.Select(x => new Facet(space, x)).ToList();
-        
-        await Parallel.ForEachAsync(newFacets, async (childFacet, _) => 
-            await SummarizeAsync(childFacet));
+        var newFacets = components.Select(x => new Facet(space, x))
+            .OrderByDescending(x => x.Vector.CoherenceWeight)
+            .ToList();
 
-        var primaryFacet = newFacets.OrderByDescending(x => x.Vector.CoherenceWeight).FirstOrDefault();
+        var primaryFacet = newFacets.FirstOrDefault();
         if (primaryFacet != null)
-            space.CalculateCoherence(primaryFacet, postsToFacet);
-        
+            space.CalculateAnswer(primaryFacet, postsToFacet);
+
+        // Make sure the facets are aligned with the newly calculated answer
+        newFacets.ForEach(x => x.Vector = x.Vector.AlignWith(space.Vector));
+
         space.MaterializeAxes(newFacets);
+
+        await Parallel.ForEachAsync(newFacets, async (childFacet, _) =>
+            await SummarizeAsync(childFacet));
 
         await facets.UpdateAsync(newFacets);
 
         return newFacets;
     }
 
-    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain = 1, int maxCount = 3)
+    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, BlossomVector alignmentVector, double varianceToExplain = 1, int maxCount = 3)
     {
         var mean = BlossomVector.Average(vectors);
         var centeredVectors = vectors.Select(v => v.Center(mean)).ToList();
@@ -63,10 +67,11 @@ internal class BlossomSpaceFaceter(
         {
             var componentArray = svd.VT.Row(i).ToArray();
 
-            components.Add(new BlossomVector(componentArray)
+            var component = new BlossomVector(componentArray)
             {
                 CoherenceWeight = (float)(Math.Pow(svd.S[i], 2) / svd.S.Sum(x => x * x))
-            });
+            };
+            components.Add(component);
 
             if (components.Sum(c => c.CoherenceWeight) >= varianceToExplain)
                 break;

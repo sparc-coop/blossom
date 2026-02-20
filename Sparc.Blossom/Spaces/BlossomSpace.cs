@@ -77,7 +77,7 @@ public class BlossomSpace : BlossomSpaceObject
         Vector = DescriptiveField;
     }
 
-    public void CalculateCoherence(Facet coherenceAxis, IEnumerable<Post> allPosts)
+    public void CalculateAnswer(Facet coherenceAxis, IEnumerable<Post> allPosts)
     {
         var previousCoherence = Coherence;
 

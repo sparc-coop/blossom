@@ -87,7 +87,6 @@ public class BlossomVector : BlossomVectorBase
     public float PositionOnAxis(BlossomVector axis, float? axisMin = null, float? axisMax = null)
     {
         var rawPosition = DotProduct(axis);
-        var normalizedRawPosition = Normalize().DotProduct(axis);
 
         if (axisMin == null || axisMax == null)
             return rawPosition;
@@ -144,7 +143,14 @@ public class BlossomVector : BlossomVectorBase
         return weight;
     }
 
-    public BlossomVector ThisWith(float[] other, string? type = null) => new(other) {  Text = Text };
+    public BlossomVector ThisWith(float[] other) => new(other) 
+    {  
+        Text = Text, 
+        CoherenceWeight = CoherenceWeight, 
+        Model = Model, 
+        SimilarityToSpace = SimilarityToSpace 
+    };
+
     public float Length => (float)Math.Sqrt(Vector.Sum(x => x * x));
 
     public void Update(BlossomVector vector, float? scaleFactor = null)
@@ -234,14 +240,18 @@ public class BlossomVector : BlossomVectorBase
 
     public BlossomVector AlignWith(BlossomVector other)
     {
-        return DotProduct(other) >= 0 ? this : Multiply(-1);
+        var dot = DotProduct(other);
+        return dot >= 0 ? this : Multiply(-1);
     }
+
+    public BlossomVector AlignWith(BlossomVector from, BlossomVector to)
+        => AlignWith(to.Subtract(from));
 
     public BlossomVector Scale(BlossomVector from, BlossomVector to)
     {
         var fromScalar = DotProduct(from);
         var toScalar = DotProduct(to);
-        return Multiply(toScalar - fromScalar);
+        return Multiply(Math.Abs(fromScalar - toScalar));
     }
 
     public BlossomVector Normalize()

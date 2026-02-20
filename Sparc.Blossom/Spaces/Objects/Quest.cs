@@ -16,7 +16,7 @@ public class Quest : BlossomSpace
     public Quest(BlossomSpace space, BlossomSpace userSpace, Facet facet) : base(space, "Quest")
     {
         User = userSpace.User;
-        Vector = facet.Vector;
+        Vector = facet.Vector.AlignWith(userSpace.Vector, space.Vector);
         Name = facet.Summary?.Name ?? Name;
         Summary = facet.Summary;
         FacetId = facet.Id;
