@@ -25,7 +25,8 @@ internal class BlossomGameStates(
             ? userSpace.Vector.DistanceTo(space.Vector)
             : userSpace.Vector.DistanceTo(activeQuest.Vector);
 
-        var axes = userSpace.Axes.Count > 0 ? userSpace.Axes : space.Axes;
+        var axes = userSpace.Axes.Count > 0 ? userSpace.Axes.ToList() : space.Axes.ToList();
+        axes.Add(new(userSpace));
 
         var availableQuests = activeQuest != null 
             ? [activeQuest]

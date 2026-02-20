@@ -26,7 +26,7 @@ internal class BlossomSpaces(
         if (type != null)
             spaces = spaces.Where(x => x.RoomType == type);
 
-        return await spaces.ToListAsync();
+        return await spaces.OrderByDescending(x => x.Timestamp).ToListAsync();
     }
 
     internal async Task<BlossomSpace?> GetSpaceAsync(ClaimsPrincipal principal, string spaceId, string? parentSpaceId = null)
