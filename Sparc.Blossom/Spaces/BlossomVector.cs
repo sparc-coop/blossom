@@ -1,5 +1,4 @@
-﻿using System.Numerics;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Spaces;
@@ -9,7 +8,6 @@ public class BlossomVectorBase
 {
     public string Model { get; init; } = "";
     public float[] Vector { get; set; } = [];
-    public float[]? Point { get; set; }
     public float CoherenceWeight { get; set; } = 0;
     public float SimilarityToSpace { get; set; } = 0;
     public string? ConstellationId { get; set; }
@@ -152,11 +150,11 @@ public class BlossomVector : BlossomVectorBase
         scaleFactor ??= Signal(vector);
         
         if (IsEmpty)
-            Point = vector.Vector;
+            Vector = vector.Vector;
         else
-            Point = new BlossomVector(Point).Add(vector.Multiply(scaleFactor.Value)).Vector;
+            Vector = Multiply(1.0f - scaleFactor.Value).Add(vector.Multiply(scaleFactor.Value)).Vector;
 
-        Vector = new BlossomVector(Point).Normalize().Vector;
+        Vector = Normalize().Vector;
     }
 
     public override string ToString()
@@ -261,15 +259,23 @@ public class BlossomVector : BlossomVectorBase
 
     public float CalculateGlobalCoherence(List<BlossomVector> children)
     {
-        var weightedOrthogonalChildren = children.Select(child => child.Orthogonal().Multiply(child.CoherenceWeight)).ToList();
+        float numerator = 0f;
+        float orthogonalSum = 0f;
 
-        var numerator = children.Sum(c => Math.Abs(DotProduct(c)) * c.CoherenceWeight);
-        var denominator = numerator + children.Sum(c => OrthogonalResidual(c).Magnitude() * c.CoherenceWeight);
+        foreach (var c in children)
+        {
+            var projScalar = Math.Abs(DotProduct(c));
+            var orthResidual = c.Subtract(Multiply(DotProduct(c))).Magnitude();
 
+            numerator += projScalar * c.CoherenceWeight;
+            orthogonalSum += orthResidual * c.CoherenceWeight;
+        }
+
+        var denominator = numerator + orthogonalSum;
         if (denominator == 0)
             return 1;
-        else
-            return numerator / denominator;
+
+        return numerator / denominator;
     }
 
     public void CalculateLocalCoherence(List<BlossomVector> neighbors)

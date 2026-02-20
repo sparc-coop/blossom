@@ -65,7 +65,6 @@ internal class BlossomSpaceFaceter(
 
             components.Add(new BlossomVector(componentArray)
             {
-                Point = mean.Vector,
                 CoherenceWeight = (float)(Math.Pow(svd.S[i], 2) / svd.S.Sum(x => x * x))
             });
 
