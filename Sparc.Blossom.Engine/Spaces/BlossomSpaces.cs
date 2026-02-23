@@ -12,7 +12,8 @@ internal class BlossomSpaces(
     BlossomSpaceConstellator constellator,
     BlossomSpaceTranslator translator,
     IRepository<BlossomUserTrail> headspaces,
-    BlossomGameStates gameStates)
+    BlossomGameStates gameStates,
+    SparcAuthenticator<BlossomUser> auth)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
     public const string Domain = "sparc.coop";
@@ -62,8 +63,11 @@ internal class BlossomSpaces(
     }
 
 
-    private async Task<Post> PostAsync(string spaceId, Post post)
+    private async Task<Post> PostAsync(ClaimsPrincipal principal, string spaceId, Post post)
     {
+        var user = await auth.GetAsync(principal);
+        post.User = user.Avatar;
+
         var space = await GetOrCreate(post.SpaceId, user: post.User);
         var userSpace = await GetOrCreateUserSpace(space, post.User);
         var isFirstPost = space.Vector.IsEmpty;
@@ -120,11 +124,11 @@ internal class BlossomSpaces(
 
     private async Task<GameState> GetCoordinatesAsync(ClaimsPrincipal principal, string spaceId)
     {
+        var space = await GetOrCreate(spaceId);
+        var userSpace = await GetOrCreate(principal.Id(), "User", spaceId);
+
         try
         {
-            var space = await GetOrCreate(spaceId);
-            var userSpace = await GetOrCreate(principal.Id(), "User", spaceId);
-
             var state = await gameStates.GetCoordinatesAsync(space, userSpace);
             return state;
         }
@@ -132,7 +136,7 @@ internal class BlossomSpaces(
         {
             Debug.WriteLine(e.Message + e.InnerException?.Message);
             Console.WriteLine(e.Message + e.InnerException?.Message);
-            return new(new BlossomSpace(e.Message + e.InnerException?.Message + e.StackTrace), null, null, null, null, null, null, 0);
+            return new(space, userSpace, null, null, null, null, null, 0);
         }
     }
 
@@ -170,7 +174,7 @@ internal class BlossomSpaces(
         spaces.MapGet("{spaceId}/simpleposts", GetSimplePostsAsync);
         spaces.MapGet("{spaceId}/coordinates", async (ClaimsPrincipal principal, string spaceId)
             => await GetCoordinatesAsync(principal, spaceId));
-        spaces.MapPost("{spaceId}", PostAsync);
+        spaces.MapPost("{spaceId}", async (ClaimsPrincipal principal, string spaceId, Post post) => await PostAsync(principal, spaceId, post));
         spaces.MapPost("{spaceId}/quests/{facetId}", async (ClaimsPrincipal principal, string spaceId, string facetId)
             => await ActivateQuestAsync(principal, spaceId, facetId));
         spaces.MapPut("{spaceId}", SaveAsync);
