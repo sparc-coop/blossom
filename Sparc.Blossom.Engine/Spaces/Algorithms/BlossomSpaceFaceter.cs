@@ -7,6 +7,7 @@ namespace Sparc.Blossom.Spaces;
 internal class BlossomSpaceFaceter(
     IRepository<Facet> facets,
     IRepository<Quest> quests,
+    IRepository<BlossomSpace> spaces,
     BlossomPosts posts,
     IEnumerable<ITranslator> translators)
 {
@@ -15,6 +16,7 @@ internal class BlossomSpaceFaceter(
         var components = ToPrincipalComponents(guides.Select(g => g.Vector), space.Vector, 0.8, 10);
         var facets = components.Select(c => new Facet(space, c, guides)).ToList();
         space.MaterializeAxes(facets);
+        await spaces.UpdateAsync(space);
     }
     
     public async Task<List<Facet>> FacetAsync(BlossomSpace space)

@@ -16,12 +16,12 @@ public class Quest : BlossomSpace
     public Quest(BlossomSpace space, BlossomSpace userSpace, Facet facet) : base(space, "Quest")
     {
         User = userSpace.User;
-        Vector = facet.Vector.AlignWith(userSpace.Vector, space.Vector);
+        Vector = facet.Vector.AlignWith(userSpace.Origin, space.Vector);
         Name = facet.Summary?.Name ?? Name;
         Summary = facet.Summary;
         FacetId = facet.Id;
 
-        NextTurn = facet.Vector.Scale(userSpace.Vector, space.Vector);
+        NextTurn = facet.Vector.Scale(userSpace.Origin, space.Vector);
 
         Length = NextTurn.Length;
         Importance = facet.Vector.CoherenceWeight * 10;
@@ -31,9 +31,7 @@ public class Quest : BlossomSpace
 
     public override void MaterializeCoordinates(List<Axis> axes)
     {
-        Coordinates = NextTurn.ToCoordinates(axes);
-        Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.DistanceTo(NextTurn) * lightYearsPerUnit ?? 0;
-
+        MaterializeCoordinates(axes, NextTurn);
     }
 
     public List<Axis> MaterializeQuestAxes(BlossomSpace space, List<Axis> axes)

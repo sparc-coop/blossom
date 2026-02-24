@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-using Sparc.Blossom.Content;
+﻿using Sparc.Blossom.Content;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Spaces;
@@ -39,8 +38,7 @@ public class BlossomSpace : BlossomSpaceObject
     public float Coherence { get; set; }
     public BlossomSpaceSettings Settings { get; set; } = new();
     public List<Axis> Axes { get; set; } = [];
-    public BlossomVector DescriptiveVector { get; set; } = new();
-    public BlossomVector EpistemicField { get; set; } = new();
+    public BlossomVector Origin { get; set; } = new();
 
     public string? ActiveQuestId { get; set; }
 
@@ -71,36 +69,36 @@ public class BlossomSpace : BlossomSpaceObject
             Name = summary.Name;
     }
 
-    public void Add(Post post)
+    public override void MaterializeCoordinates(List<Axis> axes)
     {
-        if (Vector.IsEmpty)
-        {
-            Vector = post.Vector;
-            DescriptiveVector = post.Vector;
-            return;
-        }
-        
-        var scale = post.Vector.SimilarityTo(Vector);
-        DescriptiveVector = DescriptiveVector.Add(post.Vector.Multiply(scale));
-        Vector = DescriptiveVector.Normalize();
+        var coordinateVector = RoomType == "User" ? Origin : Vector;
+        base.MaterializeCoordinates(axes, coordinateVector);
     }
 
-    public void Update(IEnumerable<Post> allPosts)
+    public void Add(Post post, Post? previousPost, BlossomSpace alignmentSpace)
     {
-        if (DescriptiveVector.IsEmpty)
-        {
-            UpdateDescriptiveVector(allPosts);
-            Vector = DescriptiveVector;
-            return;
-        }
+        var semanticChange = previousPost == null ? 1 : post.Vector.Subtract(previousPost.Vector).Magnitude();
+        var confidence = alignmentSpace.Summary == null ? 1 : post.Vector.AlignmentWith(alignmentSpace.Summary.Vector);
 
-        var relevantPosts = GetRelevantPosts(allPosts);
-
-        var gradients = relevantPosts.Select(x => x.Vector.Subtract(DescriptiveVector)).ToList();
-        Vector = BlossomVector.Sum(gradients).Normalize();
-
-        UpdateDescriptiveVector(relevantPosts);
+        Origin.Update(post.Vector, semanticChange * confidence);
     }
+
+    //public void Update(IEnumerable<Post> allPosts)
+    //{
+    //    if (SummaryVector.IsEmpty)
+    //    {
+    //        UpdateDescriptiveVector(allPosts);
+    //        Vector = SummaryVector;
+    //        return;
+    //    }
+
+    //    var relevantPosts = GetRelevantPosts(allPosts);
+
+    //    var gradients = relevantPosts.Select(x => x.Vector.Subtract(SummaryVector)).ToList();
+    //    Vector = BlossomVector.Sum(gradients).Normalize();
+
+    //    UpdateDescriptiveVector(relevantPosts);
+    //}
 
     List<Post> GetRelevantPosts(IEnumerable<Post> allPosts)
     {
@@ -119,24 +117,19 @@ public class BlossomSpace : BlossomSpaceObject
         return relevantPosts.ToList();
     }
 
-    public void CalculateAnswer(Facet coherenceAxis, IEnumerable<Post> allPosts)
+    public void CalculateAnswer(IEnumerable<Post> relevantPosts)
     {
-        var previousCoherence = Coherence;
+        if (Summary == null || Summary.Vector.IsEmpty)
+            return;
 
-        var postVectors = allPosts.Select(p => p.Vector).ToList();
-        Coherence = coherenceAxis.Vector.CalculateGlobalCoherence(postVectors);
-        var coherenceChange = Coherence - previousCoherence;
-
-        var lastPost = allPosts.OrderByDescending(x => x.Timestamp).First();
-        EpistemicField.Update(lastPost.Vector, coherenceChange);
-
-        Vector = DescriptiveVector.Multiply(0.2f).Add(EpistemicField.Multiply(0.8f));
+        var weightedPosts = relevantPosts.Select(x => x.Vector.Multiply(x.Vector.SimilarityTo(Summary.Vector)));
+        Vector = BlossomVector.Sum(weightedPosts).Normalize();
     }
 
-    void UpdateDescriptiveVector(IEnumerable<Post> posts)
-    {
-        DescriptiveVector = BlossomVector.Average(posts.Select(x => x.Vector), x => x.CoherenceWeight);
-    }
+    //void UpdateDescriptiveVector(IEnumerable<Post> posts)
+    //{
+    //    SummaryVector = BlossomVector.Average(posts.Select(x => x.Vector), x => x.CoherenceWeight);
+    //}
 
     public List<Axis> MaterializeAxes(IEnumerable<Facet> candidates)
     {

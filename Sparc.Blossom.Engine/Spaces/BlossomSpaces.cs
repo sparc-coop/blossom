@@ -74,10 +74,9 @@ internal class BlossomSpaces(
 
         post = await posts.AddAsync(post, space);
         var allPosts = await posts.GetAllAsync(space, 1000);
+        var userPosts = allPosts.Where(x => x.User.Id == userSpace.User.Id).ToList();
 
-        await Repository.ExecuteAsync(space, x => x.Update(allPosts));
-
-        await Repository.ExecuteAsync(userSpace, x => x.Add(post));
+        await Repository.ExecuteAsync(userSpace, x => x.Add(post, userPosts.Skip(1).FirstOrDefault(), space));
 
         var headspace = new BlossomUserTrail(space, userSpace);
         await headspaces.AddAsync(headspace);
@@ -86,12 +85,15 @@ internal class BlossomSpaces(
         {
             var facts = await translator.SeedAsync(space, post);
             await faceter.SeedAsync(space, facts);
-            await Repository.UpdateAsync(space);
         }
         else
         {
             await SaveAsync(spaceId, space);
         }
+
+        var relevantFacts = await posts.SearchAsync(space.Vector, 20);
+        await translator.AnswerAsync(space, [ allPosts.Last(), .. relevantFacts.Select(x => x.Item) ]);
+        await translator.AnswerAsync(userSpace, userPosts);
 
         //var hintVectors = await vectors.GetAllAsync(space.Space.Id, "Hint");
         //var hint = await vectors.CalculateHintAsync(userSpace, post, space);

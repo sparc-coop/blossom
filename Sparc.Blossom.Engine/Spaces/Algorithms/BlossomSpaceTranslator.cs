@@ -6,6 +6,7 @@ namespace Sparc.Blossom.Spaces;
 internal class BlossomSpaceTranslator
     (IEnumerable<ITranslator> translators,
     BlossomPosts posts,
+    IRepository<BlossomSpace> spaces,
     VoyageTranslator vectorizer,
     FriendlyId friendlyId)
 {
@@ -21,13 +22,12 @@ internal class BlossomSpaceTranslator
         
         await vectorizer.VectorizeAsync([.. facts, .. questions, space]);
 
-        var guideVectors = facts.Select(g => g.Vector).ToList();
-        guideVectors.ForEach(x => x.CalculateLocalCoherence(guideVectors.Except([x]).ToList()));
         await posts.UpdateAsync(facts);
         await posts.UpdateAsync(questions);
 
         space.SetSummary(new(friendlyId.Create(), question.Text ?? "", ""));
 
+        await spaces.UpdateAsync(space);
         return facts;
     }
 
@@ -44,5 +44,20 @@ internal class BlossomSpaceTranslator
         await posts.UpdateAsync([hintPost]);
 
         return hintPost;
+    }
+
+    internal async Task AnswerAsync(BlossomSpace space, IEnumerable<Post> allPosts)
+    {
+        var summary = await translator.AskAsync(new SummaryQuestion(allPosts, 32000));
+        if (summary == null)
+            return;
+
+        summary.Value!.Vector.Text = summary.Value.Description;
+        await vectorizer.VectorizeAsync(summary.Value);
+        
+        space.SetSummary(summary.Value);
+        space.CalculateAnswer(allPosts);
+
+        await spaces.UpdateAsync(space);
     }
 }

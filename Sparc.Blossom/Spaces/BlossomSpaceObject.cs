@@ -29,10 +29,13 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
     }
 
     protected const float lightYearsPerUnit = 46_500_000_000;
-    public virtual void MaterializeCoordinates(List<Axis> axes)
+    
+    public virtual void MaterializeCoordinates(List<Axis> axes) => MaterializeCoordinates(axes, Vector);
+
+    public void MaterializeCoordinates(List<Axis> axes, BlossomVector coordinateVector)
     {
-        Coordinates = Vector.ToCoordinates(axes);
-        Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.DistanceTo(Vector) * lightYearsPerUnit ?? 0;
+        Coordinates = coordinateVector.ToCoordinates(axes);
+        Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.DistanceTo(coordinateVector) * lightYearsPerUnit ?? 0;
     }
 
     public static void DoNotSerializeVectors(JsonTypeInfo typeInfo)

@@ -25,8 +25,8 @@ internal class BlossomGameStates(
         spacePosts.AddRange(guides.Select(x => x.Item));
 
         var distanceToAnswer = activeQuest == null
-            ? userSpace.Vector.DistanceTo(space.Vector)
-            : userSpace.Vector.DistanceTo(activeQuest.Vector);
+            ? userSpace.Origin.DistanceTo(space.Vector)
+            : userSpace.Origin.DistanceTo(activeQuest.Vector);
 
         var axes = userSpace.Axes.Count > 0 ? userSpace.Axes.ToList() : space.Axes.ToList();
         axes.Add(new("User", userSpace)); // Z axis is the user space itself, to brighten/dim objects based on user proximity

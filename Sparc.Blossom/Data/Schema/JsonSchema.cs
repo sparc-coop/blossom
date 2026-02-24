@@ -2,6 +2,11 @@
 
 namespace Sparc.Blossom;
 
+[AttributeUsage(AttributeTargets.Property)]
+public class JsonSchemaIgnoreAttribute : Attribute
+{
+}
+
 public record JsonSchema(string Type, bool? AdditionalProperties = false)
 {
     public JsonSchema() : this("object")
@@ -15,7 +20,7 @@ public record JsonSchema(string Type, bool? AdditionalProperties = false)
             .ToList();
 
         Properties = properties
-            .Where(x => x.Name != "GenericId")
+            .Where(x => x.Name != "GenericId" && !x.GetCustomAttributes().Any(y => y is JsonSchemaIgnoreAttribute))
             .ToDictionary(
             p => p.Name,
             p => (object)(JsonSchemaProperty.JsonType(p.PropertyType) == "object" ? new JsonSchema(p.PropertyType) : new JsonSchemaProperty(p))

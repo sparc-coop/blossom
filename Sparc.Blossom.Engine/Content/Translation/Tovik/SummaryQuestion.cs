@@ -6,15 +6,15 @@ internal class SummaryQuestion : BlossomQuestion<BlossomSummary>
 {
 
     public SummaryQuestion(IEnumerable<Post> messages, int tokenLimit) : base(
-    "Provide a concise summary of the following messages, including a name, topic, and description. " +
+    "Provide a comprehensive summary of the following messages, including a name, topic, and description. " +
     "The summary should capture the main themes and key points discussed in the messages.")
     {
-        Instructions = "You are an assistant that summarizes messages into a brief overview that will be used for room identification.\r\n" +
-            "Analyze the provided messages and extract the main themes to create a concise summary.\r\n\r\n" +
+        Instructions = "You are an assistant that summarizes messages into a brief overview that will be used for room identification and embedding.\r\n" +
+            "Analyze the provided messages and extract the main themes to create a comprehensive summary.\r\n\r\n" +
             "The summary should include:\r\n" +
             "- Name: A short, 2 to 3 word descriptive room title for the collection of messages. This name should be extremely specific to the primary subject matter of the room.\r\n" +
             "- Topic: The 10-20 word primary subject matter discussed in the messages.\r\n" +
-            "- Description: A 50-100 word overview highlighting the key points and themes.";
+            "- Description: A 100-200 word overview highlighting the key points and themes.";
 
         Text += "\r\n\r\nMessages: ";
         AddMessages(messages, tokenLimit);
