@@ -18,10 +18,11 @@ internal class BlossomSpaceTranslator
 
         var guides = statements.Value!.Statements.Select(x => new Guide(space, x)).ToList();
         await vectorizer.VectorizeAsync(guides);
+        var guideVectors = guides.Select(g => g.Vector).ToList();
+        guideVectors.ForEach(x => x.CalculateLocalCoherence(guideVectors.Except([x]).ToList()));
         await posts.UpdateAsync(guides);
 
-        foreach (var guide in guides)
-            space.Add(guide);
+        space.Update(guides);
 
         space.SetSummary(new(friendlyId.Create(), question.Text ?? "", ""));
 

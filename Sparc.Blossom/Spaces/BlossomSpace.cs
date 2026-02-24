@@ -39,7 +39,7 @@ public class BlossomSpace : BlossomSpaceObject
     public float Coherence { get; set; }
     public BlossomSpaceSettings Settings { get; set; } = new();
     public List<Axis> Axes { get; set; } = [];
-    public BlossomVector DescriptiveField { get; set; } = new();
+    public BlossomVector DescriptiveVector { get; set; } = new();
     public BlossomVector EpistemicField { get; set; } = new();
 
     public string? ActiveQuestId { get; set; }
@@ -71,10 +71,52 @@ public class BlossomSpace : BlossomSpaceObject
             Name = summary.Name;
     }
 
-    public void Add(Post post, IEnumerable<Post>? previousPosts = null)
+    public void Add(Post post)
     {
-        DescriptiveField.Update(post.Vector);
-        Vector = DescriptiveField;
+        if (Vector.IsEmpty)
+        {
+            Vector = post.Vector;
+            DescriptiveVector = post.Vector;
+            return;
+        }
+        
+        var scale = post.Vector.SimilarityTo(Vector);
+        DescriptiveVector = DescriptiveVector.Add(post.Vector.Multiply(scale));
+        Vector = DescriptiveVector.Normalize();
+    }
+
+    public void Update(IEnumerable<Post> allPosts)
+    {
+        if (DescriptiveVector.IsEmpty)
+        {
+            UpdateDescriptiveVector(allPosts);
+            Vector = DescriptiveVector;
+            return;
+        }
+
+        var relevantPosts = GetRelevantPosts(allPosts);
+
+        var gradients = relevantPosts.Select(x => x.Vector.Subtract(DescriptiveVector)).ToList();
+        Vector = BlossomVector.Sum(gradients).Normalize();
+
+        UpdateDescriptiveVector(relevantPosts);
+    }
+
+    List<Post> GetRelevantPosts(IEnumerable<Post> allPosts)
+    {
+        int k = (int)Math.Floor(Math.Sqrt(allPosts.Count()));
+
+        var angleToSearch = allPosts
+            .OrderBy(x => Vector.SimilarityTo(x.Vector))
+            .Skip(k - 1)
+            .FirstOrDefault()?
+            .Vector.SimilarityTo(Vector);
+
+        var relevantPosts = allPosts.Where(x => Vector.SimilarityTo(x.Vector) >= angleToSearch);
+        if (RoomType == "User")
+            relevantPosts = relevantPosts.Where(x => x.User.Id == User.Id);
+        
+        return relevantPosts.ToList();
     }
 
     public void CalculateAnswer(Facet coherenceAxis, IEnumerable<Post> allPosts)
@@ -88,7 +130,12 @@ public class BlossomSpace : BlossomSpaceObject
         var lastPost = allPosts.OrderByDescending(x => x.Timestamp).First();
         EpistemicField.Update(lastPost.Vector, coherenceChange);
 
-        Vector = DescriptiveField.Multiply(0.2f).Add(EpistemicField.Multiply(0.8f));
+        Vector = DescriptiveVector.Multiply(0.2f).Add(EpistemicField.Multiply(0.8f));
+    }
+
+    void UpdateDescriptiveVector(IEnumerable<Post> posts)
+    {
+        DescriptiveVector = BlossomVector.Average(posts.Select(x => x.Vector), x => x.CoherenceWeight);
     }
 
     public List<Axis> MaterializeAxes(IEnumerable<Facet> candidates)

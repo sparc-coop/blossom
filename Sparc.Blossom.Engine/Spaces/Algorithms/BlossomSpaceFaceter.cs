@@ -38,10 +38,9 @@ internal class BlossomSpaceFaceter(
             .OrderByDescending(x => x.Vector.CoherenceWeight)
             .ToList();
 
-        var primaryFacet = newFacets.FirstOrDefault();
-        if (primaryFacet != null)
-            space.CalculateAnswer(primaryFacet, postsToFacet);
-
+        //var primaryFacet = newFacets.FirstOrDefault();
+        //if (primaryFacet != null)
+            //space.CalculateAnswer(primaryFacet, postsToFacet);
         // Make sure the facets are aligned with the newly calculated answer
         newFacets.ForEach(x => x.AlignWith(space));
 

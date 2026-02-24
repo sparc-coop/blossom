@@ -3,7 +3,8 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
 
-internal class BlossomPosts(IRepository<Post> posts,       
+internal class BlossomPosts(IRepository<Post> posts,
+    IRepository<Guide> guides,
     VoyageTranslator translator)
 {
     internal async Task<Post> VectorizeAsync(Post post, BlossomSpace space)
@@ -32,17 +33,28 @@ internal class BlossomPosts(IRepository<Post> posts,
         return post;
     }
 
-    internal async Task<List<Post>> GetAllAsync(BlossomSpace space, int take = 50) => await GetAllAsync(space.Id, take);
+    internal async Task<List<Post>> GetAllAsync(BlossomSpace space, int take = 50, bool includeGuides = false) => await GetAllAsync(space.Id, take, includeGuides);
 
-    internal async Task<List<Post>> GetAllAsync(string spaceId, int take = 50)
+    internal async Task<List<Post>> GetAllAsync(string spaceId, int take = 50, bool includeGuides = false)
     {
         if (take == 0)
             return [];
 
-        return await posts.Query.Where(x => x.SpaceId == spaceId)
+        var result = await posts.Query.Where(x => x.SpaceId == spaceId)
             .OrderByDescending(x => x.Timestamp)
             .Take(take)
             .ToListAsync();
+
+        if (includeGuides)
+        {
+            var result2 = await guides.Query.Where(x => x.SpaceId == spaceId)
+                .OrderByDescending(x => x.Timestamp)
+                .Take(take)
+                .ToListAsync();
+            result.AddRange(result2);
+        }
+
+        return result;
     }
 
     internal async Task<List<BlossomScoredVector<Post>>> SearchAsync(string spaceId, BlossomVector vector, int count, double? similarityThreshold = null)
