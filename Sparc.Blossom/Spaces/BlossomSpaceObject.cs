@@ -1,5 +1,6 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Sparc.Blossom.Spaces;
 
@@ -30,4 +31,17 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
     {
         Coordinates = Vector.ToCoordinates(axes);
     }
+
+    public static void DoNotSerializeVectors(JsonTypeInfo typeInfo)
+    {
+        if (!typeInfo.Type.IsAssignableTo(typeof(BlossomSpaceObject)))
+            return;
+
+        foreach (var prop in typeInfo.Properties)
+        {
+            if (prop.PropertyType == typeof(BlossomVector) && !prop.Name.Contains("coordinates"))
+                prop.ShouldSerialize = (_, _) => false;
+        }
+    }
+
 }

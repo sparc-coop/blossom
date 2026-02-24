@@ -1,4 +1,7 @@
-﻿namespace Sparc.Blossom.Spaces;
+﻿using Microsoft.AspNetCore.Http.Json;
+using System.Text.Json.Serialization.Metadata;
+
+namespace Sparc.Blossom.Spaces;
 
 public static class ServiceCollectionExtensions
 {
@@ -13,6 +16,11 @@ public static class ServiceCollectionExtensions
             .AddTransient<BlossomSpaceTranslator>()
             .AddTransient<BlossomGameStates>();
 
+        builder.Services.Configure<JsonOptions>(options =>
+        {
+            options.SerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver().WithAddedModifier(BlossomSpaceObject.DoNotSerializeVectors);
+        });
+        
         return builder;
     }
 

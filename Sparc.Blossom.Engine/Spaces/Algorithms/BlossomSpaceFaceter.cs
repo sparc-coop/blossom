@@ -10,7 +10,7 @@ internal class BlossomSpaceFaceter(
     BlossomPosts posts,
     IEnumerable<ITranslator> translators)
 {
-    public async Task SeedAsync(BlossomSpace space, IEnumerable<Guide> guides)
+    public async Task SeedAsync(BlossomSpace space, IEnumerable<Fact> guides)
     {
         var components = ToPrincipalComponents(guides.Select(g => g.Vector), space.Vector, 0.8, 10);
         var facets = components.Select(c => new Facet(space, c, guides)).ToList();

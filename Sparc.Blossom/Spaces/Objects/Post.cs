@@ -11,9 +11,14 @@ public class Post : BlossomSpaceObject
     }
 
     public Post(BlossomSpace space, BlossomAvatar user, string text)
+        : this(space.Id, user, text)
+    {
+    }
+
+    public Post(string spaceId, BlossomAvatar user, string text)
         : this()
     {
-        SpaceId = space.Id;
+        SpaceId = spaceId;
         User = user;
         Text = text;
         Vector = new(text);

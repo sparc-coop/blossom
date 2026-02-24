@@ -2,14 +2,14 @@
 
 namespace Sparc.Blossom.Content;
 
-public record AxisDiscoveryResponse(List<string> Statements);
-internal class SpaceDiscoveryQuestion : BlossomQuestion<AxisDiscoveryResponse>
+public record SpaceDiscoveryResponse(string InitialAnswer, List<string> Facts, List<string> Questions);
+internal class SpaceDiscoveryQuestion : BlossomQuestion<SpaceDiscoveryResponse>
 {
 
-    public SpaceDiscoveryQuestion(Post question) : base("Provide up to 10 initial statements to begin exploring the following question.")
+    public SpaceDiscoveryQuestion(Post question) : base("Provide an initial answer or hypothesis, up to 20 initial facts, and up to 10 Socratic questions to begin exploring the following question.")
     {
-        Instructions = "You are an assistant that transforms a question into an initial exploratory set of Socratic statements.\r\n" +
-            "Analyze the provided question and extract 50 diverse statements that encourage deep thinking and exploration of the topic from many different angles.";
+        Instructions = "You are an assistant that transforms a question into a Bayesian prior answer, an initial exploratory set of facts, and an initial exploratory set of Socratic questions related to the question.\r\n" +
+            "Analyze the provided question and extract an initial answer and 50 diverse statements that encourage deep thinking and exploration of the topic from many different angles.";
 
         Text += "\r\n\r\nQuestion: " + question.Text;
     }
@@ -32,7 +32,7 @@ public record BasicResponse(string Text);
 internal class AnswerHintQuestion : BlossomQuestion<BasicResponse>
 {
 
-    public AnswerHintQuestion(BlossomSpace destination, Post lastPost, List<BlossomScoredVector<Post>> clues) : base("Given the following question, last post from the user, and clues, suggest the next step for the user to take to uncover the answer:")
+    public AnswerHintQuestion(BlossomSpace destination, Post lastPost, List<BlossomScoredVector<Fact>> clues) : base("Given the following question, last post from the user, and clues, suggest the next step for the user to take to uncover the answer:")
     {
         Instructions = "You are a dungeon master that is attempting to guide the user through a dimensional space to uncover a hidden truth.\r\n" +
             "You will receive clues and a weighted score from 0 to 1 representing the strength of the clue and its alignment to the hidden truth. " +

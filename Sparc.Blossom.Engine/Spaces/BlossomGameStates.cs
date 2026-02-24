@@ -21,6 +21,8 @@ internal class BlossomGameStates(
             ? null
             : await questRepo.FindAsync(space.Id, userSpace.ActiveQuestId);
 
+        var guides = await posts.SearchAsync(userSpace.Vector, 20);
+
         var distanceToAnswer = activeQuest == null
             ? userSpace.Vector.DistanceTo(space.Vector)
             : userSpace.Vector.DistanceTo(activeQuest.Vector);
@@ -35,13 +37,8 @@ internal class BlossomGameStates(
             .OrderByDescending(x => x.Importance)
             .ToList();
 
-        userSpace.MaterializeCoordinates(axes);
-        space.MaterializeCoordinates(axes);
-
-        spacePosts.ForEach(x => x.MaterializeCoordinates(axes));
-        availableQuests.ForEach(x => x.MaterializeCoordinates(axes));
-        spaceConstellations.ForEach(x => x.MaterializeCoordinates(axes));
-        headspaces.ForEach(x => x.MaterializeCoordinates(axes));
+        List<BlossomSpaceObject> all = [userSpace, space, .. spacePosts, .. availableQuests, .. spaceConstellations, .. headspaces];
+        all.ForEach(x => x.MaterializeCoordinates(axes));
 
         return new(activeQuest ?? space, userSpace, space, spacePosts, headspaces, availableQuests, spaceConstellations, distanceToAnswer);
     }

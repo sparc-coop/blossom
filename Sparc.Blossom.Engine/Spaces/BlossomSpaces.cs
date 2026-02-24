@@ -73,7 +73,7 @@ internal class BlossomSpaces(
         var isFirstPost = space.Vector.IsEmpty;
 
         post = await posts.AddAsync(post, space);
-        var allPosts = await posts.GetAllAsync(space, 1000, includeGuides: true);
+        var allPosts = await posts.GetAllAsync(space, 1000);
 
         await Repository.ExecuteAsync(space, x => x.Update(allPosts));
 
@@ -84,8 +84,8 @@ internal class BlossomSpaces(
 
         if (isFirstPost)
         {
-            var guides = await translator.SeedAsync(space, post);
-            await faceter.SeedAsync(space, guides);
+            var facts = await translator.SeedAsync(space, post);
+            await faceter.SeedAsync(space, facts);
             await Repository.UpdateAsync(space);
         }
         else

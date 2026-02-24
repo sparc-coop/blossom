@@ -4,7 +4,7 @@ using Sparc.Blossom.Data;
 namespace Sparc.Blossom.Spaces;
 
 internal class BlossomPosts(IRepository<Post> posts,
-    IRepository<Guide> guides,
+    IRepository<Fact> guides,
     VoyageTranslator translator)
 {
     internal async Task<Post> VectorizeAsync(Post post, BlossomSpace space)
@@ -33,9 +33,9 @@ internal class BlossomPosts(IRepository<Post> posts,
         return post;
     }
 
-    internal async Task<List<Post>> GetAllAsync(BlossomSpace space, int take = 50, bool includeGuides = false) => await GetAllAsync(space.Id, take, includeGuides);
+    internal async Task<List<Post>> GetAllAsync(BlossomSpace space, int take = 50) => await GetAllAsync(space.Id, take);
 
-    internal async Task<List<Post>> GetAllAsync(string spaceId, int take = 50, bool includeGuides = false)
+    internal async Task<List<Post>> GetAllAsync(string spaceId, int take = 50)
     {
         if (take == 0)
             return [];
@@ -44,31 +44,14 @@ internal class BlossomPosts(IRepository<Post> posts,
             .OrderByDescending(x => x.Timestamp)
             .Take(take)
             .ToListAsync();
-
-        if (includeGuides)
-        {
-            var result2 = await guides.Query.Where(x => x.SpaceId == spaceId)
-                .OrderByDescending(x => x.Timestamp)
-                .Take(take)
-                .ToListAsync();
-            result.AddRange(result2);
-        }
-
+        
         return result;
     }
 
-    internal async Task<List<BlossomScoredVector<Post>>> SearchAsync(string spaceId, BlossomVector vector, int count, double? similarityThreshold = null)
+    internal async Task<List<BlossomScoredVector<Fact>>> SearchAsync(BlossomVector vector, int count)
     {
-        var allPosts = await GetAllAsync(spaceId, 10000);
-        var result = allPosts.Select(p => new BlossomScoredVector<Post>(p, p.Vector.SimilarityTo(vector)));
-
-        if (similarityThreshold == null)
-            return result.OrderByDescending(x => x.Score).Take(count).ToList();
-
-        if (similarityThreshold < 0)
-            return result.Where(x => x.Score < 0).OrderBy(x => x.Score).Take(count).ToList();
-        else
-            return result.Where(x => x.Score > 0).OrderBy(x => x.Score).Take(count).ToList();
+        var result = await guides.SearchAsync(BlossomSpaces.Domain, vector, count);
+        return result;
     }
 
     internal async Task UpdateAsync(IEnumerable<Post> postsToUpdate) => await posts.UpdateAsync(postsToUpdate);
