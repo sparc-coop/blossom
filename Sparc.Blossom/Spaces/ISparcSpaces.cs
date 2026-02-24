@@ -54,7 +54,14 @@ public interface ISparcSpaces
     Task SetPresenceAsync(string userId, BlossomPresence presence);
 }
 
-public record GameState(BlossomSpace Space, BlossomSpace? Self, BlossomSpace Answer, List<Post> Posts, List<BlossomUserTrail> UserTrails, List<Quest> AvailableQuests, List<Constellation> Constellations, double DistanceToAnswer);
+public record GameState(
+    BlossomSpace Space,
+    BlossomSpace? Self,
+    BlossomSpace Answer, 
+    List<Post> Posts, 
+    List<BlossomUserTrail> UserTrails, 
+    List<Quest> AvailableQuests, 
+    List<Constellation> Constellations);
 
 public record InviteToSpaceRequest(string UserId);
 public record CreateSpaceRequest(

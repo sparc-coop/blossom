@@ -31,7 +31,9 @@ public class Quest : BlossomSpace
 
     public override void MaterializeCoordinates(List<Axis> axes)
     {
-        base.MaterializeCoordinates(axes);
+        Coordinates = NextTurn.ToCoordinates(axes);
+        Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.DistanceTo(NextTurn) * lightYearsPerUnit ?? 0;
+
     }
 
     public List<Axis> MaterializeQuestAxes(BlossomSpace space, List<Axis> axes)

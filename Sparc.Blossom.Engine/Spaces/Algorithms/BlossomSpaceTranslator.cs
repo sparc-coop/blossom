@@ -16,7 +16,7 @@ internal class BlossomSpaceTranslator
         var seed = await translator.AskAsync(new SpaceDiscoveryQuestion(question));
 
         var facts = seed.Value!.Facts.Select(x => new Fact(space, x)).ToList();
-        var questions = seed.Value!.Questions.Select(x => new Fact(space, x)).ToList();
+        var questions = seed.Value!.Questions.Select(x => new Question(space, x)).ToList();
         space.Vector.Text = seed.Value!.InitialAnswer;
         
         await vectorizer.VectorizeAsync([.. facts, .. questions, space]);

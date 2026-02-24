@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Concurrent;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
@@ -7,7 +8,7 @@ namespace Sparc.Blossom.Data;
 public class BlossomPolymorphicTypeResolver : DefaultJsonTypeInfoResolver
 {
     static Dictionary<Type, List<JsonDerivedType>>? DerivedTypes;
-    static Dictionary<Type, JsonTypeInfo> TypeInfoCache = [];
+    static ConcurrentDictionary<Type, JsonTypeInfo> TypeInfoCache = new();
 
     static BlossomPolymorphicTypeResolver()
     {
@@ -31,7 +32,7 @@ public class BlossomPolymorphicTypeResolver : DefaultJsonTypeInfoResolver
             return TypeInfoCache[type];
         
         JsonTypeInfo jsonTypeInfo = base.GetTypeInfo(type, options);
-        if (DerivedTypes?.Any() == true && DerivedTypes.ContainsKey(jsonTypeInfo.Type))
+        if (DerivedTypes?.Count > 0 && DerivedTypes.TryGetValue(jsonTypeInfo.Type, out List<JsonDerivedType>? value))
         {
             jsonTypeInfo.PolymorphismOptions = new JsonPolymorphismOptions
             {
@@ -39,7 +40,7 @@ public class BlossomPolymorphicTypeResolver : DefaultJsonTypeInfoResolver
                 UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType,
             };
 
-            foreach (var derivedType in DerivedTypes[jsonTypeInfo.Type])
+            foreach (var derivedType in value)
                 jsonTypeInfo.PolymorphismOptions.DerivedTypes.Add(derivedType);
 
         }

@@ -135,7 +135,7 @@ internal class BlossomSpaces(
         {
             Debug.WriteLine(e.Message + e.InnerException?.Message);
             Console.WriteLine(e.Message + e.InnerException?.Message);
-            return new(space, userSpace, null, null, null, null, null, 0);
+            return new(space, userSpace, null, null, null, null, null);
         }
     }
 

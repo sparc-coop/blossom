@@ -357,7 +357,8 @@ public class BlossomVector : BlossomVectorBase
 
         var xAxis = axes.First().Vector.Normalize();
         var yAxis = axes.Skip(1).FirstOrDefault()?.Vector.Normalize();
-        var zAxis = axes.Skip(2).FirstOrDefault()?.Vector.Normalize();
+        var zAxis = axes.Skip(2).FirstOrDefault()?.Vector.Normalize()
+            ?? axes.FirstOrDefault(x => x.Name == "User")?.Vector.Normalize();
 
         var x = PositionOnAxis(xAxis);
         var y = yAxis == null ? 0 : PositionOnAxis(yAxis);

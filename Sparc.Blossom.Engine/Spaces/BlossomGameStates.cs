@@ -9,26 +9,27 @@ internal class BlossomGameStates(
     IRepository<Facet> facetRepo,
     IRepository<Quest> questRepo,
     IRepository<Constellation> constellationRepo,
-    IRepository<BlossomUserTrail> headspaceRepo)
+    IRepository<BlossomUserTrail> userTrailRepo)
 {
     public async Task<GameState> GetCoordinatesAsync(BlossomSpace space, BlossomSpace userSpace)
     {
         var spacePosts = await posts.GetAllAsync(space);
         var spaceFacets = await facetRepo.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
         var spaceConstellations = await constellationRepo.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
-        var headspaces = await headspaceRepo.Query.Where(x => x.SpaceId == space.Id).OrderBy(x => x.Timestamp).ToListAsync();
+        var userTrails = await userTrailRepo.Query.Where(x => x.SpaceId == space.Id).OrderBy(x => x.Timestamp).ToListAsync();
         var activeQuest = userSpace.ActiveQuestId == null
             ? null
             : await questRepo.FindAsync(space.Id, userSpace.ActiveQuestId);
 
         var guides = await posts.SearchAsync(userSpace.Vector, 20);
+        spacePosts.AddRange(guides.Select(x => x.Item));
 
         var distanceToAnswer = activeQuest == null
             ? userSpace.Vector.DistanceTo(space.Vector)
             : userSpace.Vector.DistanceTo(activeQuest.Vector);
 
         var axes = userSpace.Axes.Count > 0 ? userSpace.Axes.ToList() : space.Axes.ToList();
-        axes.Add(new(userSpace));
+        axes.Add(new("User", userSpace)); // Z axis is the user space itself, to brighten/dim objects based on user proximity
 
         var availableQuests = activeQuest != null 
             ? [activeQuest]
@@ -37,10 +38,12 @@ internal class BlossomGameStates(
             .OrderByDescending(x => x.Importance)
             .ToList();
 
-        List<BlossomSpaceObject> all = [userSpace, space, .. spacePosts, .. availableQuests, .. spaceConstellations, .. headspaces];
+        List<BlossomSpaceObject> all = [userSpace, space, .. spacePosts, .. userTrails, .. availableQuests, .. spaceConstellations];
         all.ForEach(x => x.MaterializeCoordinates(axes));
 
-        return new(activeQuest ?? space, userSpace, space, spacePosts, headspaces, availableQuests, spaceConstellations, distanceToAnswer);
+        spacePosts = spacePosts.OrderBy(x => x.Distance).ToList();
+
+        return new(activeQuest ?? space, userSpace, space, spacePosts, userTrails, availableQuests, spaceConstellations);
     }
 
     public record GraphExtractionResult(List<SparcEntityBase> Entities, List<SparcRelationship> Relationships);

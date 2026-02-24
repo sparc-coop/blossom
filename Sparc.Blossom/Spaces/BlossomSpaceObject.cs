@@ -21,15 +21,18 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
     public BlossomAvatar User { get; set; } = BlossomUser.System.Avatar;
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public BlossomVector? Coordinates { get; set; }
+    public float Distance { get; set; }
 
     public virtual void SetSummary(BlossomSummary? summary)
     {
         Summary = summary;
     }
 
+    protected const float lightYearsPerUnit = 46_500_000_000;
     public virtual void MaterializeCoordinates(List<Axis> axes)
     {
         Coordinates = Vector.ToCoordinates(axes);
+        Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.DistanceTo(Vector) * lightYearsPerUnit ?? 0;
     }
 
     public static void DoNotSerializeVectors(JsonTypeInfo typeInfo)
