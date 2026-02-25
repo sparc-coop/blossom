@@ -4,14 +4,17 @@ using System.Security.Claims;
 using Sparc.Blossom.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http;
 
 namespace Sparc.Blossom.Platforms.Server;
 
 // Adapted from MS PersistingRevalidatingAuthenticationStateProvider
-public class BlossomServerAuthenticationStateProvider<T>(ILoggerFactory loggerFactory, IServiceScopeFactory scopeFactory) 
-    : RevalidatingServerAuthenticationStateProvider(loggerFactory) where T : BlossomUser
+public class BlossomServerAuthenticationStateProvider<T>(ILoggerFactory loggerFactory, IServiceScopeFactory scopeFactory, IHttpContextAccessor http) 
+    : RevalidatingServerAuthenticationStateProvider(loggerFactory), IClaimsPrincipalProvider where T : BlossomUser
 {
     protected override TimeSpan RevalidationInterval => TimeSpan.FromMinutes(30);
+
+    public ClaimsPrincipal Principal => http.HttpContext?.User ?? new ClaimsPrincipal(new ClaimsIdentity());
 
     protected override async Task<bool> ValidateAuthenticationStateAsync(
         AuthenticationState authenticationState, CancellationToken cancellationToken)

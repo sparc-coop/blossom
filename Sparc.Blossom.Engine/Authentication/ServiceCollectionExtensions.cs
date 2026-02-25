@@ -24,12 +24,10 @@ public static class ServiceCollectionExtensions
         builder.Services.AddScoped<AuthenticationStateProvider, BlossomServerAuthenticationStateProvider<TUser>>()
             .AddScoped<SparcAuthenticator<TUser>>()
             .AddScoped<IBlossomAuthenticator, SparcAuthenticator<TUser>>()
-            .AddScoped<SparcTokens>();
+            .AddScoped<SparcTokens>()
+            .AddScoped<IClaimsPrincipalProvider, BlossomServerAuthenticationStateProvider<TUser>>();
 
-        builder.Services.AddTransient(s =>
-            s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User
-            ?? new ClaimsPrincipal(new ClaimsIdentity()));
-
+        builder.Services.AddTransient(s => s.GetRequiredService<IClaimsPrincipalProvider>().Principal);
         builder.Services.AddTransient(s => BlossomUser.FromPrincipal(s.GetRequiredService<ClaimsPrincipal>()));
 
         builder.Services.AddPasswordlessSdk(x =>

@@ -1,5 +1,4 @@
 using Anthropic.SDK;
-using Anthropic.SDK.Batches;
 using MediatR.NotificationPublishers;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http.Json;

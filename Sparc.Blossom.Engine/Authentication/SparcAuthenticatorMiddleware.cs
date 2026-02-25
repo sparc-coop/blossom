@@ -10,6 +10,7 @@ public class SparcAuthenticatorMiddleware(RequestDelegate next)
         {
             await _next(context);
             return;
+
         }
 
         if (context.User.Identity?.IsAuthenticated == true)

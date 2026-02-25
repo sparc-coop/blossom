@@ -97,7 +97,7 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
             ?? new ClaimsPrincipal(new ClaimsIdentity()));
     }
 
-    public override void AddBlossomEngine(string? url = null) => AddBlossomEngine<SparcAuraTokenHandler>(url);
+    public override void AddSparcEngine(string? url = null) => AddBlossomEngine<SparcAuraTokenHandler>(url);
     protected override void AddSparcAura()
     {
         Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -110,11 +110,10 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
         Services.AddCascadingAuthenticationState();
         Services.AddScoped<SparcAuraServerAuthenticator>()
             .AddScoped<IBlossomAuthenticator, SparcAuraServerAuthenticator>()
-            .AddScoped<PasskeyAuthenticator>();
+            .AddScoped<PasskeyAuthenticator>()
+            .AddScoped<IClaimsPrincipalProvider, SparcAuraServerAuthenticator>();
 
-        Services.AddTransient(s =>
-            s.GetRequiredService<IHttpContextAccessor>().HttpContext?.User
-            ?? new ClaimsPrincipal(new ClaimsIdentity()));
+        Services.AddTransient(s => s.GetRequiredService<IClaimsPrincipalProvider>().Principal);
     }
 
     void AddBlossomServer(IComponentRenderMode? renderMode = null)

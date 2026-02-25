@@ -85,7 +85,7 @@ public abstract class BlossomApplicationBuilder
         Services.AddScoped<BlossomHubProxy>();
     }
 
-    public abstract void AddBlossomEngine(string? url = null);
+    public abstract void AddSparcEngine(string? url = null);
     protected void AddBlossomEngine<TTokenHandler>(string? url = null)
         where TTokenHandler : DelegatingHandler
     {
