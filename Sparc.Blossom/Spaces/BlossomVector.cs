@@ -387,4 +387,11 @@ public class BlossomVector : BlossomVectorBase
         var result = xAxis.Vector.Multiply(x).Add(yAxis.Vector.Multiply(y));
         return result.Normalize();
     }
+
+    internal float AngularDistanceTo(BlossomVector coordinateVector, float lightYearsPerUnit)
+    {
+        var similarity = SimilarityTo(coordinateVector);
+        var percentage = (1 - similarity) / 2; // Put into 0-1 scale
+        return percentage * lightYearsPerUnit;
+    }
 }

@@ -35,7 +35,7 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
     public void MaterializeCoordinates(List<Axis> axes, BlossomVector coordinateVector)
     {
         Coordinates = coordinateVector.ToCoordinates(axes);
-        Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.DistanceTo(coordinateVector) * lightYearsPerUnit ?? 0;
+        Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.AngularDistanceTo(coordinateVector, lightYearsPerUnit) ?? 0;
     }
 
     public static void DoNotSerializeVectors(JsonTypeInfo typeInfo)
