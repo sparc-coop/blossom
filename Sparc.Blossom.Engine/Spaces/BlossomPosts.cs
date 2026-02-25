@@ -1,4 +1,5 @@
-﻿using Sparc.Blossom.Content;
+﻿using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
@@ -23,9 +24,10 @@ internal class BlossomPosts(IRepository<Post> posts,
         return post;
     }
 
-    internal async Task<Post> AddAsync(Post post, BlossomSpace space)
+    internal async Task<Post> AddAsync(Post post, BlossomSpace space, BlossomSpace userSpace)
     {
         post.SpaceId = space.Id;
+        post.User = userSpace.User;
 
         await VectorizeAsync(post, space);
         await posts.AddAsync(post);
@@ -55,4 +57,15 @@ internal class BlossomPosts(IRepository<Post> posts,
     }
 
     internal async Task UpdateAsync(IEnumerable<Post> postsToUpdate) => await posts.UpdateAsync(postsToUpdate);
+
+    internal async Task<List<Post>> GetAllAsync(BlossomSpace space, BlossomAvatar user, int take)
+    {
+        var result = await posts.Query
+            .Where(x => x.SpaceId == space.Id && x.User.Id == user.Id)
+            .OrderByDescending(x => x.Timestamp)
+            .Take(take)
+            .ToListAsync();
+
+        return result;
+    }
 }

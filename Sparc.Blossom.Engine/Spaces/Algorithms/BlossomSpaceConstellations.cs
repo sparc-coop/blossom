@@ -3,7 +3,7 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
 
-internal class BlossomSpaceConstellator(
+internal class BlossomSpaceConstellations(
     IRepository<Constellation> constellations,
     BlossomPosts postRepository,
     IEnumerable<ITranslator> translators)
@@ -201,4 +201,6 @@ internal class BlossomSpaceConstellator(
         int idx = Math.Max(0, (int)Math.Floor(weights.Count * 0.75));
         return weights[idx];
     }
+
+    internal async Task<List<Constellation>> GetAllAsync(BlossomSpace space) => await constellations.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
 }

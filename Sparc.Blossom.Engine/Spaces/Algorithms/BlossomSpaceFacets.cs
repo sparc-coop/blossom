@@ -4,21 +4,21 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
 
-internal class BlossomSpaceFaceter(
+internal class BlossomSpaceFacets(
     IRepository<Facet> facets,
     IRepository<Quest> quests,
     IRepository<BlossomSpace> spaces,
     BlossomPosts posts,
     IEnumerable<ITranslator> translators)
 {
-    public async Task SeedAsync(BlossomSpace space, IEnumerable<Fact> guides)
+    public async Task SeedAsync(BlossomSpace space, IEnumerable<Fact> facts)
     {
-        var components = ToPrincipalComponents(guides.Select(g => g.Vector), space.Vector, 0.8, 10);
-        var facets = components.Select(c => new Facet(space, c, guides)).ToList();
+        var components = ToPrincipalComponents(facts.Select(g => g.Vector), space.Vector, 0.8, 10);
+        var facets = components.Select(c => new Facet(space, c, facts)).ToList();
         space.MaterializeAxes(facets);
         await spaces.UpdateAsync(space);
     }
-    
+
     public async Task<List<Facet>> FacetAsync(BlossomSpace space)
     {
         var postsToFacet = await posts.GetAllAsync(space);
@@ -35,14 +35,14 @@ internal class BlossomSpaceFaceter(
             .ToListAsync();
 
         await facets.DeleteAsync(existingFacets);
-        
+
         var newFacets = components.Select(x => new Facet(space, x, postsToFacet))
             .OrderByDescending(x => x.Vector.CoherenceWeight)
             .ToList();
 
         //var primaryFacet = newFacets.FirstOrDefault();
         //if (primaryFacet != null)
-            //space.CalculateAnswer(primaryFacet, postsToFacet);
+        //space.CalculateAnswer(primaryFacet, postsToFacet);
         // Make sure the facets are aligned with the newly calculated answer
         newFacets.ForEach(x => x.AlignWith(space));
 
@@ -92,14 +92,20 @@ internal class BlossomSpaceFaceter(
         facet.SetSummary(summary.Value);
     }
 
-    public async Task<Quest> ActivateQuestAsync(BlossomSpace space, BlossomSpace userSpace, string facetId)
+    public async Task<Quest?> ActivateQuestAsync(BlossomSpace space, BlossomSpace userSpace, string facetId)
     {
+        if (userSpace.ActiveQuestId != null)
+        {
+            userSpace.DeactivateQuest();
+            return null;
+        }
+
         var facet = await facets.FindAsync(space.Id, facetId)
             ?? throw new Exception($"Facet with ID {facetId} not found in space {space.Id}");
 
         var quest = new Quest(space, userSpace, facet);
         await quests.AddAsync(quest);
-        userSpace.ActivateQuest(quest);
+        await spaces.ExecuteAsync(userSpace, x => x.ActivateQuest(quest));
 
         return quest;
     }
@@ -107,4 +113,13 @@ internal class BlossomSpaceFaceter(
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
         => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
 
+    internal async Task<List<Facet>> GetAllAsync(BlossomSpace space) => await facets.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
+
+    internal async Task<Quest?> GetActiveQuestAsync(BlossomSpace userSpace)
+    {
+        if (userSpace.ActiveQuestId == null)
+            return null;
+
+        return await quests.FindAsync(userSpace.SpaceId, userSpace.ActiveQuestId);
+    }
 }

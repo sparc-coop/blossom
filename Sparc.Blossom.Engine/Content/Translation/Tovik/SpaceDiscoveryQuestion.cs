@@ -6,12 +6,15 @@ public record SpaceDiscoveryResponse(string InitialAnswer, List<string> Facts, L
 internal class SpaceDiscoveryQuestion : BlossomQuestion<SpaceDiscoveryResponse>
 {
 
-    public SpaceDiscoveryQuestion(Post question) : base("Provide an initial answer or hypothesis, up to 20 initial facts, and up to 10 Socratic questions to begin exploring the following question.")
+    public SpaceDiscoveryQuestion(BlossomSpace space, Post question, int count) : base($"Given the state of the argument, provide an initial answer or hypothesis, up to {count} initial facts, and up to {count} Socratic questions to begin exploring the following statement.")
     {
-        Instructions = "You are an assistant that transforms a question into a Bayesian prior answer, an initial exploratory set of facts, and an initial exploratory set of Socratic questions related to the question.\r\n" +
-            "Analyze the provided question and extract an initial answer and 50 diverse statements that encourage deep thinking and exploration of the topic from many different angles.";
+        Instructions = "You are an assistant that transforms a statement into a Bayesian prior answer, an initial exploratory set of facts, and an initial exploratory set of Socratic questions related to the statement.\r\n" +
+            $"Analyze the provided statement and extract an initial answer and {count} diverse statements that encourage deep thinking and exploration of the topic from many different angles.";
 
-        Text += "\r\n\r\nQuestion: " + question.Text;
+        if (space.Summary != null)
+            Text += "Current State: " + space.Summary.Description + "\r\n\r\n";
+
+        Text += "\r\n\r\nStatement: " + question.Text;
     }
 }
 

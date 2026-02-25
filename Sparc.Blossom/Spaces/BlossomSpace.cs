@@ -75,12 +75,14 @@ public class BlossomSpace : BlossomSpaceObject
         base.MaterializeCoordinates(axes, coordinateVector);
     }
 
-    public void Add(Post post, Post? previousPost, BlossomSpace alignmentSpace)
+    public BlossomUserTrail Add(Post post, Post? previousPost, BlossomSpace alignmentSpace)
     {
         var semanticChange = previousPost == null ? 1 : post.Vector.Subtract(previousPost.Vector).Magnitude();
         var confidence = alignmentSpace.Summary == null ? 1 : post.Vector.AlignmentWith(alignmentSpace.Summary.Vector);
 
         Origin.Update(post.Vector, semanticChange * confidence);
+
+        return new(alignmentSpace, this);
     }
 
     //public void Update(IEnumerable<Post> allPosts)
