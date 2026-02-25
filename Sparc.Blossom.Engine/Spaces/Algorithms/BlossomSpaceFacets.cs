@@ -11,21 +11,19 @@ internal class BlossomSpaceFacets(
     BlossomPosts posts,
     IEnumerable<ITranslator> translators)
 {
-    public async Task SeedAsync(BlossomSpace space, IEnumerable<Fact> facts)
-    {
-        var components = ToPrincipalComponents(facts.Select(g => g.Vector), space.Vector, 0.8, 10);
-        var facets = components.Select(c => new Facet(space, c, facts)).ToList();
-        space.MaterializeAxes(facets);
-        await spaces.UpdateAsync(space);
-    }
-
-    public async Task<List<Facet>> FacetAsync(BlossomSpace space)
+    public async Task<List<Facet>> FacetAsync(BlossomSpace space, IEnumerable<Fact> facts)
     {
         var postsToFacet = await posts.GetAllAsync(space);
 
         // Start using the posts from non-system users once there is enough
         if (postsToFacet.Count < 2)
-            return [];
+        {
+            var initialComponents = ToPrincipalComponents(facts.Select(g => g.Vector), space.Vector, 0.8, 10);
+            var facets = initialComponents.Select(c => new Facet(space, c, facts)).ToList();
+            space.MaterializeAxes(facets);
+            await spaces.UpdateAsync(space);
+            return facets;
+        }
 
         // Factor into principal components
         var components = ToPrincipalComponents(postsToFacet.Select(p => p.Vector), space.Vector, 0.8, 10);
@@ -52,6 +50,7 @@ internal class BlossomSpaceFacets(
             await SummarizeAsync(childFacet, space));
 
         await facets.UpdateAsync(newFacets);
+        await spaces.UpdateAsync(space);
 
         return newFacets;
     }

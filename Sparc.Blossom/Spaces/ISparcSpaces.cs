@@ -24,7 +24,7 @@ public interface ISparcSpaces
     Task SaveSpaceAsync(string spaceId, BlossomSpace space);
 
     [Delete("/spaces/{spaceId}")]
-    Task<BlossomSpace> DeleteSpaceAsync(string spaceId);
+    Task DeleteSpaceAsync(string spaceId);
 
     [Post("/spaces/{spaceId}/join")]
     Task<BlossomSpace> JoinSpaceAsync(string spaceId);

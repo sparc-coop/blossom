@@ -60,8 +60,7 @@ internal class BlossomSpaceTranslator
         await headspaces.AddAsync(headspace);
 
         var facts = await SeedAsync(space, post, userPosts.Count == 1 ? 20 : 10);
-        await facets.FacetAsync(space);
-        await spaces.UpdateAsync(space);
+        await facets.FacetAsync(space, facts);
         //await constellator.ConstellateAsync(space);
 
         var relevantFacts = await posts.SearchAsync(space.Vector, 20);

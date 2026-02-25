@@ -8,7 +8,8 @@ internal class BlossomSpaces(
     BlossomAggregateOptions<BlossomSpace> options,
     BlossomPosts posts,
     BlossomSpaceFacets facets,
-    BlossomSpaceTranslator translator)
+    BlossomSpaceTranslator translator,
+    IRepository<BlossomSpaceObject> spaceObjects)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
     public const string Domain = "sparc.coop";
@@ -95,6 +96,16 @@ internal class BlossomSpaces(
         return (space, userSpace);
     }
 
+    private async Task DeleteSpaceAsync(string spaceId)
+    {
+        var allVectors = await spaceObjects.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
+        await spaceObjects.DeleteAsync(allVectors);
+
+        var space = await Repository.FindAsync(Domain, spaceId);
+        if (space != null)
+            await Repository.DeleteAsync(space);
+    }
+
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var spaces = endpoints.MapGroup("/spaces");
@@ -106,6 +117,9 @@ internal class BlossomSpaces(
         spaces.MapGet("{spaceId}/coordinates", async (string spaceId)  => await GetCoordinatesAsync(spaceId));
         spaces.MapPost("{spaceId}", async (string spaceId, Post post) => await PostAsync(spaceId, post));
         spaces.MapPost("{spaceId}/quests/{facetId}", async (string spaceId, string facetId) => await ActivateQuestAsync(spaceId, facetId));
+        spaces.MapDelete("{spaceId}", async (string spaceId) => await DeleteSpaceAsync(spaceId));
         spaces.MapPut("{spaceId}", SaveAsync);
     }
+
+    
 }
