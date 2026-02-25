@@ -22,9 +22,15 @@ internal class BlossomSpaceTranslator
 
         var facts = seed.Value!.Facts.Select(x => new Fact(space, x)).ToList();
         var questions = seed.Value!.Questions.Select(x => new Question(space, x)).ToList();
-        space.Vector.Text = seed.Value!.InitialAnswer;
         
-        await vectorizer.VectorizeAsync([.. facts, .. questions, space]);
+        List<IVectorizable> itemsToVectorize = [.. facts, .. questions];
+        if (space.Vector.IsEmpty)
+        {
+            space.Vector.Text = seed.Value.InitialAnswer;
+            itemsToVectorize.Add(space);
+        }
+
+        await vectorizer.VectorizeAsync(itemsToVectorize);
 
         await posts.UpdateAsync(facts);
         await posts.UpdateAsync(questions);
@@ -59,9 +65,17 @@ internal class BlossomSpaceTranslator
         await spaces.UpdateAsync(userSpace);
         await headspaces.AddAsync(headspace);
 
-        var facts = await SeedAsync(space, post, userPosts.Count == 1 ? 20 : 10);
-        await facets.FacetAsync(space, facts);
-        //await constellator.ConstellateAsync(space);
+        var activeQuest = await facets.GetActiveQuestAsync(userSpace);
+        if (activeQuest != null)
+        {
+            await facets.SeedAsync(space, userSpace, activeQuest);
+        }
+        else
+        {
+            var facts = await SeedAsync(space, post, userPosts.Count == 1 ? 20 : 10);
+            await facets.FacetAsync(space, facts);
+            //await constellator.ConstellateAsync(space);
+        }
 
         var relevantFacts = await posts.SearchAsync(space.Vector, 20);
         await CalculateAnswerAsync(space, [userPosts.Last(), .. relevantFacts.Select(x => x.Item)]);

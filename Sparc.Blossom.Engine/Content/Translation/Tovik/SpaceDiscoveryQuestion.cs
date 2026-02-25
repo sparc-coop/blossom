@@ -12,7 +12,7 @@ internal class SpaceDiscoveryQuestion : BlossomQuestion<SpaceDiscoveryResponse>
             $"Analyze the provided statement and extract an initial answer and {count} diverse statements that encourage deep thinking and exploration of the topic from many different angles.";
 
         if (space.Summary != null)
-            Text += "Current State: " + space.Summary.Description + "\r\n\r\n";
+            Text += "\r\n\r\nCurrent State: " + space.Summary.Description + "\r\n\r\n";
 
         Text += "\r\n\r\nStatement: " + question.Text;
     }

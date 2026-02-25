@@ -9,8 +9,11 @@ internal class BlossomSpaceFacets(
     IRepository<Quest> quests,
     IRepository<BlossomSpace> spaces,
     BlossomPosts posts,
-    IEnumerable<ITranslator> translators)
+    IEnumerable<ITranslator> translators,
+    VoyageTranslator vectorizer)
 {
+    readonly AITranslator translator = translators.OfType<AITranslator>().First();
+
     public async Task<List<Facet>> FacetAsync(BlossomSpace space, IEnumerable<Fact> facts)
     {
         var postsToFacet = await posts.GetAllAsync(space);
@@ -18,7 +21,7 @@ internal class BlossomSpaceFacets(
         // Start using the posts from non-system users once there is enough
         if (postsToFacet.Count < 2)
         {
-            var initialComponents = ToPrincipalComponents(facts.Select(g => g.Vector), space.Vector, 0.8, 10);
+            var initialComponents = ToPrincipalComponents(facts.Select(g => g.Vector), 0.8, 10);
             var facets = initialComponents.Select(c => new Facet(space, c, facts)).ToList();
             space.MaterializeAxes(facets);
             await spaces.UpdateAsync(space);
@@ -26,7 +29,7 @@ internal class BlossomSpaceFacets(
         }
 
         // Factor into principal components
-        var components = ToPrincipalComponents(postsToFacet.Select(p => p.Vector), space.Vector, 0.8, 10);
+        var components = ToPrincipalComponents(postsToFacet.Select(p => p.Vector), 0.8, 10);
 
         var existingFacets = await facets.Query
             .Where(x => x.SpaceId == space.Id)
@@ -34,8 +37,8 @@ internal class BlossomSpaceFacets(
 
         await facets.DeleteAsync(existingFacets);
 
-        var newFacets = components.Select(x => new Facet(space, x, postsToFacet))
-            .OrderByDescending(x => x.Vector.CoherenceWeight)
+        var newFacets = components.Select(x => new Facet(space, x))
+            .OrderByDescending(f => f.Vector.CoherenceWeight)
             .ToList();
 
         //var primaryFacet = newFacets.FirstOrDefault();
@@ -49,13 +52,12 @@ internal class BlossomSpaceFacets(
         await Parallel.ForEachAsync(newFacets, async (childFacet, _) =>
             await SummarizeAsync(childFacet, space));
 
-        await facets.UpdateAsync(newFacets);
         await spaces.UpdateAsync(space);
 
         return newFacets;
     }
 
-    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, BlossomVector alignmentVector, double varianceToExplain = 1, int maxCount = 3)
+    public static List<BlossomVector> ToPrincipalComponents(IEnumerable<BlossomVector> vectors, double varianceToExplain = 1, int maxCount = 3)
     {
         var mean = BlossomVector.Average(vectors);
         var centeredVectors = vectors.Select(v => v.Center(mean)).ToList();
@@ -80,22 +82,11 @@ internal class BlossomSpaceFacets(
         return components;
     }
 
-    async Task SummarizeAsync(Facet facet, BlossomSpace space)
-    {
-        if (space.Vector.PositionOnAxis(facet.Vector) < 0)
-            throw new Exception("Facet vector is in the opposite direction of the space vector, cannot summarize.");
-
-        var translator = translators.OfType<AITranslator>().First();
-        var question = new SummaryQuestion(facet, space.Vector);
-        var summary = await translator.AskAsync(question);
-        facet.SetSummary(summary.Value);
-    }
-
     public async Task<Quest?> ActivateQuestAsync(BlossomSpace space, BlossomSpace userSpace, string facetId)
     {
         if (userSpace.ActiveQuestId != null)
         {
-            userSpace.DeactivateQuest();
+            await spaces.ExecuteAsync(userSpace, x => x.DeactivateQuest());
             return null;
         }
 
@@ -106,7 +97,46 @@ internal class BlossomSpaceFacets(
         await quests.AddAsync(quest);
         await spaces.ExecuteAsync(userSpace, x => x.ActivateQuest(quest));
 
+        await SeedAsync(space, userSpace, quest);
+
         return quest;
+    }
+
+    internal async Task SummarizeAsync(Facet facet, BlossomSpace space)
+    {
+        if (space.Vector.PositionOnAxis(facet.Vector) < 0)
+            throw new Exception("Facet vector is in the opposite direction of the space vector, cannot summarize.");
+
+        var relevantFacts = await posts.SearchAsync(facet.Vector, 20);
+        facet.SetSignposts(relevantFacts.Select(x => x.Item));
+
+        var translator = translators.OfType<AITranslator>().First();
+        var question = new SummaryQuestion(facet, space.Vector);
+        var summary = await translator.AskAsync(question);
+        facet.SetSummary(summary.Value);
+
+        await facets.UpdateAsync(facet);
+    }
+
+    public async Task<List<Fact>> SeedAsync(BlossomSpace space, BlossomSpace userSpace, Quest quest)
+    {
+        var seed = await translator.AskAsync(new JourneyQuestion(userSpace, quest));
+
+        var facts = seed.Value!.Facts.Select(x => new Fact(space, x)).ToList();
+        var questions = seed.Value!.Questions.Select(x => new Question(space, x)).ToList();
+        quest.Hint = seed.Value.Hint;
+
+        await vectorizer.VectorizeAsync([.. facts, .. questions]);
+
+        await posts.UpdateAsync(facts);
+        await posts.UpdateAsync(questions);
+
+        var relevantFacts = await posts.SearchAsync(quest.Vector, 20);
+        quest.SetSignposts(relevantFacts.Select(x => x.Item));
+
+        await quests.UpdateAsync(quest);
+
+        return facts;
     }
 
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)

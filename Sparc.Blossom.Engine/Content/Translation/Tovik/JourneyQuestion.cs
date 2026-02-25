@@ -2,27 +2,26 @@
 
 namespace Sparc.Blossom.Content;
 
-internal class JourneyQuestion : BlossomQuestion<BlossomSummary>
+public record BlossomJourney(string Hint, List<string> Facts, List<string> Questions);
+
+internal class JourneyQuestion : BlossomQuestion<BlossomJourney>
 {
-    public JourneyQuestion(IEnumerable<BlossomScoredVector<Post>> messages, BlossomScoredVector<Post> userLocation, BlossomScoredVector<Post> exitLocation)
+    public JourneyQuestion(BlossomSpace userSpace, Quest quest)
         : base(
-    "Given the following set of messages which represent a sequential journey, left to right, and the user's current location, guide the user toward the exit, via the conflict or tension located within." +
+    "Given the following set of messages which represent a sequential journey, left to right, and the user's current location, guide the user toward the stated exit location, via the conflict or tension located within." +
     " This will be used for a game quest description, so phrase accordingly.")
     {
-        Instructions = "You are an assistant that summarizes a series of messages into a new semantic facet that will be used for a game quest.\r\n" +
-                    "Analyze the provided messages and extract the main themes from the messages to guide the user from their current location toward the last message of the quest, via the conflict or tension located within.\r\n\r\n" +
-                    "The summary should include:\r\n" +
-                    "- Name: A short, 2 to 3 word descriptive quest title encompassing the journey to take to reach the right side. This name should be extremely specific to the primary subject matter of the quest.\r\n" +
-                    "- Topic: The 10-20 word primary subject matter represented by the journey from the user's current location to the right side. This should be phrased as a game quest description.\r\n" +
-                    "- Description: A 10-20 word set of hints as to how to navigate this journey.";
+        Instructions = "You are an assistant that takes a sequential journey of relevant facts as signposts along the way, a user's location, and an exit location, and guides the user accordingly.\r\n" +
+                    "Analyze the provided messages and extract the main themes from the messages to guide the user from their current location toward the exit location of the quest, whether that's left or right, via the conflict or tension located within.\r\n\r\n" +
+                    "The output should include:\r\n" +
+                    "- Hint: A 10-20 word hint as to how to navigate this journey from the user's current location to the exit location.\r\n" +
+                    "- Facts: A list of key verified facts with a preponderance of evidence in the world which are relevant to this journey.\r\n" +
+                    "- Questions: A list of 3 to 5 Socratic questions that use the facts along the way to encourage the user to move toward the exit.\r\n";
 
-        Instructions += "- LeftTopic: A short, 2 to 3 word descriptive topic for the left set of messages that distinguishes it from the right set of messages and relates it to the overall summary.\r\n";
-        Instructions += "- RightTopic: A short, 2 to 3 word descriptive topic for the right set of messages that distinguishes it from the left set of messages and relates it to the overall summary.";
-
-        Text += "\r\n\r\nUser's Current Location: " + SafeText(userLocation.Item);
-        Text += "\r\n\r\nExit Location: " + SafeText(exitLocation.Item);
+        Text += "\r\n\r\nUser's Current Location: " + SafeText(quest.ClosestSignpost(userSpace));
+        Text += "\r\n\r\nExit Location: " + SafeText(quest.NextTurnSignpost(userSpace));
         Text += "\r\n\r\nSequential Journey (left to right): ";
-        foreach (var message in messages.OrderBy(x => x.Score))
+        foreach (var message in quest.Signposts.OrderBy(x => x.Score))
             Text += "\r\n- " + SafeText(message.Item);
     }
 }

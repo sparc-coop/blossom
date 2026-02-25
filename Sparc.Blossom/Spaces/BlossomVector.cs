@@ -113,6 +113,12 @@ public class BlossomVector : BlossomVectorBase
 
     public BlossomVector Subtract(BlossomVector other)
     {
+        if (IsEmpty)
+            return ThisWith(other.Vector.Select(x => -x).ToArray());
+
+        if (other.IsEmpty)
+            return this;
+
         var result = new float[Vector.Length];
         for (int i = 0; i < Vector.Length; i++)
             result[i] = Vector[i] - other.Vector[i];

@@ -29,7 +29,7 @@ public class Facet : BlossomSpaceObject
         return quest.Vector.Length >= lengthThreshold;
     }
 
-    void SetSignposts(IEnumerable<Post> posts)
+    public void SetSignposts(IEnumerable<Post> posts)
     {
         var scoredPosts = posts.Select(p => new BlossomScoredVector<string>(p.Text!, p.Vector.PositionOnAxis(Vector)));
         // Choose up to 20 signposts distributed across the similarity spectrum
