@@ -377,6 +377,12 @@ public class BlossomVector : BlossomVectorBase
         return new([x, y, z]);
     }
 
+    public BlossomVector ProjectOntoAxis(BlossomVector axis)
+    {
+        var scalarProjection = PositionOnAxis(axis);
+        return axis.Multiply(scalarProjection);
+    }
+
     public BlossomVector ProjectOntoPlane(BlossomVector xAxis, BlossomVector yAxis)
     {
         var plane = Plane(xAxis, yAxis);

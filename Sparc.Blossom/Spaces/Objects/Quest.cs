@@ -3,7 +3,6 @@
 public class Quest : BlossomSpace
 {
     public string FacetId { get; set; } = "";
-    public double Length { get; set; }
     public double Importance { get; set; }
     public List<BlossomScoredVector<string>> Signposts { get; set; } = [];
     public BlossomVector NextTurn { get; set; } = new();
@@ -24,8 +23,7 @@ public class Quest : BlossomSpace
         FacetId = facet.Id;
         Signposts = facet.Signposts;
 
-        NextTurn = facet.Vector.Scale(userSpace.Origin, space.Vector);
-        Length = NextTurn.Length;
+        NextTurn = space.Vector.ProjectOntoAxis(Vector);
 
         Importance = facet.Vector.CoherenceWeight * 10;
 
@@ -49,29 +47,22 @@ public class Quest : BlossomSpace
 
     public string ClosestSignpost(BlossomSpace userSpace)
     {
-        var nextTurnPosition = NextTurn.PositionOnAxis(Vector);
         var userPosition = userSpace.Origin.PositionOnAxis(Vector);
-        if (userPosition < nextTurnPosition)
-            return Signposts.FirstOrDefault(s => s.Score >= userPosition)?.Item ?? "";
-        else
-            return Signposts.LastOrDefault(s => s.Score < userPosition)?.Item ?? "";
+        return Signposts.OrderBy(s => Math.Abs(s.Score - userPosition)).FirstOrDefault()?.Item ?? "";
     }
 
     public string NextTurnSignpost(BlossomSpace userSpace)
     {
         var nextTurnPosition = NextTurn.PositionOnAxis(Vector);
-        var userPosition = userSpace.Origin.PositionOnAxis(Vector);
-        if (userPosition < nextTurnPosition)
-            return Signposts.LastOrDefault(s => s.Score < userPosition)?.Item ?? "";
-        else
-            return Signposts.FirstOrDefault(s => s.Score >= userPosition)?.Item ?? "";
+        return Signposts.OrderBy(s => Math.Abs(s.Score - nextTurnPosition)).FirstOrDefault()?.Item ?? "";
     }
-
-
 
     public override void MaterializeCoordinates(List<Axis> axes)
     {
-        MaterializeCoordinates(axes, NextTurn);
+        var userAxis = axes.FirstOrDefault(x => x.Name == "User");
+        var userRoute = userAxis == null ? NextTurn : NextTurn.Subtract(userAxis.Vector);
+        Coordinates = userRoute.ToCoordinates(axes);
+        Distance = userAxis?.Vector.AngularDistanceTo(NextTurn, lightYearsPerUnit) ?? 0;
     }
 
     public List<Axis> MaterializeQuestAxes(BlossomSpace space, List<Axis> axes)
@@ -86,5 +77,10 @@ public class Quest : BlossomSpace
             new(space, new Facet(SpaceId) { Vector = yAxis }, "Y"),
             new(space, new Facet(SpaceId) { Vector = zAxis }, "Z")
         ];
+    }
+
+    public bool IsExitable(BlossomSpace userSpace)
+    {
+        return userSpace.Vector.AngularDistanceTo(NextTurn, lightYearsPerUnit) < 1_000_000_000;
     }
 }

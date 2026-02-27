@@ -113,19 +113,16 @@ internal class BlossomSpaceTranslator
         var guides = await posts.SearchAsync(userSpace.Vector, 20);
         spacePosts.AddRange(guides.Select(x => x.Item));
 
-        var distanceToAnswer = activeQuest == null
-            ? userSpace.Origin.DistanceTo(space.Vector)
-            : userSpace.Origin.DistanceTo(activeQuest.Vector);
-
         var axes = userSpace.Axes.Count > 0 ? userSpace.Axes.ToList() : space.Axes.ToList();
         axes.Add(new("User", userSpace)); // Z axis is the user space itself, to brighten/dim objects based on user proximity
 
-        var availableQuests = activeQuest != null
-            ? [activeQuest]
-            : spaceFacets
+        List<Quest> availableQuests = activeQuest != null ? [activeQuest] : [];
+
+        if (activeQuest == null || activeQuest.IsExitable(userSpace))
+            availableQuests.AddRange(spaceFacets
             .Select(x => new Quest(space, userSpace, x))
             .OrderByDescending(x => x.Importance)
-            .ToList();
+            .ToList());
 
         List<BlossomSpaceObject> all = [userSpace, space, .. spacePosts, .. userTrails, .. availableQuests, .. spaceConstellations];
         all.ForEach(x => x.MaterializeCoordinates(axes));
