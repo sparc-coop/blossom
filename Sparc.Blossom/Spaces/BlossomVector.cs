@@ -187,6 +187,9 @@ public class BlossomVector : BlossomVectorBase
 
     public static BlossomVector Sum(IEnumerable<BlossomVector> spaceVectors)
     {
+        if (!spaceVectors.Any())
+            return new();
+        
         var vectorLength = spaceVectors.First().Vector.Length;
         var sumVector = new float[vectorLength];
         foreach (var vec in spaceVectors)

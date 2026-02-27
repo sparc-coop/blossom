@@ -8,7 +8,7 @@ public class Fact : Post
     {
     }
     public Fact(BlossomSpace space, string text)
-        : base(space.SpaceId, BlossomUser.System.Avatar, text)
+        : base(space, BlossomUser.System.Avatar, text)
     {
     }
 

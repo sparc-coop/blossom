@@ -14,7 +14,7 @@ internal class BlossomSpaceFacets(
 {
     readonly AITranslator translator = translators.OfType<AITranslator>().First();
 
-    public async Task<List<Facet>> FacetAsync(BlossomSpace space, IEnumerable<Fact> facts)
+    public async Task<List<Facet>> FacetAsync(BlossomSpace space, IEnumerable<Post> facts)
     {
         var postsToFacet = await posts.GetAllAsync(space);
 
@@ -107,7 +107,7 @@ internal class BlossomSpaceFacets(
         if (space.Vector.PositionOnAxis(facet.Vector) < 0)
             throw new Exception("Facet vector is in the opposite direction of the space vector, cannot summarize.");
 
-        var relevantFacts = await posts.SearchAsync(facet.Vector, 20);
+        var relevantFacts = await posts.SearchAsync(space, facet.Vector, 20);
         facet.SetSignposts(relevantFacts.Select(x => x.Item));
 
         var translator = translators.OfType<AITranslator>().First();
@@ -131,7 +131,7 @@ internal class BlossomSpaceFacets(
         await posts.UpdateAsync(facts);
         await posts.UpdateAsync(questions);
 
-        var relevantFacts = await posts.SearchAsync(quest.Vector, 20);
+        var relevantFacts = await posts.SearchAsync(space, quest.Vector, 20);
         quest.SetSignposts(relevantFacts.Select(x => x.Item));
 
         await quests.UpdateAsync(quest);

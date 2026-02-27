@@ -7,7 +7,7 @@ public class Axis : Facet
     public Axis(string spaceId) : base(spaceId)
     { }
 
-    public Axis(string name, BlossomSpace userSpace) : base(userSpace, userSpace.Origin)
+    public Axis(string name, BlossomSpace userSpace) : base(userSpace, userSpace.Vector)
     {
         Name = name;
     }

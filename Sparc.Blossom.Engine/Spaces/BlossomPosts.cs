@@ -50,9 +50,9 @@ internal class BlossomPosts(IRepository<Post> posts,
         return result;
     }
 
-    internal async Task<List<BlossomScoredVector<Fact>>> SearchAsync(BlossomVector vector, int count)
+    internal async Task<List<BlossomScoredVector<Fact>>> SearchAsync(BlossomSpace space, BlossomVector vector, int count)
     {
-        var result = await guides.SearchAsync(BlossomSpaces.Domain, vector, count);
+        var result = await guides.SearchAsync(space.Id, vector, count);
         return result;
     }
 

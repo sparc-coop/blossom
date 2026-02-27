@@ -9,7 +9,6 @@ internal class BlossomSpaceTranslator
     BlossomPosts posts,
     IRepository<BlossomSpace> spaces,
     IRepository<BlossomUserTrail> headspaces,
-    IRepository<BlossomSpaceObject> objects,
     BlossomSpaceFacets facets,
     BlossomSpaceConstellations constellations,
     VoyageTranslator vectorizer,
@@ -17,7 +16,7 @@ internal class BlossomSpaceTranslator
 {
     readonly AITranslator translator = translators.OfType<AITranslator>().First();
 
-    public async Task<List<Fact>> SeedAsync(BlossomSpace space, Post question, int count)
+    public async Task<List<Post>> SeedAsync(BlossomSpace space, Post question, int count)
     {
         var seed = await translator.AskAsync(new SpaceDiscoveryQuestion(space, question, count));
 
@@ -25,11 +24,6 @@ internal class BlossomSpaceTranslator
         var questions = seed.Value!.Questions.Select(x => new Question(space, x)).ToList();
         
         List<IVectorizable> itemsToVectorize = [.. facts, .. questions];
-        if (space.Vector.IsEmpty)
-        {
-            space.Vector.Text = seed.Value.InitialAnswer;
-            itemsToVectorize.Add(space);
-        }
 
         await vectorizer.VectorizeAsync(itemsToVectorize);
 
@@ -39,14 +33,14 @@ internal class BlossomSpaceTranslator
         space.SetSummary(new(friendlyId.Create(), question.Text ?? "", ""));
 
         await spaces.UpdateAsync(space);
-        return facts;
+        return [..facts, ..questions];
     }
 
     internal async Task<Post> CalculateHintAsync(BlossomSpace currentLocation, Post lastPost, BlossomSpace destination)
     {
         var journey = destination.Vector.Subtract(currentLocation.Vector);
 
-        var clues = await posts.SearchAsync(journey, 5);
+        var clues = await posts.SearchAsync(destination, journey, 5);
         var question = new AnswerHintQuestion(destination, lastPost, clues);
         var hint = await translator.AskAsync(question);
         var hintPost = new Post(destination, BlossomUser.System.Avatar, hint.Value!.Text);
@@ -55,6 +49,15 @@ internal class BlossomSpaceTranslator
         await posts.UpdateAsync([hintPost]);
 
         return hintPost;
+    }
+
+    internal async Task<BlossomVector?> VectorizeAsync(BlossomSpaceObject obj)
+    {
+        if (obj.Vector?.Text == null)
+            return null;
+
+        await vectorizer.VectorizeAsync(obj);
+        return obj.Vector;
     }
 
     internal async Task RecalculateSpaceAsync(BlossomSpace space, BlossomSpace userSpace)
@@ -78,7 +81,7 @@ internal class BlossomSpaceTranslator
             //await constellator.ConstellateAsync(space);
         }
 
-        var relevantFacts = await posts.SearchAsync(space.Vector, 20);
+        var relevantFacts = await posts.SearchAsync(space, space.Vector, 20);
         await CalculateAnswerAsync(space, [userPosts.Last(), .. relevantFacts.Select(x => x.Item)]);
         await CalculateAnswerAsync(userSpace, userPosts);
 
@@ -111,7 +114,7 @@ internal class BlossomSpaceTranslator
         var userTrails = await headspaces.Query.Where(x => x.SpaceId == space.Id).OrderBy(x => x.Timestamp).ToListAsync();
         var activeQuest = await facets.GetActiveQuestAsync(userSpace);
 
-        var guides = await posts.SearchAsync(userSpace.Vector, 20);
+        var guides = await posts.SearchAsync(space, userSpace.Vector, 20);
         spacePosts.AddRange(guides.Select(x => x.Item));
 
         var axes = userSpace.Axes.Count > 0 ? userSpace.Axes.ToList() : space.Axes.ToList();

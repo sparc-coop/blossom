@@ -15,7 +15,7 @@ public interface ISparcSpaces
     Task<BlossomSpace?> GetSpaceAsync(string parentSpaceId, string spaceId);
 
     [Post("/spaces")]
-    Task<BlossomSpace> CreateSpaceAsync(CreateSpaceRequest request);
+    Task<BlossomSpace> CreateSpaceAsync(Post post);
 
     [Post("/spaces/{spaceId}")]
     Task<Post> PostAsync(string spaceId, Post post);
@@ -64,18 +64,6 @@ public record GameState(
     List<Constellation> Constellations);
 
 public record InviteToSpaceRequest(string UserId);
-public record CreateSpaceRequest(
-    string? Name = null,
-    string Visibility = "private",
-    string? Topic = null,
-    string RoomVersion = "1",
-    string? RoomAliasName = null,
-    string? Preset = null,
-    bool? IsDirect = null,
-    List<string>? Invite = null,
-    List<StateEvent>? InitialState = null,
-    Dictionary<string, object>? CreationContent = null);
-public record CreateSpaceResponse(string spaceId);
 public record SendMessageRequest(string Body, string MsgType = "m.text");
 public record DeleteSpaceRequest(string spaceId);
 

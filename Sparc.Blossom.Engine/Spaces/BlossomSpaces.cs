@@ -36,6 +36,24 @@ internal class BlossomSpaces(
         return await Repository.FindAsync(parentSpaceId, spaceId);
     }
 
+    private async Task<BlossomSpace> CreateAsync(Post post)
+    {
+        var (space, userSpace) = await GetCurrentSpaces(post.SpaceId);
+
+        post.Vector.Text = post.Text;
+        userSpace.Vector = await translator.VectorizeAsync(post) ?? new();
+        space.Vector = userSpace.Vector;
+        
+        await Repository.UpdateAsync(space);
+        await Repository.UpdateAsync(userSpace);
+
+        var seeds = await translator.SeedAsync(space, post, 20);
+        await facets.FacetAsync(space, seeds);
+        await objects.RecalculateAsync(space);
+
+        return space;
+    }
+
     private async Task<BlossomSpace> GetOrCreate(string? spaceId, string roomType = "Space", string? parentSpaceId = null, BlossomAvatar? user = null)
     {
         parentSpaceId ??= Domain;
@@ -110,6 +128,7 @@ internal class BlossomSpaces(
         var spaces = endpoints.MapGroup("/spaces");
 
         spaces.MapGet("", GetSpacesAsync);
+        spaces.MapPost("", async (Post post) => await CreateAsync(post));
         spaces.MapGet("{spaceId}", GetSpaceAsync);
         spaces.MapGet("{parentSpaceId}/subspaces/{spaceId}", GetSpaceAsync);
         spaces.MapGet("{spaceId}/posts", GetPostsAsync);
@@ -119,6 +138,4 @@ internal class BlossomSpaces(
         spaces.MapDelete("{spaceId}", async (string spaceId) => await DeleteSpaceAsync(spaceId));
         spaces.MapPut("{spaceId}", SaveAsync);
     }
-
-    
 }
