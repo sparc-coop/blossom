@@ -45,7 +45,7 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
 
     
     const float gravitationalConstant = 1;
-    public void SetGravitationalForce(IEnumerable<BlossomSpaceObject> objects)
+    public virtual void SetGravitationalForce(IEnumerable<BlossomSpaceObject> objects)
     {
         if (Mass == 0)
             return;

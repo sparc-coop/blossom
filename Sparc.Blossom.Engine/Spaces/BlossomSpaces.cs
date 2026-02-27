@@ -9,7 +9,8 @@ internal class BlossomSpaces(
     BlossomPosts posts,
     BlossomSpaceFacets facets,
     BlossomSpaceTranslator translator,
-    BlossomSpaceObjects objects)
+    BlossomSpaceObjects objects,
+    IBlossomAuthenticator auth)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
     public const string Domain = "sparc.coop";
@@ -64,6 +65,7 @@ internal class BlossomSpaces(
         var existing = await Repository.FindAsync(parentSpaceId, spaceId);
         if (existing == null)
         {
+            user ??= (await auth.GetAsync(User))?.Avatar;
             existing = new BlossomSpace(spaceId, roomType) { SpaceId = parentSpaceId, User = user ?? BlossomUser.System.Avatar };
             await Repository.AddAsync(existing);
         }

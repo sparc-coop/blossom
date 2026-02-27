@@ -39,7 +39,7 @@ public class BlossomSpace : BlossomSpaceObject
     public BlossomSpaceSettings Settings { get; set; } = new();
     public List<Axis> Axes { get; set; } = [];
     public BlossomVector Origin { get; set; } = new();
-    public override float Mass => RoomType == "User" ? 5 : 0;
+    public override float Mass => RoomType == "User" ? 10 : 0;
 
     public string? ActiveQuestId { get; set; }
 
@@ -78,6 +78,14 @@ public class BlossomSpace : BlossomSpaceObject
         Origin.Update(post.Vector, semanticChange * confidence);
 
         return new(alignmentSpace, this);
+    }
+
+    public override void SetGravitationalForce(IEnumerable<BlossomSpaceObject> objects)
+    {
+        if (RoomType == "User")
+            objects = objects.Where(x => x.User.Id == Id); // User orb only feels gravity from their own posts
+        
+        base.SetGravitationalForce(objects);
     }
 
     //public void Update(IEnumerable<Post> allPosts)
