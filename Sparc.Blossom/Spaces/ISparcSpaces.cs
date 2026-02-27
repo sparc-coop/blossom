@@ -58,7 +58,7 @@ public record GameState(
     BlossomSpace Space,
     BlossomSpace? Self,
     BlossomSpace Answer, 
-    List<Post> Posts, 
+    List<Post> SpaceObjects, 
     List<BlossomUserTrail> UserTrails, 
     List<Quest> AvailableQuests, 
     List<Constellation> Constellations);

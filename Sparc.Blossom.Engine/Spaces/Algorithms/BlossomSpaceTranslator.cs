@@ -1,6 +1,5 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
-using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
 
@@ -10,7 +9,7 @@ internal class BlossomSpaceTranslator
     IRepository<BlossomSpace> spaces,
     IRepository<BlossomUserTrail> headspaces,
     BlossomSpaceFacets facets,
-    BlossomSpaceConstellations constellations,
+    BlossomSpaceObjects objects,
     VoyageTranslator vectorizer,
     FriendlyId friendlyId)
 {
@@ -107,32 +106,33 @@ internal class BlossomSpaceTranslator
 
     public async Task<GameState> GetCoordinatesAsync(BlossomSpace space, BlossomSpace userSpace)
     {
-        var spacePosts = await posts.GetAllAsync(space);
-        var spaceFacets = await facets.GetAllAsync(space);
-        var spaceConstellations = await constellations.GetAllAsync(space);
+        var spaceObjects = await objects.GetAllAsync(space);
+        
+        //var spaceFacets = await facets.GetAllAsync(space);
+        //var spaceConstellations = await constellations.GetAllAsync(space);
 
-        var userTrails = await headspaces.Query.Where(x => x.SpaceId == space.Id).OrderBy(x => x.Timestamp).ToListAsync();
-        var activeQuest = await facets.GetActiveQuestAsync(userSpace);
+        //var userTrails = await headspaces.Query.Where(x => x.SpaceId == space.Id).OrderBy(x => x.Timestamp).ToListAsync();
+        //var activeQuest = await facets.GetActiveQuestAsync(userSpace);
 
-        var guides = await posts.SearchAsync(space, userSpace.Vector, 20);
-        spacePosts.AddRange(guides.Select(x => x.Item));
+        //var guides = await posts.SearchAsync(space, userSpace.Vector, 20);
+        //spacePosts.AddRange(guides.Select(x => x.Item));
 
         var axes = userSpace.Axes.Count > 0 ? userSpace.Axes.ToList() : space.Axes.ToList();
         axes.Add(new("User", userSpace)); // Z axis is the user space itself, to brighten/dim objects based on user proximity
 
-        List<Quest> availableQuests = activeQuest != null ? [activeQuest] : [];
+        //List<Quest> availableQuests = activeQuest != null ? [activeQuest] : [];
 
-        if (activeQuest == null || activeQuest.IsExitable(userSpace))
-            availableQuests.AddRange(spaceFacets
-            .Select(x => new Quest(space, userSpace, x))
-            .OrderByDescending(x => x.Importance)
-            .ToList());
+        //if (activeQuest == null || activeQuest.IsExitable(userSpace))
+        //    availableQuests.AddRange(spaceFacets
+        //    .Select(x => new Quest(space, userSpace, x))
+        //    .OrderByDescending(x => x.Importance)
+        //    .ToList());
 
-        List<BlossomSpaceObject> all = [userSpace, space, .. spacePosts, .. userTrails, .. availableQuests, .. spaceConstellations];
+        List<BlossomSpaceObject> all = [userSpace, space, .. spaceObjects];
         all.ForEach(x => x.MaterializeCoordinates(axes));
 
-        spacePosts = spacePosts.OrderBy(x => x.Distance).ToList();
+        var posts = spaceObjects.OfType<Post>().OrderBy(x => x.Distance).ToList();
 
-        return new(activeQuest ?? space, userSpace, space, spacePosts, userTrails, availableQuests, spaceConstellations);
+        return new(space, userSpace, space, posts, [], [], []);
     }
 }
