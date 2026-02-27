@@ -129,6 +129,7 @@ internal class BlossomSpaceTranslator
         //    .ToList());
 
         List<BlossomSpaceObject> all = [userSpace, space, .. spaceObjects];
+        all.ForEach(x => x.SetGravitationalForce(all));
         all.ForEach(x => x.MaterializeCoordinates(axes));
 
         var posts = spaceObjects.OfType<Post>().OrderBy(x => x.Distance).ToList();

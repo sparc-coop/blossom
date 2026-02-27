@@ -35,9 +35,9 @@ internal class BlossomSpaceObjects(
 
     internal async Task RecalculateAsync(BlossomSpace space)
     {
-        var objects = await GetAllAsync(space);
-        objects.ForEach(x => x.SetGravitationalForce(objects));
-        await UpdateAsync(objects);
+        //var objects = await GetAllAsync(space);
+        //objects.ForEach(x => x.SetGravitationalForce(objects));
+        //await UpdateAsync(objects);
 
         //var hintVectors = await vectors.GetAllAsync(space.Space.Id, "Hint");
         //var hint = await vectors.CalculateHintAsync(userSpace, post, space);
