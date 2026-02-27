@@ -57,12 +57,12 @@ public class Quest : BlossomSpace
         return Signposts.OrderBy(s => Math.Abs(s.Score - nextTurnPosition)).FirstOrDefault()?.Item ?? "";
     }
 
-    public override void MaterializeCoordinates(List<Axis> axes)
+    public override void MaterializeCoordinates(List<Axis> axes, IEnumerable<BlossomSpaceObject>? objects = null)
     {
         var userAxis = axes.FirstOrDefault(x => x.Name == "User");
         var userRoute = userAxis == null ? NextTurn : NextTurn.Subtract(userAxis.Vector);
         Coordinates = userRoute.ToCoordinates(axes);
-        Distance = userAxis?.Vector.AngularDistanceTo(NextTurn, lightYearsPerUnit) ?? 0;
+        Distance = userAxis?.Vector.AngularDistanceTo(NextTurn, parsecsPerUnit) ?? 0;
     }
 
     public List<Axis> MaterializeQuestAxes(BlossomSpace space, List<Axis> axes)
@@ -81,6 +81,6 @@ public class Quest : BlossomSpace
 
     public bool IsExitable(BlossomSpace userSpace)
     {
-        return userSpace.Vector.AngularDistanceTo(NextTurn, lightYearsPerUnit) < 1_000_000_000;
+        return userSpace.Vector.AngularDistanceTo(NextTurn, parsecsPerUnit) < 1_000_000_000;
     }
 }

@@ -22,20 +22,49 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     public BlossomVector? Coordinates { get; set; }
     public float Distance { get; set; }
+    public virtual float Mass => 0;
+    public float Temperature { get; set; }
+    public float Luminosity { get; set; }
+    public BlossomVector? GravitationalForce { get; set; }
 
     public virtual void SetSummary(BlossomSummary? summary)
     {
         Summary = summary;
     }
 
-    protected const float lightYearsPerUnit = 46_500_000_000;
+    protected const float parsecsPerUnit = 11f * 3.262f; // Average size of a stellar nursery * parsecs per light year
     
-    public virtual void MaterializeCoordinates(List<Axis> axes) => MaterializeCoordinates(axes, Vector);
+    public virtual void MaterializeCoordinates(List<Axis> axes, IEnumerable<BlossomSpaceObject>? objects = null) => MaterializeCoordinates(axes, Vector, objects);
 
-    public void MaterializeCoordinates(List<Axis> axes, BlossomVector coordinateVector)
+    public void MaterializeCoordinates(List<Axis> axes, BlossomVector coordinateVector, IEnumerable<BlossomSpaceObject>? objects = null)
     {
         Coordinates = coordinateVector.ToCoordinates(axes);
-        Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.AngularDistanceTo(coordinateVector, lightYearsPerUnit) ?? 0;
+        Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.AngularDistanceTo(coordinateVector, parsecsPerUnit) ?? 0;
+        if (objects != null)
+            SetGravitationalForce(objects);
+    }
+
+    
+    const float gravitationalConstant = 1;
+    public void SetGravitationalForce(IEnumerable<BlossomSpaceObject> objects)
+    {
+        if (Mass == 0)
+            return;
+        
+        var forces = objects.Where(x => x.Id != Id && x.Mass > 0)
+            .Select(x => x.Vector.Multiply(GravitationalScale(x)))
+            .ToList();
+
+        GravitationalForce = BlossomVector.Sum(forces).Multiply(gravitationalConstant);
+    }
+
+    float GravitationalScale(BlossomSpaceObject other)
+    {
+        var masses = Mass * other.Mass;
+        var distanceSquared = Vector.AngularDistanceTo(other.Vector, parsecsPerUnit);
+        if (distanceSquared == 0)
+            return 0;
+        return masses / (distanceSquared * distanceSquared);
     }
 
     public static void DoNotSerializeVectors(JsonTypeInfo typeInfo)
@@ -49,5 +78,4 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
                 prop.ShouldSerialize = (_, _) => false;
         }
     }
-
 }

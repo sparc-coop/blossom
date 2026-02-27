@@ -28,6 +28,7 @@ public class Post : BlossomSpaceObject
     public List<SparcEntity> Entities { get; set; } = [];
     public string? ConstellationId { get; set; }
     public string? ConstellationConnectorId { get; set; }
+    public override float Mass => 2;
 
     public async Task ExtractEntities(ISparcContent tovik, List<SparcEntityType> entityTypes)
     {

@@ -39,6 +39,7 @@ public class BlossomSpace : BlossomSpaceObject
     public BlossomSpaceSettings Settings { get; set; } = new();
     public List<Axis> Axes { get; set; } = [];
     public BlossomVector Origin { get; set; } = new();
+    public override float Mass => RoomType == "User" ? 5 : 0;
 
     public string? ActiveQuestId { get; set; }
 
@@ -69,10 +70,10 @@ public class BlossomSpace : BlossomSpaceObject
             Name = summary.Name;
     }
 
-    public override void MaterializeCoordinates(List<Axis> axes)
+    public override void MaterializeCoordinates(List<Axis> axes, IEnumerable<BlossomSpaceObject>? objects = null)
     {
         var coordinateVector = RoomType == "User" ? Origin : Vector;
-        base.MaterializeCoordinates(axes, coordinateVector);
+        base.MaterializeCoordinates(axes, coordinateVector, objects);
     }
 
     public BlossomUserTrail Add(Post post, Post? previousPost, BlossomSpace alignmentSpace)

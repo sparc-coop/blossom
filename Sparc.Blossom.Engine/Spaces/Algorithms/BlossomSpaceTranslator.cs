@@ -56,6 +56,36 @@ internal class BlossomSpaceTranslator
         return hintPost;
     }
 
+    internal async Task CalculateAsync(BlossomSpace space, BlossomSpace userSpace)
+    {
+        var userPosts = await posts.GetAllAsync(space, userSpace.User, 50);
+        var post = userPosts.First();
+
+        var headspace = userSpace.Add(post, userPosts.Skip(1).FirstOrDefault(), space);
+        await spaces.UpdateAsync(userSpace);
+        await headspaces.AddAsync(headspace);
+
+        var activeQuest = await facets.GetActiveQuestAsync(userSpace);
+        if (activeQuest != null)
+        {
+            await facets.SeedAsync(space, userSpace, activeQuest);
+        }
+        else
+        {
+            var facts = await SeedAsync(space, post, userPosts.Count == 1 ? 20 : 10);
+            await facets.FacetAsync(space, facts);
+            //await constellator.ConstellateAsync(space);
+        }
+
+        var relevantFacts = await posts.SearchAsync(space.Vector, 20);
+        await CalculateAnswerAsync(space, [userPosts.Last(), .. relevantFacts.Select(x => x.Item)]);
+        await CalculateAnswerAsync(userSpace, userPosts);
+
+        //var hintVectors = await vectors.GetAllAsync(space.Space.Id, "Hint");
+        //var hint = await vectors.CalculateHintAsync(userSpace, post, space);
+        //await posts.AddAsync(hint);
+    }
+
     internal async Task RecalculateSpaceAsync(BlossomSpace space, BlossomSpace userSpace)
     {
         var userPosts = await posts.GetAllAsync(space, userSpace.User, 20);
@@ -125,7 +155,7 @@ internal class BlossomSpaceTranslator
             .ToList());
 
         List<BlossomSpaceObject> all = [userSpace, space, .. spacePosts, .. userTrails, .. availableQuests, .. spaceConstellations];
-        all.ForEach(x => x.MaterializeCoordinates(axes));
+        all.ForEach(x => x.MaterializeCoordinates(axes, all));
 
         spacePosts = spacePosts.OrderBy(x => x.Distance).ToList();
 
