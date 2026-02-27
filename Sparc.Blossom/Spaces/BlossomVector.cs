@@ -355,7 +355,7 @@ public class BlossomVector : BlossomVectorBase
         return Basis(Vector.Length, leastAlignedIndex);
     }
 
-    public BlossomVector ToCoordinates(List<Axis> axes)
+    public BlossomVector ToCoordinates(List<Axis> axes, BlossomVector? velocity = null)
     {
         if (Vector.Length <= 3)
             return new(Vector);
@@ -372,6 +372,13 @@ public class BlossomVector : BlossomVectorBase
                 ? AlignmentWith(xAxis)
                 : 1 - DistanceFromPlane(xAxis, yAxis)
             : PositionOnAxis(zAxis);
+
+        if (velocity != null && !velocity.IsEmpty)
+        {
+            var velocityCoordinates = velocity.ToCoordinates(axes);
+            if (velocityCoordinates.Vector.Length >= 3)
+                return new([x, y, z, velocityCoordinates.Vector[0], velocityCoordinates.Vector[1], velocityCoordinates.Vector[2]]);
+        }
 
         return new([x, y, z]);
     }

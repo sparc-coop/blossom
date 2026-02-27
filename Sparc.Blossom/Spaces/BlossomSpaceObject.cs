@@ -26,6 +26,7 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
     public float Temperature { get; set; }
     public float Luminosity { get; set; }
     public BlossomVector? GravitationalForce { get; set; }
+    public float CollapseScale { get; set; }
 
     public virtual void SetSummary(BlossomSummary? summary)
     {
@@ -34,14 +35,12 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
 
     protected const float parsecsPerUnit = 11f * 3.262f; // Average size of a stellar nursery * parsecs per light year
     
-    public virtual void MaterializeCoordinates(List<Axis> axes, IEnumerable<BlossomSpaceObject>? objects = null) => MaterializeCoordinates(axes, Vector, objects);
+    public virtual void MaterializeCoordinates(List<Axis> axes) => MaterializeCoordinates(axes, Vector);
 
-    public void MaterializeCoordinates(List<Axis> axes, BlossomVector coordinateVector, IEnumerable<BlossomSpaceObject>? objects = null)
+    public void MaterializeCoordinates(List<Axis> axes, BlossomVector coordinateVector)
     {
-        Coordinates = coordinateVector.ToCoordinates(axes);
+        Coordinates = coordinateVector.ToCoordinates(axes, GravitationalForce);
         Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.AngularDistanceTo(coordinateVector, parsecsPerUnit) ?? 0;
-        if (objects != null)
-            SetGravitationalForce(objects);
     }
 
     
@@ -56,6 +55,7 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
             .ToList();
 
         GravitationalForce = BlossomVector.Sum(forces).Multiply(gravitationalConstant);
+        CollapseScale = GravitationalForce.Magnitude();
     }
 
     float GravitationalScale(BlossomSpaceObject other)

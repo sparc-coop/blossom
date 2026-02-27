@@ -70,10 +70,10 @@ public class BlossomSpace : BlossomSpaceObject
             Name = summary.Name;
     }
 
-    public override void MaterializeCoordinates(List<Axis> axes, IEnumerable<BlossomSpaceObject>? objects = null)
+    public override void MaterializeCoordinates(List<Axis> axes)
     {
         var coordinateVector = RoomType == "User" ? Origin : Vector;
-        base.MaterializeCoordinates(axes, coordinateVector, objects);
+        base.MaterializeCoordinates(axes, coordinateVector);
     }
 
     public BlossomUserTrail Add(Post post, Post? previousPost, BlossomSpace alignmentSpace)

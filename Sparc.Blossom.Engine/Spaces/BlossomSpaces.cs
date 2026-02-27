@@ -9,7 +9,7 @@ internal class BlossomSpaces(
     BlossomPosts posts,
     BlossomSpaceFacets facets,
     BlossomSpaceTranslator translator,
-    IRepository<BlossomSpaceObject> spaceObjects)
+    BlossomSpaceObjects objects)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
     public const string Domain = "sparc.coop";
@@ -57,7 +57,7 @@ internal class BlossomSpaces(
     {
         var (space, userSpace) = await GetCurrentSpaces(spaceId);
         post = await posts.AddAsync(post, space, userSpace);
-        await translator.RecalculateSpaceAsync(space, userSpace);
+        await objects.RecalculateAsync(space);
 
         return post;
     }
@@ -68,7 +68,7 @@ internal class BlossomSpaces(
         existing.Settings = space.Settings;
         await Repository.UpdateAsync(existing);
 
-        await translator.RecalculateSpaceAsync(existing, userSpace);
+        await objects.RecalculateAsync(existing);
     }
 
     private async Task<List<Post>> GetPostsAsync(string spaceId, string type = "Post", int take = 50)
@@ -98,8 +98,7 @@ internal class BlossomSpaces(
 
     private async Task DeleteSpaceAsync(string spaceId)
     {
-        var allVectors = await spaceObjects.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
-        await spaceObjects.DeleteAsync(allVectors);
+        await objects.DeleteAsync(spaceId);
 
         var space = await Repository.FindAsync(Domain, spaceId);
         if (space != null)

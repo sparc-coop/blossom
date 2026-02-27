@@ -57,7 +57,7 @@ public class Quest : BlossomSpace
         return Signposts.OrderBy(s => Math.Abs(s.Score - nextTurnPosition)).FirstOrDefault()?.Item ?? "";
     }
 
-    public override void MaterializeCoordinates(List<Axis> axes, IEnumerable<BlossomSpaceObject>? objects = null)
+    public override void MaterializeCoordinates(List<Axis> axes)
     {
         var userAxis = axes.FirstOrDefault(x => x.Name == "User");
         var userRoute = userAxis == null ? NextTurn : NextTurn.Subtract(userAxis.Vector);

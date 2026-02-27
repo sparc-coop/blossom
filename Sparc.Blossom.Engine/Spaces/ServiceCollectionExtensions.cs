@@ -14,7 +14,7 @@ public static class ServiceCollectionExtensions
             .AddTransient<BlossomSpaceConstellations>()
             .AddTransient<BlossomPosts>()
             .AddTransient<BlossomSpaceTranslator>()
-            .AddTransient<BlossomGameStates>();
+            .AddTransient<BlossomSpaceObjects>();
 
         builder.Services.Configure<JsonOptions>(options =>
         {
