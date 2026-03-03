@@ -22,6 +22,9 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
             Type = options.Schema?.Name
         };
 
+        if (options.Version.HasValue)
+            result.Version = options.Version.Value;
+
         return result;
     }
 
@@ -57,7 +60,11 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
             }
         });
 
-        return translatedMessages.ToList();
+        var result = translatedMessages.ToList();
+        if (options.Version.HasValue)
+            result.ForEach(x => x.Version = options.Version.Value);
+
+        return result;
     }
 
     public abstract Task<BlossomAnswer<T>> AskAsync<T>(BlossomQuestion<T> question);

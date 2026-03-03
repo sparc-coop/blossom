@@ -3,16 +3,17 @@ using Sparc.Core;
 
 namespace Sparc.Blossom.Authentication;
 
+public record TovikSettings(int Version, List<string> IgnoreList);
 public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(domain))
 {
     public string Domain { get; set; } = Normalize(domain) ?? throw new Exception($"Invalid domain name: {domain}");
-    public List<string> Exemptions { get; set; } = [];
     public DateTime? DateConnected { get; set; }
     public DateTime? LastTranslatedDate { get; set; }
     public string? LastTranslatedLanguage { get; set; }
     public Dictionary<string, int> PagesPerLanguage { get; set; } = [];
     public int TovikUsage { get; set; }
     public string? TovikUserId { get; set; }
+    public TovikSettings Settings { get; set; } = new(1, []);
     public List<SparcLicense> Products { get; set; } = [];
     public bool IsBlocked { get; set; }
 
@@ -122,6 +123,31 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
 
         TovikUserId = userId;
     }
+
+    public void AddToIgnoreList(string item)
+    {
+        if (!Settings.IgnoreList.Contains(item))
+        {
+            Settings.IgnoreList.Add(item);
+            UpdateVersion();
+        }
+    }
+
+    public void RemoveFromIgnoreList(string item)
+    {
+        if (Settings.IgnoreList.Contains(item))
+        {
+            Settings.IgnoreList.Remove(item);
+            UpdateVersion();
+        }
+    }
+
+    void UpdateVersion()
+    {
+        Settings = Settings with { Version = Settings.Version + 1 };
+    }
+
+    public bool IsBeyondTranslationLimit() => Product("Tovik") != null && TovikUsage > Product("Tovik")!.MaxUsage;
 
     public string FaviconUri => $"https://{Domain}/favicon.ico";
 }

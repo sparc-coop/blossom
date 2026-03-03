@@ -36,6 +36,7 @@ public class TextContent : BlossomEntity<string>
     public string OriginalText { get; set; } = "";
     internal List<EditHistory> EditHistory { get; set; } = [];
     public string Html { get; set; } = "";
+    public int Version { get; set; } = 1;
 
     [JsonConstructor]
     private TextContent()

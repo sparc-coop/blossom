@@ -1,5 +1,4 @@
-﻿using HtmlAgilityPack;
-using Sparc.Blossom.Authentication;
+﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content.Tovik;
 using Sparc.Blossom.Data;
 using System.Globalization;
@@ -62,10 +61,17 @@ public class TovikTranslator(
         if (toLanguage == null)
             return request.Content;
 
-        if (!await CanTranslate(request.Content))
-            throw new Exception("You've reached your Tovik translation limit!");
+        var domain = await GetOrCreateDomain(request.Content.First().Domain);
+        //if (domain.IsBeyondTranslationLimit())
+        //    throw new Exception("You've reached your Tovik translation limit!");
 
-        var options = new TovikTranslationOptions { OutputLanguage = toLanguage, AdditionalContext = request.AdditionalContext };
+        var options = new TovikTranslationOptions 
+        {
+            Version = domain.Settings.Version,
+            IgnoreList = domain.Settings.IgnoreList,
+            OutputLanguage = toLanguage, 
+            AdditionalContext = request.AdditionalContext,
+        };
 
         if (request.Model != null)
         {
@@ -113,9 +119,13 @@ public class TovikTranslator(
             return contents;
 
         var domain = contents.First().Domain;
+        var sparcDomain = await GetOrCreateDomain(domain);
         var ids = contents.Select(x => x.Id).ToList();
 
-        var existing = await Content.Query(domain).Where(x => ids.Contains(x.Id)).ToListAsync();
+        var existing = await Content.Query(domain)
+            .Where(x => ids.Contains(x.Id) && x.Version == sparcDomain.Settings.Version)
+            .ToListAsync();
+
         return existing;
     }
 
@@ -140,12 +150,8 @@ public class TovikTranslator(
         return results.Union(translations).ToList();
     }
 
-    private async Task<bool> CanTranslate(List<TextContent> contents)
+    private async Task<SparcDomain> GetOrCreateDomain(string domainName)
     {
-        var domainName = contents.FirstOrDefault()?.Domain;
-        if (string.IsNullOrWhiteSpace(domainName))
-            return true;
-
         var domain = await domains.Query
             .Where(x => x.Domain == domainName)
             .FirstOrDefaultAsync();
@@ -156,7 +162,19 @@ public class TovikTranslator(
             await domains.AddAsync(domain);
         }
 
-        if (domain != null && domain.TovikUsage <= 500)
+        return domain;
+    }
+
+    private async Task<bool> CanTranslate(List<TextContent> contents)
+    {
+        var domainName = contents.FirstOrDefault()?.Domain;
+        if (domainName == null)
+            return false;
+
+        var domain = await GetOrCreateDomain(domainName);
+
+        var tovik = domain.Product("Tovik");
+        if (tovik != null && domain.TovikUsage <= tovik.MaxUsage)
             return true;
 
         return false;
