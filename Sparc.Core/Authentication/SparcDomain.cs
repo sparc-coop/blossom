@@ -1,5 +1,6 @@
 ﻿using Sparc.Blossom.Billing;
 using Sparc.Core;
+using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -16,6 +17,7 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
     public TovikSettings Settings { get; set; } = new(1, []);
     public List<SparcLicense> Products { get; set; } = [];
     public bool IsBlocked { get; set; }
+    public List<string> Users { get; set; } = [];
 
     public string ToAbsoluteUrl(string? relativeUrl = null) => $"https://{Domain.TrimEnd('/')}/{relativeUrl?.TrimStart('/')}";
 
@@ -122,6 +124,7 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
         }
 
         TovikUserId = userId;
+        Users = [];
     }
 
     public void AddToIgnoreList(string item)
@@ -148,6 +151,12 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
     }
 
     public bool IsBeyondTranslationLimit() => Product("Tovik") != null && TovikUsage > Product("Tovik")!.MaxUsage;
+
+    public bool CanBeAccessedBy(ClaimsPrincipal user)
+    {
+        var id = user.Id();
+        return TovikUserId == id || Users.Contains(id);
+    }
 
     public string FaviconUri => $"https://{Domain}/favicon.ico";
 }
