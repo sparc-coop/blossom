@@ -13,6 +13,7 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(
     public string? LastTranslatedLanguage { get; set; }
     public Dictionary<string, int> PagesPerLanguage { get; set; } = [];
     public int TovikUsage { get; set; }
+    public bool IsActive { get; set; } = true;
     public string? TovikUserId { get; set; }
     public TovikSettings Settings { get; set; } = new(1, []);
     public List<SparcLicense> Products { get; set; } = [];
