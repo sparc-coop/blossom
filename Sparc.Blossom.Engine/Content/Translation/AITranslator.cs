@@ -11,6 +11,7 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
     public int Priority { get; } = priority;
     protected string DefaultModel = defaultModel;
     protected decimal CostPerToken = costPerToken;
+    protected bool SupportsJsonSchema = true;
 
     public async Task<TextContent> TranslateAsync(TextContent message, TovikTranslationOptions options)
     {
@@ -28,7 +29,7 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
         return result;
     }
 
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
+    public virtual async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
     {
         var fromLanguages = messages.GroupBy(x => x.Language);
         var batches = TovikTranslator.Batch(messages, 5);

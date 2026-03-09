@@ -14,12 +14,14 @@ internal class TovikTranslationQuestion : BlossomQuestion<TovikTranslations>
     public TovikTranslationQuestion(TextContent message, TovikTranslationOptions options)
     : base(options.ToPrompt())
     {
-        Instructions = 
-            options.Instructions ?? (
+        Instructions =
             "You are a translation and tone‑shaping assistant.\r\n" +
             "For the following message, adjust grammar, vocabulary, idioms, and sentence structure to match the specified tone levels, while preserving the original meaning.\r\n\r\n" +
             "If an output language is also provided, first translate the message into that language, then adjust the grammar, vocabulary, idioms, and sentence structure.\r\n\r\n" +
-            "If the message is not translatable, use the original message in the output.");
+            "If the message is not translatable, use the original message in the output.";
+
+        if (options.Instructions != null)
+            Instructions += "\r\n\r\n" + options.Instructions;
 
         if (options.Schema != null)
             Schema = options.Schema;
@@ -36,7 +38,10 @@ internal class TovikTranslationQuestion : BlossomQuestion<TovikTranslations>
             "If an output language is also provided, first translate each message into that language, then adjust the grammar, vocabulary, idioms, and sentence structure.\r\n\r\n" +
             "If any message is not translatable, use the original message in the output, don't skip it. " +
             "The answer should always contain the same quantity of translations as the input.";
-        
+
+        if (options.Instructions != null)
+            Instructions += "\r\n\r\n" + options.Instructions;
+
         var textToTranslate = messages
             .Where(x => x.Text != null)
             .Select(x => new TovikTranslation(x.Id.Substring(0, 4), x.Text!.Replace('\u00A0', ' ')));

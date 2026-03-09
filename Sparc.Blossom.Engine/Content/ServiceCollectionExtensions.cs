@@ -9,6 +9,7 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<ITranslator, DeepLTranslator>()
             .AddScoped<ITranslator, OpenAITranslator>()
             .AddScoped<ITranslator, AnthropicTranslator>()
+            .AddScoped<ITranslator, VertexTranslator>()
             .AddScoped<TovikTranslator>()
             .AddScoped<BlossomAggregateOptions<TextContent>>()
             .AddScoped<BlossomAggregate<TextContent>>()
