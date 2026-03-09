@@ -13,8 +13,10 @@
 @if (string.IsNullOrWhiteSpace(PaymentIntentId))
 {
     <form id="payment-form" @onsubmit="Pay" @onsubmit:preventDefault="true">
-        <header><h4>Currency</h4></header>
-        <CurrencySelector Avatar="Avatar" />
+        <header>
+            <h4>Currency</h4>
+            <CurrencySelector Avatar="Avatar" />
+        </header>
         <div id="@Id" @ref=PaymentForm>
             <p style="font-size: 16px">Loading payment form...</p>
         </div>
@@ -36,29 +38,33 @@
 }
 else
 {
-    if (Order != null)
-    {
-        <header>
-            <h2>Thank you for your purchase!</h2>
-        </header>
-        <div class="purchased">
-            <p>Your Order ID is:</p>
-            <h4>@Order.OrderId</h4>
-            <p>Tovik has been enabled on your account, and you can start configuring your domains right away!</p>
-            <p>If you provided an email address, a receipt has been emailed to you.</p>
-            <p>Thank you so much for supporting Tovik!</p>
-            <a class="button primary-btn" href="/Install?domain=@Domain">Proceed to Installation</a>
-        </div>
-    }
-    else
-    {
-        <header>
-            <h2>Processing your payment...</h2>
-        </header>
-        <div class="processing">
-            <p>This usually takes less than a minute. Please do not refresh or navigate away from this page.</p>
-        </div>
-    }
+    <article class="receipt">
+        @if (Order != null)
+        {
+            <header>
+                <h2>Thank you for your purchase!</h2>
+            </header>
+            <div class="purchased">
+                <p>Your Order ID is:</p>
+                <h4>@Order.OrderId</h4>
+                <p>Tovik has been enabled on your account, and you can start configuring your domains right away!</p>
+                <p>If you provided an email address, a receipt has been emailed to you.</p>
+                <p>Thank you so much for supporting Tovik!</p>
+            </div>
+            <footer>
+                <a class="button primary-btn" href="/sites/@(Domain.Id)">Manage My Domain</a>
+            </footer>
+        }
+        else
+        {
+            <header>
+                <h2>Processing your payment...</h2>
+            </header>
+            <div class="processing">
+                <p>This usually takes less than a minute. Please do not refresh or navigate away from this page.</p>
+            </div>
+        }
+    </article>
 }
 
 
@@ -71,7 +77,7 @@ else
     [Parameter] public required string ProductId { get; set; } = default!;
     [Parameter] public required string TierId { get; set; }
     [Parameter] public required BlossomAvatar Avatar { get; set; } = default!;
-    [Parameter] public required string Domain { get; set; }
+    [Parameter] public required SparcDomain Domain { get; set; }
     [Parameter] public StripeAppearance? Appearance { get; set; }
     [Parameter][SupplyParameterFromQuery] public string? PaymentIntentId { get; set; }
 
@@ -112,7 +118,7 @@ else
         try
         {
             ErrorMessage = null;
-            var request = new StartCheckoutRequest(Domain, Product.Id, TierId, Avatar.Currency?.Id, Intent?.PaymentIntentId ?? PaymentIntentId)
+            var request = new StartCheckoutRequest(Domain.Domain, Product.Id, TierId, Avatar.Currency?.Id, Intent?.PaymentIntentId ?? PaymentIntentId)
             {
                 Email = Email
             };
@@ -159,12 +165,6 @@ else
         ErrorMessage = null;
         if (Intent == null)
             return;
-
-        if (string.IsNullOrWhiteSpace(Domain))
-        {
-            ErrorMessage = "Please enter a domain name for your Tovik installation.";
-            return;
-        }
 
         try
         {
