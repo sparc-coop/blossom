@@ -23,14 +23,11 @@ public class TranslationOptions
     public Language? OutputLanguage { get; set; }
     public List<string>? IgnoreList { get; set; }
     public int? Version { get; set; }
-    public decimal SlangOrProper { get; set; } = 0.5M;
-    public decimal CasualOrFormal { get; set; } = 0.5M;
-    public decimal FunnyOrSerious { get; set; } = 0.5M;
-    public decimal IrreverentOrRespectful { get; set; } = 0.5M;
-    public decimal EnthusiasticOrMatterOfFact { get; set; } = 0.5M;
+    public Tones? Tone { get; set; }
     public string? Instructions { get; set; }
     public string? AdditionalContext { get; set; }
     public BlossomSchema? Schema { get; set; }
+    public string? Model { get; set; }
 
     public void MatchTone(List<TextContent> content)
     {

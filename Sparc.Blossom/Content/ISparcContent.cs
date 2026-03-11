@@ -40,6 +40,22 @@ public interface ISparcContent
         return obj;
     }
 
+    [Post("/translate/entity")]
+    Task<List<TextContent>> TranslateAsync(TranslationRequest request);
+
+    public async Task<T?> TranslateAsync<T>(TextContent content, TranslationOptions? options = null)
+        => await TranslateAsync<T, T>(content, options);
+
+    public async Task<T?> TranslateAsync<T, TSchema>(TextContent content, TranslationOptions? options = null)
+    {
+        options ??= new();
+        options.Schema = new(typeof(TSchema));
+        var request = new TranslationRequest([content], options);
+        var result = await TranslateAsync(request);
+        var obj = result.Cast<T>().FirstOrDefault();
+        return obj;
+    }
+
     [Post("/content/graph")]
     Task<List<SparcEntity>> ExtractGraphAsync(ExtractGraphRequest request);
 }
@@ -49,3 +65,4 @@ public record PostContentRequest(List<TextContent> Content, TranslationOptions? 
 public record CrawlRequest(string Domain, List<string> ToLanguages, string FromLanguage = "en");
 public record ExtractGraphRequest(IVectorizable Content, List<SparcEntityType> EntityTypes);
 public record Visit(string Domain, string Path);
+public record TranslationRequest(List<TextContent> Content, TranslationOptions Options);

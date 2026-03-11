@@ -65,15 +65,15 @@ public class TovikTranslator(
         //if (domain.IsBeyondTranslationLimit())
         //    throw new Exception("You've reached your Tovik translation limit!");
 
-        var options = new TovikTranslationOptions 
+        var options = new TranslationOptions 
         {
             Version = domain.Settings.Version,
             IgnoreList = domain.Settings.IgnoreList,
             OutputLanguage = toLanguage, 
-            AdditionalContext = request.AdditionalContext,
+            AdditionalContext = request.Options.AdditionalContext,
         };
 
-        if (request.Model != null)
+        if (request.Options.Model != null)
         {
             var translator = Translators
                 .OrderBy(x => x.Priority)
@@ -94,7 +94,7 @@ public class TovikTranslator(
         return translations;
     }
 
-    public async Task<TextContent> TranslateToEntity(TextContent content, TovikTranslationOptions options)
+    public async Task<TextContent> TranslateToEntity(TextContent content, TranslationOptions options)
     {
         if (content.Text?.StartsWith("http") == true)
         {
@@ -144,7 +144,7 @@ public class TovikTranslator(
             throw new Exception("You've reached your Tovik translation limit!");
 
         var additionalContext = string.Join("\n", contents.Select(x => x.Text).OrderBy(x => Guid.NewGuid()).Take(20));
-        var translations = await TranslateAsync(needsTranslation, new TovikTranslationOptions { OutputLanguage = toLanguage, AdditionalContext = additionalContext });
+        var translations = await TranslateAsync(needsTranslation, new TranslationOptions { OutputLanguage = toLanguage, AdditionalContext = additionalContext });
         await PublishAsync(translations);
 
         return results.Union(translations).ToList();
@@ -183,7 +183,7 @@ public class TovikTranslator(
     public async Task<TextContent?> TranslateAsync(TextContent message, Language toLanguage, string? additionalContext = null)
         => (await TranslateAsync([message], new() { OutputLanguage = toLanguage, AdditionalContext = additionalContext })).FirstOrDefault();
 
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
+    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
     {
         var translator = Translators.OrderBy(x => x.Priority).First();
         var result = await translator.TranslateAsync(messages.ToList(), options);
@@ -278,7 +278,7 @@ public class TovikTranslator(
         group.MapPost("visit", async (TovikTranslator translator, HttpRequest request, Visit visit) =>
         {
             var language = Language.Find(request.Headers.AcceptLanguage);
-            await translator.Visit(visit, language);
+            await translator.Visit(visit, language!);
             return Results.Ok();
         });
 
@@ -305,9 +305,9 @@ public class TovikTranslator(
                 return Results.StatusCode(429);
             }
         });
-        group.MapPost("entity", async (TovikTranslator translator, TovikTranslationRequest request) =>
+        group.MapPost("entity", async (TovikTranslator translator, TranslationRequest request) =>
         {
-            var result = await translator.TranslateToEntity(request.Content, request.Options);
+            var result = await translator.TranslateToEntity(request.Content.First(), request.Options);
             return Results.Ok(result);
         });
     }

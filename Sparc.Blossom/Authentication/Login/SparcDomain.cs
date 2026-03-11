@@ -5,7 +5,7 @@ using System.Security.Claims;
 namespace Sparc.Blossom.Authentication;
 
 public record TovikSettings(int Version, List<string> IgnoreList);
-public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.MD5(domain))
+public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.SHA256(domain))
 {
     public string Domain { get; set; } = Normalize(domain) ?? throw new Exception($"Invalid domain name: {domain}");
     public DateTime? DateConnected { get; set; }
