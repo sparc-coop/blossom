@@ -1,42 +1,70 @@
 ﻿form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    label {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        input {
+            display: flex;
+            padding: 16px;
+            width: 100%;
+            align-items: flex-start;
+            border-radius: 20px;
+        }
+
+        select {
+            width: 50%;
+        }
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+
+        label {
+            width: 50%;
+        }
+    }
 }
-form label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+
+::deep .currency-selector {
+    padding: 16px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
 }
-form label span {
-  font-size: 1.2rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: 140%; /* 16.8px */
-  letter-spacing: -0.12px;
+
+header h4, label span {
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-form label input {
-  display: flex;
-  padding: 16px;
-  margin-top: 8px;
-  width: 100%;
-  box-sizing: border-box;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 10px;
-  border-radius: 26px;
-  border: 1px solid var(--purple-100);
+
+header h4 {
+    margin-bottom: 4px;
 }
-form label select {
-  width: 50%;
+
+input, select {
+    max-width: max(50vw, 100%);
 }
-form .form-group {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-form .form-group label {
-  width: 50%;
+
+.receipt {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    h4 {
+        margin: 16px;
+    }
+
+    p {
+        margin: 8px 0;
+    }
 }

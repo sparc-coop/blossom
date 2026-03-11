@@ -1,1 +1,0 @@
-﻿.bouncy-icon{display:inline-block;transition:transform .3s ease-in-out;cursor:pointer;}.bouncy-icon:hover{animation:smileBounce .6s ease-in-out;transform-origin:center;}@keyframes smileBounce{0%{transform:scale(1,1);}20%{transform:scale(1.1,.9);}40%{transform:scale(.95,1.05);}60%{transform:scale(1.05,.95);}80%{transform:scale(.98,1.02);}100%{transform:scale(1,1);}}

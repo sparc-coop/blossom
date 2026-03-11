@@ -14,21 +14,21 @@
             </button>
         }
         <InputSelect @bind-Value="SelectedLanguageId" @bind-Value:after="ChangeLanguage">
-            @foreach (var language in Languages.GroupBy(x => x.LanguageId).OrderBy(x => x.First().LanguageNativeName))
+            @foreach (var language in Languages.GroupBy(x => x.LanguageId).OrderBy(x => x.First().LanguageDisplayName))
             {
                 @if (language.Count() == 1)
                 {
                     <option value="@language.First().Id">
-                        @language.First().NativeName
+                        @language.First().DisplayName
                     </option>
                 }
                 else
                 {
-                    <optgroup label="@language.First().LanguageNativeName">
-                        @foreach (var sublanguage in language.OrderBy(x => x.NativeName))
+                    <optgroup label="@language.First().LanguageDisplayName">
+                        @foreach (var sublanguage in language.OrderBy(x => x.DisplayName))
                         {
                             <option value="@sublanguage.Id">
-                                @sublanguage.NativeName
+                                @sublanguage.DisplayName
                             </option>
                         }
                     </optgroup>

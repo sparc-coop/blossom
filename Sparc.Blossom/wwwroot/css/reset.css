@@ -126,11 +126,11 @@ input:where( [type="submit"], [type="reset"], [type="button"] ) {
 
 :where(table) {
     border-collapse: collapse;
-    border: 1px solid;
+    border: 1px solid transparent;
 }
 
 :where(th, td) {
-    border: 1px solid;
+    border: 1px solid transparent;
     padding: 0.25em 0.5em;
 }
 

@@ -3,6 +3,19 @@ using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Content;
 
+public class LanguageComparer : IEqualityComparer<Language>
+{
+    public bool Equals(Language x, Language y)
+    {
+        return x != null && y != null && x.Id == y.Id;
+    }
+
+    public int GetHashCode(Language obj)
+    {
+        return obj.Id.GetHashCode();
+    }
+}
+
 public record Language
 {
     public string Id { get; set; } = "";
@@ -108,12 +121,21 @@ public record Language
         return false;
     }
 
+    public static List<Language> ManualLanguages = [
+        new Language("ig-NG", "Igbo (Nigeria)", "Igbo (Naịjíríà)", false)
+        ];
+
     public static List<Language> All = CultureInfo
         .GetCultures(CultureTypes.SpecificCultures)
         .Select(c => FromCulture(c.Name))
+        .ToList()
+        .Union(ManualLanguages, new LanguageComparer())
         .OrderBy(l => l.DisplayName)
         .ThenBy(x => x.DialectId == null ? 1 : 0)
         .ToList();
+
+    public static int Count => All.Count;
+    public static int LanguageCount => All.Select(x => x.LanguageId).Distinct().Count();
 
     private static List<string> GoodRandomLanguages = [
         "es-ES", "fr-FR", "de-DE", "it-IT", "ja-JP", "pt-BR", 

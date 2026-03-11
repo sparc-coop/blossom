@@ -21,7 +21,13 @@ public class TranslationOptions
     }
 
     public Language? OutputLanguage { get; set; }
-    public Tones? Tone { get; set; }
+    public List<string>? IgnoreList { get; set; }
+    public int? Version { get; set; }
+    public decimal SlangOrProper { get; set; } = 0.5M;
+    public decimal CasualOrFormal { get; set; } = 0.5M;
+    public decimal FunnyOrSerious { get; set; } = 0.5M;
+    public decimal IrreverentOrRespectful { get; set; } = 0.5M;
+    public decimal EnthusiasticOrMatterOfFact { get; set; } = 0.5M;
     public string? Instructions { get; set; }
     public string? AdditionalContext { get; set; }
     public BlossomSchema? Schema { get; set; }
@@ -66,6 +72,13 @@ public class TranslationOptions
 
             if (Tone.EnthusiasticOrMatterOfFact != 0.5M)
                 prompt.AppendLine("- " + EnthusiasticOrMatterOfFactMappings[Round(Tone.EnthusiasticOrMatterOfFact)]);
+        }
+
+        if (IgnoreList != null && IgnoreList.Count > 0)
+        {
+            prompt.AppendLine("- Never translate the following words and phrases (if transliteration is needed for these, do so):");
+            foreach (var item in IgnoreList)
+                prompt.AppendLine($"  - {item}");
         }
 
         return prompt.ToString();
