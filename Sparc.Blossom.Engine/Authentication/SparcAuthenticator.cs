@@ -56,6 +56,8 @@ public class SparcAuthenticator<T>(
             {
                 var authenticationType = TwilioService.IsValidEmail(emailOrToken) ? "Email" : "Phone";
                 var identity = SparcUser.GetOrCreateIdentity(authenticationType, emailOrToken);
+                await UpdateAsync(SparcUser);
+
                 if (!identity.IsVerified)
                     await SendVerificationCodeAsync(identity);
             }
@@ -78,9 +80,16 @@ public class SparcAuthenticator<T>(
         return matchingUser;
     }
 
-    public async Task<SparcCode> Register(ClaimsPrincipal principal)
+    public async Task<SparcCode> Register(ClaimsPrincipal principal, BlossomIdentity? identity = null)
     {
         SparcUser = await GetUserAsync(principal);
+        if (identity?.Type == "Email")
+        {
+            SparcUser.GetOrCreateIdentity(identity.Type, identity.Id);
+            await UpdateAsync(SparcUser);
+            return new SparcCode();
+        }
+
         var passwordlessToken = await StartPasskeyRegistrationAsync(SparcUser);
         return new SparcCode(passwordlessToken);
     }
@@ -206,7 +215,7 @@ public class SparcAuthenticator<T>(
         var auth = endpoints.MapGroup("/aura").RequireCors("Auth");
         //auth.MapGet("login", DoLogin);
         //auth.MapGet("logout", DoLogout);
-        auth.MapPost("register", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal) => await auth.Register(principal));
+        auth.MapPost("register", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal, BlossomIdentity? identity = null) => await auth.Register(principal, identity));
         auth.MapPost("login", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.DoLogin(principal, emailOrToken));
         auth.MapPost("logout", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.DoLogout(principal, emailOrToken));
         auth.MapGet("userinfo", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal) => await GetAsync(principal));
