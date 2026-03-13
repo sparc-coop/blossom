@@ -125,7 +125,7 @@ public record Language
         new Language("ig-NG", "Igbo (Nigeria)", "Igbo (Naịjíríà)", false)
         ];
 
-    public static List<Language> All = CultureInfo
+    public static List<Language> All => CultureInfo
         .GetCultures(CultureTypes.SpecificCultures)
         .Select(c => FromCulture(c.Name))
         .ToList()
