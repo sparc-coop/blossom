@@ -9,30 +9,34 @@ using Sparc.Blossom.Billing;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
 using Sparc.Blossom.Engine;
+using Sparc.Blossom.Plugins.Slack;
 using Sparc.Blossom.Realtime;
+using Sparc.Blossom.Spaces;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddScoped<FriendlyId>();
 
-builder.Services.AddCosmos<SparcEngineContext>(builder.Configuration.GetConnectionString("Cosmos")!, builder.Environment.IsDevelopment() ? "sparc-dev" : "sparc", ServiceLifetime.Scoped);
+builder.Services.AddCosmos<SparcEngineContext>(builder.Configuration.GetConnectionString("Cosmos")!, "sparc-dev", ServiceLifetime.Scoped);
 builder.Services.AddAzureStorage(builder.Configuration.GetConnectionString("Storage")!);
 
 builder.AddSparcAuthentication<BlossomUser>();
 builder.AddSparcBilling();
-builder.AddSparcChat();
+builder.AddSparcSpaces();
 builder.Services.AddScoped(_ => new OpenAIClient(builder.Configuration.GetConnectionString("OpenAI")!));
+
+builder.Services.AddSlackIntegration();
 
 Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", builder.Configuration.GetConnectionString("Anthropic"));
 builder.Services.AddHttpClient<AnthropicClient>().AddStandardResilienceHandler();
 
-builder.AddTovikTranslator();
-builder.Services.AddBlossomService<BillToTovik>();
+builder.AddSparcContent();
+builder.Services.AddBlossomService<ProcessContent>();
 
 builder.Services.AddMediatR(options =>
 {
     options.RegisterServicesFromAssemblyContaining<Program>();
-    options.RegisterServicesFromAssemblyContaining<BlossomEvent>();
+    options.RegisterServicesFromAssemblyContaining<BlossomEntityChanged>();
     options.NotificationPublisher = new TaskWhenAllPublisher();
     options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
 });
@@ -52,7 +56,7 @@ var app = builder.Build();
 app.MapStaticAssets();
 app.UseSparcAuthentication<BlossomUser>();
 app.UseSparcBilling();
-app.UseSparcChat();
+app.UseSparcSpaces();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -66,26 +70,9 @@ app.UseCors();
 
 app.MapGet("/aura/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 app.MapGet("/hi", () => "Hi from Sparc!");
-app.MapGet("/upgrade-2", async (IRepository<Page> pages, IRepository<SparcDomain> domains, IRepository<UserCharge> charges) =>
-{
-    var domainsWithTovik = await domains.Query.ToListAsync();
-    foreach (var domain in domainsWithTovik)
-    {
-        var lastTranslated = await charges.Query
-            .Where(charges => charges.Domain == domain.Domain)
-            .OrderByDescending(charges => charges.Timestamp)
-            .Select(charges => charges.Timestamp)
-            .FirstOrDefaultAsync();
-
-        if (lastTranslated == default)
-            domain.LastTranslatedDate = null;
-        else
-            domain.LastTranslatedDate = lastTranslated;
-        await domains.UpdateAsync(domain);
-    }
-});
 
 using var scope = app.Services.CreateScope();
+scope.ServiceProvider.GetRequiredService<Contents>().Map(app);
 scope.ServiceProvider.GetRequiredService<TovikTranslator>().Map(app);
 
 foreach (var translator in scope.ServiceProvider.GetServices<ITranslator>())
@@ -93,7 +80,7 @@ foreach (var translator in scope.ServiceProvider.GetServices<ITranslator>())
 
 if (!string.IsNullOrWhiteSpace(app.Configuration.GetConnectionString("Cognitive")))
 {
-    var translator = scope.ServiceProvider.GetRequiredService<TovikTranslator>();
+    var translator = scope.ServiceProvider.GetRequiredService<Contents>();
     await translator.GetLanguagesAsync();
 }
 app.Run();

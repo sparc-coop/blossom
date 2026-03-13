@@ -1,5 +1,4 @@
 ﻿using Refit;
-using Sparc.Blossom.Billing;
 
 namespace Sparc.Blossom.Authentication;
 
@@ -12,7 +11,7 @@ public interface ISparcAura
     Task<string> FriendlyId();
 
     [Post("/aura/register")]
-    Task<SparcCode> Register();
+    Task<SparcCode> Register(BlossomIdentity? identity = null);
 
     [Post("/aura/login")]
     Task<BlossomLogin> Login(string? emailOrToken = null);

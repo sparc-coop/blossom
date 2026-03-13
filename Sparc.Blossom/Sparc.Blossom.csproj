@@ -13,7 +13,7 @@
 		<Nullable>enable</Nullable>
 		<OutputType>Library</OutputType>
 		<IsPackable>true</IsPackable>
-		<Version>10.0.0</Version>
+		<Version>10.0.1</Version>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 		<Authors>Sparc Cooperative</Authors>
@@ -34,13 +34,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="Mapster" Version="7.4.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.0" />
-		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.10" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="10.0.1" />
+		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
 		<ProjectReference Include="..\Sparc.Core\Sparc.Core.csproj" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.0" />
-		<PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.10.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.QuickGrid" Version="10.0.1" />
+		<PackageReference Include="Refit.HttpClientFactory" Version="9.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -90,7 +90,7 @@
 		<UseBlazorWebAssembly>true</UseBlazorWebAssembly>
 	</PropertyGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'browser'">
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.1" />
 		<Compile Remove="**\*.xaml.cs" />
 		<None Include="**\*.xaml.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 		<Compile Remove="**\*.xaml" />
@@ -109,7 +109,7 @@
 	</PropertyGroup>
 	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == ''">
 		<!--<FrameworkReference Include="Microsoft.AspNetCore.App" />-->
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.1" />
 		<Compile Remove="**\*.xaml.cs" />
 		<None Include="**\*.xaml.cs" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
 		<Compile Remove="**\*.xaml" />

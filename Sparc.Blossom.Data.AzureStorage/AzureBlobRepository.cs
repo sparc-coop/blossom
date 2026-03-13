@@ -101,7 +101,7 @@ public class AzureBlobRepository(BlobServiceClient client) : IRepository<Blossom
         if (id is not string sid || sid == null)
             throw new Exception("ID must be a folder/filename");
 
-        var file = new BlossomFile(sid);
+        var file = new BlossomFile(Client.Uri, sid);
         if (string.IsNullOrWhiteSpace(file.FolderName))
             throw new Exception("Couldn't find a folder name in the filename passed");
 

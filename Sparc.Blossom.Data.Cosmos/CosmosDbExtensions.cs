@@ -50,6 +50,26 @@ public static class CosmosDbExtensions
         return results;
     }
 
+    public static async IAsyncEnumerable<List<T>> ToBatchedListAsync<T>(this IQueryable<T> query, int batchSize)
+    {
+        var iterator = query.ToFeedIterator();
+
+        var results = new List<T>();
+        while (iterator.HasMoreResults)
+        {
+            foreach (var item in await iterator.ReadNextAsync())
+            {
+                results.Add(item);
+                if (results.Count >= batchSize)
+                {
+                    yield return results;
+                    results = [];
+                }
+            }
+        }
+        yield return results;
+    }
+
     public static async Task<T?> FirstOrDefaultAsync<T>(this IQueryable<T> query)
     {
         var results = await query.ToListAsync();

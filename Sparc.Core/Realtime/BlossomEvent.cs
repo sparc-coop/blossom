@@ -1,85 +1,101 @@
-﻿using Sparc.Blossom.Authentication;
-using System.Security.Claims;
+﻿using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 
-namespace Sparc.Blossom;
+namespace Sparc.Blossom.Realtime;
 
-public record BlossomEvent : MediatR.INotification
+public class BlossomEvent(string spaceId, string sender) : BlossomEntity<string>(), MediatR.INotification
 {
-    public BlossomEvent()
+    public string Type { get; set; } = "";
+    public string EventId { get { return Id; } set { Id = value; } }
+    public long Depth { get; set; } = 1;
+    public long OriginServerTs { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+    public List<string> PrevEvents { get; set; } = [];
+    public string SpaceId { get; set; } = spaceId;
+    public string Sender { get; set; } = sender;
+    public string? StateKey { get; set; }
+
+    // For event signing and verification 
+    public MatrixEventHash Hashes { get; set; } = null!;
+    public Dictionary<string, Dictionary<string, string>> Signatures { get; set; } = [];
+    public MatrixUnsignedData Unsigned => new(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - OriginServerTs);
+
+    public static BlossomEvent<T> Create<T>(string spaceId, string sender, T content, List<BlossomEvent>? previousEvents = null)
     {
-        // for JSON deserialization
-        Name = "BlossomEvent";
+        return new BlossomEvent<T>(spaceId, sender, content, previousEvents);
     }
+    
+    //// Special magic to be able to save & query polymorphically to/from Cosmos
+    //public static string Types<T>() =>  
+    //    MatrixEventTypes.TryGetValue(typeof(BlossomEvent<>).MakeGenericType(typeof(T)), out var type) 
+    //    ? type 
+    //    : throw new NotImplementedException($"Matrix event type for {typeof(T).Name} is not implemented.");
 
-    private BlossomEvent(string name)
+    //private static Dictionary<Type, string> MatrixEventTypes =>
+    //    typeof(BlossomEvent)
+    //        .GetCustomAttributes(typeof(JsonDerivedTypeAttribute), false)
+    //        .OfType<JsonDerivedTypeAttribute>()
+    //        .ToDictionary(attr => attr.DerivedType, attr => attr.TypeDiscriminator!.ToString()!);
+
+    public static string OpaqueId(int length = 64)
     {
-        Name = name;
-    }
+        // Generate a random string of characters and digits
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var random = new Random();
+        var result = new char[length];
+        for (int i = 0; i < length; i++)
+            result[i] = chars[random.Next(chars.Length)];
 
-    public BlossomEvent(BlossomEntity entity) : this(entity.GetType().Name)
-    {
-        EntityId = entity.GenericId.ToString();
-        EntityType = entity.GetType().Name;
-    }
-
-    public BlossomEvent(string name, BlossomEntity entity) : this(entity)
-    {
-        Name = name;
-    }
-
-    public BlossomEvent(IBlossomEntityProxy proxy) : this(proxy.GetType().Name)
-    {
-        EntityType = proxy.GetType().Name;
-    }
-
-    public string Name { get; set; }
-    public string EntityType { get; set; } = "";
-    public string EntityId { get; set; } = "";
-    public long Id { get; set; } = DateTime.UtcNow.Ticks;
-    public string? UserId { get; set; }
-    public BlossomPatch? Changes { get; set; } = null;
-    public long? PreviousId { get; set; }
-    public List<long> FutureIds { get; set; } = [];
-    public string? SubscriptionId => string.IsNullOrWhiteSpace(EntityId) ? null : $"{EntityType}-{EntityId}";
-
-    public void SetUser(ClaimsPrincipal? user)
-    {
-        UserId = user?.Id();
-    }
-
-    public void ApplyTo(IBlossomEntityProxy entity)
-    {
-        Changes?.ApplyTo(entity);
+        return new string(result);
     }
 }
 
-public record BlossomEvent<T> : BlossomEvent where T : BlossomEntity
+public class BlossomEvent<T> : BlossomEvent
 {
-    public T Entity { get; private set; }
+    public T Content { get; set; }
 
-    public BlossomEvent(T entity) : base(entity)
+    public BlossomEvent() : this(string.Empty, string.Empty, default!)
     {
-        Entity = entity;
     }
 
-    public BlossomEvent(BlossomEvent<T> previous) : base(previous)
+    public BlossomEvent(string spaceId, string sender, T content, List<BlossomEvent>? previousEvents = null) 
+        : base(spaceId, sender)
     {
-        Entity = previous.Entity;
+        Type = typeof(T).Name;
+        Content = content;
+
+        if (previousEvents != null && previousEvents.Count > 0)
+        {
+            PrevEvents = previousEvents
+                .OrderByDescending(x => x.OriginServerTs)
+                .Take(20)
+                .Select(e => e.EventId)
+                .ToList();
+            Depth = previousEvents.Max(e => e.Depth) + 1;
+        }
+
+        Id = "$" + UnpaddedBase64(ReferenceHash());
     }
 
-    public BlossomEvent(string name, T entity) : this(entity)
+    public byte[] ReferenceHash()
     {
-        Name = name;
+        var json = JsonSerializer.Serialize(this, new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+            WriteIndented = false
+        });
+        using var sha256 = SHA256.Create();
+        return sha256.ComputeHash(Encoding.UTF8.GetBytes(json));
     }
 
-    public BlossomEvent(T entity, BlossomPatch changes) : this(entity)
+    public string UnpaddedBase64(byte[] bytes)
     {
-        Changes = changes;
-    }
-
-    public BlossomEvent(T entity, BlossomEvent<T> previous) : this(entity)
-    {
-        PreviousId = previous.Id;
-        Changes = new(previous.Entity, entity);
+        return Convert.ToBase64String(bytes)
+                    .Replace("=", "")
+                    .Replace("+", "-")
+                    .Replace("/", "_");
     }
 }
+
+public record MatrixEventHash(string Sha256);
+public record MatrixUnsignedData(long Age);

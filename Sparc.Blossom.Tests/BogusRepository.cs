@@ -117,4 +117,9 @@ public class BogusRepository<T> : IRepository<T> where T : BlossomEntity<string>
     {
         throw new NotImplementedException();
     }
+
+    public Task<List<T>> GetAllAsync()
+    {
+        throw new NotImplementedException();
+    }
 }

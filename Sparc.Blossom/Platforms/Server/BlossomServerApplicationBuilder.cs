@@ -24,6 +24,7 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
         Builder = WebApplication.CreateBuilder(args);
         Services = Builder.Services;
         Configuration = Builder.Configuration;
+        IsDevelopment = Builder.Environment.IsDevelopment();
     }
 
     public override IBlossomApplication Build(Assembly? entityAssembly = null)
@@ -96,6 +97,25 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
             ?? new ClaimsPrincipal(new ClaimsIdentity()));
     }
 
+    public override void AddSparcEngine(string? url = null) => AddBlossomEngine<SparcAuraTokenHandler>(url);
+    protected override void AddSparcAura()
+    {
+        Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options => {
+                options.Cookie.Name = "Sparc." + Assembly.GetEntryAssembly()?.GetName().Name;
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.ExpireTimeSpan = TimeSpan.FromDays(30);
+            });
+
+        Services.AddCascadingAuthenticationState();
+        Services.AddScoped<SparcAuraServerAuthenticator>()
+            .AddScoped<IBlossomAuthenticator, SparcAuraServerAuthenticator>()
+            .AddScoped<PasskeyAuthenticator>()
+            .AddScoped<IClaimsPrincipalProvider, SparcAuraServerAuthenticator>();
+
+        Services.AddTransient(s => s.GetRequiredService<IClaimsPrincipalProvider>().Principal);
+    }
+
     void AddBlossomServer(IComponentRenderMode? renderMode = null)
     {
         var razor = Services.AddRazorComponents();
@@ -127,7 +147,7 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
         Services.AddMediatR(options =>
         {
             options.RegisterServicesFromAssembly(assembly);
-            options.RegisterServicesFromAssemblyContaining<BlossomEvent>();
+            options.RegisterServicesFromAssemblyContaining<BlossomEntityChanged>();
             options.RegisterServicesFromAssemblyContaining<BlossomHub>();
             options.RegisterServicesFromAssemblyContaining<THub>();
             options.NotificationPublisher = new TaskWhenAllPublisher();

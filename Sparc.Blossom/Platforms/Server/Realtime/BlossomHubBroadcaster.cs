@@ -5,12 +5,12 @@ namespace Sparc.Blossom.Platforms.Server;
 
 public class BlossomHubBroadcaster<T>(IHubContext<BlossomHub> hub, IRepository<T> repository) 
     : INotificationHandler<T> 
-    where T : BlossomEvent
+    where T : BlossomEntityChanged
 {
     public IHubContext<BlossomHub> Hub { get; } = hub;
     public IRepository<T> Repository { get; } = repository;
 
-    public async Task ExecuteAsync(BlossomEvent blossomEvent)
+    public async Task ExecuteAsync(BlossomEntityChanged blossomEvent)
     {
         if (blossomEvent.SubscriptionId != null)
         {
@@ -21,7 +21,7 @@ public class BlossomHubBroadcaster<T>(IHubContext<BlossomHub> hub, IRepository<T
 
     public async Task Handle(T notification, CancellationToken cancellationToken)
     {
-        if (notification is BlossomEvent blossomEvent)
+        if (notification is BlossomEntityChanged blossomEvent)
         {
             await ExecuteAsync(blossomEvent);
         }

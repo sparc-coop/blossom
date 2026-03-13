@@ -2,6 +2,7 @@
 using System.Linq.Dynamic.Core;
 using Mapster;
 using Microsoft.AspNetCore.Http;
+using Sparc.Blossom.Authentication;
 
 namespace Sparc.Blossom;
 
@@ -166,9 +167,9 @@ public class BlossomAggregate<T>(BlossomAggregateOptions<T> options)
     }
 }
 
-public class BlossomAggregateOptions<T>(IRepository<T> repository, ClaimsPrincipal principal)
+public class BlossomAggregateOptions<T>(IRepository<T> repository, IClaimsPrincipalProvider provider)
     where T : BlossomEntity
 {
     public IRepository<T> Repository { get; } = repository;
-    public ClaimsPrincipal User => principal;
+    public ClaimsPrincipal User => provider.Principal;
 }

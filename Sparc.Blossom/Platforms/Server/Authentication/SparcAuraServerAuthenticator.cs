@@ -5,11 +5,13 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class SparcAuraServerAuthenticator(ISparcAura aura, IHttpContextAccessor http) : IBlossomAuthenticator
+public class SparcAuraServerAuthenticator(ISparcAura aura, IHttpContextAccessor http) : IBlossomAuthenticator, IClaimsPrincipalProvider
 {
     public LoginStates LoginState { get; set; } = LoginStates.NotInitialized;
     public BlossomUser? User { get; private set; }
     public string? Message { get; set; }
+
+    public ClaimsPrincipal Principal => http.HttpContext?.User ?? new(new ClaimsIdentity());
 
     public async Task<BlossomUser> GetAsync(ClaimsPrincipal principal)
     {

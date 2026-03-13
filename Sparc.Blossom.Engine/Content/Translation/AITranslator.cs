@@ -1,7 +1,4 @@
-﻿#pragma warning disable OPENAI001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-
-using Sparc.Blossom.Content.OpenAI;
-using Sparc.Blossom.Content.Tovik;
+﻿using Sparc.Blossom.Spaces;
 using System.Collections.Concurrent;
 
 namespace Sparc.Blossom.Content;
@@ -12,15 +9,19 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
     protected string DefaultModel = defaultModel;
     protected decimal CostPerToken = costPerToken;
 
-    public async Task<TextContent> TranslateAsync(TextContent message, TovikTranslationOptions options)
+    public abstract Task VectorizeAsync(IVectorizable item, IEnumerable<IVectorizable>? additionalContext = null);
+    public abstract Task VectorizeAsync(IEnumerable<IVectorizable> items, int? lastX = null, int? lookback = null);
+
+    public async Task<TextContent> TranslateAsync(TextContent message, TranslationOptions options)
     {
-        var question = new TovikTranslationQuestion(message, options);
+        var question = new TranslationQuestion(message, options);
         var answer = await AskAsync(question);
 
-        var result = new TextContent(message, options.OutputLanguage ?? message.Language, answer.Value!.Text.First().Text)
-        {
-            Type = options.Schema?.Name
-        };
+        var text = answer.Value!.Text.FirstOrDefault()?.Text ?? answer.Text ?? "";
+        var result = new TextContent(message, options.OutputLanguage ?? message.Language, text);
+        //{
+        //    Type = options.Schema?.Name
+        //};
 
         if (options.Version.HasValue)
             result.Version = options.Version.Value;
@@ -28,10 +29,20 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
         return result;
     }
 
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TovikTranslationOptions options)
+    internal async Task IntersectAsync(List<BlossomSpace> spaces)
+    {
+        foreach (var space in spaces)
+        {
+            var question = new SummaryQuestion(space, spaces.Except([space]));
+            var answer = await AskAsync(question);
+            space.SetSummary(answer.Value);
+        }
+    }
+
+    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
     {
         var fromLanguages = messages.GroupBy(x => x.Language);
-        var batches = TovikTranslator.Batch(messages, 5);
+        var batches = messages.Batch(5);
 
         var translatedMessages = new ConcurrentBag<TextContent>();
 
@@ -43,7 +54,7 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
 
             foreach (var fromLanguage in fromLanguages)
             {
-                var question = new TovikTranslationQuestion(safeBatch, options);
+                var question = new TranslationQuestion(safeBatch, options);
                 var answer = await AskAsync(question);
                 if (answer.Value?.Text == null)
                     continue;
@@ -75,5 +86,4 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
     }
 
     public bool CanTranslate(Language fromLanguage, Language toLanguage) => true;
-
 }

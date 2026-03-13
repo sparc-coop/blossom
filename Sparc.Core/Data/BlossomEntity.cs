@@ -9,11 +9,11 @@ public abstract class BlossomEntity
     [Newtonsoft.Json.JsonIgnore]
     [System.Text.Json.Serialization.JsonIgnore]
     public virtual object GenericId { get; } = null!;
-    protected List<BlossomEvent>? _events;
-    public long? Revision { get; set; }
+    protected List<BlossomEntityChanged>? _events;
+    public long? Revision { get; private set; }
 
     // Event system
-    public List<BlossomEvent> Publish()
+    public List<BlossomEntityChanged> Publish()
     {
         _events ??= [];
 
@@ -23,9 +23,9 @@ public abstract class BlossomEntity
         return domainEvents;
     }
 
-    protected void Broadcast<T>() where T : BlossomEvent => Broadcast((T)Activator.CreateInstance(typeof(T), this));
+    protected void Broadcast<T>() where T : BlossomEntityChanged => Broadcast((T)Activator.CreateInstance(typeof(T), this));
 
-    protected void Broadcast(BlossomEvent notification)
+    protected void Broadcast(BlossomEntityChanged notification)
     {
         _events ??= [];
         _events!.Add(notification);
@@ -74,6 +74,8 @@ public abstract class BlossomEntity
         throw new Exception($"Relationship {typeof(T).Name} on entity {GetType().Name} not found.");
     }
 
+    public void UpdateRevision() => Revision = DateTime.UtcNow.Ticks;
+
     PropertyInfo? GetCollectionProperty<T>() =>
     GetType().GetProperties().FirstOrDefault(x => typeof(ICollection<T>).IsAssignableFrom(x.PropertyType));
 
@@ -86,10 +88,15 @@ public class BlossomEntity<T> : BlossomEntity where T : notnull
     public BlossomEntity()
     {
         Id = default!;
+        EntityType = GetType().Name;
     }
 
-    public BlossomEntity(T id) => Id = id;
+    public BlossomEntity(T id) : this() => Id = id;
     public override object GenericId => Id;
+
+    [JsonProperty("_type")]
+    [JsonPropertyName("_type")]
+    public string EntityType { get; set; }
 
     [JsonProperty("id")]
     [JsonPropertyName("id")]

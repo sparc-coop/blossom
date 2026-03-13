@@ -3,7 +3,8 @@ using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Billing;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data.Pouch;
-using Sparc.Blossom.Realtime.Matrix;
+using Sparc.Blossom.Realtime;
+using Sparc.Blossom.Spaces;
 
 namespace Sparc.Blossom.Engine;
 
@@ -20,7 +21,7 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
             .HasKey(x => x.Id);
 
         model.Entity<TextContent>().ToContainer("TextContent")
-            .HasPartitionKey(x => new { x.Domain, x.LanguageId })
+            .HasPartitionKey(x => x.Domain)
             .HasKey(x => x.Id);
 
         model.Entity<SparcProduct>().ToContainer("Products")
@@ -46,9 +47,22 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
         model.Entity<BlossomUser>().ToContainer("Users")
             .HasPartitionKey(x => x.UserId);
 
-        model.Entity<MatrixEvent>()
+        model.Entity<BlossomEvent>()
           .ToContainer("Events")
-          .HasPartitionKey(e => e.RoomId)
+          .HasPartitionKey(e => e.SpaceId)
           .HasKey(x => x.Id);
+
+        model.Entity<BlossomSpaceObject>()
+            .ToContainer("Vectors1024")
+            .HasPartitionKey(v => v.SpaceId)
+            .HasKey(x => x.Id);
+
+        model.Entity<Post>();
+        model.Entity<Facet>();
+        model.Entity<Constellation>();
+        model.Entity<Axis>();
+        model.Entity<Quest>();
+        model.Entity<BlossomUserTrail>();
+        model.Entity<BlossomSpace>();
     }
 }

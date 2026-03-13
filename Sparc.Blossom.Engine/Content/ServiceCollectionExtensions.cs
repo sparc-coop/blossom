@@ -2,7 +2,7 @@
 
 public static class ContentServiceCollectionExtensions
 {
-    public static WebApplicationBuilder AddTovikTranslator(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddSparcContent(this WebApplicationBuilder builder)
     {
         builder.Services
             .AddScoped<ITranslator, AzureTranslator>()
@@ -10,6 +10,7 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<ITranslator, OpenAITranslator>()
             .AddScoped<ITranslator, AnthropicTranslator>()
             .AddScoped<TovikTranslator>()
+            .AddScoped<VoyageTranslator>()
             .AddScoped<BlossomAggregateOptions<TextContent>>()
             .AddScoped<BlossomAggregate<TextContent>>()
             .AddScoped<Contents>();

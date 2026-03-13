@@ -1,4 +1,4 @@
-﻿namespace Sparc.Blossom.Realtime.Matrix;
+﻿namespace Sparc.Blossom.Realtime;
 
 public record ChangeMembershipState(
     string Membership,
@@ -6,18 +6,18 @@ public record ChangeMembershipState(
     string? AvatarUrl = null,
     string? DisplayName = null,
     string? Reason = null,
-    bool? IsDirect = null) : IMatrixRoomEvent
+    bool? IsDirect = null)
 {
-    public void ApplyTo(MatrixRoom room)
-    {
-        switch (Membership)
-        {
-            case "join":
-                room.NumJoinedMembers++;
-                break;
-            case "leave":
-                room.NumJoinedMembers--; 
-                break; 
-        }
-    }
+    //public void ApplyTo(MatrixRoom room)
+    //{
+    //    switch (Membership)
+    //    {
+    //        case "join":
+    //            room.NumJoinedMembers++;
+    //            break;
+    //        case "leave":
+    //            room.NumJoinedMembers--; 
+    //            break; 
+    //    }
+    //}
 }

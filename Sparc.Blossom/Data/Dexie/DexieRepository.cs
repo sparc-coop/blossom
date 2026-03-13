@@ -54,9 +54,9 @@ public class DexieRepository<T>(IServiceProvider services) : IRepository<T>
         throw new NotImplementedException();
     }
 
-    public async Task<List<T>> GetAllAsync() => await ExecuteAsync<List<T>>("getAll", null);
+    public async Task<List<T>> GetAllAsync() => await ExecuteAsync<List<T>>("getAll", null) ?? [];
 
-    public async Task<List<T>> GetAllAsync(long? asOfRevision = null) => await ExecuteAsync<List<T>>("getAll", asOfRevision);
+    public async Task<List<T>> GetAllAsync(long? asOfRevision = null) => await ExecuteAsync<List<T>>("getAll", asOfRevision) ?? [];
 
     public Task<List<T>> GetAllAsync(ISpecification<T> spec)
     {
@@ -73,7 +73,7 @@ public class DexieRepository<T>(IServiceProvider services) : IRepository<T>
         await dexie.InvokeVoidAsync(identifier, CancellationToken.None, DbName, item);
     }
 
-    async Task<TResult> ExecuteAsync<TResult>(string identifier, object? item)
+    async Task<TResult?> ExecuteAsync<TResult>(string identifier, object? item)
     {
         try
         {

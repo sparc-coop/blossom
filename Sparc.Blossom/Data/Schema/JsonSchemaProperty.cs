@@ -27,7 +27,13 @@ public record JsonSchemaProperty
             Properties = new JsonSchema(type);
 
         if (type.IsGenericType && type.GenericTypeArguments[0] != null)
-            Items = new JsonSchema(type.GenericTypeArguments[0]);
+        {
+            var subType = JsonType(type.GenericTypeArguments[0]);
+            if (subType == "object" || subType == "array")
+                Items = new JsonSchema(type.GenericTypeArguments[0]);
+            else
+                Items = new JsonSchema(subType);
+        }
 
         if (type == typeof(DateTime) || type == typeof(DateTime?))
             Description = " Format in ISO 8601.";
@@ -41,8 +47,6 @@ public record JsonSchemaProperty
 
         var jsonType = type switch
         {
-            Type t when t == typeof(List<string>) => "array",
-            Type t when t == typeof(List<double>) => "array",
             Type t when t == typeof(string) => "string",
             Type t when t == typeof(int) => "integer",
             Type t when t == typeof(long) => "integer",
@@ -51,6 +55,7 @@ public record JsonSchemaProperty
             Type t when t == typeof(decimal) => "number",
             Type t when t == typeof(bool) => "boolean",
             Type t when t == typeof(DateTime) => "string",
+            Type t when t.IsAssignableFrom(typeof(IList)) => "array",
             _ => "object"
         };
 

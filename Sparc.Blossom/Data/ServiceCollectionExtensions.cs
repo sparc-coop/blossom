@@ -18,4 +18,9 @@ public static class ServiceCollectionExtensions
     {
         return new(() => js.InvokeAsync<IJSObjectReference>("import", module).AsTask());
     }
+
+    public static async Task<IJSObjectReference> ImportAsync(this IJSRuntime js, string module)
+    {
+        return await js.InvokeAsync<IJSObjectReference>("import", module);
+    }
 }

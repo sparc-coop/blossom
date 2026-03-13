@@ -21,6 +21,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
         Builder = WebAssemblyHostBuilder.CreateDefault(args);
         Services = Builder.Services;
         Configuration = Builder.Configuration;
+        IsDevelopment = Builder.HostEnvironment.IsDevelopment();
     }
 
     public override IBlossomApplication Build(Assembly? entityAssembly = null)
@@ -48,6 +49,12 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
         Services.AddScoped(_ => new ClaimsPrincipal(new ClaimsIdentity()));
         Services.AddScoped(s => BlossomUser.FromPrincipal(s.GetRequiredService<ClaimsPrincipal>()));
 
+        Services.AddCascadingAuthenticationState();
+        Services.AddScoped<SparcAuraBrowserAuthenticator>()
+            .AddScoped<IBlossomAuthenticator, SparcAuraBrowserAuthenticator>()
+            .AddScoped<PasskeyAuthenticator>();
+
+
         if (!isAuthenticationAdded)
         {
             // No-config Blossom User setup
@@ -55,5 +62,14 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
                 .AddScoped<IBlossomAuthenticator, BlossomDefaultAuthenticator<BlossomUser>>();
             Services.AddScoped<IRepository<BlossomUser>, BlossomRepository<BlossomUser>>();
         }
+    }
+
+    public override void AddSparcEngine(string? url = null) => AddBlossomEngine<SparcAuraBrowserTokenHandler>(url);
+    protected override void AddSparcAura()
+    {
+        Services.AddCascadingAuthenticationState();
+        Services.AddScoped<SparcAuraBrowserAuthenticator>()
+            .AddScoped<IBlossomAuthenticator, SparcAuraBrowserAuthenticator>()
+            .AddScoped<PasskeyAuthenticator>();
     }
 }

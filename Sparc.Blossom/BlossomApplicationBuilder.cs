@@ -1,8 +1,13 @@
-﻿using Sparc.Blossom.Authentication;
-using System.Reflection;
-using MediatR.NotificationPublishers;
-using Microsoft.Extensions.DependencyInjection;
+﻿using MediatR.NotificationPublishers;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Refit;
+using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Billing;
+using Sparc.Blossom.Content;
+using Sparc.Blossom.Realtime;
+using Sparc.Blossom.Spaces;
+using System.Reflection;
 
 namespace Sparc.Blossom;
 
@@ -11,6 +16,7 @@ public abstract class BlossomApplicationBuilder
     public virtual IServiceCollection Services { get; protected set; } = null!;
     public virtual IConfiguration Configuration { get; protected set; } = null!;
     protected bool isAuthenticationAdded => Services.Any(x => x.ServiceType == typeof(IBlossomAuthenticator));
+    public bool IsDevelopment { get; protected set; }
 
     public abstract void AddAuthentication<TUser>() where TUser : BlossomUser, new();
     public virtual void AddAuthentication<TAuthenticator, TUser>()
@@ -42,8 +48,8 @@ public abstract class BlossomApplicationBuilder
                 typeof(BlossomAggregate<>).MakeGenericType(entity));
 
             Services.AddScoped(
-                typeof(IRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)),
-                typeof(BlossomInMemoryRepository<>).MakeGenericType(typeof(BlossomEvent<>).MakeGenericType(entity)));
+                typeof(IRepository<>).MakeGenericType(typeof(BlossomEntityChanged<>).MakeGenericType(entity)),
+                typeof(BlossomInMemoryRepository<>).MakeGenericType(typeof(BlossomEntityChanged<>).MakeGenericType(entity)));
         }
 
         foreach (var aggregate in aggregates)
@@ -79,17 +85,61 @@ public abstract class BlossomApplicationBuilder
         Services.AddScoped<BlossomHubProxy>();
     }
 
+    public abstract void AddSparcEngine(string? url = null);
+    protected void AddBlossomEngine<TTokenHandler>(string? url = null)
+        where TTokenHandler : DelegatingHandler
+    {
+        url ??= "https://engine.sparc.coop";
+        var uri = new Uri(url);
+
+        Services.AddTransient<TTokenHandler>();
+
+        Services.AddRefitClient<ISparcAura>()
+            .ConfigureHttpClient(x => x.BaseAddress = uri)
+            .AddHttpMessageHandler<TTokenHandler>()
+            .AddStandardResilienceHandler();
+
+        Services.AddRefitClient<ISparcBilling>()
+            .ConfigureHttpClient(x => x.BaseAddress = uri)
+            .AddHttpMessageHandler<TTokenHandler>()
+            .AddStandardResilienceHandler();
+
+        Services.AddRefitClient<ISparcContent>()
+            .ConfigureHttpClient(x => x.BaseAddress = uri)
+            .AddHttpMessageHandler<TTokenHandler>()
+            .AddStandardResilienceHandler(x =>
+            {
+                x.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(240);
+                x.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(240);
+                x.AttemptTimeout.Timeout = TimeSpan.FromSeconds(120);
+            });
+
+        Services.AddRefitClient<ISparcSpaces>()
+            .ConfigureHttpClient(x => x.BaseAddress = uri)
+            .AddHttpMessageHandler<TTokenHandler>()
+            .AddStandardResilienceHandler(x =>
+            {
+                x.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(240);
+                x.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(240);
+                x.AttemptTimeout.Timeout = TimeSpan.FromSeconds(120);
+            });
+
+        AddSparcAura();
+        Services.AddScoped<SparcEvents>();
+    }
+
     protected virtual void AddBlossomRealtime(Assembly assembly)
     {
         Services.AddMediatR(options =>
         {
             options.RegisterServicesFromAssembly(assembly);
-            options.RegisterServicesFromAssemblyContaining<BlossomEvent>();
+            options.RegisterServicesFromAssemblyContaining<BlossomEntityChanged>();
             options.NotificationPublisher = new TaskWhenAllPublisher();
             options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
         });
     }
 
+    protected abstract void AddSparcAura();
 
     protected static IEnumerable<Type> GetDtos(Assembly assembly)
        => assembly.GetDerivedTypes(typeof(BlossomAggregateProxy<>))

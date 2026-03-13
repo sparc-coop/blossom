@@ -1,4 +1,6 @@
-﻿namespace Sparc.Blossom.Realtime.Matrix;
+﻿using Sparc.Blossom.Spaces;
+
+namespace Sparc.Blossom.Realtime;
 
 public enum HistoryVisibility
 {
@@ -16,8 +18,8 @@ public enum GuestAccess
 
 public record StateEvent(string Type, object Content, string StateKey = "");
 
-public record GetPublicRoomsResponse(
-    List<MatrixRoom> Chunk,
+public record GetPublicSpacesResponse(
+    List<BlossomSpace> Chunk,
     string? NextBatch = null,
     string? PrevBatch = null,
     int? TotalRoomCountEstimate = null

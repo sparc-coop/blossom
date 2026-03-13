@@ -2,7 +2,6 @@
 using Ardalis.Specification.EntityFrameworkCore;
 using MediatR;
 using Microsoft.Azure.Cosmos;
-using Microsoft.EntityFrameworkCore;
 
 namespace Sparc.Blossom.Data;
 
@@ -10,7 +9,12 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
     : RepositoryBase<T>(simpleClient.Context), IRepository<T>
     where T : BlossomEntity<string>
 {
-    public IQueryable<T> Query { get; } = simpleClient.Container.GetItemLinqQueryable<T>();
+    static string TypeName = typeof(T).Name;
+    public IQueryable<T> Query { get; } = 
+        simpleClient.IsPolymorphicType
+        ? simpleClient.Container.GetItemLinqQueryable<T>().Where(x => x.EntityType == TypeName)
+        : simpleClient.Container.GetItemLinqQueryable<T>();
+
     public CosmosDbSimpleClient<T> Client { get; } = simpleClient;
     public IMediator Mediator { get; } = mediator;
 
@@ -81,6 +85,11 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
                 // Handle 409 Conflict (item already exists)
                 Console.WriteLine($"Conflict: Item with id {item.Id} already exists.");
             }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+            {
+                // Handle 429 Too Many Requests (rate limiting)
+                Console.WriteLine($"Rate limit exceeded when adding item with id {item.Id}. Consider retrying after some time.");
+            }
             await Publish(item);
         });
     }
@@ -149,26 +158,10 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
     {
         foreach (var item in items)
         {
-            var partitionKey = GetPartitionKey(item);
+            var partitionKey = Client.GetPartitionKey(item);
             await Client.Container.DeleteItemAsync<T>(item.Id, partitionKey);
             await Publish(item);
         }
-    }
-
-    public PartitionKey GetPartitionKey(T item)
-    {
-        var partitionKeyProperty = Client.EntityType?.GetPartitionKeyProperties();
-        if (partitionKeyProperty == null || partitionKeyProperty.Count == 0)
-            return PartitionKey.None;
-
-        var partitionKey = new PartitionKeyBuilder();
-        foreach (var property in partitionKeyProperty)
-        {
-            var value = item.GetType().GetProperty(property.Name)?.GetValue(item)?.ToString();
-            partitionKey.Add(value);
-        }
-
-        return partitionKey.Build();
     }
 
     public IQueryable<T> FromSqlRaw(string sql, params object[] parameters)
