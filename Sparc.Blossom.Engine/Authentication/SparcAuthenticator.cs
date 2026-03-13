@@ -58,8 +58,8 @@ public class SparcAuthenticator<T>(
                 var identity = SparcUser.GetOrCreateIdentity(authenticationType, emailOrToken);
                 await UpdateAsync(SparcUser);
 
-                if (!identity.IsVerified)
-                    await SendVerificationCodeAsync(identity);
+                //if (!identity.IsVerified)
+                    //await SendVerificationCodeAsync(identity);
             }
         }
 

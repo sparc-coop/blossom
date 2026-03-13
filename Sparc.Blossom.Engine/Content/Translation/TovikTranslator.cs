@@ -1,5 +1,4 @@
 ﻿using Sparc.Blossom.Authentication;
-using Sparc.Blossom.Content.Tovik;
 using Sparc.Blossom.Data;
 using System.Globalization;
 using System.Security.Claims;
@@ -70,10 +69,10 @@ public class TovikTranslator(
             Version = domain.Settings.Version,
             IgnoreList = domain.Settings.IgnoreList,
             OutputLanguage = toLanguage, 
-            AdditionalContext = request.Options.AdditionalContext,
+            AdditionalContext = request.Options?.AdditionalContext,
         };
 
-        if (request.Options.Model != null)
+        if (request.Options?.Model != null)
         {
             var translator = Translators
                 .OrderBy(x => x.Priority)

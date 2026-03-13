@@ -71,38 +71,9 @@ app.UseCors();
 app.MapGet("/aura/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 app.MapGet("/hi", () => "Hi from Sparc!");
 
-app.MapGet("/slack/import", async (SlackIntegrationService slack, IRepository<Post> repo) =>
-{
-    var existingMessages = await repo.Query.Where(x => x.SpaceId == "conseris").ToListAsync();
-    if (existingMessages.Any())
-        await repo.DeleteAsync(existingMessages);
-    
-    var channels = new List<SlackNet.Conversation>();
-    var english = Language.Find("en-US");
-    await foreach (var channelBatch in slack.GetChannelsAsync(1000))
-    {
-        var conserisChannel = channelBatch.FirstOrDefault(x => x.Name == "conseris");
-        if (conserisChannel == null)
-            continue;
-
-        await foreach (var messageBatch in slack.GetMessagesAsync([conserisChannel.Id], 10000))
-        {
-            //var posts = messageBatch.Select(x => new Post("kuviocreative.com", "conseris", english!, x.Text, new(x.User, x.User))
-            //{
-            //    Timestamp = x.Timestamp
-            //});
-            //await repo.AddAsync(posts);
-        }
-    }
-});
-
-app.MapGet("/slack/vectorize", async (IRepository<Post> repo, IEnumerable<ITranslator> translators, IRepository<BlossomVector> vectorRepo) =>
-{
-    
-});
-
 using var scope = app.Services.CreateScope();
 scope.ServiceProvider.GetRequiredService<Contents>().Map(app);
+scope.ServiceProvider.GetRequiredService<TovikTranslator>().Map(app);
 
 foreach (var translator in scope.ServiceProvider.GetServices<ITranslator>())
     await translator.GetLanguagesAsync();
