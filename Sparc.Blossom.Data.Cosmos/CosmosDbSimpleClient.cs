@@ -25,8 +25,7 @@ public class CosmosDbSimpleClient<T>(DbContext context, CosmosClient client)
         {
             UseSystemTextJsonSerializerWithOptions = new()
             {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                TypeInfoResolver = new BlossomPolymorphicTypeResolver()
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             },
             ConnectionMode = ConnectionMode.Direct
         };
