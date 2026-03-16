@@ -15,7 +15,7 @@ ul.colors {
     display: flex;
     gap: 4px;
     flex-wrap: wrap;
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
 
     li {

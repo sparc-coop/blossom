@@ -1,0 +1,13 @@
+﻿header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    align-items: flex-start;
+}
+
+div {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}

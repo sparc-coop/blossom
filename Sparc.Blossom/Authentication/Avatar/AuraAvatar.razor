@@ -1,6 +1,6 @@
-<figure class="avatar @(HasEmoji ? "emoji" : "")" style="background-color: @Avatar.BackgroundColor">
+<figure class="avatar @(HasEmoji ? "emoji" : "")">
     <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <text x="50%" y="50%" style="fill: @Avatar.ForegroundColor">
+        <text x="50%" y="50%" style="fill: @Avatar.BackgroundColor">
             @(!string.IsNullOrWhiteSpace(Avatar.Emoji) ? Avatar.Emoji : (!string.IsNullOrWhiteSpace(Avatar.Initials) ? Avatar.Initials : ""))
         </text>
     </svg>

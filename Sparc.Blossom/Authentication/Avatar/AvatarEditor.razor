@@ -6,8 +6,6 @@
 </header>
 <div>
     <AuraAvatar Avatar="UserAvatar" />
-</div>
-<div>
     <ColorSelector @bind-BackgroundColor="UserAvatar.BackgroundColor" @bind-BackgroundColor:after=Save />
     <EmojiSelector Emoji="@UserAvatar.Emoji" EmojiChanged="HandleEmojiChanged" />
 </div>

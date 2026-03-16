@@ -24,6 +24,8 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     internal Dictionary<string, IEnumerable<string>> MultiClaims { get; set; } = [];
     public string? Identity(string authenticationType) => 
         Identities.FirstOrDefault(x => x.Type == authenticationType)?.Id;
+    public bool IsRegistered => Identities.Any();
+    public bool IsVerified => Identities.Any(x => x.IsVerified);
 
     public void AddClaim(string type, string? value)
     {
