@@ -1,13 +1,8 @@
 ﻿@using Sparc.Blossom.Realtime
 
-<header>
-    <h4>Avatar</h4>
-    <p>Customize your profile's avatar!</p>
-</header>
 <div>
-    <AuraAvatar Avatar="UserAvatar" />
     <ColorSelector @bind-BackgroundColor="UserAvatar.BackgroundColor" @bind-BackgroundColor:after=Save />
-    <EmojiSelector Emoji="@UserAvatar.Emoji" EmojiChanged="HandleEmojiChanged" />
+    <EmojiSelector Avatar="UserAvatar" EmojiChanged="HandleEmojiChanged" />
 </div>
 
 @inject ISparcAura Aura

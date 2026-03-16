@@ -1,247 +1,77 @@
 ﻿::deep dialog[open] {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    padding: 16px;
+    display: flex;
+    flex-direction: column;
     gap: 16px;
+    width: min(90dvw, 1000px);
+    height: min(90dvh, 600px);
+    padding: 0 24px 24px 24px;
     background: var(--aura-background);
-    width: 100%;
-    max-width: min(90dvw, 1000px);
-    border-radius: 20px;
-    color: var(--aura-text);
-    box-sizing: border-box;
-    border: none;
-    z-index: 10000;
-    max-height: min(90dvh, 800px);
-    font-family: 'elza-text';
+    border-radius: 32px;
 
-    header {
+    .column {
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    > header {
+        display: flex;
         justify-content: space-between;
-        gap: 8px;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        padding: 24px 0;
+        background: var(--aura-background);
 
-        div {
+        > div {
             display: flex;
-            align-items: center;
             gap: 8px;
-
-            h3 {
-                font-size: 2.133rem;
-                font-weight: 500;
-                line-height: 110%;
-            }
+            align-items: center;
         }
 
         button {
-            background: none;
+            background: transparent;
             border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            height: 32px;
-            padding: 8px 10px;
 
-            &:hover {
-                ::deep svg path {
-                    stroke: var(--aura-text);
-                }
+            svg path {
+                stroke: var(--aura-text);
             }
         }
     }
 
-    section {
-        gap: 8px;
-        flex: 1;
+    > section {
         max-height: 100%;
         overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
 
-        .column:first-of-type, .column:last-of-type {
-            > section:first-of-type {
-                flex: 1 1 auto;
-            }
-
-            > section:not(:first-of-type) {
-                flex: 0 0 auto;
-            }
-        }
-
-        .column {
+        section {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            flex: 1;
-            min-height: 0;
-            align-self: stretch;
+        }
 
-            > section:first-of-type {
-                flex: 1 1 0;
-                display: flex;
-                flex-direction: column;
-                min-height: 0;
+        @media (orientation: landscape) {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            height: 100%;
+
+            .column {
+                max-height: 100%;
+                overflow-y: auto;
             }
 
-            > section:not(:first-of-type) {
-                flex-shrink: 0;
-                margin-top: auto;
-            }
-
-            > section {
-                display: flex;
-                flex-direction: column;
-                gap: 20px;
-                border-radius: 20px;
-                border: 1px solid var(--aura-border);
-                padding: 20px;
-
-                aside {
-                    font-size: 1.2rem;
-                    text-align: center;
-
-                    button {
-                        background: transparent;
-                        text-decoration: underline;
-                        margin-top: 4px;
-                    }
-                }
-
-                > header {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-
-                    h4 {
-                        font-size: 1.6rem;
-                        font-weight: 500;
-                        line-height: 140%;
-                    }
-
-                    p {
-                        font-size: 1.4rem;
-                        font-weight: 400;
-                        line-height: 140%;
-                        color: rgba(43, 28, 69, 0.90);
-                    }
-
-                    ::deep svg {
-                        align-self: center;
-                    }
-                }
-
-                > div {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                    width: 100%;
-
-                    p.message {
-                        font-size: 1.2rem;
-                        font-weight: 500;
-                        color: var(--aura-text);
-                    }
-
-                    input, select, textarea {
-                        color: var(--aura-input-text);
-                    }
-
-                    input,
-                    textarea {
-                        padding: 16px 32px;
-                        border-radius: 20px;
-                        border: 1px solid var(--aura-border);
-                        background: transparent;
-                    }
-
-                    textarea {
-                        min-height: 8rem;
-                        flex: 1 1 auto;
-                        height: 100%;
-                        resize: none;
-                    }
-
-                    label {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 8px;
-                        font-size: 12px;
-                        font-weight: 500;
-                        line-height: 140%;
-                    }
-
-                    figure {
-                        height: 220px;
-                        width: 220px;
-                    }
-                }
-
-                &.app-links {
-                    padding: 16px;
-                    gap: 16px;
-
-                    > header {
-                        gap: 4px;
-                    }
-
-                    > div {
-                        flex-direction: row;
-                        align-content: flex-start;
-                        align-self: stretch;
-                        flex-wrap: wrap;
-                        gap: 7px;
-
-                        > article {
-                            all: unset;
-                            display: flex;
-                            width: 51.2px;
-                            height: 51.2px;
-                            justify-content: center;
-                            align-items: center;
-                            box-sizing: border-box;
-                            border-radius: 8px;
-                            border: 1px solid transparent;
-                            overflow: hidden;
-
-                            ::deep svg {
-                                width: 100%;
-                                height: 100%;
-                                object-fit: cover;
-                                border-radius: 8px;
-                            }
-
-                            &:hover {
-                                border: 1px solid var(--aura-input-text);
-                            }
-                        }
-                    }
-                }
-
-                &.profile-customization {
-                    flex: 0 0 auto;
-                    gap: 16px;
-                }
-
-                &.user-details {
-                    flex: 1 1 auto;
-                    padding: 16px;
-                    gap: 16px;
-
-                    > div {
-                        flex: 1 1 auto;
-                        display: flex;
-                        flex-direction: column;
-                        min-height: 0;
-
-                        label:last-of-type {
-                            flex: 1 1 auto;
-                        }
-                    }
-                }
+            .column-2 {
+                justify-content: space-between;
             }
         }
     }
 }
 
-@media (min-width: 996px) {
-    dialog[open] section {
-        display: flex;
-        flex-direction: row;
+.login {
+    margin-top: 40px;
+    p {
+        text-align: center;
     }
 }

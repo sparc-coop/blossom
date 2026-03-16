@@ -12,7 +12,7 @@
                 {
                     <li tabindex="@(tabIndex++)"
                         @onclick="(() => SetEmoji(emoji))"                        
-                        class="@(Emoji == emoji ? "selected" : "")">
+                        style="@(Avatar.Emoji == emoji ? ("color: " + Avatar.BackgroundColor) : "")">
                         @emoji
                     </li>
                 }
@@ -22,7 +22,7 @@
 }
 
 @code {
-    [Parameter] public string Emoji { get; set; } = "";
+    [Parameter] public required BlossomAvatar Avatar { get; set; }
     [Parameter] public EventCallback<string> EmojiChanged { get; set; }
 
     private List<string>? Emojis;
