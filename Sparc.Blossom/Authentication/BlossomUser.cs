@@ -186,7 +186,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         Avatar.Emoji = avatar.Emoji;
         Avatar.HearOthers = avatar.HearOthers;
         Avatar.MuteMe = avatar.MuteMe;
-        Avatar.PasskeyName = avatar.PasskeyName;
+        //Avatar.PasskeyName = avatar.PasskeyName;
     }
 
     internal void GoOnline(string connectionId)
@@ -204,6 +204,11 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
         return Identities.Any(x => x.Type == authenticationType);
     }
 
+    public bool HasVerifiedIdentity(string authenticationType)
+    {
+        return Identities.Any(x => x.Type == authenticationType && x.IsVerified);
+    }
+
     public BlossomIdentity GetOrCreateIdentity(string authenticationType, string externalId)
     {
         var identity = Identities.FirstOrDefault(x => x.Type == authenticationType && x.Id == externalId)
@@ -216,10 +221,6 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     {
         var identity = new BlossomIdentity(externalId, authenticationType);
         Identities.Add(identity);
-
-        Avatar.VerificationLevel = Identity("Email") != null ? 2
-            : Identity("Passkey") != null ? 1
-            : 0;
 
         return identity;
     }

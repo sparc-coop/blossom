@@ -37,8 +37,8 @@
 @inject SparcEvents Events
 @code
 {
-    [Parameter] public required BlossomAvatar UserAvatar { get; set; }
-    bool HasAtLeastOnePasskey => UserAvatar.VerificationLevel > 0;
+    [Parameter] public required BlossomUser User { get; set; }
+    bool HasAtLeastOnePasskey => User.Identity("Passkey") != null;
     bool IsLoggingIn;
     string? Message;
     string? PasskeyName;
@@ -46,13 +46,14 @@
     string SaveButtonText => 
         IsLoggingIn ? "Saving..." 
         : CantSave ? "Save"
-        : PasskeyName != UserAvatar.PasskeyName 
+        : PasskeyName != Passkey?.Name
         ? $"Save \"{PasskeyName}\" (new)"
         : $"Save \"{PasskeyName}\"";
+    BlossomIdentity? Passkey => User.Identities.FirstOrDefault(x => x.Type == "Passkey");
 
     protected override void OnInitialized()
     {
-        PasskeyName = UserAvatar.PasskeyName;
+        PasskeyName = Passkey?.Name;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -69,19 +70,19 @@
 
         try
         {
-            if (PasskeyName != UserAvatar.PasskeyName)
+            if (Passkey != null && PasskeyName != Passkey.Name)
             {
-                UserAvatar.PasskeyName = PasskeyName;
-                await Aura.UpdateUserInfo(UserAvatar);
+                Passkey.Name = PasskeyName;
+                await Aura.UpdateUserInfo(User.Avatar);
                 await Auth.RegisterAsync();
             }
             else
             {
-                await Aura.UpdateUserInfo(UserAvatar);
+                await Aura.UpdateUserInfo(User.Avatar);
                 IsLoggingIn = false;
                 Message = "Your profile has been saved successfully!";
             }
-            await Events.OnAvatarChanged(UserAvatar);
+            await Events.OnAvatarChanged(User.Avatar);
         }
         catch (Exception e)
         {

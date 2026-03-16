@@ -132,7 +132,7 @@ public class SparcAuthenticator<T>(
 
     private async Task<string> StartPasskeyRegistrationAsync(BlossomUser user)
     {
-        var options = new RegisterOptions(user.Id, user.Avatar.PasskeyName ?? user.Avatar.Username)
+        var options = new RegisterOptions(user.Id, user.Avatar.Username)
         {
             Aliases = [user.Avatar.Username]
         };

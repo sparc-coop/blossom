@@ -32,6 +32,8 @@
 </div>
 
 @code {
+    [Parameter] public required BlossomUser User { get; set; }
+
     private bool IsVerified = false;
     private string VerificationCode { get; set; } = "";
     private void VerifyCode(string code)

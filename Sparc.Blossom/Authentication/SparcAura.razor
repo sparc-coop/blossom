@@ -1,7 +1,7 @@
 ﻿@using Sparc.Blossom.Shared
 @using Sparc.Blossom.Realtime
 
-@if (UserAvatar != null)
+@if (User != null && UserAvatar != null)
 {
     <div class="account-btn" @onclick="OpenUserProfile">
         <AuraAvatar Avatar="UserAvatar" />
@@ -12,7 +12,7 @@
             <header>
                 <div>
                     <AuraAvatar Avatar="UserAvatar" />
-                    <h3>@(UserAvatar.PasskeyName ?? "Your Profile")</h3>
+                    <h3>Your Profile</h3>
                 </div>
                 <button type="button" aria-label="Close" @onclick="@CloseUserProfile"><XIcon /></button>
             </header>
@@ -35,14 +35,16 @@
                         }
                     </section>
                     <section class="login">
-                        @if (UserAvatar.VerificationLevel == 0)
+                        @if (!User.HasVerifiedIdentity("Passkey"))
                         {
-                            <LoginWithPasskey UserAvatar="UserAvatar" />
+                            <LoginWithPasskey User="User" />
                         }
-                        else if (UserAvatar.VerificationLevel == 1)
+
+                        @if (!User.HasVerifiedIdentity("Email"))
                         {
-                            <LoginWithEmail UserAvatar="UserAvatar" />
+                            <LoginWithEmail User="User" />
                         }
+
                         else
                         {
                             <p>You are logged in and your data is protected.</p>
@@ -65,13 +67,14 @@
     [Parameter] public RenderFragment<BlossomAvatar>? ChildContent { get; set; }
     BlossomDialog Dialog = null!;
 
+    public BlossomUser? User { get; set; }
     public BlossomAvatar? UserAvatar { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        var user = await Aura.UserInfo();
-        if (user != null)
-            await SetAvatar(user.Avatar);
+        User = await Aura.UserInfo();
+        if (User != null)
+            await SetAvatar(User.Avatar);
 
         Events.AvatarChanged += SetAvatar;
     }

@@ -7,6 +7,7 @@ namespace Sparc.Blossom.Authentication;
 public class BlossomIdentity(string id, string type)
 {
     public string Id { get; set; } = id;
+    public string? Name { get; set; }
     public string Type { get; set; } = type;
     internal string? VerificationHash { get; set; }
     public bool IsVerified { get; set; }
