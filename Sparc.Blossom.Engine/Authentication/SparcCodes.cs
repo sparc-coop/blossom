@@ -5,14 +5,14 @@ using System.Text;
 
 namespace Sparc.Blossom.Authentication;
 
-public record SparcCodeIndex(string Hash, string UserId, byte[] UserSecret, DateTime Expires);
+public record SparcCodeIndex(string Hash, string UserId, string IdentityId, byte[] UserSecret, DateTime Expires);
 public class SparcCodes
 {
     static readonly ConcurrentDictionary<string, SparcCodeIndex> TotpIndex = [];
     static readonly VerificationWindow Window = VerificationWindow.RfcSpecifiedNetworkDelay;
     static readonly int TotpSize = 8;
 
-    public static SparcCode? Generate(BlossomUser user)
+    public static SparcCode? Generate(BlossomUser user, BlossomIdentity identity)
     {
         var secretKey = UserSecret(user);
         if (secretKey == null)
@@ -22,7 +22,7 @@ public class SparcCodes
         do
         {
             code = Generate(secretKey);
-            var index = GenerateIndex(code, user.Id, secretKey);
+            var index = GenerateIndex(code, user.Id, identity.Id, secretKey);
             if (!TotpIndex.TryAdd(index.Hash, index))
                 code = null;
         } while (code == null);
@@ -30,7 +30,7 @@ public class SparcCodes
         return code;
     }
 
-    public static string? Verify(string code)
+    public static (string? UserId, string? IdentityId)? Verify(string code)
     {
         CleanUpExpiredEntries();
 
@@ -48,7 +48,7 @@ public class SparcCodes
 
         // If the code is valid, remove it from the index
         TotpIndex.TryRemove(hash, out _);
-        return index.UserId;
+        return (index.UserId, index.IdentityId);
     }
 
     private static SparcCode Generate(byte[] secretKey)
@@ -57,11 +57,11 @@ public class SparcCodes
         return new SparcCode(totp.ComputeTotp(), totp.RemainingSeconds());
     }
 
-    private static SparcCodeIndex GenerateIndex(SparcCode code, string userId, byte[] secretKey)
+    private static SparcCodeIndex GenerateIndex(SparcCode code, string userId, string identityId, byte[] secretKey)
     {
         var hash = Hash(code.Code);
         var expires = DateTime.UtcNow.AddSeconds(code.RemainingSeconds * 10);
-        SparcCodeIndex index = new(hash, userId, secretKey, expires);
+        SparcCodeIndex index = new(hash, userId, identityId, secretKey, expires);
         return index;
     }
 

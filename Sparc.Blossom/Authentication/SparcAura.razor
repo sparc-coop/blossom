@@ -18,12 +18,9 @@
             </header>
             <section>
                 <div class="column">
-                    <section class="profile-customization">
+                    @* <section class="profile-customization">
                         <AvatarEditor UserAvatar="UserAvatar" />
-                    </section>
-                </div>
-
-                <div class="column column-2">
+                    </section> *@
                     <section class="language-selector">
                         <header>
                             <h4>Language</h4>
@@ -34,24 +31,15 @@
                             @ChildContent(UserAvatar)
                         }
                     </section>
+                </div>
+
+                <div class="column column-2">
                     <section class="login">
-                        @if (!User.HasVerifiedIdentity("Passkey"))
-                        {
-                            <LoginWithPasskey User="User" />
-                        }
-
-                        @if (!User.HasVerifiedIdentity("Email"))
-                        {
-                            <LoginWithEmail User="User" />
-                        }
-
-                        else
-                        {
-                            <p>You are logged in and your data is protected.</p>
-                            <button @onclick=Logout>
-                                Forget Me on this Device
-                            </button>
-                        }
+                        <LoginWithPasskey User="User" />
+                        <LoginWithEmail User="User" />
+                        <button class="secondary-btn" @onclick=Logout>
+                            Sign Out
+                        </button>
                     </section>
                 </div>
             </section>
@@ -60,6 +48,7 @@
 }
 
 @inject ISparcAura Aura
+@inject IBlossomAuthenticator Auth
 @inject IJSRuntime Js
 @inject NavigationManager Nav
 @inject SparcEvents Events
@@ -88,13 +77,11 @@
 
     private async Task Logout()
     {
-        var confirm = await Js.InvokeAsync<bool>("confirm", "Are you sure you want to log out?");
+        var confirm = await Js.InvokeAsync<bool>("confirm", "Are you sure you want to sign out?");
         if (!confirm)
             return;
 
-        var user = await Aura.Logout();
-        UserAvatar = user.Avatar;
-        Nav.Refresh(true);
+        Nav.NavigateTo("/_signout", true);
     }
 
     private async Task OpenUserProfile() => await Dialog.OpenModalAsync();

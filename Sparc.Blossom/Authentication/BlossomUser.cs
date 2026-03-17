@@ -175,6 +175,7 @@ public class BlossomUser : BlossomEntity<string>, IEquatable<BlossomUser>
     public void UpdateAvatar(BlossomAvatar avatar)
     {
         Avatar.Id = Id;
+        Avatar.Username = avatar.Username;
         Avatar.Language = avatar.Language;
         Avatar.Locale = avatar.Locale;
         Avatar.Currency = avatar.Currency;

@@ -1,35 +1,45 @@
 ﻿@using Sparc.Blossom.Realtime
 
-<header>
-    <h4>Save Your Profile</h4>
-    <p>
-        Save your profile securely with a passkey —- a modern, password-free method that stores your profile safely on your device.
-    </p>
-    <p>
-        Your passkey stays private and is never shared with us or any third parties.
-    </p>
-</header>
+@if (!User.HasVerifiedIdentity("Passwordless"))
+{
+    <header>
+        <h4>Set Up Your Profile</h4>
+        <p>
+            Sign in securely with a passkey —- a modern, password-free method that stores your profile safely on your device.
+        </p>
+        <p>
+            Your passkey stays private and is never shared with us or any third parties.
+        </p>
+    </header>
 
-<div>
+    <form @onsubmit="Register">
+        <input type="text" @bind="Username" placeholder="Choose a username" @bind:event="oninput" />
+        <button type="button" class="primary-btn" @onclick="Register" disabled="@CantSave">
+            Save
+        </button>
+    </form>
+
     @if (Message != null)
     {
         <p class="message">
             @Message
         </p>
     }
-    <input type="text" @bind="PasskeyName" placeholder="Name your profile" @bind:event="oninput" />
-    <button type="button" class="primary-btn" @onclick="Register" disabled="@CantSave">
-        @SaveButtonText
-    </button>
 
     <aside>
         Already have a profile for this app?
-        <button @onclick=Login disabled="@IsLoggingIn">
+        <button class="link-btn" @onclick=Login disabled="@IsLoggingIn">
             Load My Profile
         </button>
     </aside>
-</div>
-
+}
+else
+{
+    <header>
+        <h4>Welcome Back</h4>
+        <p>You are signed in and your data is protected.</p>
+    </header>
+}
 
 @inject PasskeyAuthenticator Auth
 @inject NavigationManager Nav
@@ -38,23 +48,12 @@
 @code
 {
     [Parameter] public required BlossomUser User { get; set; }
-    bool HasAtLeastOnePasskey => User.Identity("Passkey") != null;
     bool IsLoggingIn;
     string? Message;
-    string? PasskeyName;
-    bool CantSave => string.IsNullOrWhiteSpace(PasskeyName) || IsLoggingIn;
-    string SaveButtonText => 
-        IsLoggingIn ? "Saving..." 
-        : CantSave ? "Save"
-        : PasskeyName != Passkey?.Name
-        ? $"Save \"{PasskeyName}\" (new)"
-        : $"Save \"{PasskeyName}\"";
-    BlossomIdentity? Passkey => User.Identities.FirstOrDefault(x => x.Type == "Passkey");
+    string? Username;
+    bool CantSave => string.IsNullOrWhiteSpace(Username) || IsLoggingIn;
 
-    protected override void OnInitialized()
-    {
-        PasskeyName = Passkey?.Name;
-    }
+    BlossomIdentity? Passkey => User.Identities.FirstOrDefault(x => x.Type == "Passwordless");
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -70,18 +69,19 @@
 
         try
         {
-            if (Passkey != null && PasskeyName != Passkey.Name)
+            if (Passkey == null)
             {
-                Passkey.Name = PasskeyName;
-                await Aura.UpdateUserInfo(User.Avatar);
                 await Auth.RegisterAsync();
-            }
-            else
-            {
                 await Aura.UpdateUserInfo(User.Avatar);
-                IsLoggingIn = false;
-                Message = "Your profile has been saved successfully!";
             }
+            else if (Username != null && Username != User.Avatar.Username)
+            {
+                User.Avatar.Username = Username;
+                await Aura.UpdateUserInfo(User.Avatar);
+            }
+
+            Message = "Your profile has been saved successfully!";
+            IsLoggingIn = false;
             await Events.OnAvatarChanged(User.Avatar);
         }
         catch (Exception e)

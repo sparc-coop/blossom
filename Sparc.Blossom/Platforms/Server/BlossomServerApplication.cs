@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite;
@@ -100,6 +102,12 @@ public class BlossomServerApplication : IBlossomApplication
         Host.UseAuthentication();
         Host.UseAuthorization();
         Host.UseMiddleware<BlossomAuthenticatorMiddleware>();
+
+        Host.MapGet("/_signout", async (HttpContext context) =>
+        {
+            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return Results.Redirect("/");
+        });
     }
 
     void MapBlossomContexts(Assembly assembly)

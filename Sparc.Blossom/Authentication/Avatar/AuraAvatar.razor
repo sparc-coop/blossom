@@ -1,12 +1,27 @@
-<figure class="avatar @(HasEmoji ? "emoji" : "")">
-    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <text x="50%" y="50%" style="fill: @Avatar.BackgroundColor">
-            @(!string.IsNullOrWhiteSpace(Avatar.Emoji) ? Avatar.Emoji : (!string.IsNullOrWhiteSpace(Avatar.Initials) ? Avatar.Initials : ""))
-        </text>
-    </svg>
-</figure>
+@if (Mode == "face")
+{
+    <figure class="avatar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M9.26766 9L8.34766 12.472" stroke="#3F1805" stroke-width="1.5" stroke-miterlimit="10" />
+            <path d="M23.9116 10.6121C23.6596 11.8641 23.4996 13.1361 23.4316 14.4121" stroke="#3F1805" stroke-width="1.5" stroke-miterlimit="10" />
+            <path d="M15.4962 11.3281C12.8922 13.8761 9.65625 15.7721 6.15625 16.8001C7.49625 19.4321 10.5042 21.1161 13.4482 20.8801" stroke="#3F1805" stroke-width="1.5" stroke-miterlimit="10" />
+            <path d="M21.3598 21.272C20.5038 24.256 16.9838 25.416 14.2998 24.556" stroke="#3F1805" stroke-width="1.5" stroke-miterlimit="10" />
+        </svg>
+    </figure>
+}
+else
+{
+    <figure class="avatar @(HasEmoji ? "emoji" : "")">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <text x="50%" y="50%" style="fill: @Avatar.BackgroundColor">
+                @(!string.IsNullOrWhiteSpace(Avatar.Emoji) ? Avatar.Emoji : (!string.IsNullOrWhiteSpace(Avatar.Initials) ? Avatar.Initials : ""))
+            </text>
+        </svg>
+    </figure>
+}
 
 @code {
     [Parameter] public required BlossomAvatar Avatar { get; set; }
+    string Mode = "face";
     private bool HasEmoji => !string.IsNullOrWhiteSpace(Avatar?.Emoji);
 }

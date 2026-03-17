@@ -1,0 +1,32 @@
+﻿header h4 {
+    margin-bottom: 0;
+}
+
+ul {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+
+    li {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 12px 16px;
+        border-radius: 20px;
+        background: var(--blue-800);
+
+        > div {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+    }
+
+    input, button {
+        padding: 8px 12px;
+    }
+}

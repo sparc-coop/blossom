@@ -14,6 +14,10 @@ figure {
             text-anchor: middle;
             dominant-baseline: central;
         }
+
+        path {
+            stroke: var(--aura-text);
+        }
     }
 
     &:hover {

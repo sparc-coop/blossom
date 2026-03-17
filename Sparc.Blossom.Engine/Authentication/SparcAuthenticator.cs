@@ -1,4 +1,5 @@
-﻿using Passwordless;
+﻿using Microsoft.AspNetCore.Authentication;
+using Passwordless;
 using Sparc.Blossom.Billing;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
@@ -45,22 +46,29 @@ public class SparcAuthenticator<T>(
         // 1. Convert the ClaimsPrincipal from the cookie into a BlossomUser
         SparcUser = await GetUserAsync(principal);
 
-        if (emailOrToken != null)
+        try
         {
-            // Verify Authentication Token or Register
-            if (emailOrToken.StartsWith("verify"))
-                await VerifyTokenAsync(emailOrToken);
-            else if (emailOrToken.StartsWith("totp"))
-                await VerifyTotpAsync(emailOrToken);
-            else
+            if (emailOrToken != null)
             {
-                var authenticationType = TwilioService.IsValidEmail(emailOrToken) ? "Email" : "Phone";
-                var identity = SparcUser.GetOrCreateIdentity(authenticationType, emailOrToken);
-                await UpdateAsync(SparcUser);
+                // Verify Authentication Token or Register
+                if (emailOrToken.StartsWith("verify"))
+                    await VerifyTokenAsync(emailOrToken);
+                else if (emailOrToken.StartsWith("totp"))
+                    await VerifyTotpAsync(emailOrToken);
+                else
+                {
+                    var authenticationType = TwilioService.IsValidEmail(emailOrToken) ? "Email" : "Phone";
+                    var identity = SparcUser.GetOrCreateIdentity(authenticationType, emailOrToken);
+                    await UpdateAsync(SparcUser);
 
-                //if (!identity.IsVerified)
-                    //await SendVerificationCodeAsync(identity);
+                    if (!identity.IsVerified)
+                        await SendVerificationCodeAsync(SparcUser, identity);
+                }
             }
+        }
+        catch
+        {
+            return new(SparcUser);
         }
 
         return tokens.Create(SparcUser);
@@ -68,13 +76,19 @@ public class SparcAuthenticator<T>(
 
     private async Task<BlossomUser> VerifyTotpAsync(string emailOrToken)
     {
-        var matchingUserId = SparcCodes.Verify(emailOrToken)
+        var (userId, identityId) = SparcCodes.Verify(emailOrToken)
                         ?? throw new InvalidOperationException("Invalid TOTP code.");
 
         var matchingUser = await Users.Query
-            .Where(x => x.Id == matchingUserId)
+            .Where(x => x.Id == userId)
             .FirstOrDefaultAsync()
             ?? throw new InvalidOperationException("User not found for the provided TOTP code.");
+
+        var identity = matchingUser.Identities.FirstOrDefault(i => i.Id == identityId)
+            ?? throw new InvalidOperationException("Identity not found for the provided TOTP code.");
+
+        identity.IsVerified = true;
+        await UpdateAsync(matchingUser);
 
         await LoginAsync(matchingUser.ToPrincipal());
         return matchingUser;
@@ -96,7 +110,17 @@ public class SparcAuthenticator<T>(
 
     private async Task<BlossomUser> VerifyTokenAsync(string token)
     {
-        var verifiedUser = await _passwordlessClient.VerifyAuthenticationTokenAsync(token);
+        VerifiedUser? verifiedUser;
+        try
+        {
+            verifiedUser = await _passwordlessClient.VerifyAuthenticationTokenAsync(token);
+        }
+        catch (Exception ex)
+        {
+            Message = $"Token verification failed: {ex.Message}";
+            LoginState = LoginStates.Error;
+            throw new InvalidOperationException(Message, ex);
+        }
 
         if (verifiedUser?.Success != true)
         {
@@ -114,20 +138,20 @@ public class SparcAuthenticator<T>(
             throw new InvalidOperationException(Message);
         }
 
-        SparcUser.GetOrCreateIdentity("Passwordless", verifiedUser.UserId);
-
+        var identity = SparcUser.GetOrCreateIdentity("Passwordless", verifiedUser.UserId);
+        identity.IsVerified = true;
         await SaveAsync();
         return SparcUser;
     }
-    
+
     public async Task<BlossomUser> DoLogout(ClaimsPrincipal principal, string? emailOrToken = null)
     {
-        var user = await GetAsync(principal);
-
-        user.Logout();
+        SparcUser = await GetUserAsync(principal);
+        SparcUser.Logout();
         await SaveAsync();
 
-        return user;
+        var login = await DoLogin(new(new ClaimsIdentity()));
+        return login.User;
     }
 
     private async Task<string> StartPasskeyRegistrationAsync(BlossomUser user)
@@ -143,6 +167,7 @@ public class SparcAuthenticator<T>(
 
     private async Task SaveAsync()
     {
+        await Users.UpdateAsync(SparcUser!);
         await LoginAsync(SparcUser!.ToPrincipal());
         User = SparcUser;
     }
@@ -160,23 +185,23 @@ public class SparcAuthenticator<T>(
         return User!;
     }
 
-    public async Task SendVerificationCodeAsync(BlossomIdentity identity)
+    public async Task SendVerificationCodeAsync(BlossomUser user, BlossomIdentity identity)
     {
         identity.Revoke();
 
-        var code = identity.GenerateVerificationCode();
-        var message = $"Your Sparc verification code is: {code}";
+        var code = SparcCodes.Generate(user, identity);
+        var message = $"Your Sparc verification code is: {code!.Code}";
         var subject = "Sparc Verification Code";
 
         await twilio.SendAsync(identity.Id, message, subject);
         await SaveAsync();
     }
 
-    internal async Task<SparcCode?> GetSparcCode(ClaimsPrincipal principal)
-    {
-        var user = await GetAsync(principal);
-        return SparcCodes.Generate(user);
-    }
+    //internal async Task<SparcCode?> GetSparcCode(ClaimsPrincipal principal)
+    //{
+    //    var user = await GetAsync(principal);
+    //    return SparcCodes.Generate(user);
+    //}
 
     private void UpdateFromHttpContext(ClaimsPrincipal principal)
     {
@@ -220,6 +245,6 @@ public class SparcAuthenticator<T>(
         auth.MapPost("logout", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.DoLogout(principal, emailOrToken));
         auth.MapGet("userinfo", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal) => await GetAsync(principal));
         auth.MapPost("userinfo", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal, BlossomAvatar avatar) => await auth.UpdateAsync(principal, avatar));
-        auth.MapGet("code", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal) => await GetSparcCode(principal));
+        //auth.MapGet("code", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal) => await GetSparcCode(principal));
     }
 }

@@ -1,53 +1,98 @@
 <div class="verify-contact">
     <header>
-        <h4>Verify Contact</h4>
-        <p>To keep your account secure, help with recovery, and support cross-device access, please verify your contact. This setting is optional.</p>
+        <h4>Your Sign-In Methods</h4>
     </header>
-    <div>
-        <input type="text" placeholder="Phone number or Email" />
-        <button type="button" class="primary-btn">Verify</button>
-    </div>
     <ul>
-        <li>
-            <div>
-                <span>xxx-xxx-5678</span>
-                @if (IsVerified)
-                {
+        @if (IsVerifying)
+        {
+            <li>
+                <div>
+                    <span>@EmailOrPhone</span>
+                </div>
+                <form>
+                    <input type="text" placeholder="Verification Code" @bind="VerificationCode" @bind:event="oninput" />
+                    <button type="button" class="primary-btn" @onclick="Verify">Verify</button>
+                </form>
+            </li>
+        }
+
+        @foreach (var identity in VerifiedIdentities)
+        {
+            <li>
+                <div>
+                    <span>@(identity.Type == "Passwordless" ? "Passkey" : identity.Id)</span>
                     <Check />
-                }
-            </div>
-            <button>Unlink</button>
-        </li>
-        <li>
-            <div>
-                <span>xxxxx@Kuviocreative.com</span>
-                @if (IsVerified)
-                {
-                    <Check />
-                }
-            </div>
-            <button>Unlink</button>
-        </li>
+                </div>
+                <button class="link-btn" @onclick=@(() => Unlink(identity))">Unlink</button>
+            </li>
+        }
     </ul>
+
+    @if (User.HasVerifiedIdentity("Passwordless") && !User.HasVerifiedIdentity("Email") && !User.HasVerifiedIdentity("Phone") && !IsVerifying)
+    {
+        <header>
+            <h4>Add Backup Sign-In Method (recommended)</h4>
+            <p>To keep your account secure, help with recovery, and support cross-device access, please add at least one backup sign-in method (email or phone).</p>
+        </header>
+        @if (!IsVerifying)
+        {
+            <form @onsubmit="Register">
+                <input type="text" @bind="EmailOrPhone" placeholder="Phone number or Email" />
+                <button type="button" class="primary-btn" @onclick="Register">Verify</button>
+            </form>
+        }
+        @if (Message != null)
+        {
+            <p class="message">
+                @Message
+            </p>
+        }
+    }
 </div>
 
+@inject ISparcAura Aura
 @code {
     [Parameter] public required BlossomUser User { get; set; }
+    List<BlossomIdentity> VerifiedIdentities = [];
+    string EmailOrPhone = "";
+    string? Message;
+    bool IsVerifying = false;
+    string VerificationCode { get; set; } = "";
 
-    private bool IsVerified = false;
-    private string VerificationCode { get; set; } = "";
-    private void VerifyCode(string code)
+    protected override void OnParametersSet()
     {
-        VerificationCode = code;
-        // var success = await SparcEngine.VerifyCode(new VerificationRequest(CurrentVerificationDestination, VerificationCode));
-        // if (success)
-        // {
-        //     await SparcEngine.UserInfo();
-        //     StateHasChanged();
-        // }
-        // else
-        // {
-        //     // VerificationError = "Invalid verification code. Please try again.";
-        // }
+        VerifiedIdentities = User.Identities
+            .Where(x => x.IsVerified)
+            .ToList();
+    }
+
+    async Task Register()
+    {
+        if (string.IsNullOrWhiteSpace(EmailOrPhone))
+            return;
+
+        var result = await Aura.Login(EmailOrPhone);
+        IsVerifying = true;
+    }
+
+    async Task Verify()
+    {
+        var login = await Aura.Login("totp:" + VerificationCode);
+        if (login.AccessToken != null)
+        {
+            VerifiedIdentities = login.User.Identities
+                .Where(x => x.IsVerified && (x.Type == "Email" || x.Type == "Phone"))
+                .ToList();
+            IsVerifying = false;
+            EmailOrPhone = "";
+        }
+        else
+        {
+            Message = "Invalid verification code. Please try again.";
+        }
+    }
+
+    async Task Unlink(BlossomIdentity identity)
+    {
     }
 }
