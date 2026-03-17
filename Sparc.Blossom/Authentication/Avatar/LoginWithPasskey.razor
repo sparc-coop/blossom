@@ -29,7 +29,7 @@
     <aside>
         Already have a profile for this app?
         <button class="link-btn" @onclick=Login disabled="@IsLoggingIn">
-            Load My Profile
+            Sign In
         </button>
     </aside>
 }
@@ -39,6 +39,9 @@ else
         <h4>Welcome Back</h4>
         <p>You are signed in and your data is protected.</p>
     </header>
+    <button class="secondary-btn" @onclick=Logout>
+        Sign Out
+    </button>
 }
 
 @inject PasskeyAuthenticator Auth
@@ -107,5 +110,14 @@ else
             IsLoggingIn = false;
             Message = e.Message;
         }
+    }
+
+    private async Task Logout()
+    {
+        var confirm = await Js.InvokeAsync<bool>("confirm", "Are you sure you want to sign out?");
+        if (!confirm)
+            return;
+
+        Nav.NavigateTo("/_signout", true);
     }
 }

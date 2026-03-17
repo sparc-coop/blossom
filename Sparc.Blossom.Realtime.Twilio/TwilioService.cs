@@ -16,7 +16,8 @@ public class TwilioService
     {
         Config = configuration;
         SendGridClient = sendGridClient;
-        
+
+        TwilioClient.SetLogLevel("debug");
         if (configuration.AccountSid != null && configuration.AuthToken != null)
             TwilioClient.Init(configuration.AccountSid, configuration.AuthToken);
     }
@@ -37,22 +38,28 @@ public class TwilioService
         return PhoneNumberRegion.GetAll();
     }
 
-    public static async Task<PhoneNumberResource> LookupPhoneNumberAsync(string phoneNumber, PhoneNumberRegion region)
+    public static async Task<PhoneNumberResource> LookupPhoneNumberAsync(string phoneNumber)
     {
-        return await PhoneNumberResource.FetchAsync(phoneNumber, region.CountryCode);
+        return await PhoneNumberResource.FetchAsync(phoneNumber);
     }
 
     public async Task<bool> SendSmsAsync(string phoneNumber, string body)
     {
-        var message = await MessageResource.CreateAsync(
-            body: body,
-            from: new Twilio.Types.PhoneNumber(Config.FromPhoneNumber),
-            to: new Twilio.Types.PhoneNumber(phoneNumber)
-        );
+        try
+        {
+            var message = await MessageResource.CreateAsync(
+                body: body,
+                from: new Twilio.Types.PhoneNumber(Config.FromPhoneNumber),
+                to: new Twilio.Types.PhoneNumber(phoneNumber)
+            );
 
-        if (message.ErrorMessage != null)
-            throw new Exception($"Unable to send SMS: {message.ErrorCode} {message.ErrorMessage}");
-
+            if (message.ErrorMessage != null)
+                throw new Exception($"Unable to send SMS: {message.ErrorCode} {message.ErrorMessage}");
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Unable to send SMS: {e.Message}");
+        }
         return true;
     }
 

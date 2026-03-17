@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Sparc.Blossom.Authentication;
 
-public record SparcCodeIndex(string Hash, string UserId, string IdentityId, byte[] UserSecret, DateTime Expires);
+public record SparcCodeIndex(string Hash, string UserId, string IdentityId, byte[]? UserSecret, DateTime Expires);
 public class SparcCodes
 {
     static readonly ConcurrentDictionary<string, SparcCodeIndex> TotpIndex = [];
@@ -22,7 +22,7 @@ public class SparcCodes
         do
         {
             code = Generate(secretKey);
-            var index = GenerateIndex(code, user.Id, identity.Id, secretKey);
+            var index = GenerateIndex(code, user, identity, secretKey);
             if (!TotpIndex.TryAdd(index.Hash, index))
                 code = null;
         } while (code == null);
@@ -38,6 +38,12 @@ public class SparcCodes
         var hash = Hash(cleanCode);
         if (!TotpIndex.TryGetValue(hash, out var index))
             return null;
+
+        if (index.UserSecret == null && index.Expires > DateTime.UtcNow)
+        {
+            TotpIndex.TryRemove(hash, out _);
+            return (index.UserId, index.IdentityId);
+        }
 
         // Validate against the user secret
         var totp = new Totp(index.UserSecret, totpSize: TotpSize);
@@ -57,11 +63,18 @@ public class SparcCodes
         return new SparcCode(totp.ComputeTotp(), totp.RemainingSeconds());
     }
 
-    private static SparcCodeIndex GenerateIndex(SparcCode code, string userId, string identityId, byte[] secretKey)
+    private static SparcCodeIndex GenerateIndex(SparcCode code, BlossomUser user, BlossomIdentity identity, byte[]? secretKey)
     {
         var hash = Hash(code.Code);
         var expires = DateTime.UtcNow.AddSeconds(code.RemainingSeconds * 10);
-        SparcCodeIndex index = new(hash, userId, identityId, secretKey, expires);
+
+        if (identity.Type == "Email" || identity.Type == "Phone")
+        {
+            expires = DateTime.UtcNow.AddMinutes(15);
+            secretKey = null;
+        }
+
+        SparcCodeIndex index = new(hash, user.Id, identity.Id, secretKey, expires);
         return index;
     }
 

@@ -37,9 +37,6 @@
                     <section class="login">
                         <LoginWithPasskey User="User" />
                         <LoginWithEmail User="User" />
-                        <button class="secondary-btn" @onclick=Logout>
-                            Sign Out
-                        </button>
                     </section>
                 </div>
             </section>
@@ -49,7 +46,6 @@
 
 @inject ISparcAura Aura
 @inject IBlossomAuthenticator Auth
-@inject IJSRuntime Js
 @inject NavigationManager Nav
 @inject SparcEvents Events
 @code {
@@ -73,15 +69,6 @@
         UserAvatar = avatar;
         StateHasChanged();
         return Task.CompletedTask;
-    }
-
-    private async Task Logout()
-    {
-        var confirm = await Js.InvokeAsync<bool>("confirm", "Are you sure you want to sign out?");
-        if (!confirm)
-            return;
-
-        Nav.NavigateTo("/_signout", true);
     }
 
     private async Task OpenUserProfile() => await Dialog.OpenModalAsync();

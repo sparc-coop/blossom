@@ -1,54 +1,56 @@
-<div class="verify-contact">
-    <header>
-        <h4>Your Sign-In Methods</h4>
-    </header>
-    <ul>
-        @if (IsVerifying)
-        {
-            <li>
-                <div>
-                    <span>@EmailOrPhone</span>
-                </div>
-                <form>
-                    <input type="text" placeholder="Verification Code" @bind="VerificationCode" @bind:event="oninput" />
-                    <button type="button" class="primary-btn" @onclick="Verify">Verify</button>
-                </form>
-            </li>
-        }
-
-        @foreach (var identity in VerifiedIdentities)
-        {
-            <li>
-                <div>
-                    <span>@(identity.Type == "Passwordless" ? "Passkey" : identity.Id)</span>
-                    <Check />
-                </div>
-                <button class="link-btn" @onclick=@(() => Unlink(identity))">Unlink</button>
-            </li>
-        }
-    </ul>
-
-    @if (User.HasVerifiedIdentity("Passwordless") && !User.HasVerifiedIdentity("Email") && !User.HasVerifiedIdentity("Phone") && !IsVerifying)
-    {
+@if (User.HasVerifiedIdentity("Passwordless"))
+{
+    <div class="verify-contact">
         <header>
-            <h4>Add Backup Sign-In Method (recommended)</h4>
-            <p>To keep your account secure, help with recovery, and support cross-device access, please add at least one backup sign-in method (email or phone).</p>
+            <h4>Your Sign-In Methods</h4>
+            @if (!VerifiedIdentities.Any(x => x.Type == "Email" || x.Type == "Phone"))
+            {
+                <p>To keep your account secure, help with recovery, and support cross-device access, please add at least one backup sign-in method (email or phone).</p>
+            }
         </header>
+        <ul>
+            @if (IsVerifying)
+            {
+                <li>
+                    <div>
+                        <span>@EmailOrPhone</span>
+                    </div>
+                    <form class="verify">
+                        <input type="text" placeholder="Enter code" @bind="VerificationCode" @bind:event="oninput" />
+                        <button type="button" class="primary-btn" @onclick="Verify">Verify</button>
+                    </form>
+                </li>
+            }
+
+            @foreach (var identity in VerifiedIdentities)
+            {
+                <li>
+                    <div>
+                        <span>@(identity.Type == "Passwordless" ? "Passkey" : identity.Id)</span>
+                        <Check />
+                    </div>
+                    <button class="link-btn" @onclick=@(() => Unlink(identity))" title="Unlink From This Account"><Close /></button>
+                </li>
+            }
+
+        </ul>
+
         @if (!IsVerifying)
         {
             <form @onsubmit="Register">
-                <input type="text" @bind="EmailOrPhone" placeholder="Phone number or Email" />
-                <button type="button" class="primary-btn" @onclick="Register">Verify</button>
+                <input type="text" @bind="EmailOrPhone" placeholder="Add a phone or email..." />
+                <button type="button" class="primary-btn" @onclick="Register">Add</button>
             </form>
+
+            @if (Message != null)
+            {
+                <p class="message">
+                    @Message
+                </p>
+            }
         }
-        @if (Message != null)
-        {
-            <p class="message">
-                @Message
-            </p>
-        }
-    }
-</div>
+    </div>
+}
 
 @inject ISparcAura Aura
 @code {
@@ -81,7 +83,7 @@
         if (login.AccessToken != null)
         {
             VerifiedIdentities = login.User.Identities
-                .Where(x => x.IsVerified && (x.Type == "Email" || x.Type == "Phone"))
+                .Where(x => x.IsVerified)
                 .ToList();
             IsVerifying = false;
             EmailOrPhone = "";
