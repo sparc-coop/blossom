@@ -3,9 +3,13 @@
     <div class="verify-contact">
         <header>
             <h4>Your Sign-In Methods</h4>
-            @if (!VerifiedIdentities.Any(x => x.Type == "Email" || x.Type == "Phone"))
+            @if (IsVerifying)
             {
-                <p>To keep your account secure, help with recovery, and support cross-device access, please add at least one backup sign-in method (email or phone).</p>
+                <p>Check your email for a verification code, and enter it below to verify your email address as a backup sign-in method.</p>
+            }
+            else if (!VerifiedIdentities.Any(x => x.Type == "Email" || x.Type == "Phone"))
+            {
+                <p>To keep your account secure, help with recovery, and support cross-device access, please add at least one backup sign-in email address.</p>
             }
         </header>
         <ul>
@@ -38,7 +42,7 @@
         @if (!IsVerifying)
         {
             <form @onsubmit="Register">
-                <input type="text" @bind="EmailOrPhone" placeholder="Add a phone or email..." />
+                <input type="email" @bind="EmailOrPhone" placeholder="Add an email address..." />
                 <button type="button" class="primary-btn" @onclick="Register">Add</button>
             </form>
 
