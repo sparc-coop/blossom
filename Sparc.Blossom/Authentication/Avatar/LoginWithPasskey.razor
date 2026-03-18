@@ -66,22 +66,20 @@ else
 
     async Task Register()
     {
+        if (string.IsNullOrWhiteSpace(Username))
+            return;
+
         IsLoggingIn = true;
         Message = null;
         StateHasChanged();
 
+        User.Avatar.Username = Username;
+        await Aura.UpdateUserInfo(User.Avatar);
+
         try
         {
-            if (Passkey == null)
-            {
-                await Auth.RegisterAsync();
-                await Aura.UpdateUserInfo(User.Avatar);
-            }
-            else if (Username != null && Username != User.Avatar.Username)
-            {
-                User.Avatar.Username = Username;
-                await Aura.UpdateUserInfo(User.Avatar);
-            }
+            await Auth.RegisterAsync();
+            await Aura.UpdateUserInfo(User.Avatar);
 
             Message = "Your profile has been saved successfully!";
             IsLoggingIn = false;
