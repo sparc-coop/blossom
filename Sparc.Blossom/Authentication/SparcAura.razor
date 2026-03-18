@@ -62,6 +62,7 @@
             await SetAvatar(User.Avatar);
 
         Events.AvatarChanged += SetAvatar;
+        Events.SetupProfile += OpenUserProfile;
     }
 
     private Task SetAvatar(BlossomAvatar avatar)

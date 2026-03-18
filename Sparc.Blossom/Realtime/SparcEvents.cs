@@ -1,4 +1,5 @@
-﻿using Sparc.Blossom.Authentication;
+﻿using Microsoft.AspNetCore.Components;
+using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Billing;
 
 namespace Sparc.Blossom.Realtime;
@@ -17,5 +18,12 @@ public class SparcEvents
     {
         if (AvatarChanged != null)
             await AvatarChanged.Invoke(avatar);
+    }
+
+    public event Func<Task> SetupProfile;
+    public async Task OnSetupProfile()
+    {
+        if (SetupProfile != null)
+            await SetupProfile.Invoke();
     }
 }
