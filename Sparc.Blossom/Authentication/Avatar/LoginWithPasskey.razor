@@ -15,7 +15,7 @@
     <form @onsubmit="Register">
         <input type="text" @bind="Username" placeholder="Choose a username" @bind:event="oninput" />
         <button type="button" class="primary-btn" @onclick="Register" disabled="@CantSave">
-            Save
+            Sign In
         </button>
     </form>
 
@@ -29,7 +29,7 @@
     <aside>
         Already have a profile for this app?
         <button class="link-btn" @onclick=Login disabled="@IsLoggingIn">
-            Sign In
+            Load Existing Profile
         </button>
     </aside>
 }
