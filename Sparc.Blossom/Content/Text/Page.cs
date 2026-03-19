@@ -23,7 +23,7 @@ public class Page : BlossomSpace
 
     private Page(string domain, string path) : base(domain, path)
     {
-        Id = BlossomHash.SHA256($"{domain}:{path}");
+        Id = BlossomKey.SHA256($"{domain}:{path}");
         SpaceId = domain;
         Path = path;
         Name = Id;

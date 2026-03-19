@@ -5,7 +5,7 @@ using System.Security.Claims;
 namespace Sparc.Blossom.Authentication;
 
 public record TovikSettings(int Version, List<string> IgnoreList);
-public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.SHA256(domain))
+public class SparcDomain(string domain) : BlossomEntity<string>(BlossomKey.SHA256(domain))
 {
     public string Domain { get; set; } = Normalize(domain) ?? throw new Exception($"Invalid domain name: {domain}");
     public DateTime? DateConnected { get; set; }
@@ -19,6 +19,7 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.SHA2
     public List<SparcLicense> Products { get; set; } = [];
     public bool IsBlocked { get; set; }
     public List<string> Users { get; set; } = [];
+    public BlossomKey? ApiKey { get; set; }
 
     public string ToAbsoluteUrl(string? relativeUrl = null) => $"https://{Domain.TrimEnd('/')}/{relativeUrl?.TrimStart('/')}";
 
@@ -157,6 +158,19 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomHash.SHA2
     {
         var id = user.Id();
         return TovikUserId == id || Users.Contains(id);
+    }
+
+    public string? ToggleApiKey()
+    {
+        if (ApiKey != null)
+        {
+            ApiKey = null;
+            return null;
+        }
+
+        var (apiKey, key) = BlossomKey.Create();
+        ApiKey = apiKey;
+        return key;
     }
 
     public string FaviconUri => $"https://{Domain}/favicon.ico";
