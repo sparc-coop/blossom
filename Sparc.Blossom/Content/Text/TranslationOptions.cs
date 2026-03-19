@@ -40,6 +40,14 @@ public class TranslationOptions
     public string ToPrompt()
     {
         var prompt = new StringBuilder();
+        if (!string.IsNullOrWhiteSpace(AdditionalContext))
+        {
+            prompt.AppendLine("Given the following context:");
+            prompt.AppendLine(AdditionalContext);
+            prompt.AppendLine().AppendLine();
+        }
+
+
         if (Schema != null)
             prompt.AppendLine("Extract data from the following text into the supplied JSON schema.");
         else if (Tone == null)
