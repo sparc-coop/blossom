@@ -1,5 +1,6 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
+using Sparc.Core;
 using System.Globalization;
 using System.Security.Claims;
 
@@ -270,7 +271,6 @@ public class TovikTranslator(
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var group = endpoints.MapGroup("translate").RequireCors("Tovik");
-        group.MapPost("", async (TovikTranslator translator, HttpRequest request, TextContent content) => await translator.Get(content));
         group.MapGet("languages", GetLanguagesAsync).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
         group.MapGet("language", (ClaimsPrincipal principal, HttpRequest request) => Language.Find(principal.Get("language") ?? request.Headers.AcceptLanguage));
         group.MapPost("language", async (TovikTranslator translator, Language language) => await translator.SetLanguage(language));
@@ -307,6 +307,36 @@ public class TovikTranslator(
         group.MapPost("entity", async (TovikTranslator translator, TranslationRequest request) =>
         {
             var result = await translator.TranslateToEntity(request.Content.First(), request.Options);
+            return Results.Ok(result);
+        });
+
+        group.MapPost("", async (TovikTranslator translator, TranslationApiRequest request, HttpRequest http) =>
+        {
+            // Look up domain by API key in bearer auth
+            var token = http.Headers.Authorization.ToString().Replace("Bearer ", "");
+            if (string.IsNullOrWhiteSpace(token))
+                return Results.Unauthorized();
+
+            var hash = BlossomKey.SHA256(token);
+            var domain = await domains.Query.Where(x => x.ApiKey != null && x.ApiKey.Hash == hash).FirstOrDefaultAsync();
+            if (domain == null)
+                return Results.Unauthorized();
+
+            if (domain.TovikApiUsage > domain.Product("Tovik")?.MaxUsage * 1000)
+                return Results.StatusCode(429);
+
+            var fromLang = Language.Find(http.Headers.ContentLanguage.ToString()) ?? Language.Find("en");
+            var toLang = Language.Find(http.Headers.AcceptLanguage.ToString());
+            if (toLang != null)
+                request.Options.OutputLanguage = toLang;
+
+            var content = request.Content.Select(x => new TextContent(domain.Domain, "*api*", fromLang!, x)).ToList();
+            var translations = await translator.SingleTranslate(new TranslationRequest(content, request.Options), toLang);
+            var result = translations.Select(x => new TranslationApiResponse(x.OriginalText, x.Text, x.LanguageId));
+
+            domain.TovikApiUsage += content.Sum(x => x.WordCount());
+            await domains.UpdateAsync(domain);
+
             return Results.Ok(result);
         });
     }

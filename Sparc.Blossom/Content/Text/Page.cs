@@ -43,10 +43,12 @@ public class Page : BlossomSpace
 
     public void RegisterTovikUsage(ContentPosted content)
     {
-        if (TovikUsage.ContainsKey(content.Content.LanguageId))
-            TovikUsage[content.Content.LanguageId] += content.TokenCount;
+        var languageId = content.Content.LanguageId;
+        
+        if (TovikUsage.ContainsKey(languageId))
+            TovikUsage[languageId] += content.TokenCount;
         else
-            TovikUsage[content.Content.LanguageId] = content.TokenCount;
+            TovikUsage[languageId] = content.TokenCount;
     }
 
     public void RegisterVisit(Language language)

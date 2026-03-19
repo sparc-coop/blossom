@@ -134,7 +134,7 @@ public class TextContent : BlossomEntity<string>
         }
     }
 
-    private int WordCount()
+    public int WordCount()
     {
         var textToCount = string.IsNullOrWhiteSpace(OriginalText) ? Text : OriginalText;
 

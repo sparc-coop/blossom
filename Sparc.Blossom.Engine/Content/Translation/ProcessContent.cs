@@ -41,6 +41,9 @@ public class ProcessContent(
 
         await RegisterTovikUsage(item, domain);
         await RegisterPageView(item, domain);
+
+        if (new Random().Next(10) == 1)
+            await UpdateDomainStats(domain);
     }
 
     private async Task RegisterTovikUsage(ContentPosted item, SparcDomain? domain)
@@ -69,10 +72,20 @@ public class ProcessContent(
         if (domain == null)
             return;
 
-        domain.TovikUsage = await pages.Query.Where(x => x.Domain == item.Content.Domain).CountAsync();
+        domain.LastTranslatedDate = DateTime.UtcNow;
+        domain.LastTranslatedLanguage = item.Content.Language.Id;
+        await domains.UpdateAsync(domain);
+    }
+
+    private async Task UpdateDomainStats(SparcDomain? domain)
+    {
+        if (domain == null)
+            return;
+
+        domain.TovikUsage = await pages.Query.Where(x => x.Domain == domain.Domain && x.SpaceId != "*api*").CountAsync();
 
         var ppl = await pages.Query
-            .Where(x => x.Domain == item.Content.Domain)
+            .Where(x => x.Domain == domain.Domain && x.SpaceId != "*api*")
             .Select(p => p.TovikUsage)
             .ToListAsync();
 
@@ -81,9 +94,8 @@ public class ProcessContent(
             .GroupBy(g => g)
             .ToDictionary(g => g.Key, g => g.Count());
 
-        domain.LastTranslatedDate = DateTime.UtcNow;
-        domain.LastTranslatedLanguage = item.Content.Language.Id;
-
         await domains.UpdateAsync(domain);
     }
+
+
 }

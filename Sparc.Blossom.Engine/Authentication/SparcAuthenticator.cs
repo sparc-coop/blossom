@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Passwordless;
+﻿using Passwordless;
 using Sparc.Blossom.Billing;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
 using Sparc.Blossom.Realtime;
+using Sparc.Core;
 using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
@@ -14,18 +14,19 @@ public class SparcAuthenticator<T>(
     TwilioService twilio,
     FriendlyId friendlyId,
     IHttpContextAccessor http,
-    SparcTokens tokens) : BlossomDefaultAuthenticator<T>(users), IBlossomEndpoints
+    SparcTokens tokens,
+    IRepository<SparcDomain> domains)
+    : BlossomDefaultAuthenticator<T>(users), IBlossomEndpoints
     where T : BlossomUser, new()
 {
     T? SparcUser;
-    readonly IRepository<T> Users = users;
 
     public override async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal)
     {
         SparcUser = await GetUserAsync(principal);
         SparcUser.Login();
         UpdateFromHttpContext(principal);
-        await Users.UpdateAsync(SparcUser!);
+        await users.UpdateAsync(SparcUser!);
 
         var priorUser = BlossomUser.FromPrincipal(principal);
         var newPrincipal = SparcUser.ToPrincipal();
@@ -36,7 +37,23 @@ public class SparcAuthenticator<T>(
         }
 
         return newPrincipal;
+    }
 
+    public override async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId)
+    {
+        if (authenticationType != "Bearer")
+            return await base.LoginAsync(principal, authenticationType, externalId);
+
+        var hash = BlossomKey.SHA256(externalId);
+        var matchingDomain = await domains.Query
+            .Where(x => x.ApiKey != null && x.ApiKey.Hash == hash)
+            .FirstOrDefaultAsync() 
+            ?? throw new Exception("Invalid API key.");
+
+        var user = await users.FindAsync(matchingDomain.TovikUserId ?? matchingDomain.Users.First());
+        principal = user!.ToPrincipal(authenticationType, hash);
+        await users.UpdateAsync(user);
+        return principal;
     }
 
     public async Task<BlossomLogin> DoLogin(ClaimsPrincipal principal, string? emailOrToken = null)
@@ -79,7 +96,7 @@ public class SparcAuthenticator<T>(
         var (userId, identityId) = SparcCodes.Verify(emailOrToken)
                         ?? throw new InvalidOperationException("Invalid TOTP code.");
 
-        var matchingUser = await Users.Query
+        var matchingUser = await users.Query
             .Where(x => x.Id == userId)
             .FirstOrDefaultAsync()
             ?? throw new InvalidOperationException("User not found for the provided TOTP code.");
@@ -129,7 +146,7 @@ public class SparcAuthenticator<T>(
             throw new InvalidOperationException(Message);
         }
 
-        SparcUser = await Users.FindAsync(verifiedUser.UserId);
+        SparcUser = await users.FindAsync(verifiedUser.UserId);
 
         if (SparcUser == null)
         {
@@ -167,14 +184,14 @@ public class SparcAuthenticator<T>(
 
     private async Task SaveAsync()
     {
-        await Users.UpdateAsync(SparcUser!);
+        await users.UpdateAsync(SparcUser!);
         await LoginAsync(SparcUser!.ToPrincipal());
         User = SparcUser;
     }
 
     public async Task<BlossomUser> UpdateAsync(BlossomUser user)
     {
-        await Users.UpdateAsync((T)user);
+        await users.UpdateAsync((T)user);
         return user;
     }
 

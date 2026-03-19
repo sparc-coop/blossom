@@ -10,11 +10,19 @@ public class SparcAuthenticatorMiddleware(RequestDelegate next)
         {
             await _next(context);
             return;
-
         }
 
         if (context.User.Identity?.IsAuthenticated == true)
         {   // If the user is already authenticated, we can skip the authentication process.
+            await _next(context);
+            return;
+        }
+
+        var bearerToken = context.Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last();
+        if (bearerToken != null)
+        {
+            // Look up domain by bearer token and set the user principal if found
+            await auth.LoginAsync(context.User, "Bearer", bearerToken);
             await _next(context);
             return;
         }
