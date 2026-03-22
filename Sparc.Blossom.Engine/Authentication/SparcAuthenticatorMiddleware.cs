@@ -19,7 +19,7 @@ public class SparcAuthenticatorMiddleware(RequestDelegate next)
         }
 
         var bearerToken = context.Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last();
-        if (bearerToken != null)
+        if (bearerToken != null && bearerToken.Length == 32)
         {
             // Look up domain by bearer token and set the user principal if found
             await auth.LoginAsync(context.User, "Bearer", bearerToken);
