@@ -30,6 +30,13 @@ public class Post : BlossomSpaceObject
     public string? ConstellationConnectorId { get; set; }
     public override float Mass => 2;
 
+    public void CalculateLocalCoherence(List<BlossomScoredVector<Post>> neighbors)
+    {
+        var neighborVectors = neighbors.Select(x => x.Item.Vector).ToList();
+        Vector.CalculateLocalCoherence(neighborVectors);
+        Temperature = 1 / Vector.CoherenceWeight;
+    }
+
     public async Task ExtractEntities(ISparcContent tovik, List<SparcEntityType> entityTypes)
     {
         Entities = await tovik.ExtractGraphAsync(new(this, entityTypes));
