@@ -30,8 +30,8 @@ internal class BlossomSpaceTranslator
         await posts.UpdateAsync(questions);
 
         space.SetSummary(new(friendlyId.Create(), question.Text ?? "", ""));
-
         await spaces.UpdateAsync(space);
+
         return [..facts, ..questions];
     }
 

@@ -42,7 +42,6 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
         Coordinates = coordinateVector.ToCoordinates(axes, GravitationalForce);
         Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.AngularDistanceTo(coordinateVector, parsecsPerUnit) ?? 0;
     }
-
     
     const float gravitationalConstant = 1;
     public virtual void SetGravitationalForce(IEnumerable<BlossomSpaceObject> objects)
@@ -51,20 +50,20 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
             return;
         
         var forces = objects.Where(x => x.Id != Id && x.Mass > 0)
-            .Select(x => x.Vector.Multiply(GravitationalScale(x)))
+            .Select(x => x.Vector.Subtract(Vector).Normalize().Multiply(GravitationalScale(x)))
             .ToList();
 
-        GravitationalForce = BlossomVector.Sum(forces).Multiply(gravitationalConstant);
+        GravitationalForce = BlossomVector.Sum(forces);
         CollapseScale = GravitationalForce.Magnitude();
     }
 
     float GravitationalScale(BlossomSpaceObject other)
     {
-        var masses = Mass * other.Mass;
-        var distanceSquared = Vector.AngularDistanceTo(other.Vector, parsecsPerUnit);
-        if (distanceSquared == 0)
+        var distance = Vector.AngularDistanceTo(other.Vector, parsecsPerUnit);
+        if (distance == 0)
             return 0;
-        return masses / (distanceSquared * distanceSquared);
+
+        return gravitationalConstant * Mass * other.Mass / (distance * distance);
     }
 
     public static void DoNotSerializeVectors(JsonTypeInfo typeInfo)
