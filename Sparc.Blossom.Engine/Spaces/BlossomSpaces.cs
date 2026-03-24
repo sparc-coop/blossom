@@ -106,7 +106,8 @@ internal class BlossomSpaces(
     private async Task ActivateQuestAsync(string spaceId, string facetId)
     {
         var (space, userSpace) = await GetCurrentSpaces(spaceId);
-        await facets.ActivateQuestAsync(space, userSpace, facetId);
+        var allObjects = await objects.GetAllAsync(space);
+        await facets.ActivateQuestAsync(space, userSpace, allObjects);
     }
 
     private async Task<(BlossomSpace space, BlossomSpace userSpace)> GetCurrentSpaces(string spaceId)

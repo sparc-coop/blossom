@@ -43,7 +43,7 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
         Distance = axes.FirstOrDefault(x => x.Name == "User")?.Vector.AngularDistanceTo(coordinateVector, parsecsPerUnit) ?? 0;
     }
     
-    const float gravitationalConstant = 1;
+    protected const float gravitationalConstant = 1;
     public virtual void SetGravitationalForce(IEnumerable<BlossomSpaceObject> objects)
     {
         if (Mass == 0)

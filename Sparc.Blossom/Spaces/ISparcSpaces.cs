@@ -59,9 +59,7 @@ public record GameState(
     BlossomSpace? Self,
     BlossomSpace Answer, 
     List<Post> SpaceObjects, 
-    List<BlossomUserTrail> UserTrails, 
-    List<Quest> AvailableQuests, 
-    List<Constellation> Constellations);
+    List<QuestPath> QuestPaths);
 
 public record InviteToSpaceRequest(string UserId);
 public record SendMessageRequest(string Body, string MsgType = "m.text");

@@ -9,7 +9,7 @@ public class BlossomUserTrail : BlossomSpaceObject
     {
     }
 
-    public BlossomUserTrail(BlossomSpace space, BlossomSpace previousHeadspace) : base(space, previousHeadspace.Origin)
+    public BlossomUserTrail(BlossomSpace space, BlossomSpace previousHeadspace) : base(space, previousHeadspace.Vector)
     {
         User = previousHeadspace.User;
     }

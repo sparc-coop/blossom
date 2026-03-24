@@ -415,4 +415,9 @@ public class BlossomVector : BlossomVectorBase
         var percentage = (1 - similarity) / 2; // Put into 0-1 scale
         return percentage * lightYearsPerUnit;
     }
+
+    internal static BlossomVector Zero(int length)
+    {
+        return new(new float[length]);
+    }
 }

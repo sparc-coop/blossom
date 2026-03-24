@@ -6,7 +6,7 @@ public record BlossomJourney(string Hint, List<string> Facts, List<string> Quest
 
 internal class JourneyQuestion : BlossomQuestion<BlossomJourney>
 {
-    public JourneyQuestion(BlossomSpace userSpace, Quest quest)
+    public JourneyQuestion(BlossomSpace userSpace, List<QuestPath> paths)
         : base(
     "Given the following set of messages which represent a sequential journey, left to right, and the user's current location, guide the user toward the stated exit location, via the conflict or tension located within." +
     " This will be used for a game quest description, so phrase accordingly.")
@@ -18,10 +18,10 @@ internal class JourneyQuestion : BlossomQuestion<BlossomJourney>
                     "- Facts: A list of key verified facts with a preponderance of evidence in the world which are relevant to this journey.\r\n" +
                     "- Questions: A list of 3 to 5 Socratic questions that use the facts along the way to encourage the user to move toward the exit.\r\n";
 
-        Text += "\r\n\r\nUser's Current Location: " + SafeText(quest.ClosestSignpost(userSpace));
-        Text += "\r\n\r\nExit Location: " + SafeText(quest.NextTurnSignpost(userSpace));
+        Text += "\r\n\r\nUser's Current Location: " + SafeText(QuestPath.Closest(paths, userSpace)?.Signpost);
+        Text += "\r\n\r\nExit Location: " + SafeText(paths.LastOrDefault()?.Signpost);
         Text += "\r\n\r\nSequential Journey (left to right): ";
-        foreach (var message in quest.Signposts.OrderBy(x => x.Score))
-            Text += "\r\n- " + SafeText(message.Item);
+        foreach (var message in paths.OrderBy(x => x.Index))
+            Text += "\r\n- " + SafeText(message.Vector.Text);
     }
 }

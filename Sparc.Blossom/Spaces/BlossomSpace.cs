@@ -38,7 +38,6 @@ public class BlossomSpace : BlossomSpaceObject
     public float Coherence { get; set; }
     public BlossomSpaceSettings Settings { get; set; } = new();
     public List<Axis> Axes { get; set; } = [];
-    public BlossomVector Origin { get; set; } = new();
     public override float Mass => RoomType == "User" ? 10 : 0;
 
     public string? ActiveQuestId { get; set; }
@@ -75,17 +74,59 @@ public class BlossomSpace : BlossomSpaceObject
         var semanticChange = previousPost == null ? 1 : post.Vector.Subtract(previousPost.Vector).Magnitude();
         var confidence = alignmentSpace.Summary == null ? 1 : post.Vector.AlignmentWith(alignmentSpace.Summary.Vector);
 
-        Origin.Update(post.Vector, semanticChange * confidence);
+        Vector.Update(post.Vector, semanticChange * confidence);
 
         return new(alignmentSpace, this);
     }
 
+    IEnumerable<BlossomSpaceObject> RelevantObjects(IEnumerable<BlossomSpaceObject> objects) => 
+        RoomType == "User" ? objects.Where(x => x.User.Id == Id) : objects;
+
     public override void SetGravitationalForce(IEnumerable<BlossomSpaceObject> objects)
     {
-        if (RoomType == "User")
-            objects = objects.Where(x => x.User.Id == Id); // User orb only feels gravity from their own posts
+        base.SetGravitationalForce(RelevantObjects(objects));
+    }
+
+    public BlossomVector CenterOfMass(List<BlossomSpaceObject> objects)
+    {
+        objects = RelevantObjects(objects).ToList();
+
+        var totalMass = objects.Sum(x => x.Mass);
+        if (totalMass == 0)
+            return BlossomVector.Zero(Vector.Vector.Length);
+
+        var centerOfMass = BlossomVector.Zero(Vector.Vector.Length);
+        foreach (var obj in objects)
+        {
+            var weight = obj.Mass / totalMass;
+            centerOfMass = centerOfMass.Add(obj.Vector.Multiply(weight));
+        }
         
-        base.SetGravitationalForce(objects);
+        return centerOfMass;
+    }
+
+    public BlossomVector GradientForce(List<BlossomSpaceObject> objects, BlossomVector x)
+    {
+        objects = RelevantObjects(objects).ToList();
+
+        var force = BlossomVector.Zero(Vector.Vector.Length);
+        const double eps = 1e-6;
+
+        foreach (var obj in objects)
+        {
+            var r = x.Subtract(obj.Vector);
+            var dist = r.Magnitude();
+            if (dist < eps)
+                continue;
+
+            // inverse-square style contribution scaled by space gravity and object mass
+            var invDistCubed = 1 / (dist * dist * dist);
+            var magnitude = gravitationalConstant * obj.Mass * invDistCubed;
+            var contrib = r.Multiply(magnitude);
+            force = force.Add(contrib);
+        }
+
+        return force;
     }
 
     //public void Update(IEnumerable<Post> allPosts)

@@ -68,17 +68,8 @@ internal class BlossomSpaceTranslator
         await spaces.UpdateAsync(userSpace);
         await headspaces.AddAsync(headspace);
 
-        var activeQuest = await facets.GetActiveQuestAsync(userSpace);
-        if (activeQuest != null)
-        {
-            await facets.SeedAsync(space, userSpace, activeQuest);
-        }
-        else
-        {
-            var facts = await SeedAsync(space, post, userPosts.Count == 1 ? 20 : 10);
-            await facets.FacetAsync(space, facts);
-            //await constellator.ConstellateAsync(space);
-        }
+        var facts = await SeedAsync(space, post, userPosts.Count == 1 ? 20 : 10);
+        await facets.FacetAsync(space, facts);
 
         var relevantFacts = await posts.SearchAsync(space, space.Vector, 20);
         await CalculateAnswerAsync(space, [userPosts.Last(), .. relevantFacts.Select(x => x.Item)]);
@@ -108,32 +99,19 @@ internal class BlossomSpaceTranslator
     {
         var spaceObjects = await objects.GetAllAsync(space);
         
-        //var spaceFacets = await facets.GetAllAsync(space);
-        //var spaceConstellations = await constellations.GetAllAsync(space);
-
         //var userTrails = await headspaces.Query.Where(x => x.SpaceId == space.Id).OrderBy(x => x.Timestamp).ToListAsync();
-        //var activeQuest = await facets.GetActiveQuestAsync(userSpace);
-
-        //var guides = await posts.SearchAsync(space, userSpace.Vector, 20);
-        //spacePosts.AddRange(guides.Select(x => x.Item));
+        var (activeQuest, questPaths) = await facets.GetActiveQuestAsync(userSpace, spaceObjects);
+        questPaths = activeQuest.Travel(userSpace.Vector, spaceObjects, 100, 0.001f, 0.1f);
 
         var axes = userSpace.Axes.Count > 0 ? userSpace.Axes.ToList() : space.Axes.ToList();
         axes.Add(new("User", userSpace)); // Z axis is the user space itself, to brighten/dim objects based on user proximity
 
-        //List<Quest> availableQuests = activeQuest != null ? [activeQuest] : [];
-
-        //if (activeQuest == null || activeQuest.IsExitable(userSpace))
-        //    availableQuests.AddRange(spaceFacets
-        //    .Select(x => new Quest(space, userSpace, x))
-        //    .OrderByDescending(x => x.Importance)
-        //    .ToList());
-
-        List<BlossomSpaceObject> all = [userSpace, space, .. spaceObjects];
+        List<BlossomSpaceObject> all = [userSpace, space, .. spaceObjects, ..questPaths];
         all.ForEach(x => x.SetGravitationalForce(all));
         all.ForEach(x => x.MaterializeCoordinates(axes));
 
         var posts = spaceObjects.OfType<Post>().OrderBy(x => x.Distance).ToList();
 
-        return new(space, userSpace, space, posts, [], [], []);
+        return new(space, userSpace, space, posts, questPaths);
     }
 }

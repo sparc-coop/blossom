@@ -7,6 +7,7 @@ namespace Sparc.Blossom.Spaces;
 internal class BlossomSpaceFacets(
     IRepository<Facet> facets,
     IRepository<Quest> quests,
+    IRepository<QuestPath> questPaths,
     IRepository<BlossomSpace> spaces,
     BlossomPosts posts,
     IEnumerable<ITranslator> translators,
@@ -82,7 +83,7 @@ internal class BlossomSpaceFacets(
         return components;
     }
 
-    public async Task<Quest?> ActivateQuestAsync(BlossomSpace space, BlossomSpace userSpace, string facetId)
+    public async Task<Quest?> ActivateQuestAsync(BlossomSpace space, BlossomSpace userSpace, IEnumerable<BlossomSpaceObject> spaceObjects)
     {
         if (userSpace.ActiveQuestId != null)
         {
@@ -90,14 +91,15 @@ internal class BlossomSpaceFacets(
             return null;
         }
 
-        var facet = await facets.FindAsync(space.Id, facetId)
-            ?? throw new Exception($"Facet with ID {facetId} not found in space {space.Id}");
-
-        var quest = new Quest(space, userSpace, facet);
+        var quest = new Quest(space, userSpace);
         await quests.AddAsync(quest);
+
+        var paths = quest.Travel(userSpace.Vector, spaceObjects.ToList());
+        await questPaths.AddAsync(paths);
+
         await spaces.ExecuteAsync(userSpace, x => x.ActivateQuest(quest));
 
-        await SeedAsync(space, userSpace, quest);
+        //await SeedAsync(space, userSpace, quest, paths);
 
         return quest;
     }
@@ -118,9 +120,9 @@ internal class BlossomSpaceFacets(
         await facets.UpdateAsync(facet);
     }
 
-    public async Task<List<Fact>> SeedAsync(BlossomSpace space, BlossomSpace userSpace, Quest quest)
+    public async Task<List<Fact>> SeedAsync(BlossomSpace space, BlossomSpace userSpace, Quest quest, List<QuestPath> paths)
     {
-        var seed = await translator.AskAsync(new JourneyQuestion(userSpace, quest));
+        var seed = await translator.AskAsync(new JourneyQuestion(userSpace, paths));
 
         var facts = seed.Value!.Facts.Select(x => new Fact(space, x)).ToList();
         var questions = seed.Value!.Questions.Select(x => new Question(space, x)).ToList();
@@ -130,9 +132,6 @@ internal class BlossomSpaceFacets(
 
         await posts.UpdateAsync(facts);
         await posts.UpdateAsync(questions);
-
-        var relevantFacts = await posts.SearchAsync(space, quest.Vector, 20);
-        quest.SetSignposts(relevantFacts.Select(x => x.Item));
 
         await quests.UpdateAsync(quest);
 
@@ -144,11 +143,16 @@ internal class BlossomSpaceFacets(
 
     internal async Task<List<Facet>> GetAllAsync(BlossomSpace space) => await facets.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
 
-    internal async Task<Quest?> GetActiveQuestAsync(BlossomSpace userSpace)
+    internal async Task<(Quest quest, List<QuestPath> paths)> GetActiveQuestAsync(BlossomSpace userSpace, IEnumerable<BlossomSpaceObject> spaceObjects)
     {
         if (userSpace.ActiveQuestId == null)
-            return null;
+            await ActivateQuestAsync(userSpace, userSpace, spaceObjects);
 
-        return await quests.FindAsync(userSpace.SpaceId, userSpace.ActiveQuestId);
+        var quest = await quests.FindAsync(userSpace.Id, userSpace.ActiveQuestId!);
+        //var paths = await questPaths.Query.Where(x => x.SpaceId == quest!.Id)
+        //    .OrderBy(x => x.Index)
+        //    .ToListAsync();
+
+        return (quest!, []);
     }
 }

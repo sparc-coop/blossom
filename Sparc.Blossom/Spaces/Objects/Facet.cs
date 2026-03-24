@@ -18,16 +18,16 @@ public class Facet : BlossomSpaceObject
 
     public List<BlossomScoredVector<string>> Signposts { get; set; } = [];
 
-    public bool IsQuestable(BlossomSpace space, BlossomSpace userSpace, double distanceToAnswer)
-    {
-        var quest = new Quest(space, userSpace, this);
+    //public bool IsQuestable(BlossomSpace space, BlossomSpace userSpace, double distanceToAnswer)
+    //{
+    //    var quest = new Quest(space, userSpace, this);
 
-        var lengthThreshold = Math.Min(0.1, distanceToAnswer / 2);
-        //var similarityThreshold = 0.8;
-        //var similarity = lastMovement.SimilarityTo(quest);
+    //    var lengthThreshold = Math.Min(0.1, distanceToAnswer / 2);
+    //    //var similarityThreshold = 0.8;
+    //    //var similarity = lastMovement.SimilarityTo(quest);
 
-        return quest.Vector.Length >= lengthThreshold;
-    }
+    //    return quest.Vector.Length >= lengthThreshold;
+    //}
 
     public void SetSignposts(IEnumerable<Post> posts)
     {

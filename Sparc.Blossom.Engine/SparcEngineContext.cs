@@ -62,6 +62,7 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
         model.Entity<Constellation>();
         model.Entity<Axis>();
         model.Entity<Quest>();
+        model.Entity<QuestPath>();
         model.Entity<BlossomUserTrail>();
         model.Entity<BlossomSpace>();
     }
