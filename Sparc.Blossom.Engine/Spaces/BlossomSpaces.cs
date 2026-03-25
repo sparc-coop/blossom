@@ -103,6 +103,21 @@ internal class BlossomSpaces(
         return await translator.GetCoordinatesAsync(space, userSpace);
     }
 
+    private async Task<List<QuestPath>> TravelAsync(string spaceId, string originId)
+    {
+        var (space, userSpace) = await GetCurrentSpaces(spaceId);
+        var quest = new Quest(space, userSpace);
+        var spaceObjects = await objects.GetAllAsync(space);
+        if (originId == "self") originId = userSpace.Id;
+        var origin = spaceObjects.FirstOrDefault(o => o.Id == originId);
+        if (origin == null)
+            return [];
+
+        var path = quest.Travel(origin, spaceObjects, 100, 0.5f, 2f);
+        path.ForEach(x => x.MaterializeCoordinates(space.Axes));
+        return path;
+    }
+
     private async Task ActivateQuestAsync(string spaceId, string facetId)
     {
         var (space, userSpace) = await GetCurrentSpaces(spaceId);
@@ -134,7 +149,8 @@ internal class BlossomSpaces(
         spaces.MapGet("{spaceId}", GetSpaceAsync);
         spaces.MapGet("{parentSpaceId}/subspaces/{spaceId}", GetSpaceAsync);
         spaces.MapGet("{spaceId}/posts", GetPostsAsync);
-        spaces.MapGet("{spaceId}/coordinates", async (string spaceId)  => await GetCoordinatesAsync(spaceId));
+        spaces.MapGet("{spaceId}/coordinates", async (string spaceId) => await GetCoordinatesAsync(spaceId));
+        spaces.MapGet("{spaceId}/travel/{originId}", async (string spaceId, string originId) => await TravelAsync(spaceId, originId));
         spaces.MapPost("{spaceId}", async (string spaceId, Post post) => await PostAsync(spaceId, post));
         spaces.MapPost("{spaceId}/quests/{facetId}", async (string spaceId, string facetId) => await ActivateQuestAsync(spaceId, facetId));
         spaces.MapDelete("{spaceId}", async (string spaceId) => await DeleteSpaceAsync(spaceId));

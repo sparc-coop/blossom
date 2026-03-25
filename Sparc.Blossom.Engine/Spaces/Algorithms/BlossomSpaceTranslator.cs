@@ -98,22 +98,17 @@ internal class BlossomSpaceTranslator
     public async Task<GameState> GetCoordinatesAsync(BlossomSpace space, BlossomSpace userSpace)
     {
         var spaceObjects = await objects.GetAllAsync(space);
-        var spaceObject = spaceObjects.First();
-        var avgDistance = spaceObjects.Average(x => x.Vector.DistanceTo(space.Vector));
 
         //var userTrails = await headspaces.Query.Where(x => x.SpaceId == space.Id).OrderBy(x => x.Timestamp).ToListAsync();
-        var (activeQuest, questPaths) = await facets.GetActiveQuestAsync(userSpace, spaceObjects);
-        questPaths = activeQuest.Travel(userSpace.Vector, spaceObjects, 100, 0.5f, 2f);
-
         var axes = userSpace.Axes.Count > 0 ? userSpace.Axes.ToList() : space.Axes.ToList();
         axes.Add(new("User", userSpace)); // Z axis is the user space itself, to brighten/dim objects based on user proximity
 
-        List<BlossomSpaceObject> all = [userSpace, space, .. spaceObjects, ..questPaths];
-        all.ForEach(x => x.SetGravitationalForce(all));
+        List<BlossomSpaceObject> all = [userSpace, space, .. spaceObjects];
+        //all.ForEach(x => x.SetGravitationalForce(all));
         all.ForEach(x => x.MaterializeCoordinates(axes));
 
         var posts = spaceObjects.OfType<Post>().OrderBy(x => x.Distance).ToList();
 
-        return new(space, userSpace, space, posts, questPaths);
+        return new(space, userSpace, space, posts, []);
     }
 }

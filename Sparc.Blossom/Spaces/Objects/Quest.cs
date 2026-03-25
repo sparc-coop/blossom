@@ -15,9 +15,11 @@ public class Quest : BlossomSpace
         User = userSpace.User;
     }
 
-    public List<QuestPath> Travel(BlossomVector initialPoint, List<BlossomSpaceObject> objects, int maxIterations = 100, float stepSize = 0.1f, float tolerance = 0.01f)
+    public List<QuestPath> Travel(BlossomSpaceObject initialPoint, List<BlossomSpaceObject> objects, int maxIterations = 100, float stepSize = 0.1f, float tolerance = 0.01f)
     {
-        List<QuestPath> path = [new(this, 0, initialPoint)];
+        objects = objects.Where(x => x.Id != initialPoint.Id).ToList();
+        
+        List<QuestPath> path = [new(this, 0, initialPoint.Vector)];
         for (int i = 1; i < maxIterations; i++)
         {
             var previous = path[i - 1];
@@ -36,7 +38,7 @@ public class Quest : BlossomSpace
             next.Signpost = closestObject?.Vector.Text ?? "";
         }
 
-        Vector = path.LastOrDefault()?.Vector ?? initialPoint;
+        Vector = path.LastOrDefault()?.Vector ?? initialPoint.Vector;
 
         return path;
     }

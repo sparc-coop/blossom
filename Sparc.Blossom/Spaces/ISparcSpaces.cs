@@ -20,6 +20,9 @@ public interface ISparcSpaces
     [Post("/spaces/{spaceId}")]
     Task<Post> PostAsync(string spaceId, Post post);
 
+    [Get("/spaces/{spaceId}/travel/{originId}")]
+    Task<List<QuestPath>> TravelAsync(string spaceId, string originId);
+
     [Put("/spaces/{spaceId}")]
     Task SaveSpaceAsync(string spaceId, BlossomSpace space);
 
