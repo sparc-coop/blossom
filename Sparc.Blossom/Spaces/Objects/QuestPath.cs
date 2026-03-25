@@ -15,10 +15,10 @@ public class QuestPath : BlossomSpaceObject
 
     public QuestPath(Quest quest, int index, BlossomVector vector, QuestPath? previousPath = null, string? signpost = null) : base(quest.Id)
     {
-        Vector = vector;
+        Point = vector;
         Index = index;
         User = quest.User;
-        Point = previousPath == null ? vector : previousPath.Point.Add(vector);
+        Vector = previousPath == null ? vector : previousPath.Vector.Subtract(vector);
 
         if (signpost != null)
             Signpost = signpost;

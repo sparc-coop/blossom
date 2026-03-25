@@ -83,7 +83,7 @@ internal class BlossomSpaceFacets(
         return components;
     }
 
-    public async Task<Quest?> ActivateQuestAsync(BlossomSpace space, BlossomSpace userSpace, IEnumerable<BlossomSpaceObject> spaceObjects)
+    public async Task<Quest?> ActivateQuestAsync(BlossomSpace space, BlossomSpace userSpace)
     {
         if (userSpace.ActiveQuestId != null)
         {
@@ -93,9 +93,6 @@ internal class BlossomSpaceFacets(
 
         var quest = new Quest(space, userSpace);
         await quests.AddAsync(quest);
-
-        var paths = quest.Travel(userSpace.Vector, spaceObjects.ToList());
-        await questPaths.AddAsync(paths);
 
         await spaces.ExecuteAsync(userSpace, x => x.ActivateQuest(quest));
 
@@ -146,7 +143,7 @@ internal class BlossomSpaceFacets(
     internal async Task<(Quest quest, List<QuestPath> paths)> GetActiveQuestAsync(BlossomSpace userSpace, IEnumerable<BlossomSpaceObject> spaceObjects)
     {
         if (userSpace.ActiveQuestId == null)
-            await ActivateQuestAsync(userSpace, userSpace, spaceObjects);
+            await ActivateQuestAsync(userSpace, userSpace);
 
         var quest = await quests.FindAsync(userSpace.Id, userSpace.ActiveQuestId!);
         //var paths = await questPaths.Query.Where(x => x.SpaceId == quest!.Id)

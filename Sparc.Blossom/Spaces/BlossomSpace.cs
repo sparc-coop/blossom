@@ -38,7 +38,7 @@ public class BlossomSpace : BlossomSpaceObject
     public float Coherence { get; set; }
     public BlossomSpaceSettings Settings { get; set; } = new();
     public List<Axis> Axes { get; set; } = [];
-    public override float Mass => RoomType == "User" ? 10 : 0;
+    public override float Mass => RoomType == "User" ? 0 : 0;
 
     public string? ActiveQuestId { get; set; }
 
@@ -105,25 +105,24 @@ public class BlossomSpace : BlossomSpaceObject
         return centerOfMass;
     }
 
-    public BlossomVector GradientForce(List<BlossomSpaceObject> objects, BlossomVector x)
+    public BlossomVector Potential(List<BlossomSpaceObject> objects, BlossomVector x)
     {
         objects = RelevantObjects(objects).ToList();
 
-        var force = BlossomVector.Zero(Vector.Vector.Length);
+        var force = BlossomVector.Zero(1024);
         const double eps = 1e-6;
 
         foreach (var obj in objects)
         {
-            var r = x.Subtract(obj.Vector);
-            var dist = r.Magnitude();
+            var diff = x.Subtract(obj.Vector);
+            var dist = diff.Magnitude();
             if (dist < eps)
                 continue;
 
             // inverse-square style contribution scaled by space gravity and object mass
-            var invDistCubed = 1 / (dist * dist * dist);
-            var magnitude = gravitationalConstant * obj.Mass * invDistCubed;
-            var contrib = r.Multiply(magnitude);
-            force = force.Add(contrib);
+            var soft = 0.01f; // softening factor to prevent singularities
+            var denom = MathF.Pow(dist * dist + soft * soft, 1.5f);
+            force = force.Add(diff.Multiply(gravitationalConstant * obj.Mass / denom));
         }
 
         return force;

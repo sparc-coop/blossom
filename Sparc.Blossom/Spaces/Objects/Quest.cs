@@ -21,12 +21,14 @@ public class Quest : BlossomSpace
         for (int i = 1; i < maxIterations; i++)
         {
             var previous = path[i - 1];
-            var force = GradientForce(objects, previous.Point);
+            var force = Potential(objects, previous.Vector);
             var magnitude = force.Magnitude();
             if (magnitude < tolerance)
                 break;
 
-            var nextStep = force.Multiply(stepSize);
+            var adaptiveMagnitude = stepSize / (1 + magnitude * magnitude);
+            var nextStep = force.Multiply(adaptiveMagnitude);
+
             QuestPath next = new(this, i, nextStep, previous);
             path.Add(next);
 
