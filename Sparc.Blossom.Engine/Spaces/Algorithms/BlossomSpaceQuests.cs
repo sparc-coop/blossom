@@ -1,6 +1,7 @@
 ﻿using MathNet.Numerics.LinearAlgebra;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
+using System.Collections.Concurrent;
 
 namespace Sparc.Blossom.Spaces;
 
@@ -15,22 +16,35 @@ internal class BlossomSpaceQuests(
 {
     readonly AITranslator translator = translators.OfType<AITranslator>().First();
 
-    public async Task<List<Quest>> FindQuestsAsync(BlossomSpace space, BlossomSpace userSpace)
+    public async Task<List<Quest>> CalculateQuestsAsync(BlossomSpace space, List<BlossomSpaceObject>? spaceObjects = null)
     {
-        var allObjects = await objects.GetAllAsync(space!);
+        var allObjects = spaceObjects ?? await objects.GetAllAsync(space);
 
-        var newQuests = new List<Quest>();
-        var maxAlignment = 0.8f;
-        foreach (var obj in allObjects)
+        var currentQuests = allObjects.OfType<Quest>().ToList();
+        currentQuests.ForEach(x => x.Reset());
+
+        var maxAlignment = 0.9f;
+
+        var newQuests = new ConcurrentBag<Quest>(currentQuests);
+        Parallel.ForEach(allObjects, obj =>
         {
-            var quest = new Quest(space, userSpace);
+            var quest = new Quest(space);
             var path = quest.Travel(obj, allObjects, 100, 0.5f, 2f);
-            if (!newQuests.Any(x => x.Vector.AlignmentWith(quest.Vector) > maxAlignment))
-                newQuests.Add(quest);
-        }
 
-        await quests.UpdateAsync(newQuests);
-        return newQuests;
+            var closestQuest = newQuests
+                .Where(x => x.Vector.AlignmentWith(quest.Vector) > maxAlignment)
+                .OrderByDescending(x => x.Vector.AlignmentWith(quest.Vector))
+                .FirstOrDefault();
+
+            if (closestQuest == null)
+                newQuests.Add(quest);
+            else
+                closestQuest.Assign(quest, obj);
+        });
+
+        currentQuests = newQuests.ToList();
+        await quests.UpdateAsync(currentQuests);
+        return currentQuests;
     }
 
     public async Task<List<Facet>> FacetAsync(BlossomSpace space, IEnumerable<Post> facts)
@@ -109,7 +123,7 @@ internal class BlossomSpaceQuests(
             return null;
         }
 
-        var quest = new Quest(space, userSpace);
+        var quest = new Quest(space);
         await quests.AddAsync(quest);
 
         await spaces.ExecuteAsync(userSpace, x => x.ActivateQuest(quest));

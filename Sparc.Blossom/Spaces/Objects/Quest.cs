@@ -3,6 +3,7 @@
 public class Quest : BlossomSpace
 {
     public string? Hint { get; set; }
+    public List<string> ConnectedObjects { get; set; } = [];
 
     public Quest()
     { }
@@ -10,9 +11,8 @@ public class Quest : BlossomSpace
     public Quest(string spaceId) : base(spaceId)
     { }
     
-    public Quest(BlossomSpace space, BlossomSpace userSpace) : base(space, "Quest")
+    public Quest(BlossomSpace space) : base(space, "Quest")
     {
-        User = userSpace.User;
     }
 
     public List<QuestPath> Travel(BlossomSpaceObject initialPoint, List<BlossomSpaceObject> objects, int maxIterations = 100, float stepSize = 0.1f, float tolerance = 0.01f)
@@ -86,4 +86,23 @@ public class Quest : BlossomSpace
         ];
     }
 
+    public void Reset()
+    {
+        Weight = 0;
+        ConnectedObjects.Clear();
+    }
+
+    public void Assign(Quest quest, BlossomSpaceObject obj)
+    {
+        if (!ConnectedObjects.Contains(obj.Id))
+        {
+            ConnectedObjects.Add(obj.Id);
+            Weight += 1;
+        }
+
+        if (Vector.IsEmpty)
+            Vector = quest.Vector;
+        else
+            Vector = BlossomVector.Average([Vector, quest.Vector]);
+    }
 }

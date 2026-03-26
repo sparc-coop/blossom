@@ -50,7 +50,7 @@ internal class BlossomSpaces(
 
         var seeds = await translator.SeedAsync(space, post, 20);
         await quests.FacetAsync(space, seeds);
-        await quests.FindQuestsAsync(space, userSpace);
+        await quests.CalculateQuestsAsync(space);
         await objects.RecalculateAsync(space);
 
         return space;
@@ -78,6 +78,7 @@ internal class BlossomSpaces(
     {
         var (space, userSpace) = await GetCurrentSpaces(spaceId);
         post = await posts.AddAsync(post, space, userSpace);
+        await quests.CalculateQuestsAsync(space);
         await objects.RecalculateAsync(space);
 
         return post;
@@ -107,7 +108,7 @@ internal class BlossomSpaces(
     private async Task<List<QuestPath>> TravelAsync(string spaceId, string originId)
     {
         var (space, userSpace) = await GetCurrentSpaces(spaceId);
-        var quest = new Quest(space, userSpace);
+        var quest = new Quest(space);
         var spaceObjects = await objects.GetAllAsync(space);
         if (originId == "self") originId = userSpace.Id;
         var origin = spaceObjects.FirstOrDefault(o => o.Id == originId);
