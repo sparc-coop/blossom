@@ -60,9 +60,7 @@ public interface ISparcSpaces
 public record GameState(
     BlossomSpace Space,
     BlossomSpace? Self,
-    BlossomSpace Answer, 
-    List<Post> SpaceObjects, 
-    List<QuestPath> QuestPaths);
+    List<BlossomSpaceObject> SpaceObjects);
 
 public record InviteToSpaceRequest(string UserId);
 public record SendMessageRequest(string Body, string MsgType = "m.text");

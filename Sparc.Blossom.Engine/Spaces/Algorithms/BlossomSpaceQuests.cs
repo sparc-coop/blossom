@@ -4,16 +4,34 @@ using Sparc.Blossom.Data;
 
 namespace Sparc.Blossom.Spaces;
 
-internal class BlossomSpaceFacets(
+internal class BlossomSpaceQuests(
     IRepository<Facet> facets,
     IRepository<Quest> quests,
-    IRepository<QuestPath> questPaths,
     IRepository<BlossomSpace> spaces,
+    BlossomSpaceObjects objects,
     BlossomPosts posts,
     IEnumerable<ITranslator> translators,
     VoyageTranslator vectorizer)
 {
     readonly AITranslator translator = translators.OfType<AITranslator>().First();
+
+    public async Task<List<Quest>> FindQuestsAsync(BlossomSpace space, BlossomSpace userSpace)
+    {
+        var allObjects = await objects.GetAllAsync(space!);
+
+        var newQuests = new List<Quest>();
+        var maxAlignment = 0.8f;
+        foreach (var obj in allObjects)
+        {
+            var quest = new Quest(space, userSpace);
+            var path = quest.Travel(obj, allObjects, 100, 0.5f, 2f);
+            if (!newQuests.Any(x => x.Vector.AlignmentWith(quest.Vector) > maxAlignment))
+                newQuests.Add(quest);
+        }
+
+        await quests.UpdateAsync(newQuests);
+        return newQuests;
+    }
 
     public async Task<List<Facet>> FacetAsync(BlossomSpace space, IEnumerable<Post> facts)
     {

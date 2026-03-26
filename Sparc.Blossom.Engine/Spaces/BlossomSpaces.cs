@@ -7,7 +7,7 @@ namespace Sparc.Blossom.Spaces;
 internal class BlossomSpaces(
     BlossomAggregateOptions<BlossomSpace> options,
     BlossomPosts posts,
-    BlossomSpaceFacets facets,
+    BlossomSpaceQuests quests,
     BlossomSpaceTranslator translator,
     BlossomSpaceObjects objects,
     IBlossomAuthenticator auth)
@@ -49,7 +49,8 @@ internal class BlossomSpaces(
         await Repository.UpdateAsync(userSpace);
 
         var seeds = await translator.SeedAsync(space, post, 20);
-        await facets.FacetAsync(space, seeds);
+        await quests.FacetAsync(space, seeds);
+        await quests.FindQuestsAsync(space, userSpace);
         await objects.RecalculateAsync(space);
 
         return space;
@@ -121,7 +122,7 @@ internal class BlossomSpaces(
     private async Task ActivateQuestAsync(string spaceId, string facetId)
     {
         var (space, userSpace) = await GetCurrentSpaces(spaceId);
-        await facets.ActivateQuestAsync(space, userSpace);
+        await quests.ActivateQuestAsync(space, userSpace);
     }
 
     private async Task<(BlossomSpace space, BlossomSpace userSpace)> GetCurrentSpaces(string spaceId)

@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
         builder.Services.AddTransient<BlossomSpaces>()
             .AddScoped<BlossomAggregateOptions<BlossomSpace>>()
             .AddScoped<BlossomAggregate<BlossomSpace>>()
-            .AddTransient<BlossomSpaceFacets>()
+            .AddTransient<BlossomSpaceQuests>()
             .AddTransient<BlossomSpaceConstellations>()
             .AddTransient<BlossomPosts>()
             .AddTransient<BlossomSpaceTranslator>()

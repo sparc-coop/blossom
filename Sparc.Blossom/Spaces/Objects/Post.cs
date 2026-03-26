@@ -24,7 +24,6 @@ public class Post : BlossomSpaceObject
         Vector = new(text);
     }
 
-    public string? Text { get; set; }
     public List<SparcEntity> Entities { get; set; } = [];
     public string? ConstellationId { get; set; }
     public string? ConstellationConnectorId { get; set; }

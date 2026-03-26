@@ -8,7 +8,7 @@ internal class BlossomSpaceTranslator
     BlossomPosts posts,
     IRepository<BlossomSpace> spaces,
     IRepository<BlossomUserTrail> headspaces,
-    BlossomSpaceFacets facets,
+    BlossomSpaceQuests facets,
     BlossomSpaceObjects objects,
     VoyageTranslator vectorizer,
     FriendlyId friendlyId)
@@ -107,8 +107,8 @@ internal class BlossomSpaceTranslator
         //all.ForEach(x => x.SetGravitationalForce(all));
         all.ForEach(x => x.MaterializeCoordinates(axes));
 
-        var posts = spaceObjects.OfType<Post>().OrderBy(x => x.Distance).ToList();
+        spaceObjects = spaceObjects.OrderBy(x => x.Distance).ToList();
 
-        return new(space, userSpace, space, posts, []);
+        return new(space, userSpace, spaceObjects);
     }
 }

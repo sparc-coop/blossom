@@ -7,6 +7,7 @@ internal class BlossomSpaceObjects(
     BlossomPosts posts,
     IRepository<BlossomSpace> spaces,
     IRepository<Fact> facts,
+    IRepository<Quest> quests,
     IRepository<Question> questions,
     IRepository<BlossomSpaceObject> allObjects)
 {
@@ -15,9 +16,10 @@ internal class BlossomSpaceObjects(
         var spaceFacts = await facts.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
         var spaceQuestions = await questions.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
         var spacePosts = await posts.GetAllAsync(space, 10000);
-        var users = await spaces.Query.Where(x => x.SpaceId == space.Id && x.RoomType == "User").ToListAsync();
+        var subspaces = await spaces.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
+        var spaceQuests = await quests.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
 
-        return [.. spaceFacts, .. spaceQuestions, .. spacePosts, ..users];
+        return [.. spaceFacts, .. spaceQuestions, .. spacePosts, ..subspaces, ..spaceQuests];
     }
 
     public async Task UpdateAsync(IEnumerable<BlossomSpaceObject> objects)
@@ -25,12 +27,12 @@ internal class BlossomSpaceObjects(
         var factsToUpdate = objects.OfType<Fact>();
         var questionsToUpdate = objects.OfType<Question>();
         var postsToUpdate = objects.OfType<Post>();
-        var usersToUpdate = objects.OfType<BlossomSpace>().Where(x => x.RoomType == "User");
+        var subspacesToUpdate = objects.OfType<BlossomSpace>();
 
         await facts.UpdateAsync(factsToUpdate);
         await questions.UpdateAsync(questionsToUpdate);
         await posts.UpdateAsync(postsToUpdate);
-        await spaces.UpdateAsync(usersToUpdate);
+        await spaces.UpdateAsync(subspacesToUpdate);
     }
 
     internal async Task RecalculateAsync(BlossomSpace space)

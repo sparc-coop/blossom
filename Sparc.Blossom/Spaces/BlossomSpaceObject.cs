@@ -27,6 +27,7 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
     public float Luminosity { get; set; }
     public BlossomVector? GravitationalForce { get; set; }
     public float CollapseScale { get; set; }
+    public string? Text { get; set; }
 
     public virtual void SetSummary(BlossomSummary? summary)
     {
