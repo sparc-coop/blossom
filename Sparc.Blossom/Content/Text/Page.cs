@@ -11,7 +11,8 @@ public class Page : BlossomSpace
     public Dictionary<string, int> Visits { get; set; } = [];
     public AudioContent? Audio { get; set; }
     public string Domain { get { return SpaceId; } set { SpaceId = value; } }
-    
+    public Language? Language { get; set; }
+
     [JsonConstructor]
     private Page() : base()
     { 

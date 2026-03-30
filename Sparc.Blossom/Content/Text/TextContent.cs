@@ -72,6 +72,11 @@ public class TextContent : BlossomEntity<string>
         SetText(text);
     }
 
+    public TextContent(Page page, string text) : this(page.Domain, page.Id, page.Language?.Id ?? new Language().Id)
+    {
+        Text = text;
+    }
+
     //public static string IdHash(string? text, Language language) => BlossomHash.MD5($"{text}:{language}");
 
     //internal async Task<TextContent?> TranslateAsync(Language language, IRepository<TextContent> contents, BlossomTranslator provider)

@@ -11,6 +11,7 @@ public class TovikTranslator(
     IRepository<TextContent> content,
     IRepository<SparcDomain> domains,
     IRepository<Page> pages,
+    DocumentTranslator documents,
     ClaimsPrincipal principal,
     SparcAuthenticator<BlossomUser> auth) : IBlossomEndpoints
 {
@@ -129,10 +130,10 @@ public class TovikTranslator(
         return existing;
     }
 
-    public async Task<List<TextContent>> BulkTranslate(List<TextContent> contents)
+    public async Task<List<TextContent>> BulkTranslate(List<TextContent> contents, string? lang = null)
     {
         var user = await auth.GetAsync(principal);
-        var toLanguage = user?.Avatar.Language;
+        var toLanguage = lang == null ? user?.Avatar.Language : Language.Find(lang);
 
         var results = await GetAll(contents, toLanguage);
 
@@ -287,23 +288,30 @@ public class TovikTranslator(
             var result = await translator.SingleTranslate(translationRequest, toLanguage);
             return Results.Ok(result);
         });
+
+        group.MapGet("documents", async (TovikTranslator translator, HttpRequest request, string domain, string id, string? lang = null) =>
+        {
+            var language = Language.Find(lang ?? request.Headers.AcceptLanguage);
+            var (page, content) = await documents.ExtractAsync(domain, id);
+            var translations = await translator.BulkTranslate(content, lang);
+            var result = await documents.ReplaceAsync(page, translations);
+            return Results.File(result, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", page.Name);
+        });
+
+        group.MapPost("documents", async (TovikTranslator translator, string domain, IFormFile file) =>
+        {
+            var sparcDomain = await translator.GetOrCreateDomain(domain);
+            var page = await documents.UploadAsync(sparcDomain, file.OpenReadStream(), file.FileName);
+            return Results.Ok(page);
+        });
+
         group.MapPost("all", async (TovikTranslator translator, HttpRequest request, List<TextContent> contents) =>
         {
             var toLanguage = Language.Find(request.Headers.AcceptLanguage);
             var result = await translator.GetAll(contents, toLanguage);
             return Results.Ok(result);
         });
-        group.MapPost("bulk", async (TovikTranslator translator, List<TextContent> contents) =>
-        {
-            try
-            {
-                return Results.Ok(await translator.BulkTranslate(contents));
-            }
-            catch (Exception ex) when (ex.Message.Contains("limit"))
-            {
-                return Results.StatusCode(429);
-            }
-        });
+        
         group.MapPost("entity", async (TovikTranslator translator, TranslationRequest request) =>
         {
             var result = await translator.TranslateToEntity(request.Content.First(), request.Options);
