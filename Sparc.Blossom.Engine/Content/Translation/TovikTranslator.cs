@@ -1,8 +1,10 @@
-﻿using Sparc.Blossom.Authentication;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
 using Sparc.Core;
 using System.Globalization;
 using System.Security.Claims;
+using Twilio.Rest;
 
 namespace Sparc.Blossom.Content;
 
@@ -135,14 +137,19 @@ public class TovikTranslator(
         var user = await auth.GetAsync(principal);
         var toLanguage = lang == null ? user?.Avatar.Language : Language.Find(lang);
 
-        var results = await GetAll(contents, toLanguage);
+        var domain = contents.FirstOrDefault()?.Domain;
+        var spaceId = contents.FirstOrDefault()?.SpaceId;
+
+        var results = await Content.Query(domain)
+            .Where(x => x.SpaceId == spaceId && x.LanguageId == toLanguage!.Id)
+            .ToListAsync();
 
         var needsTranslation = contents
-            .Where(content => !results.Any(x => x.Id == content.Id))
+            .Where(content => !results.Any(x => x.OriginalText == content.Text))
             .ToList();
 
-        if (!await CanTranslate(needsTranslation))
-            throw new Exception("You've reached your Tovik translation limit!");
+        //if (!await CanTranslate(needsTranslation))
+        //    throw new Exception("You've reached your Tovik translation limit!");
 
         var additionalContext = string.Join("\n", contents.Select(x => x.Text).OrderBy(x => Guid.NewGuid()).Take(20));
         var translations = await TranslateAsync(needsTranslation, new TranslationOptions { OutputLanguage = toLanguage, AdditionalContext = additionalContext });
@@ -289,20 +296,13 @@ public class TovikTranslator(
             return Results.Ok(result);
         });
 
-        group.MapGet("documents", async (TovikTranslator translator, HttpRequest request, string domain, string id, string? lang = null) =>
+        group.MapGet("documents/{id}", async (TovikTranslator translator, HttpRequest request, string id, string domain, string? lang = null) =>
         {
             var language = Language.Find(lang ?? request.Headers.AcceptLanguage);
             var (page, content) = await documents.ExtractAsync(domain, id);
             var translations = await translator.BulkTranslate(content, lang);
             var result = await documents.ReplaceAsync(page, translations);
             return Results.File(result, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", page.Name);
-        });
-
-        group.MapPost("documents", async (TovikTranslator translator, string domain, IFormFile file) =>
-        {
-            var sparcDomain = await translator.GetOrCreateDomain(domain);
-            var page = await documents.UploadAsync(sparcDomain, file.OpenReadStream(), file.FileName);
-            return Results.Ok(page);
         });
 
         group.MapPost("all", async (TovikTranslator translator, HttpRequest request, List<TextContent> contents) =>

@@ -11,6 +11,7 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<ITranslator, AnthropicTranslator>()
             .AddScoped<TovikTranslator>()
             .AddScoped<VoyageTranslator>()
+            .AddScoped<DocumentTranslator>()
             .AddScoped<BlossomAggregateOptions<TextContent>>()
             .AddScoped<BlossomAggregate<TextContent>>()
             .AddScoped<Contents>();

@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
+using Stripe;
 using System.Text;
 using Twilio.Rest;
 
@@ -28,27 +29,6 @@ public class DocumentTranslator(IRepository<BlossomFile> files, IRepository<Page
             Reader.Close();
             Stream.Close();
         }
-    }
-
-    public async Task<Page> UploadAsync(SparcDomain domain, Stream stream, string filename)
-    {
-        var obfuscatedFileName = $"{domain.Id}/{Guid.NewGuid()}.docx";
-
-        var doc = Open(stream);
-        Simplify(doc);
-
-        var file = new BlossomFile("documents", obfuscatedFileName, AccessTypes.Private, stream);
-        await files.AddAsync(file);
-
-        Page page = new(domain.Domain, obfuscatedFileName, filename)
-        {
-            Language = Language.Find("en-US")
-        };
-        await pages.AddAsync(page);
-
-        await ExtractAsync(page.Domain, page.Id);
-
-        return page;
     }
 
     public WordprocessingDocument Simplify(WordprocessingDocument doc)
@@ -89,6 +69,9 @@ public class DocumentTranslator(IRepository<BlossomFile> files, IRepository<Page
 
                 paragraph.RemoveChild(run);
             }
+
+            newRun.AppendChild(new Text(mergedText.ToString()));
+            paragraph.AppendChild(newRun);
         }
 
         doc.MainDocumentPart!.Document!.Save();
@@ -119,7 +102,7 @@ public class DocumentTranslator(IRepository<BlossomFile> files, IRepository<Page
         var file = await files.FindAsync($"documents/{page.Path}")
             ?? throw new Exception($"File not found for page {page.Path}");
 
-        var doc = Open(file.Stream!);
+        var (doc, stream) = Open(file.Stream!);
 
         var text = doc.MainDocumentPart?.Document?.Body?
             .Descendants<Text>()
@@ -136,56 +119,34 @@ public class DocumentTranslator(IRepository<BlossomFile> files, IRepository<Page
         var file = await files.FindAsync($"documents/{page.Path}")
             ?? throw new Exception($"File not found for page {page.Path}");
 
-        var doc = OpenForStreamingEdit(file.Stream!);
+        var (doc, stream) = Open(file.Stream!);
+        var text = doc.MainDocumentPart?.Document?.Body?
+            .Descendants<Text>()
+            .ToList() ?? [];
 
-        doc.Writer.WriteStartDocument();
-        // TODO: Write language element
-
-        while (doc.Reader.Read())
+        foreach (var item in text)
         {
-            if (doc.Reader.ElementType == typeof(Text))
-            {
-                if (doc.Reader.IsStartElement)
-                {
-                    doc.Writer.WriteStartElement(doc.Reader);
-
-                    var matchingContent = translatedContent.FirstOrDefault(x => x.OriginalText == doc.Reader.GetText());
-                    if (matchingContent?.Text != null)
-                        doc.Writer.WriteString(matchingContent.Text);
-                    else
-                        doc.Writer.WriteString(doc.Reader.GetText());
-                }
-                else
-                {
-                    doc.Writer.WriteEndElement();
-                }
-            }
-            else
-            {
-                doc.CopyAsIs();
-            }
+            var originalText = item.Text;
+            var matchingContent = translatedContent.FirstOrDefault(x => x.OriginalText == originalText);
+            if (matchingContent?.Text != null)
+                item.Text = matchingContent.Text;
         }
 
-        doc.Stream.Position = 0;
-        return doc.Stream;
+        doc.MainDocumentPart!.Document!.Save();
+        doc.Dispose();
+
+        stream!.Position = 0;
+        return stream!;
     }
 
-    Document OpenForStreamingEdit(Stream stream)
+    (WordprocessingDocument, MemoryStream) Open(Stream stream)
     {
-        var doc = Open(stream);
-        var memoryStream = new MemoryStream();
-        var reader = OpenXmlReader.Create(doc.MainDocumentPart!);
-        var writer = OpenXmlWriter.Create(stream);
-        return new Document(doc, memoryStream, reader, writer);
-    }
-
-    WordprocessingDocument Open(Stream stream)
-    {
-        var doc = WordprocessingDocument.Open(stream, true).Clone();
+        var newStream = new MemoryStream();
+        var doc = WordprocessingDocument.Open(stream, true).Clone(newStream);
         if (doc.MainDocumentPart == null)
             throw new InvalidOperationException("The document does not contain a main document part.");
 
-        return doc;
+        Simplify(doc);
+        return (doc, newStream);
     }
-
 }

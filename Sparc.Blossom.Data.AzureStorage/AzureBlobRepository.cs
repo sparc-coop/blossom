@@ -17,7 +17,8 @@ public class AzureBlobRepository(BlobServiceClient client) : IRepository<Blossom
         var blob = container.GetBlobClient(item.FileName);
         if (!await blob.ExistsAsync() && item.Stream != null)
         {
-            item.Stream.Position = 0;
+            if (item.Stream.GetType().Name != "BrowserFileStream")
+                item.Stream.Position = 0;
             await blob.UploadAsync(item.Stream);
         }
         item.Url = blob.Uri.AbsoluteUri;
