@@ -1,11 +1,8 @@
 ﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
-using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Data;
-using Stripe;
 using System.Text;
-using Twilio.Rest;
 
 namespace Sparc.Blossom.Content;
 
@@ -51,7 +48,9 @@ public class DocumentTranslator(IRepository<BlossomFile> files, IRepository<Page
                 // Append text until the run's properties change
                 if (run.RunProperties?.OuterXml != newRun.RunProperties?.OuterXml)
                 {
-                    newRun.AppendChild(new Text(mergedText.ToString()));
+                    var text = mergedText.ToString();
+                    var preserveWhitespace = text.First() == ' ' || text.Last() == ' ';
+                    newRun.AppendChild(new Text(text) { Space = preserveWhitespace ? SpaceProcessingModeValues.Preserve : null });
                     paragraph.AppendChild(newRun);
                     mergedText.Clear();
 
@@ -129,7 +128,12 @@ public class DocumentTranslator(IRepository<BlossomFile> files, IRepository<Page
             var originalText = item.Text;
             var matchingContent = translatedContent.FirstOrDefault(x => x.OriginalText == originalText);
             if (matchingContent?.Text != null)
-                item.Text = matchingContent.Text;
+            {
+                var preWhitespace = item.Space?.Value == SpaceProcessingModeValues.Preserve ? item.Text.Length - item.Text.TrimStart(' ').Length : 0;
+                var postWhitespace = item.Space?.Value == SpaceProcessingModeValues.Preserve ? item.Text.Length - item.Text.TrimEnd(' ').Length : 0;
+
+                item.Text = new string(' ', preWhitespace) + matchingContent.Text.Trim() + new string(' ', postWhitespace);
+            }
         }
 
         doc.MainDocumentPart!.Document!.Save();

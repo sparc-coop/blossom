@@ -74,7 +74,7 @@ public class TextContent : BlossomEntity<string>
 
     public TextContent(Page page, string text) : this(page.Domain, page.Id, page.Language?.Id ?? new Language().Id)
     {
-        Text = text;
+        SetText(text);
     }
 
     //public static string IdHash(string? text, Language language) => BlossomHash.MD5($"{text}:{language}");
