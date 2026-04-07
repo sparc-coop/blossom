@@ -134,6 +134,12 @@ public record Language
         .ThenBy(x => x.DialectId == null ? 1 : 0)
         .ToList();
 
+    public static List<Language> RegionNeutral => CultureInfo
+        .GetCultures(CultureTypes.NeutralCultures)
+        .Select(c => FromCulture(c.Name))
+        .OrderBy(l => l.DisplayName)
+        .ToList();
+
     public static int Count => All.Count;
     public static int LanguageCount => All.Select(x => x.LanguageId).Distinct().Count();
 
@@ -153,10 +159,14 @@ public record Language
         if (string.IsNullOrWhiteSpace(languageClaim))
             return null;
 
-        var languages = Language.IdsFrom(languageClaim);
+        var languages = IdsFrom(languageClaim);
         // Try to find a matching language in LanguagesSpoken or create a new one
         foreach (var langCode in languages)
         {
+            var neutralMatch = RegionNeutral.FirstOrDefault(l => l.Id.Equals(langCode, StringComparison.OrdinalIgnoreCase));
+            if (neutralMatch != null)
+                return neutralMatch;
+            
             // Try to match by Id or DialectId
             var match = All
                 .OrderBy(x => x.DialectId != null ? 0 : 1)
