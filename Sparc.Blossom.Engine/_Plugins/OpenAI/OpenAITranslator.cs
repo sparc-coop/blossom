@@ -84,7 +84,7 @@ internal class OpenAITranslator(OpenAIClient client)
             answer.Log("Info", $"Asking {DefaultModel} {question.Text}" + (options.PreviousResponseId == null ? "" : $" from {options.PreviousResponseId}"));
 
             var now = DateTime.UtcNow;
-            var responder = client.GetResponsesClient(DefaultModel);
+            var responder = client.GetResponsesClient();
             
             var response = await responder.CreateResponseAsync(options);
             var message = response.Value.OutputItems.OfType<MessageResponseItem>().First();
@@ -115,7 +115,7 @@ internal class OpenAITranslator(OpenAIClient client)
     {
         List<ResponseItem> prompt = [ResponseItem.CreateUserMessageItem(question.PromptText)];
 
-        var options = new CreateResponseOptions(prompt)
+        var options = new CreateResponseOptions(DefaultModel, prompt)
         {
             Temperature = DefaultModel.Contains("4.1") ? 0.2f : null,
             ServiceTier = new ResponseServiceTier("priority"),

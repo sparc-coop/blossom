@@ -1,9 +1,10 @@
 ﻿using Azure;
+using Azure.AI.TextAnalytics;
 using Azure.AI.Translation.Text;
 
 namespace Sparc.Blossom.Content;
 
-internal class AzureTranslator(IConfiguration configuration) : ITranslator
+internal class AzureTranslator(IConfiguration configuration) : ITranslator, ILanguageDetector
 {
     static TextTranslationClient? Client;
 
@@ -75,5 +76,15 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator
            "southcentralus");
 
         return Task.CompletedTask;
+    }
+
+    public async Task<Language?> DetectLanguageAsync(List<TextContent> content, bool forceReload = false)
+    {
+        var client = new TextAnalyticsClient(new Uri("https://kori.cognitiveservices.azure.com/"), new AzureKeyCredential(configuration.GetConnectionString("AzureAI")!));
+
+        var text = string.Join("\n", content.Select(x => x.Text));
+        text = text.Length > 500 ? text[..500] : text; // Azure Text Analytics has a limit of 5,000 characters for language detection
+        var result = await client.DetectLanguageAsync(text);
+        return Language.Find(result.Value.Iso6391Name);
     }
 }

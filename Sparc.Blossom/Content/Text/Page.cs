@@ -12,6 +12,7 @@ public class Page : BlossomSpace
     public AudioContent? Audio { get; set; }
     public string Domain { get { return SpaceId; } set { SpaceId = value; } }
     public Language? Language { get; set; }
+    public DateTime? LanguageDetectedDate { get; set; }
 
     [JsonConstructor]
     private Page() : base()
@@ -22,7 +23,7 @@ public class Page : BlossomSpace
         Name = string.Empty;
     }
 
-    private Page(string domain, string path) : base(domain, path)
+    public Page(string domain, string path) : base(domain, path)
     {
         Id = BlossomKey.SHA256($"{domain}:{path}");
         SpaceId = domain;
@@ -74,5 +75,11 @@ public class Page : BlossomSpace
     }
     
     public void UpdateName(string name) => Name = name;
+
+    public void SetLanguage(Language? language)
+    {
+        LanguageDetectedDate = DateTime.UtcNow;
+        Language = language;
+    }
 }
 
