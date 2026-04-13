@@ -8,7 +8,7 @@ using System.Text;
 namespace Sparc.Blossom.Content;
 
 internal class OpenAITranslator(OpenAIClient client) 
-    : AITranslator("gpt-4.1-nano", 0.40m / 1_000_000, 0)
+    : AITranslator("gpt-5.4-nano", 1.25m / 1_000_000, 0)
 {
     public override async Task VectorizeAsync(IVectorizable message, IEnumerable<IVectorizable>? additionalContext = null)
     {
@@ -117,7 +117,7 @@ internal class OpenAITranslator(OpenAIClient client)
 
         var options = new CreateResponseOptions(DefaultModel, prompt)
         {
-            Temperature = DefaultModel.Contains("4.1") ? 0.2f : null,
+            Temperature = DefaultModel.Contains("4.1") || DefaultModel.Contains("5.4") ? 0.2f : null,
             ServiceTier = new ResponseServiceTier("priority"),
             Instructions = question.Instructions,
             PreviousResponseId = question.PreviousResponseId,
@@ -133,7 +133,7 @@ internal class OpenAITranslator(OpenAIClient client)
         {
             options.ReasoningOptions = new()
             {
-                ReasoningEffortLevel = ResponseReasoningEffortLevel.Minimal
+                ReasoningEffortLevel = ResponseReasoningEffortLevel.None
             };
         }
 

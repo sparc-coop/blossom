@@ -11,21 +11,9 @@ internal class TranslationQuestion : BlossomQuestion<TranslationResult>
     };
 
     public TranslationQuestion(TextContent message, TranslationOptions options)
-    : base(options.ToPrompt())
+    : this([message], options)
     {
-        Instructions =
-            options.Instructions ?? (
-            "You are a translation and tone‑shaping assistant.\r\n" +
-            "For the following message, adjust grammar, vocabulary, idioms, and sentence structure to match the specified tone levels, while preserving the original meaning.\r\n\r\n" +
-            "If an output language is also provided, first translate the message into that language, then adjust the grammar, vocabulary, idioms, and sentence structure.\r\n\r\n" +
-            "If the message is not translatable, use the original message in the output.");
-
-        if (options.Schema != null)
-            Schema = options.Schema;
-
-        Text += "\r\n\r\nText to translate: " + message.Text!.Replace('\u00A0', ' ');
     }
-
 
     public TranslationQuestion(IEnumerable<TextContent> messages, TranslationOptions options)
         : base(options.ToPrompt())
@@ -33,7 +21,9 @@ internal class TranslationQuestion : BlossomQuestion<TranslationResult>
         Instructions = "You are a translation and tone‑shaping assistant.\r\n" +
             "For each message you receive, adjust grammar, vocabulary, idioms, and sentence structure to match the specified tone levels, while preserving the original meaning.\r\n\r\n" +
             "If an output language is also provided, first translate each message into that language, then adjust the grammar, vocabulary, idioms, and sentence structure.\r\n\r\n" +
-            "If any message is not translatable, use the original message in the output, don't skip it. " +
+            "If any message is not translatable, use the original message in the output; do not skip it. The answer must always contain the same number of output messages as the input.\r\n\r\n" +
+            "Return exactly one output for each input message, in the same order. Do not omit, merge, split, summarize, or add messages.\r\n\r\n" +
+            "If tone levels are not specified but context is provided, match the general tone and formality of the provided context. If required tone or language information is missing or ambiguous, do not guess beyond the provided context; preserve meaning and apply only what is explicitly specified.\r\n\r\n" +
             "The answer should always contain the same quantity of translations as the input.";
 
         var textToTranslate = messages
