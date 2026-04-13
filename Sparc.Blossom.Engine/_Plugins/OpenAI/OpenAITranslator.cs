@@ -8,7 +8,7 @@ using System.Text;
 namespace Sparc.Blossom.Content;
 
 internal class OpenAITranslator(OpenAIClient client) 
-    : AITranslator("gpt-5.4-nano", 1.25m / 1_000_000, 0)
+    : AITranslator("gpt-5.4-nano", 0.20m / 1_000_000, 1.25m / 1_000_000, 0)
 {
     public override async Task VectorizeAsync(IVectorizable message, IEnumerable<IVectorizable>? additionalContext = null)
     {
@@ -91,14 +91,14 @@ internal class OpenAITranslator(OpenAIClient client)
             var content = message.Content.First();
 
             var timeTook = (DateTime.UtcNow - now).TotalMilliseconds;
-            answer.Log("Info", $"Answer {response.Value.Id} in {timeTook}ms");
+            answer.Log("Info", $"Answer {response.Value.Id} in {timeTook}ms, {response.Value.Usage.InputTokenCount} input ({response.Value.Usage.InputTokenCount * InputCostPerToken}, {response.Value.Usage.OutputTokenCount} output ({response.Value.Usage.OutputTokenCount * OutputCostPerToken})");
 
             if (content.Kind == ResponseContentPartKind.Refusal)
                 answer.SetError(content.Refusal, response.Value.Usage.TotalTokenCount);
             else if (response.Value.Error != null)
                 answer.SetError(response.Value.Error.Message, response.Value.Usage.TotalTokenCount);
             else
-                answer.SetResponse(response.Value.Id, content.Text, response.Value.Usage.TotalTokenCount);
+                answer.SetResponse(response.Value.Id, content.Text, response.Value.Usage.InputTokenCount, response.Value.Usage.OutputTokenCount);
 
             return answer;
         }
@@ -117,8 +117,7 @@ internal class OpenAITranslator(OpenAIClient client)
 
         var options = new CreateResponseOptions(DefaultModel, prompt)
         {
-            Temperature = DefaultModel.Contains("4.1") || DefaultModel.Contains("5.4") ? 0.2f : null,
-            ServiceTier = new ResponseServiceTier("priority"),
+            Temperature = DefaultModel.Contains("4.1") ? 0.2f : null,
             Instructions = question.Instructions,
             PreviousResponseId = question.PreviousResponseId,
             TextOptions = new()
@@ -133,7 +132,7 @@ internal class OpenAITranslator(OpenAIClient client)
         {
             options.ReasoningOptions = new()
             {
-                ReasoningEffortLevel = ResponseReasoningEffortLevel.None
+                ReasoningEffortLevel = ResponseReasoningEffortLevel.Low
             };
         }
 

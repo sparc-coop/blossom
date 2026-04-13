@@ -3,11 +3,12 @@ using System.Collections.Concurrent;
 
 namespace Sparc.Blossom.Content;
 
-internal abstract class AITranslator(string defaultModel, decimal costPerToken, int priority = 0) : ITranslator
+internal abstract class AITranslator(string defaultModel, decimal inputCostPerToken, decimal outputCostPerToken, int priority = 0) : ITranslator
 {
     public int Priority { get; } = priority;
     protected string DefaultModel = defaultModel;
-    protected decimal CostPerToken = costPerToken;
+    protected decimal InputCostPerToken = inputCostPerToken;
+    protected decimal OutputCostPerToken = outputCostPerToken;
 
     public abstract Task VectorizeAsync(IVectorizable item, IEnumerable<IVectorizable>? additionalContext = null);
     public abstract Task VectorizeAsync(IEnumerable<IVectorizable> items, int? lastX = null, int? lookback = null);
@@ -66,7 +67,7 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
 
                 foreach (var translatedMessage in translations)
                 {
-                    translatedMessage.AddCharge(answer.TokensUsed, CostPerToken, $"{GetType().Name} translation of {translatedMessage.OriginalText} to {translatedMessage.LanguageId}");
+                    translatedMessage.AddCharge(answer.InputTokens, InputCostPerToken, answer.OutputTokens, OutputCostPerToken, $"{GetType().Name} translation of {translatedMessage.OriginalText} to {translatedMessage.LanguageId}");
                     translatedMessages.Add(translatedMessage);
                 }
             }

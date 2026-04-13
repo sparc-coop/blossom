@@ -150,13 +150,16 @@ public class TextContent : BlossomEntity<string>
         return matches.Count;
     }
 
-    public TextContent AddCharge(int numTokens, decimal costPerToken, string? description = null)
+    public TextContent AddCharge(int inputTokens, decimal costPerInputToken, int outputTokens, decimal costPerOutputToken, string? description = null)
     {
-        Charge += numTokens;
-        Cost -= numTokens * costPerToken;
+        var totalTokens = inputTokens + outputTokens;
+        var totalCost = inputTokens * costPerInputToken + outputTokens * costPerOutputToken;
 
-        if (numTokens > 0 || Charge > 0)
-            Broadcast(new ContentPosted(this, numTokens, numTokens * costPerToken, description));
+        Charge += totalTokens;
+        Cost -= totalCost;
+
+        if (inputTokens > 0 || outputTokens > 0 || Charge > 0)
+            Broadcast(new ContentPosted(this, totalTokens, totalCost, description));
 
         return this;
     }

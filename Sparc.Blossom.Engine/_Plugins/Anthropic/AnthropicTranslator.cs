@@ -7,7 +7,7 @@ using Sparc.Blossom.Spaces;
 namespace Sparc.Blossom.Content;
 
 internal class AnthropicTranslator(AnthropicClient client)
-    : AITranslator(AnthropicModels.Claude45Haiku, 5m / 1_000_000, 50)
+    : AITranslator(AnthropicModels.Claude45Haiku, 1m / 1_000_000, 5m / 1_000_000, 50)
 {
     public override async Task<BlossomAnswer<T>> AskAsync<T>(BlossomQuestion<T> question)
     {
@@ -25,7 +25,7 @@ internal class AnthropicTranslator(AnthropicClient client)
 
             var timeTook = (DateTime.UtcNow - now).TotalMilliseconds;
             answer.Log("Info", $"Answer {response.Id} in {timeTook}ms: {content}");
-            answer.SetResponse(response.Id, content!.ToString(), response.Usage.OutputTokens);
+            answer.SetResponse(response.Id, content!.ToString(), response.Usage.InputTokens, response.Usage.OutputTokens);
 
             return answer;
         }

@@ -11,14 +11,15 @@ internal class BlossomAnswer<T>()
     public string Name { get; set; } = string.Empty;
     public string? Text { get; set; }
     public string? Error { get; set; }
-    public int TokensUsed { get; set; }
+    public int InputTokens { get; set; }
+    public int OutputTokens { get; set; }
     public T? Value { get; set; }
     public object? GenericTypedAnswer { get; internal set; }
     internal string? ResponseId { get; private set; }
     bool IsExpanded;
     bool HasAnswer;
 
-    public virtual void SetResponse(string responseId, string response, int tokensUsed)
+    public virtual void SetResponse(string responseId, string response, int inputTokens, int outputTokens)
     {
         if (response.Contains("```json"))
         {
@@ -29,7 +30,8 @@ internal class BlossomAnswer<T>()
         }
         
         ResponseId = responseId;
-        TokensUsed = tokensUsed;
+        InputTokens = inputTokens;
+        OutputTokens = outputTokens;
         Text = response;
         Error = null;
 
@@ -66,7 +68,7 @@ internal class BlossomAnswer<T>()
         }
         catch { }
 
-        Log("Info", $"Answer set to {response} via {responseId}. {tokensUsed} tokens used.");
+        Log("Info", $"Answer set to {response} via {responseId}. {inputTokens} input tokens, {outputTokens} output tokens.");
     }
 
     public void SetError(string? error, int? tokensUsed = null)
@@ -77,7 +79,7 @@ internal class BlossomAnswer<T>()
             Log("Error", error);
 
         if (tokensUsed != null)
-            TokensUsed = tokensUsed.Value;
+            InputTokens = tokensUsed.Value;
     }
 
     public object? this[string propertyName]
