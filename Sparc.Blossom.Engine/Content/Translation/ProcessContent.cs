@@ -23,8 +23,6 @@ public class ProcessContent(
 {
     public async Task ExecuteAsync(ContentPosted item, CancellationToken cancellationToken)
     {
-        Console.WriteLine("Billing: " + item.Content.Id);
-
         try
         {
             // Cache-aside the translated content 

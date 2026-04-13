@@ -25,7 +25,7 @@ public class BlossomBackgroundService<T> : BackgroundService where T : class
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation($"Blossom Runner is running.");
+        //_logger.LogInformation($"Blossom Runner is running.");
 
         for (var i = 0; i < _executorsCount; i++)
         {
@@ -42,7 +42,7 @@ public class BlossomBackgroundService<T> : BackgroundService where T : class
         while (!stoppingToken.IsCancellationRequested)
         {
             var workItem = await Queue.GetAsync(stoppingToken);
-            _logger.LogInformation("Starting execution of {WorkItem}.", nameof(workItem));
+            //_logger.LogInformation("Starting execution of {WorkItem}.", nameof(workItem));
 
             try
             {
@@ -50,7 +50,7 @@ public class BlossomBackgroundService<T> : BackgroundService where T : class
                 var item = scope.ServiceProvider.GetRequiredService<T>();
                 
                 await workItem(item, stoppingToken);
-                _logger.LogInformation("Execution of {WorkItem} complete.", nameof(workItem));
+                //_logger.LogInformation("Execution of {WorkItem} complete.", nameof(workItem));
             }
             catch (Exception ex)
             {
@@ -62,7 +62,7 @@ public class BlossomBackgroundService<T> : BackgroundService where T : class
 
     public override Task StopAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Blossom Runner is stopping.");
+        //_logger.LogInformation("Blossom Runner is stopping.");
 
         if (_executors != null)
         {

@@ -42,7 +42,6 @@ internal class AnthropicTranslator(AnthropicClient client)
     public record AnthropicInputSchema(BlossomSchema input_schema);
     private MessageParameters CreateResponseOptions(BlossomQuestion question)
     {
-        Console.WriteLine("using schema: " + question.Schema?.ToString());
         var options = new MessageParameters()
         {
             Temperature = 0.2m,

@@ -42,10 +42,11 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
     {
         var fromLanguages = messages.GroupBy(x => x.Language);
-        var batches = messages.Batch(5);
+        var batches = messages.Batch(10);
 
         var translatedMessages = new ConcurrentBag<TextContent>();
 
+        var now = DateTime.UtcNow;
         await Parallel.ForEachAsync(batches, async (batch, _) =>
         {
             var safeBatch = batch.Where(x => !string.IsNullOrWhiteSpace(x.Text)).ToList();
@@ -70,6 +71,9 @@ internal abstract class AITranslator(string defaultModel, decimal costPerToken, 
                 }
             }
         });
+
+        var timeTook = (DateTime.UtcNow - now).TotalMilliseconds;
+        Console.WriteLine("*** Translated {0} messages in {1} ms", translatedMessages.Count, timeTook);
 
         var result = translatedMessages.ToList();
         if (options.Version.HasValue)

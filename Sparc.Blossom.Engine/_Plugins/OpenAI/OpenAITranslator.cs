@@ -81,7 +81,7 @@ internal class OpenAITranslator(OpenAIClient client)
         try
         {
             var options = CreateResponseOptions(question);
-            answer.Log("Info", $"Asking {DefaultModel} {question.Text}" + (options.PreviousResponseId == null ? "" : $" from {options.PreviousResponseId}"));
+            //answer.Log("Info", $"Asking {DefaultModel} {question.Text}" + (options.PreviousResponseId == null ? "" : $" from {options.PreviousResponseId}"));
 
             var now = DateTime.UtcNow;
             var responder = client.GetResponsesClient();
@@ -91,7 +91,7 @@ internal class OpenAITranslator(OpenAIClient client)
             var content = message.Content.First();
 
             var timeTook = (DateTime.UtcNow - now).TotalMilliseconds;
-            answer.Log("Info", $"Answer {response.Value.Id} in {timeTook}ms: {content.Text}");
+            answer.Log("Info", $"Answer {response.Value.Id} in {timeTook}ms");
 
             if (content.Kind == ResponseContentPartKind.Refusal)
                 answer.SetError(content.Refusal, response.Value.Usage.TotalTokenCount);
