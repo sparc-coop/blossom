@@ -43,7 +43,7 @@ public class TranslationOptions
         if (!string.IsNullOrWhiteSpace(AdditionalContext))
         {
             prompt.AppendLine("Given the following context:");
-            prompt.AppendLine(AdditionalContext);
+            prompt.AppendLine(AdditionalContext.Substring(0, Math.Min(AdditionalContext.Length, 1000)));
             prompt.AppendLine().AppendLine();
         }
 
@@ -85,6 +85,8 @@ public class TranslationOptions
             foreach (var item in IgnoreList)
                 prompt.AppendLine($"  - {item}");
         }
+
+        prompt.AppendLine().AppendLine();
 
         return prompt.ToString();
     }
