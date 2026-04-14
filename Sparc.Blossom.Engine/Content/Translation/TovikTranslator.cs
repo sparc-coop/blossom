@@ -26,32 +26,7 @@ public class TovikTranslator(
         return languages.FirstOrDefault(x => x.Id == language);
     }
 
-    public async Task<TextContent> Get(TextContent content)
-    {
-        var user = await auth.GetAsync(principal);
-        var toLanguage = user.Avatar.Language;
-
-        if (toLanguage == null)
-            return content;
-
-        return await GetOrTranslateAsync(content, toLanguage);
-    }
-
-    private async Task<TextContent> GetOrTranslateAsync(TextContent content, Language toLanguage)
-    {
-        var existing = await Content.FindAsync(content.Domain, content.Id);
-
-        if (existing != null)
-            return existing;
-
-        var translation = await TranslateAsync(content, toLanguage)
-            ?? throw new InvalidOperationException("Translation failed.");
-
-        await PublishAsync([translation]);
-        return translation;
-    }
-
-    public async Task<List<TextContent>> SingleTranslate(TranslationRequest request, Language? toLanguage = null)
+    public async Task<List<TextContent>> TranslateAsync(TranslationRequest request, Language? toLanguage = null)
     {
         if (toLanguage == null)
         {
@@ -73,21 +48,6 @@ public class TovikTranslator(
             OutputLanguage = toLanguage, 
             AdditionalContext = request.Options?.AdditionalContext,
         };
-
-        if (request.Options?.Model != null)
-        {
-            var translator = Translators
-                .OrderBy(x => x.Priority)
-                .Where(x => x.CanTranslate(request.Content.First().Language, toLanguage))
-                .FirstOrDefault();
-
-            if (translator != null)
-            {
-                var liveTranslations = await translator.TranslateAsync(request.Content, options);
-                await PublishAsync(liveTranslations);
-                return liveTranslations;
-            }
-        }
 
         var translations = await TranslateAsync(request.Content, options);
         await PublishAsync(translations);
@@ -123,8 +83,6 @@ public class TovikTranslator(
         var path = contents.First().SpaceId;
         var sparcDomain = await GetOrCreateDomain(domain);
 
-
-
         var ids = contents.Select(x => x.Id).ToList();
         var existing = await Content.Query(domain)
             .Where(x => ids.Contains(x.Id) && x.Version == sparcDomain.Settings.Version)
@@ -133,24 +91,14 @@ public class TovikTranslator(
         return existing;
     }
 
-    public async Task<List<TextContent>> BulkTranslate(List<TextContent> contents, string? lang = null)
+    public async Task<List<TextContent>> GetOrTranslateAsync(List<TextContent> contents, string? lang = null)
     {
-        var user = await auth.GetAsync(principal);
-        var toLanguage = lang == null ? user?.Avatar.Language : Language.Find(lang);
-
-        var domain = contents.FirstOrDefault()?.Domain;
-        var spaceId = contents.FirstOrDefault()?.SpaceId;
-
-        var results = await Content.Query(domain)
-            .Where(x => x.SpaceId == spaceId && x.LanguageId == toLanguage!.Id)
-            .ToListAsync();
+        var toLanguage = Language.Find(lang);
+        var results = await GetAll(contents, toLanguage);
 
         var needsTranslation = contents
             .Where(content => !results.Any(x => x.OriginalText == content.Text))
             .ToList();
-
-        //if (!await CanTranslate(needsTranslation))
-        //    throw new Exception("You've reached your Tovik translation limit!");
 
         var additionalContext = string.Join("\n", contents.Select(x => x.Text).OrderBy(x => Guid.NewGuid()).Take(20));
         var translations = await TranslateAsync(needsTranslation, new TranslationOptions { OutputLanguage = toLanguage, AdditionalContext = additionalContext });
@@ -173,24 +121,6 @@ public class TovikTranslator(
 
         return domain;
     }
-
-    private async Task<bool> CanTranslate(List<TextContent> contents)
-    {
-        var domainName = contents.FirstOrDefault()?.Domain;
-        if (domainName == null)
-            return false;
-
-        var domain = await GetOrCreateDomain(domainName);
-
-        var tovik = domain.Product("Tovik");
-        if (tovik != null && domain.TovikUsage <= tovik.MaxUsage)
-            return true;
-
-        return false;
-    }
-
-    public async Task<TextContent?> TranslateAsync(TextContent message, Language toLanguage, string? additionalContext = null)
-        => (await TranslateAsync([message], new() { OutputLanguage = toLanguage, AdditionalContext = additionalContext })).FirstOrDefault();
 
     public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
     {
@@ -310,7 +240,7 @@ public class TovikTranslator(
         group.MapPost("untranslated", async (TovikTranslator translator, HttpRequest request, TranslationRequest translationRequest) =>
         {
             var toLanguage = Language.Find(request.Headers.AcceptLanguage);
-            var result = await translator.SingleTranslate(translationRequest, toLanguage);
+            var result = await translator.TranslateAsync(translationRequest, toLanguage);
             return Results.Ok(result);
         });
 
@@ -318,7 +248,7 @@ public class TovikTranslator(
         {
             var language = Language.Find(lang ?? request.Headers.AcceptLanguage);
             var (page, content) = await documents.ExtractAsync(domain, id);
-            var translations = await translator.BulkTranslate(content, lang);
+            var translations = await translator.GetOrTranslateAsync(content, lang);
             var result = await documents.ReplaceAsync(page, translations);
             return Results.File(result, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", page.Name);
         });
@@ -363,7 +293,7 @@ public class TovikTranslator(
                 request.Options.OutputLanguage = toLang;
 
             var content = request.Content.Select(x => new TextContent(domain.Domain, "*api*", fromLang!, x)).ToList();
-            var translations = await translator.SingleTranslate(new TranslationRequest(content, request.Options), toLang);
+            var translations = await translator.TranslateAsync(new TranslationRequest(content, request.Options), toLang);
             var result = translations.Select(x => new TranslationApiResponse(x.OriginalText, x.Text, x.LanguageId));
 
             domain.TovikApiUsage += content.Sum(x => x.WordCount());
