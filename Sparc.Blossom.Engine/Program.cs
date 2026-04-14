@@ -1,5 +1,4 @@
 using Anthropic.SDK;
-using MediatR.NotificationPublishers;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http.Json;
 using OpenAI;
@@ -12,6 +11,7 @@ using Sparc.Blossom.Engine;
 using Sparc.Blossom.Plugins.Slack;
 using Sparc.Blossom.Realtime;
 using Sparc.Blossom.Spaces;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
@@ -31,15 +31,7 @@ Environment.SetEnvironmentVariable("ANTHROPIC_API_KEY", builder.Configuration.Ge
 builder.Services.AddHttpClient<AnthropicClient>().AddStandardResilienceHandler();
 
 builder.AddSparcContent();
-builder.Services.AddBlossomService<ProcessContent>();
-
-builder.Services.AddMediatR(options =>
-{
-    options.RegisterServicesFromAssemblyContaining<Program>();
-    options.RegisterServicesFromAssemblyContaining<BlossomEntityChanged>();
-    options.NotificationPublisher = new TaskWhenAllPublisher();
-    options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
-});
+builder.AddBlossomRealtime();
 
 builder.Services.AddTwilio(builder.Configuration);
 

@@ -1,27 +1,19 @@
-﻿using MediatR;
-using Microsoft.Azure.Cosmos.Linq;
+﻿using Microsoft.Azure.Cosmos.Linq;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
 using Sparc.Blossom.Data;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Billing;
-
-public class TovikContentTranslatedHandler(BlossomQueue<ProcessContent> biller)  : INotificationHandler<ContentPosted>
-{
-    public async Task Handle(ContentPosted notification, CancellationToken cancellationToken)
-    {
-        await biller.AddAsync(async (x, token) => await x.ExecuteAsync(notification, token));
-    }
-}
 
 public class ProcessContent(
     IRepository<SparcDomain> domains,
     IRepository<Page> pages,
     IRepository<UserCharge> charges,
     CosmosDbSimpleRepository<TextContent> content
-    )
+    ) : BlossomOn<ContentPosted>
 {
-    public async Task ExecuteAsync(ContentPosted item, CancellationToken cancellationToken)
+    public override async Task ExecuteAsync(ContentPosted item)
     {
         try
         {

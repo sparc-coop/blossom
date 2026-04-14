@@ -1,11 +1,11 @@
 ﻿using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
-using MediatR;
 using Microsoft.Azure.Cosmos;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, IMediator mediator) 
+public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, IBlossomChannels channels) 
     : RepositoryBase<T>(simpleClient.Context), IRepository<T>
     where T : BlossomEntity<string>
 {
@@ -16,7 +16,6 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         : simpleClient.Container.GetItemLinqQueryable<T>();
 
     public CosmosDbSimpleClient<T> Client { get; } = simpleClient;
-    public IMediator Mediator { get; } = mediator;
 
     public async Task<T?> FindAsync(object id)
     {
@@ -100,7 +99,7 @@ public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, I
         try
         {
             foreach (var ev in events)
-                await Mediator.Publish(ev);
+                await channels.Publish(ev);
         }
         catch (Exception e)
         {

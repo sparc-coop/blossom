@@ -1,30 +1,19 @@
-﻿using System.Security.Cryptography;
+﻿using Sparc.Blossom.Authentication;
+using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
 namespace Sparc.Blossom.Realtime;
 
-public class BlossomEvent(string spaceId, string sender) : BlossomEntity<string>(), MediatR.INotification
+public record BlossomEvent(string SpaceId)
 {
-    public string Type { get; set; } = "";
-    public string EventId { get { return Id; } set { Id = value; } }
-    public long Depth { get; set; } = 1;
+    public string Id { get; set; } = "$" + OpaqueId();
+    public string Type { get; set; } = "BlossomEvent";
     public long OriginServerTs { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-    public List<string> PrevEvents { get; set; } = [];
-    public string SpaceId { get; set; } = spaceId;
-    public string Sender { get; set; } = sender;
-    public string? StateKey { get; set; }
+    public string SubscriptionId => $"{Type}-{SpaceId}";
+    public string? UserId { get; set; }
 
-    // For event signing and verification 
-    public MatrixEventHash Hashes { get; set; } = null!;
-    public Dictionary<string, Dictionary<string, string>> Signatures { get; set; } = [];
-    public MatrixUnsignedData Unsigned => new(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - OriginServerTs);
-
-    public static BlossomEvent<T> Create<T>(string spaceId, string sender, T content, List<BlossomEvent>? previousEvents = null)
-    {
-        return new BlossomEvent<T>(spaceId, sender, content, previousEvents);
-    }
-    
     //// Special magic to be able to save & query polymorphically to/from Cosmos
     //public static string Types<T>() =>  
     //    MatrixEventTypes.TryGetValue(typeof(BlossomEvent<>).MakeGenericType(typeof(T)), out var type) 
@@ -48,31 +37,22 @@ public class BlossomEvent(string spaceId, string sender) : BlossomEntity<string>
 
         return new string(result);
     }
+
+    public void SetUser(ClaimsPrincipal? user)
+    {
+        UserId = user?.Id();
+    }
 }
 
-public class BlossomEvent<T> : BlossomEvent
+public record BlossomEvent<T>(string SpaceId) : BlossomEvent(SpaceId)
 {
-    public T Content { get; set; }
+    public T Data { get; set; } = default!;
 
-    public BlossomEvent() : this(string.Empty, string.Empty, default!)
-    {
-    }
-
-    public BlossomEvent(string spaceId, string sender, T content, List<BlossomEvent>? previousEvents = null) 
-        : base(spaceId, sender)
+    public BlossomEvent(string spaceId, T data)
+        : this(spaceId)
     {
         Type = typeof(T).Name;
-        Content = content;
-
-        if (previousEvents != null && previousEvents.Count > 0)
-        {
-            PrevEvents = previousEvents
-                .OrderByDescending(x => x.OriginServerTs)
-                .Take(20)
-                .Select(e => e.EventId)
-                .ToList();
-            Depth = previousEvents.Max(e => e.Depth) + 1;
-        }
+        Data = data;
 
         Id = "$" + UnpaddedBase64(ReferenceHash());
     }
@@ -96,6 +76,3 @@ public class BlossomEvent<T> : BlossomEvent
                     .Replace("/", "_");
     }
 }
-
-public record MatrixEventHash(string Sha256);
-public record MatrixUnsignedData(long Age);

@@ -1,5 +1,4 @@
-﻿using MediatR.NotificationPublishers;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Refit;
 using Sparc.Blossom.Authentication;
@@ -128,16 +127,7 @@ public abstract class BlossomApplicationBuilder
         Services.AddScoped<SparcEvents>();
     }
 
-    protected virtual void AddBlossomRealtime(Assembly assembly)
-    {
-        Services.AddMediatR(options =>
-        {
-            options.RegisterServicesFromAssembly(assembly);
-            options.RegisterServicesFromAssemblyContaining<BlossomEntityChanged>();
-            options.NotificationPublisher = new TaskWhenAllPublisher();
-            options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
-        });
-    }
+    protected abstract void AddBlossomRealtime(Assembly assembly);
 
     protected abstract void AddSparcAura();
 

@@ -1,5 +1,4 @@
-﻿using MediatR.NotificationPublishers;
-using Microsoft.AspNetCore.Authentication.Cookies;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -9,6 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Realtime;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
@@ -52,7 +52,7 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
         Services.AddHttpContextAccessor();
         Services.AddOutputCache();
 
-        AddBlossomRealtime(callingAssembly);
+        Builder.AddBlossomRealtime(callingAssembly);
 
         return new BlossomServerApplication(Builder);
     }
@@ -128,33 +128,23 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
             razor.AddInteractiveWebAssemblyComponents();
     }
 
-    protected override void AddBlossomRealtime(Assembly assembly) => AddBlossomRealtime<BlossomHub>(assembly);
+    protected override void AddBlossomRealtime(Assembly assembly)
+    {
+        Builder.AddBlossomRealtime(assembly);
+    }
 
     void AddBlossomRealtime<THub>(Assembly assembly)
     {
-        var signalR = Services.AddSignalR(e =>
-        {
-            e.EnableDetailedErrors = true;
-            e.MaximumReceiveMessageSize = 102400000; // for Dexie repository data transfer
-        })
-            .AddJsonProtocol(options =>
-            {
-                options.PayloadSerializerOptions.PropertyNamingPolicy = null;
-                options.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-            });
-        //.AddMessagePackProtocol();
-
-        Services.AddMediatR(options =>
-        {
-            options.RegisterServicesFromAssembly(assembly);
-            options.RegisterServicesFromAssemblyContaining<BlossomEntityChanged>();
-            options.RegisterServicesFromAssemblyContaining<BlossomHub>();
-            options.RegisterServicesFromAssemblyContaining<THub>();
-            options.NotificationPublisher = new TaskWhenAllPublisher();
-            options.NotificationPublisherType = typeof(TaskWhenAllPublisher);
-        });
-
-        // Use the User ID as the SignalR user identifier    
-        Services.AddSingleton<IUserIdProvider, UserIdProvider>();
+        //var signalR = Services.AddSignalR(e =>
+        //{
+        //    e.EnableDetailedErrors = true;
+        //    e.MaximumReceiveMessageSize = 102400000; // for Dexie repository data transfer
+        //})
+        //    .AddJsonProtocol(options =>
+        //    {
+        //        options.PayloadSerializerOptions.PropertyNamingPolicy = null;
+        //        options.PayloadSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        //    });
+        ////.AddMessagePackProtocol();
     }
 }

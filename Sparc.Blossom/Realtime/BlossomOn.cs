@@ -1,13 +1,17 @@
-﻿using MediatR;
+﻿namespace Sparc.Blossom.Realtime;
 
-namespace Sparc.Blossom;
+public interface IBlossomOn
+{
+    Task ExecuteAsync<T>(T item);
+}
 
-public abstract class BlossomOn<T> : INotificationHandler<T> where T : BlossomEntityChanged
+public abstract class BlossomOn<T> : IBlossomOn where T : BlossomEvent
 {
     public abstract Task ExecuteAsync(T item);
 
-    public async Task Handle(T request, CancellationToken cancellationToken)
+    async Task IBlossomOn.ExecuteAsync<TItem>(TItem item)
     {
-        await ExecuteAsync(request);
+        if (item is T typedItem)
+            await ExecuteAsync(typedItem);
     }
 }

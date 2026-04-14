@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Reflection;
 using System.Security.Claims;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Platforms.Browser;
 
@@ -36,7 +37,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
         AddBlossomRepository();
 
         Services.AddSingleton<TimeProvider, BrowserTimeProvider>();
-        AddBlossomRealtime(callingAssembly);
+        //AddBlossomRealtime(callingAssembly);
 
         var host = Builder.Build();
         return new BlossomBrowserApplication<TApp>(host);
@@ -71,5 +72,10 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
         Services.AddScoped<SparcAuraBrowserAuthenticator>()
             .AddScoped<IBlossomAuthenticator, SparcAuraBrowserAuthenticator>()
             .AddScoped<PasskeyAuthenticator>();
+    }
+
+    protected override void AddBlossomRealtime(Assembly assembly)
+    {
+        Services.AddBlossomRealtime(assembly);
     }
 }
