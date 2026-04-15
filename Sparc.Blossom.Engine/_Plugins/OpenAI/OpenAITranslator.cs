@@ -8,7 +8,7 @@ using System.Text;
 namespace Sparc.Blossom.Content;
 
 internal class OpenAITranslator(OpenAIClient client) 
-    : AITranslator("gpt-5.4-nano", 0.20m / 1_000_000, 1.25m / 1_000_000, 0)
+    : AITranslator("gpt-4.1-nano", 0.20m / 1_000_000, 0.80m / 1_000_000, 0)
 {
     public override async Task VectorizeAsync(IVectorizable message, IEnumerable<IVectorizable>? additionalContext = null)
     {
@@ -119,6 +119,7 @@ internal class OpenAITranslator(OpenAIClient client)
         {
             Temperature = DefaultModel.Contains("4.1") ? 0.2f : null,
             Instructions = question.Instructions,
+            ServiceTier = new ResponseServiceTier("priority"),
             PreviousResponseId = question.PreviousResponseId,
             TextOptions = new()
             {
