@@ -91,6 +91,11 @@ public record Language
                 DialectNativeName = NativeName.Split('(').Last().Trim(')', ' ');
             }
         }
+        else
+        {
+            LanguageDisplayName = DisplayName;
+            LanguageNativeName = NativeName;
+        }
     }
 
     public bool Matches(Language language)
