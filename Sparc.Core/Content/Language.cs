@@ -91,6 +91,11 @@ public record Language
                 DialectNativeName = NativeName.Split('(').Last().Trim(')', ' ');
             }
         }
+        else
+        {
+            LanguageDisplayName = DisplayName;
+            LanguageNativeName = NativeName;
+        }
     }
 
     public bool Matches(Language language)
@@ -143,13 +148,8 @@ public record Language
     public static int Count => All.Count;
     public static int LanguageCount => All.Select(x => x.LanguageId).Distinct().Count();
 
-    private static List<string> GoodRandomLanguages = [
-        "es-ES", "fr-FR", "de-DE", "it-IT", "ja-JP", "pt-BR", 
-        "ko-KR", "nl-NL", "sv-SE", "fi-FI", "no-NO", "da-DK",
-        "pl-PL"
-    ];
-    public static Language Random => All
-        .Where(x => GoodRandomLanguages.Contains(x.Id))
+    public static Language Random(string? except = null) => All
+        .Where(x => except == null || !x.Id.StartsWith(except, StringComparison.OrdinalIgnoreCase))
         .OrderBy(x => Guid.NewGuid())
         .First();
 
