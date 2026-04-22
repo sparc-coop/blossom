@@ -13,23 +13,6 @@ internal abstract class AITranslator(string defaultModel, decimal inputCostPerTo
     public abstract Task VectorizeAsync(IVectorizable item, IEnumerable<IVectorizable>? additionalContext = null);
     public abstract Task VectorizeAsync(IEnumerable<IVectorizable> items, int? lastX = null, int? lookback = null);
 
-    public async Task<TextContent> TranslateAsync(TextContent message, TranslationOptions options)
-    {
-        var question = new TranslationQuestion(message, options);
-        var answer = await AskAsync(question);
-
-        var text = answer.Value!.Text.FirstOrDefault()?.Text ?? answer.Text ?? "";
-        var result = new TextContent(message, options.OutputLanguage ?? message.Language, text);
-        //{
-        //    Type = options.Schema?.Name
-        //};
-
-        if (options.Version.HasValue)
-            result.Version = options.Version.Value;
-
-        return result;
-    }
-
     internal async Task IntersectAsync(List<BlossomSpace> spaces)
     {
         foreach (var space in spaces)
@@ -40,10 +23,10 @@ internal abstract class AITranslator(string defaultModel, decimal inputCostPerTo
         }
     }
 
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
+    public async Task<List<TextContent>> TranslateAsync(TranslationRequest request)
     {
-        var fromLanguages = messages.GroupBy(x => x.Language);
-        var batches = messages.Batch(10);
+        var fromLanguages = request.Content.GroupBy(x => x.Language);
+        var batches = request.Content.Batch(10);
 
         var translatedMessages = new ConcurrentBag<TextContent>();
 
@@ -56,14 +39,14 @@ internal abstract class AITranslator(string defaultModel, decimal inputCostPerTo
 
             foreach (var fromLanguage in fromLanguages)
             {
-                var question = new TranslationQuestion(safeBatch, options);
+                var question = new TranslationQuestion(safeBatch, request.Options);
                 var answer = await AskAsync(question);
                 if (answer.Value?.Text == null)
                     continue;
 
                 var translations = new List<TextContent>();
                 foreach (var translation in safeBatch.Where(x => answer.Value.Text.Any(y => x.Id.StartsWith(y.Id))))
-                    translations.Add(new TextContent(translation, options.OutputLanguage ?? translation.Language, answer.Value.Text.First(y => translation.Id.StartsWith(y.Id)).Text));
+                    translations.Add(new TextContent(translation, request.Options.OutputLanguage ?? translation.Language, answer.Value.Text.First(y => translation.Id.StartsWith(y.Id)).Text));
 
                 foreach (var translatedMessage in translations)
                 {
@@ -77,8 +60,7 @@ internal abstract class AITranslator(string defaultModel, decimal inputCostPerTo
         Console.WriteLine("*** Translated {0} messages in {1} ms", translatedMessages.Count, timeTook);
 
         var result = translatedMessages.ToList();
-        if (options.Version.HasValue)
-            result.ForEach(x => x.Version = options.Version.Value);
+        result.ForEach(x => x.Version = request.Options.TovikSettings.Version);
 
         return result;
     }

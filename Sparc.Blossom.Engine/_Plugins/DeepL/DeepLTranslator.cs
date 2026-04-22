@@ -1,6 +1,4 @@
 ﻿using DeepL;
-using Sparc.Blossom.Content.Tovik;
-using System.Linq;
 
 namespace Sparc.Blossom.Content;
 
@@ -14,25 +12,20 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
     public int Priority => 1;
     decimal CostPerWord => 25.00m / 1_000_000 * 5; // $25 per million characters, assuming average 5 characters per word
 
-    public async Task<TextContent> TranslateAsync(TextContent message, TranslationOptions options)
-    {
-        var result = await TranslateAsync([message], options);
-        return result.First();
-    }
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
+    public async Task<List<TextContent>> TranslateAsync(TranslationRequest request)
     {
         Client ??= new(configuration.GetConnectionString("DeepL")!);
 
         var deepLOptions = new TextTranslateOptions
         {
-            Context = options.AdditionalContext,
+            Context = request.Options.AdditionalContext,
             ModelType = ModelType.PreferQualityOptimized
         };
 
-        var fromLanguages = messages.GroupBy(x => SourceLanguage(x.Language));
-        var toDeepLLanguage = TargetLanguage(options.OutputLanguage!);
+        var fromLanguages = request.Content.GroupBy(x => SourceLanguage(x.Language));
+        var toDeepLLanguage = TargetLanguage(request.Options.OutputLanguage!);
 
-        var batches = messages.Batch(50);
+        var batches = request.Content.Batch(50);
 
         var translatedMessages = new List<TextContent>();
         foreach (var batch in batches)
@@ -46,7 +39,7 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
                 var safeTargetLanguage = toDeepLLanguage.ToString() == "en" ? "en-US" : toDeepLLanguage.ToString(); // en is deprecated
                 var texts = safeBatch.Select(x => x.Text);
                 var result = await Client.TranslateTextAsync(texts!, sourceLanguage.Key.ToString(), safeTargetLanguage, deepLOptions);
-                var newContent = safeBatch.Zip(result, (message, translation) => new TextContent(message, options.OutputLanguage!, translation.Text));
+                var newContent = safeBatch.Zip(result, (message, translation) => new TextContent(message, request.Options.OutputLanguage!, translation.Text));
                 translatedMessages.AddRange(newContent);
                 translatedMessages.ForEach(x => x.AddCharge(CostPerWord, $"DeepL translation of {x.OriginalText} to {x.LanguageId}"));
             }

@@ -7,7 +7,7 @@ public class BlossomHubBroadcaster<T>(IHubContext<BlossomHub> hub) : BlossomOn<B
 {
     public override async Task ExecuteAsync(BlossomEvent ev)
     {
-        Console.WriteLine($"Notification: {ev.SubscriptionId}");
-        await hub.Clients.Group(ev.SubscriptionId).SendAsync(ev.SubscriptionId, ev);
+        Console.WriteLine($"Notification: {ev.Source}");
+        await hub.Clients.Group(ev.Source).SendAsync(ev.Source, ev);
     }
 }

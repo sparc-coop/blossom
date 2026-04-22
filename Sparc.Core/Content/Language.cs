@@ -179,6 +179,26 @@ public record Language
         return null;
     }
 
+    public static BlossomRegion? GetLocale(string languageClaim)
+    {
+        var languages = IdsFrom(languageClaim);
+
+        try
+        {
+            var locale = languages
+                .Where(x => x.Contains('-'))
+                .Select(x => x.Split('-').Last())
+                .Select(region => new RegionInfo(region))
+                .FirstOrDefault();
+
+            return locale == null ? null : new(locale);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
     public static List<string> IdsFrom(string? languageClaim)
     {
         if (string.IsNullOrWhiteSpace(languageClaim))

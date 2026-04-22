@@ -6,12 +6,17 @@ using System.Text.Json;
 
 namespace Sparc.Blossom.Realtime;
 
-public record BlossomEvent(string SpaceId)
+public record BlossomEvent(string Source)
 {
+    public BlossomEvent() : this("https://engine.sparc.coop")
+    {
+    }
+    
     public string Id { get; set; } = "$" + OpaqueId();
     public string Type { get; set; } = "BlossomEvent";
-    public long OriginServerTs { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-    public string SubscriptionId => $"{Type}-{SpaceId}";
+    public string SpecVersion { get; set; } = "1.0";
+    public string? Subject { get; set; }
+    public DateTime Time { get; set; } = DateTime.UtcNow;
     public string? UserId { get; set; }
 
     //// Special magic to be able to save & query polymorphically to/from Cosmos
@@ -44,12 +49,12 @@ public record BlossomEvent(string SpaceId)
     }
 }
 
-public record BlossomEvent<T>(string SpaceId) : BlossomEvent(SpaceId)
+public record BlossomEvent<T>(string Source) : BlossomEvent(Source)
 {
     public T Data { get; set; } = default!;
 
-    public BlossomEvent(string spaceId, T data)
-        : this(spaceId)
+    public BlossomEvent(string source, T data)
+        : this(source)
     {
         Type = typeof(T).Name;
         Data = data;

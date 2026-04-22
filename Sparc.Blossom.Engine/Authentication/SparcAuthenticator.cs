@@ -238,7 +238,7 @@ public class SparcAuthenticator<T>(
                 if (newLanguage != null)
                     User.ChangeLanguage(newLanguage);
 
-                var newLocale = Contents.GetLocale(acceptLanguage!);
+                var newLocale = Language.GetLocale(acceptLanguage!);
                 if (newLocale != null)
                     User.Avatar.Locale = newLocale;
 

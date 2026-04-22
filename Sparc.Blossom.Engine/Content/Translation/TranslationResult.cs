@@ -9,3 +9,5 @@ public class TranslationResult
 }
 
 public record TextContentBase(string Id, string Text);
+
+public record TranslationRequested(string Id, TranslationRequest Request, Language? ToLanguage);

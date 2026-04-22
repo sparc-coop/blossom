@@ -65,5 +65,6 @@ public record PostContentRequest(List<TextContent> Content, TranslationOptions? 
 public record CrawlRequest(string Domain, List<string> ToLanguages, string FromLanguage = "en");
 public record ExtractGraphRequest(IVectorizable Content, List<SparcEntityType> EntityTypes);
 public record TranslationRequest(List<TextContent> Content, TranslationOptions Options);
+public record TranslationResponse(List<TextContent> Content, string? SubscriptionId = null);
 public record TranslationApiRequest(List<string> Content, TranslationOptions Options);
 public record TranslationApiResponse(string OriginalText, string? TranslatedText, string Language);

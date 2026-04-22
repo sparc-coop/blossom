@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Sparc.Blossom.Authentication;
+namespace Sparc.Blossom.Content;
 
 public class BlossomRegion(RegionInfo region)
 {

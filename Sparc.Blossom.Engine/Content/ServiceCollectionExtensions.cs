@@ -13,8 +13,8 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<VoyageTranslator>()
             .AddScoped<DocumentTranslator>()
             .AddScoped<BlossomAggregateOptions<TextContent>>()
-            .AddScoped<BlossomAggregate<TextContent>>()
-            .AddScoped<Contents>();
+            .AddScoped<BlossomAggregate<TextContent>>();
+            //.AddScoped<Contents>();
 
         return builder;
     }

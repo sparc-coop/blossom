@@ -10,7 +10,7 @@ public static class ServiceCollectionExtensions
     {
         assembly ??= Assembly.GetExecutingAssembly();
         builder.Services.AddBlossomRealtime(assembly);
-        builder.Services.AddHostedService<BlossomChannels>();
+        builder.Services.AddHostedService<BlossomJobProcessor>();
         return builder;
     }
 }

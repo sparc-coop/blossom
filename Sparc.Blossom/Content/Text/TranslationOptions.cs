@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Sparc.Blossom.Authentication;
+using System.Text;
 
 namespace Sparc.Blossom.Content;
 
@@ -21,13 +22,14 @@ public class TranslationOptions
     }
 
     public Language? OutputLanguage { get; set; }
-    public List<string>? IgnoreList { get; set; }
-    public int? Version { get; set; }
+    public TovikSettings TovikSettings { get; set; } = new(1, []);
     public Tones? Tone { get; set; }
     public string? Instructions { get; set; }
     public string? AdditionalContext { get; set; }
     public BlossomSchema? Schema { get; set; }
-    public string? Model { get; set; }
+    public bool RunInBackground { get; set; }
+    public string? BackgroundId { get; set; }
+    public bool CrawlHtml { get; set; }
 
     public void MatchTone(List<TextContent> content)
     {
@@ -79,10 +81,10 @@ public class TranslationOptions
                 prompt.AppendLine("- " + EnthusiasticOrMatterOfFactMappings[Round(Tone.EnthusiasticOrMatterOfFact)]);
         }
 
-        if (IgnoreList != null && IgnoreList.Count > 0)
+        if (TovikSettings.IgnoreList != null && TovikSettings.IgnoreList.Count > 0)
         {
             prompt.AppendLine("- Never translate the following words and phrases (if transliteration is needed for these, do so):");
-            foreach (var item in IgnoreList)
+            foreach (var item in TovikSettings.IgnoreList)
                 prompt.AppendLine($"  - {item}");
         }
 

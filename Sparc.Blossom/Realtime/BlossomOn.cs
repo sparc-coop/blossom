@@ -5,7 +5,7 @@ public interface IBlossomOn
     Task ExecuteAsync<T>(T item);
 }
 
-public abstract class BlossomOn<T> : IBlossomOn where T : BlossomEvent
+public abstract class BlossomOn<T> : IBlossomOn
 {
     public abstract Task ExecuteAsync(T item);
 

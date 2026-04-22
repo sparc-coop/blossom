@@ -13,29 +13,23 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator, ILan
     public int Priority => 2;
     decimal CostPerWord => 10.00m / 1_000_000 * 5; // $10 per million characters, assuming average 5 characters per word
 
-    public async Task<TextContent> TranslateAsync(TextContent message, TranslationOptions options)
+    public async Task<List<TextContent>> TranslateAsync(TranslationRequest request)
     {
-        var result = await TranslateAsync([message], options);
-        return result.First();
-    }
-
-    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
-    {
-        var azureLanguage = AzureLanguage(options.OutputLanguage!);
+        var azureLanguage = AzureLanguage(request.Options.OutputLanguage!);
 
         await ConnectAsync();
         var azureOptions = new TextTranslationTranslateOptions(
-            targetLanguages: [options.OutputLanguage!.Id],
-            content: messages.Select(x => x.Text));
+            targetLanguages: [request.Options.OutputLanguage!.Id],
+            content: request.Content.Select(x => x.Text));
 
         var response = await Client!.TranslateAsync(azureOptions);
-        var translations = messages.Zip(response.Value);
+        var translations = request.Content.Zip(response.Value);
 
         var translatedMessages = new List<TextContent>();
         foreach (var (sourceContent, result) in translations)
         {
             var newContent = result.Translations.Select(translation =>
-                new TextContent(sourceContent, options.OutputLanguage!, translation.Text));
+                new TextContent(sourceContent, request.Options.OutputLanguage!, translation.Text));
 
             translatedMessages.AddRange(newContent);
             translatedMessages.ForEach(x => x.AddCharge(CostPerWord, $"Azure translation of {x.OriginalText} to {x.LanguageId}"));
