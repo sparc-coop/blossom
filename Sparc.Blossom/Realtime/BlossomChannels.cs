@@ -12,7 +12,7 @@ public class BlossomJobProcessor(BlossomChannels channels, IServiceScopeFactory 
         await foreach (BlossomJob job in channels.Jobs.Reader.ReadAllAsync(stoppingToken))
             try
             {
-                await Run(job, stoppingToken);
+                _ = Run(job).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -21,7 +21,7 @@ public class BlossomJobProcessor(BlossomChannels channels, IServiceScopeFactory 
             }
     }
 
-    public async Task Run(BlossomJob job, CancellationToken cancellationToken = default)
+    public async Task Run(BlossomJob job)
     {
         using var scope = scopes.CreateScope();
         var parameters = job.Action.Method.GetParameters();
