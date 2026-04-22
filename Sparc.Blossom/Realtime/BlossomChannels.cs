@@ -1,15 +1,24 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Concurrent;
+using System.Net.ServerSentEvents;
 
 namespace Sparc.Blossom.Realtime;
 
-public class BlossomJobProcessor(IServiceScopeFactory scopes) : BackgroundService
+public class BlossomJobProcessor(BlossomChannels channels, IServiceScopeFactory scopes) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await foreach (BlossomJob job in BlossomChannels.Jobs.Reader.ReadAllAsync(stoppingToken))
-            await Run(job, stoppingToken);
+        await foreach (BlossomJob job in channels.Jobs.Reader.ReadAllAsync(stoppingToken))
+            try
+            {
+                await Run(job, stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it as needed
+                Console.Error.WriteLine($"Error processing job {job.Id}: {ex}");
+            }
     }
 
     public async Task Run(BlossomJob job, CancellationToken cancellationToken = default)
@@ -62,19 +71,31 @@ public class BlossomJobProcessor(IServiceScopeFactory scopes) : BackgroundServic
 public record BlossomJob(string Id, Delegate Action, BlossomChannel<BlossomEvent> Channel);
 public class BlossomChannels() : IBlossomChannels
 {
-    public static string DefaultSource { get; set; } = "https://engine.sparc.coop";
-    internal static readonly BlossomChannel<BlossomJob> Jobs = new();
-    static readonly ConcurrentDictionary<string, BlossomChannel<BlossomEvent>> Channels = [];
+    public string DefaultSource { get; set; } = "https://engine.sparc.coop";
+    internal readonly BlossomChannel<BlossomJob> Jobs = new();
+    readonly ConcurrentDictionary<string, BlossomChannel<BlossomEvent>> Channels = [];
 
-    public IAsyncEnumerable<BlossomEvent> Watch(string source)
+    public async IAsyncEnumerable<BlossomEvent> Watch(string source)
     {
         if (!Channels.TryGetValue(source, out var channel))
-            return AsyncEnumerable.Empty<BlossomEvent>();
+            yield break;
 
-        return channel.Reader.ReadAllAsync();
+        await foreach (var ev in channel.Reader.ReadAllAsync())
+            yield return ev;
+
+        yield return new BlossomEvent(source) { Type = "done" };
     }
 
-    public static BlossomChannel<BlossomEvent> GetOrCreate(string source)
+    public async IAsyncEnumerable<SseItem<BlossomEvent>> GetSseStream(string source)
+    {
+        if (Channels.TryGetValue(source, out var channel))
+            await foreach (var ev in channel.Reader.ReadAllAsync())
+                yield return new(ev, ev.Type);
+
+        yield return new(new(source) { Type = "done" }, "done");
+    }
+
+    public BlossomChannel<BlossomEvent> GetOrCreate(string source)
     {
         if (!Channels.TryGetValue(source, out var queue))
         {
@@ -85,16 +106,15 @@ public class BlossomChannels() : IBlossomChannels
         return queue;
     }
 
-    public async Task<string> Publish<T>(T ev, CancellationToken cancellationToken = default)
+    public async Task Publish<T>(T ev, CancellationToken cancellationToken = default)
         => await Publish(DefaultSource, ev, cancellationToken);
 
-    public async Task<string> Publish<T>(string source, T ev, CancellationToken cancellationToken = default)
+    public async Task Publish<T>(string source, T ev, CancellationToken cancellationToken = default)
     {
         var blossomEvent = new BlossomEvent<T>(source, ev);
-        
+
         var queue = GetOrCreate(source);
         await queue.Writer.WriteAsync(blossomEvent, cancellationToken);
-        return blossomEvent.Id;
     }
 
     public async Task<string> Execute(Delegate action)
@@ -104,7 +124,7 @@ public class BlossomChannels() : IBlossomChannels
         return id;
     }
 
-    public static async Task Execute(string id, Delegate action)
+    public async Task Execute(string id, Delegate action)
     {
         var queue = GetOrCreate(id);
         var job = new BlossomJob(id, action, queue);
@@ -114,6 +134,6 @@ public class BlossomChannels() : IBlossomChannels
     internal static void Complete(BlossomJob job)
     {
         job.Channel.Writer.TryComplete();
-        Channels.TryRemove(job.Id, out _);
+        //Channels.TryRemove(job.Id, out _);
     }
 }

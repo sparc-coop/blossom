@@ -6,13 +6,24 @@ public class BlossomChannel<T> where T : class
 {
     readonly Channel<T> _queue;
 
-    public BlossomChannel(int capacity = 200)
+    public BlossomChannel(int? capacity = null)
     {
-        var options = new BoundedChannelOptions(capacity)
+        if (capacity == null)
+            _queue = Channel.CreateUnbounded<T>(new UnboundedChannelOptions
+            {
+                SingleReader = false,
+                SingleWriter = false
+            });
+        else
         {
-            FullMode = BoundedChannelFullMode.Wait
-        };
-        _queue = Channel.CreateBounded<T>(options);
+            var options = new BoundedChannelOptions(capacity.Value)
+            {
+                FullMode = BoundedChannelFullMode.Wait,
+                SingleReader = false,
+                SingleWriter = false
+            };
+            _queue = Channel.CreateBounded<T>(options);
+        }
     }
 
     public ChannelReader<T> Reader => _queue.Reader;

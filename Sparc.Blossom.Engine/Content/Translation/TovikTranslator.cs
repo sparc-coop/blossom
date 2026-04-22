@@ -13,7 +13,8 @@ public class TovikTranslator(
     IRepository<Page> pages,
     DocumentTranslator documents,
     ClaimsPrincipal principal,
-    SparcAuthenticator<BlossomUser> auth) : IBlossomEndpoints
+    SparcAuthenticator<BlossomUser> auth,
+    BlossomChannels channels) : IBlossomEndpoints
 {
     internal IEnumerable<ITranslator> Translators { get; } = translators;
     public IRepository<TextContent> Content { get; } = content;
@@ -70,7 +71,7 @@ public class TovikTranslator(
             .Where(x => ids.Contains(x.Id) && x.Version == sparcDomain.Settings.Version)
             .ToListAsync();
 
-        var needsTranslation = existing
+        var needsTranslation = request.Content
             .Where(content => !existing.Any(x => x.OriginalText == content.Text))
             .ToList();
 
@@ -82,7 +83,7 @@ public class TovikTranslator(
         if (request.Options.RunInBackground)
         {
             request.Options.BackgroundId = Guid.NewGuid().ToString();
-            await BlossomChannels.Execute(request.Options.BackgroundId, async (TovikTranslator translator) => await translator.TranslateAsync(request, sparcDomain));
+            await channels.Execute(request.Options.BackgroundId, async (TovikTranslator translator) => await translator.TranslateAsync(request, sparcDomain));
             return new(existing, request.Options.BackgroundId);
         }
 
@@ -167,11 +168,18 @@ public class TovikTranslator(
 
         group.MapPost("stream", async (TovikTranslator translator, HttpRequest request, TranslationRequest translationRequest) =>
         {
-            var toLanguage = Language.Find(request.Headers.AcceptLanguage);
+            if (translationRequest.Options.OutputLanguage == null)
+                 translationRequest.Options.OutputLanguage = Language.Find(request.Headers.AcceptLanguage);
+
             translationRequest.Options.RunInBackground = true;
             var result = await translator.GetAll(translationRequest);
 
             return Results.Ok(result);
+        });
+
+        group.MapGet("stream/{id}", async (string id, BlossomChannels channels) =>
+        {
+            return Results.ServerSentEvents(channels.GetSseStream(id));
         });
 
         group.MapPost("untranslated", async (TovikTranslator translator, HttpRequest request, TranslationRequest translationRequest) =>

@@ -2,12 +2,13 @@
 using Anthropic.SDK.Common;
 using Anthropic.SDK.Constants;
 using Anthropic.SDK.Messaging;
+using Sparc.Blossom.Realtime;
 using Sparc.Blossom.Spaces;
 
 namespace Sparc.Blossom.Content;
 
-internal class AnthropicTranslator(AnthropicClient client)
-    : AITranslator(AnthropicModels.Claude45Haiku, 1m / 1_000_000, 5m / 1_000_000, 50)
+internal class AnthropicTranslator(BlossomChannels channels, AnthropicClient client)
+    : AITranslator(channels, AnthropicModels.Claude45Haiku, 1m / 1_000_000, 5m / 1_000_000, 50)
 {
     public override async Task<BlossomAnswer<T>> AskAsync<T>(BlossomQuestion<T> question)
     {

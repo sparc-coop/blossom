@@ -1,9 +1,11 @@
-﻿using Sparc.Blossom.Spaces;
+﻿using Sparc.Blossom.Realtime;
+using Sparc.Blossom.Spaces;
 using System.Collections.Concurrent;
 
 namespace Sparc.Blossom.Content;
 
-internal abstract class AITranslator(string defaultModel, decimal inputCostPerToken, decimal outputCostPerToken, int priority = 0) : ITranslator
+record ContentTranslated(TextContent TranslatedContent) : BlossomEvent;
+internal abstract class AITranslator(BlossomChannels channels, string defaultModel, decimal inputCostPerToken, decimal outputCostPerToken, int priority = 0) : ITranslator
 {
     public int Priority { get; } = priority;
     protected string DefaultModel = defaultModel;
@@ -37,6 +39,8 @@ internal abstract class AITranslator(string defaultModel, decimal inputCostPerTo
             if (safeBatch.Count == 0)
                 return;
 
+            request.Options.SetWindowedContext(safeBatch, 1000);
+            
             foreach (var fromLanguage in fromLanguages)
             {
                 var question = new TranslationQuestion(safeBatch, request.Options);
@@ -50,6 +54,9 @@ internal abstract class AITranslator(string defaultModel, decimal inputCostPerTo
 
                 foreach (var translatedMessage in translations)
                 {
+                    if (request.Options.BackgroundId != null)
+                        await channels.Publish(request.Options.BackgroundId, new ContentTranslated(translatedMessage));
+                    
                     translatedMessage.AddCharge(answer.InputTokens, InputCostPerToken, answer.OutputTokens, OutputCostPerToken, $"{GetType().Name} translation of {translatedMessage.OriginalText} to {translatedMessage.LanguageId}");
                     translatedMessages.Add(translatedMessage);
                 }

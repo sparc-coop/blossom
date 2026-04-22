@@ -26,26 +26,21 @@ public class TranslationOptions
     public Tones? Tone { get; set; }
     public string? Instructions { get; set; }
     public string? AdditionalContext { get; set; }
+    public string? WindowedContext { get; set; }
     public BlossomSchema? Schema { get; set; }
     public bool RunInBackground { get; set; }
     public string? BackgroundId { get; set; }
     public bool CrawlHtml { get; set; }
 
-    public void MatchTone(List<TextContent> content)
-    {
-        AdditionalContext ??= "";
-        var sampleContent = content.Select(x => x.Text).OrderBy(x => Guid.NewGuid()).Take(20);
-        AdditionalContext += "\n" + string.Join("\n", sampleContent);
-
-    }
-
     public string ToPrompt()
     {
         var prompt = new StringBuilder();
-        if (!string.IsNullOrWhiteSpace(AdditionalContext))
+        var context = WindowedContext ?? AdditionalContext;
+
+        if (!string.IsNullOrWhiteSpace(context))
         {
             prompt.AppendLine("Given the following context:");
-            prompt.AppendLine(AdditionalContext.Substring(0, Math.Min(AdditionalContext.Length, 1000)));
+            prompt.AppendLine(context.Substring(0, Math.Min(context.Length, 1000)));
             prompt.AppendLine().AppendLine();
         }
 
@@ -94,6 +89,52 @@ public class TranslationOptions
     }
 
     static decimal Round(decimal value) => Math.Round(value * 10) / 10;
+
+    public void SetWindowedContext(List<TextContent> content, int maxChars)
+    {
+        if (string.IsNullOrWhiteSpace(AdditionalContext))
+            AdditionalContext = string.Join(" ", content.Select(x => x.Text));
+
+        if (AdditionalContext.Length <= maxChars)
+        {
+            WindowedContext = AdditionalContext;
+            return;
+        }
+
+        var firstItemIndex = AdditionalContext.IndexOf(content.First().Text ?? "");
+        var lastItemIndex = AdditionalContext.LastIndexOf(content.Last().Text ?? "");
+        var numSamples = firstItemIndex > -1 && lastItemIndex > -1
+            ? lastItemIndex - firstItemIndex > maxChars ? 2 : 1
+            : firstItemIndex > -1 || lastItemIndex > -1 ? 1
+                : 0;
+
+        if (numSamples == 0)
+            WindowedContext = AdditionalContext.Substring(0, maxChars);
+        else if (numSamples == 2)
+        {
+            var firstStartIndex = Math.Max(0, firstItemIndex - maxChars / 4);
+            var firstEndIndex = Math.Min(AdditionalContext.Length, firstItemIndex + maxChars / 4);
+            var lastStartIndex = Math.Max(0, lastItemIndex - maxChars / 4);
+            var lastEndIndex = Math.Min(AdditionalContext.Length, lastItemIndex + maxChars / 4);
+            WindowedContext = AdditionalContext.Substring(firstStartIndex, firstEndIndex - firstStartIndex) 
+                + AdditionalContext.Substring(lastStartIndex, lastEndIndex - lastStartIndex);
+        }
+        else
+        {
+            var index = firstItemIndex > -1 ? firstItemIndex : lastItemIndex;
+            var start = Math.Max(0, index - maxChars / 2);
+            var end = Math.Min(AdditionalContext.Length, index + maxChars / 2);
+
+            // ensure we get as close to totalChars as possible
+            if (end - start < maxChars)
+            {
+                start = Math.Max(0, end - maxChars);
+                end = Math.Min(AdditionalContext.Length, start + maxChars);
+            }
+
+            WindowedContext = AdditionalContext.Substring(start, end - start);
+        }
+    }
 
     static Dictionary<decimal, string> SlangOrProperMappings = new()
     {

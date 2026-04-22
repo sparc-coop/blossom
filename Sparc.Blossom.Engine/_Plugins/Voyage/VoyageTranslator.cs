@@ -1,4 +1,5 @@
 ﻿
+using Sparc.Blossom.Realtime;
 using Sparc.Blossom.Spaces;
 
 namespace Sparc.Blossom.Content;
@@ -7,7 +8,7 @@ internal class VoyageTranslator : AITranslator
 {
     HttpClient Client = new() { BaseAddress = new Uri("https://api.voyageai.com/v1/") };
 
-    public VoyageTranslator(IConfiguration config) : base("voyage-4", 0, 0.06m / 1_000_000, 1)
+    public VoyageTranslator(BlossomChannels channels, IConfiguration config) : base(channels, "voyage-4", 0, 0.06m / 1_000_000, 1)
     {
         var apiKey = config.GetConnectionString("Voyage");
         Client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
