@@ -1,7 +1,15 @@
-﻿using System.Text.Encodings.Web;
+﻿using System.ComponentModel;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 
 namespace Sparc.Blossom.Content;
+
+public record TextContentBase(string Id, string Text);
+public class TranslationResult
+{
+    [Description("The original given ID of the original text as Id, and the translated text in the target language as Text.")]
+    public List<TextContentBase> Text { get; set; } = [];
+}
 
 internal class TranslationQuestion : BlossomQuestion<TranslationResult>
 {
