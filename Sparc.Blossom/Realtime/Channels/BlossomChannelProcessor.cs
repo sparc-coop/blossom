@@ -8,10 +8,15 @@ public class BlossomChannelProcessor(BlossomEvents events, IServiceScopeFactory 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await foreach (BlossomEvent ev in events.Events.Reader.ReadAllAsync(stoppingToken))
-        {
-            Console.WriteLine("Received event: {0}", ev);
-            await Process(ev, stoppingToken);
-        }
+            try
+            {
+                _ = Process(ev, stoppingToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it as needed
+                Console.Error.WriteLine($"Error processing event {ev.Id}: {ex}");
+            }
     }
 
     public async Task Process(BlossomEvent ev, CancellationToken cancellationToken = default)
