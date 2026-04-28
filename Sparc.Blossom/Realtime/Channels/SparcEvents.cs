@@ -19,7 +19,7 @@ public class SparcEvents
             await AvatarChanged.Invoke(avatar);
     }
 
-    public event Func<Task> SetupProfile;
+    public event Func<Task>? SetupProfile;
     public async Task OnSetupProfile()
     {
         if (SetupProfile != null)

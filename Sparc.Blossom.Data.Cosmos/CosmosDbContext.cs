@@ -4,7 +4,7 @@ using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Data.Cosmos;
 
-public class CosmosDbContext(DbContextOptions dbOptions, IBlossomChannels channels) : DbContext(dbOptions)
+public class CosmosDbContext(DbContextOptions dbOptions, IBlossomEvents channels) : DbContext(dbOptions)
 {
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

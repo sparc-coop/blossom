@@ -9,24 +9,13 @@ namespace Sparc.Blossom.Billing;
 public class ProcessContent(
     IRepository<SparcDomain> domains,
     IRepository<Page> pages,
-    IRepository<UserCharge> charges,
-    CosmosDbSimpleRepository<TextContent> content
-    ) : BlossomOn<ContentPosted>
+    IRepository<UserCharge> charges) : BlossomOn<ContentPosted>
 {
     public override async Task ExecuteAsync(ContentPosted item)
     {
-        try
-        {
-            // Cache-aside the translated content 
-            await content.UpdateNoPublishAsync(item.Content);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed to cache translated content {item.Content.Id}: {ex.Message}");
-        }
-        
         // Get owning user
-        var domain = await domains.Query.Where(d => d.Domain == item.Content.Domain)
+        var domain = await domains.Query
+            .Where(d => d.Domain == item.Content.Domain)
             .FirstOrDefaultAsync();
 
         await RegisterTovikUsage(item, domain);

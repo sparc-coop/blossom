@@ -5,7 +5,7 @@ using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Data;
 
-public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, IBlossomChannels channels) 
+public class CosmosDbSimpleRepository<T>(CosmosDbSimpleClient<T> simpleClient, IBlossomEvents channels) 
     : RepositoryBase<T>(simpleClient.Context), IRepository<T>
     where T : BlossomEntity<string>
 {

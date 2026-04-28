@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Sparc.Blossom.Content;
 
-internal class OpenAITranslator(BlossomChannels channels, OpenAIClient client) 
+internal class OpenAITranslator(BlossomEvents channels, OpenAIClient client) 
     : AITranslator(channels, "gpt-4.1-nano", 0.20m / 1_000_000, 0.80m / 1_000_000, 0)
 {
     public override async Task VectorizeAsync(IVectorizable message, IEnumerable<IVectorizable>? additionalContext = null)

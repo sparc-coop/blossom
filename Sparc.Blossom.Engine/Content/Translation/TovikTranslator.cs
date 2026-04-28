@@ -14,7 +14,7 @@ public class TovikTranslator(
     DocumentTranslator documents,
     ClaimsPrincipal principal,
     SparcAuthenticator<BlossomUser> auth,
-    BlossomChannels channels) : IBlossomEndpoints
+    BlossomEvents channels) : IBlossomEndpoints
 {
     internal IEnumerable<ITranslator> Translators { get; } = translators;
     public IRepository<TextContent> Content { get; } = content;
@@ -177,7 +177,7 @@ public class TovikTranslator(
             return Results.Ok(result);
         });
 
-        group.MapGet("stream/{id}", async (string id, BlossomChannels channels) =>
+        group.MapGet("stream/{id}", async (string id, BlossomEvents channels) =>
         {
             return Results.ServerSentEvents(channels.GetSseStream(id));
         });

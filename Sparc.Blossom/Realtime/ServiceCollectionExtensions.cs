@@ -15,8 +15,8 @@ public static class BlossomRealtimeServiceCollectionExtensions
         }
 
         services
-            .AddSingleton<BlossomChannels>()
-            .AddSingleton<IBlossomChannels, BlossomChannels>();
+            .AddSingleton<BlossomEvents>()
+            .AddSingleton<IBlossomEvents, BlossomEvents>();
 
         return services;
     }

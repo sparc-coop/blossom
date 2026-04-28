@@ -7,7 +7,7 @@ using Sparc.Blossom.Spaces;
 
 namespace Sparc.Blossom.Content;
 
-internal class AnthropicTranslator(BlossomChannels channels, AnthropicClient client)
+internal class AnthropicTranslator(BlossomEvents channels, AnthropicClient client)
     : AITranslator(channels, AnthropicModels.Claude45Haiku, 1m / 1_000_000, 5m / 1_000_000, 50)
 {
     public override async Task<BlossomAnswer<T>> AskAsync<T>(BlossomQuestion<T> question)
