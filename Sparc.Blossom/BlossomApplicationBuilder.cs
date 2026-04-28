@@ -127,7 +127,7 @@ public abstract class BlossomApplicationBuilder
         Services.AddScoped<SparcEvents>();
     }
 
-    protected abstract void AddBlossomRealtime(Assembly assembly);
+    protected abstract void AddBlossomRealtime(AppDomain domain);
 
     protected abstract void AddSparcAura();
 

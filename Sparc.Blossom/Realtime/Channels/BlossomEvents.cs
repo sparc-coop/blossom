@@ -41,13 +41,15 @@ public class BlossomEvents() : IBlossomEvents
     }
 
     public async Task Publish<T>(T ev, CancellationToken cancellationToken = default) where T : BlossomEvent
-        => await Events.Writer.WriteAsync(ev, cancellationToken);
-
-    public async Task Publish<T>(string source, T ev, CancellationToken cancellationToken = default)
     {
-        var blossomEvent = new BlossomEvent<T>(source, ev);
+        await Events.Writer.WriteAsync(ev, cancellationToken);
+    }
 
-        var channel = GetOrCreate(source);
+    public async Task Publish<T>(string channelId, T ev, CancellationToken cancellationToken = default)
+    {
+        var blossomEvent = new BlossomEvent<T>(channelId, ev);
+
+        var channel = GetOrCreate(channelId);
         await channel.Writer.WriteAsync(blossomEvent, cancellationToken);
     }
 
@@ -60,8 +62,8 @@ public class BlossomEvents() : IBlossomEvents
 
     public async Task Execute(string id, Delegate action)
     {
-        var queue = GetOrCreate(id);
-        var job = new BlossomJob(id, action, queue);
+        var channel = GetOrCreate(id);
+        var job = new BlossomJob(id, action, channel);
         await Jobs.Writer.WriteAsync(job);
     }
 

@@ -9,18 +9,12 @@ public class BlossomChannel<T> where T : class
     public BlossomChannel(int? capacity = null)
     {
         if (capacity == null)
-            _queue = Channel.CreateUnbounded<T>(new UnboundedChannelOptions
-            {
-                SingleReader = false,
-                SingleWriter = false
-            });
+            _queue = Channel.CreateUnbounded<T>();
         else
         {
             var options = new BoundedChannelOptions(capacity.Value)
             {
-                FullMode = BoundedChannelFullMode.Wait,
-                SingleReader = false,
-                SingleWriter = false
+                FullMode = BoundedChannelFullMode.Wait
             };
             _queue = Channel.CreateBounded<T>(options);
         }

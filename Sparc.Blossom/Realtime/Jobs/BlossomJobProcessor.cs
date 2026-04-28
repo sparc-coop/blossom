@@ -4,11 +4,11 @@ using Microsoft.Extensions.Hosting;
 namespace Sparc.Blossom.Realtime;
 
 public record BlossomJob(string Id, Delegate Action, BlossomChannel<BlossomEvent> Channel);
-public class BlossomJobProcessor(BlossomEvents channels, IServiceScopeFactory scopes) : BackgroundService
+public class BlossomJobProcessor(BlossomEvents events, IServiceScopeFactory scopes) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await foreach (BlossomJob job in channels.Jobs.Reader.ReadAllAsync(stoppingToken))
+        await foreach (BlossomJob job in events.Jobs.Reader.ReadAllAsync(stoppingToken))
             try
             {
                 _ = Run(job).ConfigureAwait(false);

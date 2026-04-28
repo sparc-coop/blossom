@@ -52,7 +52,7 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
         Services.AddHttpContextAccessor();
         Services.AddOutputCache();
 
-        Builder.AddBlossomRealtime(callingAssembly);
+        Builder.AddBlossomRealtime();
 
         return new BlossomServerApplication(Builder);
     }
@@ -128,9 +128,9 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
             razor.AddInteractiveWebAssemblyComponents();
     }
 
-    protected override void AddBlossomRealtime(Assembly assembly)
+    protected override void AddBlossomRealtime(AppDomain domain)
     {
-        Builder.AddBlossomRealtime(assembly);
+        Builder.AddBlossomRealtime(domain);
     }
 
     void AddBlossomRealtime<THub>(Assembly assembly)

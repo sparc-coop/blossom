@@ -74,8 +74,8 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
             .AddScoped<PasskeyAuthenticator>();
     }
 
-    protected override void AddBlossomRealtime(Assembly assembly)
+    protected override void AddBlossomRealtime(AppDomain domain)
     {
-        Services.AddBlossomRealtime(assembly);
+        Services.AddBlossomRealtime(domain);
     }
 }

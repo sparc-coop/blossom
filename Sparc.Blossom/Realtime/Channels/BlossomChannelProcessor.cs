@@ -3,12 +3,15 @@ using Microsoft.Extensions.Hosting;
 
 namespace Sparc.Blossom.Realtime;
 
-public class BlossomChannelProcessor(BlossomEvents channels, IServiceScopeFactory scopes) : BackgroundService
+public class BlossomChannelProcessor(BlossomEvents events, IServiceScopeFactory scopes) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await foreach (BlossomEvent ev in channels.Events.Reader.ReadAllAsync(stoppingToken))
+        await foreach (BlossomEvent ev in events.Events.Reader.ReadAllAsync(stoppingToken))
+        {
+            Console.WriteLine("Received event: {0}", ev);
             await Process(ev, stoppingToken);
+        }
     }
 
     public async Task Process(BlossomEvent ev, CancellationToken cancellationToken = default)
