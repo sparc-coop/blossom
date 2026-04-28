@@ -38,6 +38,6 @@ public class BlossomJobProcessor(BlossomEvents events, IServiceScopeFactory scop
         if (result is Task taskResult)
             await taskResult;
 
-        BlossomEvents.Complete(job);
+        job.Channel.Writer.TryComplete();
     }
 }

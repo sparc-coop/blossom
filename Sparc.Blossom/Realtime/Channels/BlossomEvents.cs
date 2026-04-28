@@ -20,24 +20,26 @@ public class BlossomEvents() : IBlossomEvents
         yield return new BlossomEvent(source) { Type = "done" };
     }
 
-    public async IAsyncEnumerable<SseItem<BlossomEvent>> GetSseStream(string source)
+    public async IAsyncEnumerable<SseItem<BlossomEvent>> GetSseStream(string channelId)
     {
-        if (Channels.TryGetValue(source, out var channel))
+        if (Channels.TryGetValue(channelId, out var channel))
             await foreach (var ev in channel.Reader.ReadAllAsync())
                 yield return new(ev, ev.Type);
 
-        yield return new(new(source) { Type = "done" }, "done");
+        yield return new(new(channelId) { Type = "done" }, "done");
+
+        Dispose(channelId);
     }
 
-    public BlossomChannel<BlossomEvent> GetOrCreate(string source)
+    public BlossomChannel<BlossomEvent> GetOrCreate(string channelId)
     {
-        if (!Channels.TryGetValue(source, out var queue))
+        if (!Channels.TryGetValue(channelId, out var channel))
         {
-            queue = new BlossomChannel<BlossomEvent>();
-            Channels[source] = queue;
+            channel = new BlossomChannel<BlossomEvent>();
+            Channels[channelId] = channel;
         }
 
-        return queue;
+        return channel;
     }
 
     public async Task Publish<T>(T ev, CancellationToken cancellationToken = default) where T : BlossomEvent
@@ -67,9 +69,9 @@ public class BlossomEvents() : IBlossomEvents
         await Jobs.Writer.WriteAsync(job);
     }
 
-    internal static void Complete(BlossomJob job)
+    internal void Dispose(string channelId)
     {
-        job.Channel.Writer.TryComplete();
-        //Channels.TryRemove(job.Id, out _);
+        if (Channels.TryRemove(channelId, out var channel))
+            channel.Writer.TryComplete();
     }
 }
