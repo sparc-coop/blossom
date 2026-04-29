@@ -16,9 +16,6 @@ public class Contents(
     SparcAuthenticator<BlossomUser> auth,
     BlossomEvents channels) : IBlossomEndpoints
 {
-    internal IEnumerable<ITranslator> Translators { get; } = translators;
-    public IRepository<TextContent> Content { get; } = content;
-
     public Task<List<Language>> GetLanguagesAsync() => Task.FromResult(Language.All);
 
     public async Task<List<TextContent>> TranslateAsync(ContentRequest request, SparcDomain? domain = null)
@@ -44,9 +41,9 @@ public class Contents(
         //if (domain.IsBeyondTranslationLimit())
         //    throw new Exception("You've reached your Tovik translation limit!");
 
-        var translator = Translators.OrderBy(x => x.Priority).First();
+        var translator = translators.OrderBy(x => x.Priority).First();
         var translations = await translator.TranslateAsync(request);
-        await Content.UpdateAsync(translations);
+        await content.UpdateAsync(translations);
 
         return translations;
     }
@@ -67,7 +64,7 @@ public class Contents(
         var sparcDomain = await GetOrCreateDomain(domain);
 
         var ids = request.Content.Select(x => x.Id).ToList();
-        var existing = await Content.Query(domain)
+        var existing = await content.Query(domain)
             .Where(x => ids.Contains(x.Id) && x.Version == sparcDomain.Settings.Version)
             .ToListAsync();
 
@@ -116,7 +113,7 @@ public class Contents(
 
     internal async Task<Language?> DetectLanguage(List<TextContent> content)
     {
-        var translator = Translators.Where(x => x is ILanguageDetector).Cast<ILanguageDetector>().First();
+        var translator = translators.Where(x => x is ILanguageDetector).Cast<ILanguageDetector>().First();
         return await translator.DetectLanguageAsync(content);
     }
 
