@@ -1,185 +1,248 @@
-﻿//using Sparc.Blossom.Authentication;
-//using Sparc.Blossom.Data;
-//using System.Globalization;
-//using System.Security.Claims;
+﻿using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Data;
+using Sparc.Blossom.Realtime;
+using Sparc.Core;
+using System.Security.Claims;
 
-//namespace Sparc.Blossom.Content;
+namespace Sparc.Blossom.Content;
 
-//public class Contents(
-//    BlossomAggregateOptions<TextContent> options,
-//    IEnumerable<ITranslator> translators,
-//    IRepository<SparcDomain> domains,
-//    ClaimsPrincipal principal,
-//    SparcAuthenticator<BlossomUser> auth) : BlossomAggregate<TextContent>(options), IBlossomEndpoints
-//{
-//    public Task<List<Language>> GetLanguagesAsync() => Task.FromResult(Language.All);
+public class Contents(
+    IEnumerable<ITranslator> translators,
+    IRepository<TextContent> content,
+    IRepository<SparcDomain> domains,
+    IRepository<Page> pages,
+    DocumentTranslator documents,
+    ClaimsPrincipal principal,
+    SparcAuthenticator<BlossomUser> auth,
+    BlossomEvents channels) : IBlossomEndpoints
+{
+    internal IEnumerable<ITranslator> Translators { get; } = translators;
+    public IRepository<TextContent> Content { get; } = content;
 
-//    async Task<Language?> GetLanguageAsync(string language)
-//    {
-//        var languages = await GetLanguagesAsync();
-//        return languages.FirstOrDefault(x => x.Id == language);
-//    }
+    public Task<List<Language>> GetLanguagesAsync() => Task.FromResult(Language.All);
 
-//    public async Task<TextContent> Get(TextContent content, TranslationOptions? options = null)
-//    {
-//        var existing = await Repository.FindAsync(content.Domain, content.Id);
-//        if (existing != null)
-//            return existing;
+    public async Task<List<TextContent>> TranslateAsync(ContentRequest request, SparcDomain? domain = null)
+    {
+        if (request.Options.OutputLanguage == null)
+        {
+            var user = await auth.GetAsync(principal);
+            request.Options.OutputLanguage = user?.Avatar.Language;
+        }
 
-//        var translations = await Get([content], options)
-//            ?? throw new InvalidOperationException("Translation failed.");
+        if (request.Options.OutputLanguage == null)
+            return request.Content;
 
-//        await PublishAsync(translations);
-//        return translations.First();
-//    }
+        if (request.Options.CrawlHtml)
+        {
+            foreach (var item in request.Content.Where(x => x.Text?.StartsWith("http") == true))
+                item.Text = await new HtmlTranslator(item.Text!).TranslateAsync();
+        }
 
-//    public async Task<List<TextContent>> GetAll(List<TextContent> contents)
-//    {
-//        var domain = contents.First().Domain;
-//        var ids = contents.Select(x => x.Id).ToList();
+        domain ??= await GetOrCreateDomain(request.Content.First().Domain);
 
-//        var existing = await Repository.Query(domain).Where(x => ids.Contains(x.Id)).ToListAsync();
-//        return existing;
-//    }
+        request.Options.TovikSettings = domain.Settings;
+        //if (domain.IsBeyondTranslationLimit())
+        //    throw new Exception("You've reached your Tovik translation limit!");
 
+        var translator = Translators.OrderBy(x => x.Priority).First();
+        var translations = await translator.TranslateAsync(request);
+        await Content.UpdateAsync(translations);
 
-//    private async Task<bool> CanTranslate(List<TextContent> contents)
-//    {
-//        var domainName = contents.FirstOrDefault()?.Domain;
-//        if (string.IsNullOrWhiteSpace(domainName))
-//            return true;
+        return translations;
+    }
 
-//        var domain = await domains.Query
-//            .Where(x => x.Domain == domainName)
-//            .FirstOrDefaultAsync();
+    public async Task<ContentResponse> GetAll(ContentRequest request)
+    {
+        if (request.Options.OutputLanguage == null)
+        {
+            var user = await auth.GetAsync(principal);
+            request.Options.OutputLanguage = user?.Avatar.Language;
+        }
 
-//        if (domain == null)
-//        {
-//            domain = new SparcDomain(domainName);
-//            await domains.AddAsync(domain);
-//        }
+        if (request.Options.OutputLanguage == null || request.Content.Count == 0)
+            return new(request.Content);
 
-//        if (domain != null && domain.TovikUsage <= 500)
-//            return true;
+        var domain = request.Content.First().Domain;
+        var path = request.Content.First().SpaceId;
+        var sparcDomain = await GetOrCreateDomain(domain);
 
-//        return false;
-//    }
+        var ids = request.Content.Select(x => x.Id).ToList();
+        var existing = await Content.Query(domain)
+            .Where(x => ids.Contains(x.Id) && x.Version == sparcDomain.Settings.Version)
+            .ToListAsync();
 
-//    public async Task<TextContent?> TranslateAsync(TextContent message, Language toLanguage, string? additionalContext = null)
-//        => (await Get([message], new() { OutputLanguage = toLanguage, AdditionalContext = additionalContext })).FirstOrDefault();
+        var needsTranslation = request.Content
+            .Where(content => !existing.Any(x => x.OriginalText == content.Text))
+            .ToList();
 
-//    public async Task<List<TextContent>> TranslateAsync(IEnumerable<TextContent> messages, TranslationOptions options)
-//    {
-//        // Preprocess URLs
-//        foreach (var content in messages.Where(x => x.Text?.StartsWith("http") == true))
-//        {
-//            var html = new HtmlTranslator(content.Text!);
-//            content.Text = await html.TranslateAsync();
-//        }
+        if (needsTranslation.Count == 0)
+            return new(existing);
 
-//        var translator = translators.OrderBy(x => x.Priority).First();
-//        var result = await translator.TranslateAsync(messages.ToList(), options);
-//        return result;
-//    }
+        request = request with { Content = needsTranslation };
 
-//    public async Task<T?> TranslateAsync<T>(TextContent message, TranslationOptions options)
-//        => (await TranslateAsync<T>([message], options)).FirstOrDefault();
+        if (request.Options.RunInBackground)
+        {
+            request.Options.BackgroundId = Guid.NewGuid().ToString();
+            await channels.Execute(request.Options.BackgroundId, async (Contents translator) => await translator.TranslateAsync(request, sparcDomain));
+            return new(existing, request.Options.BackgroundId);
+        }
 
-//    public async Task<List<T>> TranslateAsync<T>(IEnumerable<TextContent> messages, TranslationOptions options)
-//    {
-//        options.Schema = new(typeof(T));
-//        var translator = translators.OrderBy(x => x.Priority).First();
-//        var result = await translator.TranslateAsync(messages.ToList(), options);
-//        return result.Cast<T>().ToList();
-//    }
+        var translations = await TranslateAsync(request, sparcDomain);
+        return new(existing.Union(translations).ToList());
+    }
 
-//    internal async Task<string?> TranslateAsync(string text, string fromLanguage, string toLanguage)
-//    {
-//        if (fromLanguage == toLanguage)
-//            return text;
+    private async Task<SparcDomain> GetOrCreateDomain(string domainName)
+    {
+        var domain = await domains.Query
+            .Where(x => x.Domain == domainName)
+            .FirstOrDefaultAsync();
 
-//        var language = await GetLanguageAsync(toLanguage)
-//            ?? throw new ArgumentException($"Language {toLanguage} not found");
+        if (domain == null)
+        {
+            domain = new SparcDomain(domainName);
+            await domains.AddAsync(domain);
+        }
 
-//        var from = await GetLanguageAsync(fromLanguage);
-//        var message = new TextContent("", "", from!, text);
-//        var result = await Get([message], new() { OutputLanguage = language });
-//        return result?.FirstOrDefault()?.Text;
-//    }
+        return domain;
+    }
 
-//    internal ITranslator GetBestTranslator(Language fromLanguage, Language toLanguage)
-//    {
-//        return translators
-//            .OrderBy(x => x.Priority)
-//            .FirstOrDefault(x => x.CanTranslate(fromLanguage, toLanguage))
-//            ?? throw new Exception($"No translator found for {fromLanguage.Id} to {toLanguage.Id}");
-//    }
+    internal async Task<Language> SetLanguage(Language language)
+    {
+        var user = await auth.GetAsync(principal);
+        user.Avatar.Language = Language.Find(language.Id);
+        await auth.UpdateAsync(principal, user.Avatar);
+        return language;
+    }
 
-//    internal async Task<Language> SetLanguage(Language language)
-//    {
-//        var user = await auth.GetAsync(principal);
-//        user.Avatar.Language = Language.Find(language.Id);
-//        await auth.UpdateAsync(principal, user.Avatar);
-//        return language;
-//    }
+    internal async Task<Language?> DetectLanguage(List<TextContent> content)
+    {
+        var translator = Translators.Where(x => x is ILanguageDetector).Cast<ILanguageDetector>().First();
+        return await translator.DetectLanguageAsync(content);
+    }
 
-//    internal static BlossomRegion? GetLocale(string languageClaim)
-//    {
-//        var languages = Language.IdsFrom(languageClaim);
+    private async Task<Page> GetOrCreatePage(string domain, string path)
+    {
+        var page = await pages.Query
+            .Where(x => x.Domain == domain && x.Path == path)
+            .FirstOrDefaultAsync();
 
-//        try
-//        {
-//            var locale = languages
-//                .Where(x => x.Contains('-'))
-//                .Select(x => x.Split('-').Last())
-//                .Select(region => new RegionInfo(region))
-//                .FirstOrDefault();
+        if (page == null)
+        {
+            page = new Page(domain, path);
+            await pages.AddAsync(page);
+        }
 
-//            return locale == null ? null : new(locale);
-//        }
-//        catch
-//        {
-//            return null;
-//        }
-//    }
+        return page;
+    }
 
-//    async Task PublishAsync(IEnumerable<TextContent> contents)
-//    {
-//        if (Repository is CosmosDbSimpleRepository<TextContent> cosmos)
-//            foreach (var content in contents)
-//                await cosmos.Publish(content);
-//    }
+    private async Task<Language?> Visit(TextContent content, Language? language)
+    {
+        var page = await GetOrCreatePage(content.Domain, content.SpaceId);
 
-//    private static TranslationOptions? DefaultOptions(List<TextContent> content, string? userLanguage)
-//    {
-//        // Automatically translate to user's preferred language if not specified
-//        var language = Language.Find(userLanguage);
-//        if (language != null && content.Any(c => c.LanguageId != language.Id))
-//            return new TranslationOptions(language);
+        if (page.LanguageDetectedDate == null && !string.IsNullOrWhiteSpace(content.Text))
+            page.SetLanguage(await DetectLanguage([content]));
 
-//        return null;
-//    }
+        if (language != null)
+            page.RegisterVisit(language);
 
-//    public void Map(IEndpointRouteBuilder endpoints)
-//    {
-//        var group = endpoints.MapGroup("content").RequireCors("Tovik");
+        await pages.UpdateAsync(page);
 
-//        group.MapGet("languages", GetLanguagesAsync).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
-//        group.MapGet("language", (ClaimsPrincipal principal, HttpRequest request) => Language.Find(principal.Get("language") ?? request.Headers.AcceptLanguage));
-//        group.MapPost("language", async (Contents contents, Language language) => await contents.SetLanguage(language));
+        return page.Language;
+    }
 
-//        group.MapPost("", async (Contents contents, HttpRequest request, PostContentRequest getContent) =>
-//        {
-//            var options = getContent.Options ?? DefaultOptions(getContent.Content, request.Headers.AcceptLanguage);
-//            var result = await contents.Get(getContent.Content, options);
-//            return Results.Ok(result);
-//        });
+    public void Map(IEndpointRouteBuilder endpoints)
+    {
+        var content = endpoints.MapGroup("content").RequireCors("Tovik");
+        var translate = endpoints.MapGroup("translate").RequireCors("Tovik");
+        Map(content);
+        Map(translate);
+    }
 
-//        group.MapPost("{id}", async (Contents contents, HttpRequest request, PostSingleContentRequest singleContent, string id) =>
-//        {
-//            var options = singleContent.Options ?? DefaultOptions([singleContent.Content], request.Headers.AcceptLanguage);
-//            var result = await contents.Get(singleContent.Content, options);
-//            return Results.Ok(result);
-//        });
-//    }
-//}
+    public void Map(RouteGroupBuilder group)
+    {
+        group.MapGet("languages", GetLanguagesAsync).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
+        group.MapGet("language", (ClaimsPrincipal principal, HttpRequest request) => Language.Find(principal.Get("language") ?? request.Headers.AcceptLanguage));
+        group.MapPost("language", async (Contents translator, Language language) => await translator.SetLanguage(language));
+
+        group.MapPost("all", async (Contents translator, HttpRequest request, List<TextContent> contents) =>
+        {
+            var toLanguage = Language.Find(request.Headers.AcceptLanguage);
+            var translationRequest = new ContentRequest(contents, new TranslationOptions { OutputLanguage = toLanguage });
+            var result = await translator.GetAll(translationRequest);
+
+            return Results.Ok(result.Content);
+        });
+
+        group.MapPost("stream", async (Contents translator, HttpRequest request, ContentRequest contentRequest) =>
+        {
+            if (contentRequest.Options.OutputLanguage == null)
+                contentRequest.Options.OutputLanguage = Language.Find(request.Headers.AcceptLanguage);
+
+            contentRequest.Options.RunInBackground = true;
+            var result = await translator.GetAll(contentRequest);
+
+            return Results.Ok(result);
+        });
+
+        group.MapGet("stream/{id}", async (string id, BlossomEvents channels) =>
+        {
+            return Results.ServerSentEvents(channels.GetSseStream(id));
+        });
+
+        group.MapPost("untranslated", async (Contents translator, HttpRequest request, ContentRequest contentRequest) =>
+        {
+            var toLanguage = Language.Find(request.Headers.AcceptLanguage);
+            if (contentRequest.Options.OutputLanguage == null && toLanguage != null)
+                contentRequest.Options.OutputLanguage = toLanguage;
+
+            var result = await translator.TranslateAsync(contentRequest);
+            return Results.Ok(result);
+        });
+
+        group.MapPost("visit", async (Contents translator, HttpRequest request, TextContent content) =>
+        {
+            var language = await translator.Visit(content, Language.Find(request.Headers.AcceptLanguage));
+            return Results.Ok(language);
+        });
+
+        group.MapGet("documents/{id}", async (Contents translator, HttpRequest request, string id, string domain, string? lang = null) =>
+        {
+            var language = Language.Find(lang ?? request.Headers.AcceptLanguage);
+            var (page, content) = await documents.ExtractAsync(domain, id);
+            var translationRequest = new ContentRequest(content, new(language!));
+            var translations = await translator.GetAll(translationRequest);
+            var result = await documents.ReplaceAsync(page, translations.Content);
+            return Results.File(result, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", page.Name);
+        });
+
+        group.MapPost("", async (Contents translator, TranslationApiRequest request, HttpRequest http) =>
+        {
+            // Look up domain by API key in bearer auth
+            var token = http.Headers.Authorization.ToString().Replace("Bearer ", "");
+            if (string.IsNullOrWhiteSpace(token))
+                return Results.Unauthorized();
+
+            var hash = BlossomKey.SHA256(token);
+            var domain = await domains.Query.Where(x => x.ApiKey != null && x.ApiKey.Hash == hash).FirstOrDefaultAsync();
+            if (domain == null)
+                return Results.Unauthorized();
+
+            if (domain.TovikApiUsage > domain.Product("Tovik")?.MaxUsage * 1000)
+                return Results.StatusCode(429);
+
+            var fromLang = Language.Find(http.Headers.ContentLanguage.ToString()) ?? Language.Find("en");
+            var toLang = Language.Find(http.Headers.AcceptLanguage.ToString());
+            if (toLang != null)
+                request.Options.OutputLanguage = toLang;
+
+            var content = request.Content.Select(x => new TextContent(domain.Domain, "*api*", fromLang!, x)).ToList();
+            var translations = await translator.TranslateAsync(new ContentRequest(content, request.Options));
+            var result = translations.Select(x => new TranslationApiResponse(x.OriginalText, x.Text, x.LanguageId));
+
+            domain.TovikApiUsage += content.Sum(x => x.WordCount());
+            await domains.UpdateAsync(domain);
+
+            return Results.Ok(result);
+        });
+    }
+}

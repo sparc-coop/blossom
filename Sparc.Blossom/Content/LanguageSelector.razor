@@ -48,7 +48,7 @@
     }
 </div>
 
-@inject ISparcContent Tovik
+@inject ISparcContent SparcContent
 @inject ISparcAura Aura
 @inject IJSRuntime Js
 @code {
@@ -78,7 +78,7 @@
 
         // Fallback to server-side language list for WASM, which has a limited set
         if (Languages.Count < 300)
-            Languages = (await Tovik.GetLanguages()).ToList();
+            Languages = (await SparcContent.GetLanguages()).ToList();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

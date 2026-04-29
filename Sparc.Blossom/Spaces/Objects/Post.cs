@@ -32,7 +32,7 @@ public class Post : BlossomSpaceObject
 
     public async Task ExtractEntities(ISparcContent tovik, List<SparcEntityType> entityTypes)
     {
-        Entities = await tovik.ExtractGraphAsync(new(this, entityTypes));
+        //Entities = await tovik.ExtractGraphAsync(new(this, entityTypes));
     }
 
     public void SetConstellation(Constellation? constellation, Post? connectToPost)
