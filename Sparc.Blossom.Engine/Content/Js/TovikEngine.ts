@@ -1,5 +1,7 @@
 import MD5 from "./MD5.js";
 import db from './TovikDb.js';
+import TovikLanguageElement from './TovikLanguageElement.js';
+import TovikElement from './TovikElement.js';
 
 function windowOrParentIncludes(str) {
     return window.location.href.includes(str)
@@ -67,6 +69,21 @@ export default class TovikEngine {
         return this.userLang;
     }
 
+    static async getLanguages() {
+        return await this.fetch('translate/languages');
+    }
+
+    static async setLanguage(language) {
+        if (this.userLang != language) {
+            this.userLang = language;
+            document.dispatchEvent(new CustomEvent('tovik-language-changed', { detail: this.userLang }));
+        }
+
+        document.dispatchEvent(new CustomEvent('tovik-language-set', { detail: this.userLang }));
+        document.documentElement.lang = this.userLang;
+        document.documentElement.setAttribute('dir', this.rtlLanguages.some(x => this.userLang.startsWith(x)) ? 'rtl' : 'ltr');
+    }
+
     static injectPreloadCSS() {
         const style = document.createElement('style');
         style.textContent = 'html.tovik-translating, html.tovik-translating * { color: transparent !important; caret-color: transparent !important; }'
@@ -75,6 +92,35 @@ export default class TovikEngine {
         document.head.appendChild(style);
     }
 
+    static async hi() {
+        let lang = await this.getUserLanguage();
+        this.documentLang = document.documentElement.lang;
+
+        if (this.isPreview) {
+            let languageName = new Intl.DisplayNames([navigator.language], { type: 'language' }).of(this.userLang);
+            var previewHtml = `<div class="tovik-preview" translate="no" onclick="document.dispatchEvent(new CustomEvent('tovik-exit-preview'))"><img src="https://tovik.app/images/TovikChar.svg" /> ${languageName} <span>✕</span></div>`;
+            document.body.insertAdjacentHTML('beforeend', previewHtml);
+            document.addEventListener('tovik-exit-preview', this.exitPreview);
+        }
+
+        await this.setLanguage(lang);
+        document.addEventListener('tovik-user-language-changed', async (event: CustomEvent) => {
+            if (!this.isPreview)
+                await this.setLanguage(event.detail);
+        });
+
+        customElements.define('tovik-language', TovikLanguageElement);
+        customElements.define('tovik-translate', TovikElement);
+
+        // If the document does not have a <tovik-translate> element, create one and point it to the body
+        if (!document.querySelector('tovik-translate')) {
+            var bodyElement = document.createElement('tovik-translate');
+            bodyElement.setAttribute('for', 'body');
+
+            document.body.appendChild(bodyElement);
+        }
+    }
+    
     static isRegisteringVisit = false;
     static async registerVisit() {
         if (this.isRegisteringVisit || !this.sampleText || this.sampleText.length < 100)
@@ -98,42 +144,7 @@ export default class TovikEngine {
         await localStorage.removeItem('tovik-plang');
         window.location.href = window.location.pathname;
     }
-
-    static async hi() {
-        this.injectPreloadCSS();
-
-        let lang = await this.getUserLanguage();
-        this.documentLang = document.documentElement.lang;
-
-        if (this.isPreview) {
-            let languageName = new Intl.DisplayNames([navigator.language], { type: 'language' }).of(this.userLang);
-            var previewHtml = `<div class="tovik-preview" translate="no" onclick="document.dispatchEvent(new CustomEvent('tovik-exit-preview'))"><img src="https://tovik.app/images/TovikChar.svg" /> ${languageName} <span>✕</span></div>`;
-            document.body.insertAdjacentHTML('beforeend', previewHtml);
-            document.addEventListener('tovik-exit-preview', this.exitPreview);
-        }
-
-        await this.setLanguage(lang);
-        document.addEventListener('tovik-user-language-changed', async (event: CustomEvent) => {
-            if (!this.isPreview)
-                await this.setLanguage(event.detail);
-        });
-    }
-
-    static async getLanguages() {
-        return await this.fetch('translate/languages');
-    }
-
-    static async setLanguage(language) {
-        if (this.userLang != language) {
-            this.userLang = language;
-            document.dispatchEvent(new CustomEvent('tovik-language-changed', { detail: this.userLang }));
-        }
-
-        document.dispatchEvent(new CustomEvent('tovik-language-set', { detail: this.userLang }));
-        document.documentElement.lang = this.userLang;
-        document.documentElement.setAttribute('dir', this.rtlLanguages.some(x => this.userLang.startsWith(x)) ? 'rtl' : 'ltr');
-    }
-
+    
     static idHash(text, lang = null) {
         if (!lang)
             lang = this.userLang;
@@ -151,7 +162,6 @@ export default class TovikEngine {
         var result = await this.fetch('translate/all', { content: requests, options: { additionalContext: this.sampleText } }, this.userLang);
         return result.content;
     }
-
 
     static async stream(pendingTranslations, textMap, fromLang, onTranslation) {
         if (!pendingTranslations.length)
