@@ -214,6 +214,4 @@ public class TextContent : BlossomEntity<string>
 
         return this;
     }
-
-
 }

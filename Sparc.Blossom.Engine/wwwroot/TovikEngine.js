@@ -100,7 +100,7 @@ export default class TovikEngine {
         // If the document does not have a <tovik-translate> element, create one and point it to the body
         if (!document.querySelector('tovik-translate')) {
             var bodyElement = document.createElement('tovik-translate');
-            bodyElement.setAttribute('for', 'body');
+            bodyElement.setAttribute('for', 'html');
             document.body.appendChild(bodyElement);
         }
     }

@@ -18,7 +18,7 @@ export default class TovikElement extends HTMLElement {
         // if the attribute 'for' is set, observe the element with that selector
         if (this.hasAttribute('for')) {
             const selector = this.getAttribute('for');
-            this.#observedElement = document.querySelector(selector);
+            this.#observedElement = selector == 'html' ? document.documentElement : document.querySelector(selector);
         }
 
         await this.translatePage(this.#observedElement);

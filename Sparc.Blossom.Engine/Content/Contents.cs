@@ -57,7 +57,7 @@ public class Contents(
         }
 
         if (request.Options.OutputLanguage == null || request.Content.Count == 0)
-            return new(request.Content);
+            return new(request.Content.Select(x => new TextContentLight(x)).ToList());
 
         var domain = request.Content.First().Domain;
         var path = request.Content.First().SpaceId;
@@ -73,7 +73,7 @@ public class Contents(
             .ToList();
 
         if (needsTranslation.Count == 0)
-            return new(existing);
+            return new(existing.Select(x => new TextContentLight(x)).ToList());
 
         request = request with { Content = needsTranslation };
 
@@ -81,11 +81,11 @@ public class Contents(
         {
             request.Options.BackgroundId = Guid.NewGuid().ToString();
             await channels.Execute(request.Options.BackgroundId, async (Contents translator) => await translator.TranslateAsync(request, sparcDomain));
-            return new(existing, request.Options.BackgroundId);
+            return new(existing.Select(x => new TextContentLight(x)).ToList(), request.Options.BackgroundId);
         }
 
         var translations = await TranslateAsync(request, sparcDomain);
-        return new(existing.Union(translations).ToList());
+        return new(existing.Union(translations).Select(x => new TextContentLight(x)).ToList());
     }
 
     private async Task<SparcDomain> GetOrCreateDomain(string domainName)
