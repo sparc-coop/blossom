@@ -214,4 +214,10 @@ public class TextContent : BlossomEntity<string>
 
         return this;
     }
+
+    public void SetDomain(SparcDomain sparcDomain, string absoluteUri)
+    {
+        Domain = sparcDomain.Domain;
+        SpaceId = new Uri(absoluteUri).AbsolutePath.Trim('/');
+    }
 }

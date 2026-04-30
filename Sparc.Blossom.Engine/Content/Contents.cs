@@ -35,7 +35,7 @@ public class Contents(
                 item.Text = await new HtmlTranslator(item.Text!).TranslateAsync();
         }
 
-        domain ??= await GetOrCreateDomain(request.Content.First().Domain);
+        domain ??= await GetOrCreateDomain(request.Referrer!);
 
         request.Options.TovikSettings = domain.Settings;
         //if (domain.IsBeyondTranslationLimit())
@@ -59,12 +59,11 @@ public class Contents(
         if (request.Options.OutputLanguage == null || request.Content.Count == 0)
             return new(request.Content.Select(x => new TextContentLight(x)).ToList());
 
-        var domain = request.Content.First().Domain;
-        var path = request.Content.First().SpaceId;
-        var sparcDomain = await GetOrCreateDomain(domain);
+        var sparcDomain = await GetOrCreateDomain(request.Referrer!);
+        request.Content.ForEach(x => x.SetDomain(sparcDomain, request.Referrer!));
 
         var ids = request.Content.Select(x => x.Id).ToList();
-        var existing = await content.Query(domain)
+        var existing = await content.Query(sparcDomain.Domain)
             .Where(x => ids.Contains(x.Id) && x.Version == sparcDomain.Settings.Version)
             .ToListAsync();
 
@@ -90,6 +89,9 @@ public class Contents(
 
     private async Task<SparcDomain> GetOrCreateDomain(string domainName)
     {
+        var uri = new Uri(domainName);
+        domainName = uri.Host;
+
         var domain = await domains.Query
             .Where(x => x.Domain == domainName)
             .FirstOrDefaultAsync();
@@ -164,7 +166,7 @@ public class Contents(
         group.MapPost("all", async (Contents translator, HttpRequest request, List<TextContent> contents) =>
         {
             var toLanguage = Language.Find(request.Headers.AcceptLanguage);
-            var translationRequest = new ContentRequest(contents, new TranslationOptions { OutputLanguage = toLanguage });
+            var translationRequest = new ContentRequest(contents, new TranslationOptions { OutputLanguage = toLanguage }, request.Headers.Referer);
             var result = await translator.GetAll(translationRequest);
 
             return Results.Ok(result.Content);
@@ -176,6 +178,8 @@ public class Contents(
                 contentRequest.Options.OutputLanguage = Language.Find(request.Headers.AcceptLanguage);
 
             contentRequest.Options.RunInBackground = true;
+            contentRequest = contentRequest with { Referrer = request.Headers.Referer };
+
             var result = await translator.GetAll(contentRequest);
 
             return Results.Ok(result);
@@ -233,7 +237,7 @@ public class Contents(
                 request.Options.OutputLanguage = toLang;
 
             var content = request.Content.Select(x => new TextContent(domain.Domain, "*api*", fromLang!, x)).ToList();
-            var translations = await translator.TranslateAsync(new ContentRequest(content, request.Options));
+            var translations = await translator.TranslateAsync(new ContentRequest(content, request.Options, domain.ToAbsoluteUrl()));
             var result = translations.Select(x => new TranslationApiResponse(x.OriginalText, x.Text, x.LanguageId));
 
             domain.TovikApiUsage += content.Sum(x => x.WordCount());

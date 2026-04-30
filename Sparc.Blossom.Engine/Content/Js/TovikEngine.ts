@@ -132,8 +132,6 @@ export default class TovikEngine {
         this.isRegisteringVisit = true;
 
         this.fetch('translate/visit', {
-            Domain: window.location.host,
-            SpaceId: window.location.pathname,
             LanguageId: this.documentLang,
             Language: { Id: this.documentLang },
             Text: this.sampleText.substring(0, 1000)
@@ -153,17 +151,6 @@ export default class TovikEngine {
             lang = this.userLang;
 
         return MD5(text.trim() + ':' + lang);
-    }
-
-    static async getFromCache(items, fromLang) {
-        const requests = items.map(item => TovikEngine.toRequest(item, fromLang));
-
-        if (!this.userLang) {
-            await this.getUserLanguage();
-        }
-
-        var result = await this.fetch('translate/all', { content: requests, options: { additionalContext: this.sampleText } }, this.userLang);
-        return result.content;
     }
 
     static async stream(pendingTranslations, textMap, fromLang, onTranslation) {
@@ -188,21 +175,20 @@ export default class TovikEngine {
             source.addEventListener('done', () => source.close());
             source.addEventListener('ContentTranslated', (event) => {
                 var translation = JSON.parse(event.data).data.translatedContent;
-                const items = pendingTranslations.filter(item => item.hash === translation.id);
-                for (let item of items) {
-                    onTranslation(item.element, translation);
-                    db.translations.put(translation);
-                }
+                this.replace(pendingTranslations, translation, onTranslation);
             });
         }
 
-        for (let translation of result.content) {
-            const pending = pendingTranslations.find(item => item.hash === translation.id);
-            if (pending) {
-                onTranslation(pending.element, translation);
-                db.translations.put(translation);
-            }
-        }
+        for (let translation of result.content)
+            this.replace(pendingTranslations, translation, onTranslation);
+    }
+
+    static replace(pendingTranslations, translation, onTranslation) {
+        const items = pendingTranslations.filter(item => item.hash === translation.id);
+        for (let item of items)
+            onTranslation(item.element, translation);
+
+        db.translations.put(translation);
     }
 
     static getWindowedSample(firstItem, lastItem, totalChars) {
@@ -244,83 +230,9 @@ export default class TovikEngine {
         return sample;
     }
 
-    static async getUntranslated(items, fromLang) {
-        if (!items.length)
-            return [];
-
-        const requests = items.map(item => TovikEngine.toRequest(item, fromLang));
-
-        if (!this.userLang) {
-            await this.getUserLanguage();
-        }
-
-        var windowedContext = this.getWindowedSample(items[0], items[items.length - 1], 1000);
-        var result = await this.fetch('translate/untranslated', { content: requests, options: { additionalContext: windowedContext } }, this.userLang);
-        return result;
-    }
-
-    static async translateAll(pendingTranslations, textMap, fromLang, onTranslation) {
-        if (!pendingTranslations.length)
-            return;
-
-        var progress = document.querySelectorAll('.language-select-progress-bar');
-        for (let i = 0; i < progress.length; i++) {
-            progress[i].classList.add('show');
-        }
-
-        const uniqueMap = new Map();
-        for (const item of pendingTranslations) {
-            if (!uniqueMap.has(item.hash))
-                uniqueMap.set(item.hash, { hash: item.hash, text: textMap(item.element) });
-        }
-
-        var textsToTranslate = Array.from(uniqueMap.values());
-
-        const existingTranslations = await TovikEngine.getFromCache(textsToTranslate, fromLang);
-        if (existingTranslations) {
-            for (let translation of existingTranslations) {
-                const pending = pendingTranslations.find(item => item.hash === translation.id);
-                if (pending) {
-                    onTranslation(pending.element, translation);
-                    db.translations.put(translation);
-                }
-            }
-        }
-
-        const untranslated = textsToTranslate.filter(item => !existingTranslations.some(t => t.id === item.hash));
-        const batches = [];
-        const batchSize = 10;
-        for (let i = 0; i < untranslated.length; i += batchSize) {
-            batches.push(untranslated.slice(i, i + batchSize));
-        }
-
-        await Promise.all(batches.map(async batch => {
-            let newTranslations = await TovikEngine.getUntranslated(batch, fromLang);
-            if (!newTranslations)
-                return;
-
-            for (let translation of newTranslations) {
-                const items = pendingTranslations.filter(item => item.hash === translation.id);
-                for (let item of items) {
-                    onTranslation(item.element, translation);
-                    db.translations.put(translation);
-                }
-            }
-        }));
-
-        for (let i = 0; i < progress.length; i++) {
-            progress[i].classList.remove('show');
-        }
-    }
-
     static toRequest(item, fromLang) {
-        let domain = document.body.getAttribute('data-tovikdomain') ?? window.location.host;
-        let path = document.body.getAttribute('data-tovikpath') ?? window.location.pathname;
-
         return {
             id: item.hash || this.idHash(item.text, fromLang),
-            Domain: domain,
-            SpaceId: path,
             LanguageId: fromLang,
             Language: { Id: fromLang },
             Text: item.text
@@ -331,7 +243,8 @@ export default class TovikEngine {
         const options: any = {
             credentials: 'include',
             method: body ? 'POST' : 'GET',
-            headers: new Headers()
+            headers: new Headers(),
+            referrerPolicy: 'no-referrer-when-downgrade'
         };
 
         if (body) {
