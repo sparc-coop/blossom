@@ -37,7 +37,7 @@ export default class TovikEngine {
         }
 
         // Check for data-lang on the body element
-        const htmlLang = document.body.getAttribute('data-toviklang');
+        const htmlLang = document.body?.getAttribute('data-toviklang');
         if (htmlLang) {
             this.model = 'Live';
             this.userLang = htmlLang;
@@ -97,13 +97,6 @@ export default class TovikEngine {
         let lang = await this.getUserLanguage();
         this.documentLang = document.documentElement.lang;
 
-        if (this.isPreview) {
-            let languageName = new Intl.DisplayNames([navigator.language], { type: 'language' }).of(this.userLang);
-            var previewHtml = `<div class="tovik-preview" translate="no" onclick="document.dispatchEvent(new CustomEvent('tovik-exit-preview'))"><img src="https://tovik.app/images/TovikChar.svg" /> ${languageName} <span>✕</span></div>`;
-            document.body.insertAdjacentHTML('beforeend', previewHtml);
-            document.addEventListener('tovik-exit-preview', this.exitPreview);
-        }
-
         await this.setLanguage(lang);
         document.addEventListener('tovik-user-language-changed', async (event: CustomEvent) => {
             if (!this.isPreview)
@@ -118,7 +111,16 @@ export default class TovikEngine {
             var bodyElement = document.createElement('tovik-translate');
             bodyElement.setAttribute('for', 'html');
 
-            document.body.appendChild(bodyElement);
+            document.head.appendChild(bodyElement);
+        }
+    }
+
+    static async initBody() {
+        if (this.isPreview) {
+            let languageName = new Intl.DisplayNames([navigator.language], { type: 'language' }).of(this.userLang);
+            var previewHtml = `<div class="tovik-preview" translate="no" onclick="document.dispatchEvent(new CustomEvent('tovik-exit-preview'))"><img src="https://tovik.app/images/TovikChar.svg" /> ${languageName} <span>✕</span></div>`;
+            document.body.insertAdjacentHTML('beforeend', previewHtml);
+            document.addEventListener('tovik-exit-preview', this.exitPreview);
         }
     }
     

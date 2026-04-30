@@ -9,19 +9,9 @@ export default class TovikElement extends HTMLElement {
 
     constructor() {
         super();
-    }
 
-    async connectedCallback() {
-        this.#observedElement = this;
-        this.#originalLang = this.lang || TovikEngine.documentLang;
-
-        // if the attribute 'for' is set, observe the element with that selector
-        if (this.hasAttribute('for')) {
-            const selector = this.getAttribute('for');
-            this.#observedElement = selector == 'html' ? document.documentElement : document.querySelector(selector);
-        }
-
-        await this.translatePage(this.#observedElement);
+        this.#observedElement = document.documentElement;
+        this.#originalLang = TovikEngine.documentLang;
 
         document.addEventListener('tovik-language-changed', async (event: any) => {
             await this.translatePage(this.#observedElement, true);
@@ -34,6 +24,14 @@ export default class TovikElement extends HTMLElement {
 
         this.observer = new MutationObserver(this.#observer);
         this.observer.observe(this.#observedElement, { childList: true, characterData: false, subtree: true });
+    }
+
+    async connectedCallback() {
+        // if the attribute 'for' is set, observe the element with that selector
+        if (this.hasAttribute('for')) {
+            const selector = this.getAttribute('for');
+            this.#observedElement = selector == 'html' ? document.documentElement : document.querySelector(selector);
+        }
     }
 
     disconnectedCallback() {
