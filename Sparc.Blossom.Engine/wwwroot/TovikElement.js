@@ -31,16 +31,21 @@ export default class TovikElement extends HTMLElement {
             this.observer.disconnect();
     }
     async translatePage(element, forceReload = false) {
-        if (!TovikEngine.detectedLang)
-            TovikEngine.registerVisit();
-        // Only translate if the first two characters of originalLang don't match the first two characters of TovikEngine.userLang
-        if (this.#originalLang && this.#originalLang.substring(0, 2) === TovikEngine.userLang.substring(0, 2) && !forceReload) {
-            return;
+        try {
+            if (!TovikEngine.detectedLang)
+                TovikEngine.registerVisit();
+            // Only translate if the first two characters of originalLang don't match the first two characters of TovikEngine.userLang
+            if (this.#originalLang && this.#originalLang.substring(0, 2) === TovikEngine.userLang.substring(0, 2) && !forceReload) {
+                document.documentElement.classList.remove('tovik-initializing');
+                return;
+            }
+            await this.wrapTextNodes(element, forceReload);
+            await this.translateAttribute(element, 'placeholder', forceReload);
+            document.documentElement.classList.remove('tovik-initializing');
         }
-        document.documentElement.classList.add('tovik-translating');
-        await this.wrapTextNodes(element, forceReload);
-        await this.translateAttribute(element, 'placeholder', forceReload);
-        document.documentElement.classList.remove('tovik-translating');
+        catch {
+            document.documentElement.classList.remove('tovik-initializing');
+        }
     }
     async wrapTextNodes(element, forceReload = false) {
         var nodes = [];
@@ -124,7 +129,6 @@ export default class TovikElement extends HTMLElement {
                 //        textNode.parentElement.classList.add('tovik-translating');
             }
         }));
-        document.documentElement.classList.remove('tovik-translating');
         if (window.parent && window.parent.postMessage)
             window.parent.postMessage('tovik-translating');
         await TovikEngine.stream(pendingTranslations, node => node.originalText, this.#originalLang, (el, translation) => {

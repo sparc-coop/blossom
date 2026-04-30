@@ -75,10 +75,11 @@ export default class TovikEngine {
     }
     static injectPreloadCSS() {
         const style = document.createElement('style');
-        style.textContent = 'html.tovik-translating, html.tovik-translating * { color: transparent !important; caret-color: transparent !important; }'
+        style.textContent = 'html.tovik-initializing, html.tovik-initializing * { color: transparent !important; caret-color: transparent !important; }'
             + '.tovik-preview { position: fixed; bottom: 20px; right: 20px; z-index: 1000000; background-color: #1F5068; color: white; font-size: 16px; padding: 16px 24px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 16px; }'
             + '.tovik-preview img { width: 36px; height: 36px; }';
         document.head.appendChild(style);
+        document.documentElement.classList.add('tovik-initializing');
     }
     static async hi() {
         let lang = await this.getUserLanguage();
