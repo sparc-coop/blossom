@@ -2,6 +2,7 @@ import MD5 from "./MD5.js";
 import db from './TovikDb.js';
 import TovikLanguageElement from './TovikLanguageElement.js';
 import TovikElement from './TovikElement.js';
+import KoriElement from './KoriElement.js';
 
 function windowOrParentIncludes(str) {
     return window.location.href.includes(str)
@@ -19,6 +20,7 @@ export default class TovikEngine {
     static model;
     static sampleText;
     static isPreview;
+    static isKoriEnabled;
     static rtlLanguages = ['ar', 'fa', 'he', 'ur', 'ps', 'ku', 'dv', 'yi', 'sd', 'ug'];
 
     static async getUserLanguage() {
@@ -105,6 +107,7 @@ export default class TovikEngine {
 
         customElements.define('tovik-language', TovikLanguageElement);
         customElements.define('tovik-translate', TovikElement);
+        customElements.define('kori-edit', KoriElement);
 
         // If the document does not have a <tovik-translate> element, create one and point it to the body
         if (!document.querySelector('tovik-translate')) {
@@ -113,6 +116,9 @@ export default class TovikEngine {
 
             document.head.appendChild(bodyElement);
         }
+
+        if (document.querySelector('kori-edit'))
+            this.isKoriEnabled = true;
     }
 
     static async initBody() {
@@ -183,6 +189,25 @@ export default class TovikEngine {
             this.replace(pendingTranslations, translation, onTranslation);
     }
 
+    static async update(element) {
+        const textNode = [...element.childNodes].find(x => x.nodeType === Node.TEXT_NODE);
+        const original = textNode?.originalText || element['originalText'] || element.element.innerText;
+        const hash = TovikEngine.idHash(original);
+        const request = {
+            content: [{
+                id: hash,
+                Text: element.innerText,
+                OriginalText: original,
+                LanguageId: this.userLang
+            }]
+        };
+
+        console.log('Updating translation with request:', request);
+        await db.translations.delete(hash);
+        await this.fetch('content', request, this.userLang, 'PUT');
+        document.dispatchEvent(new CustomEvent('kori-content-changed'));
+    }
+
     static replace(pendingTranslations, translation, onTranslation) {
         const items = pendingTranslations.filter(item => item.hash === translation.id);
         for (let item of items)
@@ -239,10 +264,10 @@ export default class TovikEngine {
         };
     };
 
-    static async fetch(url: string, body: any = null, language: string = null) {
+    static async fetch(url: string, body: any = null, language: string = null, method: string = null) {
         const options: any = {
             credentials: 'include',
-            method: body ? 'POST' : 'GET',
+            method: method ?? (body ? 'POST' : 'GET'),
             headers: new Headers(),
             referrerPolicy: 'no-referrer-when-downgrade'
         };
@@ -262,7 +287,7 @@ export default class TovikEngine {
         const response = await fetch(`${baseUrl}/${url}`, options);
 
         if (response.ok)
-            return await response.json();
+            return response.status == 201 ? null : await response.json();
         else if (response.status === 429) {
             console.warn(`Tovik tried to translate your website into ${language}, but your site has reached the Tovik translation limit!`);
         }

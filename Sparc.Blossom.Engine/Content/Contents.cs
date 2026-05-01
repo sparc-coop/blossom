@@ -24,12 +24,9 @@ public class Contents(
             request.Options.OutputLanguage = user?.Avatar.Language;
         }
 
-        if (request.Options.OutputLanguage == null || request.Content.Count == 0)
-            return new(request.Content.Select(x => new TextContentLight(x)).ToList());
-
         var (sparcDomain, existing, needsTranslation) = await GetContent(request);
 
-        if (needsTranslation.Count == 0)
+        if (request.Options.OutputLanguage == null || request.Content.Count == 0 || needsTranslation.Count == 0)
             return new(existing.Select(x => new TextContentLight(x)).ToList());
 
         request = request with { Content = needsTranslation };
@@ -47,15 +44,18 @@ public class Contents(
 
     public async Task UpdateAsync(ContentRequest request)
     {
-        var (sparcDomain, existing, needsCreation) = await GetContent(request);
+        var (sparcDomain, existing, needsTranslation) = await GetContent(request);
         foreach (var item in request.Content.Where(x => !string.IsNullOrWhiteSpace(x.Text)))
         {
             var updated = existing.FirstOrDefault(x => x.Id == item.Id);
             if (updated != null)
                 await content.ExecuteAsync(updated, x => x.SetText(item.Text!));
+            else
+            {
+                item.SetDomain(sparcDomain, request.Referrer!);
+                await content.UpdateAsync(item);
+            }
         }
-
-        await content.UpdateAsync(needsCreation);
     }
 
     async Task<(SparcDomain domain, List<TextContent> existing, List<TextContent> needsCreation)> GetContent(ContentRequest request)
@@ -68,8 +68,11 @@ public class Contents(
             .Where(x => ids.Contains(x.Id) && x.Version == sparcDomain.Settings.Version)
             .ToListAsync();
 
+        if (request.Options.OutputLanguage == null)
+            return (sparcDomain, existing, []);
+
         var needsTranslation = request.Content
-            .Where(content => !existing.Any(x => x.OriginalText == content.Text))
+            .Where(content => !existing.Any(x => x.OriginalText == content.Text) && content.LanguageId[..2] != request.Options.OutputLanguage.LanguageId)
             .ToList();
 
         return (sparcDomain, existing, needsTranslation);
@@ -171,6 +174,9 @@ public class Contents(
 
     static ContentRequest UpdateFromHttpRequest(ContentRequest request, HttpRequest http)
     {
+        if (request.Options == null)
+            request = request with { Options = new() };
+        
         if (request.Options.OutputLanguage == null)
             request.Options.OutputLanguage = Language.Find(http.Headers.AcceptLanguage);
 
@@ -198,12 +204,9 @@ public class Contents(
 
         group.MapPut("", async (Contents translator, HttpRequest request, ContentRequest contentRequest) =>
         {
-            if (contentRequest.Options.OutputLanguage == null)
-                contentRequest.Options.OutputLanguage = Language.Find(request.Headers.AcceptLanguage);
-
-            contentRequest = contentRequest with { Referrer = request.Headers.Referer };
+            contentRequest = UpdateFromHttpRequest(contentRequest, request);
             await translator.UpdateAsync(contentRequest);
-            return Results.Ok();
+            return Results.Created();
         });
 
         group.MapPost("stream", async (Contents translator, HttpRequest request, ContentRequest contentRequest) =>

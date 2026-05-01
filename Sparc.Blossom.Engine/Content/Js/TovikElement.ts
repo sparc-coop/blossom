@@ -18,9 +18,12 @@ export default class TovikElement extends HTMLElement {
         });
 
         document.addEventListener('tovik-content-changed', async (event: any) => {
-            await this.translatePage(this.#observedElement);
+            await this.translatePage(this.#observedElement, TovikEngine.isKoriEnabled);
         });
 
+        document.addEventListener('kori-content-changed', async (event: any) => {
+            await this.translatePage(this.#observedElement, true);
+        });
 
         this.observer = new MutationObserver(this.#observer);
         this.observer.observe(this.#observedElement, { childList: true, characterData: false, subtree: true });
@@ -97,7 +100,7 @@ export default class TovikElement extends HTMLElement {
     #tovikIgnoreFilter = function (node) {
         var approvedNodes = ['#text'];
 
-        if (!approvedNodes.includes(node.nodeName) || node.parentNode.nodeName == 'SCRIPT' || node.parentNode.nodeName == 'STYLE')
+        if (!approvedNodes.includes(node.nodeName) || node.parentNode.nodeName == 'SCRIPT' || node.parentNode.nodeName == 'STYLE' || node.contentEditable == 'true')
             return NodeFilter.FILTER_SKIP;
 
         var closest = node.parentElement.closest('[translate="no"]');

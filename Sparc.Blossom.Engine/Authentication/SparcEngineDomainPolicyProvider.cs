@@ -37,7 +37,7 @@ public class SparcEngineDomainPolicyProvider(IRepository<SparcDomain> domains, H
 
         var newPolicy = new CorsPolicyBuilder()
             .WithOrigins(origin)
-            .WithMethods("GET", "POST")
+            .WithMethods("GET", "POST", "PUT")
             .WithHeaders(HeaderNames.ContentType, HeaderNames.AcceptLanguage)
             .AllowCredentials();
        
