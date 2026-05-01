@@ -16,22 +16,6 @@ public class Contents(
     SparcAuthenticator<BlossomUser> auth,
     BlossomEvents channels) : IBlossomEndpoints
 {
-    public Task<List<Language>> GetLanguagesAsync() => Task.FromResult(Language.All);
-
-    internal async Task<Language> SetLanguage(Language language)
-    {
-        var user = await auth.GetAsync(principal);
-        user.Avatar.Language = Language.Find(language.Id);
-        await auth.UpdateAsync(principal, user.Avatar);
-        return language;
-    }
-
-    internal async Task<Language?> DetectLanguage(List<TextContent> content)
-    {
-        var translator = translators.Where(x => x is ILanguageDetector).Cast<ILanguageDetector>().First();
-        return await translator.DetectLanguageAsync(content);
-    }
-
     public async Task<ContentResponse> GetAll(ContentRequest request)
     {
         if (request.Options.OutputLanguage == null)
@@ -43,17 +27,7 @@ public class Contents(
         if (request.Options.OutputLanguage == null || request.Content.Count == 0)
             return new(request.Content.Select(x => new TextContentLight(x)).ToList());
 
-        var sparcDomain = await GetOrCreateDomain(request.Referrer!);
-        request.Content.ForEach(x => x.SetDomain(sparcDomain, request.Referrer!));
-
-        var ids = request.Content.Select(x => x.Id).ToList();
-        var existing = await content.Query(sparcDomain.Domain)
-            .Where(x => ids.Contains(x.Id) && x.Version == sparcDomain.Settings.Version)
-            .ToListAsync();
-
-        var needsTranslation = request.Content
-            .Where(content => !existing.Any(x => x.OriginalText == content.Text))
-            .ToList();
+        var (sparcDomain, existing, needsTranslation) = await GetContent(request);
 
         if (needsTranslation.Count == 0)
             return new(existing.Select(x => new TextContentLight(x)).ToList());
@@ -69,6 +43,36 @@ public class Contents(
 
         var translations = await TranslateAsync(request, sparcDomain);
         return new(existing.Union(translations).Select(x => new TextContentLight(x)).ToList());
+    }
+
+    public async Task UpdateAsync(ContentRequest request)
+    {
+        var (sparcDomain, existing, needsCreation) = await GetContent(request);
+        foreach (var item in request.Content.Where(x => !string.IsNullOrWhiteSpace(x.Text)))
+        {
+            var updated = existing.FirstOrDefault(x => x.Id == item.Id);
+            if (updated != null)
+                await content.ExecuteAsync(updated, x => x.SetText(item.Text!));
+        }
+
+        await content.UpdateAsync(needsCreation);
+    }
+
+    async Task<(SparcDomain domain, List<TextContent> existing, List<TextContent> needsCreation)> GetContent(ContentRequest request)
+    {
+        var sparcDomain = await GetOrCreateDomain(request.Referrer!);
+        request.Content.ForEach(x => x.SetDomain(sparcDomain, request.Referrer!));
+
+        var ids = request.Content.Select(x => x.Id).ToList();
+        var existing = await content.Query(sparcDomain.Domain)
+            .Where(x => ids.Contains(x.Id) && x.Version == sparcDomain.Settings.Version)
+            .ToListAsync();
+
+        var needsTranslation = request.Content
+            .Where(content => !existing.Any(x => x.OriginalText == content.Text))
+            .ToList();
+
+        return (sparcDomain, existing, needsTranslation);
     }
 
     public async Task<List<TextContent>> TranslateAsync(ContentRequest request, SparcDomain? domain = null)
@@ -149,6 +153,30 @@ public class Contents(
         return page.Language;
     }
 
+    public Task<List<Language>> GetLanguagesAsync() => Task.FromResult(Language.All);
+
+    internal async Task<Language> SetLanguage(Language language)
+    {
+        var user = await auth.GetAsync(principal);
+        user.Avatar.Language = Language.Find(language.Id);
+        await auth.UpdateAsync(principal, user.Avatar);
+        return language;
+    }
+
+    internal async Task<Language?> DetectLanguage(List<TextContent> content)
+    {
+        var translator = translators.Where(x => x is ILanguageDetector).Cast<ILanguageDetector>().First();
+        return await translator.DetectLanguageAsync(content);
+    }
+
+    static ContentRequest UpdateFromHttpRequest(ContentRequest request, HttpRequest http)
+    {
+        if (request.Options.OutputLanguage == null)
+            request.Options.OutputLanguage = Language.Find(http.Headers.AcceptLanguage);
+
+        return request with { Referrer = http.Headers.Referer };
+    }
+
     public void Map(IEndpointRouteBuilder endpoints)
     {
         var content = endpoints.MapGroup("content").RequireCors("Tovik");
@@ -159,11 +187,7 @@ public class Contents(
 
     public void Map(RouteGroupBuilder group)
     {
-        group.MapGet("languages", GetLanguagesAsync).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
-        group.MapGet("language", (ClaimsPrincipal principal, HttpRequest request) => Language.Find(principal.Get("language") ?? request.Headers.AcceptLanguage));
-        group.MapPost("language", async (Contents translator, Language language) => await translator.SetLanguage(language));
-
-        group.MapPost("all", async (Contents translator, HttpRequest request, List<TextContent> contents) =>
+        group.MapPost("", async (Contents translator, HttpRequest request, List<TextContent> contents) =>
         {
             var toLanguage = Language.Find(request.Headers.AcceptLanguage);
             var translationRequest = new ContentRequest(contents, new TranslationOptions { OutputLanguage = toLanguage }, request.Headers.Referer);
@@ -172,32 +196,27 @@ public class Contents(
             return Results.Ok(result.Content);
         });
 
-        group.MapPost("stream", async (Contents translator, HttpRequest request, ContentRequest contentRequest) =>
+        group.MapPut("", async (Contents translator, HttpRequest request, ContentRequest contentRequest) =>
         {
             if (contentRequest.Options.OutputLanguage == null)
                 contentRequest.Options.OutputLanguage = Language.Find(request.Headers.AcceptLanguage);
 
-            contentRequest.Options.RunInBackground = true;
             contentRequest = contentRequest with { Referrer = request.Headers.Referer };
+            await translator.UpdateAsync(contentRequest);
+            return Results.Ok();
+        });
 
+        group.MapPost("stream", async (Contents translator, HttpRequest request, ContentRequest contentRequest) =>
+        {
+            contentRequest = UpdateFromHttpRequest(contentRequest, request);
+            contentRequest.Options.RunInBackground = true;
             var result = await translator.GetAll(contentRequest);
-
             return Results.Ok(result);
         });
 
         group.MapGet("stream/{id}", async (string id, BlossomEvents channels) =>
         {
             return Results.ServerSentEvents(channels.GetSseStream(id));
-        });
-
-        group.MapPost("untranslated", async (Contents translator, HttpRequest request, ContentRequest contentRequest) =>
-        {
-            var toLanguage = Language.Find(request.Headers.AcceptLanguage);
-            if (contentRequest.Options.OutputLanguage == null && toLanguage != null)
-                contentRequest.Options.OutputLanguage = toLanguage;
-
-            var result = await translator.TranslateAsync(contentRequest);
-            return Results.Ok(result);
         });
 
         group.MapPost("visit", async (Contents translator, HttpRequest request, TextContent content) =>
@@ -216,7 +235,11 @@ public class Contents(
             return Results.File(result, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", page.Name);
         });
 
-        group.MapPost("", async (Contents translator, TranslationApiRequest request, HttpRequest http) =>
+        group.MapGet("languages", GetLanguagesAsync).CacheOutput(x => x.Expire(TimeSpan.FromHours(1)));
+        group.MapGet("language", (ClaimsPrincipal principal, HttpRequest request) => Language.Find(principal.Get("language") ?? request.Headers.AcceptLanguage));
+        group.MapPost("language", async (Contents translator, Language language) => await translator.SetLanguage(language));
+
+        group.MapPost("api", async (Contents translator, TranslationApiRequest request, HttpRequest http) =>
         {
             // Look up domain by API key in bearer auth
             var token = http.Headers.Authorization.ToString().Replace("Bearer ", "");
