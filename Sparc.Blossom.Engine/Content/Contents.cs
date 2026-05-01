@@ -18,34 +18,18 @@ public class Contents(
 {
     public Task<List<Language>> GetLanguagesAsync() => Task.FromResult(Language.All);
 
-    public async Task<List<TextContent>> TranslateAsync(ContentRequest request, SparcDomain? domain = null)
+    internal async Task<Language> SetLanguage(Language language)
     {
-        if (request.Options.OutputLanguage == null)
-        {
-            var user = await auth.GetAsync(principal);
-            request.Options.OutputLanguage = user?.Avatar.Language;
-        }
+        var user = await auth.GetAsync(principal);
+        user.Avatar.Language = Language.Find(language.Id);
+        await auth.UpdateAsync(principal, user.Avatar);
+        return language;
+    }
 
-        if (request.Options.OutputLanguage == null)
-            return request.Content;
-
-        if (request.Options.CrawlHtml)
-        {
-            foreach (var item in request.Content.Where(x => x.Text?.StartsWith("http") == true))
-                item.Text = await new HtmlTranslator(item.Text!).TranslateAsync();
-        }
-
-        domain ??= await GetOrCreateDomain(request.Referrer!);
-
-        request.Options.TovikSettings = domain.Settings;
-        //if (domain.IsBeyondTranslationLimit())
-        //    throw new Exception("You've reached your Tovik translation limit!");
-
-        var translator = translators.OrderBy(x => x.Priority).First();
-        var translations = await translator.TranslateAsync(request);
-        await content.UpdateAsync(translations);
-
-        return translations;
+    internal async Task<Language?> DetectLanguage(List<TextContent> content)
+    {
+        var translator = translators.Where(x => x is ILanguageDetector).Cast<ILanguageDetector>().First();
+        return await translator.DetectLanguageAsync(content);
     }
 
     public async Task<ContentResponse> GetAll(ContentRequest request)
@@ -87,7 +71,37 @@ public class Contents(
         return new(existing.Union(translations).Select(x => new TextContentLight(x)).ToList());
     }
 
-    private async Task<SparcDomain> GetOrCreateDomain(string domainName)
+    public async Task<List<TextContent>> TranslateAsync(ContentRequest request, SparcDomain? domain = null)
+    {
+        if (request.Options.OutputLanguage == null)
+        {
+            var user = await auth.GetAsync(principal);
+            request.Options.OutputLanguage = user?.Avatar.Language;
+        }
+
+        if (request.Options.OutputLanguage == null)
+            return request.Content;
+
+        if (request.Options.CrawlHtml)
+        {
+            foreach (var item in request.Content.Where(x => x.Text?.StartsWith("http") == true))
+                item.Text = await new HtmlTranslator(item.Text!).TranslateAsync();
+        }
+
+        domain ??= await GetOrCreateDomain(request.Referrer!);
+
+        request.Options.TovikSettings = domain.Settings;
+        //if (domain.IsBeyondTranslationLimit())
+        //    throw new Exception("You've reached your Tovik translation limit!");
+
+        var translator = translators.OrderBy(x => x.Priority).First();
+        var translations = await translator.TranslateAsync(request);
+        await content.UpdateAsync(translations);
+
+        return translations;
+    }
+
+    async Task<SparcDomain> GetOrCreateDomain(string domainName)
     {
         var uri = new Uri(domainName);
         domainName = uri.Host;
@@ -105,21 +119,7 @@ public class Contents(
         return domain;
     }
 
-    internal async Task<Language> SetLanguage(Language language)
-    {
-        var user = await auth.GetAsync(principal);
-        user.Avatar.Language = Language.Find(language.Id);
-        await auth.UpdateAsync(principal, user.Avatar);
-        return language;
-    }
-
-    internal async Task<Language?> DetectLanguage(List<TextContent> content)
-    {
-        var translator = translators.Where(x => x is ILanguageDetector).Cast<ILanguageDetector>().First();
-        return await translator.DetectLanguageAsync(content);
-    }
-
-    private async Task<Page> GetOrCreatePage(string domain, string path)
+    async Task<Page> GetOrCreatePage(string domain, string path)
     {
         var page = await pages.Query
             .Where(x => x.Domain == domain && x.Path == path)
@@ -134,7 +134,7 @@ public class Contents(
         return page;
     }
 
-    private async Task<Language?> Visit(TextContent content, Language? language)
+    async Task<Language?> Visit(TextContent content, Language? language)
     {
         var page = await GetOrCreatePage(content.Domain, content.SpaceId);
 
