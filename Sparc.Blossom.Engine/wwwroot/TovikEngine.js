@@ -77,9 +77,14 @@ export default class TovikEngine {
     }
     static injectPreloadCSS() {
         const style = document.createElement('style');
-        style.textContent = 'html.tovik-initializing, html.tovik-initializing * { color: transparent !important; caret-color: transparent !important; }'
-            + '.tovik-preview { position: fixed; bottom: 20px; right: 20px; z-index: 1000000; background-color: #1F5068; color: white; font-size: 16px; padding: 16px 24px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 16px; }'
-            + '.tovik-preview img { width: 36px; height: 36px; }';
+        style.textContent = 'html.tovik-initializing, html.tovik-initializing * { color: transparent !important; caret-color: transparent !important; } '
+            + '.tovik-preview { position: fixed; bottom: 20px; right: 20px; z-index: 1000000; background-color: #1F5068; color: white; font-size: 16px; padding: 16px 24px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; gap: 16px; } '
+            + '.tovik-preview img { width: 36px; height: 36px; } '
+            + 'kori-edit { pointer-events: none; } '
+            + '.kori-box { border: 1px solid #8B83FF; position: fixed; z-index: 1000000; display: none; } '
+            + '.kori-box-vertical { top: -20px; bottom: -20px; } '
+            + '.kori-box-horizontal { left: -20px; right: -20px; } '
+            + '.kori-editable { background-color: rgba(139, 131, 255, 0.2); } ';
         document.head.appendChild(style);
         document.documentElement.classList.add('tovik-initializing');
     }
