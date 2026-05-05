@@ -84,7 +84,8 @@ export default class TovikEngine {
             + '.kori-box { border: 1px solid #8B83FF; position: fixed; z-index: 1000000; display: none; } '
             + '.kori-box-vertical { top: -20px; bottom: -20px; } '
             + '.kori-box-horizontal { left: -20px; right: -20px; } '
-            + '.kori-editable { background-color: rgba(139, 131, 255, 0.2); } ';
+            + '.kori-editable:not(:focus) { background-color: rgba(139, 131, 255, 0.2); cursor: text; } '
+            + '.kori-editable:focus { outline: none; } ';
         document.head.appendChild(style);
         document.documentElement.classList.add('tovik-initializing');
     }

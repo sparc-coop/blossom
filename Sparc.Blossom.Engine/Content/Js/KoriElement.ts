@@ -28,14 +28,16 @@ export default class KoriElement extends HTMLElement {
         });
 
         document.addEventListener('click', async (event: any) => {
-            if (this.target != event.target) {
-                if (this.target)
-                    await this.save();
+            if (this.isEditable(event.target))
+                event.preventDefault();
 
+            if (this.target != event.target && this.isEditable(event.target)) {
                 this.beginEdit(event.target);
                 event.stopPropagation();
             }
         });
+
+        document.addEventListener('scroll', () => this.positionBoxes());
     }
 
     disconnectedCallback() {
@@ -55,26 +57,36 @@ export default class KoriElement extends HTMLElement {
             this.potentialTarget = null;
         } else {
             this.potentialTarget = element;
-            const rect = this.potentialTarget.getBoundingClientRect();
-
-            this.verticalBox.style.left = `${rect.left}px`;
-            this.verticalBox.style.width = `${rect.width}px`;
-            this.verticalBox.style.display = 'block';
-
-            this.horizontalBox.style.top = `${rect.top}px`;
-            this.horizontalBox.style.height = `${rect.height}px`;
-            this.horizontalBox.style.display = 'block';
+            this.positionBoxes();
 
             this.potentialTarget.classList.add('kori-editable');
-            this.potentialTarget.addEventListener('mouseleave', (event: any) => {
-                if (this.potentialTarget == event.target) {
-                    this.markTarget(null);
-                }
-            }, { once: true });
+
+            var self = this;
+            this.potentialTarget.addEventListener('mouseleave', function onMouseMove(event: any) {
+                console.log('mouseleave', self.potentialTarget, self.target, event.target);
+                if (self.potentialTarget == event.target && self.target != event.target)
+                    self.markTarget(null);
+            });
         }
     }
 
+    positionBoxes() {
+        if (!this.potentialTarget)
+            return;
+
+        const rect = this.potentialTarget.getBoundingClientRect();
+
+        this.verticalBox.style.left = `${rect.left}px`;
+        this.verticalBox.style.width = `${rect.width}px`;
+        this.verticalBox.style.display = 'block';
+
+        this.horizontalBox.style.top = `${rect.top}px`;
+        this.horizontalBox.style.height = `${rect.height}px`;
+        this.horizontalBox.style.display = 'block';
+    }
+
     beginEdit(element) {
+        this.markTarget(element);
         this.target = element;
 
         if (!this.target.originalText)
@@ -82,24 +94,26 @@ export default class KoriElement extends HTMLElement {
 
         this.target.contentEditable = true;
         this.target.focus();
-        console.log('Kori edit started on element:', this.target);
+
+        var el = this.target;
+        this.target.addEventListener('blur', () => this.save(el), { once: true });
     }
 
-    async save() {
-        if (!this.target)
+    async save(element) {
+        if (!element)
             return;
 
-        if (this.target.originalText == this.target.innerText) {
-            this.cancel();
-            return;
-        }
+        if (element.originalText != element.innerText)
+            await TovikEngine.update(element);
 
-        await TovikEngine.update(this.target);
+        element.contentEditable = false;
+        element.classList.remove('kori-editable');
 
-        this.target.contentEditable = false;
-        this.target = null;
+        if (this.target == element)
+            this.target = null;
 
-        console.log('Kori edit saved');
+        if (this.potentialTarget == element)
+            this.markTarget(null);
     }
 
     cancel() {
