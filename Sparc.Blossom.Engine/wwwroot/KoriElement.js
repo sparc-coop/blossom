@@ -4,6 +4,7 @@ export default class KoriElement extends HTMLElement {
     target;
     verticalBox;
     horizontalBox;
+    iframe;
     constructor() {
         super();
     }
@@ -15,6 +16,10 @@ export default class KoriElement extends HTMLElement {
         this.horizontalBox = document.createElement('div');
         this.horizontalBox.classList.add('kori-box', 'kori-box-horizontal');
         this.appendChild(this.horizontalBox);
+        this.iframe = document.createElement('iframe');
+        this.iframe.classList.add('kori-iframe');
+        this.iframe.src = "https://localhost:7198/sites/abc123/widget";
+        this.appendChild(this.iframe);
         document.addEventListener('mouseover', (event) => {
             if (!this.potentialTarget && this.isEditable(event.target)) {
                 this.markTarget(event.target);
@@ -22,14 +27,35 @@ export default class KoriElement extends HTMLElement {
             }
         });
         document.addEventListener('click', async (event) => {
-            if (this.isEditable(event.target))
-                event.preventDefault();
-            if (this.target != event.target && this.isEditable(event.target)) {
+            if (!this.isEditable(event.target))
+                return;
+            event.preventDefault();
+            if (this.target != event.target) {
                 this.beginEdit(event.target);
                 event.stopPropagation();
             }
         });
         document.addEventListener('scroll', () => this.positionBoxes());
+        window.addEventListener('message', async (event) => {
+            if (!event.data)
+                return;
+            try {
+                var data = JSON.parse(event.data);
+                if (!data)
+                    return;
+                switch (data.command) {
+                    case 'bold':
+                        document.execCommand('bold');
+                        event.source.postMessage(JSON.stringify({ type: "method", method: "Bolded" }), event.origin);
+                        break;
+                    case 'italic':
+                        document.execCommand('italic');
+                        event.source.postMessage(JSON.stringify({ type: "method", method: "Italicized" }), event.origin);
+                        break;
+                }
+            }
+            catch (e) { }
+        });
     }
     disconnectedCallback() {
     }
@@ -76,7 +102,7 @@ export default class KoriElement extends HTMLElement {
         this.target.contentEditable = true;
         this.target.focus();
         var el = this.target;
-        this.target.addEventListener('blur', () => this.save(el), { once: true });
+        //this.target.addEventListener('blur', () => this.save(el), { once: true });
     }
     async save(element) {
         if (!element)

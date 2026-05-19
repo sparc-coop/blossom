@@ -49,6 +49,7 @@ public class BlossomServerApplicationBuilder : BlossomApplicationBuilder
         Services.AddServerSideBlazor();
         Services.AddHttpContextAccessor();
         Services.AddOutputCache();
+        Services.AddAntiforgery(x => x.SuppressXFrameOptionsHeader = true);
 
         Builder.AddBlossomRealtime();
 

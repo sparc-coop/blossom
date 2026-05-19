@@ -3,13 +3,6 @@ import db from './TovikDb.js';
 import TovikLanguageElement from './TovikLanguageElement.js';
 import TovikElement from './TovikElement.js';
 import KoriElement from './KoriElement.js';
-function windowOrParentIncludes(str) {
-    return window.location.href.includes(str)
-        || (window.parent?.location && window.parent.location.href.includes(str));
-}
-const baseUrl = windowOrParentIncludes('localhost') ? 'https://localhost:7185'
-    : windowOrParentIncludes('tovik-staging') ? 'https://sparcengine-staging-asdagffkefgheqfm.centralus-01.azurewebsites.net'
-        : 'https://engine.sparc.coop';
 export default class TovikEngine {
     static userLang;
     static documentLang;
@@ -19,6 +12,13 @@ export default class TovikEngine {
     static isPreview;
     static isKoriEnabled;
     static rtlLanguages = ['ar', 'fa', 'he', 'ur', 'ps', 'ku', 'dv', 'yi', 'sd', 'ug'];
+    static windowOrParentIncludes(str) {
+        return window.location.href.includes(str)
+            || (window.parent?.location && window.parent.location.href.includes(str));
+    }
+    static baseUrl = TovikEngine.windowOrParentIncludes('localhost') ? 'https://localhost:7185'
+        : TovikEngine.windowOrParentIncludes('tovik-staging') ? 'https://sparcengine-staging-asdagffkefgheqfm.centralus-01.azurewebsites.net'
+            : 'https://engine.sparc.coop';
     static async getUserLanguage() {
         // If query parameter lang is set, use it
         const urlParams = new URLSearchParams(window.location.search);
@@ -85,7 +85,8 @@ export default class TovikEngine {
             + '.kori-box-vertical { top: -20px; bottom: -20px; } '
             + '.kori-box-horizontal { left: -20px; right: -20px; } '
             + '.kori-editable:not(:focus) { background-color: rgba(139, 131, 255, 0.2); cursor: text; } '
-            + '.kori-editable:focus { outline: none; } ';
+            + '.kori-editable:focus { outline: none; } '
+            + '.kori-iframe { border: none; position: fixed; pointer-events: all; z-index: 100000; bottom: 40px; background: transparent; width: 240px; height: 50px; left: 50%; transform: translateX(-50%); }';
         document.head.appendChild(style);
         document.documentElement.classList.add('tovik-initializing');
     }
@@ -154,7 +155,7 @@ export default class TovikEngine {
         }
         var result = await this.fetch('translate/stream', { content: requests, options: { additionalContext: document.body.innerText } }, this.userLang);
         if (result.continuationToken) {
-            var source = new EventSource(`${baseUrl}/translate/stream/${result.continuationToken}`);
+            var source = new EventSource(`${TovikEngine.baseUrl}/translate/stream/${result.continuationToken}`);
             source.addEventListener('done', () => source.close());
             source.addEventListener('ContentTranslated', (event) => {
                 var translation = JSON.parse(event.data).data.translatedContent;
@@ -246,7 +247,7 @@ export default class TovikEngine {
         if (language) {
             options.headers.append('Accept-Language', language);
         }
-        const response = await fetch(`${baseUrl}/${url}`, options);
+        const response = await fetch(`${TovikEngine.baseUrl}/${url}`, options);
         if (response.ok)
             return response.status == 201 ? null : await response.json();
         else if (response.status === 429) {
