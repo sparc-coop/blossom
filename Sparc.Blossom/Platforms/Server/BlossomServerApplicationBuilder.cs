@@ -4,14 +4,12 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Realtime;
 using System.Reflection;
 using System.Security.Claims;
-using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Platforms.Server;
 
