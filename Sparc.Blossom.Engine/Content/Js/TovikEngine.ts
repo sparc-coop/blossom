@@ -1,8 +1,5 @@
 import MD5 from "./MD5.js";
 import db from './TovikDb.js';
-import TovikLanguageElement from './TovikLanguageElement.js';
-import TovikElement from './TovikElement.js';
-import KoriElement from './KoriElement.js';
 
 export default class TovikEngine {
     static userLang;
@@ -112,10 +109,6 @@ export default class TovikEngine {
             if (!this.isPreview)
                 await this.setLanguage(event.detail);
         });
-
-        customElements.define('tovik-language', TovikLanguageElement);
-        customElements.define('tovik-translate', TovikElement);
-        customElements.define('kori-edit', KoriElement);
 
         // If the document does not have a <tovik-translate> element, create one and point it to the body
         if (!document.querySelector('tovik-translate')) {
