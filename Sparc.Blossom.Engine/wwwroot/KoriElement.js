@@ -1,3 +1,4 @@
+import BlossomEvents from './BlossomEvents.js';
 import TovikEngine from './TovikEngine.js';
 export default class KoriElement extends HTMLElement {
     potentialTarget;
@@ -16,6 +17,7 @@ export default class KoriElement extends HTMLElement {
         this.horizontalBox = document.createElement('div');
         this.horizontalBox.classList.add('kori-box', 'kori-box-horizontal');
         this.appendChild(this.horizontalBox);
+        // TODO: Pull auth code from query string, attach to iframe src, and save to local storage
         this.iframe = document.createElement('iframe');
         this.iframe.classList.add('kori-iframe');
         this.iframe.src = "https://localhost:7198/sites/abc123/widget";
@@ -36,26 +38,8 @@ export default class KoriElement extends HTMLElement {
             }
         });
         document.addEventListener('scroll', () => this.positionBoxes());
-        window.addEventListener('message', async (event) => {
-            if (!event.data)
-                return;
-            try {
-                var data = JSON.parse(event.data);
-                if (!data)
-                    return;
-                switch (data.command) {
-                    case 'bold':
-                        document.execCommand('bold');
-                        event.source.postMessage(JSON.stringify({ type: "method", method: "Bolded" }), event.origin);
-                        break;
-                    case 'italic':
-                        document.execCommand('italic');
-                        event.source.postMessage(JSON.stringify({ type: "method", method: "Italicized" }), event.origin);
-                        break;
-                }
-            }
-            catch (e) { }
-        });
+        BlossomEvents.on('bold', () => document.execCommand('bold'));
+        BlossomEvents.on('italic', () => document.execCommand('italic'));
     }
     disconnectedCallback() {
     }
