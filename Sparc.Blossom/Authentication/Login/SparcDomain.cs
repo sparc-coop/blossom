@@ -19,6 +19,7 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomKey.SHA25
     public TovikSettings Settings { get; set; } = new(1, []);
     public List<SparcLicense> Products { get; set; } = [];
     public bool IsBlocked { get; set; }
+    public bool IsPublic { get; set; }
     public List<string> Users { get; set; } = [];
     public BlossomKey? ApiKey { get; set; }
 

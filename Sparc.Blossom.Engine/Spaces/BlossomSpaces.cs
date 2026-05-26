@@ -19,13 +19,13 @@ internal class BlossomSpaces(
     private async Task<List<SparcDomain>> GetDomainsAsync(ClaimsPrincipal principal)
     {
         var userId = principal.Id();
-        return await domains.Query.Where(x => x.TovikUserId == userId || x.Users.Contains(userId)).ToListAsync();
+        return await domains.Query.Where(x => x.IsPublic || x.TovikUserId == userId || x.Users.Contains(userId)).ToListAsync();
     }
 
     private async Task<SparcDomain?> GetDomainAsync(ClaimsPrincipal principal, string id)
     {
         var userId = principal.Id();
-        return await domains.Query.Where(x => (x.TovikUserId == userId || x.Users.Contains(userId)) && x.Id == id).FirstOrDefaultAsync();
+        return await domains.Query.Where(x => (x.IsPublic || x.TovikUserId == userId || x.Users.Contains(userId)) && x.Id == id).FirstOrDefaultAsync();
     }
 
     private async Task<List<BlossomSpace>> GetSpacesAsync(string? parentSpaceId = null, int? limit = null, string? type = null)

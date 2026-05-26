@@ -42,19 +42,27 @@ public class Contents(
         return new(existing.Union(translations).Select(x => new TextContentLight(x)).ToList());
     }
 
-    public async Task UpdateAsync(ContentRequest request)
+    public async Task<TextContent> UpdateAsync(ContentRequest request)
     {
-        var (sparcDomain, existing, needsTranslation) = await GetContent(request);
-        foreach (var item in request.Content.Where(x => !string.IsNullOrWhiteSpace(x.Text)))
+        try
         {
-            var updated = existing.FirstOrDefault(x => x.Id == item.Id);
-            if (updated != null)
-                await content.ExecuteAsync(updated, x => x.SetText(item.Text!));
-            else
+            var (sparcDomain, existing, needsTranslation) = await GetContent(request);
+            foreach (var item in request.Content.Where(x => !string.IsNullOrWhiteSpace(x.Text)))
             {
-                item.SetDomain(sparcDomain, request.Referrer!);
-                await content.UpdateAsync(item);
+                var updated = existing.FirstOrDefault(x => x.Id == item.Id);
+                if (updated != null)
+                    await content.ExecuteAsync(updated, x => x.SetText(item.Text!));
+                else
+                {
+                    item.SetDomain(sparcDomain, request.Referrer!);
+                    await content.UpdateAsync(item);
+                }
             }
+            return request.Content.FirstOrDefault();
+        }
+        catch (Exception e)
+        {
+            return new(request.Referrer, "", Language.Find("en"), e.Message + e.InnerException?.Message + e.StackTrace);
         }
     }
 
@@ -148,17 +156,25 @@ public class Contents(
 
     async Task<Language?> Visit(TextContent content, Language? language)
     {
-        var page = await GetOrCreatePage(content.Domain, content.SpaceId);
 
-        if (page.LanguageDetectedDate == null && !string.IsNullOrWhiteSpace(content.Text))
-            page.SetLanguage(await DetectLanguage([content]));
+        try
+        {
+            var page = await GetOrCreatePage(content.Domain, content.SpaceId);
 
-        if (language != null)
-            page.RegisterVisit(language);
+            if (page.LanguageDetectedDate == null && !string.IsNullOrWhiteSpace(content.Text))
+                page.SetLanguage(await DetectLanguage([content]));
 
-        await pages.UpdateAsync(page);
+            if (language != null)
+                page.RegisterVisit(language);
 
-        return page.Language;
+            await pages.UpdateAsync(page);
+
+            return page.Language;
+        }
+        catch (Exception e)
+        {
+            return new(e.Message + e.InnerException?.Message + e.StackTrace);
+        }
     }
 
     public Task<List<Language>> GetLanguagesAsync() => Task.FromResult(Language.All);
@@ -209,8 +225,8 @@ public class Contents(
 
         group.MapPut("", async (Contents translator, HttpRequest request, ContentRequest content) =>
         {
-            await translator.UpdateAsync(content);
-            return Results.Created();
+            var result = await translator.UpdateAsync(content);
+            return Results.Ok(result);
         });
 
         group.MapPost("stream", async (Contents translator, HttpRequest request, ContentRequest contentRequest) =>

@@ -36,7 +36,7 @@ export default class KoriElement extends HTMLElement {
 
         this.iframe = document.createElement('iframe');
         this.iframe.classList.add('kori-iframe');
-        this.iframe.src = `https://localhost:7198/sites/${domain}/widget?_wauth=${authCode}`;
+        this.iframe.src = `${TovikEngine.widgetUrl}/sites/${domain}/widget?_wauth=${authCode}`;
         this.appendChild(this.iframe);
 
         BlossomEvents.on('mode', (mode) => this.setMode(mode));

@@ -14,7 +14,9 @@ export default class TovikEngine {
     }
     static baseUrl = TovikEngine.windowOrParentIncludes('localhost') ? 'https://localhost:7185'
         : TovikEngine.windowOrParentIncludes('tovik-staging') ? 'https://sparcengine-staging-asdagffkefgheqfm.centralus-01.azurewebsites.net'
-            : 'https://engine.sparc.coop';
+            : TovikEngine.windowOrParentIncludes('kori-example') ? 'https://sparcengine-kori-beheanf3dffsamf4.centralus-01.azurewebsites.net'
+                : 'https://engine.sparc.coop';
+    static widgetUrl = TovikEngine.windowOrParentIncludes('localhost') ? 'https://localhost:7198' : 'https://kori.azurewebsites.net';
     static async getUserLanguage() {
         // If query parameter lang is set, use it
         const urlParams = new URLSearchParams(window.location.search);
