@@ -10,6 +10,9 @@ public interface ISparcContent
 
     [Post("/content")]
     Task<List<TextContent>> PostAsync(ContentRequest request);
+
+    [Put("/content")]
+    Task<List<TextContent>> UpdateAsync(ContentRequest request);
 }
 
 public record CrawlRequest(string Domain, List<string> ToLanguages, string FromLanguage = "en");

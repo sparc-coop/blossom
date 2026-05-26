@@ -110,8 +110,8 @@ public class Contents(
 
     async Task<SparcDomain> GetOrCreateDomain(string domainName)
     {
-        var uri = new Uri(domainName);
-        domainName = uri.Host;
+        if (domainName.StartsWith("http"))
+            domainName = new Uri(domainName).Host;
 
         var domain = await domains.Query
             .Where(x => x.Domain == domainName)
@@ -202,10 +202,9 @@ public class Contents(
             return Results.Ok(result.Content);
         });
 
-        group.MapPut("", async (Contents translator, HttpRequest request, ContentRequest contentRequest) =>
+        group.MapPut("", async (Contents translator, HttpRequest request, ContentRequest content) =>
         {
-            contentRequest = UpdateFromHttpRequest(contentRequest, request);
-            await translator.UpdateAsync(contentRequest);
+            await translator.UpdateAsync(content);
             return Results.Created();
         });
 
