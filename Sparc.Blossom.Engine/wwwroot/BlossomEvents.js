@@ -14,9 +14,10 @@ export default class BlossomEvents {
             catch (e) { }
         });
     }
-    static broadcast(eventName, body = null) {
+    static broadcast(broadcastTo, eventName, body = null) {
         const event = new BlossomEvent('request', eventName, body);
-        window.postMessage(JSON.stringify(event), '*');
+        console.log('posting message', event);
+        broadcastTo.contentWindow.postMessage(event, '*');
     }
 }
 //# sourceMappingURL=BlossomEvents.js.map

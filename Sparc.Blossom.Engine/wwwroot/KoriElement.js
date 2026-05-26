@@ -105,15 +105,23 @@ export default class KoriElement extends HTMLElement {
             this.target.contentEditable = true;
             this.target.focus();
             var el = this.target;
-            //this.target.addEventListener('blur', () => this.save(el), { once: true });
+            this.target.addEventListener('blur', () => this.save(el), { once: true });
             event.stopPropagation();
         }
     }
     async save(element) {
         if (!element)
             return;
-        if (element.originalText != element.innerText)
-            await TovikEngine.update(element);
+        if (element.originalText != element.innerText) {
+            const hash = TovikEngine.idHash(element.originalText);
+            const request = {
+                id: hash,
+                Text: element.innerText,
+                OriginalText: element.originalText,
+                LanguageId: TovikEngine.userLang
+            };
+            BlossomEvents.broadcast(this.iframe, 'Save', request);
+        }
         element.contentEditable = false;
         element.classList.remove('kori-editable');
         if (this.target == element)
