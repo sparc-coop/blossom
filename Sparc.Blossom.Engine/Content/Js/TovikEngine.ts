@@ -8,7 +8,6 @@ export default class TovikEngine {
     static model;
     static sampleText;
     static isPreview;
-    static isKoriEnabled;
     static rtlLanguages = ['ar', 'fa', 'he', 'ur', 'ps', 'ku', 'dv', 'yi', 'sd', 'ug'];
 
     static windowOrParentIncludes(str) {
@@ -118,8 +117,12 @@ export default class TovikEngine {
             document.head.appendChild(bodyElement);
         }
 
-        if (document.querySelector('kori-edit'))
-            this.isKoriEnabled = true;
+        // Enable the Kori editor if the _kori query parameter is present
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('_kori')) {
+            var koriElement = document.createElement('kori-edit');
+            document.body.appendChild(koriElement);
+        }
     }
 
     static async initBody() {

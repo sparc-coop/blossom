@@ -18,7 +18,7 @@ export default class TovikElement extends HTMLElement {
         });
 
         document.addEventListener('tovik-content-changed', async (event: any) => {
-            await this.translatePage(this.#observedElement, TovikEngine.isKoriEnabled);
+            await this.translatePage(this.#observedElement, false);
         });
 
         document.addEventListener('kori-content-changed', async (event: any) => {

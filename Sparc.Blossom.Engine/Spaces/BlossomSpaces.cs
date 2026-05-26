@@ -10,10 +10,23 @@ internal class BlossomSpaces(
     BlossomSpaceFacets facets,
     BlossomSpaceTranslator translator,
     BlossomSpaceObjects objects,
+    IRepository<SparcDomain> domains,
     IBlossomAuthenticator auth)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
     public const string Domain = "sparc.coop";
+
+    private async Task<List<SparcDomain>> GetDomainsAsync(ClaimsPrincipal principal)
+    {
+        var userId = principal.Id();
+        return await domains.Query.Where(x => x.TovikUserId == userId || x.Users.Contains(userId)).ToListAsync();
+    }
+
+    private async Task<SparcDomain?> GetDomainAsync(ClaimsPrincipal principal, string id)
+    {
+        var userId = principal.Id();
+        return await domains.Query.Where(x => (x.TovikUserId == userId || x.Users.Contains(userId)) && x.Id == id).FirstOrDefaultAsync();
+    }
 
     private async Task<List<BlossomSpace>> GetSpacesAsync(string? parentSpaceId = null, int? limit = null, string? type = null)
     {
@@ -135,6 +148,8 @@ internal class BlossomSpaces(
         spaces.MapGet("{parentSpaceId}/subspaces/{spaceId}", GetSpaceAsync);
         spaces.MapGet("{spaceId}/posts", GetPostsAsync);
         spaces.MapGet("{spaceId}/coordinates", async (string spaceId)  => await GetCoordinatesAsync(spaceId));
+        spaces.MapGet("domains", GetDomainsAsync);
+        spaces.MapGet("domains/{domainId}", async (ClaimsPrincipal principal, string domainId) => await GetDomainAsync(principal, domainId));
         spaces.MapPost("{spaceId}", async (string spaceId, Post post) => await PostAsync(spaceId, post));
         spaces.MapPost("{spaceId}/quests/{facetId}", async (string spaceId, string facetId) => await ActivateQuestAsync(spaceId, facetId));
         spaces.MapDelete("{spaceId}", async (string spaceId) => await DeleteSpaceAsync(spaceId));

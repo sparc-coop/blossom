@@ -24,9 +24,12 @@ export default class KoriElement extends HTMLElement {
         this.horizontalBox.classList.add('kori-box', 'kori-box-horizontal');
         this.appendChild(this.horizontalBox);
         // TODO: Pull auth code from query string, attach to iframe src, and save to local storage
+        const urlParams = new URLSearchParams(window.location.search);
+        const authCode = urlParams.get('_auth');
+        const domain = urlParams.get('_kori');
         this.iframe = document.createElement('iframe');
         this.iframe.classList.add('kori-iframe');
-        this.iframe.src = "https://localhost:7198/sites/abc123/widget";
+        this.iframe.src = `https://localhost:7198/sites/${domain}/widget?_auth=${authCode}`;
         this.appendChild(this.iframe);
         BlossomEvents.on('mode', (mode) => this.setMode(mode));
         BlossomEvents.on('bold', () => document.execCommand('bold'));
