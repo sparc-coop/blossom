@@ -26,7 +26,7 @@ public class SparcAuraBrowserAuthenticator(ISparcAura aura, IRepository<BlossomU
     public async Task<ClaimsPrincipal> RegisterAsync()
     {
         var user = await aura.Login();
-        User = user.ToUser();
+        User = user.WithSparcAuraAccessToken();
         return await LoginAsync(User.ToPrincipal());
     }
 
@@ -45,7 +45,7 @@ public class SparcAuraBrowserAuthenticator(ISparcAura aura, IRepository<BlossomU
     public async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId)
     {
         var user = await aura.Login(externalId);
-        User = user.ToUser();
+        User = user.WithSparcAuraAccessToken();
         LoginState = LoginStates.LoggedIn;
         return User.ToPrincipal(authenticationType, externalId);
     }

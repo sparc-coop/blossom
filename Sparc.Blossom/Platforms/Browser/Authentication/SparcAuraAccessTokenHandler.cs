@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace Sparc.Blossom.Authentication;
 
-public class SparcAuraBrowserTokenHandler(ClaimsPrincipal principal) : DelegatingHandler
+public class SparcAuraAccessTokenHandler(ClaimsPrincipal principal) : DelegatingHandler
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {

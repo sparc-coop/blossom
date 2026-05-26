@@ -2,7 +2,7 @@
 
 public record BlossomLogin(BlossomUser User, string? AccessToken = null)
 {
-    public BlossomUser ToUser()
+    public BlossomUser WithSparcAuraAccessToken()
     {
         if (AccessToken != null)
             User.Claims["sparcaura-access"] = AccessToken;

@@ -105,9 +105,10 @@ public class SparcAuthenticator<T>(
             ?? throw new InvalidOperationException("Identity not found for the provided TOTP code.");
 
         identity.IsVerified = true;
-        await UpdateAsync(matchingUser);
-
-        await LoginAsync(matchingUser.ToPrincipal());
+        
+        SparcUser = matchingUser;
+        await SaveAsync();
+        
         return matchingUser;
     }
 

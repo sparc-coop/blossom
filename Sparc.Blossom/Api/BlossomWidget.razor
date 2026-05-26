@@ -1,7 +1,11 @@
 @using Microsoft.JSInterop
-@inject IJSRuntime Js
+@using Sparc.Blossom.Authentication
 
+@inject IJSRuntime Js
+@inject IBlossomAuthenticator Auth
+@inject ISparcAura Aura
 @code {
+    [Parameter][SupplyParameterFromQuery(Name = "_wauth")] public string? AuthCode { get; set; }
     IJSObjectReference Communicator = null!;
     Dictionary<string, Delegate> Subscriptions = [];
 
@@ -9,6 +13,13 @@
     {
         if (firstRender)
         {
+            if (AuthCode != null)
+            {
+                var user = await Aura.Login(AuthCode);
+                var principal = user.WithSparcAuraAccessToken().ToPrincipal();
+                await Auth.LoginAsync(principal);
+            }
+
             Communicator = await Js.ImportAsync("./Blossom/Api/BlossomWidget.razor.js");
             await Communicator.InvokeVoidAsync("initialize", DotNetObjectReference.Create(this));
         }

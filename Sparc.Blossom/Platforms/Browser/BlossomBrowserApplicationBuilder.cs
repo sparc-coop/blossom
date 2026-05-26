@@ -65,7 +65,7 @@ public class BlossomBrowserApplicationBuilder<[DynamicallyAccessedMembers(Dynami
         }
     }
 
-    public override void AddSparcEngine(string? url = null) => AddBlossomEngine<SparcAuraBrowserTokenHandler>(url);
+    public override void AddSparcEngine(string? url = null) => AddBlossomEngine<SparcAuraAccessTokenHandler>(url);
     protected override void AddSparcAura()
     {
         Services.AddCascadingAuthenticationState();
