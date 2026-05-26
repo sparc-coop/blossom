@@ -12,7 +12,7 @@ public interface ISparcContent
     Task<List<TextContent>> PostAsync(ContentRequest request);
 
     [Put("/content")]
-    Task<List<TextContent>> UpdateAsync(ContentRequest request);
+    Task UpdateAsync(ContentRequest request);
 }
 
 public record CrawlRequest(string Domain, List<string> ToLanguages, string FromLanguage = "en");

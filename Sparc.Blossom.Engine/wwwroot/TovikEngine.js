@@ -162,21 +162,8 @@ export default class TovikEngine {
         for (let translation of result.content)
             this.replace(pendingTranslations, translation, onTranslation);
     }
-    static async update(element) {
-        const textNode = [...element.childNodes].find(x => x.nodeType === Node.TEXT_NODE);
-        const original = textNode?.originalText || element['originalText'] || element.element.innerText;
-        const hash = TovikEngine.idHash(original);
-        const request = {
-            content: [{
-                    id: hash,
-                    Text: element.innerText,
-                    OriginalText: original,
-                    LanguageId: this.userLang
-                }]
-        };
-        console.log('Updating translation with request:', request);
+    static async update(hash) {
         await db.translations.delete(hash);
-        await this.fetch('content', request, this.userLang, 'PUT');
         document.dispatchEvent(new CustomEvent('kori-content-changed'));
     }
     static replace(pendingTranslations, translation, onTranslation) {

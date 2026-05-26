@@ -111,7 +111,12 @@ public class Contents(
     async Task<SparcDomain> GetOrCreateDomain(string domainName)
     {
         if (domainName.StartsWith("http"))
-            domainName = new Uri(domainName).Host;
+        {
+            var uri = new Uri(domainName);
+            domainName = uri.Host;
+            if (!uri.IsDefaultPort)
+                domainName += ":" + uri.Port;
+        }
 
         var domain = await domains.Query
             .Where(x => x.Domain == domainName)

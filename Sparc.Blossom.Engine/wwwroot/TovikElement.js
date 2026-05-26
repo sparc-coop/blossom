@@ -18,6 +18,7 @@ export default class TovikElement extends HTMLElement {
         document.addEventListener('kori-content-changed', async (event) => {
             await this.translatePage(this.#observedElement, true);
         });
+        this.translatePage(this.#observedElement, true);
         this.observer = new MutationObserver(this.#observer);
         this.observer.observe(this.#observedElement, { childList: true, characterData: false, subtree: true });
     }

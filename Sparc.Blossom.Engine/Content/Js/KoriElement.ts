@@ -47,9 +47,14 @@ export default class KoriElement extends HTMLElement {
     disconnectedCallback() {
     }
 
-    isEditable(element) {
+
+    textNode(element) {
         var textNodes = Array.from(element.childNodes).filter(node => node['nodeType'] === Node.TEXT_NODE && node['nodeValue'].trim() !== '');
-        return textNodes.length == 1;
+        return textNodes.length == 1 ? textNodes[0] : null;
+    }
+
+    isEditable(element) {
+        return this.textNode(element) !== null;
     }
 
     setMode(mode) {
@@ -123,9 +128,6 @@ export default class KoriElement extends HTMLElement {
             this.markTarget(event.target);
             this.target = event.target;
 
-            if (!this.target.originalText)
-                this.target.originalText = this.target.innerText;
-
             this.target.contentEditable = true;
             this.target.focus();
 
@@ -140,15 +142,17 @@ export default class KoriElement extends HTMLElement {
         if (!element)
             return;
 
-        if (element.originalText != element.innerText) {
-            const hash = TovikEngine.idHash(element.originalText);
+        var originalText = this.textNode(element)['originalText'];
+        if (originalText != element.textContent.trim()) {
+            const hash = TovikEngine.idHash(originalText);
             const request = {
                 id: hash,
-                Text: element.innerText,
-                OriginalText: element.originalText,
+                Text: element.textContent.trim(),
+                OriginalText: originalText,
                 LanguageId: TovikEngine.userLang
             };
             BlossomEvents.broadcast(this.iframe, 'Save', request);
+            await TovikEngine.update(hash);
         }
 
         element.contentEditable = false;
@@ -165,7 +169,8 @@ export default class KoriElement extends HTMLElement {
         if (!this.target)
             return;
 
-        this.target.innerText = this.target.originalText;
+        var originalText = this.textNode(this.target)['originalText'];
+        this.target.innerText = originalText;
         this.target.contentEditable = false;
         this.target = null;
     }

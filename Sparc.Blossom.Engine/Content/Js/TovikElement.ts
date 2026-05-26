@@ -25,6 +25,8 @@ export default class TovikElement extends HTMLElement {
             await this.translatePage(this.#observedElement, true);
         });
 
+        this.translatePage(this.#observedElement, true);
+
         this.observer = new MutationObserver(this.#observer);
         this.observer.observe(this.#observedElement, { childList: true, characterData: false, subtree: true });
     }
