@@ -54,8 +54,7 @@ export default class KoriElement extends HTMLElement {
     }
     textNode(element) {
         var textNodes = Array.from(element.childNodes).filter(node => node['nodeType'] === Node.TEXT_NODE && node['nodeValue'].trim() !== '');
-        console.log('text nodes found', textNodes);
-        return textNodes.length ? textNodes[0] : null;
+        return textNodes.length == 1 ? textNodes[0] : null;
     }
     isEditable(element) {
         return this.textNode(element) !== null;
@@ -129,7 +128,6 @@ export default class KoriElement extends HTMLElement {
         }
     }
     async save() {
-        console.log('saving', this.target);
         if (!this.target)
             return;
         var originalText = this.textNode(this.target)['originalText'];
