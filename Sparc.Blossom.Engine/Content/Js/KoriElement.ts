@@ -1,6 +1,16 @@
 ﻿import BlossomEvents from './BlossomEvents.js';
 import TovikEngine from './TovikEngine.js';
 
+const debounce = (callback, wait) => {
+    let timeoutId = null;
+    return (...args) => {
+        window.clearTimeout(timeoutId);
+        timeoutId = window.setTimeout(() => {
+            callback.apply(null, args);
+        }, wait);
+    };
+}
+
 export default class KoriElement extends HTMLElement {
     potentialTarget;
     target;
@@ -8,6 +18,7 @@ export default class KoriElement extends HTMLElement {
     horizontalBox;
     iframe;
     mode;
+    debounceSave;
 
     constructor() {
         super();
@@ -17,6 +28,10 @@ export default class KoriElement extends HTMLElement {
         this.beginEdit = this.beginEdit.bind(this);
         this.positionBoxes = this.positionBoxes.bind(this);
         this.setMode = this.setMode.bind(this);
+        this.format = this.format.bind(this);
+        this.endEdit = this.endEdit.bind(this);
+        this.save = this.save.bind(this);
+        this.debounceSave = debounce(this.save, 500);
     }
 
     async connectedCallback() {
@@ -40,13 +55,13 @@ export default class KoriElement extends HTMLElement {
         this.appendChild(this.iframe);
 
         BlossomEvents.on('mode', (mode) => this.setMode(mode));
-        BlossomEvents.on('bold', () => document.execCommand('bold'));
-        BlossomEvents.on('italic', () => document.execCommand('italic'));
+        BlossomEvents.on('bold', () => this.format('bold'));
+        BlossomEvents.on('italic', () => this.format('italic'));
+        BlossomEvents.on('saved', (item) => TovikEngine.update(item));
     }
 
     disconnectedCallback() {
     }
-
 
     textNode(element) {
         var textNodes = Array.from(element.childNodes).filter(node => node['nodeType'] === Node.TEXT_NODE && node['nodeValue'].trim() !== '');
@@ -55,6 +70,10 @@ export default class KoriElement extends HTMLElement {
 
     isEditable(element) {
         return this.textNode(element) !== null;
+    }
+
+    format(command) {
+        document.execCommand(command);
     }
 
     setMode(mode) {
@@ -75,7 +94,6 @@ export default class KoriElement extends HTMLElement {
     }
 
     markTarget(element) {
-        console.log('marking target', element);
         if (!element) {
             this.verticalBox.style.display = 'none';
             this.horizontalBox.style.display = 'none';
@@ -131,38 +149,46 @@ export default class KoriElement extends HTMLElement {
             this.target.contentEditable = true;
             this.target.focus();
 
-            var el = this.target;
-            this.target.addEventListener('input', () => el.isDirty = true, { once: true });
-            this.target.addEventListener('blur', () => this.save(el), { once: true });
+            this.target.addEventListener('input', this.debounceSave);
+            this.target.addEventListener('blur', this.endEdit);
             event.stopPropagation();
         }
     }
 
-
-    async save(element) {
-        if (!element || !element.isDirty)
+    async save() {
+        console.log('saving', this.target);
+        if (!this.target)
             return;
 
-        var originalText = this.textNode(element)['originalText'];
+        var originalText = this.textNode(this.target)['originalText'];
         const hash = TovikEngine.idHash(originalText);
+
         const request = {
             id: hash,
-            Text: element.textContent.trim(),
+            Text: this.target.textContent.trim(),
             OriginalText: originalText,
             LanguageId: TovikEngine.userLang
         };
+
         BlossomEvents.broadcast(this.iframe, 'Save', request);
-        await TovikEngine.update(hash);
 
-        element.contentEditable = false;
-        element.isDirty = false;
-        element.classList.remove('kori-editable');
+        this.target.isDirty = false;
+    }
 
-        if (this.target == element)
-            this.target = null;
+    endEdit(blurEvent) {
+        // Don't end edit if user clicked on widget (i.e. formatting, etc.)
+        if (blurEvent.relatedTarget && blurEvent.relatedTarget.closest('.kori-widget'))
+            return;
 
-        if (this.potentialTarget == element)
-            this.markTarget(null);
+        if (this.target) {
+            this.target.classList.remove('kori-editable');
+            this.target.contentEditable = false;
+            this.target.isDirty = false;
+            this.target.removeEventListener('input', this.debounceSave);
+            this.target.removeEventListener('blur', this.endEdit);
+        }
+
+        this.target = null;
     }
 
     cancel() {

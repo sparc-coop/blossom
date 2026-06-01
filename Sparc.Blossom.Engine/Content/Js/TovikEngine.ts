@@ -1,3 +1,4 @@
+import BlossomEvents from "./BlossomEvents.js";
 import MD5 from "./MD5.js";
 import db from './TovikDb.js';
 
@@ -196,9 +197,9 @@ export default class TovikEngine {
             this.replace(pendingTranslations, translation, onTranslation);
     }
 
-    static async update(hash) {
-        await db.translations.delete(hash);
-        document.dispatchEvent(new CustomEvent('kori-content-changed'));
+    static async update(item) {
+        console.log('updating', item);
+        await db.translations.put(item);
     }
 
     static replace(pendingTranslations, translation, onTranslation) {

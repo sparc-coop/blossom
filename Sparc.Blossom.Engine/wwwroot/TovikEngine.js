@@ -164,9 +164,9 @@ export default class TovikEngine {
         for (let translation of result.content)
             this.replace(pendingTranslations, translation, onTranslation);
     }
-    static async update(hash) {
-        await db.translations.delete(hash);
-        document.dispatchEvent(new CustomEvent('kori-content-changed'));
+    static async update(item) {
+        console.log('updating', item);
+        await db.translations.put(item);
     }
     static replace(pendingTranslations, translation, onTranslation) {
         const items = pendingTranslations.filter(item => item.hash === translation.id);
