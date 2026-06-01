@@ -84,7 +84,7 @@ export default class TovikEngine {
             + '.kori-box-horizontal { left: -20px; right: -20px; } '
             + '.kori-editable:not(:focus) { background-color: rgba(139, 131, 255, 0.2); cursor: text; } '
             + '.kori-editable:focus { outline: none; } '
-            + '.kori-iframe { border: none; position: fixed; pointer-events: all; z-index: 100000; bottom: 40px; background: transparent; width: 240px; height: 50px; left: 50%; transform: translateX(-50%); }';
+            + '.kori-iframe { border: none; position: fixed; pointer-events: all; z-index: 100000; bottom: 40px; background: transparent; width: 270px; height: 60px; left: 50%; transform: translateX(-50%); }';
         document.head.appendChild(style);
         document.documentElement.classList.add('tovik-initializing');
     }
