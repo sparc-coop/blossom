@@ -54,7 +54,8 @@ export default class KoriElement extends HTMLElement {
     }
     textNode(element) {
         var textNodes = Array.from(element.childNodes).filter(node => node['nodeType'] === Node.TEXT_NODE && node['nodeValue'].trim() !== '');
-        return textNodes.length == 1 ? textNodes[0] : null;
+        console.log('text nodes found', textNodes);
+        return textNodes.length ? textNodes[0] : null;
     }
     isEditable(element) {
         return this.textNode(element) !== null;
@@ -118,12 +119,12 @@ export default class KoriElement extends HTMLElement {
             return;
         event.preventDefault();
         if (this.target != event.target) {
+            this.endEdit();
             this.markTarget(event.target);
             this.target = event.target;
             this.target.contentEditable = true;
             this.target.focus();
             this.target.addEventListener('input', this.debounceSave);
-            this.target.addEventListener('blur', this.endEdit);
             event.stopPropagation();
         }
     }
@@ -142,10 +143,7 @@ export default class KoriElement extends HTMLElement {
         BlossomEvents.broadcast(this.iframe, 'Save', request);
         this.target.isDirty = false;
     }
-    endEdit(blurEvent) {
-        // Don't end edit if user clicked on widget (i.e. formatting, etc.)
-        if (blurEvent.relatedTarget && blurEvent.relatedTarget.closest('.kori-widget'))
-            return;
+    endEdit() {
         if (this.target) {
             this.target.classList.remove('kori-editable');
             this.target.contentEditable = false;
