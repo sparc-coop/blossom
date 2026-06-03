@@ -27,7 +27,7 @@ public class Contents(
         var (sparcDomain, existing, needsTranslation) = await GetContent(request);
 
         if (request.Options.OutputLanguage == null || request.Content.Count == 0 || needsTranslation.Count == 0)
-            return new(existing.Select(x => new TextContentLight(x)).ToList());
+            return new(TextContentLight.From(existing));
 
         request = request with { Content = needsTranslation };
 
@@ -35,11 +35,22 @@ public class Contents(
         {
             request.Options.BackgroundId = Guid.NewGuid().ToString();
             await channels.Execute(request.Options.BackgroundId, async (Contents translator) => await translator.TranslateAsync(request, sparcDomain));
-            return new(existing.Select(x => new TextContentLight(x)).ToList(), request.Options.BackgroundId);
+            return new(TextContentLight.From(existing), request.Options.BackgroundId);
         }
 
         var translations = await TranslateAsync(request, sparcDomain);
-        return new(existing.Union(translations).Select(x => new TextContentLight(x)).ToList());
+        return new(TextContentLight.From(existing.Union(translations)));
+    }
+
+    public async Task<ContentResponse> SearchAsync(string domain, string query)
+    {
+        var sql = $@"
+            SELECT TOP 10 *
+            FROM c
+            WHERE FullTextContains(c.Text, '{query}')";
+
+        var result = await content.FromSqlAsync(sql, domain);
+        return new(TextContentLight.From(result));
     }
 
     public async Task<TextContent> UpdateAsync(ContentRequest request)
