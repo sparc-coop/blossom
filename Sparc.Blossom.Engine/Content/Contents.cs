@@ -14,7 +14,8 @@ public class Contents(
     DocumentTranslator documents,
     ClaimsPrincipal principal,
     SparcAuthenticator<BlossomUser> auth,
-    BlossomEvents channels) : IBlossomEndpoints
+    BlossomEvents channels,
+    SparcCrawler crawler) : IBlossomEndpoints
 {
     public async Task<ContentResponse> GetAll(ContentRequest request)
     {
@@ -40,6 +41,13 @@ public class Contents(
 
         var translations = await TranslateAsync(request, sparcDomain);
         return new(TextContentLight.From(existing.Union(translations)));
+    }
+
+    public async Task CrawlAsync(string domain)
+    {
+        var sparcDomain = await GetOrCreateDomain(domain);
+        var jobId = await crawler.BeginCrawlAsync(sparcDomain);
+        await crawler.WaitForCrawlAsync(jobId);
     }
 
     public async Task<ContentResponse> SearchAsync(string domain, string query)
@@ -257,6 +265,12 @@ public class Contents(
         {
             var language = await translator.Visit(content, Language.Find(request.Headers.AcceptLanguage));
             return Results.Ok(language);
+        });
+
+        group.MapGet("crawl", async (Contents translator, string domain) =>
+        {
+            await translator.CrawlAsync(domain);
+            return Results.Ok();
         });
 
         group.MapGet("documents/{id}", async (Contents translator, HttpRequest request, string id, string domain, string? lang = null) =>

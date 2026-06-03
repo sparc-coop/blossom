@@ -11,9 +11,11 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<ITranslator, AnthropicTranslator>()
             .AddScoped<VoyageTranslator>()
             .AddScoped<DocumentTranslator>()
+            .AddScoped<SparcCrawler>()
             .AddScoped<BlossomAggregateOptions<TextContent>>()
             .AddScoped<BlossomAggregate<TextContent>>()
-            .AddScoped<Contents>();
+            .AddScoped<Contents>()
+            .AddScoped<Pages>();
 
         return builder;
     }
