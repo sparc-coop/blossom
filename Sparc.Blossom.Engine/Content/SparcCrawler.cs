@@ -20,16 +20,16 @@ public class SparcCrawler
         Pages = pages;
     }
 
-    record CrawlRequest(string url, int limit, int depth, List<string> crawlPurposes, GotoOptions gotoOptions);
-    record CrawlMetadata(int status, string url, string? title = null);
-    record CrawlResult(CrawlMetadata metadata, string status, string url, string? html = null);
-    record CrawlResponseWrapper(CrawlResponse result);
-    record CrawlResponse(string id, int finished, List<CrawlResult> records, string status, int total, int? cursor = null);
-    record CrawlJob(bool success, string result);
+    record CloudflareCrawlRequest(string url, int limit, int depth, List<string> crawlPurposes, GotoOptions gotoOptions);
+    record CloudflareCrawlMetadata(int status, string url, string? title = null);
+    record CloudflareCrawlResult(CloudflareCrawlMetadata metadata, string status, string url, string? html = null);
+    record CloudflareCrawlResponseWrapper(CloudflareCrawlResponse result);
+    record CloudflareCrawlResponse(string id, int finished, List<CloudflareCrawlResult> records, string status, int total, int? cursor = null);
+    record CloudflareCrawlJob(bool success, string result);
     public async Task<string> BeginCrawlAsync(SparcDomain domain)
     {
-        var request = new CrawlRequest(domain.ToAbsoluteUrl(), 100, 4, ["search"], new("networkidle0"));
-        var result = await Client.PostAsJsonAsync<CrawlJob>("crawl", request);
+        var request = new CloudflareCrawlRequest(domain.ToAbsoluteUrl(), 100, 4, ["search"], new("networkidle0"));
+        var result = await Client.PostAsJsonAsync<CloudflareCrawlJob>("crawl", request);
         if (result?.success != true)
             throw new Exception("Crawl failed");
 
@@ -38,7 +38,7 @@ public class SparcCrawler
 
     public async Task<bool> WaitForCrawlAsync(string jobId)
     {
-        var response = await Client.GetFromJsonAsync<CrawlResponseWrapper>($"crawl/{jobId}?limit=1");
+        var response = await Client.GetFromJsonAsync<CloudflareCrawlResponseWrapper>($"crawl/{jobId}?limit=1");
         while (true)
         {
             switch (response?.result.status)
@@ -49,7 +49,7 @@ public class SparcCrawler
                     return true;
                 case "running":
                     await Task.Delay(5000);
-                    response = await Client.GetFromJsonAsync<CrawlResponseWrapper>($"crawl/{jobId}?limit=1");
+                    response = await Client.GetFromJsonAsync<CloudflareCrawlResponseWrapper>($"crawl/{jobId}?limit=1");
                     break;
                 default:
                     return false;
@@ -63,7 +63,7 @@ public class SparcCrawler
         int? cursor = null;
         do
         {
-            var response = await Client.GetFromJsonAsync<CrawlResponseWrapper>($"crawl/{jobId}?status=completed" + (cursor != null ? $"&cursor={cursor}" : ""));
+            var response = await Client.GetFromJsonAsync<CloudflareCrawlResponseWrapper>($"crawl/{jobId}?status=completed" + (cursor != null ? $"&cursor={cursor}" : ""));
             if (response == null)
                 break;
 

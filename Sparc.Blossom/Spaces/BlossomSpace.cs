@@ -23,19 +23,8 @@ public class BlossomSpace : BlossomSpaceObject
 {
     public string Name { get; set; } = string.Empty;
     public string RoomType { get; set; } = "Root";
-    public int NumJoinedMembers { get; set; }
-    public bool GuestCanJoin { get; set; }
-    public bool WorldReadable { get; set; }
-    public string? AvatarUrl { get; set; }
-    public string? CanonicalAlias { get; set; }
-    public string? JoinRule { get; set; }
-    public DateTime DateRegistered { get; set; } = DateTime.UtcNow;
     public DateTime? LastActiveDate { get; set; } = DateTime.UtcNow;
     public DateTime? EndDate { get; set; }
-    public string? ModelUrl { get; set; }
-    public List<SparcEntityType> EntityTypes { get; set; } = [];
-    public double? Weight { get; set; }
-    public float Coherence { get; set; }
     public BlossomSpaceSettings Settings { get; set; } = new();
     public List<Axis> Axes { get; set; } = [];
     public BlossomVector Origin { get; set; } = new();
