@@ -1,9 +1,8 @@
 import * as Dexie from './dexie/dexie.mjs';
 const db = new Dexie.Dexie('TovikTranslate');
-db.version(4).stores({
+db.version(5).stores({
     translations: 'id',
-    languages: 'id',
-    profiles: 'id'
+    edits: 'id'
 });
 export default db;
 //# sourceMappingURL=TovikDb.js.map

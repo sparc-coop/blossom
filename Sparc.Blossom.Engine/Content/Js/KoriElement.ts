@@ -1,5 +1,6 @@
 ﻿import BlossomEvents from './BlossomEvents.js';
 import TovikEngine from './TovikEngine.js';
+import db from './TovikDb.js';
 
 const debounce = (callback, wait) => {
     let timeoutId = null;
@@ -19,6 +20,8 @@ export default class KoriElement extends HTMLElement {
     iframe;
     mode;
     debounceSave;
+    userId;
+    history;
 
     constructor() {
         super();
@@ -32,6 +35,7 @@ export default class KoriElement extends HTMLElement {
         this.endEdit = this.endEdit.bind(this);
         this.save = this.save.bind(this);
         this.debounceSave = debounce(this.save, 500);
+        this.localSave = this.localSave.bind(this);
     }
 
     async connectedCallback() {
@@ -54,7 +58,9 @@ export default class KoriElement extends HTMLElement {
         this.iframe.src = `${TovikEngine.widgetUrl}/sites/${domain}/widget?_wauth=${authCode}`;
         this.appendChild(this.iframe);
 
-        BlossomEvents.on('mode', (mode) => this.setMode(mode));
+        this.setMode('Edit');
+
+        BlossomEvents.on('initialized', (userId) => this.userId = userId);
         BlossomEvents.on('bold', () => this.format('bold'));
         BlossomEvents.on('italic', () => this.format('italic'));
         BlossomEvents.on('saved', (item) => TovikEngine.update(item));
@@ -83,7 +89,7 @@ export default class KoriElement extends HTMLElement {
             document.addEventListener('mouseover', this.highlightTarget);
             document.addEventListener('click', this.beginEdit);
             document.addEventListener('scroll', this.positionBoxes);
-        } else if (this.mode == 'Edit') {
+        } else if (false) {
             document.removeEventListener('mouseover', this.highlightTarget);
             document.removeEventListener('click', this.beginEdit);
             document.removeEventListener('scroll', this.positionBoxes);
@@ -136,7 +142,7 @@ export default class KoriElement extends HTMLElement {
         this.horizontalBox.style.display = 'block';
     }
 
-    beginEdit(event) {
+    async beginEdit(event) {
         if (!this.isEditable(event.target))
             return;
 
@@ -151,9 +157,59 @@ export default class KoriElement extends HTMLElement {
             this.target.contentEditable = true;
             this.target.focus();
 
-            this.target.addEventListener('input', this.debounceSave);
+            if (!this.target.hash)
+                this.target.hash = TovikEngine.idHash(this.textNode(this.target)['originalText']);
+
+            this.history = await db.edits.get(this.target.hash);
+            if (!this.history) {
+                this.history = { id: this.target.hash, clock: 0, edits: [], current: [] };
+                this.initializeCurrent(this.target);
+            }
+
+            this.target.addEventListener('input', this.localSave);
             event.stopPropagation();
         }
+    }
+
+    initializeCurrent(target) {
+        const originalText = this.textNode(target)['originalText'];
+        this.history.current = originalText.split('').map((char) => ({ opId: `${++this.history.clock}@original`, value: char, deleted: false }));
+        this.history.clock++;
+    }
+
+    async localSave(inputEvent) {
+        this.history.clock++;
+
+        let cursor = this.cursorPosition();
+        const action = inputEvent.inputType.startsWith('delete') ? 'delete' : inputEvent.inputType.startsWith('insert') ? 'insert' : inputEvent.inputType;
+
+        const current = this.history.current.filter(x => !x.deleted);
+        const refId = cursor && current.length > cursor ? current[cursor].opId : null;
+
+        const edit = {
+            opId: `${this.history.clock}@${this.userId}`,
+            refId: refId,
+            action: action,
+            value: inputEvent.data,
+        };
+
+        this.history.edits.push(edit);
+
+        // Process the operation
+        if (action === 'insert') {
+            const character = { opId: edit.opId, value: edit.value, deleted: false };
+            if (!refId)
+                this.history.current.push(character);
+            else
+                this.history.current.splice(current.findIndex(x => x.opId === refId) + 1, 0, character);
+        } else if (action === 'delete') {
+            const character = this.history.current.find(x => x.opId == refId);
+            if (character)
+                character.deleted = true;
+        }
+
+        console.log('edit', cursor, inputEvent.inputType, edit, this.history.current);
+        //await db.edits.put(this.history);
     }
 
     async save() {
@@ -180,12 +236,27 @@ export default class KoriElement extends HTMLElement {
             this.target.classList.remove('kori-editable');
             this.target.contentEditable = false;
             this.target.isDirty = false;
-            this.target.removeEventListener('input', this.debounceSave);
+            this.target.removeEventListener('input', this.localSave);
             this.target.removeEventListener('blur', this.endEdit);
         }
 
         this.target = null;
     }
+
+    cursorPosition() {
+        let caretPos = 0;
+
+        const sel = window.getSelection();
+        if (sel.rangeCount) {
+            const range = sel.getRangeAt(0);
+            if (range.commonAncestorContainer.parentNode == this.target) {
+                caretPos = range.endOffset;
+            }
+        }
+
+        return caretPos;
+    }
+
 
     cancel() {
         if (!this.target)

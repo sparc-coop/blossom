@@ -8,6 +8,7 @@
     [Parameter][SupplyParameterFromQuery(Name = "_wauth")] public string? AuthCode { get; set; }
     IJSObjectReference Communicator = null!;
     Dictionary<string, Delegate> Subscriptions = [];
+    protected string? UserId { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -18,6 +19,7 @@
                 var user = await Aura.Login(AuthCode);
                 var principal = user.WithSparcAuraAccessToken().ToPrincipal();
                 await Auth.LoginAsync(principal);
+                UserId = user.User.Id;
             }
 
             Communicator = await Js.ImportAsync("./Blossom/Api/BlossomWidget.razor.js");
