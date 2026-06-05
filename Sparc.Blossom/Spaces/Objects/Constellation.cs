@@ -1,6 +1,6 @@
 ﻿namespace Sparc.Blossom.Spaces;
 
-public class Constellation : BlossomSpaceObject
+public class Constellation : BlossomSpark
 {
     public Constellation() { }
 

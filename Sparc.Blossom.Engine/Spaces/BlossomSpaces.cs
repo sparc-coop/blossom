@@ -32,13 +32,12 @@ internal class BlossomSpaces(
     {
         parentSpaceId ??= Domain;
 
-        var spaces = Repository.Query
-            .Where(x => x.SpaceId == parentSpaceId);
+        var spaces = Repository.Query.Where(x => x.ParentSpaceId == parentSpaceId);
 
         if (type != null)
-            spaces = spaces.Where(x => x.RoomType == type);
+            spaces = spaces.Where(x => x.EntityType == type);
 
-        return await spaces.OrderByDescending(x => x.Timestamp).ToListAsync();
+        return await spaces.OrderByDescending(x => x.LastActiveDate).ToListAsync();
     }
 
     internal async Task<BlossomSpace?> GetSpaceAsync(ClaimsPrincipal principal, string spaceId, string? parentSpaceId = null)
@@ -52,7 +51,7 @@ internal class BlossomSpaces(
 
     private async Task<BlossomSpace> CreateAsync(Post post)
     {
-        var (space, userSpace) = await GetCurrentSpaces(post.SpaceId);
+        var (space, userSpace) = await GetCurrentSpaces(post.RealmId);
 
         post.Vector.Text = post.Text;
         userSpace.Vector = await translator.VectorizeAsync(post) ?? new();
@@ -79,7 +78,7 @@ internal class BlossomSpaces(
         if (existing == null)
         {
             user ??= (await auth.GetAsync(User))?.Avatar;
-            existing = new BlossomSpace(spaceId, roomType) { SpaceId = parentSpaceId, User = user ?? BlossomUser.System.Avatar };
+            existing = new BlossomSpace(parentSpaceId, spaceId, user ?? BlossomUser.System.Avatar, roomType);
             await Repository.AddAsync(existing);
         }
 

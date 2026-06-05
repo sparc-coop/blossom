@@ -45,7 +45,8 @@ public class SparcCrawler
             {
                 case "completed":
                     var results = await GetCrawlResultsAsync(jobId);
-                    await Parallel.ForEachAsync(results, async (result, _) => await ExtractContentAsync(result));
+                    if (results != null)
+                        await Parallel.ForEachAsync(results, async (result, _) => await ExtractContentAsync(result));
                     return true;
                 case "running":
                     await Task.Delay(5000);
@@ -92,7 +93,7 @@ public class SparcCrawler
 
         // Get language
         var htmlNode = doc.DocumentNode.SelectSingleNode("//html");
-        var lang = htmlNode?.GetAttributeValue("lang", null);
+        var lang = htmlNode?.GetAttributeValue("lang", "en");
 
         var page = await Pages.Register(crawlResult.Url, crawlResult.Title ?? "", lang);
 

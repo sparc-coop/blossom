@@ -5,32 +5,31 @@ namespace Sparc.Blossom.Spaces;
 
 internal class BlossomSpaceObjects(
     BlossomPosts posts,
-    IRepository<BlossomSpace> spaces,
     IRepository<Fact> facts,
     IRepository<Question> questions,
-    IRepository<BlossomSpaceObject> allObjects)
+    IRepository<BlossomSpark> allObjects)
 {
-    public async Task<List<BlossomSpaceObject>> GetAllAsync(BlossomSpace space)
+    public async Task<List<BlossomSpark>> GetAllAsync(BlossomSpace space)
     {
-        var spaceFacts = await facts.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
-        var spaceQuestions = await questions.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
+        var spaceFacts = await facts.Query.Where(x => x.RealmId == space.Id).ToListAsync();
+        var spaceQuestions = await questions.Query.Where(x => x.RealmId == space.Id).ToListAsync();
         var spacePosts = await posts.GetAllAsync(space, 10000);
-        var users = await spaces.Query.Where(x => x.SpaceId == space.Id && x.RoomType == "User").ToListAsync();
+        //var users = await spaces.Query.Where(x => x.SpaceId == space.Id && x.Type == "User").ToListAsync();
 
-        return [.. spaceFacts, .. spaceQuestions, .. spacePosts, ..users];
+        return [.. spaceFacts, .. spaceQuestions, .. spacePosts];
     }
 
-    public async Task UpdateAsync(IEnumerable<BlossomSpaceObject> objects)
+    public async Task UpdateAsync(IEnumerable<BlossomSpark> objects)
     {
         var factsToUpdate = objects.OfType<Fact>();
         var questionsToUpdate = objects.OfType<Question>();
         var postsToUpdate = objects.OfType<Post>();
-        var usersToUpdate = objects.OfType<BlossomSpace>().Where(x => x.RoomType == "User");
+        //var usersToUpdate = objects.OfType<BlossomSpace>().Where(x => x.Type == "User");
 
         await facts.UpdateAsync(factsToUpdate);
         await questions.UpdateAsync(questionsToUpdate);
         await posts.UpdateAsync(postsToUpdate);
-        await spaces.UpdateAsync(usersToUpdate);
+        //await spaces.UpdateAsync(usersToUpdate);
     }
 
     internal async Task RecalculateAsync(BlossomSpace space)
@@ -64,7 +63,7 @@ internal class BlossomSpaceObjects(
 
     internal async Task DeleteAsync(string spaceId)
     {
-        var allVectors = await allObjects.Query.Where(x => x.SpaceId == spaceId).ToListAsync();
+        var allVectors = await allObjects.Query.Where(x => x.RealmId == spaceId).ToListAsync();
         await allObjects.DeleteAsync(allVectors);
     }
 }

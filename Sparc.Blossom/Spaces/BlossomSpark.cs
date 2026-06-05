@@ -4,18 +4,19 @@ using System.Text.Json.Serialization.Metadata;
 
 namespace Sparc.Blossom.Spaces;
 
-public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.NewGuid().ToString()), IVectorizable
+public class BlossomSpark(string realmId) : BlossomEntity<string>(Guid.NewGuid().ToString()), IVectorizable
 {
-    public BlossomSpaceObject() : this("")
+    public BlossomSpark() : this("")
     { }
     
-    public BlossomSpaceObject(BlossomSpace space, BlossomVector? vector = null)
+    public BlossomSpark(BlossomSpace space, BlossomVector? vector = null)
         : this(space.Id)
     {
         Vector = vector ?? new BlossomVector();
     }
 
-    public string SpaceId { get; set; } = spaceId;
+    public string RealmId { get; set; } = realmId;
+    public List<string> SpaceIds { get; set; } = [];
     public BlossomVector Vector { get; set; } = new();
     public BlossomSummary? Summary { get; set; }
     public BlossomAvatar User { get; set; } = BlossomUser.System.Avatar;
@@ -45,7 +46,7 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
 
     
     const float gravitationalConstant = 1;
-    public virtual void SetGravitationalForce(IEnumerable<BlossomSpaceObject> objects)
+    public virtual void SetGravitationalForce(IEnumerable<BlossomSpark> objects)
     {
         if (Mass == 0)
             return;
@@ -58,7 +59,7 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
         CollapseScale = GravitationalForce.Magnitude();
     }
 
-    float GravitationalScale(BlossomSpaceObject other)
+    float GravitationalScale(BlossomSpark other)
     {
         var masses = Mass * other.Mass;
         var distanceSquared = Vector.AngularDistanceTo(other.Vector, parsecsPerUnit);
@@ -69,7 +70,7 @@ public class BlossomSpaceObject(string spaceId) : BlossomEntity<string>(Guid.New
 
     public static void DoNotSerializeVectors(JsonTypeInfo typeInfo)
     {
-        if (!typeInfo.Type.IsAssignableTo(typeof(BlossomSpaceObject)))
+        if (!typeInfo.Type.IsAssignableTo(typeof(BlossomSpark)))
             return;
 
         foreach (var prop in typeInfo.Properties)

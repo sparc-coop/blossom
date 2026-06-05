@@ -37,7 +37,7 @@ internal class BlossomSpaceConstellations(
     private async Task<List<Constellation>> CreateConstellations(BlossomSpace space, Dictionary<Post, List<Post>> vectors)
     {
         // Create constellation vectors as simple average of coordinates per component
-        var existing = await constellations.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
+        var existing = await constellations.Query.Where(x => x.RealmId == space.Id).ToListAsync();
         await constellations.DeleteAsync(existing);
 
         foreach (var posts in vectors.Values)
@@ -202,5 +202,5 @@ internal class BlossomSpaceConstellations(
         return weights[idx];
     }
 
-    internal async Task<List<Constellation>> GetAllAsync(BlossomSpace space) => await constellations.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
+    internal async Task<List<Constellation>> GetAllAsync(BlossomSpace space) => await constellations.Query.Where(x => x.RealmId == space.Id).ToListAsync();
 }

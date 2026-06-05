@@ -3,7 +3,7 @@ using Sparc.Blossom.Content;
 
 namespace Sparc.Blossom.Spaces;
 
-public class Post : BlossomSpaceObject
+public class Post : BlossomSpark
 {
     public Post() : base(Guid.NewGuid().ToString())
     {
@@ -18,7 +18,7 @@ public class Post : BlossomSpaceObject
     public Post(string spaceId, BlossomAvatar user, string text)
         : this()
     {
-        SpaceId = spaceId;
+        RealmId = spaceId;
         User = user;
         Text = text;
         Vector = new(text);

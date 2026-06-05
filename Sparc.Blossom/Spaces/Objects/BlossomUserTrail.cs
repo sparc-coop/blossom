@@ -1,6 +1,6 @@
 ﻿namespace Sparc.Blossom.Spaces;
 
-public class BlossomUserTrail : BlossomSpaceObject
+public class BlossomUserTrail : BlossomSpark
 {
     public BlossomUserTrail()
     { }

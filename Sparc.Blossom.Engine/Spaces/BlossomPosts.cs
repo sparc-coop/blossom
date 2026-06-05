@@ -17,7 +17,7 @@ internal class BlossomPosts(IRepository<Post> posts,
             foreach (var lookbackPost in lookbackPosts)
                 post.Vector.Update(lookbackPost.Vector, space.Settings.MessageLookbackWeight);
 
-        var neighbors = await posts.SearchAsync(post.SpaceId, post.Vector, 20);
+        var neighbors = await posts.SearchAsync(post.RealmId, post.Vector, 20);
         post.Vector.CalculateLocalCoherence(neighbors.Select(x => x.Item.Vector).ToList());
         await posts.UpdateAsync(post);
 
@@ -26,7 +26,7 @@ internal class BlossomPosts(IRepository<Post> posts,
 
     internal async Task<Post> AddAsync(Post post, BlossomSpace space, BlossomSpace userSpace)
     {
-        post.SpaceId = space.Id;
+        post.RealmId = space.Id;
         post.User = userSpace.User;
 
         await VectorizeAsync(post, space);
@@ -42,7 +42,7 @@ internal class BlossomPosts(IRepository<Post> posts,
         if (take == 0)
             return [];
 
-        var result = await posts.Query.Where(x => x.SpaceId == spaceId)
+        var result = await posts.Query.Where(x => x.RealmId == spaceId)
             .OrderByDescending(x => x.Timestamp)
             .Take(take)
             .ToListAsync();
@@ -61,7 +61,7 @@ internal class BlossomPosts(IRepository<Post> posts,
     internal async Task<List<Post>> GetAllAsync(BlossomSpace space, BlossomAvatar user, int take)
     {
         var result = await posts.Query
-            .Where(x => x.SpaceId == space.Id && x.User.Id == user.Id)
+            .Where(x => x.RealmId == space.Id && x.User.Id == user.Id)
             .OrderByDescending(x => x.Timestamp)
             .Take(take)
             .ToListAsync();

@@ -77,11 +77,11 @@ public class Contents(
                     await content.UpdateAsync(item);
                 }
             }
-            return request.Content.FirstOrDefault();
+            return request.Content.First();
         }
         catch (Exception e)
         {
-            return new(request.Referrer, "", Language.Find("en"), e.Message + e.InnerException?.Message + e.StackTrace);
+            return new(request.Referrer ?? "Unknown", "", Language.Find("en")!, e.Message + e.InnerException?.Message + e.StackTrace);
         }
     }
 

@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
 
         builder.Services.Configure<JsonOptions>(options =>
         {
-            options.SerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver().WithAddedModifier(BlossomSpaceObject.DoNotSerializeVectors);
+            options.SerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver().WithAddedModifier(BlossomSpark.DoNotSerializeVectors);
         });
         
         return builder;

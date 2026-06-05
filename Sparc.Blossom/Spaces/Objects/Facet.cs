@@ -1,6 +1,6 @@
 ﻿namespace Sparc.Blossom.Spaces;
 
-public class Facet : BlossomSpaceObject
+public class Facet : BlossomSpark
 {
     public Facet() { }
     
@@ -47,7 +47,7 @@ public class Facet : BlossomSpaceObject
     internal Facet Orthogonal()
     {
         var orthogonalVector = Vector.Orthogonal();
-        return new Facet(SpaceId) { Vector = orthogonalVector };
+        return new Facet(RealmId) { Vector = orthogonalVector };
     }
 
     public void AlignWith(BlossomSpace space)
