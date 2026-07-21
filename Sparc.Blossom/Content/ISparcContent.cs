@@ -6,7 +6,7 @@ namespace Sparc.Blossom.Content;
 
 public interface ISparcContent
 {
-    [Get("/content/languages")]
+    [Get("/translate/languages")]
     Task<IEnumerable<Language>> GetLanguages();
 
     [Post("/auth/user-languages")]
