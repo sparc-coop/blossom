@@ -174,5 +174,19 @@ public class SparcDomain(string domain) : BlossomEntity<string>(BlossomKey.SHA25
         return key;
     }
 
+    public async Task<bool> IsOnline()
+    {
+        try
+        {
+            var ping = new HttpRequestMessage(HttpMethod.Head, ToAbsoluteUrl());
+            var result = await new HttpClient().SendAsync(ping);
+            return result.IsSuccessStatusCode;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public string FaviconUri => $"https://{Domain}/favicon.ico";
 }
