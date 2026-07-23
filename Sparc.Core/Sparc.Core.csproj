@@ -19,11 +19,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="Ardalis.Specification" Version="9.3.1" />
-		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.1" />
+		<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="10.0.10" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-		<PackageReference Include="System.Drawing.Common" Version="10.0.1" />
-		<PackageReference Include="System.Text.Json" Version="10.0.1" />
-		<PackageReference Include="SystemTextJsonPatch" Version="4.2.0" />
+		<PackageReference Include="System.Drawing.Common" Version="10.0.10" />
+		<PackageReference Include="System.Text.Json" Version="10.0.10" />
+		<PackageReference Include="SystemTextJsonPatch" Version="5.0.0" />
 		<PackageReference Include="Bogus" Version="35.6.5" />
 	</ItemGroup>
 

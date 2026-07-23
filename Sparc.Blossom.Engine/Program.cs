@@ -2,7 +2,6 @@ using Anthropic.SDK;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http.Json;
 using OpenAI;
-using Scalar.AspNetCore;
 using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Billing;
 using Sparc.Blossom.Content;
@@ -11,10 +10,8 @@ using Sparc.Blossom.Engine;
 using Sparc.Blossom.Plugins.Slack;
 using Sparc.Blossom.Realtime;
 using Sparc.Blossom.Spaces;
-using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddOpenApi();
 builder.Services.AddScoped<FriendlyId>();
 
 builder.Services.AddCosmos<SparcEngineContext>(builder.Configuration.GetConnectionString("Cosmos")!, builder.Environment.IsDevelopment() ? "sparc-dev" : "sparc", ServiceLifetime.Scoped);
@@ -49,13 +46,6 @@ app.MapStaticAssets();
 app.UseSparcAuthentication<BlossomUser>();
 app.UseSparcBilling();
 app.UseSparcSpaces();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
 
 app.UseHttpsRedirection();
 app.UseCors();
