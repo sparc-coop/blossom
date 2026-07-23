@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace Sparc.Blossom.Content;
 
 public class Contents(
-    IEnumerable<ITranslator> translators,
+    IEnumerable<AITranslator> translators,
     IRepository<TextContent> content,
     IRepository<SparcDomain> domains,
     IRepository<Page> pages,

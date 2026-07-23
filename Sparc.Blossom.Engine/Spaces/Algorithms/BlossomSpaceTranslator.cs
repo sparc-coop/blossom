@@ -3,14 +3,22 @@ using Sparc.Blossom.Content;
 
 namespace Sparc.Blossom.Spaces;
 
+internal static class ITranslatorExtensions
+{
+    public static AITranslator Get(this IEnumerable<AITranslator> translators, string key)
+    {
+        return translators.FirstOrDefault(t => t.GetType().Name.StartsWith(key)) 
+            ?? throw new InvalidOperationException($"Translator with key '{key}' not found.");
+    }
+}
+
 internal class BlossomSpaceTranslator
-    (IEnumerable<ITranslator> translators,
+    (IEnumerable<AITranslator> translators,
     BlossomPosts posts,
     IRepository<BlossomSpace> spaces,
     IRepository<BlossomUserTrail> headspaces,
     BlossomSpaceFacets facets,
     BlossomSpaceObjects objects,
-    VoyageTranslator vectorizer,
     FriendlyId friendlyId)
 {
     readonly AITranslator translator = translators.OfType<AITranslator>().First();
@@ -24,7 +32,7 @@ internal class BlossomSpaceTranslator
         
         List<IVectorizable> itemsToVectorize = [.. facts, .. questions];
 
-        await vectorizer.VectorizeAsync(itemsToVectorize);
+        await translators.Get(space.Model).VectorizeAsync(itemsToVectorize);
 
         await posts.UpdateAsync(facts);
         await posts.UpdateAsync(questions);

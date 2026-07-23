@@ -9,10 +9,10 @@ internal class BlossomSpaceFacets(
     IRepository<Quest> quests,
     IRepository<BlossomSpace> spaces,
     BlossomPosts posts,
-    IEnumerable<ITranslator> translators,
+    IEnumerable<AITranslator> translators,
     VoyageTranslator vectorizer)
 {
-    readonly AITranslator translator = translators.OfType<AITranslator>().First();
+    readonly AITranslator translator = translators.First();
 
     public async Task<List<Facet>> FacetAsync(BlossomSpace space, IEnumerable<Post> facts)
     {

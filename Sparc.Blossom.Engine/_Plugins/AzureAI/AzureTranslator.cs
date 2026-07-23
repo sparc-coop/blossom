@@ -1,19 +1,16 @@
 ﻿using Azure;
 using Azure.AI.TextAnalytics;
 using Azure.AI.Translation.Text;
+using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Content;
 
-internal class AzureTranslator(IConfiguration configuration) : ITranslator, ILanguageDetector
+internal class AzureTranslator(BlossomEvents channels, IConfiguration configuration) : AITranslator(channels, "", 0, 10.00m / 1_000_000 * 5, 2), ILanguageDetector
 {
     static TextTranslationClient? Client;
-
     internal static List<Language>? Languages;
 
-    public int Priority => 2;
-    decimal CostPerWord => 10.00m / 1_000_000 * 5; // $10 per million characters, assuming average 5 characters per word
-
-    public async Task<List<TextContent>> TranslateAsync(ContentRequest request)
+    public override async Task<List<TextContent>> TranslateAsync(ContentRequest request)
     {
         var azureLanguage = AzureLanguage(request.Options.OutputLanguage!);
 

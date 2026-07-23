@@ -25,6 +25,7 @@ public class BlossomSpace : BlossomEntity<string>
     public string RealmId { get; set; }
     public string? ParentSpaceId { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string Model { get; set; } = "Voyage";
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime? LastActiveDate { get; set; } = DateTime.UtcNow;
     public DateTime? EndDate { get; set; }

@@ -6,7 +6,7 @@ namespace Sparc.Blossom.Spaces;
 internal class BlossomSpaceConstellations(
     IRepository<Constellation> constellations,
     BlossomPosts postRepository,
-    IEnumerable<ITranslator> translators)
+    IEnumerable<AITranslator> translators)
 {
     public async Task<List<Constellation>> ConstellateAsync(BlossomSpace space)
     {

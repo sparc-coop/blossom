@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 namespace Sparc.Blossom.Content;
 
 record ContentTranslated(TextContent TranslatedContent) : BlossomEvent;
-internal abstract class AITranslator(BlossomEvents channels, string defaultModel, decimal inputCostPerToken, decimal outputCostPerToken, int priority = 0) : ITranslator
+public abstract class AITranslator(BlossomEvents channels, string defaultModel, decimal inputCostPerToken, decimal outputCostPerToken, int priority = 0) : ITranslator
 {
     public int Priority { get; } = priority;
     protected string DefaultModel = defaultModel;

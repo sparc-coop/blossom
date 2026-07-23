@@ -5,10 +5,10 @@ public static class ContentServiceCollectionExtensions
     public static WebApplicationBuilder AddSparcContent(this WebApplicationBuilder builder)
     {
         builder.Services
-            .AddScoped<ITranslator, AzureTranslator>()
-            .AddScoped<ITranslator, DeepLTranslator>()
-            .AddScoped<ITranslator, OpenAITranslator>()
-            .AddScoped<ITranslator, AnthropicTranslator>()
+            .AddScoped<AITranslator, AzureTranslator>()
+            .AddScoped<AITranslator, DeepLTranslator>()
+            .AddScoped<AITranslator, OpenAITranslator>()
+            .AddScoped<AITranslator, AnthropicTranslator>()
             .AddScoped<VoyageTranslator>()
             .AddScoped<DocumentTranslator>()
             .AddScoped<SparcCrawler>()
