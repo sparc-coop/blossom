@@ -54,7 +54,7 @@ app.MapGet("/aura/friendlyid", (FriendlyId friendlyId) => friendlyId.Create());
 app.MapGet("/hi", () => "Hi from Sparc!");
 
 using var scope = app.Services.CreateScope();
-scope.ServiceProvider.GetRequiredService<TovikTranslator>().Map(app);
+scope.ServiceProvider.GetRequiredService<Contents>().Map(app);
 
 foreach (var translator in scope.ServiceProvider.GetServices<ITranslator>())
     await translator.GetLanguagesAsync();

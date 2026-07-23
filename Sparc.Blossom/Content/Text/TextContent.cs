@@ -1,4 +1,5 @@
 ﻿using Sparc.Blossom.Authentication;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
@@ -75,6 +76,7 @@ public class TextContent : BlossomEntity<string>
     public TextContent(Page page, string text) : this(page.Domain, page.Id, page.Language?.Id ?? new Language().Id)
     {
         SetText(text);
+        Id = HashId(text, Language.Id);
     }
 
     //public static string IdHash(string? text, Language language) => BlossomHash.MD5($"{text}:{language}");
@@ -215,5 +217,16 @@ public class TextContent : BlossomEntity<string>
         return this;
     }
 
+    public static string HashId(string text, string languageId)
+    {
+        var inputBytes = System.Text.Encoding.UTF8.GetBytes(text.Trim() + ":" + languageId);
+        var hashBytes = MD5.HashData(inputBytes);
+        return Convert.ToHexString(hashBytes).ToLower();
+    }
 
+    public void SetDomain(SparcDomain sparcDomain, string absoluteUri)
+    {
+        Domain = sparcDomain.Domain;
+        SpaceId = new Uri(absoluteUri).AbsolutePath.Trim('/');
+    }
 }

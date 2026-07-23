@@ -105,9 +105,10 @@ public class SparcAuthenticator<T>(
             ?? throw new InvalidOperationException("Identity not found for the provided TOTP code.");
 
         identity.IsVerified = true;
-        await UpdateAsync(matchingUser);
-
-        await LoginAsync(matchingUser.ToPrincipal());
+        
+        SparcUser = matchingUser;
+        await SaveAsync();
+        
         return matchingUser;
     }
 
@@ -214,11 +215,13 @@ public class SparcAuthenticator<T>(
         await SaveAsync();
     }
 
-    //internal async Task<SparcCode?> GetSparcCode(ClaimsPrincipal principal)
-    //{
-    //    var user = await GetAsync(principal);
-    //    return SparcCodes.Generate(user);
-    //}
+    internal async Task<SparcCode?> GetSparcCode(ClaimsPrincipal principal)
+    {
+        var user = await GetAsync(principal);
+        var identity = user.GetOrCreateIdentity("Totp", user.Id);
+        await UpdateAsync(user);
+        return SparcCodes.Generate(user, identity);
+    }
 
     private void UpdateFromHttpContext(ClaimsPrincipal principal)
     {
@@ -262,6 +265,6 @@ public class SparcAuthenticator<T>(
         auth.MapPost("logout", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal, string? emailOrToken = null) => await auth.DoLogout(principal, emailOrToken));
         auth.MapGet("userinfo", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal) => await GetAsync(principal));
         auth.MapPost("userinfo", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal, BlossomAvatar avatar) => await auth.UpdateAsync(principal, avatar));
-        //auth.MapGet("code", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal) => await GetSparcCode(principal));
+        auth.MapGet("code", async (SparcAuthenticator<T> auth, ClaimsPrincipal principal) => await GetSparcCode(principal));
     }
 }

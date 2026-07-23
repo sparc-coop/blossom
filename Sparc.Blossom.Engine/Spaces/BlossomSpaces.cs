@@ -10,22 +10,34 @@ internal class BlossomSpaces(
     BlossomSpaceFacets facets,
     BlossomSpaceTranslator translator,
     BlossomSpaceObjects objects,
+    IRepository<SparcDomain> domains,
     IBlossomAuthenticator auth)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
     public const string Domain = "sparc.coop";
 
+    private async Task<List<SparcDomain>> GetDomainsAsync(ClaimsPrincipal principal)
+    {
+        var userId = principal.Id();
+        return await domains.Query.Where(x => x.IsPublic || x.TovikUserId == userId || x.Users.Contains(userId)).ToListAsync();
+    }
+
+    private async Task<SparcDomain?> GetDomainAsync(ClaimsPrincipal principal, string id)
+    {
+        var userId = principal.Id();
+        return await domains.Query.Where(x => (x.IsPublic || x.TovikUserId == userId || x.Users.Contains(userId)) && x.Id == id).FirstOrDefaultAsync();
+    }
+
     private async Task<List<BlossomSpace>> GetSpacesAsync(string? parentSpaceId = null, int? limit = null, string? type = null)
     {
         parentSpaceId ??= Domain;
 
-        var spaces = Repository.Query
-            .Where(x => x.SpaceId == parentSpaceId);
+        var spaces = Repository.Query.Where(x => x.ParentSpaceId == parentSpaceId);
 
         if (type != null)
-            spaces = spaces.Where(x => x.RoomType == type);
+            spaces = spaces.Where(x => x.EntityType == type);
 
-        return await spaces.OrderByDescending(x => x.Timestamp).ToListAsync();
+        return await spaces.OrderByDescending(x => x.LastActiveDate).ToListAsync();
     }
 
     internal async Task<BlossomSpace?> GetSpaceAsync(ClaimsPrincipal principal, string spaceId, string? parentSpaceId = null)
@@ -39,7 +51,7 @@ internal class BlossomSpaces(
 
     private async Task<BlossomSpace> CreateAsync(Post post)
     {
-        var (space, userSpace) = await GetCurrentSpaces(post.SpaceId);
+        var (space, userSpace) = await GetCurrentSpaces(post.RealmId);
 
         post.Vector.Text = post.Text;
         userSpace.Vector = await translator.VectorizeAsync(post) ?? new();
@@ -66,7 +78,7 @@ internal class BlossomSpaces(
         if (existing == null)
         {
             user ??= (await auth.GetAsync(User))?.Avatar;
-            existing = new BlossomSpace(spaceId, roomType) { SpaceId = parentSpaceId, User = user ?? BlossomUser.System.Avatar };
+            existing = new BlossomSpace(parentSpaceId, spaceId, user ?? BlossomUser.System.Avatar, roomType);
             await Repository.AddAsync(existing);
         }
 
@@ -135,6 +147,8 @@ internal class BlossomSpaces(
         spaces.MapGet("{parentSpaceId}/subspaces/{spaceId}", GetSpaceAsync);
         spaces.MapGet("{spaceId}/posts", GetPostsAsync);
         spaces.MapGet("{spaceId}/coordinates", async (string spaceId)  => await GetCoordinatesAsync(spaceId));
+        spaces.MapGet("domains", GetDomainsAsync);
+        spaces.MapGet("domains/{domainId}", async (ClaimsPrincipal principal, string domainId) => await GetDomainAsync(principal, domainId));
         spaces.MapPost("{spaceId}", async (string spaceId, Post post) => await PostAsync(spaceId, post));
         spaces.MapPost("{spaceId}/quests/{facetId}", async (string spaceId, string facetId) => await ActivateQuestAsync(spaceId, facetId));
         spaces.MapDelete("{spaceId}", async (string spaceId) => await DeleteSpaceAsync(spaceId));

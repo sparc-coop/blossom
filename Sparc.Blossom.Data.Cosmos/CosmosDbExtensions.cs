@@ -35,6 +35,14 @@ public static class CosmosDbExtensions
         return await repository.FindAsync(id);
     }
 
+    public static async Task<List<T>> FromSqlAsync<T>(this IRepository<T> repository, string query, string? partitionKey = null) where T : BlossomEntity<string>
+    {
+        if (repository is CosmosDbSimpleRepository<T> cosmosSimpleRepository)
+            return await cosmosSimpleRepository.FromSqlAsync(query, partitionKey);
+
+        return repository.FromSqlRaw(query).ToList();
+    }
+
     public static async Task<List<T>> ToListAsync<T>(this IQueryable<T> query)
     {
         var iterator = query.ToFeedIterator();

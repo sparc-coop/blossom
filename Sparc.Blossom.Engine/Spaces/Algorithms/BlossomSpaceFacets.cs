@@ -32,7 +32,7 @@ internal class BlossomSpaceFacets(
         var components = ToPrincipalComponents(postsToFacet.Select(p => p.Vector), 0.8, 10);
 
         var existingFacets = await facets.Query
-            .Where(x => x.SpaceId == space.Id)
+            .Where(x => x.RealmId == space.Id)
             .ToListAsync();
 
         await facets.DeleteAsync(existingFacets);
@@ -142,13 +142,13 @@ internal class BlossomSpaceFacets(
     public static Matrix<float> ToMatrix(List<BlossomVector> vectors)
         => Matrix<float>.Build.Dense(vectors.Count, vectors.First().Vector.Length, (i, j) => vectors[i].Vector[j]);
 
-    internal async Task<List<Facet>> GetAllAsync(BlossomSpace space) => await facets.Query.Where(x => x.SpaceId == space.Id).ToListAsync();
+    internal async Task<List<Facet>> GetAllAsync(BlossomSpace space) => await facets.Query.Where(x => x.RealmId == space.Id).ToListAsync();
 
     internal async Task<Quest?> GetActiveQuestAsync(BlossomSpace userSpace)
     {
         if (userSpace.ActiveQuestId == null)
             return null;
 
-        return await quests.FindAsync(userSpace.SpaceId, userSpace.ActiveQuestId);
+        return await quests.FindAsync(userSpace.Id, userSpace.ActiveQuestId);
     }
 }

@@ -20,18 +20,21 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
             // Handle TOTP requests separately
             var authCode = context.Request.Query["_auth"].ToString();
             var matchingUser = await aura.Login(authCode);
-            if (matchingUser != null)
+            if (matchingUser?.AccessToken == null)
             {
-                await auth.LoginAsync(matchingUser.ToUser().ToPrincipal());
-                context.Response.Redirect(context.Request.PathBase + context.Request.Path);
+                context.Response.Clear();
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                return;
             }
 
-            await _next(context);
-            return;
+            var principal = matchingUser.WithSparcAuraAccessToken().ToPrincipal();
+            await auth.LoginAsync(principal);
+            context.Response.Redirect(context.Request.PathBase + context.Request.Path);
         }
-
-        if (context.User.Identity?.IsAuthenticated != true)
+        else if (context.User.Identity?.IsAuthenticated != true)
+        {
             await auth.RegisterAsync();
+        }
 
         await _next(context);
     }

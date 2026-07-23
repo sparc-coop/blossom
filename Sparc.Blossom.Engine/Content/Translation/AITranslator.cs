@@ -25,7 +25,7 @@ internal abstract class AITranslator(BlossomEvents channels, string defaultModel
         }
     }
 
-    public async Task<List<TextContent>> TranslateAsync(TranslationRequest request)
+    public async Task<List<TextContent>> TranslateAsync(ContentRequest request)
     {
         var fromLanguages = request.Content.GroupBy(x => x.Language);
         var batches = request.Content.Batch(10);

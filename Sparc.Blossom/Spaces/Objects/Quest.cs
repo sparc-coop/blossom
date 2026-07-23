@@ -1,8 +1,9 @@
 ﻿namespace Sparc.Blossom.Spaces;
 
-public class Quest : BlossomSpace
+public class Quest : BlossomSpark
 {
     public string FacetId { get; set; } = "";
+    public string Name { get; set; } = "";
     public double Importance { get; set; }
     public List<BlossomScoredVector<string>> Signposts { get; set; } = [];
     public BlossomVector NextTurn { get; set; } = new();
@@ -14,7 +15,7 @@ public class Quest : BlossomSpace
     public Quest(string spaceId) : base(spaceId)
     { }
     
-    public Quest(BlossomSpace space, BlossomSpace userSpace, Facet facet) : base(space, "Quest")
+    public Quest(BlossomSpace space, BlossomSpace userSpace, Facet facet) : base(space)
     {
         User = userSpace.User;
         Vector = facet.Vector.AlignWith(userSpace.Origin, space.Vector);
@@ -27,7 +28,7 @@ public class Quest : BlossomSpace
 
         Importance = facet.Vector.CoherenceWeight * 10;
 
-        MaterializeAxes([facet]);
+        space.MaterializeAxes([facet]);
     }
 
     public void SetSignposts(IEnumerable<Post> posts)
@@ -73,9 +74,9 @@ public class Quest : BlossomSpace
         
         return
         [
-            new(space, new Facet(SpaceId) { Vector = xAxis }, "X"),
-            new(space, new Facet(SpaceId) { Vector = yAxis }, "Y"),
-            new(space, new Facet(SpaceId) { Vector = zAxis }, "Z")
+            new(space, new Facet(space.Id) { Vector = xAxis }, "X"),
+            new(space, new Facet(space.Id) { Vector = yAxis }, "Y"),
+            new(space, new Facet(space.Id) { Vector = zAxis }, "Z")
         ];
     }
 

@@ -1,4 +1,5 @@
 ﻿using Refit;
+using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Realtime;
 
 namespace Sparc.Blossom.Spaces;
@@ -7,6 +8,12 @@ public interface ISparcSpaces
 {
     [Get("/spaces")]
     Task<List<BlossomSpace>> GetSpacesAsync(string? parentSpaceId = null, int? limit = null);
+
+    [Get("/spaces/domains")]
+    Task<List<SparcDomain>> GetDomainsAsync();
+
+    [Get("/spaces/domains/{domainId}")]
+    Task<SparcDomain> GetDomainAsync(string domainId);
 
     [Get("/spaces/{spaceId}")]
     Task<BlossomSpace?> GetSpaceAsync(string spaceId);

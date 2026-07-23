@@ -3,7 +3,7 @@ using Sparc.Blossom.Content;
 
 namespace Sparc.Blossom.Spaces;
 
-public class Post : BlossomSpaceObject
+public class Post : BlossomSpark
 {
     public Post() : base(Guid.NewGuid().ToString())
     {
@@ -18,7 +18,7 @@ public class Post : BlossomSpaceObject
     public Post(string spaceId, BlossomAvatar user, string text)
         : this()
     {
-        SpaceId = spaceId;
+        RealmId = spaceId;
         User = user;
         Text = text;
         Vector = new(text);
@@ -32,7 +32,7 @@ public class Post : BlossomSpaceObject
 
     public async Task ExtractEntities(ISparcContent tovik, List<SparcEntityType> entityTypes)
     {
-        Entities = await tovik.ExtractGraphAsync(new(this, entityTypes));
+        //Entities = await tovik.ExtractGraphAsync(new(this, entityTypes));
     }
 
     public void SetConstellation(Constellation? constellation, Post? connectToPost)

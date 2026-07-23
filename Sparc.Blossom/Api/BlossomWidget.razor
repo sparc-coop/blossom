@@ -1,0 +1,66 @@
+@using Microsoft.JSInterop
+@using Sparc.Blossom.Authentication
+
+@inject IJSRuntime Js
+@inject IBlossomAuthenticator Auth
+@inject ISparcAura Aura
+@code {
+    [Parameter][SupplyParameterFromQuery(Name = "_wauth")] public string? AuthCode { get; set; }
+    IJSObjectReference Communicator = null!;
+    Dictionary<string, Delegate> Subscriptions = [];
+    protected string? UserId { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (AuthCode != null)
+            {
+                var user = await Aura.Login(AuthCode);
+                var principal = user.WithSparcAuraAccessToken().ToPrincipal();
+                await Auth.LoginAsync(principal);
+                UserId = user.User.Id;
+            }
+
+            Communicator = await Js.ImportAsync("./Blossom/Api/BlossomWidget.razor.js");
+            await Communicator.InvokeVoidAsync("initialize", DotNetObjectReference.Create(this));
+        }
+    }
+
+    protected async Task BroadcastAsync(string eventName, Delegate callback)
+    {
+        On(eventName, callback);
+        await BroadcastAsync(eventName);
+    }
+
+    protected async Task BroadcastAsync(string eventName, object body, Delegate callback)
+    {
+        On(eventName, callback);
+        await BroadcastAsync(eventName, body);
+    }
+
+    protected async Task BroadcastAsync(string eventName, object? body = null)
+    {
+        await Communicator.InvokeVoidAsync("broadcast", eventName, body);
+    }
+
+    protected void On(string eventName, Delegate action)
+    {
+        Subscriptions.TryAdd(eventName, action);
+    }
+
+    [JSInvokable]
+    public async Task OnResponse(BlossomJsEvent ev)
+    {
+        if (ev.Type != "response" || !Subscriptions.ContainsKey(ev.Name))
+            return;
+
+        if (ev.Body == null)
+            Subscriptions[ev.Name].DynamicInvoke();
+        else
+            Subscriptions[ev.Name].DynamicInvoke(ev.Body);
+
+        Subscriptions.Remove(ev.Name);
+        await InvokeAsync(StateHasChanged);
+    }
+}

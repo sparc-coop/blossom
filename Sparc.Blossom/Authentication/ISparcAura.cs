@@ -20,7 +20,7 @@ public interface ISparcAura
     Task<BlossomUser> Logout();
 
     [Get("/aura/code")]
-    Task<SparcCode?> GetSparcCode();
+    Task<SparcCode> GetSparcCode();
 
     [Get("/aura/userinfo")]
     Task<BlossomUser> UserInfo();

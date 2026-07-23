@@ -10,7 +10,7 @@ public class Page : BlossomSpace
     public Dictionary<string, int> TovikUsage { get; set; } = [];
     public Dictionary<string, int> Visits { get; set; } = [];
     public AudioContent? Audio { get; set; }
-    public string Domain { get { return SpaceId; } set { SpaceId = value; } }
+    public string Domain { get { return RealmId; } set { RealmId = value; } }
     public Language? Language { get; set; }
     public DateTime? LanguageDetectedDate { get; set; }
 
@@ -18,7 +18,7 @@ public class Page : BlossomSpace
     private Page() : base()
     { 
         Id = string.Empty;
-        SpaceId = string.Empty;
+        RealmId = string.Empty;
         Path = string.Empty;
         Name = string.Empty;
     }
@@ -26,7 +26,7 @@ public class Page : BlossomSpace
     public Page(string domain, string path) : base(domain, path)
     {
         Id = BlossomKey.SHA256($"{domain}:{path}");
-        SpaceId = domain;
+        RealmId = domain;
         Path = path;
         Name = Id;
     }
@@ -62,7 +62,7 @@ public class Page : BlossomSpace
             Visits[language.Id] = 1;
     }
 
-    public string AbsolutePath(string? language = null) => $"https://{SpaceId}{Path}" + (language == null ? "" : $"?lang={language}");
+    public string AbsolutePath(string? language = null) => $"https://{RealmId}{Path}" + (language == null ? "" : $"?lang={language}");
 
     internal async Task SpeakAsync(ISpeaker speaker, List<TextContent> contents)
     {

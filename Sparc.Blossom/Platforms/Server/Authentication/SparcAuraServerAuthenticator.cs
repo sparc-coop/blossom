@@ -31,7 +31,7 @@ public class SparcAuraServerAuthenticator(ISparcAura aura, IHttpContextAccessor 
     public async Task<ClaimsPrincipal> RegisterAsync()
     {
         var user = await aura.Login();
-        User = user.ToUser();
+        User = user.WithSparcAuraAccessToken();
         return await LoginAsync(User.ToPrincipal());
     }
 
@@ -43,7 +43,8 @@ public class SparcAuraServerAuthenticator(ISparcAura aura, IHttpContextAccessor 
         if (http.HttpContext != null)
         {
             http.HttpContext.User = principal;
-            await http.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, http.HttpContext.User, new() { IsPersistent = true });
+            if (http.HttpContext.User.Identity?.AuthenticationType != "Totp")
+                await http.HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, http.HttpContext.User, new() { IsPersistent = true });
         }
 
         return principal;
@@ -52,7 +53,7 @@ public class SparcAuraServerAuthenticator(ISparcAura aura, IHttpContextAccessor 
     public async Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId)
     {
         var user = await aura.Login(externalId);
-        User = user.ToUser();
+        User = user.WithSparcAuraAccessToken();
         LoginState = LoginStates.LoggedIn;
         return User.ToPrincipal(authenticationType, externalId);
     }

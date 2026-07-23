@@ -50,7 +50,7 @@ internal class BlossomSpaceTranslator
         return hintPost;
     }
 
-    internal async Task<BlossomVector?> VectorizeAsync(BlossomSpaceObject obj)
+    internal async Task<BlossomVector?> VectorizeAsync(BlossomSpark obj)
     {
         if (obj.Vector?.Text == null)
             return null;
@@ -128,7 +128,8 @@ internal class BlossomSpaceTranslator
         //    .OrderByDescending(x => x.Importance)
         //    .ToList());
 
-        List<BlossomSpaceObject> all = [userSpace, space, .. spaceObjects];
+        //List<BlossomSpark> all = [userSpace, space, .. spaceObjects];
+        List<BlossomSpark> all = [.. spaceObjects];
         all.ForEach(x => x.SetGravitationalForce(all));
         all.ForEach(x => x.MaterializeCoordinates(axes));
 

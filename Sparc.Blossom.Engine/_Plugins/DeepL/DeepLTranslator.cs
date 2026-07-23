@@ -12,7 +12,7 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
     public int Priority => 1;
     decimal CostPerWord => 25.00m / 1_000_000 * 5; // $25 per million characters, assuming average 5 characters per word
 
-    public async Task<List<TextContent>> TranslateAsync(TranslationRequest request)
+    public async Task<List<TextContent>> TranslateAsync(ContentRequest request)
     {
         Client ??= new(configuration.GetConnectionString("DeepL")!);
 

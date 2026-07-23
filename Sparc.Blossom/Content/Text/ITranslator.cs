@@ -4,7 +4,7 @@ public interface ITranslator
 {
     int Priority { get; }
 
-    Task<List<TextContent>> TranslateAsync(TranslationRequest request);
+    Task<List<TextContent>> TranslateAsync(ContentRequest request);
     Task<List<Language>> GetLanguagesAsync();
     bool CanTranslate(Language fromLanguage, Language toLanguage);
 }

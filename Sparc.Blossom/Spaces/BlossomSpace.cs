@@ -1,4 +1,5 @@
-﻿using Sparc.Blossom.Content;
+﻿using Sparc.Blossom.Authentication;
+using Sparc.Blossom.Content;
 using System.Text.Json.Serialization;
 
 namespace Sparc.Blossom.Spaces;
@@ -19,52 +20,41 @@ public class BlossomSpaceSettings
     public float ConstellationThreshold { get; set; } = 0.2f;
 }
     
-public class BlossomSpace : BlossomSpaceObject
+public class BlossomSpace : BlossomEntity<string>
 {
+    public string RealmId { get; set; }
+    public string? ParentSpaceId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string RoomType { get; set; } = "Root";
-    public int NumJoinedMembers { get; set; }
-    public bool GuestCanJoin { get; set; }
-    public bool WorldReadable { get; set; }
-    public string? AvatarUrl { get; set; }
-    public string? CanonicalAlias { get; set; }
-    public string? JoinRule { get; set; }
-    public DateTime DateRegistered { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime? LastActiveDate { get; set; } = DateTime.UtcNow;
     public DateTime? EndDate { get; set; }
-    public string? ModelUrl { get; set; }
-    public List<SparcEntityType> EntityTypes { get; set; } = [];
-    public double? Weight { get; set; }
-    public float Coherence { get; set; }
+    public BlossomVector Vector { get; set; } = new();
+    public BlossomAvatar User { get; set; } = BlossomUser.System.Avatar;
+    public BlossomSummary? Summary { get; set; }
     public BlossomSpaceSettings Settings { get; set; } = new();
     public List<Axis> Axes { get; set; } = [];
     public BlossomVector Origin { get; set; } = new();
-    public override float Mass => RoomType == "User" ? 10 : 0;
+    public float Mass => EntityType == "User" ? 10 : 0;
 
     public string? ActiveQuestId { get; set; }
 
     [JsonConstructor]
     protected BlossomSpace() : base(Guid.NewGuid().ToString())
     {
-        Id = SpaceId;
+        RealmId = "";
     }
 
-    public BlossomSpace(string id, string? roomType = null) : base(id)
+    public BlossomSpace(string realmId, string id, BlossomAvatar? user = null, string? roomType = null) : base(id)
     {
+        RealmId = realmId;
         Id = id;
-        RoomType = roomType ?? "Ephemeral";
+        User = user ?? BlossomUser.System.Avatar;
+        EntityType = roomType ?? "Ephemeral";
     }
 
-    public BlossomSpace(BlossomSpace parentSpace, string? roomType = null)
-        : this()
+    public void SetSummary(BlossomSummary? summary)
     {
-        SpaceId = parentSpace.Id;
-        RoomType = roomType ?? "Ephemeral";
-    }
-
-    public override void SetSummary(BlossomSummary? summary)
-    {
-        base.SetSummary(summary);
+        Summary = summary;
 
         if (summary != null)
             Name = summary.Name;
@@ -80,12 +70,12 @@ public class BlossomSpace : BlossomSpaceObject
         return new(alignmentSpace, this);
     }
 
-    public override void SetGravitationalForce(IEnumerable<BlossomSpaceObject> objects)
+    public void SetGravitationalForce(IEnumerable<BlossomSpark> objects)
     {
-        if (RoomType == "User")
+        if (EntityType == "User")
             objects = objects.Where(x => x.User.Id == Id); // User orb only feels gravity from their own posts
         
-        base.SetGravitationalForce(objects);
+        // base.SetGravitationalForce(objects);
     }
 
     //public void Update(IEnumerable<Post> allPosts)
@@ -116,8 +106,9 @@ public class BlossomSpace : BlossomSpaceObject
             .Vector.SimilarityTo(Vector);
 
         var relevantPosts = allPosts.Where(x => Vector.SimilarityTo(x.Vector) >= angleToSearch);
-        if (RoomType == "User")
-            relevantPosts = relevantPosts.Where(x => x.User.Id == User.Id);
+        
+        //if (EntityType == "User")
+        //    relevantPosts = relevantPosts.Where(x => x.User.Id == User.Id);
         
         return relevantPosts.ToList();
     }
@@ -160,8 +151,8 @@ public class BlossomSpace : BlossomSpaceObject
 
     public void ActivateQuest(Quest quest)
     {
-        Axes = quest.Axes;
-        ActiveQuestId = quest.Id;
+        //Axes = quest.Axes;
+        //ActiveQuestId = quest.Id;
     }
 
     public void DeactivateQuest()

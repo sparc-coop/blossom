@@ -16,11 +16,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <TypeScriptCompile Remove="wwwroot\dexie\dexie.d.ts" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Content Include="Authentication\FriendlyId\words_alpha.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<Content Include="Authentication\FriendlyId\words_officesafe.txt">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="wwwroot\dexie\dexie.d.ts">
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		  <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</Content>
 	</ItemGroup>
 
@@ -43,6 +51,10 @@
 		<PackageReference Include="NAudio.Lame" Version="2.1.0" />
 		<PackageReference Include="SlackNet" Version="0.17.10" />
 		<PackageReference Include="Stripe.net" Version="52.1.1" />
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.9.3">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 
 	<!--<ItemGroup Condition="'$(Configuration)' == 'Release'">

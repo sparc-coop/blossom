@@ -61,10 +61,10 @@ public class ProcessContent(
         if (domain == null)
             return;
 
-        domain.TovikUsage = await pages.Query.Where(x => x.Domain == domain.Domain && x.SpaceId != "*api*").CountAsync();
+        domain.TovikUsage = await pages.Query.Where(x => x.Domain == domain.Domain && x.Path != "*api*").CountAsync();
 
         var ppl = await pages.Query
-            .Where(x => x.Domain == domain.Domain && x.SpaceId != "*api*")
+            .Where(x => x.Domain == domain.Domain && x.Path != "*api*")
             .Select(p => p.TovikUsage)
             .ToListAsync();
 

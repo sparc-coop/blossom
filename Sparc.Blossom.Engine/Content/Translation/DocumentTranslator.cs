@@ -113,7 +113,7 @@ public class DocumentTranslator(IRepository<BlossomFile> files, IRepository<Page
         return (page, text);
     }
 
-    public async Task<Stream> ReplaceAsync(Page page, List<TextContent> translatedContent)
+    public async Task<Stream> ReplaceAsync(Page page, List<TextContentLight> translatedContent)
     {
         var file = await files.FindAsync($"documents/{page.Path}")
             ?? throw new Exception($"File not found for page {page.Path}");

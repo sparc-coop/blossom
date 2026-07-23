@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Rewrite;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Globalization;
 using System.Reflection;
@@ -60,7 +61,7 @@ public class BlossomServerApplication : IBlossomApplication
         var razor = Host.MapRazorComponents<TApp>();
 
         if (Builder.Services.Any(x => x.ImplementationType?.Name.Contains("CircuitEndpointProvider") == true))
-            razor.AddInteractiveServerRenderMode();
+            razor.AddInteractiveServerRenderMode(x => x.ContentSecurityFrameAncestorsPolicy = null);
 
         if (Builder.Services.Any(x => x.ImplementationType?.Name.Contains("WebAssemblyEndpointProvider") == true))
             razor.AddInteractiveWebAssemblyRenderMode();

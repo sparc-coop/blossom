@@ -13,7 +13,7 @@ internal class AzureTranslator(IConfiguration configuration) : ITranslator, ILan
     public int Priority => 2;
     decimal CostPerWord => 10.00m / 1_000_000 * 5; // $10 per million characters, assuming average 5 characters per word
 
-    public async Task<List<TextContent>> TranslateAsync(TranslationRequest request)
+    public async Task<List<TextContent>> TranslateAsync(ContentRequest request)
     {
         var azureLanguage = AzureLanguage(request.Options.OutputLanguage!);
 
