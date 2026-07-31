@@ -17,41 +17,38 @@ internal class GoogleTranslator(BlossomEvents channels, Client client)
     {
         var model = "gemini-embedding-2"; // or "gemini-embedding-2-exp-11-2025"
         var contents = new List<Google.GenAI.Types.Content>();
-        var messagesToProcess = messages.Where(x => !string.IsNullOrWhiteSpace(x.Vector.Text) && x.Vector.Text.Contains(';')).ToList();
+        var messagesToProcess = messages.Where(x => !string.IsNullOrWhiteSpace(x.Vector.Text) && x.Vector.Text.StartsWith("http")).ToList();
         if (messagesToProcess.Count == 0)
             throw new Exception("No valid messages to process.");
 
         foreach (var message in messagesToProcess)
-        { 
-            var parts = new List<Part>
-            {
-                new() {
-                    FileData = new FileData
-                    {
-                        MimeType = message.Vector.Text!.Split(";").FirstOrDefault()?.Trim(),
-                        FileUri = message.Vector.Text.Split(";").LastOrDefault()?.Trim()
-                    }
-                }
-            };
-
-            contents.Add(new Google.GenAI.Types.Content
-            {
-                Parts = parts
-            });
+        {
+            var file = await UploadAsync(message.Vector.Text!);
+            var parts = new List<Part> { new() { FileData = file } };
+            contents.Add(new Google.GenAI.Types.Content { Parts = parts });
         }
 
-        var config = new EmbedContentConfig
-        {
-            OutputDimensionality = 1536
-        };
-
+        var config = new EmbedContentConfig { OutputDimensionality = 1536 };
         var output = await client.Models.EmbedContentAsync(model, contents, config);
+
         foreach (var message in messagesToProcess)
         {
             var values = output.Embeddings?[messagesToProcess.IndexOf(message)].Values;
             if (values != null)
                 message.Vector = new(model, values);
         }
+    }
+
+    private async Task<FileData> UploadAsync(string uri)
+    {
+        var bytes = await new HttpClient().GetByteArrayAsync(uri);
+        var file = await client.Files.UploadAsync(bytes);
+
+        return new FileData
+        {
+            MimeType = file.MimeType,
+            FileUri = file.Uri
+        };
     }
 
     public override async Task<BlossomAnswer<T>> AskAsync<T>(BlossomQuestion<T> question)
