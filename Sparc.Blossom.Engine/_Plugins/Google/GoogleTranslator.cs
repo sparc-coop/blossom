@@ -10,6 +10,7 @@ internal class GoogleTranslator(BlossomEvents channels, Client client)
 {
     public override async Task VectorizeAsync(IVectorizable message, IEnumerable<IVectorizable>? additionalContext = null)
     {
+        await VectorizeAsync([message]);
     }
 
     public override async Task VectorizeAsync(IEnumerable<IVectorizable> messages, int? lastX = null, int? lookback = null)
