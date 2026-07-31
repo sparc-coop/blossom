@@ -33,6 +33,12 @@ public class BlossomVector : BlossomVectorBase
         Vector = vector;
     }
 
+    public BlossomVector(string model, IEnumerable<double> vector)
+    {
+        Model = model;
+        Vector = [.. vector.Select(x => (float)x)];
+    }
+
     public BlossomVector(float[] vector)
     {
         Vector = vector;

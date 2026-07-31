@@ -18,7 +18,7 @@ internal class OpenAITranslator(BlossomEvents channels, OpenAIClient client)
 
         var messageWithContext = MessagesWithContext(message.Vector.Text, additionalContext?.ToList() ?? [], 1000, 1000);
         var output = await embeddings.GenerateEmbeddingAsync(messageWithContext);
-        message.Vector.Vector = output.Value.ToFloats().ToArray();
+        message.Vector = new(model, output.Value.ToFloats().ToArray());
     }
 
     public override async Task VectorizeAsync(IEnumerable<IVectorizable> messages, int? lastX = null, int? lookback = null)
@@ -33,7 +33,7 @@ internal class OpenAITranslator(BlossomEvents channels, OpenAIClient client)
             foreach (var embedding in output.Value)
             {
                 var item = messages.ElementAt(index);
-                item.Vector.Vector = embedding.ToFloats().ToArray();
+                item.Vector = new(model, embedding.ToFloats().ToArray());
             }
         }
 
@@ -61,7 +61,7 @@ internal class OpenAITranslator(BlossomEvents channels, OpenAIClient client)
             foreach (var output in outputs.Value)
             {
                 var vec = batch.ElementAt(output.Index);
-                vec.Vector.Vector = output.ToFloats().ToArray();
+                vec.Vector = new(model, output.ToFloats().ToArray());
             }
 
             offset += batchSize;

@@ -50,7 +50,7 @@ internal class GoogleTranslator(BlossomEvents channels, Client client)
         {
             var values = output.Embeddings?[messagesToProcess.IndexOf(message)].Values;
             if (values != null)
-                message.Vector.Vector = [.. values.Select(x => (float)x)];
+                message.Vector = new(model, values);
         }
     }
 

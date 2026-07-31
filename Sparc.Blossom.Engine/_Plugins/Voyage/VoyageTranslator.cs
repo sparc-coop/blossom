@@ -43,7 +43,7 @@ internal class VoyageTranslator : AITranslator
         foreach (var embedding in response.data)
         {
             var item = itemsToProcess.ElementAt(index++);
-            item.Vector.Vector = embedding.embedding.ToArray();
+            item.Vector = new(DefaultModel, embedding.embedding.ToArray());
         }
     }
 }
