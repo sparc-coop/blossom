@@ -2,10 +2,12 @@
 using Azure.AI.TextAnalytics;
 using Azure.AI.Translation.Text;
 using Sparc.Blossom.Realtime;
+using Sparc.Blossom.Spaces;
 
 namespace Sparc.Blossom.Content;
 
-internal class AzureTranslator(BlossomEvents channels, IConfiguration configuration) : AITranslator(channels, "", 0, 10.00m / 1_000_000 * 5, 2), ILanguageDetector
+public class AzureTranslator(BlossomEvents channels, IConfiguration configuration) 
+    : AITranslator(channels, "", 0, 10.00m / 1_000_000 * 5, 2), ILanguageDetector
 {
     static TextTranslationClient? Client;
     internal static List<Language>? Languages;
@@ -29,13 +31,13 @@ internal class AzureTranslator(BlossomEvents channels, IConfiguration configurat
                 new TextContent(sourceContent, request.Options.OutputLanguage!, translation.Text));
 
             translatedMessages.AddRange(newContent);
-            translatedMessages.ForEach(x => x.AddCharge(CostPerWord, $"Azure translation of {x.OriginalText} to {x.LanguageId}"));
+            translatedMessages.ForEach(x => x.AddCharge(InputCostPerToken, $"Azure translation of {x.OriginalText} to {x.LanguageId}"));
         }
 
         return translatedMessages;
     }
 
-    public bool CanTranslate(Language fromLanguage, Language toLanguage)
+    public override bool CanTranslate(Language fromLanguage, Language toLanguage)
     {
         return Languages?.Any(x => x.Matches(fromLanguage) || x.Matches(toLanguage)) == true;
     }
@@ -45,7 +47,7 @@ internal class AzureTranslator(BlossomEvents channels, IConfiguration configurat
         return Languages?.FirstOrDefault(x => x.Matches(language.Id));
     }
 
-    public async Task<List<Language>> GetLanguagesAsync()
+    public override async Task<List<Language>> GetLanguagesAsync()
     {
         if (Languages != null)
             return Languages;
@@ -77,5 +79,20 @@ internal class AzureTranslator(BlossomEvents channels, IConfiguration configurat
         text = text.Length > 500 ? text[..500] : text; // Azure Text Analytics has a limit of 5,000 characters for language detection
         var result = await client.DetectLanguageAsync(text);
         return Language.Find(result.Value.Iso6391Name);
+    }
+
+    public override Task VectorizeAsync(IVectorizable item, IEnumerable<IVectorizable>? additionalContext = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Task VectorizeAsync(IEnumerable<IVectorizable> items, int? lastX = null, int? lookback = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Task<BlossomAnswer<T>> AskAsync<T>(BlossomQuestion<T> question)
+    {
+        throw new NotImplementedException();
     }
 }

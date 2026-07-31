@@ -21,6 +21,7 @@ builder.AddSparcAuthentication<BlossomUser>();
 builder.AddSparcBilling();
 builder.AddSparcSpaces();
 builder.Services.AddScoped(_ => new OpenAIClient(builder.Configuration.GetConnectionString("OpenAI")!));
+builder.Services.AddScoped(_ => new Google.GenAI.Client(enterprise: true, apiKey: builder.Configuration.GetConnectionString("Google")!));
 
 builder.Services.AddSlackIntegration();
 

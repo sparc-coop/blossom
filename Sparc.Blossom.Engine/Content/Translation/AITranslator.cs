@@ -5,12 +5,13 @@ using System.Collections.Concurrent;
 namespace Sparc.Blossom.Content;
 
 record ContentTranslated(TextContent TranslatedContent) : BlossomEvent;
-public abstract class AITranslator(BlossomEvents channels, string defaultModel, decimal inputCostPerToken, decimal outputCostPerToken, int priority = 0) : ITranslator
+public abstract class AITranslator(BlossomEvents channels, string defaultModel, decimal inputCostPerToken, decimal outputCostPerToken, int priority = 0, int? embedPriority = null) : ITranslator
 {
     public int Priority { get; } = priority;
     protected string DefaultModel = defaultModel;
     protected decimal InputCostPerToken = inputCostPerToken;
     protected decimal OutputCostPerToken = outputCostPerToken;
+    public int? EmbedPriority { get; } = embedPriority;
 
     public abstract Task VectorizeAsync(IVectorizable item, IEnumerable<IVectorizable>? additionalContext = null);
     public abstract Task VectorizeAsync(IEnumerable<IVectorizable> items, int? lastX = null, int? lookback = null);
@@ -25,7 +26,7 @@ public abstract class AITranslator(BlossomEvents channels, string defaultModel, 
         }
     }
 
-    public async Task<List<TextContent>> TranslateAsync(ContentRequest request)
+    public virtual async Task<List<TextContent>> TranslateAsync(ContentRequest request)
     {
         var fromLanguages = request.Content.GroupBy(x => x.Language);
         var batches = request.Content.Batch(10);
@@ -74,10 +75,10 @@ public abstract class AITranslator(BlossomEvents channels, string defaultModel, 
 
     public abstract Task<BlossomAnswer<T>> AskAsync<T>(BlossomQuestion<T> question);
 
-    public Task<List<Language>> GetLanguagesAsync()
+    public virtual Task<List<Language>> GetLanguagesAsync()
     {
         return Task.FromResult(new List<Language>());
     }
 
-    public bool CanTranslate(Language fromLanguage, Language toLanguage) => true;
+    public virtual bool CanTranslate(Language fromLanguage, Language toLanguage) => true;
 }

@@ -2,7 +2,7 @@
 
 namespace Sparc.Blossom.Content;
 
-internal class BlossomQuestion(string text)
+public class BlossomQuestion(string text)
 {
     public List<string> Context { get; set; } = [];
     public string Text { get; set; } = text;
@@ -20,7 +20,7 @@ internal class BlossomQuestion(string text)
         : "";
 }
 
-internal class BlossomQuestion<T> : BlossomQuestion
+public class BlossomQuestion<T> : BlossomQuestion
 {
     public BlossomQuestion(string text) : base(text)
     {

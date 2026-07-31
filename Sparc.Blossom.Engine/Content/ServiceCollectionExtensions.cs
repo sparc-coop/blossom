@@ -9,6 +9,7 @@ public static class ContentServiceCollectionExtensions
             .AddScoped<AITranslator, DeepLTranslator>()
             .AddScoped<AITranslator, OpenAITranslator>()
             .AddScoped<AITranslator, AnthropicTranslator>()
+            .AddScoped<AITranslator, GoogleTranslator>()
             .AddScoped<VoyageTranslator>()
             .AddScoped<DocumentTranslator>()
             .AddScoped<SparcCrawler>()

@@ -22,6 +22,7 @@ internal class BlossomSpaceTranslator
     FriendlyId friendlyId)
 {
     readonly AITranslator translator = translators.OfType<AITranslator>().First();
+    readonly AITranslator vectorizer = translators.Where(x => x.EmbedPriority != null).OrderBy(x => x.EmbedPriority).First();
 
     public async Task<List<Post>> SeedAsync(BlossomSpace space, Post question, int count)
     {

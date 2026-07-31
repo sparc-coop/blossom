@@ -3,10 +3,10 @@ using System.Text.Json.Nodes;
 
 namespace Sparc.Blossom.Content;
 
-internal class BlossomAnswer : BlossomAnswer<dynamic>
+public class BlossomAnswer : BlossomAnswer<dynamic>
 { }
 
-internal class BlossomAnswer<T>()
+public class BlossomAnswer<T>()
 {
     public string Name { get; set; } = string.Empty;
     public string? Text { get; set; }

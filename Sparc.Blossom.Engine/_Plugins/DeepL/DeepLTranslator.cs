@@ -1,18 +1,18 @@
 ﻿using DeepL;
+using Sparc.Blossom.Realtime;
+using Sparc.Blossom.Spaces;
 
 namespace Sparc.Blossom.Content;
 
-internal class DeepLTranslator(IConfiguration configuration) : ITranslator
+public class DeepLTranslator(BlossomEvents channels, IConfiguration configuration) 
+    : AITranslator(channels, "DeepL", 0.00m, 25.00m / 1_000_000 * 5, 2)
 {
     static Translator? Client;
 
     internal static List<Language> SourceLanguages = [];
     internal static List<Language> TargetLanguages = [];
 
-    public int Priority => 1;
-    decimal CostPerWord => 25.00m / 1_000_000 * 5; // $25 per million characters, assuming average 5 characters per word
-
-    public async Task<List<TextContent>> TranslateAsync(ContentRequest request)
+    public override async Task<List<TextContent>> TranslateAsync(ContentRequest request)
     {
         Client ??= new(configuration.GetConnectionString("DeepL")!);
 
@@ -41,14 +41,14 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
                 var result = await Client.TranslateTextAsync(texts!, sourceLanguage.Key.ToString(), safeTargetLanguage, deepLOptions);
                 var newContent = safeBatch.Zip(result, (message, translation) => new TextContent(message, request.Options.OutputLanguage!, translation.Text));
                 translatedMessages.AddRange(newContent);
-                translatedMessages.ForEach(x => x.AddCharge(CostPerWord, $"DeepL translation of {x.OriginalText} to {x.LanguageId}"));
+                translatedMessages.ForEach(x => x.AddCharge(InputCostPerToken, $"DeepL translation of {x.OriginalText} to {x.LanguageId}"));
             }
         }
 
         return translatedMessages;
     }
 
-    public bool CanTranslate(Language fromLanguage, Language toLanguage)
+    public override bool CanTranslate(Language fromLanguage, Language toLanguage)
     {
         return SourceLanguages.Any(x => fromLanguage.Matches(x.Id)) == true &&
                TargetLanguages.Any(x => toLanguage.Matches(x.Id)) == true;
@@ -68,7 +68,7 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
             .First(x => x.Matches(language.Id));
     }
 
-    public async Task<List<Language>> GetLanguagesAsync()
+    public override async Task<List<Language>> GetLanguagesAsync()
     {
         if (SourceLanguages.Count > 0 && TargetLanguages.Count > 0)
             return SourceLanguages.Union(TargetLanguages).ToList();
@@ -87,5 +87,20 @@ internal class DeepLTranslator(IConfiguration configuration) : ITranslator
             .ToList();
 
         return SourceLanguages.Union(TargetLanguages).ToList();
+    }
+
+    public override Task VectorizeAsync(IVectorizable item, IEnumerable<IVectorizable>? additionalContext = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Task VectorizeAsync(IEnumerable<IVectorizable> items, int? lastX = null, int? lookback = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Task<BlossomAnswer<T>> AskAsync<T>(BlossomQuestion<T> question)
+    {
+        throw new NotImplementedException();
     }
 }
