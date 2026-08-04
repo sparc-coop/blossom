@@ -1,6 +1,5 @@
 ﻿using Sparc.Blossom.Authentication;
 using Sparc.Blossom.Content;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Sparc.Blossom.Spaces;
 
@@ -11,21 +10,21 @@ public class Media : BlossomSpark
         User = BlossomUser.System.Avatar;
     }
 
-    public Media(BlossomSpace space, BlossomAvatar user, string filename)
-        : this(space.Id, user, filename)
+    public Media(BlossomSpace space, BlossomAvatar user, string uri)
+        : this(space.Id, user, uri)
     {
     }
 
-    public Media(string spaceId, BlossomAvatar user, string filename)
+    public Media(string spaceId, BlossomAvatar user, string uri)
         : this()
     {
         RealmId = spaceId;
         User = user;
-        Filename = filename;
-        Vector = new(filename);
+        Uri = uri;
+        Vector = new(uri);
     }
 
-    public string Filename { get; set; } = "";
+    public string Uri { get; set; } = "";
     public override float Mass => 2;
 }
 

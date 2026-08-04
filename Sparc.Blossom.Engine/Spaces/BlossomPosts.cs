@@ -37,6 +37,13 @@ internal class BlossomPosts(IRepository<Post> posts,
         return post;
     }
 
+    internal async Task<Media> AddAsync(Media media, BlossomSpace space, BlossomSpace userSpace)
+    {
+        await medias.UpdateAsync(media);
+        //await VectorizeAsync(media, space);
+        return media;
+    }
+
     internal async Task<List<Post>> GetAllAsync(BlossomSpace space, int take = 50) => await GetAllAsync(space.Id, take);
 
     internal async Task<List<Post>> GetAllAsync(string spaceId, int take = 50)
@@ -69,17 +76,5 @@ internal class BlossomPosts(IRepository<Post> posts,
             .ToListAsync();
 
         return result;
-    }
-
-    internal async Task<Media> UploadAsync(string filename, Stream stream, BlossomSpace space, BlossomSpace userSpace)
-    {
-        var extension = Path.GetExtension(filename);
-        var azureFilename = $"uploads/{Guid.NewGuid()}{extension}";
-        var file = new BlossomFile(azureFilename, AccessTypes.Public, stream);
-        await blobs.AddAsync(file);
-
-        var media = new Media(space.Id, userSpace.User, filename);
-        await VectorizeAsync(media, space);
-        return media;
     }
 }

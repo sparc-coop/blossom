@@ -27,6 +27,12 @@ public interface ISparcSpaces
     [Post("/spaces/{spaceId}")]
     Task<Post> PostAsync(string spaceId, Post post);
 
+    [Post("/spaces/{spaceId}/media")]
+    Task<UploadToken> BeginUploadAsync(Media media);
+
+    [Put("/spaces/{spaceId}/media")]
+    Task<Media> CompleteUploadAsync(Media media);
+
     [Put("/spaces/{spaceId}")]
     Task SaveSpaceAsync(string spaceId, BlossomSpace space);
 
@@ -73,6 +79,7 @@ public record GameState(
 public record InviteToSpaceRequest(string UserId);
 public record SendMessageRequest(string Body, string MsgType = "m.text");
 public record DeleteSpaceRequest(string spaceId);
+public record UploadToken(string Token);
 
 public record GetSyncResponse(
     string next_batch,

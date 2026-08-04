@@ -9,6 +9,10 @@ public class AzureBlobRepository(BlobServiceClient client) : IRepository<Blossom
 {
     public BlobServiceClient Client { get; } = client;
 
+    public AzureBlobRepository(string sasToken) : this(new BlobServiceClient(new Uri(sasToken)))
+    {
+    }
+
     public IQueryable<BlossomFile> Query => throw new NotImplementedException();
 
     public async Task AddAsync(BlossomFile item)
@@ -63,6 +67,25 @@ public class AzureBlobRepository(BlobServiceClient client) : IRepository<Blossom
     public async Task AddAsync(IEnumerable<BlossomFile> items)
     {
         await Parallel.ForEachAsync(items, async (item, token) => await AddAsync(item));
+    }
+
+    public async Task<Uri> GetTokenAsync(BlossomFile file)
+    {
+        // Generate a SAS token for the blob service
+        var sasBuilder = new Azure.Storage.Sas.BlobSasBuilder
+        {
+            BlobContainerName = file.FolderName,
+            BlobName = file.FileName,
+            Resource = "b",
+            ExpiresOn = DateTimeOffset.UtcNow.AddMinutes(10)
+        };
+
+        sasBuilder.SetPermissions(Azure.Storage.Sas.BlobSasPermissions.Read |
+                                  Azure.Storage.Sas.BlobSasPermissions.Write);
+
+        var blobClient = Client.GetBlobContainerClient(file.FolderName).GetBlobClient(file.FileName);
+
+        return blobClient.GenerateSasUri(sasBuilder);
     }
 
     public Task<bool> AnyAsync(ISpecification<BlossomFile> spec)

@@ -11,7 +11,8 @@ internal class BlossomSpaces(
     BlossomSpaceTranslator translator,
     BlossomSpaceObjects objects,
     IRepository<SparcDomain> domains,
-    IBlossomAuthenticator auth)
+    IBlossomAuthenticator auth,
+    AzureBlobRepository blobs)
     : BlossomAggregate<BlossomSpace>(options), IBlossomEndpoints
 {
     public const string Domain = "sparc.coop";
@@ -94,13 +95,24 @@ internal class BlossomSpaces(
         return post;
     }
 
-    private async Task<Media> UploadAsync(string spaceId, IFormFile file)
+    private async Task<Media> PostAsync(string spaceId, Media media)
     {
         var (space, userSpace) = await GetCurrentSpaces(spaceId);
-        using var stream = file.OpenReadStream();
-        var media = await posts.UploadAsync(file.FileName, stream, space, userSpace);
+        await posts.AddAsync(media, space, userSpace);
         await objects.RecalculateAsync(space);
         return media;
+    }
+
+    private async Task<UploadToken> BeginUploadAsync(Media media)
+    {
+        var (space, userSpace) = await GetCurrentSpaces(media.RealmId);
+        
+        var extension = Path.GetExtension(media.Uri);
+        var azureFilename = $"uploads/{Guid.NewGuid()}{extension}";
+        var file = new BlossomFile(azureFilename);
+
+        var token = await blobs.GetTokenAsync(file);
+        return new(token.ToString());
     }
 
     private async Task SaveAsync(string spaceId, BlossomSpace space)
@@ -159,6 +171,8 @@ internal class BlossomSpaces(
         spaces.MapGet("domains", GetDomainsAsync);
         spaces.MapGet("domains/{domainId}", async (ClaimsPrincipal principal, string domainId) => await GetDomainAsync(principal, domainId));
         spaces.MapPost("{spaceId}", async (string spaceId, Post post) => await PostAsync(spaceId, post));
+        spaces.MapPost("{spaceId}/media", async (Media media) => await BeginUploadAsync(media));
+        spaces.MapPut("{spaceId}/media", async (string spaceId, Media media) => await PostAsync(spaceId, media));
         spaces.MapPost("{spaceId}/quests/{facetId}", async (string spaceId, string facetId) => await ActivateQuestAsync(spaceId, facetId));
         spaces.MapDelete("{spaceId}", async (string spaceId) => await DeleteSpaceAsync(spaceId));
         spaces.MapPut("{spaceId}", SaveAsync);
