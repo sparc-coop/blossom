@@ -6,22 +6,26 @@ namespace Sparc.Blossom.Spaces;
 
 internal class BlossomPosts(IRepository<Post> posts,
     IRepository<Fact> guides,
-    VoyageTranslator translator)
+    IRepository<Media> medias,
+    VoyageTranslator translator,
+    AzureBlobRepository blobs)
 {
-    internal async Task<Post> VectorizeAsync(Post post, BlossomSpace space)
+    internal async Task VectorizeAsync(BlossomSpark spark, BlossomSpace space)
     {
-        await translator.VectorizeAsync(post);
+        await translator.VectorizeAsync(spark);
 
         var lookbackPosts = await GetAllAsync(space, space.Settings.MessageLookback);
         if (lookbackPosts != null)
             foreach (var lookbackPost in lookbackPosts)
-                post.Vector.Update(lookbackPost.Vector, space.Settings.MessageLookbackWeight);
+                spark.Vector.Update(lookbackPost.Vector, space.Settings.MessageLookbackWeight);
 
-        var neighbors = await posts.SearchAsync(post.RealmId, post.Vector, 20);
-        post.Vector.CalculateLocalCoherence(neighbors.Select(x => x.Item.Vector).ToList());
-        await posts.UpdateAsync(post);
+        var neighbors = await posts.SearchAsync(spark.RealmId, spark.Vector, 20);
+        spark.Vector.CalculateLocalCoherence(neighbors.Select(x => x.Item.Vector).ToList());
 
-        return post;
+        if (spark is Post post)
+            await posts.UpdateAsync(post);
+        else if (spark is Media media)
+            await medias.UpdateAsync(media);
     }
 
     internal async Task<Post> AddAsync(Post post, BlossomSpace space, BlossomSpace userSpace)
@@ -30,8 +34,6 @@ internal class BlossomPosts(IRepository<Post> posts,
         post.User = userSpace.User;
 
         await VectorizeAsync(post, space);
-        await posts.AddAsync(post);
-
         return post;
     }
 
@@ -67,5 +69,17 @@ internal class BlossomPosts(IRepository<Post> posts,
             .ToListAsync();
 
         return result;
+    }
+
+    internal async Task<Media> UploadAsync(string filename, Stream stream, BlossomSpace space, BlossomSpace userSpace)
+    {
+        var extension = Path.GetExtension(filename);
+        var azureFilename = $"uploads/{Guid.NewGuid()}{extension}";
+        var file = new BlossomFile(azureFilename, AccessTypes.Public, stream);
+        await blobs.AddAsync(file);
+
+        var media = new Media(space.Id, userSpace.User, filename);
+        await VectorizeAsync(media, space);
+        return media;
     }
 }

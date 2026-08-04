@@ -58,6 +58,7 @@ internal class SparcEngineContext(DbContextOptions<SparcEngineContext> options) 
             .HasKey(x => x.Id);
 
         model.Entity<Post>();
+        model.Entity<Media>();
         model.Entity<Facet>();
         model.Entity<Constellation>();
         model.Entity<Axis>();

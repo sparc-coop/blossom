@@ -94,6 +94,15 @@ internal class BlossomSpaces(
         return post;
     }
 
+    private async Task<Media> UploadAsync(string spaceId, IFormFile file)
+    {
+        var (space, userSpace) = await GetCurrentSpaces(spaceId);
+        using var stream = file.OpenReadStream();
+        var media = await posts.UploadAsync(file.FileName, stream, space, userSpace);
+        await objects.RecalculateAsync(space);
+        return media;
+    }
+
     private async Task SaveAsync(string spaceId, BlossomSpace space)
     {
         var (existing, userSpace) = await GetCurrentSpaces(spaceId);
