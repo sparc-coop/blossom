@@ -61,4 +61,9 @@ public class SparcAuraBrowserAuthenticator(ISparcAura aura, IRepository<BlossomU
 
         return principal;
     }
+
+    public Task<ClaimsPrincipal> LoginAsync(string authCode)
+    {
+        throw new NotImplementedException();
+    }
 }

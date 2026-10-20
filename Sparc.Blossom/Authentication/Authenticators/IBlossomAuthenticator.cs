@@ -12,6 +12,7 @@ public interface IBlossomAuthenticator
     Task<BlossomUser> GetAsync(ClaimsPrincipal principal);
     Task<BlossomUser> UpdateAsync(ClaimsPrincipal principal, BlossomAvatar avatar);
     Task<ClaimsPrincipal> RegisterAsync();
+    Task<ClaimsPrincipal> LoginAsync(string authCode);
     Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal);
     Task<ClaimsPrincipal> LoginAsync(ClaimsPrincipal principal, string authenticationType, string externalId);
     Task<ClaimsPrincipal> LogoutAsync(ClaimsPrincipal principal);

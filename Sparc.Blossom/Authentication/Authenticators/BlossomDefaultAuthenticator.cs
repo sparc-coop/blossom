@@ -75,4 +75,9 @@ public class BlossomDefaultAuthenticator<T>(IRepository<T> users) : IBlossomAuth
     {
         throw new NotImplementedException();
     }
+
+    public Task<ClaimsPrincipal> LoginAsync(string authCode)
+    {
+        throw new NotImplementedException();
+    }
 }

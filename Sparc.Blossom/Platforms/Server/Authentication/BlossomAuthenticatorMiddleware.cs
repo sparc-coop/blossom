@@ -7,7 +7,7 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
 {
     private readonly RequestDelegate _next = next;
 
-    public async Task InvokeAsync(HttpContext context, IBlossomAuthenticator auth, ISparcAura aura)
+    public async Task InvokeAsync(HttpContext context, IBlossomAuthenticator auth)
     {
         if (context.IsStaticFileRequest())
         {
@@ -19,17 +19,9 @@ public class BlossomAuthenticatorMiddleware(RequestDelegate next)
         {
             // Handle TOTP requests separately
             var authCode = context.Request.Query["_auth"].ToString();
-            var matchingUser = await aura.Login(authCode);
-            if (matchingUser?.AccessToken == null)
-            {
-                context.Response.Clear();
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                return;
-            }
-
-            var principal = matchingUser.WithSparcAuraAccessToken().ToPrincipal();
-            await auth.LoginAsync(principal);
-            context.Response.Redirect(context.Request.PathBase + context.Request.Path);
+            var matchingUser = await auth.LoginAsync(authCode);
+            if (matchingUser != null)
+                context.Response.Redirect(context.Request.PathBase + context.Request.Path);
         }
         else if (context.User.Identity?.IsAuthenticated != true)
         {

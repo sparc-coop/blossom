@@ -68,4 +68,19 @@ public class SparcAuraServerAuthenticator(ISparcAura aura, IHttpContextAccessor 
 
         return principal;
     }
+
+    public async Task<ClaimsPrincipal> LoginAsync(string authCode)
+    {
+        var matchingUser = await aura.Login(authCode);
+        if (matchingUser?.AccessToken == null)
+        {
+            http.HttpContext?.Response.Clear();
+            http.HttpContext?.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return null!;
+        }
+
+        var principal = matchingUser.WithSparcAuraAccessToken().ToPrincipal();
+        await LoginAsync(principal);
+        return principal;
+    }
 }
