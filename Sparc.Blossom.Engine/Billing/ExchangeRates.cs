@@ -62,13 +62,11 @@ public class ExchangeRates(IConfiguration config, AzureBlobRepository blobs)
         {
             using var client = new HttpClient()
             {
-                BaseAddress = new Uri("https://api.apilayer.com/exchangerates_data/latest")
+                BaseAddress = new Uri("http://api.exchangeratesapi.io/v1/latest")
             };
 
-            client.DefaultRequestHeaders.Add("apikey", _apiKey);
-
             // get the json from the API and store to Azure Blob Storage
-            Rates = await client.GetFromJsonAsync<ExchangeRatesResponse>("?base=USD");
+            Rates = await client.GetFromJsonAsync<ExchangeRatesResponse>($"?access_key={_apiKey}&base=USD");
             using var stream = new MemoryStream();
             JsonSerializer.Serialize(stream, Rates);
             await blobs.AddAsync(new BlossomFile(filename, AccessTypes.Private, stream));
