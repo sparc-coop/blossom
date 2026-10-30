@@ -5,9 +5,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Sparc.Blossom;
 
-public class BlossomBackgroundService<T> : BackgroundService where T : class
+public interface IBlossomProcessor<M>
 {
-    public BlossomBackgroundService(ILogger<BlossomBackgroundService<T>> logger, IServiceScopeFactory scopes, IConfiguration config, BlossomQueue<T> queue)
+    Task ProcessAsync(M item);
+}
+
+public class BlossomBackgroundService<T, M> : BackgroundService where T : IBlossomProcessor<M>
+{
+    public BlossomBackgroundService(ILogger<BlossomBackgroundService<T, M>> logger, IServiceScopeFactory scopes, IConfiguration config, BlossomQueue<M> queue)
     {
         _logger = logger;
         Scopes = scopes;
@@ -16,10 +21,10 @@ public class BlossomBackgroundService<T> : BackgroundService where T : class
         _executors = new Task[_executorsCount];
     }
 
-    private readonly ILogger<BlossomBackgroundService<T>> _logger;
+    private readonly ILogger<BlossomBackgroundService<T, M>> _logger;
     public IServiceScopeFactory Scopes { get; }
     public IConfiguration Config { get; }
-    public BlossomQueue<T> Queue { get; }
+    public BlossomQueue<M> Queue { get; }
     private readonly Task[] _executors;
     private readonly int _executorsCount = 8;
 
@@ -41,7 +46,7 @@ public class BlossomBackgroundService<T> : BackgroundService where T : class
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var workItem = await Queue.PopAsync(stoppingToken);
+            var message = await Queue.PopAsync(stoppingToken);
             //_logger.LogInformation("Starting execution of {WorkItem}.", nameof(workItem));
 
             try
@@ -49,13 +54,13 @@ public class BlossomBackgroundService<T> : BackgroundService where T : class
                 using var scope = Scopes.CreateScope();
                 var item = scope.ServiceProvider.GetRequiredService<T>();
 
-                await workItem(item, stoppingToken);
+                await item.ProcessAsync(message);
                 //_logger.LogInformation("Execution of {WorkItem} complete.", nameof(workItem));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex,
-                    "Error occurred executing {WorkItem}.", nameof(workItem));
+                    "Error occurred executing {WorkItem}.", nameof(message));
             }
         }
     }

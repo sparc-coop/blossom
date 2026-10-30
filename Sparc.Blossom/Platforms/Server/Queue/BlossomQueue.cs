@@ -2,12 +2,15 @@
 
 namespace Sparc.Blossom;
 
+public interface IBlossomJob
+{
+    Task ExecuteAsync(CancellationToken cancellationToken);
+}
+
 public interface IBlossomQueue<T>
 {
-    ValueTask PushAsync(Func<T, CancellationToken, ValueTask> workItem);
-
-    ValueTask<Func<T, CancellationToken, ValueTask>> PopAsync(
-        CancellationToken cancellationToken);
+    ValueTask PushAsync(T message);
+    ValueTask<T> PopAsync(CancellationToken cancellationToken);
 }
 
 public class BlossomQueue<T>(int capacity) : IBlossomQueue<T>
@@ -18,22 +21,21 @@ public class BlossomQueue<T>(int capacity) : IBlossomQueue<T>
     // which only completes when space becomes available. In the event that many
     // publishers/calls start accumulating, using BoundedChannelFullMode.Wait can
     // lead to backpressure.
-    private readonly Channel<Func<T, CancellationToken, ValueTask>> _queue =
-        Channel.CreateBounded<Func<T, CancellationToken, ValueTask>>(new BoundedChannelOptions(capacity)
+    private readonly Channel<T> _queue =
+        Channel.CreateBounded<T>(new BoundedChannelOptions(capacity)
         {
             FullMode = BoundedChannelFullMode.Wait
         });
 
-    public async ValueTask PushAsync(Func<T, CancellationToken, ValueTask> workItem)
+    public async ValueTask PushAsync(T message)
     {
-        ArgumentNullException.ThrowIfNull(workItem);
-        await _queue.Writer.WriteAsync(workItem);
+        ArgumentNullException.ThrowIfNull(message);
+        await _queue.Writer.WriteAsync(message);
     }
 
-    public async ValueTask<Func<T, CancellationToken, ValueTask>> PopAsync(CancellationToken cancellationToken)
+    public async ValueTask<T> PopAsync(CancellationToken cancellationToken)
     {
-        var workItem = await _queue.Reader.ReadAsync(cancellationToken);
-
-        return workItem;
+        var message = await _queue.Reader.ReadAsync(cancellationToken);
+        return message;
     }
 }
