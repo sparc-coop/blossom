@@ -93,17 +93,17 @@ public abstract class BlossomApplicationBuilder
 
         Services.AddTransient<TTokenHandler>();
 
-        Services.AddRefitClient<ISparcAura>()
+        Services.AddRefitGeneratedClient<ISparcAura>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
             .AddHttpMessageHandler<TTokenHandler>()
             .AddStandardResilienceHandler();
 
-        Services.AddRefitClient<ISparcBilling>()
+        Services.AddRefitGeneratedClient<ISparcBilling>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
             .AddHttpMessageHandler<TTokenHandler>()
             .AddStandardResilienceHandler();
 
-        Services.AddRefitClient<ISparcContent>()
+        Services.AddRefitGeneratedClient<ISparcContent>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
             .AddHttpMessageHandler<TTokenHandler>()
             .AddStandardResilienceHandler(x =>
@@ -113,7 +113,7 @@ public abstract class BlossomApplicationBuilder
                 x.AttemptTimeout.Timeout = TimeSpan.FromSeconds(120);
             });
 
-        Services.AddRefitClient<ISparcSpaces>()
+        Services.AddRefitGeneratedClient<ISparcSpaces>()
             .ConfigureHttpClient(x => x.BaseAddress = uri)
             .AddHttpMessageHandler<TTokenHandler>()
             .AddStandardResilienceHandler(x =>

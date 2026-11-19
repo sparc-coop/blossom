@@ -16,11 +16,11 @@ public static class ServiceCollectionExtensions
 
     public static Lazy<Task<IJSObjectReference>> Import(this IJSRuntime js, string module)
     {
-        return new(() => js.InvokeAsync<IJSObjectReference>("import", module).AsTask());
+        return new(() => js.SafeInvokeAsync<IJSObjectReference>("import", module).AsTask());
     }
 
     public static async Task<IJSObjectReference> ImportAsync(this IJSRuntime js, string module)
     {
-        return await js.InvokeAsync<IJSObjectReference>("import", module);
+        return await js.SafeInvokeAsync<IJSObjectReference>("import", module);
     }
 }

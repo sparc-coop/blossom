@@ -28,10 +28,10 @@ public interface ISparcSpaces
     Task<Post> PostAsync(string spaceId, Post post);
 
     [Post("/spaces/{spaceId}/media")]
-    Task<UploadToken> BeginUploadAsync(Media media);
+    Task<UploadToken> BeginUploadAsync(string spaceId, Media media);
 
     [Put("/spaces/{spaceId}/media")]
-    Task<Media> CompleteUploadAsync(Media media);
+    Task<Media> CompleteUploadAsync(string spaceId, Media media);
 
     [Put("/spaces/{spaceId}")]
     Task SaveSpaceAsync(string spaceId, BlossomSpace space);

@@ -70,7 +70,7 @@ public class DexieRepository<T>(IServiceProvider services) : IRepository<T>
     async Task ExecuteAsync(string identifier, object item)
     {
         var dexie = await Dexie();
-        await dexie.InvokeVoidAsync(identifier, CancellationToken.None, DbName, item);
+        await dexie.SafeInvokeVoidAsync(identifier, CancellationToken.None, DbName, item);
     }
 
     async Task<TResult?> ExecuteAsync<TResult>(string identifier, object? item)
@@ -78,7 +78,7 @@ public class DexieRepository<T>(IServiceProvider services) : IRepository<T>
         try
         {
             var dexie = await Dexie();
-            return await dexie.InvokeAsync<TResult>(identifier, CancellationToken.None, DbName, item);
+            return await dexie.SafeInvokeAsync<TResult>(identifier, CancellationToken.None, DbName, item);
         }
         catch (Exception e)
         {

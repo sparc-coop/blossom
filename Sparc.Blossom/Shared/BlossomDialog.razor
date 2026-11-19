@@ -11,17 +11,17 @@
 
     public async Task OpenAsync()
     {
-        await Js.InvokeVoidAsync("eval", $"document.getElementById('{Id}').show()");
+        await Js.SafeInvokeVoidAsync("eval", $"document.getElementById('{Id}').show()");
     }
 
     public async Task OpenModalAsync()
     {
-        await Js.InvokeVoidAsync("eval", $"document.getElementById('{Id}').showModal()");
+        await Js.SafeInvokeVoidAsync("eval", $"document.getElementById('{Id}').showModal()");
     }
 
     public async Task CloseAsync()
     {
-        await Js.InvokeVoidAsync("eval", $"document.getElementById('{Id}').close()");
+        await Js.SafeInvokeVoidAsync("eval", $"document.getElementById('{Id}').close()");
     }
 
 

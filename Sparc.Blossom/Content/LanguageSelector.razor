@@ -86,11 +86,11 @@
         if (!firstRender)
             return;
 
-        NativeLanguageId = await Js.InvokeAsync<string>("eval", "navigator.language");
+        NativeLanguageId = await Js.SafeInvokeAsync<string>("eval", "navigator.language");
 
         if (InitialLanguageId == null && string.IsNullOrWhiteSpace(SelectedLanguageId))
         {
-            var tovikLanguage = await Js.InvokeAsync<string?>("eval", "localStorage.getItem('tovik-lang')")
+            var tovikLanguage = await Js.SafeInvokeAsync<string?>("eval", "localStorage.getItem('tovik-lang')")
                 ?? NativeLanguageId;
             SelectedLanguageId = Language.Find(tovikLanguage)?.Id
                 ?? Languages.FirstOrDefault(x => x.Id == tovikLanguage)?.Id
@@ -125,5 +125,5 @@
     }
 
     async Task NotifyTovik()
-        => await Js.InvokeVoidAsync("eval", "document.dispatchEvent(new CustomEvent('tovik-user-language-changed', { detail: '" + SelectedLanguageId + "' }));");
+        => await Js.SafeInvokeVoidAsync("eval", "document.dispatchEvent(new CustomEvent('tovik-user-language-changed', { detail: '" + SelectedLanguageId + "' }));");
 }

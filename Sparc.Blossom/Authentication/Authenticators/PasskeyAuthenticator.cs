@@ -18,13 +18,13 @@ public class PasskeyAuthenticator(
     public async Task InitializeAsync()
     {
         var js = await Auth.Value;
-        await js.InvokeVoidAsync("initialize", ApiKey);
+        await js.SafeInvokeVoidAsync("initialize", ApiKey);
     }
 
     public async Task LoginAsync()
     {
         var js = await Auth.Value;
-        var token = await js.InvokeAsync<string>("signInWithPasskey", null);
+        var token = await js.SafeInvokeAsync<string>("signInWithPasskey", null);
         if (!string.IsNullOrWhiteSpace(token))
             nav.NavigateTo(nav.GetUriWithQueryParameter("_auth", token), true);
     }
@@ -34,7 +34,7 @@ public class PasskeyAuthenticator(
         var code = await aura.Register();
 
         var js = await Auth.Value;
-        var passkey = await js.InvokeAsync<string>("signUpWithPasskey", code.Code);
+        var passkey = await js.SafeInvokeAsync<string>("signUpWithPasskey", code.Code);
         if (string.IsNullOrWhiteSpace(passkey))
         {
             Message = "⚠️ Passkey signup aborted.";

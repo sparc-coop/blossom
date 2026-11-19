@@ -23,7 +23,7 @@
             }
 
             Communicator = await Js.ImportAsync("./Blossom/Api/BlossomWidget.razor.js");
-            await Communicator.InvokeVoidAsync("initialize", DotNetObjectReference.Create(this));
+            await Communicator.SafeInvokeVoidAsync("initialize", DotNetObjectReference.Create(this));
         }
     }
 
@@ -41,7 +41,7 @@
 
     protected async Task BroadcastAsync(string eventName, object? body = null)
     {
-        await Communicator.InvokeVoidAsync("broadcast", eventName, body);
+        await Communicator.SafeInvokeVoidAsync("broadcast", eventName, body);
     }
 
     protected void On(string eventName, Delegate action)

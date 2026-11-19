@@ -81,7 +81,7 @@ public class BlossomProxyRunner<T, TEntity>(IRunner<TEntity> aggregate, BlossomH
     private T Adapt(TEntity entity)
     {
         var dto = entity.Adapt<T>();
-        dto.Runner = this;
+        dto!.Runner = this;
         return dto;
     }
 
