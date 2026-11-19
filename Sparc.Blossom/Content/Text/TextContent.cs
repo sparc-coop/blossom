@@ -220,8 +220,12 @@ public class TextContent : BlossomEntity<string>
     public static string HashId(string text, string languageId)
     {
         var inputBytes = System.Text.Encoding.UTF8.GetBytes(text.Trim() + ":" + languageId);
+#if BROWSER
+        throw new NotSupportedException("MD5 hashing is not supported in browser environments.");
+#else
         var hashBytes = MD5.HashData(inputBytes);
         return Convert.ToHexString(hashBytes).ToLower();
+#endif
     }
 
     public void SetDomain(SparcDomain sparcDomain, string absoluteUri)
